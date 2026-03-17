@@ -1,0 +1,215 @@
+[04-Sep-2022 07:36:44 Asia/Jakarta] PHP Warning:  require(/home/jbkn4721/public_html/elearning.akuntanmu.com/public/app/Config/Paths.php): failed to open stream: No such file or directory in /home/jbkn4721/public_html/elearning.akuntanmu.com/public/index.php on line 22
+[04-Sep-2022 07:36:44 Asia/Jakarta] PHP Fatal error:  require(): Failed opening required '/home/jbkn4721/public_html/elearning.akuntanmu.com/public/app/Config/Paths.php' (include_path='.:/opt/cpanel/ea-php74/root/usr/share/pear') in /home/jbkn4721/public_html/elearning.akuntanmu.com/public/index.php on line 22
+[04-Sep-2022 07:37:48 Asia/Jakarta] PHP Warning:  require(/home/jbkn4721/public_html/elearning.akuntanmu.com/public/app/Config/Paths.php): failed to open stream: No such file or directory in /home/jbkn4721/public_html/elearning.akuntanmu.com/public/index.php on line 22
+[04-Sep-2022 07:37:48 Asia/Jakarta] PHP Fatal error:  require(): Failed opening required '/home/jbkn4721/public_html/elearning.akuntanmu.com/public/app/Config/Paths.php' (include_path='.:/opt/cpanel/ea-php74/root/usr/share/pear') in /home/jbkn4721/public_html/elearning.akuntanmu.com/public/index.php on line 22
+[04-Sep-2022 07:37:53 Asia/Jakarta] PHP Warning:  require(/home/jbkn4721/public_html/elearning.akuntanmu.com/public/app/Config/Paths.php): failed to open stream: No such file or directory in /home/jbkn4721/public_html/elearning.akuntanmu.com/public/index.php on line 22
+[04-Sep-2022 07:37:53 Asia/Jakarta] PHP Fatal error:  require(): Failed opening required '/home/jbkn4721/public_html/elearning.akuntanmu.com/public/app/Config/Paths.php' (include_path='.:/opt/cpanel/ea-php74/root/usr/share/pear') in /home/jbkn4721/public_html/elearning.akuntanmu.com/public/index.php on line 22
+[04-Sep-2022 08:08:08 Asia/Jakarta] PHP Warning:  require(/home/jbkn4721/public_html/elearning.akuntanmu.com/public/app/Config/Paths.php): failed to open stream: No such file or directory in /home/jbkn4721/public_html/elearning.akuntanmu.com/public/index.php on line 22
+[04-Sep-2022 08:08:08 Asia/Jakarta] PHP Fatal error:  require(): Failed opening required '/home/jbkn4721/public_html/elearning.akuntanmu.com/public/app/Config/Paths.php' (include_path='.:/opt/cpanel/ea-php74/root/usr/share/pear') in /home/jbkn4721/public_html/elearning.akuntanmu.com/public/index.php on line 22
+[18-Jul-2023 15:32:54 Asia/Jakarta] PHP Fatal error:  Uncaught CodeIgniter\HTTP\Exceptions\HTTPException: Unknown HTTP status code provided with no message: 267 in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php:155
+Stack trace:
+#0 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php(155): CodeIgniter\HTTP\Exceptions\HTTPException::forUnkownStatusCode(267)
+#1 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/Debug/Exceptions.php(106): CodeIgniter\HTTP\Response->setStatusCode(267)
+#2 [internal function]: CodeIgniter\Debug\Exceptions->exceptionHandler(Object(setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException))
+#3 {main}
+  thrown in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php on line 155
+[18-Jul-2023 15:33:13 Asia/Jakarta] PHP Fatal error:  Uncaught CodeIgniter\HTTP\Exceptions\HTTPException: Unknown HTTP status code provided with no message: 267 in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php:155
+Stack trace:
+#0 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php(155): CodeIgniter\HTTP\Exceptions\HTTPException::forUnkownStatusCode(267)
+#1 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/Debug/Exceptions.php(106): CodeIgniter\HTTP\Response->setStatusCode(267)
+#2 [internal function]: CodeIgniter\Debug\Exceptions->exceptionHandler(Object(setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException))
+#3 {main}
+  thrown in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php on line 155
+[18-Jul-2023 15:34:01 Asia/Jakarta] PHP Fatal error:  Uncaught CodeIgniter\HTTP\Exceptions\HTTPException: Unknown HTTP status code provided with no message: 267 in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php:155
+Stack trace:
+#0 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php(155): CodeIgniter\HTTP\Exceptions\HTTPException::forUnkownStatusCode(267)
+#1 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/Debug/Exceptions.php(106): CodeIgniter\HTTP\Response->setStatusCode(267)
+#2 [internal function]: CodeIgniter\Debug\Exceptions->exceptionHandler(Object(setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException))
+#3 {main}
+  thrown in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php on line 155
+[18-Jul-2023 15:34:14 Asia/Jakarta] PHP Fatal error:  Uncaught CodeIgniter\HTTP\Exceptions\HTTPException: Unknown HTTP status code provided with no message: 267 in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php:155
+Stack trace:
+#0 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php(155): CodeIgniter\HTTP\Exceptions\HTTPException::forUnkownStatusCode(267)
+#1 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/Debug/Exceptions.php(106): CodeIgniter\HTTP\Response->setStatusCode(267)
+#2 [internal function]: CodeIgniter\Debug\Exceptions->exceptionHandler(Object(setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException))
+#3 {main}
+  thrown in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php on line 155
+[18-Jul-2023 15:36:17 Asia/Jakarta] PHP Fatal error:  Uncaught CodeIgniter\HTTP\Exceptions\HTTPException: Unknown HTTP status code provided with no message: 267 in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php:155
+Stack trace:
+#0 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php(155): CodeIgniter\HTTP\Exceptions\HTTPException::forUnkownStatusCode(267)
+#1 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/Debug/Exceptions.php(106): CodeIgniter\HTTP\Response->setStatusCode(267)
+#2 [internal function]: CodeIgniter\Debug\Exceptions->exceptionHandler(Object(setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException))
+#3 {main}
+  thrown in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php on line 155
+[18-Jul-2023 15:36:18 Asia/Jakarta] PHP Fatal error:  Uncaught CodeIgniter\HTTP\Exceptions\HTTPException: Unknown HTTP status code provided with no message: 267 in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php:155
+Stack trace:
+#0 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php(155): CodeIgniter\HTTP\Exceptions\HTTPException::forUnkownStatusCode(267)
+#1 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/Debug/Exceptions.php(106): CodeIgniter\HTTP\Response->setStatusCode(267)
+#2 [internal function]: CodeIgniter\Debug\Exceptions->exceptionHandler(Object(setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException))
+#3 {main}
+  thrown in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php on line 155
+[18-Jul-2023 15:36:22 Asia/Jakarta] PHP Fatal error:  Uncaught CodeIgniter\HTTP\Exceptions\HTTPException: Unknown HTTP status code provided with no message: 267 in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php:155
+Stack trace:
+#0 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php(155): CodeIgniter\HTTP\Exceptions\HTTPException::forUnkownStatusCode(267)
+#1 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/Debug/Exceptions.php(106): CodeIgniter\HTTP\Response->setStatusCode(267)
+#2 [internal function]: CodeIgniter\Debug\Exceptions->exceptionHandler(Object(setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException))
+#3 {main}
+  thrown in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php on line 155
+[18-Jul-2023 15:36:33 Asia/Jakarta] PHP Fatal error:  Uncaught CodeIgniter\HTTP\Exceptions\HTTPException: Unknown HTTP status code provided with no message: 267 in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php:155
+Stack trace:
+#0 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php(155): CodeIgniter\HTTP\Exceptions\HTTPException::forUnkownStatusCode(267)
+#1 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/Debug/Exceptions.php(106): CodeIgniter\HTTP\Response->setStatusCode(267)
+#2 [internal function]: CodeIgniter\Debug\Exceptions->exceptionHandler(Object(setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException))
+#3 {main}
+  thrown in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php on line 155
+[18-Jul-2023 15:37:07 Asia/Jakarta] PHP Fatal error:  Uncaught CodeIgniter\HTTP\Exceptions\HTTPException: Unknown HTTP status code provided with no message: 267 in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php:155
+Stack trace:
+#0 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php(155): CodeIgniter\HTTP\Exceptions\HTTPException::forUnkownStatusCode(267)
+#1 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/Debug/Exceptions.php(106): CodeIgniter\HTTP\Response->setStatusCode(267)
+#2 [internal function]: CodeIgniter\Debug\Exceptions->exceptionHandler(Object(setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException))
+#3 {main}
+  thrown in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php on line 155
+[18-Jul-2023 15:37:08 Asia/Jakarta] PHP Fatal error:  Uncaught CodeIgniter\HTTP\Exceptions\HTTPException: Unknown HTTP status code provided with no message: 267 in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php:155
+Stack trace:
+#0 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php(155): CodeIgniter\HTTP\Exceptions\HTTPException::forUnkownStatusCode(267)
+#1 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/Debug/Exceptions.php(106): CodeIgniter\HTTP\Response->setStatusCode(267)
+#2 [internal function]: CodeIgniter\Debug\Exceptions->exceptionHandler(Object(setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException))
+#3 {main}
+  thrown in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php on line 155
+[18-Jul-2023 15:40:28 Asia/Jakarta] PHP Fatal error:  Uncaught CodeIgniter\HTTP\Exceptions\HTTPException: Unknown HTTP status code provided with no message: 267 in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php:155
+Stack trace:
+#0 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php(155): CodeIgniter\HTTP\Exceptions\HTTPException::forUnkownStatusCode(267)
+#1 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/Debug/Exceptions.php(106): CodeIgniter\HTTP\Response->setStatusCode(267)
+#2 [internal function]: CodeIgniter\Debug\Exceptions->exceptionHandler(Object(setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException))
+#3 {main}
+  thrown in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php on line 155
+[18-Jul-2023 15:47:26 Asia/Jakarta] PHP Fatal error:  Uncaught CodeIgniter\HTTP\Exceptions\HTTPException: Unknown HTTP status code provided with no message: 267 in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php:155
+Stack trace:
+#0 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php(155): CodeIgniter\HTTP\Exceptions\HTTPException::forUnkownStatusCode(267)
+#1 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/Debug/Exceptions.php(106): CodeIgniter\HTTP\Response->setStatusCode(267)
+#2 [internal function]: CodeIgniter\Debug\Exceptions->exceptionHandler(Object(setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException))
+#3 {main}
+  thrown in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php on line 155
+[18-Jul-2023 15:51:19 Asia/Jakarta] PHP Fatal error:  Uncaught CodeIgniter\HTTP\Exceptions\HTTPException: Unknown HTTP status code provided with no message: 267 in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php:155
+Stack trace:
+#0 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php(155): CodeIgniter\HTTP\Exceptions\HTTPException::forUnkownStatusCode(267)
+#1 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/Debug/Exceptions.php(106): CodeIgniter\HTTP\Response->setStatusCode(267)
+#2 [internal function]: CodeIgniter\Debug\Exceptions->exceptionHandler(Object(setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException))
+#3 {main}
+  thrown in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php on line 155
+[18-Jul-2023 15:51:21 Asia/Jakarta] PHP Fatal error:  Uncaught CodeIgniter\HTTP\Exceptions\HTTPException: Unknown HTTP status code provided with no message: 267 in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php:155
+Stack trace:
+#0 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php(155): CodeIgniter\HTTP\Exceptions\HTTPException::forUnkownStatusCode(267)
+#1 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/Debug/Exceptions.php(106): CodeIgniter\HTTP\Response->setStatusCode(267)
+#2 [internal function]: CodeIgniter\Debug\Exceptions->exceptionHandler(Object(setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException))
+#3 {main}
+  thrown in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php on line 155
+[18-Jul-2023 15:51:25 Asia/Jakarta] PHP Fatal error:  Uncaught CodeIgniter\HTTP\Exceptions\HTTPException: Unknown HTTP status code provided with no message: 267 in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php:155
+Stack trace:
+#0 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php(155): CodeIgniter\HTTP\Exceptions\HTTPException::forUnkownStatusCode(267)
+#1 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/Debug/Exceptions.php(106): CodeIgniter\HTTP\Response->setStatusCode(267)
+#2 [internal function]: CodeIgniter\Debug\Exceptions->exceptionHandler(Object(setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException))
+#3 {main}
+  thrown in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php on line 155
+[18-Jul-2023 16:00:54 Asia/Jakarta] PHP Fatal error:  Uncaught CodeIgniter\HTTP\Exceptions\HTTPException: Unknown HTTP status code provided with no message: 267 in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php:155
+Stack trace:
+#0 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php(155): CodeIgniter\HTTP\Exceptions\HTTPException::forUnkownStatusCode(267)
+#1 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/Debug/Exceptions.php(106): CodeIgniter\HTTP\Response->setStatusCode(267)
+#2 [internal function]: CodeIgniter\Debug\Exceptions->exceptionHandler(Object(setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException))
+#3 {main}
+  thrown in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php on line 155
+[18-Jul-2023 16:00:55 Asia/Jakarta] PHP Fatal error:  Uncaught CodeIgniter\HTTP\Exceptions\HTTPException: Unknown HTTP status code provided with no message: 267 in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php:155
+Stack trace:
+#0 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php(155): CodeIgniter\HTTP\Exceptions\HTTPException::forUnkownStatusCode(267)
+#1 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/Debug/Exceptions.php(106): CodeIgniter\HTTP\Response->setStatusCode(267)
+#2 [internal function]: CodeIgniter\Debug\Exceptions->exceptionHandler(Object(setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException))
+#3 {main}
+  thrown in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php on line 155
+[18-Jul-2023 16:02:30 Asia/Jakarta] PHP Fatal error:  Uncaught CodeIgniter\HTTP\Exceptions\HTTPException: Unknown HTTP status code provided with no message: 267 in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php:155
+Stack trace:
+#0 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php(155): CodeIgniter\HTTP\Exceptions\HTTPException::forUnkownStatusCode(267)
+#1 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/Debug/Exceptions.php(106): CodeIgniter\HTTP\Response->setStatusCode(267)
+#2 [internal function]: CodeIgniter\Debug\Exceptions->exceptionHandler(Object(setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException))
+#3 {main}
+  thrown in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php on line 155
+[18-Jul-2023 21:14:04 Asia/Jakarta] PHP Fatal error:  Uncaught CodeIgniter\HTTP\Exceptions\HTTPException: Unknown HTTP status code provided with no message: 267 in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php:155
+Stack trace:
+#0 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php(155): CodeIgniter\HTTP\Exceptions\HTTPException::forUnkownStatusCode(267)
+#1 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/Debug/Exceptions.php(106): CodeIgniter\HTTP\Response->setStatusCode(267)
+#2 [internal function]: CodeIgniter\Debug\Exceptions->exceptionHandler(Object(setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException))
+#3 {main}
+  thrown in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php on line 155
+[18-Jul-2023 21:15:35 Asia/Jakarta] PHP Fatal error:  Uncaught CodeIgniter\HTTP\Exceptions\HTTPException: Unknown HTTP status code provided with no message: 267 in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php:155
+Stack trace:
+#0 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php(155): CodeIgniter\HTTP\Exceptions\HTTPException::forUnkownStatusCode(267)
+#1 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/Debug/Exceptions.php(106): CodeIgniter\HTTP\Response->setStatusCode(267)
+#2 [internal function]: CodeIgniter\Debug\Exceptions->exceptionHandler(Object(setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException))
+#3 {main}
+  thrown in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php on line 155
+[18-Jul-2023 21:28:26 Asia/Jakarta] PHP Fatal error:  Uncaught CodeIgniter\HTTP\Exceptions\HTTPException: Unknown HTTP status code provided with no message: 267 in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php:155
+Stack trace:
+#0 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php(155): CodeIgniter\HTTP\Exceptions\HTTPException::forUnkownStatusCode(267)
+#1 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/Debug/Exceptions.php(106): CodeIgniter\HTTP\Response->setStatusCode(267)
+#2 [internal function]: CodeIgniter\Debug\Exceptions->exceptionHandler(Object(setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException))
+#3 {main}
+  thrown in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php on line 155
+[18-Jul-2023 21:28:33 Asia/Jakarta] PHP Fatal error:  Uncaught CodeIgniter\HTTP\Exceptions\HTTPException: Unknown HTTP status code provided with no message: 267 in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php:155
+Stack trace:
+#0 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php(155): CodeIgniter\HTTP\Exceptions\HTTPException::forUnkownStatusCode(267)
+#1 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/Debug/Exceptions.php(106): CodeIgniter\HTTP\Response->setStatusCode(267)
+#2 [internal function]: CodeIgniter\Debug\Exceptions->exceptionHandler(Object(setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException))
+#3 {main}
+  thrown in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php on line 155
+[18-Jul-2023 21:33:54 Asia/Jakarta] PHP Fatal error:  Uncaught CodeIgniter\HTTP\Exceptions\HTTPException: Unknown HTTP status code provided with no message: 267 in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php:155
+Stack trace:
+#0 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php(155): CodeIgniter\HTTP\Exceptions\HTTPException::forUnkownStatusCode(267)
+#1 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/Debug/Exceptions.php(106): CodeIgniter\HTTP\Response->setStatusCode(267)
+#2 [internal function]: CodeIgniter\Debug\Exceptions->exceptionHandler(Object(setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException))
+#3 {main}
+  thrown in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php on line 155
+[19-Jul-2023 19:19:26 Asia/Jakarta] PHP Fatal error:  Uncaught CodeIgniter\HTTP\Exceptions\HTTPException: Unknown HTTP status code provided with no message: 267 in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php:155
+Stack trace:
+#0 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php(155): CodeIgniter\HTTP\Exceptions\HTTPException::forUnkownStatusCode(267)
+#1 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/Debug/Exceptions.php(106): CodeIgniter\HTTP\Response->setStatusCode(267)
+#2 [internal function]: CodeIgniter\Debug\Exceptions->exceptionHandler(Object(setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException))
+#3 {main}
+  thrown in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php on line 155
+[19-Jul-2023 19:43:05 Asia/Jakarta] PHP Fatal error:  Uncaught CodeIgniter\HTTP\Exceptions\HTTPException: Unknown HTTP status code provided with no message: 267 in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php:155
+Stack trace:
+#0 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php(155): CodeIgniter\HTTP\Exceptions\HTTPException::forUnkownStatusCode(267)
+#1 /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/Debug/Exceptions.php(106): CodeIgniter\HTTP\Response->setStatusCode(267)
+#2 [internal function]: CodeIgniter\Debug\Exceptions->exceptionHandler(Object(setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException))
+#3 {main}
+  thrown in /home/jbkn4721/public_html/elearning.akuntanmu.com/vendor/codeigniter4/framework/system/HTTP/ResponseTrait.php on line 155
+[22-May-2024 02:34:48 America/Chicago] PHP Fatal error:  Cannot use empty array elements in arrays in /home/jbkn4721/public_html/elearning.akuntanmu.com/app/Controllers/Guru.php on line 2030
+[22-May-2024 02:34:58 America/Chicago] PHP Fatal error:  Cannot use empty array elements in arrays in /home/jbkn4721/public_html/elearning.akuntanmu.com/app/Controllers/Guru.php on line 2030
+[22-May-2024 02:35:28 America/Chicago] PHP Fatal error:  Cannot redeclare App\Controllers\Guru::update_soal_() in /home/jbkn4721/public_html/elearning.akuntanmu.com/app/Controllers/Guru.php on line 2191
+[22-May-2024 02:35:29 America/Chicago] PHP Fatal error:  Cannot redeclare App\Controllers\Guru::update_soal_() in /home/jbkn4721/public_html/elearning.akuntanmu.com/app/Controllers/Guru.php on line 2191
+[19-Jun-2024 11:55:13 Asia/Jakarta] PHP Warning:  require(/home/jbkn4721/public_html/develearning.akuntanmu.com/public/app/Config/Paths.php): failed to open stream: No such file or directory in /home/jbkn4721/public_html/develearning.akuntanmu.com/public/index.php on line 43
+[19-Jun-2024 11:55:13 Asia/Jakarta] PHP Fatal error:  require(): Failed opening required '/home/jbkn4721/public_html/develearning.akuntanmu.com/public/app/Config/Paths.php' (include_path='.:/opt/cpanel/ea-php74/root/usr/share/pear') in /home/jbkn4721/public_html/develearning.akuntanmu.com/public/index.php on line 43
+[19-Jun-2024 11:55:13 Asia/Jakarta] PHP Warning:  require(/home/jbkn4721/public_html/develearning.akuntanmu.com/public/app/Config/Paths.php): failed to open stream: No such file or directory in /home/jbkn4721/public_html/develearning.akuntanmu.com/public/index.php on line 43
+[19-Jun-2024 11:55:13 Asia/Jakarta] PHP Fatal error:  require(): Failed opening required '/home/jbkn4721/public_html/develearning.akuntanmu.com/public/app/Config/Paths.php' (include_path='.:/opt/cpanel/ea-php74/root/usr/share/pear') in /home/jbkn4721/public_html/develearning.akuntanmu.com/public/index.php on line 43
+[19-Jun-2024 11:55:14 Asia/Jakarta] PHP Warning:  require(/home/jbkn4721/public_html/develearning.akuntanmu.com/public/app/Config/Paths.php): failed to open stream: No such file or directory in /home/jbkn4721/public_html/develearning.akuntanmu.com/public/index.php on line 43
+[19-Jun-2024 11:55:14 Asia/Jakarta] PHP Fatal error:  require(): Failed opening required '/home/jbkn4721/public_html/develearning.akuntanmu.com/public/app/Config/Paths.php' (include_path='.:/opt/cpanel/ea-php74/root/usr/share/pear') in /home/jbkn4721/public_html/develearning.akuntanmu.com/public/index.php on line 43
+[19-Jun-2024 11:55:17 Asia/Jakarta] PHP Warning:  require(/home/jbkn4721/public_html/develearning.akuntanmu.com/public/app/Config/Paths.php): failed to open stream: No such file or directory in /home/jbkn4721/public_html/develearning.akuntanmu.com/public/index.php on line 43
+[19-Jun-2024 11:55:17 Asia/Jakarta] PHP Fatal error:  require(): Failed opening required '/home/jbkn4721/public_html/develearning.akuntanmu.com/public/app/Config/Paths.php' (include_path='.:/opt/cpanel/ea-php74/root/usr/share/pear') in /home/jbkn4721/public_html/develearning.akuntanmu.com/public/index.php on line 43
+[19-Jun-2024 11:55:17 Asia/Jakarta] PHP Warning:  require(/home/jbkn4721/public_html/develearning.akuntanmu.com/public/app/Config/Paths.php): failed to open stream: No such file or directory in /home/jbkn4721/public_html/develearning.akuntanmu.com/public/index.php on line 43
+[19-Jun-2024 11:55:17 Asia/Jakarta] PHP Fatal error:  require(): Failed opening required '/home/jbkn4721/public_html/develearning.akuntanmu.com/public/app/Config/Paths.php' (include_path='.:/opt/cpanel/ea-php74/root/usr/share/pear') in /home/jbkn4721/public_html/develearning.akuntanmu.com/public/index.php on line 43
+[19-Jun-2024 11:55:18 Asia/Jakarta] PHP Warning:  require(/home/jbkn4721/public_html/develearning.akuntanmu.com/public/app/Config/Paths.php): failed to open stream: No such file or directory in /home/jbkn4721/public_html/develearning.akuntanmu.com/public/index.php on line 43
+[19-Jun-2024 11:55:18 Asia/Jakarta] PHP Fatal error:  require(): Failed opening required '/home/jbkn4721/public_html/develearning.akuntanmu.com/public/app/Config/Paths.php' (include_path='.:/opt/cpanel/ea-php74/root/usr/share/pear') in /home/jbkn4721/public_html/develearning.akuntanmu.com/public/index.php on line 43
+[19-Jun-2024 11:55:21 Asia/Jakarta] PHP Warning:  require(/home/jbkn4721/public_html/develearning.akuntanmu.com/public/app/Config/Paths.php): failed to open stream: No such file or directory in /home/jbkn4721/public_html/develearning.akuntanmu.com/public/index.php on line 43
+[19-Jun-2024 11:55:21 Asia/Jakarta] PHP Fatal error:  require(): Failed opening required '/home/jbkn4721/public_html/develearning.akuntanmu.com/public/app/Config/Paths.php' (include_path='.:/opt/cpanel/ea-php74/root/usr/share/pear') in /home/jbkn4721/public_html/develearning.akuntanmu.com/public/index.php on line 43
+[19-Jun-2024 11:55:26 Asia/Jakarta] PHP Warning:  require(/home/jbkn4721/public_html/develearning.akuntanmu.com/public/app/Config/Paths.php): failed to open stream: No such file or directory in /home/jbkn4721/public_html/develearning.akuntanmu.com/public/index.php on line 43
+[19-Jun-2024 11:55:26 Asia/Jakarta] PHP Fatal error:  require(): Failed opening required '/home/jbkn4721/public_html/develearning.akuntanmu.com/public/app/Config/Paths.php' (include_path='.:/opt/cpanel/ea-php74/root/usr/share/pear') in /home/jbkn4721/public_html/develearning.akuntanmu.com/public/index.php on line 43
+[19-Jun-2024 11:56:30 Asia/Jakarta] PHP Warning:  require(/home/jbkn4721/public_html/develearning.akuntanmu.com/public/app/Config/Paths.php): failed to open stream: No such file or directory in /home/jbkn4721/public_html/develearning.akuntanmu.com/public/index.php on line 43
+[19-Jun-2024 11:56:30 Asia/Jakarta] PHP Fatal error:  require(): Failed opening required '/home/jbkn4721/public_html/develearning.akuntanmu.com/public/app/Config/Paths.php' (include_path='.:/opt/cpanel/ea-php74/root/usr/share/pear') in /home/jbkn4721/public_html/develearning.akuntanmu.com/public/index.php on line 43
+[19-Jun-2024 11:56:34 Asia/Jakarta] PHP Warning:  require(/home/jbkn4721/public_html/develearning.akuntanmu.com/public/app/Config/Paths.php): failed to open stream: No such file or directory in /home/jbkn4721/public_html/develearning.akuntanmu.com/public/index.php on line 43
+[19-Jun-2024 11:56:34 Asia/Jakarta] PHP Fatal error:  require(): Failed opening required '/home/jbkn4721/public_html/develearning.akuntanmu.com/public/app/Config/Paths.php' (include_path='.:/opt/cpanel/ea-php74/root/usr/share/pear') in /home/jbkn4721/public_html/develearning.akuntanmu.com/public/index.php on line 43
+[19-Jun-2024 11:56:36 Asia/Jakarta] PHP Warning:  require(/home/jbkn4721/public_html/develearning.akuntanmu.com/public/app/Config/Paths.php): failed to open stream: No such file or directory in /home/jbkn4721/public_html/develearning.akuntanmu.com/public/index.php on line 43
+[19-Jun-2024 11:56:36 Asia/Jakarta] PHP Fatal error:  require(): Failed opening required '/home/jbkn4721/public_html/develearning.akuntanmu.com/public/app/Config/Paths.php' (include_path='.:/opt/cpanel/ea-php74/root/usr/share/pear') in /home/jbkn4721/public_html/develearning.akuntanmu.com/public/index.php on line 43
+[19-Jun-2024 11:57:58 Asia/Jakarta] PHP Warning:  require(/home/jbkn4721/public_html/develearning.akuntanmu.com/public/app/Config/Paths.php): failed to open stream: No such file or directory in /home/jbkn4721/public_html/develearning.akuntanmu.com/public/index.php on line 43
+[19-Jun-2024 11:57:58 Asia/Jakarta] PHP Fatal error:  require(): Failed opening required '/home/jbkn4721/public_html/develearning.akuntanmu.com/public/app/Config/Paths.php' (include_path='.:/opt/cpanel/ea-php74/root/usr/share/pear') in /home/jbkn4721/public_html/develearning.akuntanmu.com/public/index.php on line 43
+[19-Jun-2024 12:00:20 Asia/Jakarta] PHP Warning:  require(/home/jbkn4721/public_html/develearning.akuntanmu.com/public/app/Config/Paths.php): failed to open stream: No such file or directory in /home/jbkn4721/public_html/develearning.akuntanmu.com/public/index.php on line 43
+[19-Jun-2024 12:00:20 Asia/Jakarta] PHP Fatal error:  require(): Failed opening required '/home/jbkn4721/public_html/develearning.akuntanmu.com/public/app/Config/Paths.php' (include_path='.:/opt/cpanel/ea-php74/root/usr/share/pear') in /home/jbkn4721/public_html/develearning.akuntanmu.com/public/index.php on line 43
+[19-Jun-2024 12:00:20 Asia/Jakarta] PHP Warning:  require(/home/jbkn4721/public_html/develearning.akuntanmu.com/public/app/Config/Paths.php): failed to open stream: No such file or directory in /home/jbkn4721/public_html/develearning.akuntanmu.com/public/index.php on line 43
+[19-Jun-2024 12:00:20 Asia/Jakarta] PHP Fatal error:  require(): Failed opening required '/home/jbkn4721/public_html/develearning.akuntanmu.com/public/app/Config/Paths.php' (include_path='.:/opt/cpanel/ea-php74/root/usr/share/pear') in /home/jbkn4721/public_html/develearning.akuntanmu.com/public/index.php on line 43
