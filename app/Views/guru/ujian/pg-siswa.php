@@ -1,283 +1,280 @@
 <?= $this->extend('template/app'); ?>
-<?= $this->section('content'); ?>
-<?= $this->include('template/sidebar/guru'); ?>
+<?= $this->section('styles'); ?>
+<style>
+    .answer-box {
+        border: 2px solid #e0e6ed;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
 
+    .answer-box:hover {
+        background-color: #f1f2f3;
+        border-color: #4361ee;
+    }
+
+    .answer-box.selected {
+        border-color: #4361ee;
+        background-color: #f3f6ff;
+    }
+
+    .nav-btn {
+        width: 40px;
+        height: 40px;
+        margin: 3px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+        border: 1px solid #bfc9d4;
+    }
+
+    .nav-btn.active {
+        background-color: #4361ee !important;
+        color: #fff !important;
+        border-color: #4361ee;
+    }
+
+    .nav-btn.benar {
+        background-color: #1abc9c;
+        color: #fff;
+        border-color: #1abc9c;
+    }
+
+    .nav-btn.salah {
+        background-color: #e7515a;
+        color: #fff;
+        border-color: #e7515a;
+    }
+
+    .nav-btn.kosong {
+        background-color: #e2a03f;
+        color: #fff;
+        border-color: #e2a03f;
+    }
+
+    .question-item {
+        display: none;
+    }
+
+    .question-item.active {
+        display: block;
+    }
+</style>
+<?= $this->endSection() ?>
+<?= $this->section('content'); ?>
 <?php
 
-use App\Models\UjiansiswaModel;
+use App\Models\UjianSiswaModel;
 
-$UjiansiswaModel = new UjiansiswaModel();
+$UjianSiswaModel = new UjianSiswaModel();
 ?>
+<div class="layout-px-spacing">
 
-<!--  BEGIN CONTENT AREA  -->
-<div id="content" class="main-content">
-    <div class="layout-px-spacing">
-        <div class="row layout-top-spacing">
-            <div class="col-lg-12 layout-spacing">
-                <div class="widget shadow p-3">
-                    <div class="widget-heading">
-                        <h5 class=""><?= $ujian->nama_ujian; ?></h5>
-                        <table class="mt-2">
-                            <tr>
-                                <th>Jumlah Soal</th>
-                                <th>: <?= count($detail_ujian); ?> Soal</th>
-                            </tr>
-                            <tr>
-                                <th>Nama Peserta</th>
-                                <th>: <?= $siswa->nama_siswa; ?></th>
-                            </tr>
-                        </table>
-                        <div class="row mt-3">
-                            <div class="col-sm-9">
-                                <h5>Ujian <?= $siswa->nama_siswa; ?></h5>
-                                <form id="examwizard-question" class="mt-3" action="#" method="POST">
-                                    <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>" />
-                                    <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>" />
-                                    <div class="card-body">
-                                        <div style="margin-top: -20px;">
-                                            <?php
-                                            $no = 1;
-                                            $soal_hidden = '';
-                                            //echo session()->get('id') . '<br>';
-                                            //var_dump($siswa);
+    <div class="row layout-top-spacing mb-2">
+        <div class="col-12">
+            <div class="widget shadow-sm p-3 bg-white d-flex justify-content-between align-items-center" style="border-radius:8px;">
+                <div>
+                    <h5 class="mb-0 font-weight-bold"><?= $ujian->nama_ujian; ?></h5>
+                    <small class="text-muted">Peserta: <?= $siswa->nama_siswa; ?> | Total: <?= count($detail_ujian); ?> Soal</small>
+                </div>
+                <div>
+                    <span class="badge badge-success">Benar: <?= count($jawaban_benar); ?></span>
+                    <span class="badge badge-danger">Salah: <?= count($jawaban_salah); ?></span>
+                    <span class="badge badge-warning">Kosong: <?= count($tidak_dijawab); ?></span>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                                            foreach ($detail_ujian as $soal) : ?>
-                                                <?php $jawaban_siswa = $UjiansiswaModel
-                                                    ->where('ujian_id', $soal->id_detail_ujian)
-                                                    //->where('siswa', session()->get('id'))
-                                                    ->where('siswa', $siswa->id_siswa)
-                                                    ->get()->getRowObject();
-                                                ?>
-                                                <div class="question <?= $soal_hidden; ?> question-<?= $no; ?>" data-question="<?= $no; ?>">
-                                                    <div class="row">
-                                                        <div class="col-sm-12">
-                                                            <h6 class="question-title color-green"><span><?= $no; ?>. </span> <?= strip_tags($soal->nama_soal, '<a><ul><li><i><em><strong>'); ?></h2>
-                                                        </div>
-                                                    </div>
-                                                    <div class="row mt-50">
-                                                        <div class="col-sm-12">
-                                                            <div class="alert alert-danger hidden"></div>
-                                                            <div class="green-radio color-green">
-                                                                <ul type="none" style="color: #000;">
-                                                                    <?php if (substr($soal->pg_1, 3, strlen($soal->pg_1)) != null) { ?>
-                                                                        <li class="answer-number <?= $jawaban_siswa->jawaban == 'A'? $soal->jawaban == 'A'? 'bg-success':'bg-danger':'' ?>">
-                                                                            <label for="answer-<?= $soal->id_detail_ujian; ?>-<?= substr($soal->pg_1, 0, 1); ?>" class="answer-text" style="color: #000;">
-                                                                                <span></span><?= substr($soal->pg_1, 3, strlen($soal->pg_1)); ?>
-                                                                            </label>
-                                                                        </li>
-                                                                    <?php } ?>
-                                                                    <?php if (substr($soal->pg_2, 3, strlen($soal->pg_2)) != null) { ?>
-                                                                        <li class="answer-number <?= $jawaban_siswa->jawaban == 'B'? $soal->jawaban == 'B'? 'bg-success':'bg-danger':'' ?>">
-                                                                            <label for="answer-<?= $soal->id_detail_ujian; ?>-<?= substr($soal->pg_2, 0, 1); ?>" class="answer-text" style="color: #000;">
-                                                                                <span></span><?= substr($soal->pg_2, 3, strlen($soal->pg_2)); ?>
-                                                                            </label>
-                                                                        </li>
-                                                                    <?php } ?>
-                                                                    <?php if (substr($soal->pg_3, 3, strlen($soal->pg_3)) != null) { ?>
-                                                                        <li class="answer-number <?= $jawaban_siswa->jawaban == 'C'? $soal->jawaban == 'C'? 'bg-success':'bg-danger':'' ?>">
-                                                                            <label for="answer-<?= $soal->id_detail_ujian; ?>-<?= substr($soal->pg_3, 0, 1); ?>" class="answer-text" style="color: #000;">
-                                                                                <span></span><?= substr($soal->pg_3, 3, strlen($soal->pg_3)); ?>
-                                                                            </label>
-                                                                        </li>
-                                                                    <?php } ?>
-                                                                    <?php if (substr($soal->pg_4, 3, strlen($soal->pg_4)) != null) { ?>
-                                                                        <li class="answer-number <?= $jawaban_siswa->jawaban == 'D'? $soal->jawaban == 'D'? 'bg-success':'bg-danger':'' ?>">
-                                                                            <label for="answer-<?= $soal->id_detail_ujian; ?>-<?= substr($soal->pg_4, 0, 1); ?>" class="answer-text" style="color: #000;">
-                                                                                <span></span><?= substr($soal->pg_4, 3, strlen($soal->pg_4)); ?>
-                                                                            </label>
-                                                                        </li>
-                                                                    <?php } ?>
+    <div class="row">
+        <div class="col-md-9">
+            <div class="card shadow-sm mb-3">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <strong>Soal No. <span id="currentNumberLabel">1</span></strong>
+                </div>
 
-                                                                    <?php if (substr($soal->pg_5, 3, strlen($soal->pg_5) != null)) { ?>
-                                                                        <li class="answer-number <?= $jawaban_siswa->jawaban == 'E'? $soal->jawaban == 'E'? 'bg-success':'bg-danger':'' ?>">
-                                                                            <label for="answer-<?= $soal->id_detail_ujian; ?>-<?= substr($soal->pg_5, 0, 1); ?>" class="answer-text" style="color: #000;">
-                                                                                <span></span><?= substr($soal->pg_5, 3, strlen($soal->pg_5)); ?>
-                                                                            </label>
-                                                                        </li>
-                                                                    <?php } ?>
-                                                                </ul>
-                                                                <?php if ($soal->jawaban == $jawaban_siswa->jawaban) : ?>
-                                                                    <div class="mt-2"><span style="font-weight: bold;">Jawaban Kamu</span> : <?= $jawaban_siswa->jawaban; ?> <span class="badge badge-success ml-2">benar</span> <label for="" class="badge badge-info" data-bs-toggle="collapse" data-bs-target="#benar_penjelasan" aria-expanded="true" aria-controls="benar_penjelasan">?</label></div>
-                                                                    <div class="accordion" id="benarPen">
-                                                                        <div class="accordion-item">
-                                                                            <div id="benar_penjelasan" class="accordion-collapse collapse" data-bs-parent="#benarPen">
-                                                                                <h6>Penjelasan Jawaban</h6>
-                                                                                <div class="accordion-body">
-                                                                                    <?= $soal->penjelasan; ?>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
+                <div class="card-body">
+                    <form id="examForm">
+                        <?php $no = 1;
+                        foreach ($detail_ujian as $soal):
+                            $jawaban_siswa = $UjianSiswaModel
+                                ->where('ujian_id', $soal->id_detail_ujian)
+                                ->where('siswa', $siswa->id_siswa)
+                                ->get()->getRowObject();
 
-                                                                    </div>
+                            $is_benar = ($jawaban_siswa && $jawaban_siswa->jawaban == $soal->jawaban);
+                            $is_salah = ($jawaban_siswa && $jawaban_siswa->jawaban != NULL && $jawaban_siswa->jawaban != $soal->jawaban);
+                            $is_kosong = (!$jawaban_siswa || $jawaban_siswa->jawaban == NULL);
+                        ?>
 
+                            <div class="question-item <?= $no == 1 ? 'active' : '' ?>" id="question-<?= $no ?>" data-status="<?= $is_benar ? 'benar' : ($is_salah ? 'salah' : 'kosong') ?>">
 
-                                                                <?php else : ?>
-                                                                    <?php if ($jawaban_siswa->jawaban == NULL) : ?>
-                                                                        <div class="mt-2"><span style="font-weight: bold;">Jawaban Kamu</span> :<span class="badge badge-warning ml-2">tidak dijawab</span> <label for="" class="badge badge-info" data-bs-toggle="collapse" data-bs-target="#tidak_dijawab_penjelasan" aria-expanded="true" aria-controls="tidak_dijawab_penjelasan">?</label></div>
-                                                                        <div class="mt-2 text-success">Jawaban Benar : <?= $soal->jawaban; ?></div>
-                                                                        <div class="accordion" id="tidakPen">
-                                                                            <div class="accordion-item">
-                                                                                <div id="tidak_dijawab_penjelasan" class="accordion-collapse collapse" data-bs-parent="#tidakPen">
-                                                                                    <h6>Penjelasan Jawaban</h6>
-                                                                                    <div class="accordion-body">
-                                                                                        <?= $soal->penjelasan; ?>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
+                                <div class="mb-4 font-weight-bold" style="font-size: 1.1rem;">
+                                    <?= strip_tags($soal->nama_soal, '<b><i><u><strong><em><img><a><ul><li>') ?>
+                                </div>
 
-                                                                        </div>
-                                                                    <?php else : ?>
-                                                                        <div class="mt-2"><span style="font-weight: bold;">Jawaban Kamu</span> : <?= $jawaban_siswa->jawaban; ?> <span class="badge badge-danger ml-2">salah </span> <span class="badge badge-success ml-2">Jawaban Benar : <?= $soal->jawaban; ?></span>
-                                                                            <label for="" class="badge badge-info" data-bs-toggle="collapse" data-bs-target="#salah_penjelasan" aria-expanded="true" aria-controls="salah_penjelasan">?</label>
-                                                                        </div>
-                                                                        <!--<div class="mt-2 text-success">Jawaban Benar : <?= $soal->jawaban; ?></div>-->
-                                                                        <div class="accordion" id="salahPen">
-                                                                            <div class="accordion-item">
-                                                                                <div id="salah_penjelasan" class="accordion-collapse collapse" data-bs-parent="#salahPen">
-                                                                                    <h6>Penjelasan Jawaban</h6>
-                                                                                    <div class="accordion-body">
-                                                                                        <?= $soal->penjelasan; ?>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
+                                <div class="options-container">
+                                    <?php
+                                    $pilihan = [
+                                        'A' => $soal->pg_1,
+                                        'B' => $soal->pg_2,
+                                        'C' => $soal->pg_3,
+                                        'D' => $soal->pg_4,
+                                        'E' => $soal->pg_5
+                                    ];
 
-                                                                        </div>
-                                                                    <?php endif; ?>
-                                                                <?php endif; ?>
+                                    foreach ($pilihan as $key => $val):
+                                        if (empty($val) || strlen($val) <= 3) continue;
+                                        $isi_pg = substr($val, 3);
 
-
-
-
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <?php $soal_hidden = 'hidden'; ?>
-                                                <?php $no++ ?>
-                                            <?php endforeach; ?>
+                                        // Logika Warna Indikator
+                                        $class_label = "";
+                                        if ($jawaban_siswa && $jawaban_siswa->jawaban == $key) {
+                                            $class_label = ($key == $soal->jawaban) ? "bg-success text-white" : "bg-danger text-white";
+                                        } elseif ($key == $soal->jawaban) {
+                                            $class_label = "border-success text-success font-weight-bold"; // Tandai jawaban yang benar jika siswa salah
+                                        }
+                                    ?>
+                                        <div class="answer-box d-flex align-items-center <?= $class_label ?>">
+                                            <div class="mr-3 font-weight-bold"><?= $key ?>.</div>
+                                            <div class="answer-content"><?= $isi_pg ?></div>
                                         </div>
-                                        <!-- SOAL -->
+                                    <?php endforeach; ?>
+                                </div>
 
-                                        <input type="hidden" value="1" id="currentQuestionNumber" name="currentQuestionNumber" />
-                                        <input type="hidden" value="<?= count($detail_ujian); ?>" id="totalOfQuestion" name="totalOfQuestion" />
-                                        <input type="hidden" value="[]" id="markedQuestion" name="markedQuestions" />
-                                        <!-- END SOAL -->
+                                <hr>
+                                <hr>
+                                <div class="alert <?= $is_benar ? 'alert-light-success' : ($is_kosong ? 'alert-light-warning' : 'alert-light-danger') ?> mt-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h6 class="font-weight-bold mb-0">Analisis Jawaban:</h6>
+                                        <span class="badge badge-dark">
+                                            <i class="far fa-clock mr-1"></i> Dijawab pada: <?= $jawaban_siswa->jam ?? '-'; ?>
+                                        </span>
                                     </div>
-                                </form>
-                            </div>
 
-                            <div class="col-sm-3" id="quick-access-section" class="table-responsive">
-                                <table class="table text-center table-hover">
-                                    <thead class="question-response-header">
-                                        <tr>
-                                            <th class="text-center">No. Soal</th>
-                                            <th class="text-center">Jawaban Peserta</th>
-                                            <th class="text-center">Waktu</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php
-                                        $no = 1;
-                                        foreach ($detail_ujian as $soal) : ?>
-                                            <?php $jawaban_siswa = $UjiansiswaModel
-                                                ->where('ujian_id', $soal->id_detail_ujian)
-                                                ->where('siswa', $siswa->id_siswa)
-                                                //->where('siswa', session()->get('id'))
-                                                ->get()->getRowObject();
-                                            ?>
-                                            <tr class="question-response-rows" data-question="<?= $no; ?>" style="cursor: pointer;">
-                                                <td style="font-weight: bold;"><?= $no; ?></td>
-                                                <td class="question-response-rows-value"><?= ($jawaban_siswa->jawaban == null) ? '-' : $jawaban_siswa->jawaban; ?></td>
-                                                <td class="question-response-rows-value"><?= $jawaban_siswa->jam == null ? '-' : $jawaban_siswa->jam; ?></td>
-                                            </tr>
-                                            <?php $no++; ?>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
-                                <div class="text-nowrap text-center">
-                                    <a href="javascript:void(0)" class="btn btn-success" id="quick-access-prev">
-                                        &laquo;
-                                    </a>
-                                    <span class="alert alert-info" id="quick-access-info"></span>
-                                    <a href="javascript:void(0)" class="btn btn-success" id="quick-access-next">&raquo;</a>
+                                    <p class="mb-1">Jawaban Peserta: <strong><?= $jawaban_siswa->jawaban ?? 'Tidak Dijawab' ?></strong>
+                                        <?php if (!$is_benar && !$is_kosong): ?>
+                                            | Jawaban Benar: <strong class="text-success"><?= $soal->jawaban ?></strong>
+                                        <?php endif; ?>
+                                    </p>
+
+                                    <div class="mt-2 pt-2 border-top">
+                                        <strong>Penjelasan:</strong><br>
+                                        <div class="text-dark">
+                                            <?= $soal->penjelasan ?: 'Tidak ada penjelasan untuk soal ini.' ?>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
+                        <?php $no++;
+                        endforeach; ?>
+                    </form>
+                </div>
+            </div>
 
-                        </div>
-                        <!-- Exmas Footer - Multi Step Pages Footer -->
-                        <div class="row">
-                            <div class="col-lg-12 exams-footer">
-                                <div class="row">
-                                    <div class="col-sm-1 back-to-prev-question-wrapper text-center">
-                                        <a href="javascript:void(0);" id="back-to-prev-question" class="btn btn-success disabled">
-                                            Back
-                                        </a>
-                                    </div>
-                                    <div class="col-sm-2 footer-question-number-wrapper text-center">
-                                        <div>
-                                            <span id="current-question-number-label">1</span>
-                                            <span>Dari <b><?= count($detail_ujian); ?></b></span>
-                                        </div>
-                                        <div>
-                                            Nomor Soal
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-1 go-to-next-question-wrapper text-center">
-                                        <a href="javascript:void(0);" id="go-to-next-question" class="btn btn-success">
-                                            Next
-                                        </a>
-                                    </div>
-                                </div>
-                                <br>
-                                <span class="text-success" style="font-weight: bold;">BENAR : <?= count($jawaban_benar); ?></span> | <span class="text-danger" style="font-weight: bold;">SALAH : <?= count($jawaban_salah); ?></span> | <span class="text-warning" style="font-weight: bold;">TIDAK DIJAWAB : <?= count($tidak_dijawab); ?></span>
+            <div class="d-flex justify-content-between mb-4">
+                <button class="btn btn-secondary" id="prevBtn" disabled>Sebelumnya</button>
+                <a href="javascript:void(0)" class="btn btn-outline-primary" onclick="history.back(-1)">Kembali</a>
+                <button class="btn btn-primary" id="nextBtn">Selanjutnya</button>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm sticky-top" style="top: 20px;">
+                <div class="card-header bg-info text-white text-center font-weight-bold">
+                    Navigasi Soal
+                </div>
+                <div class="card-body p-3">
+                    <div id="navContainer" class="d-flex flex-wrap justify-content-start">
+                        <?php $n = 1;
+                        foreach ($detail_ujian as $s):
+                            // Ambil data jam untuk tooltip
+                            $js = $UjianSiswaModel->where(['ujian_id' => $s->id_detail_ujian, 'siswa' => $siswa->id_siswa])->get()->getRowObject();
+                            $jam_jawab = $js->jam ?? '-';
+                        ?>
+                            <div class="nav-btn"
+                                id="nav-btn-<?= $n ?>"
+                                onclick="goToQuestion(<?= $n ?>)"
+                                data-toggle="tooltip"
+                                title="Waktu: <?= $jam_jawab ?>">
+                                <?= $n ?>
                             </div>
+                        <?php $n++;
+                        endforeach; ?>
+                    </div>
 
-                        </div>
-                        <a href="javascript:void(0)" class="btn btn-primary mt-3" onclick="history.back(-1)">Kembali</a>
+                    <div class="mt-4 pt-2 border-top">
+                        <small class="d-block mb-1"><span class="badge badge-success">&nbsp;</span> Benar</small>
+                        <small class="d-block mb-1"><span class="badge badge-danger">&nbsp;</span> Salah</small>
+                        <small class="d-block mb-1"><span class="badge badge-warning">&nbsp;</span> Kosong / Tidak Dijawab</small>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="footer-wrapper">
-        <div class="footer-section f-section-1">
-            <p class="terms-conditions"><?= copyright() ?></p>
-        </div>
-        <div class="footer-section f-section-2">
-           
-        </div>
-    </div>
 </div>
-<!--  END CONTENT AREA  -->
-
-<!-- MODAL -->
-
+<?= $this->endSection(); ?>
+<?= $this->section('scripts'); ?>
 <script>
-    var examWizard = $.fn.examWizard({
-        finishOption: {
-            enableModal: true,
-        },
-        quickAccessOption: {
-            quickAccessPagerItem: 5,
-        },
-    });
-    $('.question-response-rows').click(function() {
-        var no_soal = $(this).data('question');
+    let currentQ = 1;
+    const totalQ = <?= count($detail_ujian); ?>;
 
-        var soal_ini = '.question-' + no_soal;
-        $('.question').addClass('hidden');
-        $(soal_ini).removeClass('hidden');
-        $('input[name=currentQuestionNumber]').val(no_soal);
-        $('#current-question-number-label').text(no_soal);
-        $('#back-to-prev-question').removeClass('disabled');
-        $('#go-to-next-question').removeClass('disabled');
+    function updateUI() {
+        // Update Soal Visibility
+        $('.question-item').removeClass('active');
+        $('#question-' + currentQ).addClass('active');
 
+        // Update Label Nomor
+        $('#currentNumberLabel').text(currentQ);
+
+        // Update Tombol
+        $('#prevBtn').prop('disabled', currentQ === 1);
+        $('#nextBtn').text(currentQ === totalQ ? 'Selesai' : 'Selanjutnya');
+
+        // Update Active Nav
+        $('.nav-btn').removeClass('active');
+        $('#nav-btn-' + currentQ).addClass('active');
+    }
+
+    function goToQuestion(num) {
+        currentQ = num;
+        updateUI();
+    }
+
+    // Beri warna pada navigasi berdasarkan status jawaban (PHP rendered)
+    function colorNav() {
+        $('.question-item').each(function() {
+            const id = $(this).attr('id').split('-')[1];
+            const status = $(this).data('status');
+            $('#nav-btn-' + id).addClass(status);
+        });
+    }
+
+    $(document).ready(function() {
+        colorNav();
+        updateUI();
+
+        $('#nextBtn').click(function() {
+            if (currentQ < totalQ) {
+                currentQ++;
+                updateUI();
+            } else {
+                history.back(-1);
+            }
+        });
+
+        $('#prevBtn').click(function() {
+            if (currentQ > 1) {
+                currentQ--;
+                updateUI();
+            }
+        });
     });
-    <?= session()->getFlashdata('pesan'); ?>
-    $(function() {
-        $('[data-toggle="tooltip"]').tooltip()
-    })
 </script>
-
 
 <?= $this->endSection(); ?>

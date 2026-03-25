@@ -1,101 +1,108 @@
 <?= $this->extend('template/app'); ?>
 <?= $this->section('css') ?>
 <style>
-.link-group {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-.link-group .form-control {
-  flex: 1;
-}
-.link-group .remove-link {
-  padding: 6px 10px;
-  font-size: 18px;
-  line-height: 1;
-}
+    .link-group {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .link-group .form-control {
+        flex: 1;
+    }
+
+    .link-group .remove-link {
+        padding: 6px 10px;
+        font-size: 18px;
+        line-height: 1;
+    }
 </style>
 
 <?= $this->endSection() ?>
 <?= $this->section('content'); ?>
 <?php $db = Config\Database::connect(); ?>
 <!--  BEGIN CONTENT AREA  -->
-    <div class="layout-px-spacing">
-        <div class="row layout-top-spacing">
-            <div class="col-lg-12 layout-spacing">
-                <div class="widget shadow p-3">
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <div class="widget-heading">
-                                <?php 
-                                $dkelas = $db->query("select nama_kelas from kelas where id_kelas = '$id_kelas'")->getRow();
-                                $dmapel = $db->query("select nama_mapel from mapel where id_mapel = '$id_mapel'")->getRow();
-                                $namamapel = $dmapel->nama_mapel; 
-                                $kelas = $dkelas->nama_kelas; 
-                                
-                                ?>
-                                <div class="row">
-                                    <div class="col-1"><h5 class="">Mapel</h5></div>
-                                    <div class="col-11"><h5 class=""><?= $namamapel ?></h5></div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-1"><h5 class="">Kelas</h5></div>
-                                    <div class="col-11"><h5 class=""><?= $kelas ?></h5></div>
-                                </div>
-                                <a href="<?= base_url('sw-guru/materi/mapel') ?>" class="btn btn-info mt-3">Kembali</a><a href="javascript:void(0)" class="btn btn-primary mt-3" data-toggle="modal" data-target="#tambah_materi">Tambah Materi</a>
-                            </div>
-                            <div class="table-responsive">
-                                <table id="datatable-table" class="table text-left text-nowrap">
-                                    <thead>
-                                        <tr>
-                                            <th>Judul</th>
-                                            <th>File Lampiran</th>
-                                            <th>Status</th>
-                                            <th>Opsi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php foreach ($materi as $m) : ?>
-                                            <tr>
-                                                <td><?= $m->nama_materi; ?></td>
-                                                <?php  $jml_file = $db->query("select count(*) as total_file from file where kode_file = '$m->kode_materi'")->getRow(); ?>
-                                                <td>
-                                                    (<?= !empty($jml_file)? $jml_file->total_file:0; ?>)  File
-                                                </td>
-                                                 <td>
-                                                    <?= $m->status == 0? '<span class="btn btn-warning btn-sm">Coming Soon</span>':'<span class="btn btn-success btn-sm">Ready</span>'; ?>
-                                                </td>
-                                                <td>
-                                                    <div class="dropdown custom-dropdown">
-                                                        <a class="dropdown-toggle btn btn-primary" href="#" role="button" id="dropdownMenuLink2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
-                                                                <line x1="3" y1="12" x2="21" y2="12"></line>
-                                                                <line x1="3" y1="6" x2="21" y2="6"></line>
-                                                                <line x1="3" y1="18" x2="21" y2="18"></line>
-                                                            </svg>
-                                                        </a>
+<div class="layout-px-spacing">
+    <div class="row layout-top-spacing">
+        <div class="col-lg-12 layout-spacing">
+            <div class="widget shadow p-3">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="widget-heading">
+                            <?php
+                            $dkelas = $db->query("select nama_kelas from kelas where id_kelas = '$id_kelas'")->getRow();
+                            $dmapel = $db->query("select nama_mapel from mapel where id_mapel = '$id_mapel'")->getRow();
+                            $namamapel = $dmapel->nama_mapel;
+                            $kelas = $dkelas->nama_kelas;
 
-                                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink2">
-                                                            <a class="dropdown-item" href="<?= base_url('sw-guru/materi/lihat_materi/') . '/' . encrypt_url($m->id_materi). '/' . $idmapel  . '/' .$idkelas; ?>">Lihat</a>
-                                                            <a class="dropdown-item edit_materi" href="javascript:void(0);" data-materi="<?= encrypt_url($m->id_materi); ?>" data-toggle="modal" data-target="#edit_materi">Edit</a>
-                                                            <a class="dropdown-item btn-hapus" href="<?= base_url('sw-guru/materi/hapus_materi/') . '/' . encrypt_url($m->kode_materi) . '/' . encrypt_url($m->id_mapel). '/' . encrypt_url($m->id_kelas); ?>" >Delete</a>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
+                            ?>
+                            <div class="row">
+                                <div class="col-1">
+                                    <h5 class="">Mapel</h5>
+                                </div>
+                                <div class="col-11">
+                                    <h5 class=""><?= $namamapel ?></h5>
+                                </div>
                             </div>
+                            <div class="row">
+                                <div class="col-1">
+                                    <h5 class="">Kelas</h5>
+                                </div>
+                                <div class="col-11">
+                                    <h5 class=""><?= $kelas ?></h5>
+                                </div>
+                            </div>
+                            <a href="<?= base_url('guru/mapel') ?>" class="btn btn-info mt-3">Kembali</a><a href="javascript:void(0)" class="btn btn-primary mt-3" data-toggle="modal" data-target="#tambah_materi">Tambah Materi</a>
                         </div>
-                        <!--<div class="col-lg-3">-->
-                        <!--    <img src="<?= base_url('assets/app-assets/img/'); ?>/materi.svg" class="align-middle" alt="">-->
-                        <!--</div>-->
+                        <div class="table-responsive">
+                            <table id="datatable-list" class="table text-left text-nowrap">
+                                <thead>
+                                    <tr>
+                                        <th>Judul</th>
+                                        <th>File Lampiran</th>
+                                        <th>Status</th>
+                                        <th>Opsi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($materi as $m) : ?>
+                                        <tr>
+                                            <td><?= $m->nama_materi; ?></td>
+                                            <?php $jml_file = $db->query("select count(*) as total_file from file where kode_file = '$m->kode_materi'")->getRow(); ?>
+                                            <td>
+                                                (<?= !empty($jml_file) ? $jml_file->total_file : 0; ?>) File
+                                            </td>
+                                            <td>
+                                                <?= $m->status == 0 ? '<span class="btn btn-warning btn-sm">Coming Soon</span>' : '<span class="btn btn-success btn-sm">Ready</span>'; ?>
+                                            </td>
+                                            <td>
+                                                <div class="dropdown custom-dropdown">
+                                                    <a class="dropdown-toggle btn btn-primary" href="#" role="button" id="dropdownMenuLink2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+                                                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                                                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                                                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                                                        </svg>
+                                                    </a>
+
+                                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuLink2">
+                                                        <a class="dropdown-item" href="<?= base_url('sw-guru/materi/lihat-materi/') . encrypt_url($m->id_materi) . '/' . $idmapel  . '/' . $idkelas; ?>">Lihat</a>
+                                                        <a class="dropdown-item edit_materi" href="javascript:void(0);" data-materi="<?= encrypt_url($m->id_materi); ?>" data-toggle="modal" data-target="#edit_materi">Edit</a>
+                                                        <a class="dropdown-item btn-hapus" href="<?= base_url('guru/hapus_materi/') . '/' . encrypt_url($m->kode_materi) . '/' . encrypt_url($m->id_mapel) . '/' . encrypt_url($m->id_kelas); ?>">Delete</a>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 <!--  END CONTENT AREA  -->
 
 <!-- MODAL -->
@@ -125,7 +132,7 @@
                         <div class="col-lg-6">
                             <div class="form-group">
                                 <label for="">Status materi</label>
-                                <select class="form-control" name="status"  required>
+                                <select class="form-control" name="status" required>
                                     <option value="">Pilih</option>
                                     <option value="0">Coming Soon</option>
                                     <option value="1">ready</option>
@@ -145,7 +152,7 @@
                             </div>
                         </div>
                     </div>
-                   
+
                     <div class="row">
                         <div class="col-lg-12">
                             <div class="custom-file-container" data-upload-id="fileMateri">
@@ -192,7 +199,7 @@
                                 <input type="hidden" name="e_kelas" id="e_kelas" value="">
                             </div>
                         </div>
-                        
+
                         <div class="col-lg-6">
                             <div class="form-group">
                                 <label for="">Status materi</label>
@@ -211,7 +218,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="row">
                         <div class="col-lg-12">
                             <div class="custom-file-container" data-upload-id="e_fileMateri">
@@ -237,154 +244,103 @@
 <?= $this->endSection(); ?>
 <?= $this->section('scripts'); ?>
 <script>
+    function updateCsrfToken(newToken) {
+        if (newToken && newToken !== csrfHash) {
+            csrfHash = newToken;
+            $('input[name="' + csrfName + '"]').val(newToken);
+            $('meta[name="csrf-hash"]').attr('content', newToken);
+        }
+    }
     $(document).ready(function() {
-
-        // MATERI
-        // $('.file_materi').click(function() {
-        //     swal({
-        //         title: 'Perhatian!',
-        //         text: 'pastikan anda sudah mengatur maksimal upload di php.ini',
-        //         type: 'warning',
-        //         padding: '2em'
-        //     })
-        // });
-
-        $('.summernote').summernote({
-            placeholder: 'Hello stand alone ui',
-            tabsize: 2,
-            height: 120,
-            toolbar: [
-                ['style', ['style']],
-                ['font', ['bold', 'underline', 'clear']],
-                ['color', ['color']],
-                ['para', ['ul', 'ol', 'paragraph']],
-                ['table', ['table']],
-                ['insert', ['link', 'picture', 'video']],
-                ['view', ['fullscreen', 'help']]
-            ],
-            callbacks: {
-                onImageUpload: function(image, which_sum = this) {
-                    uploadImage(image[0], which_sum);
-                },
-                onMediaDelete: function(target) {
-                    deleteImage(target[0].src);
-                }
-            }
-        });
-
-        function uploadImage(image, which_sum) {
-            var data = new FormData();
-            data.append("image", image);
-            $.ajax({
-                url: "<?= base_url('sw-guru/materi/upload-summernote') ?>",
-                cache: false,
-                contentType: false,
-                processData: false,
-                data: data,
-                type: "POST",
-                success: function(url) {
-                    $(which_sum).summernote("insertImage", url);
-                },
-                error: function(data) {
-                    console.log(data);
-                }
+        // 1. Inisialisasi DataTable
+        if ($.fn.DataTable) {
+            $('#datatable-list').DataTable({
+                "ordering": false
             });
         }
 
-        function deleteImage(src) {
-            $.ajax({
-                data: {
-                    src: src
-                },
-                type: "POST",
-                url: "<?= base_url('sw-guru/materi/delete-image') ?>",
-                cache: false,
-                success: function(response) {
-                    console.log(response);
-                }
-            });
-        }
-
-        $('.edit_materi').click(function() {
+        // 2. Inisialisasi Summernote
+        $(document).on('click', '.edit_materi', function() {
             const id_materi = $(this).data('materi');
-            
+            const container = $('#e_link_video');
+
+            container.html('<p class="text-muted">Loading...</p>');
+
+            // Siapkan data yang akan dikirim
+            let postData = {
+                id_materi: id_materi
+            };
+            // Sisipkan token CSRF ke dalam objek data
+            postData[csrfName] = csrfHash;
+
             $.ajax({
                 type: 'POST',
-                data: { id_materi: id_materi },
+                url: "<?= base_url('sw-guru/materi/edit') ?>",
+                data: postData, // Sekarang data membawa token
                 dataType: 'JSON',
-                async: true,
-                url: "<?= base_url('sw-guru/materi/edit-materi') ?>",
                 success: function(data) {
-                    // isi field dasar
+                    // Update token agar request berikutnya tidak error 403
+                    updateCsrfToken(data.token);
+
+                    // Isi field dasar
                     $("input[name=e_kode_materi]").val(data.kode_materi);
                     $("input[name=e_nama_materi]").val(data.nama_materi);
                     $("input[name=e_mapel]").val(data.mapel);
                     $("input[name=e_kelas]").val(data.kelas);
                     $("select[name=e_status]").val(data.status);
-        
-                    // Hapus input lama sebelum menambahkan baru
-                    const container = document.getElementById('e_link_video');
-                    container.innerHTML = '';
-        
-                    // parsing text_materi (berisi array URL video)
-                    const link_video = JSON.parse(data.text_materi || '[]');
-        
-                    // kalau tidak ada video, tampilkan 1 input kosong
+
+                    // Render Link Video
+                    container.empty();
+                    let link_video = [];
+                    try {
+                        link_video = JSON.parse(data.text_materi || '[]');
+                    } catch (e) {
+                        link_video = [];
+                    }
+
                     if (link_video.length === 0) {
-                        const div = document.createElement('div');
-                        div.className = 'link-group my-2';
-                        div.innerHTML = `
-                            <input type="text" class="form-control" name="e_text_materi[]" placeholder="Masukkan URL video">
-                            <span class="remove-link btn btn-danger">&times;</span>`;
-                        container.appendChild(div);
+                        addVideoRow('#e_link_video', 'e_text_materi[]');
                     } else {
-                        // kalau ada, tampilkan semua input berdasarkan data
-                        link_video.forEach((url, i) => {
-                            const div = document.createElement('div');
-                            div.className = 'link-group my-2';
-                            div.innerHTML = `
-                                <input type="text" class="form-control" name="e_text_materi[]" value="${url}" placeholder="Masukkan URL video">
-                                <span class="remove-link btn btn-danger">&times;</span>`;
-                            container.appendChild(div);
+                        link_video.forEach((url) => {
+                            addVideoRow('#e_link_video', 'e_text_materi[]', url);
                         });
                     }
+                },
+                error: function(xhr) {
+                    // Jika ditolak karena token expired, CI4 biasanya mengirim token baru di response
+                    if (xhr.responseJSON && xhr.responseJSON.token) {
+                        updateCsrfToken(xhr.responseJSON.token);
+                    }
+                    console.log(xhr.responseText);
+                    alert("Terjadi kesalahan keamanan (CSRF). Silakan coba lagi.");
                 }
             });
         });
 
 
-        var oneUpload = new FileUploadWithPreview('fileMateri');
-        // var secondUpload = new FileUploadWithPreview('videoMateri');
+        // 6. Helper Function untuk tambah baris URL Video
+        function addVideoRow(containerId, inputName, value = '') {
+            const row = `
+                <div class="link-group my-2">
+                    <input type="text" class="form-control" name="${inputName}" value="${value}" placeholder="Masukkan URL video">
+                    <span class="remove-link btn btn-danger ml-2">&times;</span>
+                </div>`;
+            $(containerId).append(row);
+        }
 
-        var oneUpload = new FileUploadWithPreview('e_fileMateri');
-        // var secondUpload = new FileUploadWithPreview('e_videoMateri');
-    })
-    
-    $('.tambah-baris-link').click(function() {
-        const link = `
-        <div class="link-group my-2">
-            <input type="text" class="form-control" name="text_materi[]" placeholder="Masukkan URL video">
-            <span class="remove-link btn btn-danger">&times;</span>
-        </div>`;
-        $('#link_video').append(link);
-    });
+        // Event Listener Tombol Tambah URL
+        $('.tambah-baris-link').click(function() {
+            addVideoRow('#link_video', 'text_materi[]');
+        });
 
-    // Tambah baris baru (di modal Edit Materi)
-    $('#tambah-link-edit').click(function() {
-        const link = `
-        <div class="link-group my-2">
-            <input type="text" class="form-control" name="e_text_materi[]" placeholder="Masukkan URL video">
-            <span class="remove-link btn btn-danger">&times;</span>
-        </div>`;
-        $('#e_link_video').append(link);
-    });
+        $('#tambah-link-edit').click(function() {
+            addVideoRow('#e_link_video', 'e_text_materi[]');
+        });
 
-    // Hapus baris (berlaku untuk tambah & edit)
-    $(document).on('click', '.remove-link', function() {
-        $(this).closest('.link-group').remove();
+        // Event Listener Hapus Baris (Delegasi)
+        $(document).on('click', '.remove-link', function() {
+            $(this).closest('.link-group').remove();
+        });
     });
-    
-    
 </script>
-
 <?= $this->endSection(); ?>

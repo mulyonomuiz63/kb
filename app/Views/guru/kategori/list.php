@@ -133,9 +133,6 @@
 <script>
     $(document).ready(function() {
         // 1. Inisialisasi variabel CSRF (Ambil dari sistem CI4)
-        let csrfName = '<?= csrf_token() ?>';
-        let csrfHash = '<?= csrf_hash() ?>';
-
         $(document).on('click', '.btn_edit_kategori', function() {
             const id_kategori = $(this).data('kategori');
             

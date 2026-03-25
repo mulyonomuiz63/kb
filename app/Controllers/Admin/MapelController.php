@@ -249,7 +249,7 @@ class MapelController extends BaseController
                     $namaUser = esc($chat->nama);
                     $pesan = esc($chat->text);
                     $gambar = $chat->gambar ? base_url('assets/app-assets/user/' . $chat->gambar) : base_url('assets/app-assets/img/90x90.jpg');
-                    $waktu = date('H:i', strtotime($chat->date_created ?? 'now'));
+                    $waktu = timeAgo($chat->date_created);
 
                     // Logika Bubble Chat
                     $alignClass = $isMe ? 'flex-row-reverse text-right' : '';
@@ -270,7 +270,7 @@ class MapelController extends BaseController
                             ' . $pesan . '
                         </div>
                         <div class="mt-1">
-                            <small class="text-muted" style="font-size: 9px;">' . $waktu . '</small>
+                            <small class="text-muted" style="font-size: 9px;">a</small>
                         </div>
                     </div>
                 </div>';

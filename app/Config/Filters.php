@@ -86,7 +86,10 @@ class Filters extends BaseFilters
                     'sw-admin/siswa/updateKuota',
                     'sw-admin/guru/get-chat-materi',
                     'sw-admin/guru/get-file-materi',
-                    'sw-admin/guru/chat-materi', // URL yang ingin dikecualikan
+                    'sw-admin/guru/chat-materi',
+                    'sw-guru/materi/get-chat-materi',
+                    'sw-guru/materi/get-file-materi',
+                    'sw-guru/materi/chat-materi',
                     'api/notifications/mark-all-read',
                     'api/notifications/mark-as-read',
                     'api/notifications/update-ui',

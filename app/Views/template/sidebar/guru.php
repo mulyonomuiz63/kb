@@ -1,7 +1,7 @@
 <?php
 // Konfigurasi Active Menu
 $dashboard = ['sw-guru/'];
-$mapel     = ['sw-guru/mapel'];
+$mapel     = ['sw-guru/mapel', 'sw-guru/materi'];
 $ujian     = ['sw-guru/ujian'];
 $bank_soal = ['sw-guru/bank-soal','sw-guru/kategori'];
 $profile   = ['sw-guru/profile'];

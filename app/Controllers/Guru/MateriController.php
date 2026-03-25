@@ -59,11 +59,8 @@ class MateriController extends BaseController
         return view('guru/materi/list', $data);
     }
 
-    public function tambah_materi()
+    public function store()
     {
-        if (session()->get('role') != 3) {
-            return redirect()->to('auth');
-        }
         $idmapel = encrypt_url($this->request->getVar('mapel'));
         $idkelas = encrypt_url($this->request->getVar('kelas'));
         $thumbs = $this->request->getPost();
@@ -85,7 +82,6 @@ class MateriController extends BaseController
         ];
 
 
-        $kelas = $this->kelasModel->asObject()->find($this->request->getVar('kelas'));
 
         $siswa = $this->siswaModel
             ->where('kelas', $this->request->getVar('kelas'))
@@ -139,77 +135,29 @@ class MateriController extends BaseController
         $this->materiModel->save($data_materi);
         // INSERT DATA MATERI SISWA
         $this->materiSiswaModel->insertBatch($siswa_materi);
-
-        session()->setFlashdata('pesan', "
-            swal({
-                title: 'Berhasil!',
-                text: 'Materi telah dibuat',
-                type: 'success',
-                padding: '2em'
-                });
-            ");
-        return redirect()->to('guru/materi/' . $idmapel . '/' . $idkelas);
+        return redirect()->to('sw-guru/materi/lihat/' . $idmapel . '/' . $idkelas)->with('success', 'Materi telah dibuat');
     }
-    public function lihat_materi($id, $idmapel, $idkelas)
+
+    public function edit()
     {
-        if (session()->get('role') != 3) {
-            return redirect()->to('auth');
-        }
-        $id_materi = decrypt_url($id);
-
-        // MENU DATA
-        $data['dashboard'] = [
-            'menu' => '',
-            'expanded' => 'false'
-        ];
-        $data['menu_materi'] = [
-            'menu' => 'active',
-            'expanded' => 'true',
-        ];
-        $data['menu_tugas'] = [
-            'menu' => '',
-            'expanded' => 'false',
-        ];
-        $data['menu_ujian'] = [
-            'menu' => '',
-            'expanded' => 'false',
-        ];
-        $data['menu_kategori'] = [
-            'menu' => '',
-            'expanded' => 'false',
-        ];
-        $data['menu_bank_soal'] = [
-            'menu' => '',
-            'expanded' => 'false',
-        ];
-        $data['menu_profile'] = [
-            'menu' => '',
-            'expanded' => 'false',
-        ];
-
-        $data['materiAll'] = $this->materiModel->getAllByMapelKelas(decrypt_url($idmapel), decrypt_url($idkelas));
-        $data['materi'] = $this->materiModel->getById($id_materi);
-        $data['guru'] = $this->guruModel->asObject()->find(session()->get('id'));
-        $data['file'] = $this->fileModel->getMateriWithFile(decrypt_url($idmapel), decrypt_url($idkelas));
-
-        return view('guru/materi/lihat-materi', $data);
-    }
-    public function edit_materi()
-    {
-        if (session()->get('role') != 3) {
-            return redirect()->to('auth');
-        }
         if ($this->request->isAJAX()) {
-            $materi = decrypt_url($this->request->getVar('id_materi'));
-            $data_materi = $this->materiModel->asObject()->find($materi);
-            echo json_encode($data_materi);
+            $id_materi = decrypt_url($this->request->getVar('id_materi'));
+            $data_materi = $this->materiModel->asArray()->find($id_materi);
+
+            if ($data_materi) {
+                // Tambahkan token terbaru ke dalam array response
+                $data_materi['token'] = csrf_hash();
+                return $this->response->setJSON($data_materi);
+            }
+
+            return $this->response->setJSON([
+                'token' => csrf_hash(),
+                'error' => 'Data tidak ditemukan'
+            ], 404);
         }
     }
-    public function edit_materi_()
+    public function update()
     {
-        if (session()->get('role') != 3) {
-            return redirect()->to('auth');
-        }
         $idmapel = encrypt_url($this->request->getVar('e_mapel'));
         $idkelas = encrypt_url($this->request->getVar('e_kelas'));
         $kode_materi = $this->request->getVar('e_kode_materi');
@@ -251,147 +199,187 @@ class MateriController extends BaseController
             ->set('status', $this->request->getVar('e_status'))
             ->where('kode_materi', $kode_materi)
             ->update();
-
-
-        session()->setFlashdata('pesan', "
-            swal({
-                title: 'Berhasil!',
-                text: 'Materi telah diupdate',
-                type: 'success',
-                padding: '2em'
-                });
-            ");
-        return redirect()->to('guru/materi/' . $idmapel . '/' . $idkelas);
+        return redirect()->to('sw-guru/materi/lihat/' . $idmapel . '/' . $idkelas)->with('success', 'Materi telah diupdate');
     }
-    public function chat_materi()
-    {
-        // if (session()->get('role') != 3) {
-        //     return redirect()->to('auth');
-        // }
-        if ($this->request->isAJAX()) {
-            $kode_materi = $this->request->getVar('kode_materi');
-            $chat_materi = $this->request->getVar('chat_materi');
-            $user = $this->guruModel->asObject()->find(session('id'));
 
+    public function lihatMateri($id, $idmapel, $idkelas)
+    {
+        $id_materi = decrypt_url($id);
+        $data['materiAll'] = $this->materiModel->getAllByMapelKelas(decrypt_url($idmapel), decrypt_url($idkelas));
+        $data['materi'] = $this->materiModel->getById($id_materi);
+        $data['guru'] = $this->guruModel->asObject()->find(session()->get('id'));
+        $data['file'] = $this->fileModel->getMateriWithFile(decrypt_url($idmapel), decrypt_url($idkelas));
+
+        return view('guru/materi/lihat-materi', $data);
+    }
+    public function getChatMateri()
+    {
+        if ($this->request->isAJAX()) {
+            $kode_materi = $this->request->getPost('kode_materi');
+            $idguru = decrypt_url($this->request->getPost('idguru'));
+            $user = $this->guruModel->find($idguru);
+
+            if (!$kode_materi) {
+                return $this->response->setBody('<div class="text-center mt-5 text-muted small">Pilih materi untuk melihat diskusi.</div>');
+            }
+
+            $chat_materi = $this->chatMateriModel->getAllByKodeMateri($kode_materi);
+            $myEmail = $user['email'];
+
+            $html = '';
+
+            if (empty($chat_materi)) {
+                $html = '<div class="text-center mt-5 text-muted small">Belum ada diskusi di materi ini.</div>';
+            } else {
+                foreach ($chat_materi as $chat) {
+                    $isMe = ($chat->email == $myEmail);
+                    $namaUser = esc($chat->nama);
+                    $pesan = esc($chat->text);
+                    $gambar = $chat->gambar ? base_url('assets/app-assets/user/' . $chat->gambar) : base_url('assets/app-assets/img/90x90.jpg');
+                    $waktu = timeAgo($chat->date_created);
+
+                    // Logika Bubble Chat
+                    $alignClass = $isMe ? 'flex-row-reverse text-right' : '';
+                    $bgClass = $isMe ? 'bg-primary text-white' : 'bg-light text-dark';
+                    $marginAvatar = $isMe ? 'ml-3' : 'mr-3';
+                    $borderRadius = $isMe ? 'border-radius: 15px 15px 2px 15px;' : 'border-radius: 15px 15px 15px 2px;';
+
+                    $html .= '
+                <div class="d-flex mb-4 ' . $alignClass . '">
+                    <div class="avatar ' . $marginAvatar . ' flex-shrink-0">
+                        <img src="' . $gambar . '" class="rounded-circle shadow-sm" style="width:35px; height:35px; object-fit:cover;" />
+                    </div>
+                    <div style="max-width: 80%;">
+                        <div class="d-flex align-items-center mb-1 ' . ($isMe ? 'justify-content-end' : '') . '">
+                            <small class="font-weight-bold" style="font-size: 11px; color: #888;">' . $namaUser . '</small>
+                        </div>
+                        <div class="p-2 shadow-sm ' . $bgClass . '" style="' . $borderRadius . ' font-size: 13px; white-space: pre-line; display: inline-block; text-align: left;">
+                            ' . $pesan . '
+                        </div>
+                        <div class="mt-1">
+                            <small class="text-muted" style="font-size: 9px;">' . $waktu . '</small>
+                        </div>
+                    </div>
+                </div>';
+                }
+            }
+
+            return $this->response
+                ->setHeader('X-CSRF-TOKEN', csrf_hash())
+                ->setBody($html);
+        }
+
+        return redirect()->to('auth');
+    }
+
+    public function getFileMateri()
+    {
+        if ($this->request->isAJAX()) {
+            $kode_materi = $this->request->getPost('kode_materi');
+
+            if (!$kode_materi) {
+                return $this->response->setBody('<div class="text-center mt-5 text-muted small">Pilih materi untuk melihat file.</div>');
+            }
+
+            // Pastikan cara dekrip kode_materi sesuai dengan cara kirim di JS
+            // Jika di JS tidak di-encrypt, hapus fungsi decrypt_url()
+            $decoded_kode = decrypt_url($kode_materi) ?: $kode_materi;
+            $file = $this->fileModel->getAllByKode($decoded_kode);
+
+            $html = '';
+
+            if (empty($file)) {
+                $html = '<div class="text-center mt-5 text-muted small">
+                        <i class="bi bi-folder2-open d-block mb-2" style="font-size: 2rem; color: #ddd;"></i>
+                        Belum ada file materi tersedia.
+                     </div>';
+            } else {
+                $html .= '<div class="list-group list-group-flush">';
+                foreach ($file as $m) {
+                    if ($m->nama_file) {
+                        $filePath = base_url('assets/app-assets/file/' . $m->nama_file);
+                        $namaTampil = str_replace('_', ' ', pathinfo($m->nama_file, PATHINFO_FILENAME));
+
+                        $html .= '
+                    <a href="' . $filePath . '" download class="list-group-item list-group-item-action d-flex align-items-center border-0 mb-2 shadow-sm rounded" style="background: #fdfdfd; transition: all 0.3s;">
+                        <div class="icon-file mr-3">
+                            <i class="bi bi-file-earmark-pdf-fill text-danger" style="font-size: 1.8rem;"></i>
+                        </div>
+                        <div class="file-info flex-grow-1">
+                            <h6 class="mb-0 text-dark font-weight-bold" style="font-size: 13px;">' . $namaTampil . '</h6>
+                            <small class="text-muted" style="font-size: 11px;">Klik untuk download PDF</small>
+                        </div>
+                        <div class="download-icon">
+                            <i class="bi bi-cloud-arrow-down-fill text-primary" style="font-size: 1.2rem;"></i>
+                        </div>
+                    </a>';
+                    }
+                }
+                $html .= '</div>';
+            }
+
+            return $this->response
+                ->setHeader('X-CSRF-TOKEN', csrf_hash())
+                ->setBody($html);
+        }
+
+        return redirect()->to('auth');
+    }
+
+    public function chatMateri()
+    {
+        if ($this->request->isAJAX()) {
+            $kode_materi = $this->request->getPost('kode_materi');
+            $chat_text   = $this->request->getPost('chat_materi');
+            $idguru_raw  = $this->request->getPost('idguru');
+
+            // Validasi input dasar
+            if (empty($chat_text) || empty($idguru_raw)) {
+                return $this->response->setJSON([
+                    'status' => false,
+                    'message' => 'Pesan atau ID Guru tidak boleh kosong',
+                    'token' => csrf_hash() // Kirim token baru
+                ])->setStatusCode(400);
+            }
+
+            $idguru = decrypt_url($idguru_raw);
+            $user = $this->guruModel->find($idguru);
+
+            if (!$user) {
+                return $this->response->setJSON([
+                    'status' => false,
+                    'message' => 'Data Guru tidak ditemukan',
+                    'token' => csrf_hash()
+                ])->setStatusCode(404);
+            }
+
+            // Ambil data (sesuaikan apakah $user itu array atau object)
+            // Jika find() mengembalikan array (default CI4), gunakan $user['nama_guru']
             $data = [
-                'materi' => $kode_materi,
-                'nama' => session()->get('nama'),
-                'gambar' => $user->avatar,
-                'email' => session()->get('email'),
-                'text' => $chat_materi,
+                'materi'       => $kode_materi,
+                'nama'         => is_array($user) ? $user['nama_guru'] : $user->nama_guru,
+                'gambar'       => is_array($user) ? $user['avatar'] : $user->avatar,
+                'email'        => is_array($user) ? $user['email'] : $user->email,
+                'text'         => strip_tags($chat_text), // Bersihkan tag HTML
                 'date_created' => time()
             ];
 
-            $this->chatMateriModel->save($data);
-        }
-    }
-    public function get_chat_materi()
-    {
-        // if (session()->get('role') != 3) {
-        //     return redirect()->to('auth');
-        // }
-        if ($this->request->isAJAX()) {
-            $kode_materi = $this->request->getVar('kode_materi');
-            $chat_materi = $this->chatMateriModel->getAllByKodeMateri($kode_materi);
+            try {
+                $this->chatMateriModel->save($data);
 
-            foreach ($chat_materi as $chat) {
-                if ($chat->email == session()->get('email')) {
-                    echo '
-                    <div class="media">
-                        <div class="avatar avatar-sm avatar-indicators avatar-online">
-                            <img alt="avatar" src="' . base_url('assets/app-assets/user/') . '/' . $chat->gambar . '" class="rounded-circle" />
-                        </div>
-                        <div class="media-body ml-2">
-                            <h5 class="media-heading"><span class="media-title"> ' . $chat->nama . ' <span class="badge badge-primary">You</span></h5>
-                            <p class="media-text" style="white-space: pre-line; margin-top: -20px;">
-                                ' . $chat->text . '
-                            </p>
-                            <hr>
-                        </div>
-                    </div>
-                ';
-                } else {
-                    echo '
-                    <div class="media">
-                        <div class="avatar avatar-sm avatar-indicators avatar-online">
-                            <img alt="avatar" src="' . base_url('assets/app-assets/user/') . '/' . $chat->gambar . '" class="rounded-circle" />
-                        </div>
-                        <div class="media-body ml-2">
-                            <h5 class="media-heading"><span class="media-title"> ' . $chat->nama . '</h5>
-                            <p class="media-text" style="white-space: pre-line; margin-top: -20px;">
-                                ' . $chat->text . '
-                            </p>
-                            <hr>
-                        </div>
-                    </div>
-                ';
-                }
+                return $this->response->setJSON([
+                    'status' => true,
+                    'message' => 'Pesan terkirim',
+                    'token' => csrf_hash() // Sangat penting: Kirim token baru ke JS
+                ]);
+            } catch (\Exception $e) {
+                return $this->response->setJSON([
+                    'status' => false,
+                    'message' => 'Gagal menyimpan ke database',
+                    'token' => csrf_hash()
+                ])->setStatusCode(500);
             }
-            exit;
         }
-    }
-    public function hapus_materi($kode_materi, $idmapel, $idkelas)
-    {
-        if (session()->get('role') != 3) {
-            return redirect()->to('auth');
-        }
-        $this->fileModel
-            ->where('kode_file', decrypt_url($kode_materi))
-            ->delete();
-
-        $this->materiModel
-            ->where('kode_materi', decrypt_url($kode_materi))
-            ->delete();
-
-        $this->chatMateriModel
-            ->where('materi', decrypt_url($kode_materi))
-            ->delete();
-
-        session()->setFlashdata('pesan', "
-            swal({
-                title: 'Berhasil!',
-                text: 'Materi telah di hapus',
-                type: 'success',
-                padding: '2em'
-                });
-            ");
-        return redirect()->to('guru/materi/' . $idmapel . '/' . $idkelas);
-    }
-    // END::MATERI
-
-    public function delete_file()
-    {
-        // optional: cek ajax
-        if (!$this->request->isAJAX()) {
-            return $this->response->setStatusCode(403);
-        }
-
-        $id_file = $this->request->getPost('id_file');
-
-        // ambil data dari DB (AMAN)
-        $file = $this->fileModel
-            ->where('id_file', $id_file)
-            ->first();
-
-        if (!$file) {
-            return $this->response->setJSON([
-                'status' => 'error',
-                'message' => 'Data file tidak ditemukan'
-            ]);
-        }
-
-        $path = FCPATH . 'assets/app-assets/file/' . $file['nama_file'];
-
-        // hapus file fisik (jika ada)
-        if (file_exists($path)) {
-            unlink($path);
-        }
-
-        // hapus database
-        $this->fileModel->delete($id_file);
-
-        return $this->response->setJSON([
-            'status' => 'success'
-        ]);
+        return redirect()->to('auth');
     }
 }

@@ -11,13 +11,40 @@ $routes->group('sw-guru', ['filter' => 'roleCheck:3'], function ($routes) {
         $routes->get('', 'Guru\MateriController::index');
         $routes->get('lihat/(:segment)/(:segment)', 'Guru\MateriController::lihat/$1/$2');
         $routes->post('store', 'Guru\MateriController::store');
+        $routes->post('edit', 'Guru\MateriController::edit');
+        $routes->post('update', 'Guru\MateriController::update');
         $routes->get('delete/(:segment)/(:segment)/(:segment)', 'Guru\MateriController::index/$1/$2/$3');
+
+        $routes->get('lihat-materi/(:segment)/(:segment)/(:segment)', 'Guru\MateriController::lihatMateri/$1/$2/$3');
+        $routes->post('get-file-materi', 'Guru\MateriController::getFileMateri');
+        $routes->post('get-chat-materi', 'Guru\MateriController::getChatMateri');
+        $routes->post('chat-materi', 'Guru\MateriController::ChatMateri');
     });
 
     $routes->group('ujian', function ($routes) {
         $routes->get('', 'Guru\UjianController::index');
-        $routes->post('datatables', 'Guru\UjianController::datatables');
         $routes->get('create', 'Guru\UjianController::create');
+        $routes->post('store', 'Guru\UjianController::store');
+        $routes->get('edit-ujian/(:segment)', 'Guru\UjianController::editUjian/$1');
+        $routes->post('update', 'Guru\UjianController::update');
+        $routes->get('edit-soal/(:segment)', 'Guru\UjianController::editSoal/$1');
+        $routes->post('update-soal', 'Guru\UjianController::updateSoal');
+        $routes->post('get-bank-soal', 'Guru\UjianController::getBankSoal');
+        $routes->post('tambah-bank-soal', 'Guru\UjianController::tambahBankSoal');
+        $routes->post('upload-summernote', 'Guru\UjianController::uploadSummernote');
+        $routes->post('delete-image', 'Guru\UjianController::deleteImage');
+        
+        $routes->get('lihat-ujian/(:segment)', 'Guru\UjianController::lihatUjian/$1');
+        $routes->post('ajaxSiswaUjian/(:segment)', 'Guru\UjianController::ajaxSiswaUjian/$1');
+        $routes->get('lihat-ujian-siswa/(:segment)/(:segment)', 'Guru\UjianController::lihatUjianSiswa/$1/$2');
+        $routes->get('cetak-soal-peserta/(:segment)/(:segment)', 'Guru\UjianController::cetakSoalPeserta/$1/$2');
+        $routes->get('cetak-soal/(:segment)', 'Guru\UjianController::cetakSoal/$1');
+        
+        
+        $routes->get('download-template', 'Guru\UjianController::downloadTemplate');
+        $routes->post('import-soal-excel', 'Guru\UjianController::importSoalExcel');
+        $routes->post('ubah-status-ujian', 'Guru\UjianController::ubahStatusUjian');
+
     });
 
 

@@ -46,16 +46,16 @@ function timeAgo($timestamp)
     $diff = time() - $time;
 
     if ($diff < 60) {
-        return $diff . ' detik yang lalu';
+        return $diff . ' detik lalu';
     } elseif ($diff < 3600) {
-        return floor($diff / 60) . ' menit yang lalu';
+        return floor($diff / 60) . ' menit lalu';
     } elseif ($diff < 86400) {
-        return floor($diff / 3600) . ' jam yang lalu';
+        return floor($diff / 3600) . ' jam lalu';
     } elseif ($diff < 2592000) {
-        return floor($diff / 86400) . ' hari yang lalu';
+        return floor($diff / 86400) . ' hari lalu';
     } elseif ($diff < 31536000) {
-        return floor($diff / 2592000) . ' bulan yang lalu';
+        return floor($diff / 2592000) . ' bulan lalu';
     } else {
-        return floor($diff / 31536000) . ' tahun yang lalu';
+        return floor($diff / 31536000) . ' tahun lalu';
     }
 }

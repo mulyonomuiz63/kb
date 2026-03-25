@@ -1,11 +1,9 @@
 <?= $this->extend('template/app'); ?>
 <?= $this->section('content'); ?>
-<?= $this->include('template/sidebar/guru'); ?>
 
 <!--  BEGIN CONTENT AREA  -->
-<div id="content" class="main-content">
     <div class="layout-px-spacing">
-        <form action="<?= base_url('guru/update_soal_'); ?>" method="POST" enctype="multipart/form-data">
+        <form action="<?= base_url('sw-guru/ujian/update-soal'); ?>" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>" />
             <div class="row layout-top-spacing">
                 <div class="col-lg-12 layout-spacing">
@@ -108,19 +106,10 @@
             </div>
         </form>
     </div>
-    <div class="footer-wrapper">
-        <div class="footer-section f-section-1">
-            <p class="terms-conditions"><?= copyright() ?></p>
-        </div>
-        <div class="footer-section f-section-2">
-           
-        </div>
-    </div>
-</div>
 <!--  END CONTENT AREA  -->
-
+<?= $this->endSection(); ?>
+<?= $this->section('scripts'); ?>
 <script>
-    <?= session()->getFlashdata('pesan'); ?>
     $(document).ready(function() {
         // SUMMERNOTE
         setInterval(() => {
@@ -150,33 +139,58 @@
 
         function uploadImage(image, which_sum) {
             var data = new FormData();
+
+            // SUNTIKKAN CSRF KE FORMDATA
+            data.append(csrfName, csrfHash);
             data.append("image", image);
+
             $.ajax({
-                url: "<?= base_url('guru/upload_summernote') ?>",
+                url: "<?= base_url('sw-guru/ujian/upload-summernote') ?>",
                 cache: false,
                 contentType: false,
                 processData: false,
                 data: data,
                 type: "POST",
-                success: function(url) {
-                    $(which_sum).summernote("insertImage", url);
+                success: function(response) {
+                    // Kita asumsikan response sekarang berupa JSON agar bisa update token
+                    var res = JSON.parse(response);
+
+                    if (res.token) {
+                        updateCsrfToken(res.token);
+                    }
+
+                    $(which_sum).summernote("insertImage", res.url);
                 },
-                error: function(data) {
-                    console.log(data);
+                error: function(xhr) {
+                    if (xhr.status === 403) {
+                        console.error("CSRF Expired saat upload gambar");
+                    }
                 }
             });
         }
 
         function deleteImage(src) {
             $.ajax({
+                url: "<?= base_url('sw-guru/ujian/delete-image') ?>",
+                type: "POST",
                 data: {
+                    // SUNTIKKAN CSRF
+                    [csrfName]: csrfHash,
                     src: src
                 },
-                type: "POST",
-                url: "<?= base_url('guru/delete_image') ?>",
                 cache: false,
+                dataType: "JSON", // Ubah ke JSON agar bisa membaca token baru
                 success: function(response) {
-                    console.log(response);
+                    // UPDATE TOKEN GLOBAL
+                    if (response.token) {
+                        updateCsrfToken(response.token);
+                    }
+                    console.log(response.message);
+                },
+                error: function(xhr) {
+                    if (xhr.status === 403) {
+                        console.error("Gagal menghapus: Sesi keamanan berakhir.");
+                    }
                 }
             });
         }
