@@ -8,7 +8,7 @@ class UjianModel extends Model
 {
     protected $table            = 'ujian';
     protected $primaryKey       = 'id_ujian';
-    protected $allowedFields    = ['id_siswa','kode_ujian', 'nama_ujian', 'guru', 'kelas', 'mapel', 'date_created', 'waktu_mulai', 'waktu_berakhir','start_ujian', 'end_ujian', 'jenis_ujian','status','nilai','kuota'];
+    protected $allowedFields    = ['id_siswa','kode_ujian', 'nama_ujian', 'guru', 'kelas', 'mapel', 'date_created', 'waktu_mulai', 'waktu_berakhir','start_ujian', 'end_ujian', 'jenis_ujian','status','nilai','kuota','verifikasi'];
 
     public function getAll()
     {

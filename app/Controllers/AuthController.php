@@ -24,6 +24,7 @@ class AuthController extends BaseController
     protected $PicModel;
     protected $googleClient;
     protected $email;
+    protected $emailer;
 
     public function __construct()
     {
@@ -36,9 +37,8 @@ class AuthController extends BaseController
         $this->TokenModel = new TokenModel();
         $this->MitraModel = new MitraModel();
         $this->PicModel = new PicModel();
-        date_default_timezone_set('Asia/Jakarta');
-
         $this->email = \Config\Services::email();
+        $this->emailer = new \App\Libraries\Emailer();
 
         $this->googleClient = new Google_Client();
         $this->googleClient->setClientId('381263998843-1ms0agnrq1eldj7rgj9k10qm7ktgvmb1.apps.googleusercontent.com');
@@ -352,308 +352,6 @@ class AuthController extends BaseController
     }
 
 
-    public function install()
-    {
-        return view('install');
-    }
-    public function install_()
-    {
-        // CEK EMAIL
-        $email = $this->request->getVar('email');
-
-        $siswa = $this->SiswaModel->getByEmail($email);
-        if ($siswa != null) {
-            session()->setFlashdata('pesan', "
-                swal({
-                    title: 'Oops!',
-                    text: 'Gagal Disimpan, email sudah dipakai peserta lain',
-                    type: 'error',
-                    padding: '2em'
-                    })
-                ");
-            return redirect()->to('auth/install');
-        }
-
-        $guru = $this->GuruModel->getByEmail($email);
-        if ($guru != null) {
-            session()->setFlashdata('pesan', "
-                swal({
-                    title: 'Oops!',
-                    text: 'Gagal Disimpan, email sudah dipakai Guru lain',
-                    type: 'error',
-                    padding: '2em'
-                    })
-                ");
-            return redirect()->to('auth/install');
-        }
-
-        $admin = $this->AdminModel->getbyemail($email);
-        if ($admin) {
-            session()->setFlashdata('pesan', "
-                swal({
-                    title: 'Oops!',
-                    text: 'Gagal Disimpan, email sudah dipakai Admin lain',
-                    type: 'error',
-                    padding: '2em'
-                    })
-                ");
-            return redirect()->to('auth/install');
-        }
-
-        $data_admin = [
-            'nama_admin' => $this->request->getVar('nama_admin'),
-            'email' => $email,
-            'password' => password_hash($this->request->getVar('password'), PASSWORD_DEFAULT),
-            'is_active' => 1,
-            'date_created' => time(),
-            'avatar' => 'default.jpg',
-            'role' => 1,
-            'pm' => $this->request->getVar('password')
-        ];
-
-        $this->AdminModel->save($data_admin);
-        session()->setFlashdata('pesan', "
-            swal({
-                title: 'Berhasil!',
-                text: 'Admin Disimpan, Silahkan Login',
-                type: 'success',
-                padding: '2em'
-                })
-            ");
-        return redirect()->to('auth');
-    }
-
-    public function register()
-    {
-        $data['kelas'] = $this->KelasModel->asObject()->findAll();
-
-        return view('register', $data);
-    }
-
-    public function register_()
-    {
-        $email = $this->request->getVar('email');
-
-        $siswa = $this->db->table('users')->where("email",  $email)->get()->getRowObject();
-        if ($siswa != null) {
-            session()->setFlashdata('pesan', "
-                swal({
-                    title: 'Oops!',
-                    text: 'Gagal Disimpan, email sudah dipakai peserta lain',
-                    type: 'error',
-                    padding: '2em'
-                    })
-                ");
-            return redirect()->to('auth/register')->withInput();
-        }
-
-        $guru = $this->GuruModel->getByEmail($email);
-        if ($guru != null) {
-            session()->setFlashdata('pesan', "
-                swal({
-                    title: 'Oops!',
-                    text: 'Gagal Disimpan, email sudah dipakai Guru lain',
-                    type: 'error',
-                    padding: '2em'
-                    })
-                ");
-            return redirect()->to('auth/register')->withInput();
-        }
-
-        $admin = $this->AdminModel->getbyemail($email);
-        if ($admin != null) {
-            session()->setFlashdata('pesan', "
-                swal({
-                    title: 'Oops!',
-                    text: 'Gagal Disimpan, email sudah dipakai Admin',
-                    type: 'error',
-                    padding: '2em'
-                    })
-                ");
-            return redirect()->to('auth/register')->withInput();
-        }
-
-        // JIKA YANG DAFTAR ADALAH SISWA
-        if ($this->request->getVar('saya_siswa') != null) {
-
-            $data_siswa = [
-                'no_induk_siswa' => rand(1000000, 9000000),
-                'nama_siswa' => $this->request->getVar('nama'),
-                'email' => $this->request->getVar('email'),
-                'password' => password_hash($this->request->getVar('password'), PASSWORD_DEFAULT),
-                'jenis_kelamin' => $this->request->getVar('jenis_kelamin'),
-                'kelas' => $this->request->getVar('kelas'),
-                'role' => 2,
-                'is_active' => 0,
-                'date_created' => time(),
-                'avatar' => 'default.jpg'
-            ];
-
-            $token = random_string('alnum', 32);
-            $user_token = [
-                'email' => $email,
-                'token' => $token,
-                'date_created' => time()
-            ];
-
-            // KIRIM EMAIL
-            $smtp = $this->SmtpModel->asObject()->first();
-            $config['protocol']    = 'smtp';
-            $config['SMTPHost']    = $smtp->smtp_host;
-            $config['SMTPUser']    = $smtp->smtp_user;
-            $config['SMTPPass']    = $smtp->smtp_pass;
-            $config['SMTPPort']    = $smtp->smtp_port;
-            $config['SMTPCrypto']  = $smtp->smtp_crypto;
-            $config['mailType']    = 'html';
-            $config['charset']     = 'UTF-8';
-            $config['CRLF']        = "\r\n"; // Gunakan petik dua (") agar terbaca line break
-            $config['SMTPTimeout'] = 60;
-
-            $this->email->initialize($config);
-
-            $this->email->setNewline("\r\n");
-
-            $this->email->setFrom($smtp->smtp_user, 'KelasBrevet');
-            $this->email->setTo($email);
-
-            $this->email->setSubject('Aktivasi elearning');
-            $this->email->setMessage('
-                <div style="color: #000; padding: 10px;">
-                    <div style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; font-size: 20px; color: #1C3FAA; font-weight: bold;">
-                        REGISTRASI
-                    </div>
-                    
-                    <br>
-                    <p style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; color: #000;">' . $this->request->getVar('nama') . ' <br>
-                        <span style="color: #000;">Anda telah mendaftar di KelasBrevet sebagai PESERTA. 
-                        <br>Silahkan lakukan aktivasi akun anda di bawah ini:</span><br>
-                        </p>
-                    <a href="' . base_url() . '/auth/verify?email=' . $email . '&token=' . $token .  '" style="display: inline-block; width: 100px; height: 30px; background: #1C3FAA; color: #fff; text-decoration: none; border-radius: 5px; text-align: center; line-height: 30px; font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif;">
-                        aktivasi        
-                    </a>
-                    <p style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; color: #000;">
-                    Salam,
-                    <br>Team KelasBrevet
-                    <br>KBIG Office - Jl. Sawo Raya, Lampung
-                    <br>Whatsapp: 0821-8074-4966
-                    </p>
-                </div>
-            ');
-
-            if (!$this->email->send()) {
-                // echo $this->email->printDebugger();
-                // die();
-                session()->setFlashdata('pesan', "
-                    swal({
-                        title: 'Informasi!',
-                        text: 'Sistem lagi dalam antrian, Coba lagi!',
-                        type: 'info'
-                    })
-                ");
-                return redirect()->to('auth');
-            } else {
-                $this->TokenModel->save($user_token);
-                $this->SiswaModel->save($data_siswa);
-                session()->setFlashdata('pesan', "
-                    swal({
-                        title: 'Berhasil!',
-                        text: 'Silahkan verifikasi via email',
-                        type: 'success',
-                        padding: '2em'
-                    })
-                ");
-                return redirect()->to('auth');
-            }
-        } else {
-            // JIKA GURU YANG DAFTAR
-            $data_guru = [
-                'nama_guru' => $this->request->getVar('nama'),
-                'email' => $this->request->getVar('email'),
-                'password' => password_hash($this->request->getVar('password'), PASSWORD_DEFAULT),
-                'role' => 3,
-                'is_active' => 0,
-                'date_created' => time(),
-                'avatar' => 'default.jpg'
-            ];
-            // Siapkan token
-            $token = random_string('alnum', 32);
-            $user_token = [
-                'email' => $email,
-                'token' => $token,
-                'date_created' => time()
-            ];
-
-            // KIRIM EMAIL
-            $smtp = $this->SmtpModel->asObject()->first();
-            $config['protocol']    = 'smtp';
-            $config['SMTPHost']    = $smtp->smtp_host;
-            $config['SMTPUser']    = $smtp->smtp_user;
-            $config['SMTPPass']    = $smtp->smtp_pass;
-            $config['SMTPPort']    = $smtp->smtp_port;
-            $config['SMTPCrypto']  = $smtp->smtp_crypto;
-            $config['mailType']    = 'html';
-            $config['charset']     = 'UTF-8';
-            $config['CRLF']        = "\r\n"; // Gunakan petik dua (") agar terbaca line break
-            $config['SMTPTimeout'] = 60;
-
-            $this->email->initialize($config);
-
-            $this->email->setNewline("\r\n");
-
-            $this->email->setFrom($smtp->smtp_user, 'KelasBrevet');
-            $this->email->setTo($email);
-
-            $this->email->setSubject('Aktivasi Elearning');
-            $this->email->setMessage('
-                <div style="color: #000; padding: 10px;">
-                    <div style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; font-size: 20px; color: #1C3FAA; font-weight: bold;">
-                        REGISTRASI
-                    </div>
-                    
-                    <br>
-                    <p style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; color: #000;">Hallo ' . $this->request->getVar('nama') . ' <br>
-                        <span style="color: #000;">Anda telah Melakukan Pendaftaran ke KelasBrevet sebagai PENGAJAR. 
-                        <br>Silahkan lakukan aktivasi dengan cara mengklik tombol aktivasi</span><br>
-                    </p>
-                    <a href="' . base_url() . '/auth/verify?email=' . $email . '&token=' . $token .  '" style="display: inline-block; width: 100px; height: 30px; background: #1C3FAA; color: #fff; text-decoration: none; border-radius: 5px; text-align: center; line-height: 30px; font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif;">
-                        aktivasi        
-                    </a>
-                    <p style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; color: #000;">
-                    Salam,
-                    <br>Team KelasBrevet
-                    <br>KBIG Office - Jl. Sawo Raya, Lampung
-                    <br>Whatsapp: 0821-8074-4966
-                    </p>
-                </div>
-            ');
-
-            if (!$this->email->send()) {
-                // echo $this->email->printDebugger();
-                // die();
-                session()->setFlashdata('pesan', "
-                    swal({
-                        title: 'Informasi!',
-                        text: 'Sistem lagi dalam antrian, Coba lagi!',
-                        type: 'info'
-                    })
-                ");
-                return redirect()->to('auth');
-            } else {
-                $this->TokenModel->save($user_token);
-                $this->GuruModel->save($data_guru);
-                session()->setFlashdata('pesan', "
-                    swal({
-                        title: 'Berhasil!',
-                        text: 'Akun Disimpan, Silahkan Lakukan verifikasi via email',
-                        type: 'success',
-                        padding: '2em'
-                    })
-                ");
-                return redirect()->to('auth');
-            }
-        }
-    }
-
     public function cek_no_induk()
     {
         if ($this->request->isAJAX()) {
@@ -878,27 +576,9 @@ class AuthController extends BaseController
                 ];
 
                 // KIRIM EMAIL
-                $smtp = $this->SmtpModel->asObject()->first();
-                $config['protocol']    = 'smtp';
-                $config['SMTPHost']    = $smtp->smtp_host;
-                $config['SMTPUser']    = $smtp->smtp_user;
-                $config['SMTPPass']    = $smtp->smtp_pass;
-                $config['SMTPPort']    = $smtp->smtp_port;
-                $config['SMTPCrypto']  = $smtp->smtp_crypto;
-                $config['mailType']    = 'html';
-                $config['charset']     = 'UTF-8';
-                $config['CRLF']        = "\r\n"; // Gunakan petik dua (") agar terbaca line break
-                $config['SMTPTimeout'] = 60;
 
-                $this->email->initialize($config);
-
-                $this->email->setNewline("\r\n");
-
-                $this->email->setFrom($smtp->smtp_user, 'KelasBrevet');
-                $this->email->setTo($email);
-
-                $this->email->setSubject('Forgot Password');
-                $this->email->setMessage('
+                $subject = 'RESET PASSWORD';
+                $message = '
                     <div style="color: #000; padding: 10px;">
                         <div style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; font-size: 20px; color: #1C3FAA; font-weight: bold;">
                             RESET PASSWORD
@@ -908,11 +588,13 @@ class AuthController extends BaseController
                         <p style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; color: #000;">Hallo ' . $this->request->getVar('nama') . ' <br>
                             <span style="color: #000;">Klik Tombol dibawah ini untuk melanjutkan proses</span><br>
                             </p>
-                        <a href="' . base_url() . '/auth/change_password?email=' . $email . '&token=' . $token .  '" style="display: inline-block; width: 100px; height: 30px; background: #1C3FAA; color: #fff; text-decoration: none; border-radius: 5px; text-align: center; line-height: 30px; font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif;">
+                        <a href="' . base_url() . '/auth/change-password?email=' . $email . '&token=' . $token .  '" style="display: inline-block; width: 100px; height: 30px; background: #1C3FAA; color: #fff; text-decoration: none; border-radius: 5px; text-align: center; line-height: 30px; font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif;">
                             resset Password        
                         </a>
                     </div>
-                ');
+                ';
+
+                    $this->emailer->send($this->request->getVar('email'), $subject, $message);
 
                 if (!$this->email->send()) {
                     session()->setFlashdata('pesan', "
@@ -948,7 +630,7 @@ class AuthController extends BaseController
             }
         }
     }
-    public function change_password()
+    public function changePassword()
     {
         $email = $this->request->getGet('email');
         $token = $this->request->getGet('token');
@@ -963,7 +645,7 @@ class AuthController extends BaseController
         $data['token'] = $token;
         return view('reset-password', $data);
     }
-    public function change_password_()
+    public function changePassword_()
     {
         $email = $this->request->getVar('email');
         $token = $this->request->getVar('token');
@@ -1077,29 +759,10 @@ class AuthController extends BaseController
 
     public function kirimEmail($id, $email, $nama_siswa)
     {
-        $smtp = $this->SmtpModel->asObject()->first();
-
-        $config['protocol']    = 'smtp';
-        $config['SMTPHost']    = $smtp->smtp_host;
-        $config['SMTPUser']    = $smtp->smtp_user;
-        $config['SMTPPass']    = $smtp->smtp_pass;
-        $config['SMTPPort']    = $smtp->smtp_port;
-        $config['SMTPCrypto']  = $smtp->smtp_crypto;
-        $config['mailType']    = 'html';
-        $config['charset']     = 'UTF-8';
-        $config['CRLF']        = "\r\n"; // Gunakan petik dua (") agar terbaca line break
-        $config['SMTPTimeout'] = 60;
-
         $idsiswa = encrypt_url($id);
-        $this->email->initialize($config);
 
-        $this->email->setNewline("\r\n");
-
-        $this->email->setFrom($smtp->smtp_user, 'KelasBrevet');
-        $this->email->setTo($email);
-
-        $this->email->setSubject('VERIFIKASI');
-        $this->email->setMessage('
+        $subject = 'VERIFIKASI';
+        $message = '
                 <div style="color: #000; padding: 10px;">
                     <div
                         style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; font-size: 20px; color: #1C3FAA; font-weight: bold;">
@@ -1120,12 +783,10 @@ class AuthController extends BaseController
                         </tr>
                     </table>
                     <br>
-                        <a href="' . base_url("Register/verifikasi/$idsiswa") . '"  style="display: inline-block;  background: #1C3FAA; color: #fff;margin:10px; text-decoration: none; border-radius: 5px; text-align: center; line-height: 30px; font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif;">Verifikasi Email</a>
+                        <a href="' . base_url("auth/verifikasi/$idsiswa") . '"  style="display: inline-block;  background: #1C3FAA; color: #fff;margin:10px; text-decoration: none; border-radius: 5px; text-align: center; line-height: 30px; font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif;">Verifikasi Email</a>
                     </div> 
-            ');
+            ';
 
-
-
-        return $this->email->send();
+        return $this->emailer->send($email, $subject, $message);
     }
 }

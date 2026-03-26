@@ -26,6 +26,7 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
 
         $routes->post('updateKuota', 'Admin\SiswaController::updateKuota');
         $routes->get('deleteUjian/(:segment)/(:segment)', 'Admin\SiswaController::deleteUjian/$1/$2');
+        $routes->get('sertifikat-ab', 'Admin\SiswaController::sertifikatAB');
     });
 
     $routes->group('guru', function ($routes) {

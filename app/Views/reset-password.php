@@ -26,7 +26,7 @@
 
                         <h1 class="">Password Recovery</h1>
                         <p class="signup-link recovery">silahkan masukkan sandi baru kamu</p>
-                        <form action="<?= base_url('auth/change_password_'); ?>" method="post" class="text-left">
+                        <form action="<?= base_url('auth/change-password_'); ?>" method="post" class="text-left">
                             <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>" />
                             <input type="hidden" name="email" value="<?= $email; ?>">
                             <input type="hidden" name="token" value="<?= $token; ?>">

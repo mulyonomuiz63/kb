@@ -5,14 +5,14 @@
 <div class="layout-px-spacing">
     <div class="row layout-top-spacing">
         <div class="col-lg-12 layout-spacing">
-            <div class="widget shadow p-3">
+            <div class="widget shadow p-3 bg-white">
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="mb-3 d-flex justify-content-between align-items-center">
                             <?php if ($canDownloadAll) : ?>
                                 <div class="btn-group">
                                     <span class="mr-2 pt-1"><strong>Unduh Brevet AB:</strong></span>
-                        
+
                                     <a href="javascript:void(0)"
                                         data-toggle="modal"
                                         data-target="#sertifikat_all_cetak_modal"
@@ -21,7 +21,7 @@
                                         title="Unduh Sertifikat Brevet AB">
                                         <i class="bi bi-download"></i> Standar
                                     </a>
-                        
+
                                     <a href="javascript:void(0)"
                                         data-toggle="modal"
                                         data-target="#sertifikat_all_cap_cetak_modal"
@@ -40,6 +40,7 @@
                                 <thead>
                                     <tr>
                                         <th>Nama Ujian</th>
+                                        <th>Verifikasi</th>
                                         <th>Mulai / Selesai</th>
                                         <th>Nilai</th>
                                         <th>Status</th>
@@ -116,6 +117,18 @@
             },
             columns: [{
                     data: 'nama_ujian'
+                },
+                {
+                    data: "verifikasi",
+                    render: function(data, type, row) {
+                        // Jika data null, undefined, atau string kosong, tampilkan tanda hubung
+                        if (!data || data.trim() === "") {
+                            return '<div class="text-center">-</div>';
+                        }
+
+                        // Jika ada data, tampilkan tag img
+                        return `<img src="uploads/verifikasi/${data}" alt="Verifikasi" class="img-fluid" style="max-width: 50px; height: auto;">`;
+                    }
                 },
                 {
                     data: null,

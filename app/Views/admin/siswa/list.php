@@ -9,12 +9,12 @@ use Faker\Provider\Base;
 <div class="layout-px-spacing">
     <div class="row layout-top-spacing">
         <div class="col-lg-12 layout-spacing">
-            <div class="widget shadow p-3">
+            <div class="widget shadow p-3 bg-white">
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="d-flex align-items-center mb-3">
                             <a href="<?= base_url('sw-admin/siswa/create') ?>" class="badge bg-primary p-2 mr-2">Tambah Peserta</a>
-                            <a href="<?= base_url('App/sertifikatAB/') ?>" class="badge  bg-success  p-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="List sertifikat AB seluruh siswa">
+                            <a href="<?= base_url('sw-admin/siswa/sertifikat-ab') ?>" class="badge  bg-success  p-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="List sertifikat AB seluruh siswa">
                                 Sertifikat AB
                             </a>
                             <select id="filter-status" class="badge  bg-light p-2 ml-2">

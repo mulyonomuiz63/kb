@@ -300,7 +300,7 @@
 
                     <div class="form-content">
                         <a href="<?= base_url('/'); ?>"><img src="<?= base_url('assets-landing/images/logo.png') ?>" style="width: 250px;" /></a>
-                        <form action="<?= base_url('Register/tambah_siswa'); ?>" method="POST" class="text-left" id="form" onsubmit="return submitForm(event)">
+                        <form action="<?= base_url('auth/store'); ?>" method="POST" class="text-left" id="form" onsubmit="return submitForm(event)">
                             <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>" /> 
                             <div class="form">
                                 <div id="nama_siswa-field" class="field-wrapper input">
@@ -364,7 +364,7 @@
                         </form>
                         <p class="signup-link">
 
-                            Sudah punya akun? <a href="<?= base_url('Auth') ?>">Masuk disini</a><br>
+                            Sudah punya akun? <a href="<?= base_url('auth') ?>">Masuk disini</a><br>
 
                         </p>
                         <p class="terms-conditions"><?= copyright() ?></p>

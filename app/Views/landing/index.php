@@ -60,10 +60,6 @@
     <!-- Plugins CSS -->
     <link rel="stylesheet" href="<?= base_url('assets-landing/css/plugins/animate.min.css'); ?>">
     <link rel="stylesheet" href="<?= base_url('assets-landing/css/plugins/swiper-bundle.min.css'); ?>">
-    <link rel="stylesheet" href="<?= base_url('assets-landing/css/plugins/magnific-popup.css'); ?>">
-    <link rel="stylesheet" href="<?= base_url('assets-landing/css/plugins/nice-select.css'); ?>">
-    <link rel="stylesheet" href="<?= base_url('assets-landing/css/plugins/apexcharts.css'); ?>">
-    <link rel="stylesheet" href="<?= base_url('assets-landing/css/plugins/jqvmap.min.css'); ?>">
     
     <!-- Main Style CSS -->
     
@@ -1106,8 +1102,8 @@
                                         <h4 class="footer-widget-title">Lembaga Terdaftar</h4>
                                         <div class="widget-subscribe">
                                             <div class="row">
-                                                <div class="col-4 col-md-4 col-lg-4"><?= img_lazy('assets-landing/images/lembaga/kemendikbud.png',"loading", ['class' => '', 'width' => '50']) ?></div>
-                                                <div class="col-4 col-md-4 col-lg-4"><?= img_lazy('assets-landing/images/lembaga/kemenaker.png',"loading", ['class' => '']) ?></div>
+                                                <div class="col-4 col-md-4 col-lg-4"><?= img_lazy('assets-landing/images/lembaga/kemendikbud.png',"loading", ['class' => '', 'width' => '50', 'height' => '50']) ?></div>
+                                                <div class="col-4 col-md-4 col-lg-4"><?= img_lazy('assets-landing/images/lembaga/kemenaker.png',"loading", ['class' => '', 'width' => '50','height' => '50']) ?></div>
                                             </div>
                                         </div>
                                     </div>

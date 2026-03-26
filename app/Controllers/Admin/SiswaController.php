@@ -383,6 +383,7 @@ class SiswaController extends BaseController
 
                 $rows[] = [
                     'nama_ujian'   => $t->nama_ujian,
+                    'verifikasi'   => $t->verifikasi,
                     'start_ujian'  => $t->start_ujian,
                     'end_ujian'    => $t->end_ujian,
                     'nilai'        => (int)$t->nilai,
@@ -831,5 +832,18 @@ class SiswaController extends BaseController
 
         session()->setFlashdata('success', 'Data berhasil dihapus');
         return redirect()->to('sw-admin/siswa/ujian/'.$id_siswa);
+    }
+
+    public function sertifikatAB()
+    {
+        $data = [
+            'title'        => 'List Sertifikat',
+            'parent_title' => 'List Peserta',
+            'parent_url'   => base_url('sw-admin/siswa'),
+        ];
+        // MASTER DATA
+        $data['sertifikatAB'] = $this->siswaModel->getSertifikatAB();
+        $data['kelas'] = $this->kelasModel->asObject()->findAll();
+        return view('admin/siswa/listAB', $data);
     }
 }

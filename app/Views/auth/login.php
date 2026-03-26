@@ -47,7 +47,7 @@
             </div>
             <p class="signup-link">
                 Lupa Kata Sandi? <a href="<?= base_url('auth/recovery') ?>">Klik Disini</a><br>
-                Belum punya akun? <a href="<?= base_url('Register') ?>">Registrasi disini</a>
+                Belum punya akun? <a href="<?= base_url('auth/registrasi') ?>">Registrasi disini</a>
             </p>
             <p class="terms-conditions"><?= copyright(); ?></p>
         </div>

@@ -11,9 +11,8 @@ use App\Models\GuruKelasModel;
 use App\Models\GuruMapelModel;
 use App\Models\SmtpModel;
 use Google_Client;
-use Config\Services;
 
-class Register extends BaseController
+class RegisterController extends BaseController
 {
 
     protected $AdminModel;
@@ -25,10 +24,10 @@ class Register extends BaseController
     protected $GuruMapelModel;
     protected $SmtpModel;
     protected $googleClient;
+    protected $emailer;
 
     public function __construct()
     {
-        $validation = \Config\Services::validation();
         $this->AdminModel = new AdminModel();
         $this->SiswaModel = new SiswaModel();
         $this->GuruModel = new GuruModel();
@@ -38,7 +37,7 @@ class Register extends BaseController
         $this->GuruMapelModel = new GuruMapelModel();
         $this->SmtpModel = new SmtpModel();
 
-        $this->email = \Config\Services::email();
+        $this->emailer = new \App\Libraries\Emailer();
 
         $this->googleClient = new Google_Client();
         $this->googleClient->setClientId('381263998843-1ms0agnrq1eldj7rgj9k10qm7ktgvmb1.apps.googleusercontent.com');
@@ -55,7 +54,7 @@ class Register extends BaseController
         return view('register/index', $data);
     }
 
-    public function tambah_siswa()
+    public function store()
     {
         // 1. Definisikan Rule Validasi (Mencegah karakter aneh & menjamin format email standar)
         
@@ -136,28 +135,11 @@ class Register extends BaseController
     
         $this->SiswaModel->insert($data_siswa);
         $id_siswa = $this->SiswaModel->insertID();
-        $smtp = $this->SmtpModel->asObject()->first();
-        // KIRIM EMAIL
-        $config['protocol']    = 'smtp';
-        $config['SMTPHost']    = $smtp->smtp_host;
-        $config['SMTPUser']    = $smtp->smtp_user;
-        $config['SMTPPass']    = $smtp->smtp_pass;
-        $config['SMTPPort']    = $smtp->smtp_port;
-        $config['SMTPCrypto']  = $smtp->smtp_crypto;
-        $config['mailType']    = 'html';
-        $config['charset']     = 'UTF-8';
-        $config['CRLF']        = "\r\n"; // Gunakan petik dua (") agar terbaca line break
-        $config['SMTPTimeout'] = 60;
         $idsiswa = encrypt_url($id_siswa);
-        $this->email->initialize($config);
-
-        $this->email->setNewline("\r\n");
-
-        $this->email->setFrom($smtp->smtp_user, 'KelasBrevet');
-        $this->email->setTo($this->request->getVar('email'));
-
-        $this->email->setSubject('Registrasi');
-        $this->email->setMessage('
+        // KIRIM EMAIL
+        
+        $subject = 'SELAMAT ANDA BERHASIL REGISTRASI';
+        $message = '
                 <div style="color: #000; padding: 10px;">
                     <div
                         style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; font-size: 20px; color: #1C3FAA; font-weight: bold;">
@@ -178,22 +160,13 @@ class Register extends BaseController
                         </tr>
                     </table>
                     <br>
-                        <a href="' . base_url("Register/verifikasi/$idsiswa") . '"  style="display: inline-block;  background: #1C3FAA; color: #fff;margin:10px; text-decoration: none; border-radius: 5px; text-align: center; line-height: 30px; font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif;">Verifikasi Email</a>
+                        <a href="' . base_url("auth/verifikasi/$idsiswa") . '"  style="display: inline-block;  background: #1C3FAA; color: #fff;margin:10px; text-decoration: none; border-radius: 5px; text-align: center; line-height: 30px; font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif;">Verifikasi Email</a>
                     </div> 
-            ');
+            ';
 
-
-
-        $this->email->send(); //untuk mengirim ke email
+        $this->emailer->send($this->request->getVar('email'), $subject, $message);
         
-        $data = array(
-            'id_siswa'          => $id_siswa,
-            'tanggal_mulai'     => date('Y-m-d'),
-            'tanggal_berakhir'  => date('Y-m-d'),
-        );
-
-        $builder = $this->db->table('pengikut');
-        $builder->insert($data);
+       
         session()->setFlashdata('pesan', "
         swal({
             title: 'Berhasil!',
