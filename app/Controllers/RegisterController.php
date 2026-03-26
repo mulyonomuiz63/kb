@@ -51,7 +51,7 @@ class RegisterController extends BaseController
     {
         $data['link'] = $this->googleClient->createAuthUrl();
         $data['kelas'] = $this->KelasModel->asObject()->findAll();
-        return view('register/index', $data);
+        return view('auth/registrasi', $data);
     }
 
     public function store()

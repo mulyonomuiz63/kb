@@ -3,11 +3,9 @@
 <div class="form-container">
     <div class="form-content">
         <div class="user-info">
-            <a href="<?= base_url('/'); ?>"><img src="<?= base_url('assets-landing/images/logo.png') ?>" style="width: 250px;" /></a>
-            <?php if ($admin == null) : ?>
-                <p class="signup-link">Admin belum ada. <a href="<?= base_url('auth/install'); ?>">Buat akun Admin dulu</a></p>
-            <?php endif; ?>
-
+            <div class="my-4">
+                <a href="<?= base_url('/'); ?>"><img src="<?= base_url("uploads/app-icon/".setting('logo_perusahaan')); ?>" style="width: 250px;"  /></a>
+            </div>
             <form action="<?= base_url('auth/login-proses'); ?>" method="POST" class="text-left" id="form">
                 <?= csrf_field() ?>
                 <div class="form">

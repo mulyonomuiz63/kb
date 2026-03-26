@@ -50,19 +50,8 @@ class AuthController extends BaseController
 
     public function index()
     {
-        if (session('id') != null) {
-            if (session('role') == 2) {
-                return redirect()->to('siswa');
-            } elseif (session('role') == 3) {
-                return redirect()->to('guru');
-            } else {
-                return redirect()->to('App');
-            }
-        } else {
-            $data['link'] = $this->googleClient->createAuthUrl();
-            $data['admin'] = $this->AdminModel->asObject()->first();
-            return view('auth/login', $data);
-        }
+        $data['link'] = $this->googleClient->createAuthUrl();
+        return view('auth/login', $data);
     }
     public function loginProses()
     {
@@ -284,7 +273,7 @@ class AuthController extends BaseController
                         if (!empty(session('url'))) {
                             return redirect()->to(session('url'));
                         } else {
-                            return redirect()->to('siswa');
+                            return redirect()->to('sw-siswa');
                         }
                     } else {
                         session()->setFlashdata('pesan', "
@@ -334,7 +323,7 @@ class AuthController extends BaseController
                     if (!empty(session('url'))) {
                         return redirect()->to(session('url'));
                     } else {
-                        return redirect()->to('siswa');
+                        return redirect()->to('sw-siswa');
                     }
                 }
             } else {
@@ -470,7 +459,7 @@ class AuthController extends BaseController
 
     public function recovery()
     {
-        return view('forgot-password');
+        return view('auth/forgot-password');
     }
     public function recovery_()
     {
@@ -643,7 +632,7 @@ class AuthController extends BaseController
 
         $data['email'] = $email;
         $data['token'] = $token;
-        return view('reset-password', $data);
+        return view('auth/reset-password', $data);
     }
     public function changePassword_()
     {

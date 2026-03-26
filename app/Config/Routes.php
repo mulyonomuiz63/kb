@@ -29,6 +29,49 @@ $routes->group('auth', ['filter' => 'isGuest'], function ($routes) {
 $routes->get('logout', 'AuthController::logout', ['as' => 'logout']);
 // Halaman utama form
 
+$routes->get('/', 'Landing::index');
+$routes->get('tes', 'Landing::tes');
+$routes->get('twibbon', 'Landing::twibbon');
+$routes->get('twibbon/(:any)', 'Landing::twibbon_url/$1');
+$routes->post('twibbon/simpan', 'Landing::twibbon_simpan');
+$routes->get('get_paket', 'Landing::get_paket');
+
+$routes->get('paket-allujian', 'Transaksi::allujian');
+$routes->get('paket-allinone', 'Transaksi::allinone');
+
+$routes->get('pelatihan', 'Landing::pelatihan');
+$routes->get('testimoni', 'Landing::testimoni');
+$routes->get('tentangkami', 'Landing::tentangkami');
+$routes->get('siap-kerja', 'Landing::siap_kerja');
+$routes->get('penilaian', 'Landing::penilaian');
+$routes->get('term', 'Landing::term');
+$routes->get('privasi', 'Landing::privasi');
+$routes->get('jadwal', 'Landing::jadwal');
+$routes->get('galeri', 'Landing::galeri');
+$routes->get('media-kelasbrevet', 'Landing::media');
+$routes->get('presensi/(:any)', 'Landing::presensi/$1');
+
+//quis
+$routes->group('quiz', function ($routes) {
+    $routes->get('', 'Quiz::index');
+    $routes->post('save-leaderboard', 'Quiz::saveLeaderboard');
+    $routes->get('leaderboard', 'Quiz::getLeaderboard');
+    $routes->get('reset-leaderboard', 'Quiz::resetLeaderboard');
+    $routes->get('soal/(:any)', 'Quiz::getQuiz/$1');
+});
+
+$routes->get('artikel', 'Artikel::index');
+$routes->get('artikel/(:any)', 'Artikel::detail/$1');
+$routes->get('kategori/(:any)', 'Artikel::kategori/$1');
+$routes->get('tag/(:any)', 'Artikel::tag/$1');
+
+
+//bimbel
+$routes->get('list-bimbel', 'Bimbel::index');
+$routes->get('bimbel', 'Bimbel::detail');
+$routes->get('bimbel/(:any)', 'Bimbel::detail/$1');
+$routes->get('bimbel/(:any)/(:any)', 'Bimbel::detail/$1/$2');
+
 // admin
 if (is_file(APPPATH . 'Config/RoutesAdmin.php')) {
     require APPPATH . 'Config/RoutesAdmin.php';
