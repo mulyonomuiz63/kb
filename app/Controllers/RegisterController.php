@@ -291,7 +291,7 @@ class RegisterController extends BaseController
         $this->db->table('pengikut')->insert($data_pengikut);
     
         // 9. Redirect ke halaman pesan dengan ID Paket
-        return redirect()->to('transaksi/pesan/'.$idpaketenc.'/'.$kodevoucher);
+        return redirect()->to('sw-siswa/transaksi/pesan/'.$idpaketenc.'/'.$kodevoucher);
     }
     
     private function verifyRecaptcha($token, $action)

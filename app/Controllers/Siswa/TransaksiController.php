@@ -199,7 +199,7 @@ class TransaksiController extends BaseController
 
             // Menggunakan Library Emailer baru Anda
             $this->kirimEmailInvoice($this->emailer, $diskon, $diskon_voucher, encrypt_url($idtransaksi));
-            return redirect()->to('transaksi/pesan-bayar/' . encrypt_url($idtransaksi))->with('pesan', 'Silahkan pilih metode pembayaran!');
+            return redirect()->to('sw-siswa/transaksi/pesan-bayar/' . encrypt_url($idtransaksi))->with('pesan', 'Silahkan pilih metode pembayaran!');
         } catch (\Exception $e) {
             $db->transRollback();
             return redirect()->to('sw-siswa')->with('pesan', $e->getMessage());
@@ -231,7 +231,7 @@ class TransaksiController extends BaseController
                 <li><strong>Total Bayar: ' . number_format($totalBayar, 0, '.', '.') . '</strong></li>
             </ul>
             <p>Silahkan lakukan pembayaran:<br><br>
-                <a href="' . base_url('transaksi/pesan-bayar/' . $idtransaksi) . '" style="display: inline-block; padding: 10px 20px; background: #1C3FAA; color: #fff; text-decoration: none; border-radius: 5px;">Pilih metode pembayaran</a>
+                <a href="' . base_url('sw-siswa/transaksi/pesan-bayar/' . $idtransaksi) . '" style="display: inline-block; padding: 10px 20px; background: #1C3FAA; color: #fff; text-decoration: none; border-radius: 5px;">Pilih metode pembayaran</a>
             </p>
             <p>Salam,<br>Team KelasBrevet</p>
         </div>';

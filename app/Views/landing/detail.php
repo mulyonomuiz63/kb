@@ -286,7 +286,7 @@
             </div>
         <?php endif; ?>
         <div class="d-flex gap-2 mt-3">
-            <a href="<?= base_url('transaksi/pesan/'.encrypt_url($paket->idpaket).'/'.$kdvoucher) ?>" class="btn-buy badge text-center flex-fill">Pesan Sekarang</a>
+            <a href="<?= base_url('sw-siswa/transaksi/pesan/'.encrypt_url($paket->idpaket).'/'.$kdvoucher) ?>" class="btn-buy badge text-center flex-fill">Pesan Sekarang</a>
             <!--badge text-bg-primary d-flex justify-content-center btn-hover-dark p-2-->
             <?php if(session()->get('id')): ?>
                 <?php if(!empty($affiliate)): ?>

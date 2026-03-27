@@ -253,7 +253,7 @@
 
           <h6 class="font-weight-bold mb-3">Upload Bukti Pembayaran</h6>
 
-          <form action="<?= base_url('Transaksi/UploadBuktibayar'); ?>"
+          <form action="<?= base_url('sw-siswa/transaksi/upload-bukti-bayar'); ?>"
                 method="POST"
                 enctype="multipart/form-data">
 

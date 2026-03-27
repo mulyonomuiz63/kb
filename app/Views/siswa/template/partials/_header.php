@@ -12,7 +12,7 @@
         <div class="d-flex align-items-center flex-grow-1 flex-lg-grow-0 me-lg-18">
             <?php if(session()->get('id')): ?>    
                 <a href="<?= base_url('/') ?>">
-                    <img alt="<?= setting('app_name') ?>" src="<?= base_url('uploads/app-icon/') . setting('logo_perusahaan') ?>" class="h-25px d-none d-sm-block" />
+                    <img alt="<?= setting('app_name') ?>" src="<?= base_url('assets-landing/images/logo-putih.png') ?>" class="h-25px d-none d-sm-block" />
                 </a>
             <?php endif; ?>
         </div>

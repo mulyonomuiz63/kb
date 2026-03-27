@@ -303,18 +303,18 @@ class AffiliateController extends BaseController
                         'short_code' => $affiliateLink['short_code'],
                     ];
                     session()->set($data);
-                    return redirect()->to('transaksi/pesan/' . encrypt_url($affiliateLink['paket_id']) . '/' . $voucher);
+                    return redirect()->to('sw-siswa/transaksi/pesan/' . encrypt_url($affiliateLink['paket_id']) . '/' . $voucher);
                 } else {
                     //pembelian tanpa affiliate
-                    return redirect()->to('transaksi/pesan/' . encrypt_url($affiliateLink['paket_id']) . '/' . $voucher);
+                    return redirect()->to('sw-siswa/transaksi/pesan/' . encrypt_url($affiliateLink['paket_id']) . '/' . $voucher);
                 }
             else:
                 //pembelian tanpa affiliate
-                return redirect()->to('transaksi/pesan/' . encrypt_url($affiliateLink['paket_id']) . '/' . $voucher);
+                return redirect()->to('sw-siswa/transaksi/pesan/' . encrypt_url($affiliateLink['paket_id']) . '/' . $voucher);
             endif;
         else:
             //pembelian tanpa affiliate
-            return redirect()->to('transaksi/pesan/' . encrypt_url($affiliateLink['paket_id']) . '/' . $voucher);
+            return redirect()->to('sw-siswa/transaksi/pesan/' . encrypt_url($affiliateLink['paket_id']) . '/' . $voucher);
         endif;
     }
 

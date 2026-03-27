@@ -248,7 +248,7 @@
                 </div>
     
               
-              <form action="<?= base_url('Transaksi/checkout'); ?>" method="POST">
+              <form action="<?= base_url('sw-siswa/transaksi/checkout'); ?>" method="POST">
     
                 <!-- ====== HIDDEN INPUT (TETAP) ====== -->
                 <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>">
@@ -545,7 +545,7 @@
                 },
                 dataType: 'JSON',
                 async: true,
-                url: "<?= base_url('Transaksi/cek_kode_voucher') ?>",
+                url: "<?= base_url('sw-siswa/Transaksi/cek-kode-voucher') ?>",
                 success: function(data) {
                     if(data.length > 0){
                         var diskonHasil = (nominal*diskon)/100;

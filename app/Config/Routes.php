@@ -75,20 +75,7 @@ $routes->get('bimbel', 'Bimbel::detail');
 $routes->get('bimbel/(:any)', 'Bimbel::detail/$1');
 $routes->get('bimbel/(:any)/(:any)', 'Bimbel::detail/$1/$2');
 
-// transaksi
-$routes->group('transaksi', function ($routes) {
-    $routes->get('invoice/(:any)', 'InvoiceController::invoice/$1');
-    $routes->get('', 'Siswa\TransaksiController::index');
-    $routes->get('pesan/(:segment)', 'Siswa\TransaksiController::pesan/$1');
-    $routes->post('cek-kode-voucher', 'Siswa\TransaksiController::cekKodeVoucher');
-    $routes->post('checkout', 'Siswa\TransaksiController::checkout');
-    $routes->get('pesan-bayar/(:segment)', 'Siswa\TransaksiController::pesanBayar/$1');
-    $routes->get('manual-bayar/(:segment)', 'Siswa\TransaksiController::manualBayar/$1');
-    $routes->post('upload-bukti-bayar', 'Siswa\TransaksiController::uploadBuktiBayar');
 
-    //midtrans
-    $routes->get('midtrans-bayar/(:segment)', 'Siswa\TransaksiController::midtransBayar/$1');
-});
 
 // admin
 if (is_file(APPPATH . 'Config/RoutesAdmin.php')) {

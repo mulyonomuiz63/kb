@@ -228,7 +228,7 @@
                                                         
                                                     </div>
                                                     <div class="d-flex gap-2 mt-3">
-                                                        <a href="<?= base_url('transaksi/pesan/'.encrypt_url($rows->idpaket)) ?>" class="btn-buy btn-sm text-center flex-fill p-2">Pesan Sekarang</a>
+                                                        <a href="<?= base_url('sw-siswa/transaksi/pesan/'.encrypt_url($rows->idpaket)) ?>" class="btn-buy btn-sm text-center flex-fill p-2">Pesan Sekarang</a>
                                                         <?php if(session()->get('id')): ?>
                                                             <?php if(!empty($affiliate)): ?>
                                                                 <button class="btn-buy-copy btn-sm  btn-copy-link" data-paket_id="<?= $rows->idpaket ?>">
