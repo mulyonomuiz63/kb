@@ -296,7 +296,7 @@ class RegisterController extends BaseController
     
     private function verifyRecaptcha($token, $action)
     {
-        $secret = getenv('RECAPTCHA_SECRET_KEY');
+        $secret = setting('recaptcha_secret_key');
 
         $response = file_get_contents(
             "https://www.google.com/recaptcha/api/siteverify?secret={$secret}&response={$token}"

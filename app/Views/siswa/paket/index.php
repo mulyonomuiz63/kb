@@ -351,7 +351,7 @@
   }
 </script>
 
-<script src="https://www.google.com/recaptcha/api.js?render=<?= getenv('RECAPTCHA_SITE_KEY') ?>"></script>
+<script src="https://www.google.com/recaptcha/api.js?render=<?= setting('recaptcha_site_key') ?>"></script>
 <script>
   function submitForm(e) {
     e.preventDefault();
@@ -361,7 +361,7 @@
       return false;
     }
     grecaptcha.ready(function() {
-      grecaptcha.execute('<?= getenv('RECAPTCHA_SITE_KEY') ?>', {
+      grecaptcha.execute('<?= setting('recaptcha_site_key') ?>', {
         action: 'registrasi_pesan'
       }).then(function(token) {
         document.getElementById('recaptcha_token').value = token;

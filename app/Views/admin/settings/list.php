@@ -195,12 +195,12 @@
                     <div class="tab-pane fade" id="tab_recaptcha">
                         <div class="form-section-title">Pengaturan reCAPTCHA</div>
 
-                        <?php inputRow('Site Key','<input type="text" class="form-control" name="captcha_site_key" value="'.old('captcha_site_key',$settings['captcha_site_key']??'').'">'); ?>
-                        <?php inputRow('Secret Key','<input type="text" class="form-control" name="captcha_secret_key" value="'.old('captcha_secret_key',$settings['captcha_secret_key']??'').'">'); ?>
+                        <?php inputRow('Site Key','<input type="text" class="form-control" name="recaptcha_site_key" value="'.old('captcha_site_key',$settings['captcha_site_key']??'').'">'); ?>
+                        <?php inputRow('Secret Key','<input type="text" class="form-control" name="recaptcha_secret_key" value="'.old('captcha_secret_key',$settings['captcha_secret_key']??'').'">'); ?>
                         <?php inputRow('Status',
-                            '<select name="captcha_status" class="form-control">
-                                <option value="A" '.(($settings['captcha_status']??'')=='A'?'selected':'').'>Aktif</option>
-                                <option value="T" '.(($settings['captcha_status']??'')=='T'?'selected':'').'>Tidak Aktif</option>
+                            '<select name="recaptcha_status" class="form-control">
+                                <option value="true" '.(($settings['captcha_status']??'')=='true'?'selected':'').'>Aktif</option>
+                                <option value="false" '.(($settings['captcha_status']??'')=='false'?'selected':'').'>Tidak Aktif</option>
                             </select>'
                         ); ?>
                     </div>
@@ -214,8 +214,8 @@
                         <?php inputRow('Redirect URI','<input type="text" class="form-control" name="redirect_uri" value="'.old('redirect_uri',$settings['redirect_uri']??'').'">'); ?>
                         <?php inputRow('Status',
                             '<select name="client_status" class="form-control">
-                                <option value="A" '.(($settings['client_status']??'')=='A'?'selected':'').'>Aktif</option>
-                                <option value="T" '.(($settings['client_status']??'')=='T'?'selected':'').'>Non Aktif</option>
+                                <option value="true" '.(($settings['client_status']??'')=='true'?'selected':'').'>Aktif</option>
+                                <option value="false" '.(($settings['client_status']??'')=='false'?'selected':'').'>Non Aktif</option>
                             </select>'
                         ); ?>
                     </div>
@@ -228,8 +228,8 @@
                         <?php inputRow('Server Key','<input type="text" class="form-control" name="midtrans_server_key" value="'.old('midtrans_server_key',$settings['midtrans_server_key']??'').'">'); ?>
                         <?php inputRow('Is Production',
                             '<select name="midtrans_is_production" class="form-control">
-                                <option value="True" '.(($settings['midtrans_is_production']??'')=='True'?'selected':'').'>Aktif</option>
-                                <option value="False" '.(($settings['midtrans_is_production']??'')=='False'?'selected':'').'>Non Aktif</option>
+                                <option value="true" '.(($settings['midtrans_is_production']??'')=='true'?'selected':'').'>Aktif</option>
+                                <option value="false" '.(($settings['midtrans_is_production']??'')=='false'?'selected':'').'>Non Aktif</option>
                             </select>'
                         ); ?>
                     </div>

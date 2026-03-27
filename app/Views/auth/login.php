@@ -40,10 +40,12 @@
                     </div>
                 </div>
             </form>
-            <div id="username-field" class="field-wrapper input my-4">
-                <a href="<?= $link ?>" class="btn  btn-sm form-control"><img src="<?= base_url('assets-landing/images/icon/google.png') ?>" style="width: 30px;" /> <span style="font-size:14px;">Masuk dengan <b>Google</b></span></a>
-            </div>
-            <p class="signup-link">
+            <?php if(strtolower(setting('client_status')) == 'true'): ?>
+                <div id="username-field" class="field-wrapper input my-4">
+                    <a href="<?= $link ?>" class="btn  btn-sm form-control"><img src="<?= base_url('assets-landing/images/icon/google.png') ?>" style="width: 30px;" /> <span style="font-size:14px;">Masuk dengan <b>Google</b></span></a>
+                </div>
+            <?php endif; ?>
+            <p class="signup-link mt-4">
                 Lupa Kata Sandi? <a href="<?= base_url('auth/recovery') ?>">Klik Disini</a><br>
                 Belum punya akun? <a href="<?= base_url('auth/registrasi') ?>">Registrasi disini</a>
             </p>

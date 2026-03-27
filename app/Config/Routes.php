@@ -25,6 +25,9 @@ $routes->group('auth', ['filter' => 'isGuest'], function ($routes) {
     $routes->post('store', 'RegisterController::store');
     $routes->post('store-siswa-melalui-pesan', 'RegisterController::storeSiswaMelaluiPesan');
     $routes->get('verifikasi/(:segment)', 'RegisterController::verifikasi/$1');
+    
+    
+    $routes->get('google', 'RegisterController::google');
 });
 $routes->get('logout', 'AuthController::logout', ['as' => 'logout']);
 // Halaman utama form

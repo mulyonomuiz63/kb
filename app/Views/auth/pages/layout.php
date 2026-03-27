@@ -740,11 +740,11 @@
             <?= session()->getFlashdata('pesan'); ?>
         </script>
 
-        <script src="https://www.google.com/recaptcha/api.js?render=<?= getenv('RECAPTCHA_SITE_KEY') ?>"></script>
+        <script src="https://www.google.com/recaptcha/api.js?render=<?= setting('recaptcha_site_key') ?>"></script>
         <script>
             function submitForm() {
                 // Ambil status aktif reCAPTCHA dari PHP/Env
-                const isRecaptchaActive = <?= getenv('RECAPTCHA_ACTIVE') === 'true' ? 'true' : 'false' ?>;
+                const isRecaptchaActive = <?= setting('recaptcha_status') === 'true' ? 'true' : 'false' ?>;
 
                 // Jika tidak aktif, langsung submit form
                 if (!isRecaptchaActive) {
@@ -759,7 +759,7 @@
                 }
 
                 grecaptcha.ready(function() {
-                    grecaptcha.execute('<?= getenv('RECAPTCHA_SITE_KEY') ?>', {
+                    grecaptcha.execute('<?= setting('recaptcha_site_key') ?>', {
                         action: 'login'
                     }).then(function(token) {
                         document.getElementById('recaptcha_token').value = token;

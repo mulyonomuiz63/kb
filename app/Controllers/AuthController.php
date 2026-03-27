@@ -28,7 +28,7 @@ class AuthController extends BaseController
 
     public function __construct()
     {
-        $validation = \Config\Services::validation();
+        helper('setting');
         $this->AdminModel = new AdminModel();
         $this->SiswaModel = new SiswaModel();
         $this->GuruModel = new GuruModel();
@@ -41,9 +41,12 @@ class AuthController extends BaseController
         $this->emailer = new \App\Libraries\Emailer();
 
         $this->googleClient = new Google_Client();
-        $this->googleClient->setClientId('381263998843-1ms0agnrq1eldj7rgj9k10qm7ktgvmb1.apps.googleusercontent.com');
-        $this->googleClient->setClientSecret('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');
-        $this->googleClient->setRedirectUri('https://kelasbrevet.com/Auth/google');
+        $clientId     = setting('client_id');
+        $clientSecret = setting('client_secret');
+        $redirectUri  = setting('redirect_uri');
+        $this->googleClient->setClientId($clientId);
+        $this->googleClient->setClientSecret($clientSecret);
+        $this->googleClient->setRedirectUri($redirectUri);
         $this->googleClient->addScope('email');
         $this->googleClient->addScope('profile');
     }
@@ -75,7 +78,7 @@ class AuthController extends BaseController
 
         // --- PERBAIKAN RECAPTCHA DISINI ---
         // Cek apakah recaptcha diaktifkan di .env
-        $isRecaptchaActive = getenv('RECAPTCHA_ACTIVE') === 'true';
+        $isRecaptchaActive = setting('recaptcha_status') === 'true';
 
         if ($isRecaptchaActive) {
             if (!$this->verifyRecaptcha($token, 'login')) {
@@ -204,7 +207,7 @@ class AuthController extends BaseController
 
     private function verifyRecaptcha($token, $action)
     {
-        $secret = getenv('RECAPTCHA_SECRET_KEY');
+        $secret = setting('recaptcha_secret_key');
 
         $response = file_get_contents(
             "https://www.google.com/recaptcha/api/siteverify?secret={$secret}&response={$token}"
