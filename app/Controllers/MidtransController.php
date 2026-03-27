@@ -14,6 +14,7 @@ class MidtransController extends BaseController
     protected $ujianSiswaModel;
     protected $paketModel;
     protected $affiliateCommissionModel;
+    protected $emailer;
 
     public function __construct()
     {
@@ -25,6 +26,7 @@ class MidtransController extends BaseController
         $this->ujianSiswaModel = new \App\Models\UjianSiswaModel();
         $this->paketModel = new \App\Models\PaketModel();
         $this->affiliateCommissionModel = new \App\Models\AffiliateCommissionModel();
+        $this->emailer = new Emailer();
     }
 
     public function notification()
@@ -72,7 +74,7 @@ class MidtransController extends BaseController
             if ($internalStatus === 'S') {
                 $updateData['tgl_pembayaran'] = date('Y-m-d H:i:s');
                 $this->approveOtomatis($trx['idtransaksi']);
-                
+
                 // Kirim Notifikasi Email
                 $this->kirimNotifikasiEmail($trx, $payload->gross_amount);
             }
@@ -87,7 +89,6 @@ class MidtransController extends BaseController
                 $this->db->transCommit();
                 return $this->response->setJSON(['message' => 'OK']);
             }
-
         } catch (\Exception $e) {
             if ($this->db->transStatus() === false) $this->db->transRollback();
             log_message('error', '[Midtrans Notification Error] ' . $e->getMessage());
@@ -95,240 +96,105 @@ class MidtransController extends BaseController
         }
     }
 
-    public function midtrans_(){
-        $db = \Config\Database::connect();
-        $db->transBegin();
-           $smtp = $this->SmtpModel->asObject()->first();
-           
-            \Midtrans\Config::$serverKey = midtrans_server_key();
-            // Set to Development/Sandbox Environment (default). Set to true for Production Environment (accept real transaction).
-            \Midtrans\Config::$isProduction = status_midtrans();
-            // Set sanitization on (default)
-            \Midtrans\Config::$isSanitized = true;
-            // Set 3DS transaction for credit card to true
-            \Midtrans\Config::$is3ds = true;
-            
-            $idtransaksi = $this->request->getGet('order_id');
-            $status = \Midtrans\Transaction::status($idtransaksi);
-                if($status->transaction_status == 'pending'){
-                    $this->TransaksiModel
-                        ->where('idtransaksi', $idtransaksi)
-                        ->set('status', 'PM')
-                        ->set('tgl_exp', $status->transaction_time)
-                        ->set('tgl_drop', $status->expiry_time)
-                        ->update();
-                    session()->setFlashdata('pesan', "swal({
-                        title: 'Informasi!',
-                        text: 'Silahkan lakukan pembayaran',
-                        type: 'info',
-                        padding: '2em'
-                        })
-                    ");
-                        
-                }elseif($status->transaction_status == 'denied'){
-                     $this->TransaksiModel
-                        ->where('idtransaksi', $idtransaksi)
-                        ->set('status', 'DM')
-                        ->set('tgl_exp', $status->transaction_time)
-                        ->set('tgl_drop', $status->expiry_time)
-                        ->update();
-                    session()->setFlashdata('pesan', "swal({
-                        title: 'Informasi!',
-                        text: 'Pembayaran Denied',
-                        type: 'info',
-                        padding: '2em'
-                        })
-                    ");
-                }elseif($status->transaction_status == 'expire'){
-                     $this->TransaksiModel
-                        ->where('idtransaksi', $idtransaksi)
-                        ->set('status', 'E')
-                        ->set('tgl_exp', $status->transaction_time)
-                        ->set('tgl_drop', $status->expiry_time)
-                        ->update();
-                    session()->setFlashdata('pesan', "swal({
-                        title: 'Informasi!',
-                        text: 'Pembayaran Expire',
-                        type: 'info',
-                        padding: '2em'
-                        })
-                    ");
-                }
-                    
-         
-                
-    
-                if($status->transaction_status == 'settlement'){
-                    $datatransaksi = $this->TransaksiModel->join('detail_transaksi', 'detail_transaksi.idtransaksi=transaksi.idtransaksi')->where('transaksi.idtransaksi', $idtransaksi)->groupBy('detail_transaksi.idpaket')->get()->getResultObject();
-                    foreach($datatransaksi as $rowst){
-                        if($rowst->status != 'S'){
-                            $idsiswa = $rowst->idsiswa;
-                            if($rowst->idmapel != '0'):
-                                $data_mapel_siswa = [
-                                        'idmapel' => $rowst->idmapel,
-                                        'idsiswa' => $rowst->idsiswa
-                                    ];
-                                $this->MapelSiswaModel->save($data_mapel_siswa);
-                            endif;
-                            $datapaket = $this->DetailPaketModel->join('ujian_master', 'detail_paket.id_ujian=ujian_master.id_ujian')->where('idpaket', $rowst->idpaket)->groupBy('detail_paket.id_ujian')->get()->getResultObject();
-                            foreach($datapaket as $rowsp){
-                                //menambah ujian ke siswa
-                                $data_ujian= [
-                                    'id_siswa' => $rowst->idsiswa,
-                                    'kode_ujian' => $rowsp->kode_ujian,
-                                    'nama_ujian' => $rowsp->nama_ujian,
-                                    'guru' => $rowsp->guru,
-                                    'kelas' => $rowsp->kelas,
-                                    'mapel' => $rowsp->mapel,
-                                    'date_created' => time(),
-                                ];
-                                  $this->UjianModel->save($data_ujian);
-                                  
-                                 //menambah ujian ke tabel ujian siswa
-                                $data_ujian_siswa = $this->UjiansiswaModel->where('ujian', $rowsp->kode_ujian)->where('siswa', $idsiswa)->get()->getResultObject();
-                                foreach ($data_ujian_siswa as $rows) {
-                                    $data_detail_siswa = [
-                                        'jawaban'       => null,
-                                        'benar'         => null,
-                                        'jam'           => null,
-                                        'status'        => null,
-                                    ];
-                                    $this->UjiansiswaModel->set($data_detail_siswa)->where('id_ujian_siswa', $rows->id_ujian_siswa)->update();
-                                }
-                            }
-                            
-                            
-                            //untuk cek paket
-                            $this->builder = $this->db->query("select * from pengikut where id_siswa =' $idsiswa'")->getRow();
-                            $dataPaket = $this->PaketModel->where('idpaket', $rowst->idpaket)->get()->getRowObject();
-                            $tambahBulan = '+' . $dataPaket->jumlah_bulan . ' month';
-                            if ($this->builder == null) {
-                                $tgl_mulai = date('Y-m-d');
-                                $tanggal_berakhir = date('Y-m-d', strtotime($tambahBulan, strtotime($tgl_mulai)));
-                
-                                $data = array(
-                                    'id_siswa'          => $idsiswa,
-                                    'status'            => 'Subscribed',
-                                    'tanggal_mulai'     => date('Y-m-d'),
-                                    'tanggal_berakhir'  => $tanggal_berakhir,
-                                );
-                
-                                $builder = $this->db->table('pengikut');
-                                $builder->insert($data);
-                            } else {
-                                if ($this->builder->tanggal_berakhir < date('Y-m-d')) {
-                                    $tgl_mulai = date('Y-m-d');
-                                } else {
-                                    $tgl_mulai = $this->builder->tanggal_berakhir;
-                                }
-                                $tanggal_berakhir = date('Y-m-d', strtotime($tambahBulan, strtotime($tgl_mulai)));
-                                $data = array(
-                                    'status'                => 'Subscribed',
-                                    'tanggal_mulai'     => date('Y-m-d'),
-                                    'tanggal_berakhir'     => $tanggal_berakhir,
-                                );
-                
-                                $builder = $this->db->table('pengikut');
-                                $builder->where('id_siswa', $idsiswa);
-                                $builder->update($data);
-                            }
-                            
-                            $commission = $this->affiliateCommissionModel
-                                ->where('id_transaksi', $idtransaksi)
-                                ->first();
-                            
-                            if ($commission) {
-                                $this->affiliateCommissionModel
-                                    ->where('id_transaksi', $idtransaksi)
-                                    ->update(null, [
-                                        'status'            => 'approved',
-                                        'tgl_approved'      => date('Y-m-d H:i:s'),
-                                        'status_penarikan'  => 'pending'
-                                    ]);
-                            }
-                        
-            
-                        
-            
-                            // KIRIM EMAIL
-                            $config['protocol']    = 'smtp';
-                            $config['SMTPHost']    = $smtp->smtp_host;
-                            $config['SMTPUser']    = $smtp->smtp_user;
-                            $config['SMTPPass']    = $smtp->smtp_pass;
-                            $config['SMTPPort']    = $smtp->smtp_port;
-                            $config['SMTPCrypto']  = $smtp->smtp_crypto;
-                            $config['mailType']    = 'html';
-                            $config['charset']     = 'UTF-8';
-                            $config['CRLF']        = "\r\n"; // Gunakan petik dua (") agar terbaca line break
-                            $config['SMTPTimeout'] = 60;
-                
-                            $this->email->initialize($config);
-                
-                            $this->email->setNewline("\r\n");
-                
-                            $this->email->setFrom($smtp->smtp_user, 'KelasBrevet');
-                            $this->email->setTo(session('email'));
-                
-                            $this->email->setSubject('Akun KelasBrevet');
-                            $this->email->setMessage('
-                                    <div style="color: #000; padding: 10px;">
-                                        <div
-                                            style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; font-size: 20px; color: #1C3FAA; font-weight: bold;">
-                                            PEMBAYARAN TERVERIFIKASI</div>
-                                        
-                                        <br>
-                                        <p style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; color: #000;">Hallo ' . $this->request->getVar('nama_siswa') . ' <br>
-                                            <span style="color: #000;">Pembayaran anda telah berhasil kami verifikasi. Silahkan kembali ke aplikasi https://kelasbrevet.com/</span></p>
-                                        
-                                      </div>
-                                ');
-                
-                            if (!$this->email->send()) {
-                                // echo $this->email->printDebugger();
-                                // die();
-                            }
-                        }
-                    }
-                    
-                    //untuk merubah validasi di transaksi data dari midtrans
-                    $this->TransaksiModel
-                        ->where('idtransaksi', $idtransaksi)
-                        ->set('status', 'S')
-                        ->set('tgl_pembayaran', date("Y-m-d H:i:s"))
-                        ->update();
-                    session()->setFlashdata('pesan', "swal({
-                        title: 'Berhasil!',
-                        text: 'Pembayaran kami terima',
-                        type: 'success',
-                        padding: '2em'
-                        })
-                    ");
-                    
-                    $cekDataTransaksi = $this->TransaksiModel
-                        ->where('idtransaksi', $idtransaksi)
-                        ->where('status', 'S')
-                        ->get()
-                        ->getRowObject();
-                    
-                    // Cek apakah data ditemukan
-                    if ($cekDataTransaksi) {
-                        send_notif(
-                            $cekDataTransaksi->idsiswa, // Pastikan kolom di DB namanya idsiswa
-                            "Pembayaran berhasil", 
-                            "Pembelian paket berhasil dibayar.", 
-                            base_url('siswa/transaksi')
-                        );
-                    }
-                }
-        // COMMIT / ROLLBACK
-        if ($db->transStatus() === false) {
-            $db->transRollback();
-        } else {
-            $db->transCommit();
+    public function notificationManual()
+    {
+        $idtransaksi = $this->request->getGet('order_id');
+        $cekTransaksi = $this->transaksiModel->where('idtransaksi', $idtransaksi)->where('status', 'S')->get()->getRowObject();
+
+        // Cek jika transaksi sudah selesai (sesuai kode bawaan Anda)
+        if (empty($cekTransaksi)) {
+            return redirect()->to('sw-siswa/transaksi')->with('success', 'Paket sudah dibayar silahkan untuk memulai ujian');
         }
 
-        // Cek apakah query insert nya sukses atau gagal
-        return redirect()->to('sw-siswa/transaksi');
+        $db = \Config\Database::connect();
+        $db->transBegin();
+
+        try {
+            // ---------------------------------------------------------
+            // 1. KONFIGURASI MIDTRANS
+            // ---------------------------------------------------------
+            \Midtrans\Config::$serverKey = setting('midtrans_server_key');
+            \Midtrans\Config::$isProduction = filter_var(setting('midtrans_is_production'), FILTER_VALIDATE_BOOLEAN);
+            \Midtrans\Config::$isSanitized = true;
+            \Midtrans\Config::$is3ds = true;
+
+            // Tarik status terbaru langsung dari server Midtrans
+            // Jika server Midtrans down/error, bagian ini akan otomatis dilempar ke 'catch'
+            $status = (object) \Midtrans\Transaction::status($idtransaksi);
+
+            // ---------------------------------------------------------
+            // 2. UPDATE STATUS TRANSAKSI (SELAIN SETTLEMENT)
+            // ---------------------------------------------------------
+            if ($status->transaction_status == 'pending') {
+                $this->transaksiModel->where('idtransaksi', $idtransaksi)
+                    ->set('status', 'PM')
+                    ->set('tgl_exp', $status->transaction_time)
+                    ->set('tgl_drop', $status->expiry_time)
+                    ->update();
+            } elseif ($status->transaction_status == 'denied') {
+                $this->transaksiModel->where('idtransaksi', $idtransaksi)
+                    ->set('status', 'DM')
+                    ->set('tgl_exp', $status->transaction_time)
+                    ->set('tgl_drop', $status->expiry_time)
+                    ->update();
+            } elseif ($status->transaction_status == 'expire') {
+                $this->transaksiModel->where('idtransaksi', $idtransaksi)
+                    ->set('status', 'E')
+                    ->set('tgl_exp', $status->transaction_time)
+                    ->set('tgl_drop', $status->expiry_time)
+                    ->update();
+            }
+
+            // ---------------------------------------------------------
+            // 3. JIKA TRANSAKSI BERHASIL (SETTLEMENT)
+            // ---------------------------------------------------------
+            if ($status->transaction_status == 'settlement') {
+                $this->approveOtomatis($idtransaksi);
+
+                // Kirim Email Konfirmasi
+                $subject = 'PEMBAYARAN BERHASIL';
+                $namaSiswa = $this->request->getVar('nama_siswa') ?? 'Siswa';
+                $message = '
+                <div style="color: #000; padding: 10px;">
+                    <div style="font-family: `Segoe UI`, Tahoma, sans-serif; font-size: 20px; color: #1C3FAA; font-weight: bold;">
+                        PEMBAYARAN TERVERIFIKASI
+                    </div><br>
+                    <p style="font-family: `Segoe UI`, Tahoma, sans-serif; color: #000;">
+                        Hallo ' . esc($namaSiswa) . '<br>
+                        Pembayaran anda telah berhasil kami verifikasi. Silahkan kembali ke aplikasi <a href="https://kelasbrevet.com/">KelasBrevet.com</a>
+                    </p>
+                </div>';
+
+                if (session('email')) {
+                    $this->emailer->send(session('email'), $subject, $message);
+                }
+
+                // Update Status Transaksi menjadi Sukses (S)
+                $this->transaksiModel->where('idtransaksi', $idtransaksi)
+                    ->set('status', 'S')
+                    ->set('tgl_pembayaran', date("Y-m-d H:i:s"))
+                    ->update();
+            }
+
+            // ---------------------------------------------------------
+            // 4. COMMIT ATAU ROLLBACK TRANSAKSI
+            // ---------------------------------------------------------
+            if ($db->transStatus() === false) {
+                $db->transRollback();
+                return redirect()->to('sw-siswa/transaksi')->with('pesan', 'Pembayaran tidak dapat di proses');
+            } else {
+                $db->transCommit();
+                return redirect()->to('sw-siswa/transaksi')->with('success', 'Pembayaran kami terima');
+            }
+        } catch (\Exception $e) {
+            // ---------------------------------------------------------
+            // 5. TANGKAP ERROR (MIDTRANS API DOWN / KONEKSI GAGAL)
+            // ---------------------------------------------------------
+            $db->transRollback();
+
+            // Mengembalikan ke halaman transaksi dengan pesan error yang aman tanpa merusak tampilan
+            return redirect()->to('sw-siswa/transaksi')->with('pesan', 'Terjadi kesalahan koneksi ke server pembayaran. Silakan coba lagi.');
+        }
     }
 
     private function approveOtomatis($idtransaksi)
@@ -413,7 +279,6 @@ class MidtransController extends BaseController
     private function kirimNotifikasiEmail($trx, $amount)
     {
         try {
-            $emailer = new Emailer();
             $subject = "Pembayaran Berhasil - " . $trx['idtransaksi'];
 
             $message = "
@@ -433,11 +298,11 @@ class MidtransController extends BaseController
                 </div>
             ";
 
-            $emailer->send($trx['email'], $subject, $message);
+            $this->emailer->send($trx['email'], $subject, $message);
             // Cek apakah data ditemukan
             send_notif(
                 $trx['idsiswa'], // Pastikan kolom di DB namanya idsiswa
-                "Verifikasi Pembayaran",
+                "Pembayaran Berhasil",
                 "Pembelian paket berhasil.",
                 base_url('sw-siswa/transaksi')
             );
