@@ -99,10 +99,13 @@ class MidtransController extends BaseController
     public function notificationManual()
     {
         $idtransaksi = $this->request->getGet('order_id');
+
+        // Cari transaksi dengan ID tersebut yang statusnya SUDAH SUKSES ('S')
         $cekTransaksi = $this->transaksiModel->where('idtransaksi', $idtransaksi)->where('status', 'S')->get()->getRowObject();
 
-        // Cek jika transaksi sudah selesai (sesuai kode bawaan Anda)
-        if (empty($cekTransaksi)) {
+        // LOGIKA DIPERBAIKI: Jika datanya TIDAK KOSONG (!empty), artinya transaksi ini sudah pernah diproses sukses.
+        // Cegah proses berulang dan langsung kembalikan ke halaman.
+        if (!empty($cekTransaksi)) {
             return redirect()->to('sw-siswa/transaksi')->with('success', 'Paket sudah dibayar silahkan untuk memulai ujian');
         }
 
@@ -119,36 +122,38 @@ class MidtransController extends BaseController
             \Midtrans\Config::$is3ds = true;
 
             // Tarik status terbaru langsung dari server Midtrans
-            // Jika server Midtrans down/error, bagian ini akan otomatis dilempar ke 'catch'
             $status = (object) \Midtrans\Transaction::status($idtransaksi);
 
             // ---------------------------------------------------------
-            // 2. UPDATE STATUS TRANSAKSI (SELAIN SETTLEMENT)
+            // 2. UPDATE STATUS TRANSAKSI (SELAIN SUKSES)
             // ---------------------------------------------------------
             if ($status->transaction_status == 'pending') {
                 $this->transaksiModel->where('idtransaksi', $idtransaksi)
                     ->set('status', 'PM')
                     ->set('tgl_exp', $status->transaction_time)
-                    ->set('tgl_drop', $status->expiry_time)
+                    ->set('tgl_drop', $status->expiry_time ?? null)
                     ->update();
-            } elseif ($status->transaction_status == 'denied') {
+
+                // LOGIKA DIPERBAIKI: Menambahkan 'deny' dan 'cancel' sesuai dokumentasi resmi Midtrans API
+            } elseif ($status->transaction_status == 'deny' || $status->transaction_status == 'cancel') {
                 $this->transaksiModel->where('idtransaksi', $idtransaksi)
                     ->set('status', 'DM')
                     ->set('tgl_exp', $status->transaction_time)
-                    ->set('tgl_drop', $status->expiry_time)
+                    ->set('tgl_drop', $status->expiry_time ?? null)
                     ->update();
             } elseif ($status->transaction_status == 'expire') {
                 $this->transaksiModel->where('idtransaksi', $idtransaksi)
                     ->set('status', 'E')
                     ->set('tgl_exp', $status->transaction_time)
-                    ->set('tgl_drop', $status->expiry_time)
+                    ->set('tgl_drop', $status->expiry_time ?? null)
                     ->update();
             }
 
             // ---------------------------------------------------------
-            // 3. JIKA TRANSAKSI BERHASIL (SETTLEMENT)
+            // 3. JIKA TRANSAKSI BERHASIL
             // ---------------------------------------------------------
-            if ($status->transaction_status == 'settlement') {
+            // LOGIKA DIPERBAIKI: Mengakomodasi 'capture' (Credit Card) dan 'settlement' (Transfer/E-Wallet)
+            if ($status->transaction_status == 'settlement' || $status->transaction_status == 'capture') {
                 $this->approveOtomatis($idtransaksi);
 
                 // Kirim Email Konfirmasi
@@ -184,7 +189,7 @@ class MidtransController extends BaseController
                 return redirect()->to('sw-siswa/transaksi')->with('pesan', 'Pembayaran tidak dapat di proses');
             } else {
                 $db->transCommit();
-                return redirect()->to('sw-siswa/transaksi')->with('success', 'Pembayaran kami terima');
+                return redirect()->to('sw-siswa/transaksi')->with('success', 'Status pembayaran berhasil diperbarui');
             }
         } catch (\Exception $e) {
             // ---------------------------------------------------------
