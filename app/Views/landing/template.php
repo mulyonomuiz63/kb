@@ -488,7 +488,7 @@
                         <!-- Header Top Left End -->
                         <!-- Header Top Right Start -->
                         <div class="header-top-right">
-                            <a href="https://kelasbrevet.com/Transaksi/pesan/T2w0WnJ0ZWhBWmNUR3A1endmZTdkdz09 " class="badge text-bg-primary">Ambil Promo</a>
+                            <a href="https://kelasbrevet.com/transaksi/pesan/T2w0WnJ0ZWhBWmNUR3A1endmZTdkdz09 " class="badge text-bg-primary">Ambil Promo</a>
                         </div>
                         <!-- Header Top Right End -->
                     </div>

@@ -31,44 +31,50 @@
             </div>
             <div class="col-md-6">
                 <div class="card p-4 border-0">
-                    <?= img_lazy('assets-landing/images/slider/slider-2.png',"loading", ['class' => 'card-img-top']) ?>
+                    <?= img_lazy('assets-landing/images/slider/slider-2.png', "loading", ['class' => 'card-img-top']) ?>
                 </div>
             </div>
         </div>
     </div>
 </div>
- <!-- untuk tampilan surat izin LKP-->
+<!-- untuk tampilan surat izin LKP-->
 <div class="modal fade" id="lihatIzinLkp" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl" >
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
+                <h5 class="modal-title">Surat Izin LKP</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-              <iframe src="https://docs.google.com/gview?embedded=true&url=<?= urlencode(base_url("assets-landing/images/surat-izin/izin-LKP-akuntanmu-01.pdf")) ?>" width="100%" height="500vh"></iframe>
+            <div class="modal-body p-0">
+                <iframe src="<?= base_url('assets-landing/images/surat-izin/izin-LKP-akuntanmu-01.pdf') ?>" width="100%" height="600px" style="border: none;"></iframe>
+            </div>
         </div>
     </div>
 </div>
 
 <!--surat izin LPK-->
 <div class="modal fade" id="lihatIzinLpk" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl" >
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
+                <h5 class="modal-title">Sertifikat Standar LPK</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-              <iframe src="https://docs.google.com/gview?embedded=true&url=<?= urlencode(base_url("assets-landing/images/surat-izin/izin-LPK-akuntanmu-01.pdf")) ?>" width="100%" height="500vh"></iframe>
+            <div class="modal-body p-0">
+                <iframe src="<?= base_url('assets-landing/images/surat-izin/izin-LPK-akuntanmu-01.pdf') ?>" width="100%" height="600px" style="border: none;"></iframe>
+            </div>
         </div>
     </div>
 </div>
 
 <!--kemnaker-->
 <div class="modal fade" id="lihatKemnaker" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl" >
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-              <iframe src="https://skillhub.kemnaker.go.id/mitra/temukan-mitra/lpk-akuntanmu-by-legalyn-konsultan-indonesia-d8c65b1d-90e6-43a3-b1de-96cb4af8c662" width="100%" height="500vh"></iframe>
+            <iframe src="https://skillhub.kemnaker.go.id/mitra/temukan-mitra/lpk-akuntanmu-by-legalyn-konsultan-indonesia-d8c65b1d-90e6-43a3-b1de-96cb4af8c662" width="100%" height="500vh"></iframe>
         </div>
     </div>
 </div>
