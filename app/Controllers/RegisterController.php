@@ -91,7 +91,7 @@ class RegisterController extends BaseController
                     padding: '2em'
                 })
             ");
-            return redirect()->to('Register')->withInput();
+            return redirect()->to('auth/registrasi')->withInput();
         }
         
         
@@ -112,7 +112,7 @@ class RegisterController extends BaseController
         $token = $this->request->getPost('recaptcha_token');
         if (!$this->verifyRecaptcha($token, 'registrasi')) {
             session()->setFlashdata('pesan', "swal({title:'Info', text:'Verifikasi Bot Gagal', type:'info', padding:'2em'})");
-            return redirect()->to('Register')->withInput();
+            return redirect()->to('auth/registrasi')->withInput();
         }
     
         // 4. Proses Data (Hanya jika lolos validasi)
@@ -179,7 +179,7 @@ class RegisterController extends BaseController
         return redirect()->to('Auth');
     }
     
-    public function tambah_siswa_melalui_pesan(){
+    public function storeSiswaMelaluiPesan(){
         // 1. Ambil data input awal
         $idpaketenc = $this->request->getPost('idpaketenc');
         $kodevoucher = $this->request->getPost('kodevoucher');
@@ -291,7 +291,7 @@ class RegisterController extends BaseController
         $this->db->table('pengikut')->insert($data_pengikut);
     
         // 9. Redirect ke halaman pesan dengan ID Paket
-        return redirect()->to('Transaksi/pesan/'.$idpaketenc.'/'.$kodevoucher);
+        return redirect()->to('transaksi/pesan/'.$idpaketenc.'/'.$kodevoucher);
     }
     
     private function verifyRecaptcha($token, $action)

@@ -20,11 +20,11 @@ $routes->group('auth', ['filter' => 'isGuest'], function ($routes) {
     $routes->post('recovery_', 'AuthController::recovery_');
     $routes->get('change-password', 'AuthController::changePassword');
     $routes->post('change-password_', 'AuthController::changePassword_');
-    
+
     $routes->get('registrasi', 'RegisterController::index');
     $routes->post('store', 'RegisterController::store');
+    $routes->post('store-siswa-melalui-pesan', 'RegisterController::storeSiswaMelaluiPesan');
     $routes->get('verifikasi/(:segment)', 'RegisterController::verifikasi/$1');
-
 });
 $routes->get('logout', 'AuthController::logout', ['as' => 'logout']);
 // Halaman utama form
@@ -44,7 +44,7 @@ $routes->get('testimoni', 'Landing::testimoni');
 $routes->get('tentangkami', 'Landing::tentangkami');
 $routes->get('siap-kerja', 'Landing::siap_kerja');
 $routes->get('penilaian', 'Landing::penilaian');
-$routes->get('term', 'Landing::term');
+$routes->get('terms', 'Landing::term');
 $routes->get('privasi', 'Landing::privasi');
 $routes->get('jadwal', 'Landing::jadwal');
 $routes->get('galeri', 'Landing::galeri');
@@ -71,6 +71,21 @@ $routes->get('list-bimbel', 'Bimbel::index');
 $routes->get('bimbel', 'Bimbel::detail');
 $routes->get('bimbel/(:any)', 'Bimbel::detail/$1');
 $routes->get('bimbel/(:any)/(:any)', 'Bimbel::detail/$1/$2');
+
+// transaksi
+$routes->group('transaksi', function ($routes) {
+    $routes->get('invoice/(:any)', 'InvoiceController::invoice/$1');
+    $routes->get('', 'Siswa\TransaksiController::index');
+    $routes->get('pesan/(:segment)', 'Siswa\TransaksiController::pesan/$1');
+    $routes->post('cek-kode-voucher', 'Siswa\TransaksiController::cekKodeVoucher');
+    $routes->post('checkout', 'Siswa\TransaksiController::checkout');
+    $routes->get('pesan-bayar/(:segment)', 'Siswa\TransaksiController::pesanBayar/$1');
+    $routes->get('manual-bayar/(:segment)', 'Siswa\TransaksiController::manualBayar/$1');
+    $routes->post('upload-bukti-bayar', 'Siswa\TransaksiController::uploadBuktiBayar');
+
+    //midtrans
+    $routes->get('midtrans-bayar/(:segment)', 'Siswa\TransaksiController::midtransBayar/$1');
+});
 
 // admin
 if (is_file(APPPATH . 'Config/RoutesAdmin.php')) {
@@ -118,7 +133,7 @@ $routes->group('api/notifications', function ($routes) {
 });
 
 // untuk admin
-$routes->group('notif', function($routes) {
+$routes->group('notif', function ($routes) {
     $routes->get('get-data', 'NotificationController::getNotifications');
     $routes->post('mark-read', 'NotificationController::markAsRead');
     $routes->post('mark-all-read', 'NotificationController::markAllRead');

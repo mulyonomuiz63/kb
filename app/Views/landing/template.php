@@ -570,19 +570,18 @@
                             <ul  class="nav-menu ">
                                 <?php if(session('nama') == ''): ?>
                                     <li><a class="sign-in" href="<?= base_url('auth'); ?>">Masuk</a></li>
-                                    <!--<li><a class="sign-up" href="<?= base_url('Register'); ?>">Daftar</a></li>-->
                                 <?php else: ?>
                                 <?php 
                                     if(session('role') == '1'):
-                                       $url =  base_url('App');
+                                       $url =  base_url('sw-admin');
                                     elseif(session('role') == '2'):
-                                        $url =  base_url('siswa'); 
+                                        $url =  base_url('sw-siswa'); 
                                     elseif(session('role') == '3'):
-                                        $url =  base_url('guru');
+                                        $url =  base_url('sw-guru');
                                     elseif(session('role') == '4'):
-                                        $url =  base_url('Mitra');
+                                        $url =  base_url('sw-mitra');
                                     elseif(session('role') == '5'):
-                                        $url =  base_url('Pic');
+                                        $url =  base_url('sw-pic');
                                     endif;
                                     
                                 ?>
@@ -627,19 +626,19 @@
                 <ul>
                     <?php if(session('nama') == ''): ?>
                         <li><a class="sign-in" href="<?= base_url('auth'); ?>">Masuk</a></li>
-                        <li><a class="sign-up" href="<?= base_url('Register'); ?>">Daftar</a></li>
+                        <li><a class="sign-up" href="<?= base_url('auth/registrasi'); ?>">Daftar</a></li>
                     <?php else: ?>
                     <?php 
                         if(session('role') == '1'):
-                           $url =  base_url('App');
+                           $url =  base_url('sw-admin');
                         elseif(session('role') == '2'):
-                            $url =  base_url('siswa'); 
+                            $url =  base_url('sw-siswa'); 
                         elseif(session('role') == '3'):
-                            $url =  base_url('guru');
+                            $url =  base_url('sw-guru');
                         elseif(session('role') == '4'):
-                            $url =  base_url('Mitra');
+                            $url =  base_url('sw-mitra');
                         elseif(session('role') == '5'):
-                            $url =  base_url('Pic');
+                            $url =  base_url('sw-pic');
                         endif;
                         
                     ?>
@@ -701,9 +700,6 @@
 
             <!-- Footer Widget Section Start -->
             <div class="footer-widget-section">
-
-                <?= img_lazy('assets-landing/images/shape/shape-21.png',"loading", ['class' => 'shape-1 animation-down']) ?>
-
                 <div class="container">
                     <div class="row">
                         <div class="col-lg-6 col-md-6 order-md-6 order-lg-6">
@@ -711,7 +707,9 @@
                             <!-- Footer Widget Start -->
                             <div class="footer-widget">
                                 <div class="widget-logo">
-                                    <a href="#"><?= img_lazy('assets-landing/images/logo.png',"loading", ['class' => '']) ?></a>
+                                    <a href="#">
+                                        <img src="<?= base_url('uploads/app-icon/'. setting('logo_perusahaan')) ?>"  alt="...">
+                                    </a>
                                 </div>
 
                                 <div>
@@ -752,8 +750,12 @@
                                         <h4 class="footer-widget-title">Lembaga Terdaftar</h4>
                                         <div class="widget-subscribe">
                                             <div class="row">
-                                                <div class="col-4 col-md-4 col-lg-4"><?= img_lazy('assets-landing/images/lembaga/kemendikbud.png',"loading", ['class' => '', "whidth"=>"50"]) ?></div>
-                                                <div class="col-4 col-md-4 col-lg-4"><?= img_lazy('assets-landing/images/lembaga/kemenaker.png',"loading", ['class' => '']) ?></div>
+                                                <div class="col-4 col-md-4 col-lg-4">
+                                                    <img src="<?= base_url('assets-landing/images/lembaga/kemendikbud.png') ?>"  alt="...">
+                                                </div>
+                                                <div class="col-4 col-md-4 col-lg-4">
+                                                    <img src="<?= base_url('assets-landing/images/lembaga/kemenaker.png') ?>"  alt="...">
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -810,7 +812,7 @@
                     <div class="accordion" id="accordionExample">
                         <div class="d-flex justify-content-between text-dark">
                             <div class="copyright-link">
-                                <a href="<?= base_url("term") ?>" class="text-dark">Terms of Conditions</a>
+                                <a href="<?= base_url("terms") ?>" class="text-dark">Terms of Conditions</a>
                                 <a href="<?= base_url("privasi") ?>" class="text-dark">Privacy Policy</a>
                             </div>
                             <div class="copyright-text">
@@ -837,7 +839,7 @@
         <!-- Chat Floating Button -->
         <div id="chatButton">
             <a href="javascript:void(0)" data-url="Halo,%20saya%20ingin%20bertanya..." class="whatsapp-button d-flex align-items-center justify-content-center">
-                <?= img_lazy('uploads/icon/call.png',"loading", ['class' => '']) ?>
+                <img src="<?= base_url('uploads/icon/call.png') ?>"  alt="...">
             </a>
         </div>
         
@@ -909,7 +911,7 @@
             btn.prop('disabled', true);
         
             $.ajax({
-                url: "<?= base_url('siswa/affiliate/copy') ?>",
+                url: "<?= base_url('sw-siswa/affiliate/copy') ?>",
                 type: "POST",
                 dataType: "json",
                 data: {
@@ -993,7 +995,7 @@
             let waWindow = window.open('about:blank', '_blank');
         
             $.ajax({
-                url: "<?= base_url('siswa/affiliate/copy') ?>",
+                url: "<?= base_url('sw-siswa/affiliate/copy') ?>",
                 type: "POST",
                 dataType: "json",
                 data: {

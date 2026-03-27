@@ -310,20 +310,18 @@
                         <div class="header-sign-in-up d-none d-lg-block">
                             <ul>
                                 <?php if(session('nama') == ''): ?>
-                                    <li><a class="sign-in text-white" href="<?= base_url('auth'); ?>">Masuk</a></li>
-                                    <!--<li><a class="sign-up" href="<?= base_url('Register'); ?>">Daftar</a></li>-->
-                                <?php else: ?>
+                                    <li><a class="sign-in text-white" href="<?= base_url('auth'); ?>">Masuk</a></li>                                <?php else: ?>
                                 <?php 
                                     if(session('role') == '1'):
-                                       $url =  base_url('App');
+                                       $url =  base_url('sw-admin');
                                     elseif(session('role') == '2'):
-                                        $url =  base_url('siswa'); 
+                                        $url =  base_url('sw-siswa'); 
                                     elseif(session('role') == '3'):
-                                        $url =  base_url('guru');
+                                        $url =  base_url('sw-guru');
                                     elseif(session('role') == '4'):
-                                        $url =  base_url('Mitra');
+                                        $url =  base_url('sw-mitra');
                                     elseif(session('role') == '5'):
-                                        $url =  base_url('Pic');
+                                        $url =  base_url('sw-pic');
                                     endif;
                                     
                                 ?>
@@ -369,19 +367,19 @@
                 <ul>
                     <?php if(session('nama') == ''): ?>
                         <li><a class="sign-in" href="<?= base_url('auth'); ?>">Masuk</a></li>
-                        <li><a class="sign-up" href="<?= base_url('Register'); ?>">Daftar</a></li>
+                        <li><a class="sign-up" href="<?= base_url('auth/registrasi'); ?>">Daftar</a></li>
                     <?php else: ?>
                     <?php 
                         if(session('role') == '1'):
-                           $url =  base_url('App');
+                           $url =  base_url('sw-admin');
                         elseif(session('role') == '2'):
-                            $url =  base_url('siswa'); 
+                            $url =  base_url('sw-siswa'); 
                         elseif(session('role') == '3'):
-                            $url =  base_url('guru');
+                            $url =  base_url('sw-guru');
                         elseif(session('role') == '4'):
-                            $url =  base_url('Mitra');
+                            $url =  base_url('sw-mitra');
                         elseif(session('role') == '5'):
-                            $url =  base_url('Pic');
+                            $url =  base_url('sw-pic');
                         endif;
                         
                     ?>
@@ -464,7 +462,7 @@
                             <div class="slider-content"> 
                                 <h4 class="text-white ">Ujian Brevet Pajak AB Online Kapan Saja dan Dimana Saja Lebih Mudah</h4>
                                 <h6 class="main-title text-white ">Harga Mulai <span class="text-white fw-bold">Rp50.000</span>/Materi</h6>
-                                <a class="btn btn-primary btn-hover-dark" href="<?= base_url('Register'); ?>">Daftar Sekarang</a>
+                                <a class="btn btn-primary btn-hover-dark" href="<?= base_url('auth/registrasi'); ?>">Daftar Sekarang</a>
                             </div>
                             <!-- Slider Content End -->
                         </div>
@@ -980,7 +978,7 @@
                     <div class="section-title section-title-white">
                         <h2 class="main-title mb-4">Ikuti Ujian Brevet Tanpa Mengikuti Kelas</h2>
                         <h6 class="text-white">Kamu bisa mengikuti Ujian Brevet secara langsung tanpa perlu Mengikuti Kelas terlebih dahulu. <br><i>*Syarat dan ketentuan berlaku</i></h6>
-                        <a href="<?= base_url('siswa') ?>" class="btn btn-light  rounded-pill text-primary btn-hover-dark">Ikuti Ujian Brevet Pajak AB</a>
+                        <a href="<?= base_url('sw-siswa') ?>" class="btn btn-light  rounded-pill text-primary btn-hover-dark">Ikuti Ujian Brevet Pajak AB</a>
                     </div>
                     <!-- Section Title End -->
                     <?= img_lazy('assets-landing/images/shape/shape-14.png',"brevet pajak", ['class' => 'shape-1 animation-righ']) ?>
@@ -1168,7 +1166,7 @@
                     <div class="accordion" id="accordionExample">
                         <div class="d-flex justify-content-between text-dark">
                             <div class="copyright-link">
-                                <a href="<?= base_url("term") ?>" class="text-dark">Terms of Conditions</a>
+                                <a href="<?= base_url("terms") ?>" class="text-dark">Terms of Conditions</a>
                                 <a href="<?= base_url("privasi") ?>" class="text-dark">Privacy Policy</a>
                             </div>
                             <div class="copyright-text">
@@ -1346,7 +1344,7 @@
             let paket_id = btn.data('paket_id');
         
             $.ajax({
-                url: "<?= base_url('siswa/affiliate/copy') ?>",
+                url: "<?= base_url('sw-siswa/affiliate/copy') ?>",
                 type: "POST",
                 dataType: "json",
                 data: {
@@ -1428,7 +1426,7 @@
             let waWindow = window.open('about:blank', '_blank');
         
             $.ajax({
-                url: "<?= base_url('siswa/affiliate/copy') ?>",
+                url: "<?= base_url('sw-siswa/affiliate/copy') ?>",
                 type: "POST",
                 dataType: "json",
                 data: {

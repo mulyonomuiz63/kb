@@ -111,7 +111,7 @@
                                 <div class="fs-6 fw-bold text-gray-800">Paket Belajar</div>
                                 <div class="fs-7 fw-semibold text-muted">Tingkatkan skill Anda hari ini</div>
                             </div>
-                            <a href="<?= base_url('sw-siswa/paket') ?>" class="btn btn-sm btn-light-primary fw-bold">Lihat Paket</a>
+                            <a href="<?= base_url('list-bimbel') ?>" class="btn btn-sm btn-light-primary fw-bold">Lihat Paket</a>
                         </div>
 
                     </div>

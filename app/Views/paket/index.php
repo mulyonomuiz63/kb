@@ -438,7 +438,7 @@
                   Registrasi atau login untuk melanjutkan pembelian
                 </h4>
         
-                <form action="<?= base_url('Register/tambah_siswa_melalui_pesan'); ?>"
+                <form action="<?= base_url('auth/store-siswa-melalui-pesan'); ?>"
                       method="POST"
                       id="form"
                       onsubmit="return submitForm(event)">
