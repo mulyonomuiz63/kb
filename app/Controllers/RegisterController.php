@@ -109,10 +109,12 @@ class RegisterController extends BaseController
         }
     
         // 3. Verifikasi reCAPTCHA
-        $token = $this->request->getPost('recaptcha_token');
-        if (!$this->verifyRecaptcha($token, 'registrasi')) {
-            session()->setFlashdata('pesan', "swal({title:'Info', text:'Verifikasi Bot Gagal', type:'info', padding:'2em'})");
-            return redirect()->to('auth/registrasi')->withInput();
+        if(setting('recaptcha_status') == 'true') {
+            $token = $this->request->getPost('recaptcha_token');
+            if (!$this->verifyRecaptcha($token, 'registrasi')) {
+                session()->setFlashdata('pesan', "swal({title:'Info', text:'Verifikasi Bot Gagal', type:'info', padding:'2em'})");
+                return redirect()->to('auth/registrasi')->withInput();
+            }
         }
     
         // 4. Proses Data (Hanya jika lolos validasi)
@@ -176,7 +178,7 @@ class RegisterController extends BaseController
             })
         ");
         // text: 'Anda berhasil mendaftar, Cek inbox/Spam email terdaftar untuk proses verifikasi akun',
-        return redirect()->to('Auth');
+        return redirect()->to('auth');
     }
     
     public function storeSiswaMelaluiPesan(){
@@ -243,11 +245,13 @@ class RegisterController extends BaseController
         }
     
         // 4. Verifikasi Google reCAPTCHA
-        if (!$this->verifyRecaptcha($token, 'registrasi_pesan')) {
-            session()->setFlashdata('pesan', "swal({title:'Info', text:'Gagal verifikasi token (Bot Detected)', type:'info', padding:'2em'})");
-            return redirect()->back()->withInput();
+        if(setting('recaptcha_status') == 'true') {
+            if (!$this->verifyRecaptcha($token, 'registrasi_pesan')) {
+                session()->setFlashdata('pesan', "swal({title:'Info', text:'Gagal verifikasi token (Bot Detected)', type:'info', padding:'2em'})");
+                return redirect()->back()->withInput();
+            }
         }
-    
+        
         // 5. Sanitasi Data (Pembersihan Karakter Tersembunyi)
         $emailClean = $this->request->getPost('email', FILTER_SANITIZE_EMAIL);
         $namaClean  = $this->request->getPost('nama_siswa', FILTER_SANITIZE_STRING);
