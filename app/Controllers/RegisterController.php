@@ -251,7 +251,7 @@ class RegisterController extends BaseController
                 return redirect()->back()->withInput();
             }
         }
-        
+
         // 5. Sanitasi Data (Pembersihan Karakter Tersembunyi)
         $emailClean = $this->request->getPost('email', FILTER_SANITIZE_EMAIL);
         $namaClean  = $this->request->getPost('nama_siswa', FILTER_SANITIZE_STRING);
@@ -341,7 +341,7 @@ class RegisterController extends BaseController
             padding: '2em'
             })
         ");
-        return redirect()->to('Auth');
+        return redirect()->to('auth');
     }
 
     public function autocomplate()

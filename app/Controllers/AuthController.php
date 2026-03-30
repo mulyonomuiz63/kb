@@ -467,24 +467,23 @@ class AuthController extends BaseController
     public function recovery_()
     {
         // CEK EMAIL
-        $email = $this->request->getVar('email');
-
-        $token = $this->request->getPost('recaptcha_token');
-
-
-        if (!$this->verifyRecaptcha($token, 'lupapassword')) {
-            session()->setFlashdata('pesan', "
-                        swal({
-                            title: 'Oops!',
-                            text: 'Email tidak ditemukan',
-                            type: 'error',
-                            padding: '2em'
-                            })
-                        ");
-            return redirect()->to('auth/recovery');
+        if(setting('recaptcha_status') == 'true') {
+            $token = $this->request->getPost('recaptcha_token');
+            if (!$this->verifyRecaptcha($token, 'lupapassword')) {
+                session()->setFlashdata('pesan', "
+                            swal({
+                                title: 'Oops!',
+                                text: 'Email tidak ditemukan',
+                                type: 'error',
+                                padding: '2em'
+                                })
+                                ");
+                return redirect()->to('auth/recovery');
+            }
         }
-
+        
         // Cek email ke siswa
+        $email = $this->request->getVar('email');
         $siswa = $this->SiswaModel->getByEmail($email);
         if ($siswa != null) {
             // Fungsi Siswa
@@ -496,28 +495,8 @@ class AuthController extends BaseController
                 'date_created' => time()
             ];
 
-            // KIRIM EMAIL
-            $smtp = $this->SmtpModel->asObject()->first();
-            $config['protocol']    = 'smtp';
-            $config['SMTPHost']    = $smtp->smtp_host;
-            $config['SMTPUser']    = $smtp->smtp_user;
-            $config['SMTPPass']    = $smtp->smtp_pass;
-            $config['SMTPPort']    = $smtp->smtp_port;
-            $config['SMTPCrypto']  = $smtp->smtp_crypto;
-            $config['mailType']    = 'html';
-            $config['charset']     = 'UTF-8';
-            $config['CRLF']        = "\r\n"; // Gunakan petik dua (") agar terbaca line break
-            $config['SMTPTimeout'] = 60;
-
-            $this->email->initialize($config);
-
-            $this->email->setNewline("\r\n");
-
-            $this->email->setFrom($smtp->smtp_user, 'KelasBrevet');
-            $this->email->setTo($email);
-
-            $this->email->setSubject('Forgot Password');
-            $this->email->setMessage('
+           $subject = 'Forgot Password';
+            $message = '
                 <div style="color: #000; padding: 10px;">
                     <div style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; font-size: 20px; color: #1C3FAA; font-weight: bold;">
                         RESET PASSWORD
@@ -527,13 +506,15 @@ class AuthController extends BaseController
                     <p style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; color: #000;">Hallo ' . $this->request->getVar('nama') . ' <br>
                         <span style="color: #000;">Klik Tombol dibawah ini untuk melanjutkan proses</span><br>
                         </p>
-                    <a href="' . base_url() . '/auth/change_password?email=' . $email . '&token=' . $token .  '" style="display: inline-block; width: 100px; height: 30px; background: #1C3FAA; color: #fff; text-decoration: none; border-radius: 5px; text-align: center; line-height: 30px; font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif;">
+                    <a href="' . base_url() . '/auth/change-password?email=' . $email . '&token=' . $token .  '" style="display: inline-block; width: 100px; height: 30px; background: #1C3FAA; color: #fff; text-decoration: none; border-radius: 5px; text-align: center; line-height: 30px; font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif;">
                         resset Password        
                     </a>
                 </div>
-            ');
+            ';
 
-            if (!$this->email->send()) {
+            $emaiFeed = $this->emailer->send($email, $subject, $message);
+
+            if (!$emaiFeed) {
                 // echo $this->email->printDebugger();
                 // die();
                 session()->setFlashdata('pesan', "
@@ -556,70 +537,15 @@ class AuthController extends BaseController
                 return redirect()->to('auth');
             }
         } else {
-            // Cek email ke Guru
-            $guru = $this->GuruModel->getByEmail($email);
-            if ($guru != null) {
-
-                $token = random_string('alnum', 32);
-                $user_token = [
-                    'email' => $email,
-                    'token' => $token,
-                    'date_created' => time()
-                ];
-
-                // KIRIM EMAIL
-
-                $subject = 'RESET PASSWORD';
-                $message = '
-                    <div style="color: #000; padding: 10px;">
-                        <div style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; font-size: 20px; color: #1C3FAA; font-weight: bold;">
-                            RESET PASSWORD
-                        </div>
-                        
-                        <br>
-                        <p style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; color: #000;">Hallo ' . $this->request->getVar('nama') . ' <br>
-                            <span style="color: #000;">Klik Tombol dibawah ini untuk melanjutkan proses</span><br>
-                            </p>
-                        <a href="' . base_url() . '/auth/change-password?email=' . $email . '&token=' . $token .  '" style="display: inline-block; width: 100px; height: 30px; background: #1C3FAA; color: #fff; text-decoration: none; border-radius: 5px; text-align: center; line-height: 30px; font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif;">
-                            resset Password        
-                        </a>
-                    </div>
-                ';
-
-                    $this->emailer->send($this->request->getVar('email'), $subject, $message);
-
-                if (!$this->email->send()) {
-                    session()->setFlashdata('pesan', "
-                        swal({
-                            title: 'Informasi!',
-                            text: 'Sistem lagi dalam antrian, Coba lagi!',
-                            type: 'info'
-                        })
-                    ");
-                    return redirect()->to('auth');
-                } else {
-                    $this->TokenModel->save($user_token);
-                    session()->setFlashdata('pesan', "
-                        swal({
-                            title: 'Berhasil!',
-                            text: 'Silahkan buka email untuk melanjutkan prosses',
-                            type: 'success'
-                            })
-                        ");
-                    return redirect()->to('auth');
-                }
-            } else {
-                // Cek email ke Guru
-                session()->setFlashdata('pesan', "
-                            swal({
-                                title: 'Oops!',
-                                text: 'Email tidak ditemukan',
-                                type: 'error',
-                                padding: '2em'
-                                })
-                            ");
-                return redirect()->to('auth/recovery');
-            }
+            session()->setFlashdata('pesan', "
+                swal({
+                    title: 'Oops!',
+                    text: 'Email tidak ditemukan',
+                    type: 'error',
+                    padding: '2em'
+                    })
+            ");
+            return redirect()->to('auth/recovery');
         }
     }
     public function changePassword()
@@ -643,49 +569,27 @@ class AuthController extends BaseController
         $token = $this->request->getVar('token');
         $new_password = $this->request->getVar('password');
         $user = $this->SiswaModel->getByEmail($email);
-        if ($user == null) {
-            $user = $this->GuruModel->getByEmail($email);
-        }
 
         if ($user != null) {
             $user_token = $this->TokenModel->getByEmailAndToken($email, $token);
             if ($user_token != null) {
                 if (time() - $user_token->date_created < (60 * 60 * 24)) {
-                    if ($user->role == 2) {
-                        $this->SiswaModel
-                            ->set('password', password_hash($new_password, PASSWORD_DEFAULT))
-                            ->where('email', $email)
-                            ->update();
+                    $this->SiswaModel
+                        ->set('password', password_hash($new_password, PASSWORD_DEFAULT))
+                        ->where('email', $email)
+                        ->update();
 
-                        $this->TokenModel->delete($user_token->id_user_token);
+                    $this->TokenModel->delete($user_token->id_user_token);
 
-                        session()->setFlashdata(
-                            'pesan',
-                            "swal({
-                                    title: 'Berhasil!',
-                                    text: 'password diganti',
-                                    type: 'success'
-                                })"
-                        );
-                        return redirect()->to('auth');
-                    } else {
-                        $this->GuruModel
-                            ->set('password', password_hash($new_password, PASSWORD_DEFAULT))
-                            ->where('email', $email)
-                            ->update();
-
-                        $this->TokenModel->delete($user_token->id_user_token);
-
-                        session()->setFlashdata(
-                            'pesan',
-                            "swal({
-                                    title: 'Berhasil!',
-                                    text: 'password diganti',
-                                    type: 'success'
-                                })"
-                        );
-                        return redirect()->to('auth');
-                    }
+                    session()->setFlashdata(
+                        'pesan',
+                        "swal({
+                                title: 'Berhasil!',
+                                text: 'password diganti',
+                                type: 'success'
+                            })"
+                    );
+                    return redirect()->to('auth');
                 } else {
 
                     $this->TokenModel->delete($user_token->id_user_token);
@@ -705,7 +609,7 @@ class AuthController extends BaseController
                     'pesan',
                     "swal({
                             title: 'Oops!',
-                            text: 'Aktivasi gagal, Token salah!',
+                            text: 'Aktivasi gagal, Token kadaluarsa, Silahkan requesst ulang!',
                             type: 'error'
                         })"
                 );
