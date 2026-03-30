@@ -18,8 +18,8 @@ class TransaksiController extends BaseController
 
     public function __construct()
     {
-        $this->transaksiModel = new \App\models\TransaksiModel();
-        $this->detailTransaksiModel = new \App\models\DetailTransaksiModel();
+        $this->transaksiModel = new \App\Models\TransaksiModel();
+        $this->detailTransaksiModel = new \App\Models\DetailTransaksiModel();
         $this->detailPaketModel = new \App\Models\DetailPaketModel();
         $this->paketModel = new \App\Models\PaketModel();
         $this->affiliateModel = new \App\Models\AffiliateModel();

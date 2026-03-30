@@ -173,7 +173,7 @@
                 <div class="fs-5 fw-semibold text-gray-600 mb-7">Tingkatkan kompetensi Anda dengan materi terupdate dan instruktur berpengalaman.</div>
                 <div class="m-0">
                     <a href="<?= base_url('sw-siswa/materi') ?>" class="btn btn-primary fw-bold px-8 py-3">Mulai Belajar Sekarang</a>
-                    <a href="<?= base_url('sw-siswa/paket') ?>" class="btn btn-light-primary fw-bold px-8 py-3 ms-2">Lihat Paket Lain</a>
+                    <a href="<?= base_url('list-bimbel') ?>" class="btn btn-light-primary fw-bold px-8 py-3 ms-2">Lihat Paket Lain</a>
                 </div>
             </div>
         </div>
