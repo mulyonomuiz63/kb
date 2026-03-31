@@ -17,6 +17,7 @@ class TransaksiController extends BaseController
     protected $paketModel;
     protected $siswaModel;
     protected $serviceEmail;
+    protected $detailTransaksiModel;
     public function __construct()
     {
         $this->transaksiModel = new \App\Models\TransaksiModel();
@@ -28,6 +29,7 @@ class TransaksiController extends BaseController
         $this->paketModel = new \App\Models\PaketModel();
         $this->siswaModel = new \App\Models\SiswaModel();
         $this->serviceEmail = new \App\Libraries\Emailer();
+        $this->detailTransaksiModel = new \App\Models\DetailTransaksiModel();
     }
     public function index()
     {
@@ -88,9 +90,13 @@ class TransaksiController extends BaseController
                     } else {
                         $row['pembayaran'] = '<span class="text-muted small">-</span>';
                     }
+                        $diskon         = ($s->nominal * $s->diskon) / 100;
+                        $totalDiskon    = $s->nominal - $diskon ;
+                        $diskon_voucher = ($totalDiskon * $s->voucher) / 100;
+                        $nominal = $s->nominal - $diskon - $diskon_voucher;
 
                     // Kolom Nominal
-                    $row['nominal'] = '<span class="font-weight-bold text-primary">Rp ' . number_format($s->nominal, 0, ',', '.') . '</span>';
+                    $row['nominal'] = '<span class="font-weight-bold text-primary">Rp ' . number_format($nominal, 0, ',', '.') . '</span>';
 
                     // Kolom Status
                     if ($s->status === 'S') {
@@ -121,7 +127,7 @@ class TransaksiController extends BaseController
                         $row['aksi'] .= '<a class="dropdown-item text-primary" id="approve" href="' . base_url('sw-admin/transaksi/approve-manual/' . $id_enc) . '">
                         <i class="bi bi-check-square mr-2"></i> Approve Transaksi
                     </a>
-                    <a class="dropdown-item text-danger btn-delete" href="' . base_url('sw-admin/transaksi/hapus-transaksi-siswa/' . $id_enc) . '">
+                    <a class="dropdown-item text-danger btn-delete" id="hapus" href="' . base_url('sw-admin/transaksi/hapus-transaksi-siswa/' . $id_enc) . '">
                         <i class="bi bi-trash mr-2"></i> Hapus
                     </a>';
                     }
@@ -340,5 +346,25 @@ class TransaksiController extends BaseController
             $db->transRollback();
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
+    }
+    
+    public function hapusTransaksiSiswa($id)
+    {
+        $idtransaksi = decrypt_url($id);
+        $dataDrop  =   $this->db->query("select * from transaksi where idtransaksi='$idtransaksi'")->getRow();
+        if ($dataDrop != null) {
+            //untuk menghapus file bukti transaksi
+            if($dataDrop->bukti_pembayaran != ''){
+                if (file_exists('./uploads/transaksi/thumbnails/' . $dataDrop->bukti_pembayaran)) {
+                    unlink('./uploads/transaksi/thumbnails/' . $dataDrop->bukti_pembayaran);
+                };
+            }
+            $data = $this->detailTransaksiModel->where('idtransaksi', $dataDrop->idtransaksi)->get()->getResultObject();
+            foreach($data as $rows){
+                $this->detailTransaksiModel->delete($rows->iddetailtransaksi);
+            }
+            $this->transaksiModel->delete($dataDrop->idtransaksi);
+        }
+        return redirect()->to('sw-admin/transaksi')->with('success', 'Transaksi berhasil dibatalkan');
     }
 }

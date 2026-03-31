@@ -195,7 +195,7 @@
                                         Tingkatkan kompetensi Anda dengan pilihan paket Brevet terbaik kami dan jadilah ahli pajak profesional sekarang juga.
                                     </p>
                                     <div class="d-flex flex-center gap-4">
-                                        <a href="<?= base_url('sw-siswa/paket') ?>" class="btn btn-primary px-8 fw-bold">
+                                        <a href="<?= base_url('list-bimbel') ?>" class="btn btn-primary px-8 fw-bold">
                                             <i class="ki-outline ki-shopping-cart fs-4 me-2"></i> Jelajahi Paket Materi
                                         </a>
                                     </div>

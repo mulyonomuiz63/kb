@@ -10,9 +10,6 @@
                             <h5 class="font-weight-bold text-dark mb-0">Manajemen Transaksi</h5>
                             <p class="text-muted small">Kelola dan validasi pembayaran peserta ujian secara real-time.</p>
                         </div>
-                        <a href="<?= base_url('sw-admin/transaksi/transaksi-kodevoucher') ?>" class="btn btn-primary shadow-sm btn-sm px-3">
-                            <i class="bi bi-ticket-perforated mr-1"></i> Transaksi Voucher
-                        </a>
                     </div>
 
                     <div class="table-responsive">
@@ -179,7 +176,19 @@
                     let statusBadge = getStatusBadge(data.status);
                     let jenisBayar = (data.jenis_bayar == 'online') ? 'Midtrans' : (data.status == 'P' ? 'N/A' : 'Manual');
                     let imgPath = '<?= base_url('uploads/transaksi/thumbnails'); ?>/' + data.bukti_pembayaran;
-
+                    let lampiran = '';
+                    if(data.status === 'V' && data.jenis_bayar === 'manual'){
+                           lampiran = `<div class="form-group mb-0 text-center">
+                                <label class="small d-block text-left text-muted font-weight-bold">Bukti Pembayaran:</label>
+                                <img class="zoom shadow-sm border w-100 mt-2" src="${imgPath}" alt="Bukti">
+                            </div>`;
+                    }else if( data.status === 'S' && data.jenis_bayar === 'manual'){
+                        lampiran = `<div class="form-group mb-0 text-center">
+                                <label class="small d-block text-left text-muted font-weight-bold">Bukti Pembayaran:</label>
+                                <img class="zoom shadow-sm border w-100 mt-2" src="${imgPath}" alt="Bukti">
+                            </div>`;
+                    }
+                    
                     $("#isiKonten").html(`
                         <div class="modal-header bg-light">
                             <h5 class="modal-title font-weight-bold">Validasi Transaksi</h5>
@@ -191,13 +200,11 @@
                                 <div class="col-6 text-muted">Peserta:</div><div class="col-6 font-weight-bold text-right">${data.nama_siswa}</div>
                                 <hr class="w-100">
                                 <div class="col-6 text-muted">ID Transaksi:</div><div class="col-6 text-right">${data.idtransaksi}</div>
+                                <div class="col-6 text-muted">Jenis Pembayaran:</div><div class="col-6 font-weight-bold text-right text-success">${jenisBayar}</div>
                                 <div class="col-6 text-muted">Nominal:</div><div class="col-6 font-weight-bold text-right text-primary">Rp ${numberFormat(totalFix, 0, ',', '.')}</div>
                             </div>
                             <div class="mb-3 text-center">${statusBadge}</div>
-                            <div class="form-group mb-0 text-center">
-                                <label class="small d-block text-left text-muted font-weight-bold">Bukti Pembayaran:</label>
-                                <img class="zoom shadow-sm border w-100 mt-2" src="${imgPath}" alt="Bukti">
-                            </div>
+                            ${lampiran}
                             <input type="hidden" name="idtransaksi" value="${data.idtransaksi}">
                         </div>
                         <div class="modal-footer bg-light">
