@@ -29,6 +29,8 @@ $routes->group('auth', ['filter' => 'isGuest'], function ($routes) {
     
     $routes->get('google', 'RegisterController::google');
 });
+
+
 $routes->get('logout', 'AuthController::logout', ['as' => 'logout']);
 // Halaman utama form
 
@@ -86,6 +88,12 @@ if (is_file(APPPATH . 'Config/RoutesAdmin.php')) {
 if (is_file(APPPATH . 'Config/RoutesGuru.php')) {
     require APPPATH . 'Config/RoutesGuru.php';
 }
+
+// mitra
+if (is_file(APPPATH . 'Config/RoutesMitra.php')) {
+    require APPPATH . 'Config/RoutesMitra.php';
+}
+
 // siswa
 if (is_file(APPPATH . 'Config/RoutesSiswa.php')) {
     require APPPATH . 'Config/RoutesSiswa.php';

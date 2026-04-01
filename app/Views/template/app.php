@@ -75,6 +75,19 @@ $this->setData($data_view);
             <?= $this->include('template/sidebar/pic'); ?>
         <?php endif; ?>
 
+        <div id="content" class="main-content">
+            <?= $this->include('template/partials/toolbar'); ?>
+            <?= $this->renderSection('content'); ?>
+            <div class="footer-wrapper">
+                <div class="footer-section f-section-1">
+                    <p class="terms-conditions"><?= copyright() ?></p>
+                </div>
+                <div class="footer-section f-section-2">
+
+                </div>
+            </div>
+        </div>
+
         <!-- END MAIN CONTAINER -->
         <script>
             var csrfName = '<?= csrf_token() ?>';

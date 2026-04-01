@@ -367,4 +367,16 @@ class TransaksiController extends BaseController
         }
         return redirect()->to('sw-admin/transaksi')->with('success', 'Transaksi berhasil dibatalkan');
     }
+
+    public function hapusTransaksi()
+    {
+        $dataDrop  =   $this->db->query("select * from transaksi where status in ('P', 'M','PM', 'DM', 'E') and (tgl_drop <= DATE_FORMAT(NOW(),'%Y-%m-%d %H:%i:%s') )")->getRow();
+        if ($dataDrop != null) {
+            $data = $this->detailTransaksiModel->where('idtransaksi', $dataDrop->idtransaksi)->get()->getResultObject();
+            foreach($data as $rows){
+                $this->detailTransaksiModel->delete($rows->iddetailtransaksi);
+            }
+            $this->transaksiModel->delete($dataDrop->idtransaksi);
+        }
+    }
 }

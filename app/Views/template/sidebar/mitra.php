@@ -1,4 +1,9 @@
-        <!--  BEGIN SIDEBAR  -->
+<?php
+// Konfigurasi Active Menu
+$dashboard = ['sw-mitra/','sw-mitra/detail-voucher'];
+$profile   = ['sw-mitra/profile'];
+?>
+<!--  BEGIN SIDEBAR  -->
 
         <div class="sidebar-wrapper sidebar-theme">
 
@@ -26,9 +31,9 @@
 
                 <ul class="list-unstyled menu-categories" id="accordionExample">
 
-                    <li class="menu <?= $dashboard['menu']; ?>">
+                    <li class="menu <?= set_active($dashboard)['menu']; ?>">
 
-                        <a href="<?= base_url('Mitra'); ?>" aria-expanded="<?= $dashboard['expanded']; ?>" class="dropdown-toggle">
+                        <a href="<?= base_url('sw-mitra'); ?>" aria-expanded="<?= set_active($dashboard)['expanded']; ?>" class="dropdown-toggle">
 
                             <div class="">
 
@@ -61,9 +66,9 @@
 
                         
 
-                    <li class="menu <?= $menu_profile['menu']; ?>">
+                    <li class="menu <?= set_active($profile)['menu']; ?>">
 
-                        <a href="<?= base_url('Mitra/profile'); ?>" aria-expanded="<?= $menu_profile['expanded']; ?>" class="dropdown-toggle">
+                        <a href="<?= base_url('sw-mitra/profile'); ?>" aria-expanded="<?= set_active($profile)['expanded']; ?>" class="dropdown-toggle">
 
                             <div class="">
 
@@ -85,7 +90,7 @@
 
                     <li class="menu">
 
-                        <a href="<?= base_url('auth/logout'); ?>" aria-expanded="false" class="dropdown-toggle">
+                        <a href="<?= base_url('logout'); ?>" aria-expanded="false" class="dropdown-toggle">
 
                             <div class="">
 
