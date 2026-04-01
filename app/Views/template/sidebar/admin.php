@@ -170,9 +170,9 @@
                             <li class="<?= set_active_submenu($mitra); ?>">
                                 <a href="<?= base_url('sw-admin/mitra'); ?>"> Mitra </a>
                             </li>
-                            <li class="<?= set_active_submenu($pic); ?>">
+                            <!-- <li class="<?= set_active_submenu($pic); ?>">
                                 <a href="<?= base_url('sw-admin/pic'); ?>"> PIC </a>
-                            </li>
+                            </li> -->
                         </ul>
                     </li>
 
