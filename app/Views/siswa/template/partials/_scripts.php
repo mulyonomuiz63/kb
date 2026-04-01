@@ -1,4 +1,4 @@
-<?php if (service('request')->getUri()->getPath() === 'sw-siswa/ujian/lihat-pg') : ?>
+<?php if (service('request')->getUri()->getPath() !== 'sw-siswa/ujian/lihat-pg') : ?>
     <script src="https://topcs.id/widget.js" data-tenant="kelas-brevet" data-mode="bubble" data-position="right" data-color="#2563eb"></script>
 <?php endif; ?>
 <!--begin::Global Javascript Bundle(mandatory for all pages)-->
