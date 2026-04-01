@@ -199,8 +199,8 @@
                         <?php inputRow('Secret Key','<input type="text" class="form-control" name="recaptcha_secret_key" value="'.old('captcha_secret_key',$settings['captcha_secret_key']??'').'">'); ?>
                         <?php inputRow('Status',
                             '<select name="recaptcha_status" class="form-control">
-                                <option value="true" '.(($settings['captcha_status']??'')=='true'?'selected':'').'>Aktif</option>
-                                <option value="false" '.(($settings['captcha_status']??'')=='false'?'selected':'').'>Tidak Aktif</option>
+                                <option value="true" '.(($settings['recaptcha_status']??'')=='true'?'selected':'').'>Aktif</option>
+                                <option value="false" '.(($settings['recaptcha_status']??'')=='false'?'selected':'').'>Tidak Aktif</option>
                             </select>'
                         ); ?>
                     </div>
