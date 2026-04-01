@@ -104,7 +104,7 @@
             serverSide: true,
             responsive: true,
             ajax: {
-                url: "<?= base_url('sw-admin/siswa/get_data_sertifikat') ?>",
+                url: "<?= base_url('sw-admin/siswa/get-data-sertifikat') ?>",
                 type: "POST",
                 data: function(d) {
                     d.id_siswa = idSiswaEnc;
@@ -127,7 +127,7 @@
                         }
 
                         // Jika ada data, tampilkan tag img
-                        return `<img src="uploads/verifikasi/${data}" alt="Verifikasi" class="img-fluid" style="max-width: 50px; height: auto;">`;
+                        return `<img src="<?= base_url() ?>/uploads/verifikasi/${data}" alt="Verifikasi" class="img-fluid" style="max-width: 50px; height: auto;">`;
                     }
                 },
                 {

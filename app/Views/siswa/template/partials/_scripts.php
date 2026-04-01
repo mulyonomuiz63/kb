@@ -1,4 +1,6 @@
-<script src="https://topcs.id/widget.js" data-tenant="kelas-brevet" data-mode="bubble" data-position="right" data-color="#2563eb"></script>
+<?php if (service('request')->getUri()->getPath() === 'sw-siswa/ujian/lihat-pg') : ?>
+    <script src="https://topcs.id/widget.js" data-tenant="kelas-brevet" data-mode="bubble" data-position="right" data-color="#2563eb"></script>
+<?php endif; ?>
 <!--begin::Global Javascript Bundle(mandatory for all pages)-->
 <script src="<?= base_url() ?>assets/peserta/plugins/global/plugins.bundle.js"></script>
 <script src="<?= base_url() ?>assets/peserta/js/scripts.bundle.js"></script>
