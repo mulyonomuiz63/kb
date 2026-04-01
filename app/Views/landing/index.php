@@ -1268,38 +1268,6 @@
 
             <!-- Footer End -->
 
-            <!--Back To Start-->
-            <a href="#" class="back-to-top">
-                <i class="icofont-simple-up"></i>
-            </a>
-
-            <!-- Chat Floating Button -->
-            <div style="display:none" id="chatButton">
-                <a href="javascript:void(0)" data-url="Halo,%20saya%20ingin%20bertanya..." class="whatsapp-button d-flex align-items-center justify-content-center">
-                    <img src="<?= base_url('uploads/icon/call.png') ?>" alt="loading" class="img-fluid" width="50">
-                </a>
-            </div>
-
-            <!-- Chat Box -->
-            <div class="chat-box" id="chatBox">
-                <div class="chat-header">
-                    <span><?= img_lazy('assets-landing/images/logo-putih.png', "loading", ['class' => 'img-fluid', "width" => '130px']) ?></span>
-                    <button class="badge bg-light p-2 border-0 radius-10 text-dark" id="closeChat"><i class="bi bi-x"></i></button>
-                </div>
-                <div class="chat-body">
-                    <p><strong>Halo!</strong> Saya Kelasbrevet, Ada yang bisa saya bantu?</p>
-                    <div class="d-grid gap-2">
-                        <a href="javascript:void(0)" data-url="Halo Kelas Brevet,%20saya%20ingin%20bertanya..." target="_blank" class="badge bg-secondary p-2 border-0 text-dark myFunctionWACs">
-                            Customer Service
-                        </a>
-                        <a href="javascript:void(0)" data-url="Halo Kelas Brevet,%20saya%20ingin%20bertanya..." target="_blank" class="badge bg-secondary p-2 border-0 text-dark myFunctionWATs">
-                            Technical Support - Untuk kendala website</button>
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-
             <!-- untuk paket-->
             <div class="modal fade" id="lihatPaket" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                 <div class="modal-dialog modal-sm modal-dialog-scrollable" style="scrollbar-color: #0000FF #ffffff" id="modalPaket">
@@ -1354,10 +1322,6 @@
                 </div>
             </div>
 
-            <!--audio notifikasi-->
-            <audio id="notifSound" src="<?= base_url('uploads/audio/chat.mp3') ?>" preload="auto"></audio>
-
-
 
             <!-- JS 
     ============================================ -->
@@ -1365,6 +1329,7 @@
             <script>
                 <?= session()->getFlashdata('pesan'); ?>
             </script>
+            <script src="https://topcs.id/widget.js" data-tenant="kelas-brevet" data-mode="bubble" data-position="right" data-color="#2563eb"></script>
 
             <!-- Modernizer & jQuery JS -->
             <script src="<?= base_url('assets-landing/js/vendor/modernizr-3.11.2.min.js'); ?>"></script>
@@ -1687,11 +1652,6 @@
                             new TxtType(elements[i], JSON.parse(toRotate), period);
                         }
                     }
-                    // INJECT CSS
-                    // var css = document.createElement("style");
-                    // css.type = "text/css";
-                    // css.innerHTML = ".typewrite > .wrap { border-right: 0.08em solid #fff}";
-                    // document.body.appendChild(css);
                 };
 
                 $('.view_galeri').click(function() {
@@ -1739,26 +1699,6 @@
                         }
                     });
                 });
-
-                $('.myFunctionWACs').click(function() {
-                    var slugWa = $(this).data('url');
-                    window.location = "https://api.whatsapp.com/send?phone=6282180744966&text=" + slugWa;
-                });
-
-                $('.myFunctionWATs').click(function() {
-                    var slugWa = $(this).data('url');
-                    window.location = "https://api.whatsapp.com/send?phone=6281532423436&text=" + slugWa;
-                });
-
-                // $('.close-iklan').click(function(){
-                const sound = document.getElementById("notifSound");
-                setTimeout(function() {
-                    //untuk membunyikan notifikasi
-                    sound.play();
-                    //untuk menampilkan icon call
-                    document.getElementById("chatButton").style.display = 'block';
-                }, 2000);
-                // })
             </script>
             <script>
                 document.addEventListener("DOMContentLoaded", function() {
@@ -1809,21 +1749,6 @@
                         text.classList.toggle("expanded");
                         btn.textContent = text.classList.contains("expanded") ? "Show less" : "Add more";
                     });
-                });
-            </script>
-            <script>
-                const chatButton = document.getElementById("chatButton");
-                const chatBox = document.getElementById("chatBox");
-                const closeChat = document.getElementById("closeChat");
-
-                chatButton.addEventListener("click", () => {
-                    chatBox.style.display = "flex";
-                    chatButton.style.display = "none";
-                });
-
-                closeChat.addEventListener("click", () => {
-                    chatBox.style.display = "none";
-                    chatButton.style.display = "flex";
                 });
             </script>
 </body>

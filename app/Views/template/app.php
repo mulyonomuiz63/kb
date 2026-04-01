@@ -74,47 +74,6 @@ $this->setData($data_view);
         <?php else: ?>
             <?= $this->include('template/sidebar/pic'); ?>
         <?php endif; ?>
-        <div id="content" class="main-content">
-            <?= $this->include('template/partials/toolbar'); ?>
-            <?= $this->renderSection('content'); ?>
-            <div class="footer-wrapper">
-                <div class="footer-section f-section-1">
-                    <p class="terms-conditions"><?= copyright() ?></p>
-                </div>
-                <div class="footer-section f-section-2">
-
-                </div>
-            </div>
-
-            <!-- Chat Floating Button -->
-            <?php if ($url_aktif != $url_template): ?>
-                <div id="chatButton">
-                    <a href="javascript:void(0)" data-url="Halo,%20saya%20ingin%20bertanya..." class="whatsapp-button d-flex align-items-center justify-content-center">
-                        <img src="<?= base_url('uploads/icon/call.png') ?>" alt="loading" class="img-fluid" width="50">    
-                    </a>
-                </div>
-            <?php endif; ?>
-
-            <!-- Chat Box -->
-            <div class="chat-box" id="chatBox">
-                <div class="chat-header">
-                    <span><img src="<?= base_url('assets-landing/images/logo-putih.png') ?>" alt="loading" class="img-fluid" width="130"></span>
-                    <button class="badge bg-light p-2 border-0 radius-10 text-dark" id="closeChat"><i class="bi bi-x"></i></button>
-                </div>
-                <div class="chat-body">
-                    <p><strong>Halo!</strong> Saya Kelasbrevet, Ada yang bisa saya bantu?</p>
-                    <div class="d-grid gap-2">
-                        <a href="javascript:void(0)" data-url="Halo Kelas Brevet,%20saya%20ingin%20bertanya..." target="_blank" class="btn btn-secondary btn-sm text-light mb-2 myFunctionWACs">
-                            Customer Service
-                        </a>
-                        <a href="javascript:void(0)" data-url="Halo Kelas Brevet,%20saya%20ingin%20bertanya..." target="_blank" class="btn btn-secondary btn-sm text-light myFunctionWATs">
-                            Technical Support - Untuk Kendala Website</button>
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-        </div>
 
         <!-- END MAIN CONTAINER -->
         <script>

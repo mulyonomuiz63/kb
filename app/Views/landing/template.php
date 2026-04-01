@@ -415,40 +415,6 @@
         img.fade-in {
           filter: blur(0);
         }
-        
-        /* Chat box */
-        .chat-box {
-          position: fixed;
-          bottom: 70px;
-          left: 20px;
-          width: 320px;
-          max-height: 500px;
-          background: white;
-          border-radius: 10px;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-          display: none;
-          flex-direction: column;
-          overflow: hidden;
-          z-index: 1050;
-        }
-    
-        .chat-header {
-          background: #6f42c1;
-          color: white;
-          padding: 10px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-    
-        .chat-body {
-          padding: 15px;
-          flex: 1;
-          overflow-y: auto;
-          font-size: 14px;
-        }
-
-        
     </style>
     <?= $this->renderSection('css'); ?>
    
@@ -830,43 +796,12 @@
         </div>
 
         <!-- Footer End -->
-
-        <!--Back To Start-->
-        <a href="#" class="back-to-top">
-            <i class="icofont-simple-up"></i>
-        </a>
-        
-        <!-- Chat Floating Button -->
-        <div id="chatButton">
-            <a href="javascript:void(0)" data-url="Halo,%20saya%20ingin%20bertanya..." class="whatsapp-button d-flex align-items-center justify-content-center">
-                <img src="<?= base_url('uploads/icon/call.png') ?>"  alt="...">
-            </a>
-        </div>
-        
-          <!-- Chat Box -->
-        <div class="chat-box" id="chatBox">
-            <div class="chat-header">
-              <span><?= img_lazy('assets-landing/images/logo-putih.png',"loading", ['class' => 'img-fluid', "width" => '130px']) ?></span>
-              <button class="badge bg-light p-2 border-0 radius-10 text-dark" id="closeChat"><i class="bi bi-x"></i></button>
-            </div>
-            <div class="chat-body">
-              <p><strong>Halo!</strong> Saya Kelasbrevet, Ada yang bisa saya bantu?</p>
-              <div class="d-grid gap-2">
-                <a href="javascript:void(0)" data-url="Halo Kelas Brevet,%20saya%20ingin%20bertanya..."  target="_blank" class="badge bg-secondary p-2 border-0 text-dark myFunctionWACs">
-                    Customer Service
-                </a>
-                <a href="javascript:void(0)" data-url="Halo Kelas Brevet,%20saya%20ingin%20bertanya..."  target="_blank" class="badge bg-secondary p-2 border-0 text-dark myFunctionWATs">
-                    Technical Support - Untuk kendala website</button>
-                </a>
-              </div>
-            </div>
-        </div>
     </div>
 
 
     <!-- JS
     ============================================ -->
-
+    <script src="https://topcs.id/widget.js" data-tenant="kelas-brevet" data-mode="bubble" data-position="right" data-color="#2563eb"></script>
     <!-- Modernizer & jQuery JS -->
     <script src="<?= base_url('assets-landing/js/vendor/modernizr-3.11.2.min.js'); ?>"></script>
     <script src="<?= base_url('assets-landing/js/vendor/jquery-3.5.1.min.js'); ?>"></script>
@@ -1262,32 +1197,6 @@
     <?= $this->renderSection('script'); ?>
     <script>
         <?= session()->getFlashdata('pesan'); ?>
-    </script>
-    
-    <script>
-        const chatButton = document.getElementById("chatButton");
-        const chatBox = document.getElementById("chatBox");
-        const closeChat = document.getElementById("closeChat");
-    
-        chatButton.addEventListener("click", () => {
-          chatBox.style.display = "flex";
-          chatButton.style.display = "none";
-        });
-    
-        closeChat.addEventListener("click", () => {
-          chatBox.style.display = "none";
-          chatButton.style.display = "flex";
-        });
-        
-        $('.myFunctionWACs').click(function() {
-            var slugWa = $(this).data('url');
-            window.location = "https://api.whatsapp.com/send?phone=6282180744966&text="+slugWa;
-        });
-        
-        $('.myFunctionWATs').click(function() {
-            var slugWa = $(this).data('url');
-            window.location = "https://api.whatsapp.com/send?phone=6281532423436&text="+slugWa;
-        });
     </script>
 
 </body>

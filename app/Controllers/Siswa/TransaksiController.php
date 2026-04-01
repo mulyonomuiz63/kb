@@ -278,9 +278,13 @@ class TransaksiController extends BaseController
             if (empty($cekTransaksi)) {
                 // Gunakan transaksi database untuk memastikan data konsisten
                 $db->transBegin();
+                $tgl_mulai = date('Y-m-d H:i:s');
+                $tgl_exp   = date('Y-m-d H:i:s', strtotime('+ 1 day', strtotime($tgl_mulai)));
 
                 $this->transaksiModel
                     ->where('idtransaksi', $idtransaksi)
+                    ->set('tgl_mulai', $tgl_mulai)
+                    ->set('tgl_exp', $tgl_exp)
                     ->set('jenis_bayar', 'manual')
                     ->update();
 
@@ -292,7 +296,7 @@ class TransaksiController extends BaseController
                 $db->transCommit();
             }
 
-            return redirect()->to(base_url("transaksi/pesan-bayar/" . encrypt_url($idtransaksi)));
+            return redirect()->to(base_url("sw-siswa/transaksi/pesan-bayar/" . encrypt_url($idtransaksi)));
         } catch (\Exception $e) {
             // Rollback jika terjadi kesalahan di tengah jalan
             if ($db->transStatus() === false) {
