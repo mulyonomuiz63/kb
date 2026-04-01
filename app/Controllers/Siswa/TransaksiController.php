@@ -34,6 +34,11 @@ class TransaksiController extends BaseController
             ['title' => 'Dashboard', 'url' => base_url('sw-siswa')],
             ['title' => 'Histori Transaksi', 'url' => '#'],
         ];
+
+        $this->transaksiModel->where('tgl_exp <', date('Y-m-d H:i:s'))
+                     ->where('idsiswa', session('id'))
+                     ->set(['status' => 'E'])
+                     ->update();
         $data['transaksi'] = $this->transaksiModel->getByIdSiswaAll(session('id'));
 
         return view('siswa/transaksi/list', $data);
