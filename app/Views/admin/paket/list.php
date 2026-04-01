@@ -94,7 +94,7 @@
                                             <?= $s->komisi ?>%
                                         </td>
                                         <td class="text-center">
-                                            <div class="d-flex justify-content-center gap-2">
+                                            <div class="d-flex justify-content-end align-items-center">
                                                 <?php if ($s->v_ujian == 1 && $s->v_materi == 0): ?>
                                                     <a href="<?= base_url("sw-admin/paket/review/" . $s->slug) ?>"
                                                         class="btn btn-sm btn-outline-info mr-1" title="Review">
