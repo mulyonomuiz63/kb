@@ -1,4 +1,4 @@
-<?php
+<!-- <?php
 // Data Dummy Campuran (Gambar & Teks)
 $banners = [
     [
@@ -75,4 +75,4 @@ $banners = [
             <span class="carousel-control-next-icon bg-dark bg-opacity-25 rounded-circle" aria-hidden="true"></span>
         </button>
     </div>
-</div>
+</div> -->

@@ -270,7 +270,7 @@ class MapelController extends BaseController
                             ' . $pesan . '
                         </div>
                         <div class="mt-1">
-                            <small class="text-muted" style="font-size: 9px;">a</small>
+                            <small class="text-muted" style="font-size: 9px;">' . $waktu . '</small>
                         </div>
                     </div>
                 </div>';

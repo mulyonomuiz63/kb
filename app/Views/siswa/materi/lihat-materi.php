@@ -229,6 +229,7 @@
     const chat_text = textarea.val().trim();
     const kode_materi = $('#kode_materi').val();
     const link = '<?= $link ?>';
+    const linkadmin = '<?= $linkadmin ?>';
 
     if (chat_text !== '') {
       btn.prop('disabled', true);
@@ -239,7 +240,8 @@
         data: {
           chat_materi: chat_text,
           kode_materi: kode_materi,
-          link: link
+          link: link,
+          linkadmin: linkadmin,
         },
         success: function(res) {
           if (res.status === 'success') {

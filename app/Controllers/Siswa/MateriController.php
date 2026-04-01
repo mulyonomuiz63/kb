@@ -98,7 +98,8 @@ class MateriController extends BaseController
             $cekDataMateri = $this->materiModel->where('kode_materi', $dec_kode)->first();
             $data['link'] = '';
             if ($cekDataMateri) {
-                $data['link'] = base_url('sw-guru/lihat-materi/' . encrypt_url($cekDataMateri['id_materi']) . '/' . $idmapel . '/' . $idkelas);
+                $data['link'] =  encrypt_url($cekDataMateri['id_materi']) . '/' . $idmapel . '/' . $idkelas;
+                $data['linkadmin'] =  $idmapel . '/' . $idkelas . '/' . encrypt_url($cekDataMateri['guru']);
             }
 
             return view('siswa/materi/lihat-materi', $data);
@@ -222,6 +223,7 @@ class MateriController extends BaseController
                 $kode_materi = $this->request->getPost('kode_materi');
                 $chat_text   = (string) $this->request->getPost('chat_materi');
                 $link        = $this->request->getPost('link');
+                $linkadmin   = $this->request->getPost('linkadmin');
 
                 $user = $this->siswaModel->asObject()->find(session('id'));
                 $dataMateri = $this->materiModel->where('kode_materi', $kode_materi)->first();
@@ -231,13 +233,13 @@ class MateriController extends BaseController
                         $dataMateri['guru'],
                         'Pesan baru: ' . session()->get('nama'),
                         mb_strimwidth($chat_text, 0, 40, "..."),
-                        $link
+                        base_url('sw-guru/materi/lihat-materi/' . $link)
                     );
                     send_notif(
                         '1',
                         'Pesan baru: ' . session()->get('nama'),
                         mb_strimwidth($dataMateri['nama_materi'], 0, 40, "..."),
-                        $link
+                        base_url('sw-admin/guru/lihat-materi/' . $linkadmin)
                     );
                 }
 

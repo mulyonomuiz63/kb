@@ -129,7 +129,7 @@
                                                             <i class="ki-outline ki-information fs-2tx text-warning me-4"></i>
                                                             <div class="d-flex flex-stack flex-grow-1">
                                                                 <div class="fw-semibold">
-                                                                    <h4 class="text-gray-900 fw-bold">Menunggu Aktivasi</h4>
+                                                                    <h4 class="text-gray-900 fw-bold">Menunggu Verifikasi</h4>
                                                                     <div class="fs-6 text-gray-700">Waktu proses: 09:00 - 17:00 WIB</div>
                                                                 </div>
                                                             </div>
