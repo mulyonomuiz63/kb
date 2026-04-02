@@ -112,7 +112,7 @@ class RegisterController extends BaseController
         if(setting('recaptcha_status') == 'true') {
             $token = $this->request->getPost('recaptcha_token');
             if (!$this->verifyRecaptcha($token, 'akses-recaptcha')) {
-                session()->setFlashdata('pesan', "swal({title:'Info', text:'Verifikasi Bot Gagal', type:'info', padding:'2em'})");
+                session()->setFlashdata('pesan', "swal({title:'Info', text:'Verifikasi Gagal, Silahkan coba lagi', type:'info', padding:'2em'})");
                 return redirect()->to('auth/registrasi')->withInput();
             }
         }
@@ -247,7 +247,7 @@ class RegisterController extends BaseController
         // 4. Verifikasi Google reCAPTCHA
         if(setting('recaptcha_status') == 'true') {
             if (!$this->verifyRecaptcha($token, 'registrasi_pesan')) {
-                session()->setFlashdata('pesan', "swal({title:'Info', text:'Gagal verifikasi token (Bot Detected)', type:'info', padding:'2em'})");
+                session()->setFlashdata('pesan', "swal({title:'Info', text:'Gagal verifikasi token, Silahkan coba lagi', type:'info', padding:'2em'})");
                 return redirect()->back()->withInput();
             }
         }
