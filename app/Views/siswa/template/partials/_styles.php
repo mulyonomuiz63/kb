@@ -21,3 +21,10 @@
 <!--begin::Global Stylesheets Bundle(mandatory for all pages)-->
 <link href="<?= base_url() ?>assets/peserta/plugins/global/plugins.bundle.css" rel="stylesheet" type="text/css" />
 <link href="<?= base_url() ?>assets/peserta/css/style.bundle.css" rel="stylesheet" type="text/css" />
+
+<!-- midtrans -->
+ <?php if (strtolower(setting('midtrans_is_production')) == 'true'): ?>
+    <script type="text/javascript" src="https://app.midtrans.com/snap/snap.js" data-client-key="<?= setting('midtrans_client_key') ?>"></script>
+<?php else: ?>
+    <script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="<?= setting('midtrans_client_key') ?>"></script>
+<?php endif; ?>

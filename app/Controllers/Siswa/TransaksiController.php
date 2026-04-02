@@ -106,7 +106,7 @@ class TransaksiController extends BaseController
 
     public function checkout()
     {
-        $db = \Config\Database::connect();
+        $db = \Config\Database::connect(); 
         // 2. Persiapan Data
         $tgl_mulai = date('Y-m-d H:i:s');
         $tgl_exp   = date('Y-m-d H:i:s', strtotime('+ 1 day', strtotime($tgl_mulai)));
