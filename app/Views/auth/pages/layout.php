@@ -760,7 +760,7 @@
 
                 grecaptcha.ready(function() {
                     grecaptcha.execute('<?= setting('recaptcha_site_key') ?>', {
-                        action: 'akses-recaptcha'
+                        action: 'aksesrecaptcha'
                     }).then(function(token) {
                         document.getElementById('recaptcha_token').value = token;
                         document.getElementById('form').submit();
