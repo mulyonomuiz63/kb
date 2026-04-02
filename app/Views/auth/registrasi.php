@@ -4,7 +4,7 @@
 
     <div class="form-content">
         <a href="<?= base_url('/'); ?>"><img src="<?= base_url('assets-landing/images/logo.png') ?>" style="width: 250px;" /></a>
-        <form action="<?= base_url('auth/store'); ?>" method="POST" class="text-left" id="form" onsubmit="return submitForm(event)">
+        <form action="<?= base_url('auth/store'); ?>" method="POST" class="text-left" id="form">
             <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>" />
             <div class="form">
                 <div id="nama_siswa-field" class="field-wrapper input">
@@ -55,7 +55,7 @@
 
                     <div class="field-wrapper">
 
-                        <button type="submit" id="btn-submit" class="btn btn-primary" onclick="submitForm('registrasi')">Registrasi</button>
+                        <button type="button" class="btn btn-primary" onclick="submitForm('registrasi')">Registrasi</button>
 
                     </div>
 
