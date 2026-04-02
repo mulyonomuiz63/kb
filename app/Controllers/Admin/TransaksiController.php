@@ -102,7 +102,7 @@ class TransaksiController extends BaseController
                     if ($s->status === 'S') {
                         $row['status'] = '<div class="text-center"><span class="badge badge-success">Lunas</span></div>';
                     } elseif ($s->status === 'P') {
-                        $row['status'] = '<div class="text-center"><span class="badge badge-warning">Menunggu Pembayaran</span></div>';
+                        $row['status'] = '<div class="text-center"><span class="badge badge-info">Menunggu Pembayaran</span></div>';
                     } elseif ($s->status === 'V') {
                         $row['status'] = '<div class="text-center"><span class="badge badge-warning">Menunggu Approved</span></div>';
                     } elseif ($s->status === 'E') {
