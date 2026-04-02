@@ -90,23 +90,31 @@ class TransaksiController extends BaseController
                     } else {
                         $row['pembayaran'] = '<span class="text-muted small">-</span>';
                     }
-                        $diskon         = ($s->nominal * $s->diskon) / 100;
-                        $totalDiskon    = $s->nominal - $diskon ;
-                        $diskon_voucher = ($totalDiskon * $s->voucher) / 100;
-                        $nominal = $s->nominal - $diskon - $diskon_voucher;
+                    $diskon         = ($s->nominal * $s->diskon) / 100;
+                    $totalDiskon    = $s->nominal - $diskon;
+                    $diskon_voucher = ($totalDiskon * $s->voucher) / 100;
+                    $nominal = $s->nominal - $diskon - $diskon_voucher;
 
                     // Kolom Nominal
                     $row['nominal'] = '<span class="font-weight-bold text-primary">Rp ' . number_format($nominal, 0, ',', '.') . '</span>';
 
                     // Kolom Status
                     if ($s->status === 'S') {
-                        $row['status'] = '<div class="text-center"><span class="badge badge-success">Sukses</span></div>';
+                        $row['status'] = '<div class="text-center"><span class="badge badge-success">Lunas</span></div>';
                     } elseif ($s->status === 'P') {
-                        $row['status'] = '<div class="text-center"><span class="badge badge-warning">Pending</span></div>';
+                        $row['status'] = '<div class="text-center"><span class="badge badge-warning">Menunggu Pembayaran</span></div>';
                     } elseif ($s->status === 'V') {
                         $row['status'] = '<div class="text-center"><span class="badge badge-warning">Menunggu Approved</span></div>';
+                    } elseif ($s->status === 'E') {
+                        $row['status'] = '<div class="text-center"><span class="badge badge-danger">Expired</span></div>';
+                    } elseif ($s->status === 'M') {
+                        $row['status'] = '<div class="text-center"><span class="badge badge-warning">Proses Pembayaran</span></div>';
+                    } elseif ($s->status === 'DM') {
+                        $row['status'] = '<div class="text-center"><span class="badge badge-danger">Denied</span></div>';
+                    } elseif ($s->status === 'PM') {
+                        $row['status'] = '<div class="text-center"><span class="badge badge-warning">Pending</span></div>';
                     } else {
-                        $row['status'] = '<div class="text-center"><span class="badge badge-danger">Gagal</span></div>';
+                        $row['status'] = '<div class="text-center"><span class="badge badge-danger">Expired</span></div>';
                     }
 
                     // [6] Kolom Aksi (Dropdown)
@@ -347,20 +355,20 @@ class TransaksiController extends BaseController
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
-    
+
     public function hapusTransaksiSiswa($id)
     {
         $idtransaksi = decrypt_url($id);
         $dataDrop  =   $this->db->query("select * from transaksi where idtransaksi='$idtransaksi'")->getRow();
         if ($dataDrop != null) {
             //untuk menghapus file bukti transaksi
-            if($dataDrop->bukti_pembayaran != ''){
+            if ($dataDrop->bukti_pembayaran != '') {
                 if (file_exists('./uploads/transaksi/thumbnails/' . $dataDrop->bukti_pembayaran)) {
                     unlink('./uploads/transaksi/thumbnails/' . $dataDrop->bukti_pembayaran);
                 };
             }
             $data = $this->detailTransaksiModel->where('idtransaksi', $dataDrop->idtransaksi)->get()->getResultObject();
-            foreach($data as $rows){
+            foreach ($data as $rows) {
                 $this->detailTransaksiModel->delete($rows->iddetailtransaksi);
             }
             $this->transaksiModel->delete($dataDrop->idtransaksi);
@@ -370,13 +378,48 @@ class TransaksiController extends BaseController
 
     public function hapusTransaksi()
     {
-        $dataDrop  =   $this->db->query("select * from transaksi where status in ('P', 'M','PM', 'DM', 'E') and (tgl_drop <= DATE_FORMAT(NOW(),'%Y-%m-%d %H:%i:%s') )")->getRow();
-        if ($dataDrop != null) {
-            $data = $this->detailTransaksiModel->where('idtransaksi', $dataDrop->idtransaksi)->get()->getResultObject();
-            foreach($data as $rows){
-                $this->detailTransaksiModel->delete($rows->iddetailtransaksi);
+        // Ambil SEMUA transaksi yang memenuhi kriteria kedaluwarsa
+        $dataDrop = $this->db->query("SELECT * FROM transaksi WHERE status IN ('P', 'M','PM', 'DM', 'E') AND tgl_drop <= NOW()")->getResultObject();
+
+        // Cek apakah ada data yang perlu dihapus
+        if (!empty($dataDrop)) {
+
+            $berhasil = 0;
+            $gagal = 0;
+
+            // Looping setiap transaksi yang kedaluwarsa
+            foreach ($dataDrop as $transaksi) {
+
+                // 1. Mulai transaksi database untuk SATU idtransaksi ini saja
+                $this->db->transBegin();
+
+                try {
+                    // Ambil data detail transaksi (child)
+                    $details = $this->detailTransaksiModel->where('idtransaksi', $transaksi->idtransaksi)->get()->getResultObject();
+
+                    // Hapus semua child
+                    foreach ($details as $detail) {
+                        $this->detailTransaksiModel->delete($detail->iddetailtransaksi);
+                    }
+
+                    // Hapus parent (transaksi utama)
+                    $this->transaksiModel->delete($transaksi->idtransaksi);
+
+                    // Cek status query di background
+                    if ($this->db->transStatus() === false) {
+                        throw new \Exception('Query gagal dieksekusi oleh database.');
+                    }
+
+                    // Jika sukses, simpan perubahan untuk transaksi ini
+                    $this->db->transCommit();
+                    $berhasil++;
+                } catch (\Exception $e) {
+                    // Jika error, kembalikan data HANYA untuk transaksi ini
+                    $this->db->transRollback();
+                    $gagal++;
+                }
             }
-            $this->transaksiModel->delete($dataDrop->idtransaksi);
+            echo "Proses selesai. Berhasil: $berhasil, Gagal: $gagal.";
         }
     }
 }
