@@ -137,3 +137,9 @@ $routes->group('notif', function ($routes) {
     $routes->post('mark-read', 'NotificationController::markAsRead');
     $routes->post('mark-all-read', 'NotificationController::markAllRead');
 });
+
+
+
+//untuk di terapkan di cronjob, hapus transaksi yang sudah lebih dari 1 hari atau expired
+$routes->get('hapus-transaksi', 'Admin\TransaksiController::hapusTransaksi');
+$routes->get('otomatis-kirim-ujian', 'Siswa\UjianController::otomatisKirimUjian');

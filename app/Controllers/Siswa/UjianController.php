@@ -458,4 +458,46 @@ class UjianController extends BaseController
             return redirect()->to('sw-siswa/ujian')->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
+
+    public function otomatisKirimUjian(){
+         $data = $this->ujianModel->where('status', 'U')->where('end_ujian <', date('Y-m-d H:i'))->get()->getResultObject();
+         foreach($data as $rows){
+             $this->ujianSiswaModel
+                ->set('status', 'selesai')
+                ->set('date_send', time())
+                ->where('ujian', $rows->kode_ujian)
+                ->where('siswa', $rows->id_siswa)
+                ->update();
+                
+            $siswa = $this->siswaModel->where('id_siswa', $rows->id_siswa)->get()->getResultObject();
+
+            $data['ujian'] = array();
+            foreach ($siswa as  $r) {
+                $ujian = $this->ujianMasterModel->getAllUntukNilaiUjian($r->kelas, $r->id_siswa, $rows->kode_ujian);
+    
+                foreach ($ujian as $u) {
+                    $data['ujian'][] = $u;
+                }
+            }
+
+            if(!empty($data['ujian'])){
+                for ($i = 0; $i < count($data['ujian']); $i++) {
+                    $ujian_detail = $this->ujianDetailModel->getAllByKodeUjianJumlah($data['ujian'][$i]->kode_ujian);
+                    $nilai = round($data['ujian'][$i]->benar / count($ujian_detail) * 100);
+                     $this->ujianModel
+                    ->set('status', 'S')
+                    ->set('nilai', $nilai)
+                    ->where('id_ujian', $rows->id_ujian)
+                    ->update();
+                    
+                }
+            }else{
+                 $this->ujianModel
+                    ->set('status', 'S')
+                    ->set('nilai', 0)
+                    ->where('id_ujian', $rows->id_ujian)
+                    ->update();
+            }
+         }
+    }
 }
