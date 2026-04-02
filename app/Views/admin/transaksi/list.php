@@ -219,14 +219,14 @@
         function getStatusBadge(status) {
             const map = {
                 'S': '<span class="badge badge-subtle-success">Lunas</span>',
-                'P': '<span class="badge badge-subtle-info">Menunggu Pembayaran</span>',
+                'P': '<span class="badge badge-primary">Menunggu Pembayaran</span>',
                 'V': '<span class="badge badge-info">Menunggu Approval</span>',
                 'E': '<span class="badge badge-danger">Expired</span>',
-                'M': '<span class="badge badge-danger">Proses Pembayaran</span>',
+                'M': '<span class="badge badge-warning">Proses Pembayaran</span>',
                 'DM': '<span class="badge badge-danger">Denied</span>',
                 'PM': '<span class="badge badge-warning">Pending</span>'
             };
-            return map[status] || '<span class="badge badge-secondary">Dined</span>';
+            return map[status] || '<span class="badge badge-danger">Dined</span>';
         }
 
         // 4. Invoice Cetak
