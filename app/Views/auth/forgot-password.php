@@ -18,7 +18,7 @@
                 </div>
                 <div class="d-sm-flex justify-content-between">
                     <div class="field-wrapper">
-                        <button type="button" class="btn btn-primary" onclick="submitForm()">Kirim</button>
+                        <button type="button" class="btn btn-primary" onclick="submitForm('lupapassword')">Kirim</button>
                     </div>
                     <p class="signup-link">
                         <a href="<?= base_url('auth') ?>">Kembali</a>

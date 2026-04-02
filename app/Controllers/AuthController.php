@@ -81,7 +81,7 @@ class AuthController extends BaseController
         $isRecaptchaActive = setting('recaptcha_status') === 'true';
 
         if ($isRecaptchaActive) {
-            if (!$this->verifyRecaptcha($token, 'aksesrecaptcha')) {
+            if (!$this->verifyRecaptcha($token, 'login')) {
                 session()->setFlashdata('pesan', "swal({title: 'Oops!', text: 'Verifikasi reCAPTCHA gagal, silahkan coba lagi.', type: 'error', padding: '2em'});");
                 return redirect()->to('auth')->withInput();
             }
@@ -469,7 +469,7 @@ class AuthController extends BaseController
         // CEK EMAIL
         if(setting('recaptcha_status') == 'true') {
             $token = $this->request->getPost('recaptcha_token');
-            if (!$this->verifyRecaptcha($token, 'aksesrecaptcha')) {
+            if (!$this->verifyRecaptcha($token, 'lupapassword')) {
                 session()->setFlashdata('pesan', "
                             swal({
                                 title: 'Oops!',

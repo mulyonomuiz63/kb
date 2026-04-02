@@ -742,7 +742,7 @@
 
         <script src="https://www.google.com/recaptcha/api.js?render=<?= setting('recaptcha_site_key') ?>"></script>
         <script>
-            function submitForm() {
+            function submitForm(actionName) {
                 // Ambil status aktif reCAPTCHA dari PHP/Env
                 const isRecaptchaActive = <?= setting('recaptcha_status') === 'true' ? 'true' : 'false' ?>;
 
@@ -760,7 +760,7 @@
 
                 grecaptcha.ready(function() {
                     grecaptcha.execute('<?= setting('recaptcha_site_key') ?>', {
-                        action: 'aksesrecaptcha'
+                        action: actionName
                     }).then(function(token) {
                         document.getElementById('recaptcha_token').value = token;
                         document.getElementById('form').submit();

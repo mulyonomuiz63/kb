@@ -55,7 +55,7 @@
 
                     <div class="field-wrapper">
 
-                        <button type="submit" id="btn-submit" class="btn btn-primary">Registrasi</button>
+                        <button type="submit" id="btn-submit" class="btn btn-primary" onclick="submitForm('registrasi')">Registrasi</button>
 
                     </div>
 

@@ -35,7 +35,7 @@
                         </div>
                         <input type="hidden" name="recaptcha_token" id="recaptcha_token">
                         <div class="field-wrapper">
-                            <button type="button" class="btn btn-primary" onclick="submitForm()">Masuk</button>
+                            <button type="button" class="btn btn-primary" onclick="submitForm('login')">Masuk</button>
                         </div>
                     </div>
                 </div>
