@@ -27,7 +27,7 @@ $routes->group('auth', ['filter' => 'isGuest'], function ($routes) {
     $routes->get('verifikasi/(:segment)', 'RegisterController::verifikasi/$1');
     
     
-    $routes->get('google', 'RegisterController::google');
+    $routes->get('google', 'AuthController::google');
 });
 
 

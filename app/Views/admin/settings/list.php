@@ -195,8 +195,8 @@
                     <div class="tab-pane fade" id="tab_recaptcha">
                         <div class="form-section-title">Pengaturan reCAPTCHA</div>
 
-                        <?php inputRow('Site Key','<input type="text" class="form-control" name="recaptcha_site_key" value="'.old('captcha_site_key',$settings['captcha_site_key']??'').'">'); ?>
-                        <?php inputRow('Secret Key','<input type="text" class="form-control" name="recaptcha_secret_key" value="'.old('captcha_secret_key',$settings['captcha_secret_key']??'').'">'); ?>
+                        <?php inputRow('Site Key','<input type="text" class="form-control" name="recaptcha_site_key" value="'.old('recaptcha_site_key',$settings['recaptcha_site_key']??'').'">'); ?>
+                        <?php inputRow('Secret Key','<input type="text" class="form-control" name="recaptcha_secret_key" value="'.old('recaptcha_secret_key',$settings['recaptcha_secret_key']??'').'">'); ?>
                         <?php inputRow('Status',
                             '<select name="recaptcha_status" class="form-control">
                                 <option value="true" '.(($settings['recaptcha_status']??'')=='true'?'selected':'').'>Aktif</option>
