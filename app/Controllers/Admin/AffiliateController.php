@@ -291,31 +291,38 @@ class AffiliateController extends BaseController
 
     public function redirect($id, $voucher = null)
     {
-        // cek affiliate terlebih dahulu
+        // 1. Ambil data affiliate link berdasarkan short_code
         $affiliateLink = $this->affiliateLinkModel->where('short_code', $id)->first();
+
+        // JIKA affiliate link TIDAK ditemukan (Null)
+        if (!$affiliateLink) {
+            // Jangan paksa akses array, arahkan ke halaman error atau default
+            return redirect()->to('/')->with('pesan', 'Link tidak valid atau telah dihapus.');
+        }
+
+        // 2. Jika link ada, ambil data affiliate-nya
         $affiliate = $this->affiliate->where('kode_affiliate', $affiliateLink['kode_affiliate'])->first();
-        $now       = date('Y-m-d H:i:s');
-        if ($affiliateLink):
-            if ($affiliate['user_id'] != session()->get('id')):
-                if ($affiliateLink['expired_at'] > $now) {
-                    //expired masih aktif
-                    $data = [
-                        'short_code' => $affiliateLink['short_code'],
-                    ];
-                    session()->set($data);
-                    return redirect()->to('sw-siswa/transaksi/pesan/' . encrypt_url($affiliateLink['paket_id']) . '/' . $voucher);
-                } else {
-                    //pembelian tanpa affiliate
-                    return redirect()->to('sw-siswa/transaksi/pesan/' . encrypt_url($affiliateLink['paket_id']) . '/' . $voucher);
-                }
-            else:
-                //pembelian tanpa affiliate
-                return redirect()->to('sw-siswa/transaksi/pesan/' . encrypt_url($affiliateLink['paket_id']) . '/' . $voucher);
-            endif;
-        else:
-            //pembelian tanpa affiliate
-            return redirect()->to('sw-siswa/transaksi/pesan/' . encrypt_url($affiliateLink['paket_id']) . '/' . $voucher);
-        endif;
+
+        $now = date('Y-m-d H:i:s');
+        $paketIdEncrypted = encrypt_url($affiliateLink['paket_id']);
+        $targetUrl = 'sw-siswa/transaksi/pesan/' . $paketIdEncrypted . '/' . $voucher;
+
+        // 3. Mulai pengecekan logika
+        // Pastikan $affiliate ditemukan sebelum akses $affiliate['user_id']
+        if ($affiliate && $affiliate['user_id'] != session()->get('id')) {
+
+            // Cek apakah link belum expired
+            if ($affiliateLink['expired_at'] > $now) {
+                // Simpan session affiliate
+                $data = [
+                    'short_code' => $affiliateLink['short_code'],
+                ];
+                session()->set($data);
+            }
+        }
+
+        // Apapun kondisinya (expired atau punya sendiri), tetap redirect ke halaman pesan
+        return redirect()->to($targetUrl);
     }
 
 

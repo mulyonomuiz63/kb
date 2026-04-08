@@ -130,10 +130,6 @@
                     csrfHash = json[csrfName];
 
                     return json.data;
-                },
-                "error": function(xhr, error, thrown) {
-                    console.log("=== DEBUG ERROR BACKEND ===");
-                    console.log("Response Text: ", xhr.responseText);
                 }
             },
             "language": {

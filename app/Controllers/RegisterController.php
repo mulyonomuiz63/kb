@@ -16,7 +16,7 @@ class RegisterController extends BaseController
 {
 
     protected $AdminModel;
-    protected $SiswaModel;
+    protected $siswaModel;
     protected $GuruModel;
     protected $MapelModel;
     protected $KelasModel;
@@ -29,7 +29,7 @@ class RegisterController extends BaseController
     public function __construct()
     {
         $this->AdminModel = new AdminModel();
-        $this->SiswaModel = new SiswaModel();
+        $this->siswaModel = new SiswaModel();
         $this->GuruModel = new GuruModel();
         $this->MapelModel = new MapelModel();
         $this->KelasModel = new KelasModel();
@@ -135,8 +135,8 @@ class RegisterController extends BaseController
             'avatar'         => 'default.jpg',
         );
     
-        $this->SiswaModel->insert($data_siswa);
-        $id_siswa = $this->SiswaModel->insertID();
+        $this->siswaModel->insert($data_siswa);
+        $id_siswa = $this->siswaModel->insertID();
         $idsiswa = encrypt_url($id_siswa);
         // KIRIM EMAIL
         
@@ -219,36 +219,18 @@ class RegisterController extends BaseController
         if (!$this->validate($rules)) {
             $errors = $this->validator->getErrors();
             $errorMsg = implode(' ', $errors);
-            
-            session()->setFlashdata('pesan', "
-                swal({
-                    title: 'Gagal!',
-                    text: '" . str_replace(["\r", "\n"], '', $errorMsg) . "',
-                    type: 'error',
-                    padding: '2em'
-                })
-            ");
-            return redirect()->back()->withInput();
+            return redirect()->back()->withInput()->with('pesan', "'" . str_replace(["\r", "\n"], '', $errorMsg) . "'");
         }
         
         // Cek apakah domain memiliki record MX (Mail Server)
         if (!is_valid_domain($this->request->getPost('email'))) {
-            session()->setFlashdata('pesan', "
-                swal({
-                    title: 'Email Palsu Terdeteksi!',
-                    text: 'Domain email tidak terdaftar atau tidak aktif.',
-                    type: 'warning',
-                    padding: '2em'
-                })
-            ");
-            return redirect()->back()->withInput();
+            return redirect()->back()->withInput()->with('pesan', 'Domain email tidak valid.');
         }
     
         // 4. Verifikasi Google reCAPTCHA
         if(setting('recaptcha_status') == 'true') {
             if (!$this->verifyRecaptcha($token, 'registrasi')) {
-                session()->setFlashdata('pesan', "swal({title:'Info', text:'Gagal verifikasi, Silahkan coba lagi!', type:'info', padding:'2em'})");
-                return redirect()->back()->withInput();
+                return redirect()->back()->withInput()->with('pesan', 'Gagal verifikasi, Silahkan coba lagi!');
             }
         }
 
@@ -270,11 +252,11 @@ class RegisterController extends BaseController
             'avatar'         => 'default.jpg',
         );
     
-        $this->SiswaModel->insert($data_siswa);
-        $id_siswa = $this->SiswaModel->insertID();
+        $this->siswaModel->insert($data_siswa);
+        $id_siswa = $this->siswaModel->insertID();
         
         // Ambil data siswa yang baru saja masuk untuk session
-        $userBaru = $this->SiswaModel->find($id_siswa);
+        $userBaru = $this->siswaModel->find($id_siswa);
     
         // 7. Set Session (Auto-Login setelah daftar)
         $datasession = [
@@ -285,14 +267,6 @@ class RegisterController extends BaseController
             'is_logged_in'     => true
         ];
         session()->set($datasession);
-    
-        // 8. Tambahkan ke tabel pengikut
-        $data_pengikut = array(
-            'id_siswa'         => $id_siswa,
-            'tanggal_mulai'    => date('Y-m-d'),
-            'tanggal_berakhir' => date('Y-m-d'),
-        );
-        $this->db->table('pengikut')->insert($data_pengikut);
     
         // 9. Redirect ke halaman pesan dengan ID Paket
         return redirect()->to('sw-siswa/transaksi/pesan/'.$idpaketenc.'/'.$kodevoucher);
@@ -329,7 +303,7 @@ class RegisterController extends BaseController
     {
         // var_dump($idsiswa);
         $idsiswa = decrypt_url($id);
-        $this->SiswaModel
+        $this->siswaModel
             ->where('id_siswa', $idsiswa)
             ->set('is_active', '1')
             ->update();

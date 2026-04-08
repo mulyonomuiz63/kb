@@ -171,9 +171,6 @@
                 type: "POST",
                 success: function(url) {
                     $(which_sum).summernote("insertImage", url);
-                },
-                error: function(data) {
-                    console.log(data);
                 }
             });
         }
@@ -187,7 +184,6 @@
                 url: "<?= base_url('sw-guru/bank-soal/delete-image') ?>",
                 cache: false,
                 success: function(response) {
-                    console.log(response);
                 }
             });
         }

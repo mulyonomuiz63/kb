@@ -1678,7 +1678,6 @@
                         async: true,
                         url: "<?= base_url('get_paket') ?>",
                         success: function(data) {
-                            console.log(data);
                             $(".isideskripsi").html(`
                     
                     <div class="single-courses card">

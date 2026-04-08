@@ -186,7 +186,6 @@
 
         $('.edit-quiztem').click(function() {
             const idquiztem = $(this).data('idquiztem');
-            console.log(idquiztem);
             $.ajax({
                 type: 'POST',
                 data: {
@@ -196,7 +195,6 @@
                 async: true,
                 url: "<?= base_url('App/edit_quiz') ?>",
                 success: function(data) {
-                    console.log(data);
                     $.each(data, function(idquiztem, judul, deskripsi, status) {
                         $("#e_idquiztem").val(data.idquiztem);
                         $("#e_status").val(data.status);

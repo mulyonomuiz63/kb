@@ -111,7 +111,6 @@ $UjiansiswaModel = new UjiansiswaModel();
                     $(which_sum).summernote("insertImage", url);
                 },
                 error: function(data) {
-                    console.log(data);
                 }
             });
         }
@@ -125,7 +124,6 @@ $UjiansiswaModel = new UjiansiswaModel();
                 url: "<?= base_url('guru/delete_image') ?>",
                 cache: false,
                 success: function(response) {
-                    console.log(response);
                 }
             });
         }

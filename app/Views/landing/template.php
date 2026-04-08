@@ -1132,7 +1132,6 @@
         
         $('.deskripsi_paket').click(function() {
             const idpaket = $(this).data('idpaket');
-            console.log(idpaket);
             $.ajax({
                 type: 'GET',
                 data: {
@@ -1142,7 +1141,6 @@
                 async: true,
                 url: "<?= base_url('get_paket') ?>",
                 success: function(data) {
-                    console.log(data);
                     $(".isideskripsi").html(`
                     
                     <div class="single-courses card">

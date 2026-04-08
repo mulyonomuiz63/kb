@@ -306,14 +306,6 @@
                         });
                     }
                 },
-                error: function(xhr) {
-                    // Jika ditolak karena token expired, CI4 biasanya mengirim token baru di response
-                    if (xhr.responseJSON && xhr.responseJSON.token) {
-                        updateCsrfToken(xhr.responseJSON.token);
-                    }
-                    console.log(xhr.responseText);
-                    alert("Terjadi kesalahan keamanan (CSRF). Silakan coba lagi.");
-                }
             });
         });
 

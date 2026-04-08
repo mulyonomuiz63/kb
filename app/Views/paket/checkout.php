@@ -415,7 +415,6 @@
 
     function myFunction() {
         var norek = $('#norek').val();
-        console.log(norek)
         // Get the text field
 
         // Copy the text inside the text field

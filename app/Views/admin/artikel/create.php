@@ -198,13 +198,8 @@
                 },
                 cache: false,
                 success: function(response) {
-                    console.log("Deleted:", response.message);
-
                     // UPDATE TOKEN CSRF di semua input hidden agar form utama tetap valid
                     $("input[name='" + csrfName + "']").val(response.token);
-                },
-                error: function(xhr) {
-                    console.error("Gagal menghapus gambar di server.");
                 }
             });
         }

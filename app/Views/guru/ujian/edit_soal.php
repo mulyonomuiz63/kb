@@ -185,7 +185,6 @@
                     if (response.token) {
                         updateCsrfToken(response.token);
                     }
-                    console.log(response.message);
                 },
                 error: function(xhr) {
                     if (xhr.status === 403) {

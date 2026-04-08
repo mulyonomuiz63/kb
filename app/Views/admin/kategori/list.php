@@ -83,7 +83,6 @@
         var url = '<?= base_url('uploads/artikel/thumbnails/'); ?>';
         var file = $(this).data('artikel');
         var url_file = url+'/'+file;
-        console.log(url_file);
         $(".tampil-file").html('<img src="'+url_file+'" class="img-fluid" alt="...">');
        
     });

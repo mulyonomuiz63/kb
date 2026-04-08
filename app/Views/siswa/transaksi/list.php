@@ -248,7 +248,6 @@
                         },
                         onClose: function() {
                             // Jika user menutup modal tanpa bayar
-                            console.log('Customer closed the popup without finishing the payment');
                             btn.removeClass('disabled').text('Lanjut Bayar');
                         }
                     });

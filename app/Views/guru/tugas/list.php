@@ -314,7 +314,6 @@
                     $(which_sum).summernote("insertImage", url);
                 },
                 error: function(data) {
-                    console.log(data);
                 }
             });
         }
@@ -328,7 +327,6 @@
                 url: "<?= base_url('guru/delete_image') ?>",
                 cache: false,
                 success: function(response) {
-                    console.log(response);
                 }
             });
         }

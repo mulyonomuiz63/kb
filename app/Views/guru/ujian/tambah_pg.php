@@ -342,7 +342,6 @@
                     if (response.token) {
                         updateCsrfToken(response.token);
                     }
-                    console.log(response.message);
                 },
                 error: function(xhr) {
                     if (xhr.status === 403) {
@@ -560,7 +559,6 @@
                         if (xhr.status === 403) {
                             Swal.fire('Error', 'Sesi keamanan kadaluarsa, silakan refresh halaman.', 'error');
                         }
-                        console.log(xhr.responseText);
                     }
                 });
             }

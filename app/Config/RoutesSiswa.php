@@ -1,5 +1,6 @@
 <?php
 $routes->get('sw-siswa/transaksi/pesan/(:segment)', 'Siswa\TransaksiController::pesan/$1');
+$routes->get('sw-siswa/transaksi/pesan/(:segment)/(:segment)', 'Siswa\TransaksiController::pesan/$1/$2');
 
 $routes->group('sw-siswa', ['filter' => 'roleCheck:2'], function ($routes) {
     $routes->get('/', 'Siswa\HomeController::index');

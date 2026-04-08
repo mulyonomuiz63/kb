@@ -74,10 +74,6 @@ $(function () {
                 csrfHash = json[csrfName];
 
                 return json.data;
-            },
-            error: function (xhr, error, thrown) {
-                console.error('Error fetching data:', error);
-                console.log('Response:', xhr.responseText);
             }
         },
         columnDefs: [

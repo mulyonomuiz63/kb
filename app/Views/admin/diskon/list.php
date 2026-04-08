@@ -111,12 +111,6 @@
                     // Selalu update token CSRF setiap kali tabel reload
                     $('.csrf-token').val(json.<?= csrf_token() ?>);
                     return json.data;
-                },
-                error: function(xhr, error, thrown) {
-                    console.log('Error loading data: ', error);
-                    console.log('Response: ', xhr.responseText);
-                    console.log('Thrown: ', thrown);
-                    console.log('Status: ', xhr.status);
                 }
             },
             "columns": [{

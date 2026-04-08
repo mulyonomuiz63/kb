@@ -110,7 +110,7 @@ $routes->group('', function ($routes) {
 
 
 // affiliate register
-$routes->get('ref/(:segment)/(:segment)', 'Affiliate::redirect/$1/$2');
+$routes->get('ref/(:segment)/(:segment)', 'Admin\AffiliateController::redirect/$1/$2');
 
 
 //ini untuk download file IAI

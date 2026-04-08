@@ -124,7 +124,6 @@
         function updateAllCsrf(newToken) {
             if (newToken) {
                 $("input[name='" + csrfName + "']").val(newToken);
-                console.log("Token diperbarui ke: " + newToken.substring(0, 10) + "...");
             }
         }
 

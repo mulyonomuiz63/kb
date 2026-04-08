@@ -354,6 +354,11 @@
 <script src="https://www.google.com/recaptcha/api.js?render=<?= setting('recaptcha_site_key') ?>"></script>
 <script>
   function submitForm(actionName) {
+    if (!form.checkValidity()) {
+      // Jika tidak valid, munculkan peringatan bawaan browser
+      form.reportValidity(); 
+      return; // Berhenti di sini, jangan lanjut ke reCAPTCHA
+    }
     // Ambil status aktif reCAPTCHA dari PHP/Env
     const isRecaptchaActive = <?= setting('recaptcha_status') === 'true' ? 'true' : 'false' ?>;
 
