@@ -246,7 +246,7 @@ class RegisterController extends BaseController
     
         // 4. Verifikasi Google reCAPTCHA
         if(setting('recaptcha_status') == 'true') {
-            if (!$this->verifyRecaptcha($token, 'registrasi_pesan')) {
+            if (!$this->verifyRecaptcha($token, 'registrasi')) {
                 session()->setFlashdata('pesan', "swal({title:'Info', text:'Gagal verifikasi, Silahkan coba lagi!', type:'info', padding:'2em'})");
                 return redirect()->back()->withInput();
             }

@@ -163,7 +163,7 @@
               <div class="text-gray-500 fw-bold fs-6">Lengkapi data diri untuk melanjutkan pembelian paket.</div>
             </div>
 
-            <form action="<?= base_url('Register/tambah_siswa_melalui_pesan'); ?>" method="POST" id="form" onsubmit="return submitForm(event)">
+            <form action="<?= base_url('auth/store-siswa-melalui-pesan'); ?>" method="POST" id="form">
               <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>">
               <input type="hidden" name="kelas" value="1">
               <input type="hidden" name="idpaketenc" value="<?= $idpaketenc ?>">
@@ -201,7 +201,7 @@
               </div>
 
               <div class="text-center">
-                <button type="submit" class="btn btn-primary btn-lg w-100 fw-bolder">
+                <button type="submit" class="btn btn-primary btn-lg w-100 fw-bolder" onclick="submitForm('registrasi')">
                   <span class="indicator-label">Daftar & Lanjutkan Pembayaran</span>
                 </button>
                 <div class="text-gray-500 text-center fw-bold fs-7 mt-5">
@@ -353,22 +353,30 @@
 
 <script src="https://www.google.com/recaptcha/api.js?render=<?= setting('recaptcha_site_key') ?>"></script>
 <script>
-  function submitForm(e) {
-    e.preventDefault();
-    const form = e.target;
-    if (!form.checkValidity()) {
-      form.reportValidity();
-      return false;
+  function submitForm(actionName) {
+    // Ambil status aktif reCAPTCHA dari PHP/Env
+    const isRecaptchaActive = <?= setting('recaptcha_status') === 'true' ? 'true' : 'false' ?>;
+
+    // Jika tidak aktif, langsung submit form
+    if (!isRecaptchaActive) {
+      document.getElementById('form').submit();
+      return;
     }
+
+    // Logika jika aktif
+    if (typeof grecaptcha === 'undefined') {
+      alert('reCAPTCHA gagal dimuat, periksa koneksi internet Anda.');
+      return;
+    }
+
     grecaptcha.ready(function() {
       grecaptcha.execute('<?= setting('recaptcha_site_key') ?>', {
-        action: 'registrasi_pesan'
+        action: actionName
       }).then(function(token) {
         document.getElementById('recaptcha_token').value = token;
-        form.submit();
+        document.getElementById('form').submit();
       });
     });
-    return false;
   }
 
   $(document).on('click', '#togglePassword', function() {
