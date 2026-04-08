@@ -1,4 +1,6 @@
 <?php
+$routes->get('sw-siswa/transaksi/pesan/(:segment)', 'Siswa\TransaksiController::pesan/$1');
+
 $routes->group('sw-siswa', ['filter' => 'roleCheck:2'], function ($routes) {
     $routes->get('/', 'Siswa\HomeController::index');
 
@@ -16,7 +18,6 @@ $routes->group('sw-siswa', ['filter' => 'roleCheck:2'], function ($routes) {
     $routes->group('transaksi', function ($routes) {
         $routes->get('invoice/(:any)', 'InvoiceController::invoice/$1');
         $routes->get('', 'Siswa\TransaksiController::index');
-        $routes->get('pesan/(:segment)', 'Siswa\TransaksiController::pesan/$1');
         $routes->post('cek-kode-voucher', 'Siswa\TransaksiController::cekKodeVoucher');
         $routes->post('checkout', 'Siswa\TransaksiController::checkout');
         $routes->get('pesan-bayar/(:segment)', 'Siswa\TransaksiController::pesanBayar/$1');
