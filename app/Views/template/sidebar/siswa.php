@@ -167,7 +167,7 @@
 
 
                     <li class="menu">
-                        <a href="<?= base_url('auth/logout'); ?>" aria-expanded="false" class="dropdown-toggle">
+                        <a href="<?= base_url('logout'); ?>" aria-expanded="false" class="dropdown-toggle">
                             <div class="">
                                 <span><i class="bi bi-box-arrow-right mr-4"></i>Keluar</span>
                             </div>

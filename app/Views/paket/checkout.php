@@ -203,7 +203,7 @@
             <div class="dropdown-menu dropdown-menu-right">
               <a class="dropdown-item" href="<?= $url ?>">Dashboard</a>
               <div class="dropdown-divider"></div>
-              <a class="dropdown-item text-danger" href="<?= base_url('Auth/logout') ?>">
+              <a class="dropdown-item text-danger" href="<?= base_url('logout') ?>">
                 Logout
               </a>
             </div>
