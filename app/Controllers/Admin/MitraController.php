@@ -255,10 +255,8 @@ class MitraController extends BaseController
         $idmitra = decrypt_url($id);
         $dataVoucher = $this->voucherModel->join('mitra', 'voucher.idmitra=mitra.idmitra')->where('voucher.idmitra', $idmitra)->orderBy('mitra.nama_mitra', 'asc')->orderBy('voucher.diskon_voucher', 'asc')->groupBy('voucher.kode_voucher')->get()->getResultObject();
         foreach ($dataVoucher as $voucher) {
-            if(!empty($voucher->tgl_exp) && date('Y-m-d') > $voucher->tgl_exp) {
-                $this->voucherModel->where('idvoucher', $voucher->idvoucher)
-                ->set(['status' => 'T'])
-                ->update();
+            if (!empty($voucher->tgl_exp) && date('Y-m-d') > $voucher->tgl_exp && $voucher->status !== 'T') {
+                $this->voucherModel->update($voucher->idvoucher, ['status' => 'T']);
             }
         }
         $data = [
@@ -270,7 +268,7 @@ class MitraController extends BaseController
             'paket' => $this->paketModel->get()->getResultObject(),
             'idmitra' => $id,
         ];
-        
+
         return view('admin/voucher/list', $data);
     }
 

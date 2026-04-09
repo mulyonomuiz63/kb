@@ -90,14 +90,26 @@ class AffiliateController extends BaseController
                 case '1':
                     $badge = 'badge-success';
                     $text  = 'Approved';
+                    $btn = '
+                            <a href="' . base_url('sw-admin/affiliate/komisi/' . encrypt_url($row->kode_affiliate)) . '"
+                                class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i>
+                            </a>';
                     break;
                 case '0':
                     $badge = 'badge-warning';
                     $text  = 'Pending';
+                    $btn = '
+                            <a href="' . base_url('sw-admin/affiliate/edit/' . encrypt_url($row->id_affiliate)) . '"
+                                class="btn btn-sm btn-outline-warning mr-2">
+                                <i class="bi bi-eye"></i>
+                            </a>';
+            
                     break;
                 default:
                     $badge = 'badge-secondary';
                     $text  = '-';
+                    $btn = '';
             }
 
             $data[] = [
@@ -113,14 +125,7 @@ class AffiliateController extends BaseController
                 '<span class="badge ' . $badge . ' px-3 py-2">' . $text . '</span>',
 
                 '<div class="btn-group">
-                <a href="' . base_url('sw-admin/affiliate/edit/' . encrypt_url($row->id_affiliate)) . '"
-                    class="btn btn-sm btn-outline-warning mr-2">
-                    <i class="bi bi-eye"></i>
-                </a>
-                <a href="' . base_url('sw-admin/affiliate/komisi/' . encrypt_url($row->kode_affiliate)) . '"
-                    class="btn btn-sm btn-outline-primary">
-                    <i class="bi bi-eye"></i>
-                </a>
+                ' . $btn . '
             </div>'
             ];
         }
