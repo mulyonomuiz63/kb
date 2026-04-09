@@ -253,16 +253,24 @@ class MitraController extends BaseController
     public function voucher($id)
     {
         $idmitra = decrypt_url($id);
+        $dataVoucher = $this->voucherModel->join('mitra', 'voucher.idmitra=mitra.idmitra')->where('voucher.idmitra', $idmitra)->orderBy('mitra.nama_mitra', 'asc')->orderBy('voucher.diskon_voucher', 'asc')->groupBy('voucher.kode_voucher')->get()->getResultObject();
+        foreach ($dataVoucher as $voucher) {
+            if(!empty($voucher->tgl_exp) && date('Y-m-d') > $voucher->tgl_exp) {
+                $this->voucherModel->where('idvoucher', $voucher->idvoucher)
+                ->set(['status' => 'T'])
+                ->update();
+            }
+        }
         $data = [
             'title' => 'List Voucher Mitra',
             'parent_title' => 'Mitra',
             'parent_url'   => base_url('sw-admin/mitra'),
-            'voucher' => $this->voucherModel->join('mitra', 'voucher.idmitra=mitra.idmitra')->where('voucher.idmitra', $idmitra)->orderBy('mitra.nama_mitra', 'asc')->orderBy('voucher.diskon_voucher', 'asc')->groupBy('voucher.kode_voucher')->get()->getResultObject(),
+            'voucher' => $dataVoucher,
             'mitra' => $this->mitraModel->where('idmitra', $idmitra)->get()->getResultObject(),
             'paket' => $this->paketModel->get()->getResultObject(),
             'idmitra' => $id,
         ];
-
+        
         return view('admin/voucher/list', $data);
     }
 
