@@ -454,7 +454,7 @@
                         <!-- Header Top Left End -->
                         <!-- Header Top Right Start -->
                         <div class="header-top-right">
-                            <a href="https://kelasbrevet.com/transaksi/pesan/T2w0WnJ0ZWhBWmNUR3A1endmZTdkdz09 " class="badge text-bg-primary">Ambil Promo</a>
+                            <a href="<?= base_url('list-bimbel') ?>" class="badge text-bg-primary">Ambil Promo</a>
                         </div>
                         <!-- Header Top Right End -->
                     </div>
@@ -1128,38 +1128,6 @@
             $(".isiKonten").html(`
                 <img src="${url}" class="img-fluid img-thumbnail" alt="...">
             `);
-        });
-        
-        $('.deskripsi_paket').click(function() {
-            const idpaket = $(this).data('idpaket');
-            $.ajax({
-                type: 'GET',
-                data: {
-                    idpaket: idpaket
-                },
-                dataType: 'JSON',
-                async: true,
-                url: "<?= base_url('get_paket') ?>",
-                success: function(data) {
-                    $(".isideskripsi").html(`
-                    
-                    <div class="single-courses card">
-                        <div class="courses-images">
-                            <a href="#" >
-                                <img class="card-img-top zoom" src="<?= base_url('assets-landing/images/paket/thumbnails/'); ?>/${data.file}" alt="Courses">
-                            </a>
-    
-                        </div>
-                        <div class="courses-content">
-                            <div class="fs-6">
-                                ${data.deskripsi}
-                            </div>
-                        </div>
-                    </div>
-                    
-                    `);
-                }
-            });
         });
     </script>
     <script>

@@ -268,7 +268,7 @@
                         <!-- Header Top Left End -->
                         <!-- Header Top Right Start -->
                         <div class="header-top-right">
-                            <a href="https://kelasbrevet.com/transaksi/pesan/L2hSZzNKUHpPeG02L3NIdDhKOHNZQT09" class="badge text-bg-primary">Ambil Promo</a>
+                            <a href="<?= base_url('list-bimbel') ?>" class="badge text-bg-primary">Ambil Promo</a>
                         </div>
                         <!-- Header Top Right End -->
                     </div>
@@ -805,9 +805,6 @@
                                                         <?php endif; ?>
                                                     </div>
                                                 </div>
-                                                <?php if (!empty($rows->deskripsi)): ?>
-                                                    <a href="javascript:void(0)" class="badge text-bg-light p-2 mt-4 rounded-pill text-primary btn-hover-dark deskripsi_paket" data-bs-toggle="modal" data-bs-target="#lihatPaket" data-idpaket="<?= $rows->idpaket ?>"> <i class="bi bi-eye-fill me-2"></i>Lihat daftar materi</a>
-                                                <?php endif; ?>
                                                 <?php if ($rows->iddiskon != null): ?>
                                                     <div class="position-absolute top-0 end-0 diskon p-1 text-white"><?= $rows->diskon ?> %</div>
                                                 <?php endif; ?>
@@ -1268,19 +1265,6 @@
 
             <!-- Footer End -->
 
-            <!-- untuk paket-->
-            <div class="modal fade" id="lihatPaket" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                <div class="modal-dialog modal-sm modal-dialog-scrollable" style="scrollbar-color: #0000FF #ffffff" id="modalPaket">
-                    <div class="modal-content position-relative">
-
-                        <div class="modal-body card-body ">
-                            <div class="isideskripsi fs-6" style="margin-top:-25px"></div>
-                        </div>
-                        <button type="button" class="position-absolute top-0 start-0 text-light zoom close-deskripsi-paket" data-bs-dismiss="modal" aria-label="Close"><i class="bi bi-x"></i></button>
-                    </div>
-                </div>
-            </div>
-
             <!-- untuk tampilan surat izin LKP-->
             <div class="modal fade" id="lihatIzinLkp" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                 <div class="modal-dialog modal-xl">
@@ -1667,37 +1651,7 @@
             `);
                 });
 
-                $('.deskripsi_paket').click(function() {
-                    const idpaket = $(this).data('idpaket');
-                    $.ajax({
-                        type: 'GET',
-                        data: {
-                            idpaket: idpaket
-                        },
-                        dataType: 'JSON',
-                        async: true,
-                        url: "<?= base_url('get_paket') ?>",
-                        success: function(data) {
-                            $(".isideskripsi").html(`
-                    
-                    <div class="single-courses card">
-                        <div class="courses-images">
-                            <a href="#" >
-                                <img class="card-img-top zoom" src="<?= base_url('assets-landing/images/paket/thumbnails/'); ?>/${data.file}" alt="Courses">
-                            </a>
-
-                        </div>
-                        <div class="courses-content">
-                            <div class="fs-6">
-                                ${data.deskripsi}
-                            </div>
-                        </div>
-                    </div>
-                    
-                    `);
-                        }
-                    });
-                });
+                
             </script>
             <script>
                 document.addEventListener("DOMContentLoaded", function() {

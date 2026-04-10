@@ -180,15 +180,6 @@ class Landing extends BaseController
 
     }
     
-    public function get_paket()
-    {
-        if ($this->request->isAJAX()) {
-            $paket = $this->request->getVar('idpaket');
-            $data_paket = $this->PaketModel->asObject()->find($paket);
-            echo json_encode($data_paket);
-        }
-    }
-    
     public function pelatihan()
     {
         $data['paket'] = $this->PaketModel->getAllLimit();

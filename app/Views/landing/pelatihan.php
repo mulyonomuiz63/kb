@@ -245,9 +245,6 @@
                                                             
                                                        
                                                 </div>
-                                                <?php if(!empty($rows->deskripsi)): ?>
-                                                    <a href="javascript:void(0)" class="badge text-bg-light p-2 mt-4 rounded-pill text-primary btn-hover-dark text-izin deskripsi_paket" data-bs-toggle="modal" data-bs-target="#lihatPaket" data-idpaket="<?= $rows->idpaket ?>"> <i class="bi bi-eye-fill me-2"></i>Lihat Daftar Materi</a>
-                                                <?php endif; ?>
                                                 <?php if($rows->iddiskon != null ): ?>
                                                     <div class="position-absolute top-0 end-0 diskon p-1 text-white"><?= $rows->diskon ?> %</div>
                                                 <?php endif; ?>

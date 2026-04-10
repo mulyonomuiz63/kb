@@ -39,7 +39,6 @@ $routes->get('tes', 'Landing::tes');
 $routes->get('twibbon', 'Landing::twibbon');
 $routes->get('twibbon/(:any)', 'Landing::twibbon_url/$1');
 $routes->post('twibbon/simpan', 'Landing::twibbon_simpan');
-$routes->get('get_paket', 'Landing::get_paket');
 
 $routes->get('paket-allujian', 'Transaksi::allujian');
 $routes->get('paket-allinone', 'Transaksi::allinone');
