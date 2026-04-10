@@ -264,7 +264,7 @@ class RegisterController extends BaseController
             'email'            => $userBaru['email'],
             'nama'             => $userBaru['nama_siswa'],
             'role'             => $userBaru['role'],
-            'is_logged_in'     => true
+            'avatar'           => $userBaru['avatar'],
         ];
         session()->set($datasession);
     
