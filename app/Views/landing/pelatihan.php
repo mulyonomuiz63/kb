@@ -37,7 +37,7 @@
     /* ===== PRICE ===== */
     .courses-meta .fw-bold{
         font-size:17px;
-        color:#1A4FF0;
+        color:#047da7;
     }
     
     /* ===== AFFILIATE ===== */
@@ -51,7 +51,7 @@
     
     /* ===== BUTTON ===== */
     .btn-buy{
-        background:#1A4FF0;
+        background:#047da7;
         color: #fff;
         border-radius:10px;
         border:none;

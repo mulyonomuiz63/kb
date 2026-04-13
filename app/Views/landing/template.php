@@ -339,7 +339,7 @@
         .close-deskripsi-paket{
             margin:13px 0 0 10px; 
             border-radius:100%; 
-            background-color:blue; 
+            background-color:#047da7; 
             border: none
         }
         .horizontal-nav {

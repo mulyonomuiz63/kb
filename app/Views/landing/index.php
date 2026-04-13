@@ -125,7 +125,7 @@
         /* ===== PRICE ===== */
         .courses-meta .fw-bold {
             font-size: 17px;
-            color: #1A4FF0;
+            color: #047da7;
         }
 
         /* ===== AFFILIATE ===== */
@@ -139,7 +139,7 @@
 
         /* ===== BUTTON ===== */
         .btn-buy {
-            background: #1A4FF0;
+            background: #047da7;
             color: #fff;
             border-radius: 10px;
             border: none;
@@ -818,7 +818,7 @@
                                 <div class="d-flex justify-content-center">
                                     <div class="row">
                                         <div class="col-12 text-center" style="padding-top: 20px;">
-                                            <a href="<?= base_url('list-bimbel') ?>" class="text-primary mt-2 ">Lihat lebih banyak</a><i class="bi bi-arrow-down-square-fill ms-1" style="color: blue;"></i>
+                                            <a href="<?= base_url('list-bimbel') ?>" class="text-primary mt-2 ">Lihat lebih banyak</a><i class="bi bi-arrow-down-square-fill ms-1 text-primary" ></i>
                                         </div>
                                     </div>
                                 </div>
@@ -959,7 +959,7 @@
                     </div>
                     <div class="col-12 mt-4 card call-to-action-wrapper rounded table-responsive-sm">
                         <table class="table  text-center no-border font-size-table">
-                            <tr style="background-color: blue;">
+                            <tr style="background-color: #047da7;">
                                 <td class="text-white">NILAI</td>
                                 <td class="text-white">HURUF</td>
                                 <td class="text-white">PREDIKAT</td>
@@ -1034,7 +1034,7 @@
 
                 <!-- Section Title Start -->
                 <div class="section-title shape-03 text-center">
-                    <h5 class="sub-title">Testimoni Alumni</h5>
+                    <h5 class="sub-title text-primary">Testimoni Alumni</h5>
                 </div>
                 <!-- Section Title End -->
 

@@ -257,7 +257,10 @@ ul.list li {
 
 
 .sticky{
-    background-color:#1A4FF0 !important;
+    background-color:#047da7 !important;
+}
+.text-primary{
+    color:#047da7 !important;
 }
 
 #font-jadwal{
@@ -272,7 +275,7 @@ ul.list li {
 .close-deskripsi-paket{
     margin:13px 0 0 10px; 
     border-radius:100%; 
-    background-color:blue; 
+    background-color:#047da7; 
     border: none
 }
 

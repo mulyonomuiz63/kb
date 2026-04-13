@@ -56,7 +56,7 @@
 .price-detail {
   font-size: 1.35rem;
   font-weight: 800;
-  color: #1A4FF0;
+  color: #047da7;
 }
 
 .old-price {
@@ -78,7 +78,7 @@
    BUTTON
 ===================== */
 .btn-buy {
-  background: linear-gradient(135deg,#1A4FF0,#2d6bff);
+  background: linear-gradient(135deg,#047da7,#2d6bff);
   color: #fff;
   border-radius: 12px;
   border: none;

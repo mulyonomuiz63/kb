@@ -10,7 +10,7 @@
 
     <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" class="menu-item menu-lg-down-accordion me-0 me-lg-2">
         <span class="menu-link <?= (strpos($current_uri, 'sw-siswa/') !== false && $current_uri != 'sw-siswa') ? 'active' : '' ?>">
-            <span class="menu-title">Pages</span>
+            <span class="menu-title">Menu</span>
             <span class="menu-arrow d-lg-none"></span>
         </span>
 
