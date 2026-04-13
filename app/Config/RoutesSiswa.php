@@ -65,4 +65,9 @@ $routes->group('sw-siswa', ['filter' => 'roleCheck:2'], function ($routes) {
         $routes->get('remedial/(:any)/(:any)/(:any)', 'Siswa\UjianController::remedial/$1/$2/$3');
         $routes->post('proses-verifikasi', 'Siswa\UjianController::prosesVerifikasi');
     });
+
+    // diskusi
+    $routes->group('diskusi', function ($routes) {
+        $routes->get('/', 'Siswa\DiskusiController::index');
+    });
 });

@@ -99,81 +99,61 @@
         background-color: #50cd89;
         color: #ffffff;
     }
+    @media (min-width: 1200px) {
+        .sticky-column {
+            position: -webkit-sticky;
+            position: sticky;
+            top: 80px; /* Jarak dari atas layar, sesuaikan dengan tinggi header/navbar kamu */
+            z-index: 1;
+        }
+    }
 </style>
 <?= $this->endSection(); ?>
 
 <?= $this->section('content'); ?>
 <div class="row g-5 g-xl-8">
     <div class="col-xl-4">
-        <div class="row mb-5 mb-xl-8 g-5 g-xl-8">
-            <div class="col-6">
-                <div class="card card-stretch shadow-sm">
-                    <a href="<?= base_url('sw-siswa/materi') ?>" class="btn btn-flex btn-text-gray-800 btn-icon-gray-400 btn-active-color-primary bg-body flex-column justify-content-start align-items-start text-start w-100 p-10">
-                        <i class="ki-outline ki-book-open fs-2tx mb-5 ms-n1 text-primary"></i>
-                        <span class="fs-4 fw-bold">Materi Belajar</span>
-                        <span class="fs-7 fw-semibold text-muted mt-1">Akses semua modul kursus</span>
-                    </a>
+        <div class="sticky-column"> <div class="row mb-5 mb-xl-8 g-5 g-xl-8">
+                <?php 
+                $menus = [
+                    ['url' => 'sw-siswa/materi', 'icon' => 'ki-book-open', 'color' => 'primary', 'title' => 'Materi Belajar', 'desc' => 'Akses semua modul'],
+                    ['url' => 'sw-siswa/ujian', 'icon' => 'ki-notepad-edit', 'color' => 'danger', 'title' => 'Ujian & Quiz', 'desc' => 'Evaluasi pemahaman'],
+                    ['url' => 'sw-siswa/sertifikat', 'icon' => 'ki-medal-star', 'color' => 'success', 'title' => 'Sertifikat', 'desc' => 'Download bukti lulus'],
+                    ['url' => 'sw-siswa/transaksi', 'icon' => 'ki-time', 'color' => 'info', 'title' => 'Histori', 'desc' => 'Status pembayaran'],
+                    ['url' => 'sw-siswa/affiliate', 'icon' => 'ki-people', 'color' => 'warning', 'title' => 'Affiliate', 'desc' => 'Bonus referensi'],
+                    ['url' => 'sw-siswa/profile', 'icon' => 'ki-user', 'color' => 'dark', 'title' => 'Akun Saya', 'desc' => 'Pengaturan data diri'],
+                    ['url' => 'sw-siswa', 'icon' => 'ki-messages', 'color' => 'warning', 'title' => 'Diskusi', 'desc' => 'Komunitas belajar'],
+                    ['url' => 'list-bimbel', 'icon' => 'ki-briefcase', 'color' => 'warning', 'title' => 'List Paket', 'desc' => 'Daftar paket tersedia'],
+                ];
+                foreach ($menus as $m): ?>
+                <div class="col-6 d-flex">
+                    <div class="card card-stretch shadow-sm w-100">
+                        <a href="<?= base_url($m['url']) ?>" class="btn btn-flex btn-text-gray-800 btn-active-color-<?= $m['color'] ?> bg-body flex-column justify-content-start align-items-start text-start w-100 p-6 p-xl-10 h-100">
+                            <i class="ki-outline <?= $m['icon'] ?> fs-2tx mb-5 ms-n1 text-<?= $m['color'] ?>"></i>
+                            <span class="fs-4 fw-bold"><?= $m['title'] ?></span>
+                            <span class="fs-7 fw-semibold text-muted mt-1 d-none d-md-block"><?= $m['desc'] ?></span>
+                        </a>
+                    </div>
                 </div>
-            </div>
-            <div class="col-6">
-                <div class="card card-stretch shadow-sm">
-                    <a href="<?= base_url('sw-siswa/ujian') ?>" class="btn btn-flex btn-text-gray-800 btn-icon-gray-400 btn-active-color-danger bg-body flex-column justify-content-start align-items-start text-start w-100 p-10">
-                        <i class="ki-outline ki-notepad-edit fs-2tx mb-5 ms-n1 text-danger"></i>
-                        <span class="fs-4 fw-bold">Ujian & Quiz</span>
-                        <span class="fs-7 fw-semibold text-muted mt-1">Evaluasi pemahaman Anda</span>
-                    </a>
-                </div>
-            </div>
-            <div class="col-6">
-                <div class="card card-stretch shadow-sm">
-                    <a href="<?= base_url('sw-siswa/sertifikat') ?>" class="btn btn-flex btn-text-gray-800 btn-icon-gray-400 btn-active-color-success bg-body flex-column justify-content-start align-items-start text-start w-100 p-10">
-                        <i class="ki-outline ki-medal-star fs-2tx mb-5 ms-n1 text-success"></i>
-                        <span class="fs-4 fw-bold">Sertifikat</span>
-                        <span class="fs-7 fw-semibold text-muted mt-1">Download bukti kelulusan</span>
-                    </a>
-                </div>
-            </div>
-            <div class="col-6">
-                <div class="card card-stretch shadow-sm">
-                    <a href="<?= base_url('sw-siswa/transaksi') ?>" class="btn btn-flex btn-text-gray-800 btn-icon-gray-400 btn-active-color-info bg-body flex-column justify-content-start align-items-start text-start w-100 p-10">
-                        <i class="ki-outline ki-time fs-2tx mb-5 ms-n1 text-info"></i>
-
-                        <span class="fs-4 fw-bold">Histori</span>
-
-                        <span class="fs-7 fw-semibold text-muted mt-1">Pantau status pembayaran Anda</span>
-                    </a>
-                </div>
-            </div>
-            <div class="col-6">
-                <div class="card card-stretch shadow-sm">
-                    <a href="<?= base_url('sw-siswa/affiliate') ?>" class="btn btn-flex btn-text-gray-800 btn-icon-gray-400 btn-active-color-warning bg-body flex-column justify-content-start align-items-start text-start w-100 p-10">
-                        <i class="ki-outline ki-people fs-2tx mb-5 ms-n1 text-warning"></i>
-                        <span class="fs-4 fw-bold">Affiliate</span>
-                        <span class="fs-7 fw-semibold text-muted mt-1">Dapatkan bonus referensi</span>
-                    </a>
-                </div>
-            </div>
-            <div class="col-6">
-                <div class="card card-stretch shadow-sm">
-                    <a href="<?= base_url('sw-siswa/profile') ?>" class="btn btn-flex btn-text-gray-800 btn-icon-gray-400 btn-active-color-dark bg-body flex-column justify-content-start align-items-start text-start w-100 p-10">
-                        <i class="ki-outline ki-user fs-2tx mb-5 ms-n1 text-dark"></i>
-                        <span class="fs-4 fw-bold">Akun Saya</span>
-                        <span class="fs-7 fw-semibold text-muted mt-1">Pengaturan & data diri</span>
-                    </a>
-                </div>
+                <?php endforeach; ?>
             </div>
         </div>
     </div>
-
     <div class="col-xl-8 ps-xl-12">
         <div class="card bgi-position-y-bottom bgi-position-x-end bgi-no-repeat bgi-size-cover min-h-250px bg-body mb-5 mb-xl-8"
-            style="background-position: 100% 50px; background-size: 500px auto; background-image:url('<?= base_url('assets/peserta/media/misc/city.png') ?>')" dir="ltr">
+            style="background-position: 100% 50px; background-size: 500px auto; background-image:url('<?= base_url('') ?>')" dir="ltr">
             <div class="card-body d-flex flex-column justify-content-center ps-lg-15">
                 <h3 class="text-dark fs-2qx fw-bold mb-4">Siap Menjadi Ahli Pajak <br /><span class="text-primary">Profesional?</span></h3>
                 <div class="fs-5 fw-semibold text-gray-600 mb-7">Tingkatkan kompetensi Anda dengan materi terupdate dan instruktur berpengalaman.</div>
-                <div class="m-0">
-                    <a href="<?= base_url('sw-siswa/materi') ?>" class="btn btn-primary fw-bold px-8 py-3">Mulai Belajar Sekarang</a>
-                    <a href="<?= base_url('list-bimbel') ?>" class="btn btn-light-primary fw-bold px-8 py-3 ms-2">Lihat Paket Lain</a>
+                <div class="m-0 d-flex flex-column flex-sm-row">
+                    <a href="<?= base_url('sw-siswa/materi') ?>"
+                        class="btn btn-primary fw-bold px-8 py-3 mb-2 mb-sm-0 w-100 w-sm-auto">
+                        Mulai Belajar Sekarang
+                    </a>
+                    <a href="<?= base_url('list-bimbel') ?>"
+                        class="btn btn-light-primary fw-bold px-8 py-3 ms-0 ms-sm-2 w-100 w-sm-auto">
+                        Lihat Paket Lain
+                    </a>
                 </div>
             </div>
         </div>
