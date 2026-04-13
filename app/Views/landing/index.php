@@ -1524,20 +1524,6 @@
 
 
 
-
-                document.querySelector('.whatsapp-button').addEventListener('click', function() {
-
-                    this.classList.add('bounce');
-
-                    setTimeout(function() {
-
-                        this.classList.remove('bounce');
-
-                    }.bind(this), 1000);
-
-                });
-
-
                 var TxtType = function(el, toRotate, period) {
                     this.toRotate = toRotate;
                     this.el = el;
