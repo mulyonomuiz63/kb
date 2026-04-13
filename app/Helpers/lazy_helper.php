@@ -28,9 +28,9 @@ function img_lazy(string $src, string $alt = '', array $attrs = []): string
               </rect>
               <defs>
                 <linearGradient id="g">
-                    <stop stop-color="#9caaec" offset="20%" />
-                    <stop stop-color="#c4dcff" offset="50%" />
-                    <stop stop-color="#a7cfdb" offset="70%" />
+                  <stop stop-color="#eeeeee" offset="20%" />
+                  <stop stop-color="#dddddd" offset="50%" />
+                  <stop stop-color="#eeeeee" offset="70%" />
                 </linearGradient>
               </defs>
             </svg>');

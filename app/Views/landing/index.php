@@ -233,6 +233,65 @@
             color: #fff;
             transform: scale(1.05);
         }
+
+        /* Container pembungkus logo */
+        /* Pastikan slide tidak memaksa isi menjadi tinggi */
+        .tickerwrapper .swiper-slide {
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            height: 80px !important;
+            /* Kunci tinggi slider logo Anda */
+            overflow: hidden;
+        }
+
+        .lazy-img {
+            /* Mencegah gambar memanjang vertikal */
+            max-height: 100%;
+            max-width: 150px;
+            /* Batas lebar logo agar tidak terlalu besar */
+            width: auto !important;
+            height: auto !important;
+            display: block;
+        }
+
+        .tickerwrapper {
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            /* Memastikan container fleksibel */
+        }
+
+        ul.list {
+            display: flex !important;
+            /* Memaksa LI berjejer horizontal */
+            flex-direction: row;
+            white-space: nowrap;
+            /* Mencegah LI pindah baris */
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        ul.list li {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            /* Mencegah LI menciut */
+            padding: 0 20px;
+            /* Jarak antar logo */
+            height: 80px;
+            /* Tinggi slider */
+        }
+
+        /* Pastikan logo tidak melebihi tinggi container */
+        .lazy-img {
+            max-height: 50px;
+            width: auto !important;
+            display: block;
+        }
     </style>
     <!-- ✅ SEO AUTO -->
     <?= $schema ?>
@@ -517,149 +576,44 @@
                             <h6>Alumni yang pernah bergabung</h6>
                         </div>
                         <div class="swiper-container tickerwrapper">
-                            <ul class="swiper-wrapper nav list">
-                                <li class='listitem swiper-slide'>
-
-                                    <?= img_lazy('assets-landing/images/peserta/vertica.png', "loading", ['class' => 'img-fluid slider-alumnir']) ?>
-
-                                </li>
-                                <li class='listitem swiper-slide'>
-
-                                    <?= img_lazy('assets-landing/images/peserta/sultanfatih.png', "loading", ['class' => 'img-fluid slider-alumnir']) ?>
-
-                                </li>
-                                <li class='listitem swiper-slide'>
-
-                                    <?= img_lazy('assets-landing/images/peserta/meka.png', "loading", ['class' => 'img-fluid slider-alumnir']) ?>
-
-                                </li>
-                                <li class='listitem swiper-slide'>
-
-                                    <?= img_lazy('assets-landing/images/peserta/istiqomah.png', "loading", ['class' => 'img-fluid slider-alumnir']) ?>
-
-                                </li>
-                                <li class='listitem swiper-slide'>
-
-
-                                    <?= img_lazy('assets-landing/images/peserta/husnayain.png', "loading", ['class' => 'img-fluid slider-alumnir']) ?>
-
-                                </li>
-                                <li class='listitem swiper-slide'>
-
-                                    <?= img_lazy('assets-landing/images/peserta/gaspro.png', "loading", ['class' => 'img-fluid slider-alumnir']) ?>
-
-                                </li>
-                                <li class='listitem swiper-slide'>
-
-                                    <?= img_lazy('assets-landing/images/peserta/afco.png', "loading", ['class' => 'img-fluid slider-alumnir']) ?>
-
-                                </li>
-                                <li class='listitem swiper-slide'>
-
-                                    <?= img_lazy('assets-landing/images/peserta/nusapala.png', "loading", ['class' => 'img-fluid slider-alumnir']) ?>
-
-                                </li>
-                                <li class='listitem swiper-slide'>
-
-                                    <?= img_lazy('assets-landing/images/peserta/aliahospital.png', "loading", ['class' => 'img-fluid slider-alumnir']) ?>
-
-                                </li>
-                                <li class='listitem swiper-slide'>
-
-                                    <?= img_lazy('assets-landing/images/peserta/bcm.png', "loading", ['class' => 'img-fluid slider-alumnir']) ?>
-
-                                </li>
-                                <li class='listitem swiper-slide'>
-
-                                    <?= img_lazy('assets-landing/images/peserta/usp.png', "loading", ['class' => 'img-fluid slider-alumnir']) ?>
-
-                                </li>
-                                <li class='listitem swiper-slide'>
-
-                                    <?= img_lazy('assets-landing/images/peserta/rshb aceh.png', "loading", ['class' => 'img-fluid slider-alumnir']) ?>
-
-                                </li>
-                                <li class='listitem swiper-slide'>
-
-                                    <?= img_lazy('assets-landing/images/peserta/thaiwah.png', "loading", ['class' => 'img-fluid slider-alumnir']) ?>
-
-                                </li>
-                                <li class='listitem swiper-slide'>
-
-                                    <?= img_lazy('assets-landing/images/peserta/polinela.png', "loading", ['class' => 'img-fluid slider-alumnir']) ?>
-
-                                </li>
-                                <li class='listitem swiper-slide'>
-
-                                    <?= img_lazy('assets-landing/images/peserta/indra.png', "loading", ['class' => 'img-fluid slider-alumnir']) ?>
-
-                                </li>
-                                <li class='listitem swiper-slide'>
-
-                                    <?= img_lazy('assets-landing/images/peserta/stieni.png', "loading", ['class' => 'img-fluid slider-alumnir']) ?>
-
-                                </li>
-                                <li class='listitem swiper-slide'>
-
-                                    <?= img_lazy('assets-landing/images/peserta/telkom.png', "loading", ['class' => 'img-fluid slider-alumnir']) ?>
-
-                                </li>
-                                <li class='listitem swiper-slide'>
-
-                                    <?= img_lazy('assets-landing/images/peserta/sinar.png', "loading", ['class' => 'img-fluid slider-alumnir']) ?>
-
-                                </li>
-                                <li class='listitem swiper-slide'>
-
-                                    <?= img_lazy('assets-landing/images/peserta/twj.png', "loading", ['class' => 'img-fluid slider-alumnir']) ?>
-
-                                </li>
-                                <li class='listitem swiper-slide'>
-
-                                    <?= img_lazy('assets-landing/images/peserta/dipa.png', "loading", ['class' => 'img-fluid slider-alumnir']) ?>
-
-                                </li>
-                                <li class='listitem swiper-slide'>
-
-                                    <?= img_lazy('assets-landing/images/peserta/gadai.png', "loading", ['class' => 'img-fluid slider-alumnir']) ?>
-
-                                </li>
-                                <li class='listitem swiper-slide'>
-
-                                    <?= img_lazy('assets-landing/images/peserta/gbs.png', "loading", ['class' => 'img-fluid slider-alumnir']) ?>
-
-                                </li>
-                                <li class='listitem swiper-slide'>
-
-                                    <?= img_lazy('assets-landing/images/peserta/farmamedika.png', "loading", ['class' => 'img-fluid slider-alumnir']) ?>
-
-                                </li>
-                                <li class='listitem swiper-slide'>
-
-                                    <?= img_lazy('assets-landing/images/peserta/darmajaya.png', "loading", ['class' => 'img-fluid slider-alumnir']) ?>
-
-                                </li>
-                                <li class='listitem swiper-slide'>
-
-                                    <?= img_lazy('assets-landing/images/peserta/hisotex.png', "loading", ['class' => 'img-fluid slider-alumnir']) ?>
-
-                                </li>
-                                <li class='listitem swiper-slide'>
-
-                                    <?= img_lazy('assets-landing/images/peserta/abeng.png', "loading", ['class' => 'img-fluid slider-alumnir']) ?>
-
-                                </li>
-                                <li class='listitem swiper-slide'>
-
-                                    <?= img_lazy('assets-landing/images/peserta/UnMal.png', "loading", ['class' => 'img-fluid slider-alumnir']) ?>
-
-                                </li>
-                                <li class='listitem swiper-slide'>
-
-                                    <?= img_lazy('assets-landing/images/peserta/interactive.png', "loading", ['class' => 'img-fluid slider-alumnir']) ?>
-
-                                </li>
-
+                            <?php
+                            $logos = [
+                                'vertica.png',
+                                'sultanfatih.png',
+                                'meka.png',
+                                'istiqomah.png',
+                                'husnayain.png',
+                                'gaspro.png',
+                                'afco.png',
+                                'nusapala.png',
+                                'aliahospital.png',
+                                'bcm.png',
+                                'usp.png',
+                                'rshb aceh.png',
+                                'thaiwah.png',
+                                'polinela.png',
+                                'indra.png',
+                                'stieni.png',
+                                'telkom.png',
+                                'sinar.png',
+                                'twj.png',
+                                'dipa.png',
+                                'gadai.png',
+                                'gbs.png',
+                                'farmamedika.png',
+                                'darmajaya.png',
+                                'hisotex.png',
+                                'abeng.png',
+                                'UnMal.png',
+                                'interactive.png'
+                            ];
+                            ?>
+                            <ul class="swiper-wrapper list">
+                                <?php foreach ($logos as $logo) : ?>
+                                    <li class="listitem swiper-slide">
+                                        <?= img_lazy("assets-landing/images/peserta/{$logo}", "Logo {$logo}") ?>
+                                    </li>
+                                <?php endforeach; ?>
                             </ul>
                         </div>
                     </div>
@@ -818,7 +772,7 @@
                                 <div class="d-flex justify-content-center">
                                     <div class="row">
                                         <div class="col-12 text-center" style="padding-top: 20px;">
-                                            <a href="<?= base_url('list-bimbel') ?>" class="text-primary mt-2 ">Lihat lebih banyak</a><i class="bi bi-arrow-down-square-fill ms-1 text-primary" ></i>
+                                            <a href="<?= base_url('list-bimbel') ?>" class="text-primary mt-2 ">Lihat lebih banyak</a><i class="bi bi-arrow-down-square-fill ms-1 text-primary"></i>
                                         </div>
                                     </div>
                                 </div>
@@ -1650,8 +1604,6 @@
                 <iframe src="${url}" width="100%" height="500vh"></iframe>
             `);
                 });
-
-                
             </script>
             <script>
                 document.addEventListener("DOMContentLoaded", function() {
