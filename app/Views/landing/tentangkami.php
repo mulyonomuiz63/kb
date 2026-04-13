@@ -15,13 +15,13 @@
                     <div class="mt-2 mb-2">
                         <div class="row">
                             <div class="col-4 col-md-4">
-                                <a href="javascript:void(0)" class="badge text-bg-light p-2 rounded-pill text-primary btn-hover-dark text-izin" data-bs-toggle="modal" data-bs-target="#lihatIzinLkp">Izin Operasional LKP</a>
+                                <a href="javascript:void(0)" class="badge text-bg-light p-2 rounded-pill text-primary btn-hover-dark text-izin text-wrap" data-bs-toggle="modal" data-bs-target="#lihatIzinLkp">Izin Operasional LKP</a>
                             </div>
                             <div class="col-4 col-md-4">
-                                <a href="javascript:void(0)" class="badge text-bg-light p-2 rounded-pill text-primary btn-hover-dark text-izin" data-bs-toggle="modal" data-bs-target="#lihatIzinLpk">Sertifikat Standar LPK</a>
+                                <a href="javascript:void(0)" class="badge text-bg-light p-2 rounded-pill text-primary btn-hover-dark text-izin text-wrap" data-bs-toggle="modal" data-bs-target="#lihatIzinLpk">Sertifikat Standar LPK</a>
                             </div>
                             <div class="col-4 col-md-4">
-                                <a href="javascript:void(0)" class="badge text-bg-light p-2  rounded-pill text-primary btn-hover-dark text-izin" data-bs-toggle="modal" data-bs-target="#lihatKemnaker">Publikasi Kemnaker</a>
+                                <a href="javascript:void(0)" class="badge text-bg-light p-2  rounded-pill text-primary btn-hover-dark text-izin text-wrap" data-bs-toggle="modal" data-bs-target="#lihatKemnaker">Publikasi Kemnaker</a>
                             </div>
                         </div>
                     </div>

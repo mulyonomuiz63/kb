@@ -12,7 +12,7 @@
       -webkit-line-clamp: unset;
     }
     .toggle-btn {
-      color: #007bff;
+      color: #047da7;
       cursor: pointer;
       font-size: 14px;
       margin-top: 5px;
@@ -44,7 +44,7 @@
 
                 <!-- Section Title Start -->
                 <div class="section-title text-center">
-                    <h5 class="sub-title">Testimoni Alumni</h5>
+                    <h5 class="sub-title text-primary">Testimoni Alumni</h5>
                 </div>
                 <!-- Section Title End -->
 

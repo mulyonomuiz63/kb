@@ -415,6 +415,9 @@
         img.fade-in {
           filter: blur(0);
         }
+        .text-primary{
+            color:#047da7 !important;
+        }
     </style>
     <?= $this->renderSection('css'); ?>
    
