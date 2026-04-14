@@ -1,136 +1,159 @@
 <?= $this->extend('siswa/template/app'); ?>
 <?= $this->section('content'); ?>
+
+<meta name="csrf-token" content="<?= csrf_hash() ?>">
+
+<style>
+    :root {
+        --chat-bg: #F9F6F2;
+        --chat-border: #E8E2D9;
+        --chat-active: #E8DED3;
+    }
+    .chat-container { background-color: var(--chat-bg); border: 1px solid var(--chat-border); border-radius: 12px; overflow: hidden; }
+    .chat-sidebar { border-right: 1px solid var(--chat-border); background: #fff; }
+    .chat-item { cursor: pointer; transition: all 0.2s; border-bottom: 1px solid #f1f1f1; }
+    .chat-item.active { background-color: var(--chat-active) !important; }
+    .bubble-in { background-color: #EEEAE4; border-radius: 15px; padding: 12px; max-width: 70%; }
+    .btn-send { background-color: #89B3A1; border: none; border-radius: 8px; color: white; }
+    
+    /* Style untuk List Materi di Modal */
+    .materi-item { cursor: pointer; border: 1px solid #eee; border-radius: 10px; transition: all 0.2s; }
+    .materi-item:hover { background-color: #f8f9fa; border-color: #89B3A1; }
+</style>
+
 <div class="d-flex flex-column flex-column-fluid py-3 py-lg-6 mt-8">
     <div id="kt_app_content" class="app-content flex-column-fluid">
         <div id="kt_app_content_container" class="app-container container-xxl">
 
-            <div class="d-flex flex-column flex-lg-row">
-                <div class="flex-column flex-lg-row-auto w-100 w-lg-300px w-xl-400px mb-10 mb-lg-0">
-                    <div class="card card-flush">
-                        <div class="card-header pt-7" id="kt_chat_contacts_header">
-                            <form class="w-100 position-relative" autocomplete="off">
-                                <i class="ki-outline ki-magnifier fs-2 position-absolute top-50 ms-5 translate-middle-y"></i>
-                                <input type="text" class="form-control form-control-solid px-13" name="search" value="" placeholder="Cari nama atau pesan..." />
-                            </form>
-                        </div>
+            <div class="chat-container d-flex flex-column flex-lg-row">
+                
+                <div class="chat-sidebar flex-column flex-lg-row-auto w-100 w-lg-350px">
+                    <div class="p-5 d-flex justify-content-between align-items-center">
+                        <h3 class="fw-bold m-0">Chat</h3>
+                        <button class="btn btn-sm btn-icon btn-light-primary" data-bs-toggle="modal" data-bs-target="#modal_pilih_materi">
+                            <i class="ki-outline ki-plus fs-2"></i>
+                        </button>
+                    </div>
 
-                        <div class="card-body pt-5" id="kt_chat_contacts_body">
-                            <div class="scroll-y me-n5 pe-5 h-200px h-lg-auto" data-kt-scroll="true" data-kt-scroll-activate="{default: false, lg: true}" data-kt-scroll-max-height="auto" data-kt-scroll-dependencies="#kt_header, #kt_app_header, #kt_toolbar, #kt_app_toolbar, #kt_footer, #kt_app_footer, #kt_chat_contacts_header" data-kt-scroll-wrappers="#kt_content, #kt_app_content, #kt_chat_contacts_body" data-kt-scroll-offset="5px">
+                    <div class="px-5 mb-5">
+                        <input type="text" class="form-control form-control-solid border" placeholder="Cari chat..." style="border-radius: 8px;">
+                    </div>
 
-                                <div class="d-flex flex-stack py-4">
-                                    <div class="d-flex align-items-center">
-                                        <div class="symbol symbol-45px symbol-circle">
-                                            <span class="symbol-label bg-light-danger text-danger fs-6 fw-bolder">B</span>
-                                            <div class="bg-success position-absolute border border-4 border-body h-9px w-9px ms-10 mt-10 start-0 top-0"></div>
-                                        </div>
-                                        <div class="ms-5">
-                                            <a href="#" class="fs-5 fw-bold text-gray-900 text-hover-primary mb-2">Budi Santoso</a>
-                                            <div class="fw-semibold fs-7 text-muted text-truncate w-150px">Ingin tanya jadwal ujian...</div>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex flex-column align-items-end ms-2">
-                                        <span class="text-muted fs-8 mb-1">5 Menit</span>
-                                        <span class="badge badge-sm badge-circle badge-light-danger">2</span>
-                                    </div>
+                    <div class="scroll-y h-500px" id="chat_list_container">
+                        <?php foreach($diskusi as $d): ?>
+                            <div class="chat-item d-flex align-items-center p-5" data-chat-id="101" data-name="<?= $d['nama_materi'] ?>">
+                                <div class="symbol symbol-45px symbol-circle me-4">
+                                    <img src="https://ui-avatars.com/api/?name=<?= $d['nama_materi'] ?>" alt="">
                                 </div>
-                                <div class="separator separator-dashed d-none"></div>
-                                <div class="d-flex flex-stack py-4 bg-light-primary px-3 rounded-3">
-                                    <div class="d-flex align-items-center">
-                                        <div class="symbol symbol-45px symbol-circle">
-                                            <img alt="Pic" src="https://ui-avatars.com/api/?name=Ani+Lestari&background=random" />
-                                        </div>
-                                        <div class="ms-5">
-                                            <a href="#" class="fs-5 fw-bold text-gray-900 text-hover-primary mb-2">Ani Lestari</a>
-                                            <div class="fw-semibold fs-7 text-muted">Sedang mengetik...</div>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex flex-column align-items-end ms-2">
-                                        <span class="text-muted fs-8 mb-1">Baru saja</span>
-                                    </div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold fs-6"><?= $d['nama_materi'] ?></div>
                                 </div>
-
                             </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+
+                <div class="flex-lg-row-fluid d-flex flex-column" id="chat_main_area" style="display: none !important;">
+                    <div class="p-5 border-bottom d-flex justify-content-between align-items-center bg-white">
+                        <div class="d-flex align-items-center">
+                            <div class="symbol symbol-40px symbol-circle me-3">
+                                <img id="header_img" src="" alt="">
+                            </div>
+                            <div>
+                                <div class="fw-bold fs-6" id="header_name">Nama Materi</div>
+                                <div class="text-muted fs-8">Siswa & Tutor</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-10 flex-grow-1 scroll-y h-400px bg-white bg-opacity-50" id="chat_history">
+                        <div class="text-center text-muted mt-20">Memuat percakapan...</div>
+                    </div>
+
+                    <div class="p-5 bg-white border-top">
+                        <div class="d-flex align-items-center gap-3">
+                            <input type="text" id="input_msg" class="form-control border py-3" placeholder="Ketik pesan...">
+                            <button class="btn btn-send px-5 py-3" id="btn_send">Kirim</button>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex-lg-row-fluid ms-lg-7 ms-xl-10">
-                    <div class="card" id="kt_chat_messenger">
-                        <div class="card-header" id="kt_chat_messenger_header">
-                            <div class="card-title">
-                                <div class="d-flex justify-content-center flex-column me-3">
-                                    <a href="#" class="fs-4 fw-bold text-gray-900 text-hover-primary me-1 mb-2 lh-1">Ani Lestari</a>
-                                    <div class="mb-0 lh-1">
-                                        <span class="badge badge-success badge-circle w-10px h-10px me-1"></span>
-                                        <span class="fs-7 fw-semibold text-muted">Online</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card-body" id="kt_chat_messenger_body">
-                            <div class="scroll-y me-n5 pe-5 h-450px h-lg-auto pb-10"
-                                data-kt-scroll="true"
-                                data-kt-scroll-activate="{default: false, lg: true}"
-                                data-kt-scroll-max-height="auto"
-                                data-kt-scroll-dependencies="#kt_header, #kt_app_header, #kt_toolbar, #kt_app_toolbar, #kt_footer, #kt_app_footer, #kt_chat_messenger_header, #kt_chat_messenger_footer"
-                                data-kt-scroll-wrappers="#kt_content, #kt_app_content, #kt_chat_messenger_body"
-                                data-kt-scroll-offset="5px">
-
-                                <div class="d-flex justify-content-start mb-10">
-                                    <div class="d-flex flex-column align-items-start">
-                                        <div class="d-flex align-items-center mb-2">
-                                            <div class="symbol symbol-35px symbol-circle">
-                                                <img alt="Pic" src="https://ui-avatars.com/api/?name=Ani+Lestari" />
-                                            </div>
-                                            <div class="ms-3">
-                                                <a href="#" class="fs-5 fw-bold text-gray-900 text-hover-primary me-1">Ani</a>
-                                                <span class="text-muted fs-7 mb-1">2 Menit yang lalu</span>
-                                            </div>
-                                        </div>
-                                        <div class="p-5 rounded bg-light-info text-dark fw-semibold mw-lg-400px text-start">
-                                            Halo Admin, apakah modul brevet A sudah bisa diunduh?
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="d-flex justify-content-end mb-10">
-                                    <div class="d-flex flex-column align-items-end">
-                                        <div class="d-flex align-items-center mb-2">
-                                            <div class="me-3">
-                                                <span class="text-muted fs-7 mb-1">Baru saja</span>
-                                                <a href="#" class="fs-5 fw-bold text-gray-900 text-hover-primary ms-1">Anda</a>
-                                            </div>
-                                            <div class="symbol symbol-35px symbol-circle">
-                                                <img alt="Pic" src="https://ui-avatars.com/api/?name=CS" />
-                                            </div>
-                                        </div>
-                                        <div class="p-5 rounded bg-light-primary text-dark fw-semibold mw-lg-400px text-end">
-                                            Halo Ani, sudah bisa ya. Silakan cek di menu Materi Belajar.
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-
-                        <div class="card-footer pt-6" id="kt_chat_messenger_footer">
-                            <textarea class="form-control form-control-flush mb-3" rows="1" data-kt-element="input" placeholder="Tulis pesan..."></textarea>
-
-                            <div class="d-flex flex-stack">
-                                <div class="d-flex align-items-center me-2">
-                                    <button class="btn btn-sm btn-icon btn-active-light-primary me-1" type="button" data-bs-toggle="tooltip" title="Kirim Gambar">
-                                        <i class="ki-outline ki-paper-clip fs-3"></i>
-                                    </button>
-                                </div>
-                                <button class="btn btn-primary" type="button" data-kt-element="send">Kirim</button>
-                            </div>
-                        </div>
-                    </div>
+                <div class="flex-lg-row-fluid d-flex flex-column align-items-center justify-content-center p-20" id="empty_state">
+                    <i class="ki-outline ki-messages fs-5x text-muted mb-5"></i>
+                    <h3 class="text-muted">Klik tombol + untuk memulai diskusi materi</h3>
                 </div>
+
             </div>
-
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="modal_pilih_materi" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered mw-500px">
+        <div class="modal-content rounded-4">
+            <div class="modal-header border-0">
+                <h3 class="fw-bold">Pilih Materi Diskusi</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body scroll-y mh-400px">
+                <?php foreach($materi as $m): ?>
+                    <div class="materi-item p-4 mb-3 d-flex align-items-center" onclick="selectMateri(1, 'Brevet Pajak A', 'Tyas Kurniasari')">
+                        <div class="symbol symbol-40px me-4">
+                            <span class="symbol-label bg-light-danger text-danger fw-bold"><?= substr($m['nama_materi'], 0, 2) ?></span>
+                        </div>
+                        <div>
+                            <div class="fw-bold fs-6"><?= $m['nama_materi'] ?></div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') } });
+
+    // Handle klik pada list chat kiri
+    $(document).on('click', '.chat-item', function() {
+        openChat($(this).data('chat-id'), $(this).data('name'), $(this).find('img').attr('src'));
+    });
+});
+
+// Fungsi ketika materi dipilih dari modal
+function selectMateri(materiId, materiName, tutorName) {
+    // 1. Tutup Modal
+    $('#modal_pilih_materi').modal('hide');
+
+    // 2. Jalankan AJAX untuk inisialisasi diskusi di database (Opsional)
+    // Jika hanya ingin simulasi UI:
+    const tutorImg = `https://ui-avatars.com/api/?name=${tutorName.replace(' ', '+')}`;
+    
+    // Tampilkan di area chat
+    openChat(materiId, materiName, tutorImg);
+}
+
+function openChat(id, name, img) {
+    // UI Transitions
+    $('.chat-item').removeClass('active');
+    $(`.chat-item[data-chat-id="${id}"]`).addClass('active');
+    $('#empty_state').attr('style', 'display: none !important');
+    $('#chat_main_area').attr('style', 'display: flex !important');
+
+    // Update Header
+    $('#header_name').text(name);
+    $('#header_img').attr('src', img);
+
+    // Load History (AJAX)
+    $('#chat_history').html('<div class="text-center mt-20"><span class="spinner-border spinner-border-sm text-muted"></span> Memuat pesan...</div>');
+    
+    // Simulasi Delay Load
+    setTimeout(() => {
+        $('#chat_history').html(`<div class="text-center text-muted fs-8 mb-5">Diskusi dimulai pada materi: ${name}</div>`);
+    }, 500);
+}
+</script>
+
 <?= $this->endSection(); ?>

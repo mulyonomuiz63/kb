@@ -339,7 +339,7 @@
         .close-deskripsi-paket{
             margin:13px 0 0 10px; 
             border-radius:100%; 
-            background-color:#047da7; 
+            background-color:#29459A; 
             border: none
         }
         .horizontal-nav {
@@ -416,7 +416,7 @@
           filter: blur(0);
         }
         .text-primary{
-            color:#047da7 !important;
+            color:#29459A !important;
         }
     </style>
     <?= $this->renderSection('css'); ?>

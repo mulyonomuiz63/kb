@@ -12,7 +12,7 @@
       -webkit-line-clamp: unset;
     }
     .toggle-btn {
-      color: #047da7;
+      color: #29459A;
       cursor: pointer;
       font-size: 14px;
       margin-top: 5px;

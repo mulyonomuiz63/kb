@@ -113,7 +113,8 @@
 <?= $this->section('content'); ?>
 <div class="row g-5 g-xl-8">
     <div class="col-xl-4">
-        <div class="sticky-column"> <div class="row mb-5 mb-xl-8 g-5 g-xl-8">
+        <div class="sticky-column"> 
+            <div class="row mb-5 mb-xl-8 g-5 g-xl-8">
                 <?php 
                 $menus = [
                     ['url' => 'sw-siswa/materi', 'icon' => 'ki-book-open', 'color' => 'primary', 'title' => 'Materi Belajar', 'desc' => 'Akses semua modul'],

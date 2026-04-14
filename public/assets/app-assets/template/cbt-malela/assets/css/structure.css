@@ -721,9 +721,9 @@ border-top-left-radius: 4px;
 border-top-right-radius: 4px;
 margin-right: -12px;
 margin-left: -12px;
-background: #047da7;
+background: #29459A;
 margin-top: -1px;
-background-image: linear-gradient(to top, #a7a6cb 0%, #047da7 52%, #047da7 100%);
+background-image: linear-gradient(to top, #a7a6cb 0%, #29459A 52%, #29459A 100%);
 }
 .navbar .navbar-item .nav-item.user-profile-dropdown .dropdown-menu .user-profile-section .media {
 margin: 0; }

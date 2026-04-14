@@ -9,7 +9,7 @@
             </div>
             <div class="col-12 mt-4 card call-to-action-wrapper rounded table-responsive-sm">
                 <table class="table  text-center no-border" style="font-size:12px">
-                    <tr style="background-color: #047da7;">
+                    <tr style="background-color: #29459A;">
                         <td class="text-white">NILAI</td>
                         <td class="text-white">HURUF</td>
                         <td class="text-white">PREDIKAT</td>
