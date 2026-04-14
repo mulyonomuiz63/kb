@@ -99,6 +99,7 @@ class Filters extends BaseFilters
                     'sw-siswa/ujian/kirim-ujian-selesai',
                     'sw-siswa/transaksi/cek-kode-voucher',
                     'sw-siswa/materi/get-file-materi',
+                    'sw-siswa/diskusi/send',
                     'midtrans/notification', //midtrans handle
                 ]
             ],

@@ -123,7 +123,7 @@
                     ['url' => 'sw-siswa/transaksi', 'icon' => 'ki-time', 'color' => 'info', 'title' => 'Histori', 'desc' => 'Status pembayaran'],
                     ['url' => 'sw-siswa/affiliate', 'icon' => 'ki-people', 'color' => 'warning', 'title' => 'Affiliate', 'desc' => 'Bonus referensi'],
                     ['url' => 'sw-siswa/profile', 'icon' => 'ki-user', 'color' => 'dark', 'title' => 'Akun Saya', 'desc' => 'Pengaturan data diri'],
-                    ['url' => 'sw-siswa', 'icon' => 'ki-messages', 'color' => 'warning', 'title' => 'Diskusi', 'desc' => 'Komunitas belajar'],
+                    ['url' => 'sw-siswa/diskusi', 'icon' => 'ki-messages', 'color' => 'warning', 'title' => 'Diskusi', 'desc' => 'Komunitas belajar'],
                     ['url' => 'list-bimbel', 'icon' => 'ki-briefcase', 'color' => 'warning', 'title' => 'List Paket', 'desc' => 'Daftar paket tersedia'],
                 ];
                 foreach ($menus as $m): ?>

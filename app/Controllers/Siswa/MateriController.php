@@ -97,6 +97,7 @@ class MateriController extends BaseController
             // 6. Cek Data Materi & Generate Link
             $cekDataMateri = $this->materiModel->where('kode_materi', $dec_kode)->first();
             $data['link'] = '';
+            $data['linkadmin'] = '';
             if ($cekDataMateri) {
                 $data['link'] =  encrypt_url($cekDataMateri['id_materi']) . '/' . $idmapel . '/' . $idkelas;
                 $data['linkadmin'] =  $idmapel . '/' . $idkelas . '/' . encrypt_url($cekDataMateri['guru']);

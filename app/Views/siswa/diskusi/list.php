@@ -1,159 +1,369 @@
 <?= $this->extend('siswa/template/app'); ?>
-<?= $this->section('content'); ?>
 
-<meta name="csrf-token" content="<?= csrf_hash() ?>">
-
+<?= $this->section('styles'); ?>
 <style>
     :root {
         --chat-bg: #F9F6F2;
         --chat-border: #E8E2D9;
         --chat-active: #E8DED3;
     }
-    .chat-container { background-color: var(--chat-bg); border: 1px solid var(--chat-border); border-radius: 12px; overflow: hidden; }
-    .chat-sidebar { border-right: 1px solid var(--chat-border); background: #fff; }
-    .chat-item { cursor: pointer; transition: all 0.2s; border-bottom: 1px solid #f1f1f1; }
-    .chat-item.active { background-color: var(--chat-active) !important; }
-    .bubble-in { background-color: #EEEAE4; border-radius: 15px; padding: 12px; max-width: 70%; }
-    .btn-send { background-color: #89B3A1; border: none; border-radius: 8px; color: white; }
-    
-    /* Style untuk List Materi di Modal */
-    .materi-item { cursor: pointer; border: 1px solid #eee; border-radius: 10px; transition: all 0.2s; }
-    .materi-item:hover { background-color: #f8f9fa; border-color: #89B3A1; }
+
+    .chat-container {
+        background-color: var(--chat-bg);
+        border: 1px solid var(--chat-border);
+        border-radius: 12px;
+        overflow: hidden;
+        display: flex;
+        height: 700px;
+    }
+
+    .chat-sidebar {
+        width: 350px;
+        border-right: 1px solid var(--chat-border);
+        background: #fff;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .chat-item {
+        cursor: pointer;
+        padding: 15px;
+        border-bottom: 1px solid #f1f1f1;
+        transition: 0.2s;
+    }
+
+    .chat-item.active {
+        background-color: var(--chat-active);
+    }
+
+    .chat-main {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        background: #fff;
+    }
+
+    .chat-history {
+        flex-grow: 1;
+        padding: 20px;
+        overflow-y: auto;
+        background-color: var(--chat-bg);
+    }
+
+    .bubble-me {
+        background-color: #0086a7;
+        color: white;
+        border-radius: 15px 15px 0 15px;
+        padding: 12px;
+        max-width: 70%;
+        margin-left: auto;
+        shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .bubble-them {
+        background-color: #EEEAE4;
+        color: #333;
+        border-radius: 15px 15px 15px 0;
+        padding: 12px;
+        max-width: 70%;
+        shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .materi-item {
+        cursor: pointer;
+        border: 1px solid #eee;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 10px;
+        transition: 0.2s;
+    }
+
+    .materi-item:hover {
+        background: #f8f9fa;
+        border-color: #0086a7;
+    }
+
+    .bubble-me {
+        background-color: #0086a7;
+        /* Warna Biru Cyan */
+        color: white;
+        border-radius: 15px 15px 0 15px;
+        padding: 12px 18px;
+        max-width: 70%;
+        margin-left: auto;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        line-height: 1.5;
+    }
+
+    /* Agar link di dalam bubble biru tetap terlihat jelas (warna putih) */
+    .bubble-me a {
+        color: #fff !important;
+        text-decoration: underline;
+        font-weight: 600;
+    }
+
+    .bubble-them {
+        background-color: #EEEAE4;
+        /* Warna Abu-abu Cream */
+        color: #333;
+        border-radius: 15px 15px 15px 0;
+        padding: 12px 18px;
+        max-width: 70%;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        line-height: 1.5;
+    }
+
+    /* Link di bubble abu-abu menggunakan warna biru */
+    .bubble-them a {
+        color: #0086a7 !important;
+        text-decoration: underline;
+    }
 </style>
 
-<div class="d-flex flex-column flex-column-fluid py-3 py-lg-6 mt-8">
-    <div id="kt_app_content" class="app-content flex-column-fluid">
-        <div id="kt_app_content_container" class="app-container container-xxl">
+<?= $this->endSection(); ?>
+<?= $this->section('content'); ?>
 
-            <div class="chat-container d-flex flex-column flex-lg-row">
-                
-                <div class="chat-sidebar flex-column flex-lg-row-auto w-100 w-lg-350px">
-                    <div class="p-5 d-flex justify-content-between align-items-center">
-                        <h3 class="fw-bold m-0">Chat</h3>
-                        <button class="btn btn-sm btn-icon btn-light-primary" data-bs-toggle="modal" data-bs-target="#modal_pilih_materi">
-                            <i class="ki-outline ki-plus fs-2"></i>
-                        </button>
+<div class="container-xxl mt-2">
+    <div class="chat-container">
+        <div class="chat-sidebar">
+            <div class="p-5 d-flex justify-content-between align-items-center">
+                <h3 class="fw-bold m-0">Chat</h3>
+                <button class="btn btn-sm btn-icon btn-light-primary" data-bs-toggle="modal" data-bs-target="#modal_materi">
+                    <i class="ki-outline ki-plus fs-2"></i>
+                </button>
+            </div>
+            <div class="px-5 mb-4">
+                <input type="text" class="form-control form-control-solid" placeholder="Cari diskusi..." id="searchChat">
+            </div>
+            <?php foreach ($diskusi as $d): ?>
+                <div class="chat-item d-flex align-items-center" data-materi="<?= $d['materi'] ?>" data-namaMateri="<?= $d['nama_materi'] ?>">
+                    <div class="symbol symbol-45px symbol-circle me-4">
+                        <img src="https://ui-avatars.com/api/?name=<?= urlencode($d['nama_materi']) ?>&background=random" alt="">
                     </div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="fw-bold fs-6 text-dark"><?= $d['nama_materi'] ?></div>
 
-                    <div class="px-5 mb-5">
-                        <input type="text" class="form-control form-control-solid border" placeholder="Cari chat..." style="border-radius: 8px;">
-                    </div>
-
-                    <div class="scroll-y h-500px" id="chat_list_container">
-                        <?php foreach($diskusi as $d): ?>
-                            <div class="chat-item d-flex align-items-center p-5" data-chat-id="101" data-name="<?= $d['nama_materi'] ?>">
-                                <div class="symbol symbol-45px symbol-circle me-4">
-                                    <img src="https://ui-avatars.com/api/?name=<?= $d['nama_materi'] ?>" alt="">
-                                </div>
-                                <div class="flex-grow-1">
-                                    <div class="fw-bold fs-6"><?= $d['nama_materi'] ?></div>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-
-                <div class="flex-lg-row-fluid d-flex flex-column" id="chat_main_area" style="display: none !important;">
-                    <div class="p-5 border-bottom d-flex justify-content-between align-items-center bg-white">
-                        <div class="d-flex align-items-center">
-                            <div class="symbol symbol-40px symbol-circle me-3">
-                                <img id="header_img" src="" alt="">
-                            </div>
-                            <div>
-                                <div class="fw-bold fs-6" id="header_name">Nama Materi</div>
-                                <div class="text-muted fs-8">Siswa & Tutor</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="p-10 flex-grow-1 scroll-y h-400px bg-white bg-opacity-50" id="chat_history">
-                        <div class="text-center text-muted mt-20">Memuat percakapan...</div>
-                    </div>
-
-                    <div class="p-5 bg-white border-top">
-                        <div class="d-flex align-items-center gap-3">
-                            <input type="text" id="input_msg" class="form-control border py-3" placeholder="Ketik pesan...">
-                            <button class="btn btn-send px-5 py-3" id="btn_send">Kirim</button>
+                            <?php if ($d['unread_count'] > 0): ?>
+                                <span class="badge badge-circle badge-primary unread-badge" data-materi="<?= $d['materi'] ?>">
+                                    <?= ($d['unread_count'] > 99) ? '99+' : $d['unread_count'] ?>
+                                </span>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
+            <?php endforeach; ?>
+        </div>
 
-                <div class="flex-lg-row-fluid d-flex flex-column align-items-center justify-content-center p-20" id="empty_state">
-                    <i class="ki-outline ki-messages fs-5x text-muted mb-5"></i>
-                    <h3 class="text-muted">Klik tombol + untuk memulai diskusi materi</h3>
+        <div class="chat-main">
+            <div id="empty_state" class="d-flex flex-column align-items-center justify-content-center h-100">
+                <i class="ki-outline ki-messages fs-5x text-muted mb-5"></i>
+                <p class="text-muted">Pilih diskusi di sebelah kiri untuk memulai</p>
+            </div>
+
+            <div id="chat_area" style="display:none;" class="h-100 flex-column">
+                <div class="p-5 border-bottom d-flex align-items-center">
+                    <div class="fw-bold fs-5" id="active_title">Nama Materi</div>
                 </div>
 
+                <div class="chat-history" id="chat_history"></div>
+
+                <div class="p-5 border-top bg-white">
+                    <div class="d-flex gap-3">
+                        <input type="text" id="msg_input" class="form-control" placeholder="Tulis pesan...">
+                        <button class="btn btn-primary" id="btn_send">Kirim</button>
+                    </div>
+                </div>
             </div>
         </div>
+
     </div>
 </div>
 
-<div class="modal fade" id="modal_pilih_materi" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered mw-500px">
-        <div class="modal-content rounded-4">
-            <div class="modal-header border-0">
-                <h3 class="fw-bold">Pilih Materi Diskusi</h3>
+<div class="modal fade" id="modal_materi" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered mw-450px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="fw-bold">Pilih Materi</h3>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body scroll-y mh-400px">
-                <?php foreach($materi as $m): ?>
-                    <div class="materi-item p-4 mb-3 d-flex align-items-center" onclick="selectMateri(1, 'Brevet Pajak A', 'Tyas Kurniasari')">
-                        <div class="symbol symbol-40px me-4">
-                            <span class="symbol-label bg-light-danger text-danger fw-bold"><?= substr($m['nama_materi'], 0, 2) ?></span>
-                        </div>
-                        <div>
-                            <div class="fw-bold fs-6"><?= $m['nama_materi'] ?></div>
-                        </div>
+            <div class="modal-body scroll-y mh-300px">
+                <?php foreach ($materi as $m): ?>
+                    <div class="materi-item" onclick="startNewChat('<?= $m['kode_materi'] ?>', '<?= $m['nama_materi'] ?>')">
+                        <div class="fw-bold"><?= $m['nama_materi'] ?></div>
+                        <div class="text-muted fs-7">Klik untuk buka diskusi</div>
                     </div>
                 <?php endforeach; ?>
             </div>
         </div>
     </div>
 </div>
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<?= $this->endSection(); ?>
+<?= $this->section('scripts') ?>
 <script>
-$(document).ready(function() {
-    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') } });
+    let currentMateri = '';
+    let lastDisplayedId = 0; // Menyimpan ID pesan terakhir yang tampil
+    let chatInterval = null; // Untuk menghentikan interval saat ganti materi
 
-    // Handle klik pada list chat kiri
-    $(document).on('click', '.chat-item', function() {
-        openChat($(this).data('chat-id'), $(this).data('name'), $(this).find('img').attr('src'));
+    $(document).ready(function() {
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
+        $(document).on('click', '.chat-item', function() {
+            const materi = $(this).data('materi');
+            const namaMateri = $(this).data('namamateri');
+            loadChat(materi, namaMateri);
+        });
+
+        $('#btn_send').on('click', function() {
+            sendMessage();
+        });
+        $('#msg_input').on('keypress', function(e) {
+            if (e.which == 13) sendMessage();
+        });
     });
-});
 
-// Fungsi ketika materi dipilih dari modal
-function selectMateri(materiId, materiName, tutorName) {
-    // 1. Tutup Modal
-    $('#modal_pilih_materi').modal('hide');
+    function startNewChat(kodeMateri, namaMateri) {
+        // 1. Tutup modal materi
+        $('#modal_materi').modal('hide');
 
-    // 2. Jalankan AJAX untuk inisialisasi diskusi di database (Opsional)
-    // Jika hanya ingin simulasi UI:
-    const tutorImg = `https://ui-avatars.com/api/?name=${tutorName.replace(' ', '+')}`;
-    
-    // Tampilkan di area chat
-    openChat(materiId, materiName, tutorImg);
-}
+        // 2. Bersihkan interval lama jika ada (agar tidak terjadi tabrakan request)
+        if (chatInterval) {
+            clearInterval(chatInterval);
+        }
 
-function openChat(id, name, img) {
-    // UI Transitions
-    $('.chat-item').removeClass('active');
-    $(`.chat-item[data-chat-id="${id}"]`).addClass('active');
-    $('#empty_state').attr('style', 'display: none !important');
-    $('#chat_main_area').attr('style', 'display: flex !important');
+        // 3. Reset variabel global
+        currentMateri = kodeMateri;
+        lastDisplayedId = 0; // Mulai dari awal untuk materi baru
 
-    // Update Header
-    $('#header_name').text(name);
-    $('#header_img').attr('src', img);
+        // 4. Update UI Header
+        $('#active_title').text(namaMateri);
+        $('#active_img').attr('src', `https://ui-avatars.com/api/?name=${encodeURIComponent(namaMateri)}&background=random`);
 
-    // Load History (AJAX)
-    $('#chat_history').html('<div class="text-center mt-20"><span class="spinner-border spinner-border-sm text-muted"></span> Memuat pesan...</div>');
-    
-    // Simulasi Delay Load
-    setTimeout(() => {
-        $('#chat_history').html(`<div class="text-center text-muted fs-8 mb-5">Diskusi dimulai pada materi: ${name}</div>`);
-    }, 500);
-}
+        // 5. Transisi tampilan (Sembunyikan empty state, tampilkan chat area)
+        $('#empty_state').attr('style', 'display: none !important;');
+        $('#chat_area').attr('style', 'display: flex !important;');
+
+        // 6. Bersihkan history chat lama di layar
+        $('#chat_history').html('');
+
+        // 7. Ambil pesan awal (jika sebelumnya sudah pernah ada chat di materi ini)
+        fetchMessages(kodeMateri);
+
+        // 8. Aktifkan Real-time Monitoring untuk materi baru ini
+        chatInterval = setInterval(function() {
+            if (currentMateri) {
+                fetchMessages(currentMateri);
+            }
+        }, 3000);
+    }
+
+    function loadChat(materi, namaMateri) {
+        if (currentMateri === materi) return; // Jangan reload jika klik materi yang sama
+
+        currentMateri = materi;
+        lastDisplayedId = 0; // Reset ID saat pindah materi
+
+        // UI Transitions
+        $('.chat-item').removeClass('active');
+        $(`.chat-item[data-materi="${materi}"]`).addClass('active');
+        $('#empty_state').attr('style', 'display: none !important;');
+        $('#chat_area').attr('style', 'display: flex !important;');
+        $('#active_title').text(namaMateri);
+        $('#chat_history').html(''); // Bersihkan chat lama
+
+        // Ambil data awal
+        fetchMessages(materi);
+
+        // Set interval untuk cek pesan baru setiap 3 detik
+        if (chatInterval) clearInterval(chatInterval);
+        chatInterval = setInterval(function() {
+            if (currentMateri) fetchMessages(currentMateri);
+        }, 3000);
+    }
+
+    function fetchMessages(materi) {
+        $.ajax({
+            url: `<?= base_url('sw-siswa/diskusi/get-messages') ?>/${encodeURIComponent(materi)}`,
+            type: 'GET',
+            data: {
+                last_id: lastDisplayedId
+            },
+            success: function(response) {
+                const data = response.messages;
+                const unreadId = response.first_unread_id;
+
+                if (data.length > 0) {
+                    let html = '';
+                    data.forEach(m => {
+                        if (parseInt(m.id_chat_materi) > lastDisplayedId) {
+                            lastDisplayedId = parseInt(m.id_chat_materi);
+                        }
+
+                        const isMe = (m.email === '<?= session()->get('email') ?>');
+                        const processedText = urlify(m.text);
+
+                        // Tambahkan ID pada elemen HTML untuk referensi scroll
+                        const msgId = `msg-${m.id_chat_materi}`;
+
+                        if (isMe) {
+                            html += `<div id="${msgId}" class="mb-4 text-end"><div class="bubble-me text-start d-inline-block">${processedText}</div></div>`;
+                        } else {
+                            html += `
+                            <div id="${msgId}" class="d-flex mb-4">
+                                <div class="symbol symbol-35px symbol-circle me-3"><img src="https://ui-avatars.com/api/?name=${encodeURIComponent(m.nama)}"></div>
+                                <div class="bubble-them">${processedText}</div>
+                            </div>`;
+                        }
+                    });
+
+                    $('#chat_history').append(html);
+
+                    // LOGIKA SCROLL
+                    if (unreadId && lastDisplayedId == data[data.length - 1].id_chat_materi) {
+                        // Jika ada pesan belum terbaca, scroll ke pesan tersebut
+                        const targetElement = document.getElementById(`msg-${unreadId}`);
+                        if (targetElement) {
+                            targetElement.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'start'
+                            });
+                        }
+                    } else {
+                        // Jika tidak ada pesan baru, scroll ke paling bawah seperti biasa
+                        $('#chat_history').scrollTop($('#chat_history')[0].scrollHeight);
+                    }
+                }
+            }
+        });
+    }
+
+    function sendMessage() {
+        const text = $('#msg_input').val();
+        if (!text || !currentMateri) return;
+
+        // Nonaktifkan input sementara saat mengirim
+        $('#msg_input').val('').prop('disabled', true);
+
+        $.post(`<?= base_url('sw-siswa/diskusi/send') ?>`, {
+            materi: currentMateri,
+            text: text
+        }, function() {
+            $('#msg_input').prop('disabled', false).focus();
+            fetchMessages(currentMateri); // Langsung cek pesan baru
+        });
+    }
+
+    function urlify(text) {
+        if (!text) return "";
+        var urlRegex = /(https?:\/\/[^\s]+)/g;
+        return text.replace(urlRegex, function(url) {
+            return '<a href="' + url + '" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: underline;">' + url + '</a>';
+        });
+    }
 </script>
 
 <?= $this->endSection(); ?>

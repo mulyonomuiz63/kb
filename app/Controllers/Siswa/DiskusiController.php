@@ -8,12 +8,13 @@ class DiskusiController extends BaseController
 {
     protected $chatMateriModel;
     protected $materiModel;
+    protected $siswaModel;
 
     public function __construct()
     {
         $this->chatMateriModel = new \App\Models\ChatMateriModel();
         $this->materiModel = new \App\Models\MateriModel();
-
+        $this->siswaModel = new \App\Models\SiswaModel();
     }
 
     public function index()
@@ -22,30 +23,130 @@ class DiskusiController extends BaseController
             ['title' => 'Diskusi', 'url' => '#'],
         ];
 
-        $data['diskusi'] = $this->chatMateriModel->join('materi', 'chat_materi.materi = materi.kode_materi')->where('email', session()->get('email'))->get()->getResultArray(); // Ganti 'kode_materi' dengan parameter yang sesuai
+        // Di ChatController.php (Metode index atau yang memuat sidebar)
+        $myEmail = session()->get('email');
+
+
+        $data['diskusi'] = $this->chatMateriModel
+            ->select('
+        chat_materi.materi, 
+        materi.nama_materi, 
+        COUNT(CASE WHEN chat_materi.status_notif = "0" AND chat_materi.email != "' . $myEmail . '" THEN 1 END) as unread_count
+    ')
+            ->join('materi', 'chat_materi.materi = materi.kode_materi')
+            // Jangan filter email di sini secara kaku jika ingin menghitung pesan orang lain
+            // Kita filter agar hanya menampilkan materi yang memang pernah Anda ajak diskusi
+            ->whereIn('chat_materi.materi', function ($builder) use ($myEmail) {
+                return $builder->select('materi')->from('chat_materi')->where('email', $myEmail);
+            })
+            ->groupBy('chat_materi.materi')
+            ->get()
+            ->getResultArray();
+
         $data['materi'] = $this->materiModel->groupBy('kode_materi')->get()->getResultArray();
 
         return view('siswa/diskusi/list', $data);
     }
 
-    public function create()
+    public function getMessages($materiName)
     {
-        // Validasi input
-        $tutorId = $this->request->getPost('tutor_id');
-        $subject = $this->request->getPost('subject');
+        $materiName = urldecode($materiName);
+        $lastId = $this->request->getGet('last_id') ?? 0;
+        $myEmail = session()->get('email');
 
-        if (!$tutorId || !$subject) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Data tidak lengkap']);
+        // 1. Ambil pesan baru
+        $messages = $this->chatMateriModel->where('materi', $materiName)
+            ->where('id_chat_materi >', $lastId)
+            ->orderBy('date_created', 'ASC')
+            ->findAll();
+
+        // 2. Cari pesan pertama belum terbaca
+        $firstUnread = $this->chatMateriModel->where('materi', $materiName)
+            ->where('status_notif', '0')
+            ->where('email !=', $myEmail)
+            ->orderBy('id_chat_materi', 'ASC')
+            ->first();
+
+        // 3. Update status (Gunakan Try-Catch)
+        try {
+            $db = \Config\Database::connect();
+            $builder = $db->table('chat_materi');
+            $builder->where('materi', $materiName);
+            $builder->where('status_notif', '0');
+            $builder->where('email !=', $myEmail);
+
+            // Periksa apakah ada baris yang memenuhi kriteria
+            if ($builder->countAllResults(false) > 0) {
+                $builder->update(['status_notif' => '1']);
+            }
+        } catch (\Exception $e) {
+            // Abaikan error "no data to update" agar response tetap kembali ke JS
         }
 
-        // Contoh Logika Simpan Database (Sesuaikan dengan Model Anda)
-        $data = ['tutor_id' => $tutorId, 'subject' => $subject, 'user_id' => session()->get('id')];
-        $chatModel->insert($data);
-
         return $this->response->setJSON([
-            'status' => 'success',
-            'message' => 'Diskusi berhasil dibuat!',
-            'redirect' => base_url('sw-siswa/diskusi') // Atau arahkan ke ID chat spesifik
+            'messages'        => $messages,
+            'first_unread_id' => $firstUnread ? $firstUnread['id_chat_materi'] : null
         ]);
+    }
+
+    public function sendMessage()
+    {
+
+        if ($this->request->isAJAX()) {
+            try {
+                $kode_materi = $this->request->getPost('materi');
+                $chat_text   = (string) $this->request->getPost('text');
+
+                $user = $this->siswaModel->asObject()->find(session('id'));
+                $dataMateri = $this->materiModel->where('kode_materi', $kode_materi)->first();
+
+                $link = '';
+                $linkadmin = '';
+                if ($dataMateri) {
+                    $link =  encrypt_url($dataMateri['id_materi']) . '/' . encrypt_url($dataMateri['mapel']) . '/' . encrypt_url($dataMateri['kelas']);
+                    $linkadmin =  encrypt_url($dataMateri['mapel']) . '/' . encrypt_url($dataMateri['kelas']) . '/' . encrypt_url($dataMateri['guru']);
+                }
+
+
+
+                if ($dataMateri) {
+                    send_notif(
+                        $dataMateri['guru'],
+                        'Pesan baru: ' . session()->get('nama'),
+                        mb_strimwidth($chat_text, 0, 40, "..."),
+                        base_url('sw-guru/materi/lihat-materi/' . $link)
+                    );
+                    send_notif(
+                        '1',
+                        'Pesan baru: ' . session()->get('nama'),
+                        mb_strimwidth($dataMateri['nama_materi'], 0, 40, "..."),
+                        base_url('sw-admin/guru/lihat-materi/' . $linkadmin)
+                    );
+                }
+
+                $data = [
+                    'materi'       => $kode_materi,
+                    'nama'         => session()->get('nama'),
+                    'gambar'       => $user->avatar ?? 'default.png',
+                    'email'        => session()->get('email'),
+                    'text'         => htmlspecialchars($chat_text),
+                    'date_created' => time()
+                ];
+
+                if ($this->chatMateriModel->save($data)) {
+                    // PERBAIKAN: Kirim status success beserta token CSRF terbaru
+                    return $this->response->setJSON([
+                        'status' => 'success',
+                        'token'  => csrf_hash() // Hash baru setelah save
+                    ]);
+                }
+            } catch (\Exception $e) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => $e->getMessage(),
+                    'token' => csrf_hash() // Tetap kirim hash baru meski error
+                ], 500);
+            }
+        }
     }
 }
