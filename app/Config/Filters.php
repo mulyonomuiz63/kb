@@ -87,6 +87,7 @@ class Filters extends BaseFilters
                     'sw-admin/guru/get-chat-materi',
                     'sw-admin/guru/get-file-materi',
                     'sw-admin/guru/chat-materi',
+                    'sw-admin/diskusi/send',
                     'sw-guru/materi/get-chat-materi',
                     'sw-guru/materi/get-file-materi',
                     'sw-guru/materi/chat-materi',

@@ -118,6 +118,59 @@
         color: #0086a7 !important;
         text-decoration: underline;
     }
+
+    /* Container untuk meratakan ke kanan */
+    .justify-content-end {
+        justify-content: flex-end;
+    }
+
+    .chat-bubble-container {
+        display: flex;
+        align-items: flex-end;
+    }
+
+    /* Bubble untuk Siswa (Kanan) */
+    .bubble-me {
+        background-color: #9da3ac; 
+        color: #fff;
+        border-radius: 8px 8px 0 8px;
+        padding: 8px 10px;
+        position: relative;
+        min-width: 80px;
+        max-width: 80%;
+    }
+
+    /* Bubble untuk Guru/Lawan Bicara (Kiri) */
+    .bubble-them {
+        background-color: #2e3136;
+        color: #fff;
+        border-radius: 8px 8px 8px 0;
+        padding: 8px 10px;
+        position: relative;
+        min-width: 80px;
+        max-width: 80%;
+    }
+
+    .chat-name {
+        font-weight: bold;
+        font-size: 0.8rem;
+        margin-bottom: 2px;
+        color: #00d1ff; /* Warna nama */
+    }
+
+    .chat-message-text {
+        font-size: 0.9rem;
+        margin-bottom: 10px; /* Ruang untuk waktu di bawah */
+        word-wrap: break-word;
+    }
+
+    .chat-time {
+        font-size: 0.65rem;
+        color: rgba(255,255,255,0.5);
+        position: absolute;
+        bottom: 4px;
+        right: 8px;
+    }
 </style>
 
 <?= $this->endSection(); ?>
@@ -296,45 +349,71 @@
                 const data = response.messages;
                 const unreadId = response.first_unread_id;
 
-                if (data.length > 0) {
+                if (data && data.length > 0) {
                     let html = '';
                     data.forEach(m => {
-                        if (parseInt(m.id_chat_materi) > lastDisplayedId) {
-                            lastDisplayedId = parseInt(m.id_chat_materi);
-                        }
+                        const msgIdRaw = parseInt(m.id_chat_materi);
 
-                        const isMe = (m.email === '<?= session()->get('email') ?>');
-                        const processedText = urlify(m.text);
+                        if (msgIdRaw > lastDisplayedId) {
+                            lastDisplayedId = msgIdRaw;
 
-                        // Tambahkan ID pada elemen HTML untuk referensi scroll
-                        const msgId = `msg-${m.id_chat_materi}`;
+                            const isMe = (m.email === '<?= session()->get('email') ?>');
+                            const processedText = urlify(m.text);
+                            const msgId = `msg-${m.id_chat_materi}`;
 
-                        if (isMe) {
-                            html += `<div id="${msgId}" class="mb-4 text-end"><div class="bubble-me text-start d-inline-block">${processedText}</div></div>`;
-                        } else {
-                            html += `
-                            <div id="${msgId}" class="d-flex mb-4">
-                                <div class="symbol symbol-35px symbol-circle me-3"><img src="https://ui-avatars.com/api/?name=${encodeURIComponent(m.nama)}"></div>
-                                <div class="bubble-them">${processedText}</div>
+                            // FIX: Definisikan variabel time di sini
+                            const time = new Date(m.date_created * 1000).toLocaleTimeString([], {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                hour12: false
+                            });
+
+                            if (isMe) {
+                                html += `
+                            <div id="${msgId}" class="chat-bubble-container mb-4 justify-content-end">
+                                <div class="bubble-me">
+                                    <div class="chat-name text-info">${m.nama}</div>
+                                    <div class="chat-message-text">${processedText}</div>
+                                    <div class="chat-time">${time}</div>
+                                </div>
+                                <div class="symbol symbol-35px symbol-circle ms-3 align-self-end">
+                                    <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(m.nama)}&background=0086a7&color=fff">
+                                </div>
                             </div>`;
+                            } else {
+                                // FIX: Ubah struktur Them (Guru/Orang lain) agar sesuai gambar contoh
+                                html += `
+                            <div id="${msgId}" class="chat-bubble-container mb-4">
+                                <div class="symbol symbol-35px symbol-circle me-3 align-self-end">
+                                    <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(m.nama)}&background=E8DED3&color=333">
+                                </div>
+                                <div class="bubble-them">
+                                    <div class="chat-name">${m.nama}</div>
+                                    <div class="chat-message-text">${processedText}</div>
+                                    <div class="chat-time">${time}</div>
+                                </div>
+                            </div>`;
+                            }
                         }
                     });
 
-                    $('#chat_history').append(html);
+                    if (html !== '') {
+                        $('#chat_history').append(html);
 
-                    // LOGIKA SCROLL
-                    if (unreadId && lastDisplayedId == data[data.length - 1].id_chat_materi) {
-                        // Jika ada pesan belum terbaca, scroll ke pesan tersebut
-                        const targetElement = document.getElementById(`msg-${unreadId}`);
-                        if (targetElement) {
-                            targetElement.scrollIntoView({
-                                behavior: 'smooth',
-                                block: 'start'
-                            });
+                        // LOGIKA SCROLL: Hanya scroll jika ada pesan baru
+                        if (unreadId) {
+                            const targetElement = document.getElementById(`msg-${unreadId}`);
+                            if (targetElement) {
+                                targetElement.scrollIntoView({
+                                    behavior: 'smooth',
+                                    block: 'start'
+                                });
+                            }
+                        } else {
+                            $('#chat_history').animate({
+                                scrollTop: $('#chat_history')[0].scrollHeight
+                            }, 300);
                         }
-                    } else {
-                        // Jika tidak ada pesan baru, scroll ke paling bawah seperti biasa
-                        $('#chat_history').scrollTop($('#chat_history')[0].scrollHeight);
                     }
                 }
             }

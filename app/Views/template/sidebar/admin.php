@@ -1,108 +1,111 @@
         <!--  BEGIN SIDEBAR  -->
-        
-<?php
 
-    //dashboard
-    $dashboard = array(
-		'sw-admin/',
-	);
-	
-	//user
-	$siswa = array(
-    		'sw-admin/siswa',
-    		'sw-admin/siswa-tidakaktif',
-    		'sw-admin/siswa-banned',
-    		'sw-admin/sertifikatab',
-    		'sw-admin/sertifikat',
-    		'sw-admin/ujian'
-	);
-	$guru = array(
-		'sw-admin/guru',
-		'sw-admin/ujianguru',
-		'sw-admin/lihat_ujian',
-		'sw-admin/pg_siswa',
-		'sw-admin/mapelguru',
-		'sw-admin/materi',
-		'sw-admin/lihat_materi'
-	);
-	$mitra = array(
-		'sw-admin/mitra',
-		'sw-admin/mitra_voucher'
-	);
-	$pic = array(
-		'sw-admin/pic',
-	);
-	$user = array_merge($siswa, $guru, $mitra, $pic);
-	
-	//kelas
-	$kelas = array(
-		'sw-admin/kelas',
-	);
-	
-	//mapel
-	$mapel = array(
-		'sw-admin/mapel',
-	);
-	
-	//relasi
-	$relasi = array(
-		'sw-admin/relasi',
-		'sw-admin/atur_relasi'
-	);
-	
-	//langganan
-	$iklan = array(
-		'sw-admin/iklan',
-	);
-	$twibbon = array(
-    	'sw-admin/twibbon',
-	);
-	$galeri = array(
-	    'sw-admin/galeri' ,  
-	 );
-	$testimoni = array(
-	    'sw-admin/testimoni' ,  
-	 );
-	 
-	 $quiz = array(
-	    'sw-admin/quiz' ,  
-	    'sw-admin/soal' ,
-	    'sw-admin/hasil' ,
-	 );
- 	$artikel = array(
-	    'sw-admin/artikel',
-		'sw-admin/tambah-artikel',
-		'sw-admin/edit-artikel',
-		'sw-admin/kategori',
-		'sw-admin/tambah-kategori',
-		'sw-admin/edit-kategori',  
-	 );
-	$diskon = array(
-	    'sw-admin/diskon',
-	);
-	$paket = array(
-	    'sw-admin/paket',
-	    'sw-admin/review'
-	);
-	$transaksi = array(
-	    'sw-admin/transaksi',
-	);
-	//affiliate
-	$affiliate = array(
-	    'sw-admin/affiliate',
-	    'sw-admin/affiliate/komisi'
-	);
-	$langganan = array_merge($iklan, $twibbon,$artikel,$galeri,$testimoni,$quiz, $diskon, $paket, $transaksi, $affiliate);
-	
-	//profile
-	$profile = array(
-	    'sw-admin/profile',
-	);
+        <?php
 
-    $settings = array(
-        'sw-admin/settings',
-    );
-?>
+        //dashboard
+        $dashboard = array(
+            'sw-admin/',
+        );
+
+        //user
+        $siswa = array(
+            'sw-admin/siswa',
+            'sw-admin/siswa-tidakaktif',
+            'sw-admin/siswa-banned',
+            'sw-admin/sertifikatab',
+            'sw-admin/sertifikat',
+            'sw-admin/ujian'
+        );
+        $guru = array(
+            'sw-admin/guru',
+            'sw-admin/ujianguru',
+            'sw-admin/lihat_ujian',
+            'sw-admin/pg_siswa',
+            'sw-admin/mapelguru',
+            'sw-admin/materi',
+            'sw-admin/lihat_materi'
+        );
+        $mitra = array(
+            'sw-admin/mitra',
+            'sw-admin/mitra_voucher'
+        );
+        $pic = array(
+            'sw-admin/pic',
+        );
+        $user = array_merge($siswa, $guru, $mitra, $pic);
+
+        //kelas
+        $kelas = array(
+            'sw-admin/kelas',
+        );
+
+        //mapel
+        $mapel = array(
+            'sw-admin/mapel',
+        );
+
+        //relasi
+        $relasi = array(
+            'sw-admin/relasi',
+            'sw-admin/atur_relasi'
+        );
+
+        //langganan
+        $iklan = array(
+            'sw-admin/iklan',
+        );
+        $twibbon = array(
+            'sw-admin/twibbon',
+        );
+        $galeri = array(
+            'sw-admin/galeri',
+        );
+        $testimoni = array(
+            'sw-admin/testimoni',
+        );
+
+        $quiz = array(
+            'sw-admin/quiz',
+            'sw-admin/soal',
+            'sw-admin/hasil',
+        );
+        $artikel = array(
+            'sw-admin/artikel',
+            'sw-admin/tambah-artikel',
+            'sw-admin/edit-artikel',
+            'sw-admin/kategori',
+            'sw-admin/tambah-kategori',
+            'sw-admin/edit-kategori',
+        );
+        $diskon = array(
+            'sw-admin/diskon',
+        );
+        $paket = array(
+            'sw-admin/paket',
+            'sw-admin/review'
+        );
+        $transaksi = array(
+            'sw-admin/transaksi',
+        );
+        //affiliate
+        $affiliate = array(
+            'sw-admin/affiliate',
+            'sw-admin/affiliate/komisi'
+        );
+        $langganan = array_merge($iklan, $twibbon, $artikel, $galeri, $testimoni, $quiz, $diskon, $paket, $transaksi, $affiliate);
+
+        //profile
+        $profile = array(
+            'sw-admin/profile',
+        );
+
+        $settings = array(
+            'sw-admin/settings',
+        );
+        $diskusi = array(
+            'sw-admin/diskusi',
+        );
+        ?>
 
         <div class="sidebar-wrapper sidebar-theme">
 
@@ -116,7 +119,7 @@
 
                     <div class="user-info">
 
-                        <?= img_lazy('assets/app-assets/user/'.session()->get('avatar'),"loading", ['class' => 'bg-white']) ?>
+                        <?= img_lazy('assets/app-assets/user/' . session()->get('avatar'), "loading", ['class' => 'bg-white']) ?>
 
                         <h6 class=""><?= session()->get('nama'); ?></h6>
 
@@ -150,7 +153,7 @@
                     <li class="menu <?= set_active($user)['menu']; ?>">
                         <a href="#components" data-toggle="collapse" aria-expanded="<?= set_active($user)['expanded']; ?>" class="dropdown-toggle">
                             <div class="">
-                                
+
                                 <span><i class="bi bi-person-fill-check mr-4"></i> User</span>
                             </div>
                             <div>
@@ -239,8 +242,8 @@
                                 <a href="<?= base_url('sw-admin/testimoni'); ?>">Testimoni </a>
 
                             </li>
-                            
-                             <li class="<?= set_active_submenu($diskon); ?>">
+
+                            <li class="<?= set_active_submenu($diskon); ?>">
 
                                 <a href="<?= base_url('sw-admin/diskon'); ?>"> Diskon </a>
 
@@ -257,7 +260,7 @@
                                 <a href="<?= base_url('sw-admin/transaksi'); ?>"> Transaksi </a>
 
                             </li>
-                            
+
                             <li class="<?= set_active_submenu($affiliate); ?>">
 
                                 <a href="<?= base_url('sw-admin/affiliate'); ?>"> Affiliate </a>
@@ -274,6 +277,13 @@
                             </svg><span>USER MENU</span></div>
                     </li>
 
+                    <li class="menu <?= set_active($diskusi)['menu']; ?>">
+                        <a href="<?= base_url('sw-admin/diskusi'); ?>" aria-expanded="<?= set_active($diskusi)['expanded']; ?>" class="dropdown-toggle">
+                            <div class="">
+                                <span><i class="bi bi-chat-dots-fill mr-4"></i>Diskusi</span>
+                            </div>
+                        </a>
+                    </li>
                     <li class="menu <?= set_active($profile)['menu']; ?>">
                         <a href="<?= base_url('sw-admin/profile'); ?>" aria-expanded="<?= set_active($profile)['expanded']; ?>" class="dropdown-toggle">
                             <div class="">
