@@ -9,7 +9,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background-color: #009ef7 !important;
+        background-color: #29459A!important;
         border: none;
         cursor: pointer;
         transition: all 0.2s ease;
