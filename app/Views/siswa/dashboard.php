@@ -9,7 +9,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background-color: #29459A!important;
+        background-color: #29459A !important;
         border: none;
         cursor: pointer;
         transition: all 0.2s ease;
@@ -99,11 +99,13 @@
         background-color: #50cd89;
         color: #ffffff;
     }
+
     @media (min-width: 1200px) {
         .sticky-column {
             position: -webkit-sticky;
             position: sticky;
-            top: 80px; /* Jarak dari atas layar, sesuaikan dengan tinggi header/navbar kamu */
+            top: 80px;
+            /* Jarak dari atas layar, sesuaikan dengan tinggi header/navbar kamu */
             z-index: 1;
         }
     }
@@ -113,9 +115,9 @@
 <?= $this->section('content'); ?>
 <div class="row g-5 g-xl-8">
     <div class="col-xl-4">
-        <div class="sticky-column"> 
+        <div class="sticky-column">
             <div class="row mb-5 mb-xl-8 g-5 g-xl-8">
-                <?php 
+                <?php
                 $menus = [
                     ['url' => 'sw-siswa/materi', 'icon' => 'ki-book-open', 'color' => 'primary', 'title' => 'Materi Belajar', 'desc' => 'Akses semua modul'],
                     ['url' => 'sw-siswa/ujian', 'icon' => 'ki-notepad-edit', 'color' => 'danger', 'title' => 'Ujian & Quiz', 'desc' => 'Evaluasi pemahaman'],
@@ -127,15 +129,15 @@
                     ['url' => 'list-bimbel', 'icon' => 'ki-briefcase', 'color' => 'warning', 'title' => 'List Paket', 'desc' => 'Daftar paket tersedia'],
                 ];
                 foreach ($menus as $m): ?>
-                <div class="col-6 d-flex">
-                    <div class="card card-stretch shadow-sm w-100">
-                        <a href="<?= base_url($m['url']) ?>" class="btn btn-flex btn-text-gray-800 btn-active-color-<?= $m['color'] ?> bg-body flex-column justify-content-start align-items-start text-start w-100 p-6 p-xl-10 h-100">
-                            <i class="ki-outline <?= $m['icon'] ?> fs-2tx mb-5 ms-n1 text-<?= $m['color'] ?>"></i>
-                            <span class="fs-4 fw-bold"><?= $m['title'] ?></span>
-                            <span class="fs-7 fw-semibold text-muted mt-1 d-none d-md-block"><?= $m['desc'] ?></span>
-                        </a>
+                    <div class="col-6 d-flex">
+                        <div class="card card-stretch shadow-sm w-100">
+                            <a href="<?= base_url($m['url']) ?>" class="btn btn-flex btn-text-gray-800 btn-active-color-<?= $m['color'] ?> bg-body flex-column justify-content-start align-items-start text-start w-100 p-6 p-xl-10 h-100">
+                                <i class="ki-outline <?= $m['icon'] ?> fs-2tx mb-5 ms-n1 text-<?= $m['color'] ?>"></i>
+                                <span class="fs-4 fw-bold"><?= $m['title'] ?></span>
+                                <span class="fs-7 fw-semibold text-muted mt-1 d-none d-md-block"><?= $m['desc'] ?></span>
+                            </a>
+                        </div>
                     </div>
-                </div>
                 <?php endforeach; ?>
             </div>
         </div>
@@ -237,7 +239,7 @@
                                                 <a href="<?= base_url('sw-siswa/transaksi/pesan/' . encrypt_url($rows->idpaket)) ?>" class="btn btn-primary btn-sm fw-bold flex-grow-1 rounded-3 py-3">Pesan Sekarang</a>
 
                                                 <?php if (!empty($affiliate)): ?>
-                                                    <button type="button" class="btn-affiliate-action btn-copy-link btn-copy-link"
+                                                    <button type="button" class="btn-affiliate-action btn-copy-link"
                                                         data-paket_id="<?= $rows->idpaket ?>"
                                                         data-bs-toggle="tooltip" title="Salin Link Affiliate">
                                                         <i class="ki-outline ki-copy fs-3"></i>
@@ -387,12 +389,13 @@
     });
 
     function showAlert(type, title, message) {
-        swal({
+        // Gunakan Swal.fire untuk SweetAlert2
+        Swal.fire({
             title: title,
             text: message,
-            icon: type,
+            icon: type, // 'success', 'error', 'warning', 'info'
             timer: 2200,
-            buttons: false
+            showConfirmButton: false // Di SweetAlert2, 'buttons: false' diganti ini
         });
     }
 </script>

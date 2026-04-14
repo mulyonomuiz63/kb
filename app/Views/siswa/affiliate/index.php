@@ -31,8 +31,7 @@
                             <div class="d-flex flex-stack flex-wrap">
                                 <div class="d-flex align-items-center mb-2">
                                     <div class="me-5">
-                                        <div class="fs-7 text-muted fw-semibold">Kode Affiliate</div>
-                                        <div class="fs-2 fw-bolder text-gray-800"><?= $affiliates->kode_affiliate ?></div>
+                                        <div class="fs-7 text-muted fw-semibold">Affiliate</div>
                                     </div>
                                     <span class="badge <?= $currStatus['class'] ?> fs-7 fw-bold py-3 px-4">
                                         <?= $currStatus['label'] ?>

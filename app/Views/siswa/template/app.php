@@ -4,6 +4,7 @@
 
 <head>
 	<?= $this->include('siswa/template/partials/_styles') ?>
+	<?= $this->renderSection('meta_tags') ?>
 	<?= $this->renderSection('styles') ?>
 	<meta name="csrf-token" content="<?= csrf_hash() ?>">
 </head>

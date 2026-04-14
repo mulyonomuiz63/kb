@@ -79,6 +79,15 @@
   }
 </style>
 <?= $this->endSection(); ?>
+<?= $this->section('meta_tags') ?>
+    <meta property="og:title" content="<?= $paket->nama_paket ?>" />
+    <meta property="og:description" content="<?= $paket->jenis_paket ?>" />
+    <meta property="og:url" content="<?= current_url() ?>" />
+    <meta property="og:article:section" content="<?= $paket->jenis_paket ?>" />
+    <meta property="og:image" content="<?= base_url('assets-landing/images/paket/thumbnails/'.$paket->file) ?>" />
+    <meta property="og:image:alt" content="<?= $paket->nama_paket ?>" />
+    <meta property="og:image:type" content="image/jpeg" />
+<?= $this->endSection() ?>
 <?= $this->section('content'); ?>
 <div class="container py-10">
   <div class="row g-7">

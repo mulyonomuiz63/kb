@@ -94,6 +94,7 @@ class Filters extends BaseFilters
                     'api/notifications/mark-all-read',
                     'api/notifications/mark-as-read',
                     'api/notifications/update-ui',
+                    'sw-siswa/affiliate/copy',
                     'sw-siswa/materi/get-chat-materi',
                     'sw-siswa/materi/chat-materi',
                     'sw-siswa/ujian/kirim-ujian',
