@@ -33,6 +33,90 @@
     letter-spacing: 2px;
   }
 </style>
+<style>
+  /* Membuat area input transparan menutupi seluruh box */
+  .upload-container {
+    border: 2px dashed #cbd5e0;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .upload-container:hover {
+    border-color: #0086a7;
+    background-color: #f0f9ff !important;
+  }
+
+  .file-input-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 2;
+  }
+
+  .border-dashed {
+    border-style: dashed !important;
+  }
+
+  .rounded-lg {
+    border-radius: 1rem !important;
+  }
+
+  /* Mempercantik tombol ubah metode */
+  .btn-outline-secondary.border-dashed {
+    color: #6c757d;
+    background: #f8f9fa;
+    border-width: 1.5px;
+  }
+
+  .btn-outline-secondary.border-dashed:hover {
+    background: #e2e8f0;
+    color: #333;
+  }
+</style>
+<style>
+  .selection-card {
+    cursor: pointer;
+    border: 2px solid #f3f6f9;
+    transition: all 0.2s ease;
+  }
+
+  .selection-card:hover {
+    border-color: #0086a7;
+    background-color: #f0f9ff !important;
+    transform: translateY(-2px);
+  }
+
+  .symbol-label {
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background-color: #ebf8fa;
+  }
+
+  /* Mempercantik font inside modal */
+  .fw-bold {
+    font-weight: 700 !important;
+  }
+
+  .fw-semibold {
+    font-weight: 600 !important;
+  }
+
+  .fs-6 {
+    font-size: 1.05rem !important;
+  }
+
+  .fs-7 {
+    font-size: 0.85rem !important;
+  }
+</style>
 <?= $this->endSection(); ?>
 
 <?= $this->section('content'); ?>
@@ -65,10 +149,7 @@
                 <i class="ki-outline ki-arrow-right fs-2 text-gray-400"></i>
               </a>
 
-              <a href="javascript:void(0)"
-                id="btn-bayar-midtrans"
-                data-id="<?= encrypt_url($transaksi->idtransaksi) ?>"
-                class="payment-option d-flex align-items-center p-6 rounded-3 text-decoration-none">
+              <a href="javascript:void(0)" onclick="processSelection('<?= encrypt_url($transaksi->idtransaksi) ?>', 'online')" class="payment-option d-flex align-items-center p-6 rounded-3 text-decoration-none">
                 <div class="symbol symbol-40px me-5">
                   <span class="symbol-label bg-light-success">
                     <i class="ki-outline ki-flash-circle fs-2x text-success"></i>
@@ -127,14 +208,34 @@
               <input type="hidden" name="idtransaksi" value="<?= $transaksi->idtransaksi; ?>">
 
               <div class="mb-5">
-                <label class="form-label fw-bold">Upload Bukti Transfer</label>
-                <input type="file" name="bukti_bayar" class="form-control form-control-solid" accept="image/*" required>
-                <div class="form-text text-muted">Format: JPG, PNG, JPEG. Max 2MB.</div>
+                <label class="form-label fw-bold mb-3">Upload Bukti Transfer</label>
+
+                <div class="upload-container shadow-sm border-dashed p-5 text-center position-relative rounded-lg bg-light">
+                  <input type="file" name="bukti_bayar" id="bukti_bayar" class="file-input-overlay" accept="image/*" required>
+
+                  <div class="upload-placeholder">
+                    <i class="fas fa-cloud-upload-alt text-primary mb-3" style="font-size: 3rem;"></i>
+                    <h5 class="fw-bold text-dark">Klik atau Tarik File Ke Sini</h5>
+                    <p class="text-muted small mb-0">Format: JPG, PNG, JPEG (Maks. 2MB)</p>
+                  </div>
+
+                  <div id="file-preview-name" class="mt-3 font-weight-bold text-success d-none">
+                    <i class="fas fa-check-circle mr-2"></i> <span id="filename-text"></span>
+                  </div>
+                </div>
               </div>
 
-              <button type="submit" class="btn btn-primary w-100 py-4 fw-bold fs-6">
-                <i class="ki-outline ki-cloud-upload fs-2 me-2"></i> Konfirmasi Pembayaran
-              </button>
+              <div class="d-flex flex-column gap-3">
+                <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm mb-3">
+                  <i class="fas fa-paper-plane mr-2"></i> Konfirmasi Pembayaran
+                </button>
+
+                <button type="button"
+                  onclick="ubahMetode('<?= encrypt_url($transaksi->idtransaksi) ?>')"
+                  class="btn btn-outline-secondary btn-sm w-100 border-dashed py-3">
+                  <i class="fas fa-sync-alt mr-2"></i> Ubah Metode Pembayaran
+                </button>
+              </div>
             </form>
           </div>
         </div>
@@ -210,9 +311,30 @@
 
 <?= $this->section('scripts'); ?>
 <script>
-  // Integrasi Flashdata (SweetAlert)
-  <?= session()->getFlashdata('pesan'); ?>
+  document.getElementById('bukti_bayar').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const previewDiv = document.getElementById('file-preview-name');
+    const filenameText = document.getElementById('filename-text');
+    const placeholder = document.querySelector('.upload-placeholder');
 
+    if (file) {
+      // Membaca file untuk dijadikan preview gambar
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        // Mengganti icon upload dengan gambar yang dipilih
+        placeholder.innerHTML = `
+                <div class="mb-3">
+                    <img src="${event.target.result}" style="max-height: 120px; border-radius: 8px;" class="shadow-sm">
+                </div>
+                <h5 class="fw-bold text-success">File Siap Diupload!</h5>
+            `;
+
+        previewDiv.classList.remove('d-none');
+        filenameText.innerText = file.name;
+      }
+      reader.readAsDataURL(file);
+    }
+  });
   // Countdown Logic (Fungsi tetap sama)
   var countDownDate = new Date("<?= $transaksi->tgl_exp ?>").getTime();
   var x = setInterval(function() {
@@ -267,66 +389,117 @@
   }
 </script>
 <script>
-    $(document).on('click', '#btn-bayar-midtrans', function(e) {
-        e.preventDefault();
+  function ubahMetode(idEncrypted) {
+    Swal.fire({
+      title: 'Pilih Metode Pembayaran',
+      html: `
+            <div class="row mt-4 px-2">
+                <div class="col-12 mb-3">
+                    <a href="<?= base_url("sw-siswa/transaksi/manual-bayar/" . encrypt_url($transaksi->idtransaksi)) ?>" class="card p-4 selection-card border-2">
+                        <div class="d-flex align-items-center">
+                            <div class="symbol symbol-45px mr-3 bg-light-primary p-3 rounded">
+                                <i class="fas fa-university text-primary fs-4"></i>
+                            </div>
+                            <div class="text-left">
+                                <span class="fw-bold text-dark d-block fs-6">Transfer Manual Bank</span>
+                                <span class="text-muted fw-semibold fs-7 small">Konfirmasi manual oleh admin</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
 
-        let btn = $(this);
-        let idt = btn.data('id');
-
-        // Ambil token CSRF dari meta tag (pastikan meta tag sudah ada di header)
-        let csrfName = $('meta[name="X-CSRF-TOKEN"]').attr('name') || '<?= csrf_token() ?>';
-        let csrfHash = $('meta[name="X-CSRF-TOKEN"]').attr('content') || '<?= csrf_hash() ?>';
-
-        // Beri loading pada tombol agar tidak diklik berkali-kali
-        btn.addClass('disabled').html('<span class="spinner-border spinner-border-sm"></span> Loading...');
-
-        $.ajax({
-            url: "<?= base_url('sw-siswa/transaksi/midtrans-bayar') ?>/" + idt, // Sesuaikan route Anda
-            type: "GET",
-            data: {
-                [csrfName]: csrfHash
-            },
-            dataType: "JSON",
-            success: function(response) {
-                // Update CSRF Hash agar request selanjutnya tidak error 403
-                if (response.csrf_hash) {
-                    $('meta[name="X-CSRF-TOKEN"]').attr('content', response.csrf_hash);
-                }
-
-                if (response.status) {
-                    // Eksekusi Modal Snap
-                    window.snap.pay(response.snap_token, {
-                        onSuccess: function(result) {
-                            Swal.fire('Berhasil!', 'Pembayaran Anda telah sukses.', 'success').then(() => {
-                                // Arahkan ke halaman riwayat transaksi agar user bisa melihat status terupdate
-                                window.location.href = "<?= base_url('sw-siswa/transaksi') ?>";
-                            });
-                        },
-                        onPending: function(result) {
-                            // Tampilkan nomor VA atau instruksi pembayaran (opsional, Midtrans sudah menampilkannya)
-                            Swal.fire('Pending', 'Silahkan selesaikan pembayaran sesuai instruksi.', 'warning').then(() => {
-                                window.location.href = "<?= base_url('sw-siswa/transaksi') ?>";
-                            });
-                        },
-                        onError: function(result) {
-                            Swal.fire('Gagal', 'Pembayaran gagal atau dibatalkan.', 'error');
-                            btn.removeClass('disabled').text('Lanjut Bayar');
-                        },
-                        onClose: function() {
-                            // Jika user menutup modal tanpa bayar
-                            btn.removeClass('disabled').text('Lanjut Bayar');
-                        }
-                    });
-                } else {
-                    Swal.fire('Error', response.message, 'error');
-                    btn.removeClass('disabled').text('Lanjut Bayar');
-                }
-            },
-            error: function() {
-                Swal.fire('Error', 'Gagal menghubungi server.', 'error');
-                btn.removeClass('disabled').text('Lanjut Bayar');
-            }
-        });
+                <div class="col-12">
+                    <div class="card p-4 selection-card border-2" onclick="processSelection('${idEncrypted}', 'online')">
+                        <div class="d-flex align-items-center">
+                            <div class="symbol symbol-45px mr-3 bg-light-success p-3 rounded">
+                                <i class="fas fa-bolt text-success fs-4"></i>
+                            </div>
+                            <div class="text-left">
+                                <span class="fw-bold text-dark d-block fs-6">Virtual Account (Otomatis)</span>
+                                <span class="text-muted fw-semibold fs-7 small">Verifikasi instan via Midtrans</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `,
+      showConfirmButton: false,
+      showCancelButton: true,
+      cancelButtonText: 'Batal',
+      customClass: {
+        container: 'my-swal-container'
+      }
     });
+  }
+
+  function processSelection(idEncrypted, method) {
+    // Tampilkan loading saat update database
+    Swal.fire({
+      title: 'Menyiapkan Pembayaran...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    $.ajax({
+      url: "<?= base_url('sw-siswa/transaksi/update-metode-pembayaran'); ?>", // Route update DB yang kita buat tadi
+      type: "POST",
+      data: {
+        "<?= csrf_token() ?>": "<?= csrf_hash() ?>",
+        "id": idEncrypted,
+        "metode": method
+      },
+      dataType: "json",
+      success: function(response) {
+        if (response.status === 'success') {
+          if (method === 'Transfer Manual') {
+            // Jika manual, langsung reload ke halaman instruksi manual
+            window.location.href = "<?= base_url('sw-siswa/transaksi/manual-bayar/') ?>/" + idEncrypted;
+          } else {
+            // Jika Virtual Account, panggil fungsi Midtrans
+            panggilMidtrans(idEncrypted);
+          }
+        } else {
+          Swal.fire('Error', 'Gagal memperbarui metode', 'error');
+        }
+      },
+      error: function(err) {
+        console.error(err.responseText);
+        Swal.fire('Error', 'Terjadi kesalahan sistem', 'error');
+      }
+    });
+  }
+
+  function panggilMidtrans(idEncrypted) {
+    $.ajax({
+      url: "<?= base_url('sw-siswa/transaksi/midtrans-bayar') ?>/" + idEncrypted,
+      type: "GET",
+      dataType: "JSON",
+      success: function(response) {
+        if (response.status) {
+          Swal.close(); // Tutup loading Swal
+          window.snap.pay(response.snap_token, {
+            onSuccess: function(result) {
+              window.location.href = "<?= base_url('sw-siswa/transaksi') ?>";
+            },
+            onPending: function(result) {
+              window.location.href = "<?= base_url('sw-siswa/transaksi') ?>";
+            },
+            onError: function(result) {
+              Swal.fire('Gagal', 'Pembayaran gagal.', 'error').then(() => {
+                location.reload();
+              });
+            },
+            onClose: function() {
+              location.reload(); // Reload agar tampilan update ke status VA
+            }
+          });
+        } else {
+          Swal.fire('Error', response.message, 'error');
+        }
+      }
+    });
+  }
 </script>
 <?= $this->endSection(); ?>

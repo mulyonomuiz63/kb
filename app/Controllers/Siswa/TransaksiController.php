@@ -36,9 +36,9 @@ class TransaksiController extends BaseController
         ];
 
         $this->transaksiModel->where('tgl_exp <', date('Y-m-d H:i:s'))
-                     ->where('idsiswa', session('id'))
-                     ->set(['status' => 'E'])
-                     ->update();
+            ->where('idsiswa', session('id'))
+            ->set(['status' => 'E'])
+            ->update();
         $data['transaksi'] = $this->transaksiModel->getByIdSiswaAll(session('id'));
 
         return view('siswa/transaksi/list', $data);
@@ -46,7 +46,7 @@ class TransaksiController extends BaseController
     public function pesan($id = '', $kodevoucher = '')
     {
         try {
-            
+
             // 1. Inisialisasi & Setup Session URL
             $uri = new \CodeIgniter\HTTP\URI($this->request->getUri());
             session()->set(['url' => $uri->getPath()]);
@@ -106,7 +106,7 @@ class TransaksiController extends BaseController
 
     public function checkout()
     {
-        $db = \Config\Database::connect(); 
+        $db = \Config\Database::connect();
         // 2. Persiapan Data
         $tgl_mulai = date('Y-m-d H:i:s');
         $tgl_exp   = date('Y-m-d H:i:s', strtotime('+ 1 day', strtotime($tgl_mulai)));
@@ -485,7 +485,6 @@ class TransaksiController extends BaseController
                     'snap_token' => $snapToken,
                     'csrf_hash'  => csrf_hash()
                 ]);
-
             } catch (\Exception $e) {
                 return $this->response->setJSON([
                     'status'    => false,
@@ -499,6 +498,65 @@ class TransaksiController extends BaseController
                 'snap_token' => $cekTransaksi->token,
                 'csrf_hash'  => csrf_hash()
             ]);
+        }
+    }
+
+    public function updateMetodePembayaran()
+    {
+        // 1. Pastikan hanya request AJAX
+        if (!$this->request->isAJAX()) {
+            return $this->response->setStatusCode(403)->setJSON(['message' => 'Forbidden']);
+        }
+
+        $db = \Config\Database::connect();
+
+        try {
+            // 2. Ambil dan validasi data input
+            $idEncrypted = $this->request->getPost('id');
+            $metodeBaru  = $this->request->getPost('metode');
+
+            $idTransaksi = decrypt_url($idEncrypted);
+            if (!$idTransaksi) {
+                throw new \Exception('ID transaksi tidak valid.');
+            }
+
+            // 4. Mulai Database Transaction
+            $db->transBegin();
+
+            $tgl_mulai = date('Y-m-d H:i:s');
+            $tgl_exp   = date('Y-m-d H:i:s', strtotime('+ 1 day', strtotime($tgl_mulai)));
+            $updateData = [
+                'tgl_exp'     => $tgl_exp,
+                'tgl_drop'    => $tgl_exp,
+                'jenis_bayar' => $metodeBaru,
+            ];
+
+            $db->table('transaksi')
+                ->where('idtransaksi', $idTransaksi)
+                ->update($updateData);
+            // 5. Cek status transaksi
+            if ($db->transStatus() === false) {
+                $db->transRollback();
+                throw new \Exception('Gagal ubah metode pembayaran.');
+            } else {
+                // Commit perubahan jika semua oke
+                $db->transCommit();
+
+                return $this->response->setJSON([
+                    'status' => 'success',
+                    'csrf'   => csrf_hash() // Kirim token baru jika page tidak reload (opsional)
+                ]);
+            }
+        } catch (\Exception $e) {
+            // Jika terjadi error, batalkan semua perubahan DB
+            if ($db->transStatus() === false) {
+                $db->transRollback();
+            }
+
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => $e->getMessage()
+            ])->setStatusCode(500);
         }
     }
 }

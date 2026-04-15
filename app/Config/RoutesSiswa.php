@@ -24,6 +24,7 @@ $routes->group('sw-siswa', ['filter' => 'roleCheck:2'], function ($routes) {
         $routes->get('pesan-bayar/(:segment)', 'Siswa\TransaksiController::pesanBayar/$1');
         $routes->get('manual-bayar/(:segment)', 'Siswa\TransaksiController::manualBayar/$1');
         $routes->post('upload-bukti-bayar', 'Siswa\TransaksiController::uploadBuktiBayar');
+        $routes->post('update-metode-pembayaran', 'Siswa\TransaksiController::updateMetodePembayaran');
 
         //midtrans
         $routes->get('midtrans-bayar/(:segment)', 'Siswa\TransaksiController::midtransBayar/$1');
