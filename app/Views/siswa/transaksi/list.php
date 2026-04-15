@@ -83,7 +83,7 @@
                                                     Bayar Sekarang
                                                 </a>
 
-                                            <?php elseif ($s->status == 'M' && !empty($s->token)) : ?>
+                                            <?php elseif (in_array($s->status, ['M', 'PM']) && !empty($s->token)) : ?>
                                                 <button type="button"
                                                     class="btn btn-sm btn-light-info fw-bold btn-bayar"
                                                     data-id="<?= encrypt_url($s->idtransaksi) ?>">
