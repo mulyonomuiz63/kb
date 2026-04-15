@@ -396,7 +396,7 @@ class TransaksiController extends BaseController
         $idtransaksi = decrypt_url($idt);
 
         // Cek apakah sudah pernah diproses ke Midtrans (status 'M')
-        $cekTransaksi = $this->transaksiModel->where('idtransaksi', $idtransaksi)->where('status', 'M')->get()->getRowObject();
+        $cekTransaksi = $this->transaksiModel->where('idtransaksi', $idtransaksi)->whereIn('status', ['M', 'PM'])->get()->getRowObject();
 
         if (empty($cekTransaksi)) {
 
