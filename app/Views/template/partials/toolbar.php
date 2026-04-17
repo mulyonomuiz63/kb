@@ -13,7 +13,7 @@
                     <?php foreach ($breadcrumbs as $item): ?>
 
                         <li class="breadcrumb-item">
-                            <span class="bullet bg-gray-500 w-5px h-2px"></span>
+                            <i class="ki-duotone ki-right fs-7 text-gray-500 mx-n1"></i>
                         </li>
 
                         <li class="breadcrumb-item text-muted">
@@ -22,7 +22,7 @@
                                     <?= esc($item['title']) ?>
                                 </a>
                             <?php else: ?>
-                                <span class="text-gray-900"><?= esc($item['title']) ?></span>
+                                <span class="text-gray-900 fw-bold"><?= esc($item['title']) ?></span>
                             <?php endif; ?>
                         </li>
 
