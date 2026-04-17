@@ -6,12 +6,48 @@
 	<?= $this->include('siswa/template/partials/_styles') ?>
 	<?= $this->renderSection('meta_tags') ?>
 	<?= $this->renderSection('styles') ?>
+	<style>
+		/* Mencegah scroll saat loader aktif */
+		body.page-loading {
+			overflow: hidden !important;
+		}
+
+		#global-loader {
+			transition: opacity 0.6s ease-out, visibility 0.6s;
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-color: #ffffff;
+			/* Warna putih solid agar konten tidak terlihat */
+			z-index: 99999;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+		}
+
+		/* Class untuk menghilangkan loader via JS */
+		.loader-hidden {
+			opacity: 0;
+			visibility: hidden;
+		}
+	</style>
 	<meta name="csrf-token" content="<?= csrf_hash() ?>">
 </head>
 <!--end::Head-->
 <!--begin::Body-->
 
 <body id="kt_app_body" data-kt-app-header-fixed-mobile="true" data-kt-app-toolbar-enabled="true" class="app-default">
+	<div id="global-loader">
+
+		<div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status"></div>
+
+		<div class="mt-5">
+			<div class="text-gray-600 fw-semibold fs-6 text-center">Sedang memuat...</div>
+		</div>
+	</div>
 	<!--begin::Theme mode setup on page load-->
 	<script>
 		var defaultThemeMode = "light";
@@ -82,6 +118,26 @@
 	<?= $this->include('siswa/template/partials/_script_notif') ?>
 	<?= $this->include('siswa/template/partials/_script_lazy') ?>
 	<?= $this->include('siswa/template/partials/_script_alert') ?>
+	<script>
+		// Tambahkan class loading ke body saat mulai
+		document.body.classList.add('page-loading');
+
+		window.addEventListener('load', function() {
+			const loader = document.getElementById('global-loader');
+			if (loader) {
+				// Beri sedikit jeda 300ms agar mata pengguna tidak kaget saat transisi
+				setTimeout(() => {
+					loader.classList.add('loader-hidden');
+					document.body.classList.remove('page-loading');
+
+					// Hapus elemen dari DOM setelah animasi selesai (opsional)
+					setTimeout(() => {
+						loader.remove();
+					}, 600);
+				}, 300);
+			}
+		});
+	</script>
 </body>
 <!--end::Body-->
 
