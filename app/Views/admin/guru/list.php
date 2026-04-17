@@ -1,47 +1,63 @@
 <?= $this->extend('template/app'); ?>
 
 <?= $this->section('content'); ?>
+<div class="d-flex flex-column flex-column-fluid">
+    <div id="kt_app_content" class="app-content flex-column-fluid">
+        <div id="kt_app_content_container" class="app-container container-xxl">
+            
+            <div class="card card-flush shadow-sm border-0">
+                <div class="card-header align-items-center py-5 gap-2 gap-md-5">
+                    
+                    <div class="card-title">
+                        <div class="d-flex align-items-center position-relative my-1">
+                            <i class="ki-duotone ki-magnifier fs-3 position-absolute ms-4">
+                                <span class="path1"></span><span class="path2"></span>
+                            </i>
+                            <input type="text" data-kt-guru-table-filter="search" class="form-control form-control-solid w-250px ps-12" placeholder="Cari Instruktur..." />
+                        </div>
+                    </div>
 
-<div class="layout-px-spacing">
-    <div class="row layout-top-spacing">
-        <div class="col-lg-12 layout-spacing">
-            <div class="widget shadow p-3 bg-white">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="widget-heading d-flex justify-content-between">
-                            <a href="<?= base_url('sw-admin/guru/create') ?>" class="btn btn-primary">Tambah Instruktur</a>
-                        </div>
-                        <div class="table-responsive mt-4">
-                            <table id="datatable-list" class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Nama</th>
-                                        <th>Email</th>
-                                        <th>Mapel</th>
-                                        <th>Soal</th>
-                                        <th>Opsi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                </tbody>
-                            </table>
-                        </div>
+                    <div class="card-toolbar">
+                        <a href="<?= base_url('sw-admin/guru/create') ?>" class="btn btn-primary fw-bold">
+                            <i class="ki-duotone ki-plus fs-2"></i> Tambah Instruktur
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card-body pt-0">
+                    <div class="table-responsive">
+                        <table id="datatable-list" class="table align-middle table-row-dashed fs-6 gy-5 w-100">
+                            <thead>
+                                <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
+                                    <th class="min-w-200px">Nama</th>
+                                    <th class="min-w-150px">Email</th>
+                                    <th class="min-w-5">Mapel</th>
+                                    <th class="min-w-5px text-center">Soal</th>
+                                    <th class="min-w-10px text-center">Opsi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="fw-semibold text-gray-600">
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 </div>
 <?= $this->endSection(); ?>
+
 <?= $this->section('scripts'); ?>
 <script>
     $(document).ready(function() {
+        
         var table = $('#datatable-list').DataTable({
             "processing": true,
             "serverSide": true,
             "order": [],
             "ajax": {
-                "url": "<?= base_url('sw-admin/guru/datatable') ?>", // Arahkan ke method controller di atas
+                "url": "<?= base_url('sw-admin/guru/datatable') ?>", 
                 "type": "POST",
                 "data": function(d) {
                     // Kirim CSRF Token
@@ -53,29 +69,40 @@
                     return json.data;
                 }
             },
-            "columns": [{
-                    "data": "nama"
+            "columns": [
+                { 
+                    "data": "nama",
+                    "className": "text-gray-800 fw-bold"
                 },
-                {
-                    "data": "email"
+                { 
+                    "data": "email" 
                 },
-                {
-                    "data": "mapel"
+                { 
+                    "data": "mapel" 
                 },
-                {
-                    "data": "soal"
+                { 
+                    "data": "soal",
+                    "className": "text-center"
                 },
-                {
-                    "data": "opsi"
+                { 
+                    "data": "opsi",
+                    "className": "text-center text-nowrap",
+                    "orderable": false
                 }
             ],
-            // Total ada 5 objek, sama dengan 5 <th> di atas.
-            "language": {
-                "search": "Cari Siswa:",
-                "lengthMenu": "Tampilkan _MENU_ data",
-                "processing": '<div class="spinner-border text-primary" role="status"></div>'
+            // Inisialisasi ulang komponen menu bawaan Metronic jika terdapat di tombol Opsi
+            "drawCallback": function(settings) {
+                if (typeof KTMenu !== 'undefined') {
+                    KTMenu.createInstances();
+                }
             }
         });
+
+        // Fitur Pencarian Custom yang menyatu dengan UI Metronic
+        $('[data-kt-guru-table-filter="search"]').on('keyup', function() {
+            table.search(this.value).draw();
+        });
+
     });
 </script>
 <?= $this->endSection(); ?>

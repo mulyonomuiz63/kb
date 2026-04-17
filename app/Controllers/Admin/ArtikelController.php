@@ -10,8 +10,9 @@ class ArtikelController extends BaseController
 
     public function index()
     {
-        $data = [
-            'title' => 'Daftar Artikel',
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'Data Artikel', 'url' => '#'],
         ];
         return view('admin/artikel/list', $data);
     }
@@ -59,25 +60,61 @@ class ArtikelController extends BaseController
 
             $results = [];
             foreach ($data as $s) {
+                // Penyesuaian warna badge Metronic 8
                 $status_badge = [
-                    'utama_up'   => '<span class="badge badge-primary">Utama Atas</span>',
-                    'utama_down' => '<span class="badge badge-success">Utama Bawah</span>',
-                    'rekomendasi' => '<span class="badge badge-warning">Rekomendasi</span>'
+                    'utama_up'    => '<span class="badge badge-light-primary fw-bold px-3 py-2">Utama Atas</span>',
+                    'utama_down'  => '<span class="badge badge-light-success fw-bold px-3 py-2">Utama Bawah</span>',
+                    'rekomendasi' => '<span class="badge badge-light-warning fw-bold px-3 py-2">Rekomendasi</span>'
                 ];
 
                 $row = [];
-                $row[] = '<div class="text-wrap" style="min-width:200px"><b>' . esc($s->judul) . '</b><br><small class="text-muted">' . esc($s->kategori) . '</small></div>';
-                $row[] = '<img src="' . base_url('uploads/artikel/thumbnails/' . $s->image_default) . '" class="rounded border preview-img" style="cursor:pointer; width:60px" data-src="' . base_url('uploads/artikel/thumbnails/' . $s->image_default) . '">';
-                $row[] = '<span class="badge outline-badge-info">' . $s->hit . ' Views</span>';
-                $row[] = $status_badge[$s->status] ?? '<span class="badge badge-secondary">Draft</span>';
+
+                // 1. Kolom Informasi Artikel
                 $row[] = '
-                <div class="dropdown custom-dropdown">
-                    <a class="dropdown-toggle" href="javascript:void(0)" role="button" data-toggle="dropdown" id="drop' . $s->id . '"><i class="bi bi-three-dots-vertical"></i></a>
-                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="drop' . $s->id . '">
-                        <a class="dropdown-item" href="' . base_url('sw-admin/artikel/edit/' . encrypt_url($s->id)) . '">Edit</a>
-                        <a class="dropdown-item text-danger btn-delete" href="' . base_url('sw-admin/artikel/delete/' . encrypt_url($s->id)) . '">Hapus</a>
-                    </div>
-                </div>';
+                    <div class="d-flex flex-column" style="min-width: 200px">
+                        <span class="text-gray-800 fw-bold fs-6 mb-1">' . esc($s->judul) . '</span>
+                        <span class="text-muted fw-semibold fs-7">' . esc($s->kategori) . '</span>
+                    </div>';
+
+                            // 2. Kolom Thumbnail (Dipertahankan class preview-img dan data-src untuk trigger Modal JS)
+                            $imgSrc = base_url('uploads/artikel/thumbnails/' . $s->image_default);
+                            $row[] = '
+                    <div class="symbol symbol-60px symbol-2by3">
+                        <img src="' . $imgSrc . '" class="rounded border border-gray-300 preview-img" style="cursor: pointer; object-fit: cover;" data-src="' . $imgSrc . '" alt="thumbnail">
+                    </div>';
+
+                            // 3. Kolom Visitor
+                            $row[] = '<span class="badge badge-light-info fw-bold px-3 py-2">' . $s->hit . ' Views</span>';
+
+                            // 4. Kolom Status
+                            $row[] = $status_badge[$s->status] ?? '<span class="badge badge-light-secondary fw-bold px-3 py-2">Draft</span>';
+
+                            // 5. Kolom Aksi (Metronic 8 KTMenu Dropdown)
+                            $row[] = '
+                    <div class="text-center">
+                        <a href="#" class="btn btn-sm btn-light btn-flex btn-center btn-active-light-primary" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+                            Aksi <i class="ki-duotone ki-down fs-5 ms-1"></i>
+                        </a>
+                        
+                        <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-125px py-4 text-start" data-kt-menu="true">
+                            
+                            <div class="menu-item px-3">
+                                <a href="' . base_url('sw-admin/artikel/edit/' . encrypt_url($s->id)) . '" class="menu-link px-3">
+                                    <i class="ki-duotone ki-pencil fs-4 me-2 text-primary"><span class="path1"></span><span class="path2"></span></i> Edit
+                                </a>
+                            </div>
+                            
+                            <div class="separator mt-3 opacity-75"></div>
+                            
+                            <div class="menu-item px-3 mt-3">
+                                <a href="' . base_url('sw-admin/artikel/delete/' . encrypt_url($s->id)) . '" class="menu-link px-3 text-danger btn-delete">
+                                    <i class="ki-duotone ki-trash fs-4 me-2 text-danger"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i> Hapus
+                                </a>
+                            </div>
+                            
+                        </div>
+                    </div>';
+
                 $results[] = $row;
             }
 
@@ -100,12 +137,12 @@ class ArtikelController extends BaseController
     }
     public function create()
     {
-        $data = [
-            'title'        => 'Tambah Artikel',
-            'parent_title' => 'List Artikel',
-            'parent_url'   => base_url('sw-admin/artikel'),
-            'kategori'     => $this->db->table('kategori_artikel')->get()->getResultObject()
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'Data Artikel', 'url' => base_url('sw-admin/artikel')],
+            ['title' => 'Tambah Artikel', 'url' => '#'],
         ];
+        $data['kategori'] = $this->db->table('kategori_artikel')->get()->getResultObject();
         return view('admin/artikel/create', $data);
     }
 
@@ -203,12 +240,14 @@ class ArtikelController extends BaseController
             return redirect()->to('sw-admin/artikel')->with('error', 'Artikel tidak ditemukan');
         }
 
-        $data = [
-            'title'    => 'Edit Artikel',
-            'kategori' => $this->db->table('kategori_artikel')->get()->getResultObject(),
-            'artikel'  => $artikel,
-            'tag'      => $this->db->table('tag_artikel')->where('idartikel', $id_decoded)->get()->getResultObject(),
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'Data Artikel', 'url' => base_url('sw-admin/artikel')],
+            ['title' => 'Edit Artikel', 'url' => '#'],
         ];
+        $data['kategori'] = $this->db->table('kategori_artikel')->get()->getResultObject();
+        $data['artikel'] = $artikel;
+        $data['tag'] = $this->db->table('tag_artikel')->where('idartikel', $id_decoded)->get()->getResultObject();
 
         return view('admin/artikel/edit', $data);
     }

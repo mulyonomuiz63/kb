@@ -1,57 +1,62 @@
 <?= $this->extend('template/app'); ?>
 <?= $this->section('content'); ?>
 
-<div class="layout-px-spacing">
-    <div class="row layout-top-spacing">
-        <div class="col-xl-12 col-lg-12 col-sm-12 layout-spacing">
-            <div class="widget shadow-sm border-0 p-4 bg-white" style="border-radius: 15px;">
-                
-                <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
-                    <div>
-                        <h4 class="font-weight-bold text-dark mb-1">Manajemen Artikel</h4>
-                        <p class="text-muted small mb-0">Kelola konten berita dan publikasi Anda</p>
+<div class="d-flex flex-column flex-column-fluid">
+    <div id="kt_app_content" class="app-content flex-column-fluid">
+        <div id="kt_app_content_container" class="app-container container-xxl">
+
+            <div class="card card-flush shadow-sm border-0">
+
+                <div class="card-header align-items-center py-5 gap-2 gap-md-5">
+                    <div class="card-title flex-column align-items-start">
+                        <div class="d-flex align-items-center gap-2 gap-lg-3">
+                            <a href="<?= base_url('sw-admin/artikel/create'); ?>" class="btn btn-sm btn-primary fw-bold">
+                                <i class="ki-duotone ki-plus fs-2"></i> Buat Artikel
+                            </a>
+                        </div>
                     </div>
-                    <div class="d-flex">
-                        <a href="<?= base_url('sw-admin/artikel/kategori'); ?>" class="btn btn-outline-warning shadow-sm mr-2">
-                            <i class="bi bi-tag mr-2"></i> Kategori
-                        </a>
-                        <a href="<?= base_url('sw-admin/artikel/create'); ?>" class="btn btn-primary shadow-sm">
-                            <i class="bi bi-plus-lg mr-1"></i> Buat Artikel
-                        </a>
+
+                    <div class="card-toolbar flex-row-fluid justify-content-end gap-5">
+                        <div class="d-flex align-items-center position-relative my-1">
+                            <i class="ki-duotone ki-magnifier fs-3 position-absolute ms-4">
+                                <span class="path1"></span><span class="path2"></span>
+                            </i>
+                            <input type="text" data-kt-artikel-table-filter="search" class="form-control form-control-solid w-250px ps-12" placeholder="Cari Artikel..." />
+                        </div>
                     </div>
                 </div>
 
-                <hr class="mb-4" style="opacity: 0.1;">
-
-                <div class="table-responsive">
-                    <table id="datatables-list" class="table table-hover border-0 w-100">
-                        <thead>
-                            <tr class="bg-light">
-                                <th class="border-0 py-3">Informasi Artikel</th>
-                                <th class="border-0 py-3">Thumbnail</th>
-                                <th class="border-0 py-3">Visitor</th>
-                                <th class="border-0 py-3">Status</th>
-                                <th class="border-0 py-3 text-center">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody class="align-middle">
+                <div class="card-body pt-0">
+                    <div class="table-responsive">
+                        <table id="datatables-list" class="table align-middle table-row-dashed fs-6 gy-5 text-nowrap w-100">
+                            <thead>
+                                <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0 border-bottom border-gray-200">
+                                    <th class="min-w-250px">Informasi Artikel</th>
+                                    <th class="text-center min-w-100px">Thumbnail</th>
+                                    <th class="text-center min-w-100px">Visitor</th>
+                                    <th class="text-center min-w-100px">Status</th>
+                                    <th class="text-center min-w-100px">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="fw-semibold text-gray-600">
                             </tbody>
-                    </table>
+                        </table>
+                    </div>
                 </div>
-
             </div>
+
         </div>
     </div>
 </div>
+<div class="modal fade" id="previewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered mw-800px">
+        <div class="modal-content bg-transparent shadow-none">
+            <div class="modal-body p-0 position-relative text-center">
+                <div class="btn btn-icon btn-sm btn-active-light-primary ms-2 position-absolute" data-bs-dismiss="modal" aria-label="Close" style="top: 10px; right: 10px; z-index: 10; background: rgba(255,255,255,0.8);">
+                    <i class="ki-duotone ki-cross fs-1 text-dark"><span class="path1"></span><span class="path2"></span></i>
+                </div>
 
-<div class="modal fade" id="previewModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content border-0 bg-transparent">
-            <div class="modal-body p-0 text-center position-relative">
-                <button type="button" class="close position-absolute text-white" data-dismiss="modal" aria-label="Close" style="top: 10px; right: 20px; z-index: 10; font-size: 2rem; outline: none;">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-                <img src="" id="imgFull" class="img-fluid rounded shadow-lg">
+                <img src="" id="imgFull" class="img-fluid rounded shadow-lg" alt="Preview Image">
             </div>
         </div>
     </div>
@@ -61,44 +66,63 @@
 
 <?= $this->section('scripts'); ?>
 <script>
-$(document).ready(function() {
-    // Mematikan alert default DataTables agar tidak muncul popup browser yang mengganggu
-    $.fn.dataTable.ext.errMode = 'none';
-
-    // DataTable Server Side
-    var table = $('#datatables-list').DataTable({
-        "processing": true,
-        "serverSide": true,
-        "order": [], 
-        "ajax": {
-            "url": "<?= base_url('sw-admin/artikel/datatables') ?>",
-            "type": "POST",
-            "data": function(d) {
-                // CSRF Token Global CI4
-                d.<?= csrf_token() ?> = "<?= csrf_hash() ?>"; 
+    $(document).ready(function() {
+        // DataTable Server Side dg Custom DOM Metronic
+        var table = $('#datatables-list').DataTable({
+            "processing": true,
+            "serverSide": true,
+            "order": [],
+            "ajax": {
+                "url": "<?= base_url('sw-admin/artikel/datatables') ?>",
+                "type": "POST",
+                "data": function(d) {
+                    // CSRF Token Global CI4
+                    d.<?= csrf_token() ?> = "<?= csrf_hash() ?>";
+                },
+                "dataSrc": function(json) {
+                    // Jika server mengirimkan token baru (Regenerate CSRF)
+                    if (json.token) {
+                        // Update hash untuk request berikutnya jika diperlukan
+                        // console.log("CSRF Updated");
+                    }
+                    return json.data;
+                },
             },
-            "dataSrc": function(json) {
-                // Jika server mengirimkan token baru (Regenerate CSRF)
-                if(json.token) {
-                    // Update hash untuk request berikutnya jika diperlukan
-                    // console.log("CSRF Updated");
+            "columnDefs": [{
+                    "targets": [0],
+                    "className": "text-gray-800 fw-bold"
+                },
+                {
+                    "targets": [1, 4],
+                    "orderable": false
+                },
+                {
+                    "targets": [1, 2, 3, 4],
+                    "className": "text-center align-middle"
                 }
-                return json.data;
-            },
-        },
-        "columnDefs": [
-            { "targets": [1, 4], "orderable": false },
-            { "className": "text-center align-middle", "targets": [1, 2, 3, 4] }
-        ],
-    
-    });
+            ],
+            drawCallback: function(settings) {
+                // Beri tahu Metronic untuk membaca ulang DOM dan mengaktifkan dropdown baru
+                if (typeof KTMenu !== 'undefined') {
+                    KTMenu.createInstances();
+                }
+            }
+        });
 
-    // Preview Image Logic (Bootstrap 4 .modal('show'))
-    $(document).on('click', '.preview-img', function() {
-        const src = $(this).attr('data-src');
-        $('#imgFull').attr('src', src);
-        $('#previewModal').modal('show');
+        // Fitur Pencarian Custom yang menyatu dengan UI Card Header Metronic
+        $('[data-kt-artikel-table-filter="search"]').on('keyup', function() {
+            table.search(this.value).draw();
+        });
+
+        // Preview Image Logic (Menggunakan data-bs-target atau langsung via JS standard BS5)
+        $(document).on('click', '.preview-img', function() {
+            const src = $(this).attr('data-src');
+            $('#imgFull').attr('src', src);
+
+            // Membuka modal dengan API Bootstrap 5
+            var myModal = new bootstrap.Modal(document.getElementById('previewModal'));
+            myModal.show();
+        });
     });
-});
 </script>
 <?= $this->endSection(); ?>

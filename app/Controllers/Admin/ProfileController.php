@@ -14,10 +14,11 @@ class ProfileController extends BaseController
     }
     public function index()
     {
-        $data = [
-            'title' => 'Profile',
-            'admin' => $this->adminModel->asObject()->find(session()->get('id'))
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'Data Profile', 'url' => '#'],
         ];
+        $data['admin'] = $this->adminModel->asObject()->find(session()->get('id'));
         return view('admin/profile/list', $data);
     }
 

@@ -2,181 +2,124 @@
 
 <?= $this->section('styles'); ?>
 <style>
-    :root {
-        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        --accent-color: #4361ee;
-    }
-
-    /* Profile Header Styling */
-    .profile-header-banner {
-        background: var(--primary-gradient);
-        height: 150px;
-        border-radius: 20px 20px 0 0;
-        position: relative;
-    }
-
-    .profile-container {
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(10px);
-        border-radius: 20px;
-        box-shadow: 0 15px 35px rgba(0,0,0,0.05);
-        margin-top: -75px;
-        padding-bottom: 30px;
-        border: 1px solid rgba(255,255,255,0.3);
-    }
-
-    .profile-img-wrapper {
-        width: 130px;
-        height: 130px;
-        background: white;
-        border-radius: 50%;
-        margin: 0 auto;
-        padding: 5px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-    }
-
-    .profile-initial {
-        width: 100%;
-        height: 100%;
-        background: #f8f9fa;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 3rem;
-        font-weight: 800;
-        color: #764ba2;
-    }
-
-    /* Badge & Info Styling */
-    .status-pill {
-        background: #eef2ff;
-        color: #4361ee;
-        font-size: 12px;
-        font-weight: 700;
-        padding: 6px 18px;
-        border-radius: 50px;
-        display: inline-block;
-        letter-spacing: 0.5px;
-    }
-
-    /* List Content Styling */
-    .content-box {
-        background: #ffffff;
-        border-radius: 15px;
-        padding: 20px;
-        height: 100%;
-        border: 1px solid #edf2f7;
-        transition: all 0.3s ease;
-    }
-
-    .content-box:hover {
-        border-color: #4361ee;
-        box-shadow: 0 5px 15px rgba(67, 97, 238, 0.05);
-    }
-
-    .item-label {
-        font-size: 0.75rem;
-        color: #a0aec0;
-        text-transform: uppercase;
-        font-weight: 700;
-        margin-bottom: 15px;
-        display: flex;
-        align-items: center;
-    }
-
-    .item-label i {
-        font-size: 18px;
-        margin-right: 8px;
-        color: #4361ee;
-    }
-
-    .custom-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    .custom-list-item {
-        background: #f8fafc;
-        margin-bottom: 8px;
-        padding: 12px 15px;
-        border-radius: 10px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-weight: 500;
-        color: #4a5568;
-        border: 1px solid transparent;
-    }
-
-    .custom-list-item:hover {
-        background: #fff;
-        border-color: #e2e8f0;
-        transform: scale(1.02);
-    }
-
-    .empty-state {
-        color: #cbd5e0;
-        font-style: italic;
-        font-size: 0.9rem;
+    /* Custom overlay untuk banner jika ingin gradasi spesifik */
+    .banner-gradient {
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
     }
 </style>
 <?= $this->endSection(); ?>
 
 <?= $this->section('content'); ?>
-<div class="layout-px-spacing">
-    <div class="row justify-content-center">
-        <div class="col-xl-12 col-lg-12 col-md-12">
-            
-            <div class="profile-header-banner mt-4"></div>
-
-            <div class="profile-container text-center">
-                <div class="row text-left px-md-5 px-3 mt-4">
-                    <div class="col-md-6 mb-4">
-                        <div class="content-box">
-                            <div class="item-label">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                                Distribusi Kelas
-                            </div>
-                            <div class="custom-list">
-                                <?php if (!empty($guru_kelas)) : ?>
-                                    <?php foreach ($guru_kelas as $gk) : ?>
-                                        <div class="custom-list-item">
-                                            <span><?= $gk->nama_kelas; ?></span>
-                                            <span class="badge badge-light-primary text-primary">Kelas</span>
-                                        </div>
-                                    <?php endforeach; ?>
-                                <?php else : ?>
-                                    <p class="empty-state">Belum terdaftar di kelas manapun.</p>
-                                <?php endif; ?>
+<div id="kt_app_content" class="app-content flex-column-fluid">
+    <div id="kt_app_content_container" class="app-container container-xxl">
+        
+        <div class="card mb-5 mb-xl-10 shadow-sm">
+            <div class="card-body pt-9 pb-0">
+                <div class="d-flex flex-wrap flex-sm-nowrap mb-3">
+                    <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap mb-2">
+                            <div class="d-flex flex-column">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="text-gray-900 text-hover-primary fs-2 fw-bolder me-1">Ringkasan Distribusi</span>
+                                    <span>
+                                        <i class="ki-duotone ki-verify fs-1 text-primary">
+                                            <span class="path1"></span><span class="path2"></span>
+                                        </i>
+                                    </span>
+                                </div>
+                                <div class="d-flex flex-wrap fw-bold fs-6 mb-4 pe-2">
+                                    <span class="d-flex align-items-center text-gray-500 me-5 mb-2">
+                                    <i class="ki-duotone ki-address-book fs-4 me-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i> 
+                                    Data Akademik Guru
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="col-md-6 mb-4">
-                        <div class="content-box">
-                            <div class="item-label">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                <div class="d-flex overflow-auto h-55px">
+                    <ul class="nav nav-stretch nav-line-tabs nav-line-tabs-2x border-transparent fs-5 fw-bolder flex-nowrap">
+                        <li class="nav-item">
+                            <a class="nav-link text-active-primary me-6 active" href="#">Overview</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-5 g-xl-10">
+            
+            <div class="col-md-6">
+                <div class="card card-flush h-md-100 shadow-sm">
+                    <div class="card-header pt-7">
+                        <h3 class="card-title align-items-start flex-column">
+                            <span class="card-label fw-bolder text-dark">
+                                <i class="ki-duotone ki-people fs-2 text-primary me-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i>
+                                Distribusi Kelas
+                            </span>
+                            <span class="text-gray-400 mt-1 fw-bold fs-7">Daftar kelas yang diajar</span>
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <?php if (!empty($guru_kelas)) : ?>
+                            <?php foreach ($guru_kelas as $gk) : ?>
+                                <div class="d-flex align-items-center mb-7 bg-light-neutral p-4 rounded border border-dashed">
+                                    <div class="symbol symbol-50px me-5">
+                                        <span class="symbol-label bg-light-primary">
+                                            <i class="ki-duotone ki-element-11 fs-2x text-primary"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i>
+                                        </span>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <span class="text-gray-800 fw-bolder fs-6"><?= $gk->nama_kelas; ?></span>
+                                    </div>
+                                    <span class="badge badge-light-primary fw-bolder">Kelas</span>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else : ?>
+                            <div class="text-center py-10">
+                                <i class="ki-duotone ki-information-5 fs-3x text-gray-300 mb-3"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
+                                <p class="text-gray-400 font-italic">Belum terdaftar di kelas manapun.</p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card card-flush h-md-100 shadow-sm">
+                    <div class="card-header pt-7">
+                        <h3 class="card-title align-items-start flex-column">
+                            <span class="card-label fw-bolder text-dark">
+                                <i class="ki-duotone ki-book-open fs-2 text-info me-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i>
                                 Mata Pelajaran
+                            </span>
+                            <span class="text-gray-400 mt-1 fw-bold fs-7">Bidang studi yang diampu</span>
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <?php if (!empty($guru_mapel)) : ?>
+                            <?php foreach ($guru_mapel as $gm) : ?>
+                                <div class="d-flex align-items-center mb-7 bg-light-neutral p-4 rounded border border-dashed">
+                                    <div class="symbol symbol-50px me-5">
+                                        <span class="symbol-label bg-light-info">
+                                            <i class="ki-duotone ki-book fs-2x text-info"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i>
+                                        </span>
+                                    </div>
+                                    <div class="flex-grow-1 text-gray-800 fw-bolder fs-6">
+                                        <?= $gm->nama_mapel; ?>
+                                    </div>
+                                    <div class="symbol symbol-circle symbol-15px">
+                                        <div class="bg-info h-15px w-15px rounded-circle"></div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else : ?>
+                            <div class="text-center py-10">
+                                <i class="ki-duotone ki-information-5 fs-3x text-gray-300 mb-3"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
+                                <p class="text-gray-400 font-italic">Mata pelajaran belum ditentukan.</p>
                             </div>
-                            <div class="custom-list">
-                                <?php if (!empty($guru_mapel)) : ?>
-                                    <?php foreach ($guru_mapel as $gm) : ?>
-                                        <div class="custom-list-item">
-                                            <span><?= $gm->nama_mapel; ?></span>
-                                            <i class="dot" style="width: 10px; height: 10px; background: #764ba2; border-radius: 50%;"></i>
-                                        </div>
-                                    <?php endforeach; ?>
-                                <?php else : ?>
-                                    <p class="empty-state">Mata pelajaran belum ditentukan.</p>
-                                <?php endif; ?>
-                            </div>
-                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>

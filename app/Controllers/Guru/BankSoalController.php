@@ -21,11 +21,20 @@ class BankSoalController extends BaseController
     }
     public function index()
     {
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-guru')],
+            ['title' => 'List Soal', 'url' => '#'],
+        ];
         $data['soal'] = $this->bankSoalModel->getAll();
         return view('guru/bank_soal/list', $data);
     }
     public function create()
     {
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-guru')],
+            ['title' => 'Bank Soal', 'url' => base_url('sw-guru/bank-soal')],
+            ['title' => 'Tambah Soal', 'url' => '#'],
+        ];
         $data['kategori'] = $this->kategoriModel->getAll();
         return view('guru/bank_soal/tambah_pg', $data);
     }
@@ -60,6 +69,11 @@ class BankSoalController extends BaseController
 
     public function edit($id_bank_soal)
     {
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-guru')],
+            ['title' => 'Bank Soal', 'url' => base_url('sw-guru/bank-soal')],
+            ['title' => 'Edit Soal', 'url' => '#'],
+        ];
         $data['soal'] = $this->bankSoalModel->getById(decrypt_url($id_bank_soal));
         $data['kategori'] = $this->kategoriModel->getAll();
 

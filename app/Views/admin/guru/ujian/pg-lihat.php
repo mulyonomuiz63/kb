@@ -1,121 +1,49 @@
 <?= $this->extend('template/app'); ?>
-<?= $this->section('styles'); ?>
 
-<style>
-    /* ====== JAWABAN VERTIKAL ====== */
-
-    .answer-box {
-        cursor: pointer;
-        margin-bottom: 15px;
-    }
-
-    .answer-content {
-        border: 1px solid #dee2e6;
-        padding: 14px 18px;
-        border-radius: 8px;
-        transition: 0.2s;
-        background: #fff;
-    }
-
-    .answer-box:hover .answer-content {
-        background: #f8f9fa;
-        border-color: #007bff;
-    }
-
-    .answer-box.active .answer-content {
-        background: #e7f1ff;
-        border-color: #007bff;
-    }
-
-    /* ====== NAVIGATION ====== */
-
-    .nav-number {
-        width: 45px;
-        height: 45px;
-        margin: 4px;
-        font-weight: 600;
-
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        padding: 0;
-        line-height: 1;
-        white-space: nowrap;
-    }
-
-    .nav-number.active {
-        background: #007bff !important;
-        color: #fff !important;
-    }
-
-    .nav-number.answered {
-        background: #28a745 !important;
-        color: #fff !important;
-    }
-
-    /* Tambahan agar hover effect terasa lebih premium */
-    .list-group-item {
-        transition: background-color 0.2s ease;
-        border-left: 3px solid transparent;
-    }
-
-    .list-group-item:hover {
-        background-color: #f8fbff;
-        border-left: 3px solid #4361ee;
-    }
-
-    .avatar-container img {
-        transition: transform 0.2s ease;
-    }
-
-    .list-group-item:hover .avatar-container img {
-        transform: scale(1.1);
-    }
-
-    .dropdown-item i {
-        width: 20px;
-    }
-</style>
-
-<?= $this->endSection() ?>
 <?= $this->section('content'); ?>
-<!--  BEGIN CONTENT AREA  -->
-<div class="container-fluid">
-    <div class="row mt-4">
-        <div class="col-lg-12">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white py-3 d-flex align-items-center">
-                    <h5 class="mb-0 text-dark font-weight-bold">
-                        <i class="fas fa-users mr-2 text-primary"></i> Peserta Selesai
-                    </h5>
+<div class="d-flex flex-column flex-column-fluid">
+    <div id="kt_app_content" class="app-content flex-column-fluid">
+        <div id="kt_app_content_container" class="app-container container-xxl">
+            
+            <div class="card card-flush shadow-sm border-0">
+                <div class="card-header align-items-center py-5 gap-2 gap-md-5">
+                    <div class="card-title">
+                        <div class="d-flex align-items-center position-relative my-1">
+                            <i class="ki-duotone ki-magnifier fs-3 position-absolute ms-4">
+                                <span class="path1"></span><span class="path2"></span>
+                            </i>
+                            <input type="text" data-kt-peserta-table-filter="search" class="form-control form-control-solid w-250px ps-12" placeholder="Cari Peserta..." />
+                        </div>
+                    </div>
                 </div>
 
-                <div class="card-body">
+                <div class="card-body pt-0">
                     <div class="table-responsive">
-                        <table id="tableSiswa" class="table table-hover border-0 w-100">
+                        <table id="tableSiswa" class="table align-middle table-row-dashed fs-6 gy-5 text-nowrap w-100">
                             <thead>
-                                <tr>
-                                    <th>Peserta</th>
-                                    <th class="text-center">Statistik</th>
-                                    <th class="text-center">Aksi</th>
+                                <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
+                                    <th class="min-w-200px">Peserta</th>
+                                    <th class="text-center min-w-150px">Statistik</th>
+                                    <th class="text-center min-w-100px">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody></tbody>
+                            <tbody class="fw-semibold text-gray-600">
+                            </tbody>
                         </table>
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 </div>
-
-<!--  END CONTENT AREA  -->
 <?= $this->endSection(); ?>
+
 <?= $this->section('scripts'); ?>
 <script>
     $(document).ready(function() {
-        $('#tableSiswa').DataTable({
+        
+        var table = $('#tableSiswa').DataTable({
             "processing": true,
             "serverSide": true,
             "ordering": false,
@@ -127,21 +55,25 @@
                 },
                 "dataSrc": function(json) {
                     // Update input CSRF dengan token baru yang dikirim oleh Controller
-                    csrfHash = json[csrfName];
-
+                    if(json[csrfName]) {
+                        csrfHash = json[csrfName];
+                    }
                     return json.data;
                 }
             },
-            "language": {
-                "search": "Cari Peserta:",
-                "lengthMenu": "Tampilkan _MENU_ data",
-                "paginate": {
-                    "previous": "<",
-                    "next": ">"
-                },
-            },
-            "dom": '<"d-flex justify-content-between align-items-center mb-3"lf>rt<"d-flex justify-content-between align-items-center mt-3"ip>'
+            // Inisialisasi ulang komponen menu bawaan Metronic jika terdapat di tombol Aksi
+            "drawCallback": function(settings) {
+                if (typeof KTMenu !== 'undefined') {
+                    KTMenu.createInstances();
+                }
+            }
         });
+
+        // Fitur Pencarian Custom yang menyatu dengan UI Card Header Metronic
+        $('[data-kt-peserta-table-filter="search"]').on('keyup', function() {
+            table.search(this.value).draw();
+        });
+
     });
 </script>
 <?= $this->endSection(); ?>

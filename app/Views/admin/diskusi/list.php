@@ -1,322 +1,235 @@
 <?= $this->extend('template/app'); ?>
+
 <?= $this->section('styles'); ?>
 <style>
-    :root {
-        --chat-bg: #F9F6F2;
-        --chat-border: #E8E2D9;
-        --chat-active: #E8DED3;
-        --primary-color: #0086a7;
-    }
-
-    .chat-container {
-        background-color: var(--chat-bg);
-        border: 1px solid var(--chat-border);
-        border-radius: 12px;
-        display: flex;
-        height: 700px;
-        margin-bottom: 20px;
-    }
-
-    .chat-sidebar {
-        width: 350px;
-        border-right: 1px solid var(--chat-border);
-        background: #fff;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .chat-main {
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-        background: #fff;
-        position: relative;
-    }
-
+    /* Styling scrollbar untuk area chat */
     .chat-history {
-        flex-grow: 1;
-        padding: 20px;
-        overflow-y: auto;
-        background-color: var(--chat-bg);
+        scroll-behavior: smooth;
     }
 
-    /* Accordion & Sidebar Item Styling */
-    .btn-link,
-    .btn-link:hover,
-    .btn-link:focus {
-        text-decoration: none;
-        color: inherit;
+    .chat-history::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .chat-history::-webkit-scrollbar-thumb {
+        background-color: var(--bs-gray-300);
+        border-radius: 10px;
     }
 
     .chat-item {
         cursor: pointer;
-        transition: all 0.2s ease;
-        border-left: 4px solid transparent;
-        border-bottom: 1px solid #f1f1f1;
+        transition: background-color 0.2s ease;
     }
 
-    .chat-item:hover {
-        background-color: #f0f7f9 !important;
-        border-left-color: var(--primary-color) !important;
-    }
-
+    .chat-item:hover,
     .chat-item.active {
-        background-color: var(--chat-active) !important;
-        border-left-color: var(--primary-color) !important;
+        background-color: var(--bs-gray-100);
     }
 
-    /* Dasar Bubble */
-    .bubble-me,
-    .bubble-them {
-        position: relative;
-        padding: 8px 12px;
-        min-width: 140px;
-        max-width: 75%;
-        display: flex;
-        flex-direction: column;
-    }
-
-    /* Warna & Bentuk Bubble Kanan (Me) */
-    .bubble-me {
-        background-color: #1e2023;
-        /* Warna gelap sesuai gambar */
-        color: #ffffff;
-        border-radius: 12px 12px 0 12px;
-        /* Ekor kanan bawah */
-    }
-
-    /* Warna & Bentuk Bubble Kiri (Them) */
-    .bubble-them {
-        background-color: #29459A;
-        /* Abu-abu gelap */
-        color: #ffffff;
-        border-radius: 12px 12px 12px 0;
-        /* Ekor kiri bawah */
-    }
-
-    /* Gaya Nama di dalam Bubble */
-    .chat-name {
-        font-weight: bold;
-        font-size: 0.8rem;
-        margin-bottom: 2px;
-    }
-
-    .text-info-custom {
-        color: #00d1ff !important;
-    }
-
-    .text-guru-custom {
-        color: #ffcc00 !important;
-    }
-
-    /* Gaya Teks Pesan */
+    /* Memastikan text URL wrap */
     .chat-message-text {
-        font-size: 0.9rem;
-        margin-bottom: 12px;
-        /* Memberi ruang untuk waktu agar tidak tumpang tindih */
         word-wrap: break-word;
+        white-space: pre-wrap;
+    }
+</style>
+<style>
+    /* Mencegah card kiri melompat saat menjadi sticky */
+    .sticky-lg-top {
+        transition: top 0.3s ease;
     }
 
-    /* Gaya Waktu (Pojok Kanan Bawah) */
-    .chat-time {
-        font-size: 0.65rem;
-        color: rgba(255, 255, 255, 0.5);
-        position: absolute;
-        bottom: 4px;
-        right: 10px;
+    /* Mempercantik scrollbar internal card kiri agar lebih profesional */
+    #kt_chat_contacts_body::-webkit-scrollbar {
+        width: 4px;
     }
-
-    .avatar-circle {
-        width: 35px;
-        height: 35px;
-        border-radius: 50%;
+    #kt_chat_contacts_body::-webkit-scrollbar-thumb {
+        background-color: var(--bs-gray-300);
+        border-radius: 10px;
     }
-
-    /* Animation */
-    .btn-link[aria-expanded="true"] i.fa-chevron-down {
-        transform: rotate(180deg);
-        transition: 0.3s;
-    }
-
-    /* Struktur dasar container bubble */
-    .chat-bubble-container {
-        display: flex;
-        align-items: flex-end;
-        /* Avatar rata bawah */
-        margin-bottom: 1rem;
-        max-width: 80%;
-        /* Batasi lebar total chat agar tidak penuh */
-    }
-
-
-    /* Penanganan Elemen Di Dalam Bubble */
-    .chat-name {
-        font-weight: bold;
-        color: #0086a7;
-        /* Warna primary Anda untuk Nama */
-        font-size: 0.8rem;
-        margin-bottom: 4px;
-        /* Spasi ke teks pesan */
-    }
-
-    .chat-message-text {
-        font-size: 0.9rem;
-        line-height: 1.4;
-        margin-right: 25px;
-        /* Spasi agar teks tidak menimpa waktu */
-    }
-
-    /* Waktu di Pojok Kanan Bawah Bubble (Floating) */
-    .chat-time {
-        font-size: 0.7rem;
-        color: rgba(255, 255, 255, 0.6);
-        /* Putih transparan */
-        position: absolute;
-        bottom: 5px;
-        right: 8px;
-    }
-
-    /* Avatar Samping Bubble */
-    .avatar-sm {
-        width: 35px;
-        height: 35px;
-        border-radius: 50%;
-        object-fit: cover;
+    
+    /* Memastikan kontainer utama tidak memiliki overflow yang memotong sticky */
+    #kt_app_content_container {
+        overflow: visible !important;
     }
 </style>
 <?= $this->endSection(); ?>
 
 <?= $this->section('content'); ?>
-<div class="container-fluid mt-4">
-    <div class="chat-container shadow-sm">
-        <div class="chat-sidebar">
-            <div class="p-3 d-flex justify-content-between align-items-center border-bottom">
-                <h4 class="font-weight-bold m-0">Chat</h4>
-                <button class="btn btn-primary btn-sm px-3 shadow-sm" data-toggle="modal" data-target="#modal_materi" style="border-radius: 20px;">
-                    <i class="bi bi-chat-plus-fill mr-1"></i> Chat Baru
-                </button>
-            </div>
+<div class="d-flex flex-column flex-column-fluid">
+    <div id="kt_app_content" class="app-content flex-column-fluid">
+        <div id="kt_app_content_container" class="app-container container-xxl">
 
-            <div class="p-3 border-bottom bg-light">
-                <input type="text" class="form-control" placeholder="Cari diskusi..." id="searchChat">
-            </div>
+            <div class="d-flex flex-column flex-lg-row align-items-stretch">
 
-            <div class="overflow-auto" id="chat_list">
-                <div class="accordion" id="accordionGuru">
-                    <?php foreach ($diskusi as $index => $group): ?>
-                        <?php
-                        if (empty($group['materi'])) continue;
+                <div class="flex-column flex-lg-row-auto w-100 w-lg-300px w-xl-400px mb-10 mb-lg-0">
+                    <div class="sticky-lg-top" style="top: 100px; z-index: 9;">
+                        <div class="card card-flush shadow-sm">
 
-                        // HITUNG TOTAL UNREAD UNTUK GURU INI
-                        $totalUnreadGuru = 0;
-                        foreach ($group['materi'] as $m) {
-                            $totalUnreadGuru += $m['unread_count'];
-                        }
-                        ?>
-
-                        <div class="card border-0 border-bottom">
-                            <div class="card-header bg-white p-0">
-                                <button class="btn btn-link btn-block text-left text-dark font-weight-bold d-flex align-items-center p-3 shadow-none"
-                                    type="button" data-toggle="collapse" data-target="#collapse<?= $group['id_guru'] ?>">
-
-                                    <div class="position-relative mr-3">
-                                        <img src="https://ui-avatars.com/api/?name=<?= urlencode($group['nama_guru']) ?>&background=E8DED3&color=333" class="avatar-sm">
-
-                                        <?php if ($totalUnreadGuru > 0): ?>
-                                            <span class="badge badge-danger badge-pill position-absolute"
-                                                style="top: -5px; right: -5px; font-size: 0.6rem; border: 2px solid white;">
-                                                <?= ($totalUnreadGuru > 99) ? '99+' : $totalUnreadGuru ?>
-                                            </span>
-                                        <?php endif; ?>
-                                    </div>
-
-                                    <span class="flex-grow-1"><?= $group['nama_guru'] ?></span>
-                                    <i class="fas fa-chevron-down small text-muted"></i>
-                                </button>
+                            <div class="card-header pt-7" id="kt_chat_contacts_header">
+                                <form class="w-100 position-relative" autocomplete="off">
+                                    <i class="ki-duotone ki-magnifier fs-3 text-gray-500 position-absolute top-50 ms-5 translate-middle-y"><span class="path1"></span><span class="path2"></span></i>
+                                    <input type="text" class="form-control form-control-solid px-13" name="search" id="searchChat" placeholder="Cari diskusi..." />
+                                </form>
                             </div>
 
-                            <div id="collapse<?= $group['id_guru'] ?>" class="collapse" data-parent="#accordionGuru">
-                                <div class="card-body p-0 border-0" style="background-color: #fcfcfc;">
-                                    <?php foreach ($group['materi'] as $m): ?>
-                                        <div class="chat-item d-flex align-items-center py-3 px-4"
-                                            data-materi="<?= $m['materi'] ?>"
-                                            data-namamateri="<?= $m['nama_materi'] ?>"
-                                            data-emailguru="<?= $group['email_guru'] ?>"
-                                            data-namaguru="<?= $group['nama_guru'] ?>">
+                            <div class="card-body pt-5" id="kt_chat_contacts_body">
+                                <div class="scroll-y me-n5 pe-5 h-200px h-lg-auto" style="max-height: 60vh;" id="chat_list">
 
-                                            <div class="flex-grow-1">
-                                                <div class="d-flex justify-content-between align-items-center">
-                                                    <div class="d-flex flex-column">
-                                                        <span class="text-dark font-weight-bold mb-0" style="font-size: 0.85rem;">
-                                                            <?= $m['nama_materi'] ?>
-                                                        </span>
-                                                        <small class="text-muted" style="font-size: 0.7rem;">Klik untuk diskusi</small>
+                                    <div class="accordion accordion-icon-toggle" id="accordionGuru">
+                                        <?php foreach ($diskusi as $index => $group): ?>
+                                            <?php
+                                            if (empty($group['materi'])) continue;
+
+                                            $totalUnreadGuru = 0;
+                                            foreach ($group['materi'] as $m) {
+                                                $totalUnreadGuru += $m['unread_count'];
+                                            }
+                                            ?>
+
+                                            <div class="mb-5">
+
+                                                <div class="accordion-header py-3 d-flex" data-bs-toggle="collapse" data-bs-target="#collapse<?= $group['id_guru'] ?>">
+                                                    <span class="accordion-icon"><i class="ki-duotone ki-arrow-right fs-4"><span class="path1"></span><span class="path2"></span></i></span>
+                                                    <div class="d-flex align-items-center w-100">
+                                                        <div class="symbol symbol-35px symbol-circle me-3 position-relative">
+                                                            <img src="https://ui-avatars.com/api/?name=<?= urlencode($group['nama_guru']) ?>&background=E8DED3&color=333" alt="Pic">
+                                                            <?php if ($totalUnreadGuru > 0): ?>
+                                                                <span class="position-absolute top-0 start-100 translate-middle badge badge-circle badge-danger fs-9 h-20px w-20px">
+                                                                    <?= ($totalUnreadGuru > 99) ? '99+' : $totalUnreadGuru ?>
+                                                                </span>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                        <h3 class="fs-5 fw-bold mb-0 text-gray-900"><?= $group['nama_guru'] ?></h3>
                                                     </div>
-
-                                                    <?php if ($m['unread_count'] > 0): ?>
-                                                        <span class="badge badge-primary badge-pill unread-badge" data-materi="<?= $m['materi'] ?>">
-                                                            <?= ($m['unread_count'] > 99) ? '99+' : $m['unread_count'] ?>
-                                                        </span>
-                                                    <?php endif; ?>
                                                 </div>
+
+                                                <div id="collapse<?= $group['id_guru'] ?>" class="collapse fs-6 ps-10" data-bs-parent="#accordionGuru">
+                                                    <div class="d-flex flex-column gap-2 py-3">
+                                                        <?php foreach ($group['materi'] as $m): ?>
+                                                            <div class="chat-item d-flex flex-stack p-3 rounded"
+                                                                data-materi="<?= $m['materi'] ?>"
+                                                                data-namamateri="<?= $m['nama_materi'] ?>"
+                                                                data-emailguru="<?= $group['email_guru'] ?>"
+                                                                data-namaguru="<?= $group['nama_guru'] ?>">
+
+                                                                <div class="d-flex align-items-center">
+                                                                    <div class="d-flex flex-column">
+                                                                        <span class="text-gray-900 fw-bold fs-6"><?= $m['nama_materi'] ?></span>
+                                                                        <span class="text-muted fw-semibold fs-7">Klik untuk diskusi</span>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="d-flex flex-column align-items-end ms-2">
+                                                                    <?php if ($m['unread_count'] > 0): ?>
+                                                                        <span class="badge badge-sm badge-circle badge-primary unread-badge" data-materi="<?= $m['materi'] ?>">
+                                                                            <?= ($m['unread_count'] > 99) ? '99+' : $m['unread_count'] ?>
+                                                                        </span>
+                                                                    <?php endif; ?>
+                                                                </div>
+                                                            </div>
+                                                        <?php endforeach; ?>
+                                                    </div>
+                                                </div>
+
                                             </div>
-                                        </div>
-                                    <?php endforeach; ?>
+
+                                        <?php endforeach; ?>
+                                    </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-lg-row-fluid ms-lg-7 ms-xl-10">
+                    <div class="card shadow-sm">
+
+                        <div id="empty_state" class="card-body d-flex flex-column justify-content-center align-items-center text-center h-100" style="min-height: 50vh;">
+                            <i class="ki-duotone ki-messages fs-5x text-gray-400 mb-5"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i>
+                            <h3 class="text-gray-600 fw-bold">Belum Ada Obrolan Aktif</h3>
+                            <div class="text-gray-500 fw-semibold fs-6">Pilih salah satu materi di sebelah kiri untuk memulai diskusi.</div>
+                        </div>
+
+                        <div id="chat_area" class="d-none flex-column h-100">
+
+                            <div class="card-header border-bottom">
+                                <div class="card-title">
+                                    <div class="d-flex justify-content-center flex-column me-3">
+                                        <h2 class="fs-4 fw-bold text-gray-900 mb-0" id="active_title">Nama Materi</h2>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card-body">
+                                <div class="scroll-y me-n5 pe-5 chat-history"
+                                    id="chat_history"
+                                    data-kt-scroll="true"
+                                    data-kt-scroll-activate="{default: true, lg: true}"
+                                    data-kt-scroll-max-height="auto"
+                                    data-kt-scroll-dependencies="#kt_header, #kt_app_header, #kt_toolbar, #kt_app_toolbar, #kt_footer, #kt_app_footer, .card-header, .card-footer"
+                                    data-kt-scroll-wrappers="#kt_app_content_container, .card-body"
+                                    data-kt-scroll-offset="5px"
+                                    style="min-height: 400px; height: 500px;">
+                                </div>
+                            </div>
+
+                            <div class="card-footer pt-4" id="kt_chat_messenger_footer">
+                                <div class="d-flex align-items-center">
+                                    <input type="text" id="msg_input" class="form-control form-control-flush mb-0 border-0 fs-6" placeholder="Tuliskan pesan Anda..." autocomplete="off" />
+                                    <div class="d-flex align-items-center ms-2">
+                                        <button class="btn btn-primary btn-sm btn-icon" id="btn_send">
+                                            <i class="ki-duotone ki-send fs-2"><span class="path1"></span><span class="path2"></span></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modal_materi" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered mw-650px">
+        <div class="modal-content rounded border-0">
+
+            <div class="modal-header pb-0 border-0 justify-content-between">
+                <h2 class="fw-bold">Mulai Diskusi Baru</h2>
+                <div class="btn btn-sm btn-icon btn-active-color-primary" data-bs-dismiss="modal">
+                    <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i>
+                </div>
+            </div>
+
+            <div class="modal-body scroll-y px-10 px-lg-15 pt-5 pb-10">
+                <div class="text-gray-500 fw-semibold fs-6 mb-5">Pilih materi di bawah ini untuk memulai atau melanjutkan diskusi.</div>
+
+                <div class="mh-300px scroll-y me-n5 pe-5">
+                    <?php foreach ($materi as $m): ?>
+                        <div class="d-flex flex-stack py-4 border-bottom border-gray-200" style="cursor:pointer;"
+                            onclick="startNewChat('<?= $m['kode_materi'] ?>', '<?= esc($m['nama_materi']) ?>', '<?= esc($group['email_guru'] ?? '') ?>', '<?= esc($group['nama_guru'] ?? '') ?>')">
+
+                            <div class="d-flex align-items-center">
+                                <div class="symbol symbol-40px symbol-circle me-4">
+                                    <span class="symbol-label bg-light-primary">
+                                        <i class="ki-duotone ki-book-open text-primary fs-3"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i>
+                                    </span>
+                                </div>
+                                <div class="d-flex flex-column">
+                                    <span class="text-gray-900 fw-bold fs-6"><?= $m['nama_materi'] ?></span>
+                                    <span class="text-muted fw-semibold fs-7">Guru: <?= $m['nama_guru'] ?? 'Pengajar' ?></span>
+                                </div>
+                            </div>
+
                         </div>
                     <?php endforeach; ?>
                 </div>
             </div>
-        </div>
 
-        <div class="chat-main">
-            <div id="empty_state" class="text-center my-auto">
-                <i class="fas fa-comments fa-4x text-muted mb-3"></i>
-                <p class="text-muted">Pilih diskusi di sebelah kiri untuk memulai</p>
-            </div>
-
-            <div id="chat_area" style="display:none;" class="h-100 flex-column">
-                <div class="p-3 border-bottom bg-white d-flex align-items-center shadow-sm">
-                    <h5 class="m-0 font-weight-bold" id="active_title">Nama Materi</h5>
-                </div>
-
-                <div class="chat-history" id="chat_history"></div>
-
-                <div class="p-3 border-top bg-white">
-                    <div class="input-group">
-                        <input type="text" id="msg_input" class="form-control" placeholder="Tulis pesan...">
-                        <div class="input-group-append">
-                            <button class="btn btn-primary px-4" id="btn_send">
-                                <i class="fas fa-paper-plane mr-1"></i> Kirim
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="modal_materi" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title font-weight-bold">Mulai Diskusi Baru</h5>
-                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-            </div>
-            <div class="modal-body overflow-auto" style="max-height: 400px;">
-                <?php foreach ($materi as $m): ?>
-                    <div class="materi-item border p-3 mb-2 rounded shadow-sm" style="cursor:pointer;"
-                        onclick="startNewChat('<?= $m['kode_materi'] ?>', '<?= $m['nama_materi'] ?>', '<?= $group['email_guru'] ?>', '<?= $group['nama_guru'] ?>')">
-                        <div class="font-weight-bold text-primary"><?= $m['nama_materi'] ?></div>
-                        <small class="text-muted">Guru: <?= $m['nama_guru'] ?? 'Pengajar' ?></small>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        </div>
-    </div>
-</div>
 <?= $this->endSection(); ?>
 
 <?= $this->section('scripts') ?>
@@ -332,8 +245,8 @@
         $(document).on('click', '.chat-item', function() {
             const materi = $(this).data('materi');
             const namaMateri = $(this).data('namamateri');
-            currentEmailGuru = $(this).data('emailguru'); // Tangkap email guru dari sidebar
-            currentNamaGuru = $(this).data('namaguru'); // Tangkap nama guru dari sidebar
+            currentEmailGuru = $(this).data('emailguru');
+            currentNamaGuru = $(this).data('namaguru');
 
             $('.chat-item').removeClass('active');
             $(this).addClass('active');
@@ -349,21 +262,25 @@
 
     function startNewChat(kodeMateri, namaMateri, emailGuru, nama_guru) {
         $('#modal_materi').modal('hide');
-        currentEmailGuru = emailGuru; // Set email guru dari modal
-        currentNamaGuru = nama_guru; // Set nama guru dari modal
+        currentEmailGuru = emailGuru;
+        currentNamaGuru = nama_guru;
         loadChat(kodeMateri, namaMateri);
     }
 
     function loadChat(materi, namaMateri) {
-        if (currentMateri === materi && $('#chat_area').is(':visible')) return;
+        if (currentMateri === materi && !$('#chat_area').hasClass('d-none')) return;
 
         currentMateri = materi;
         lastDisplayedId = 0;
 
-        $('#empty_state').hide();
-        $('#chat_area').attr('style', 'display: flex !important;');
+        // Sembunyikan Empty State (Hapus d-flex, tambah d-none)
+        $('#empty_state').removeClass('d-flex').addClass('d-none');
+
+        // Tampilkan Chat Area (Hapus d-none, tambah d-flex)
+        $('#chat_area').removeClass('d-none').addClass('d-flex');
+
         $('#active_title').text(namaMateri);
-        $('#chat_history').html('');
+        $('#chat_history').html('<div class="text-center py-20"><span class="spinner-border text-primary"></span></div>');
 
         fetchMessages(materi);
 
@@ -378,17 +295,20 @@
                 last_id: lastDisplayedId
             },
             function(response) {
+                if (lastDisplayedId === 0) {
+                    $('#chat_history').html('');
+                }
                 const data = response.messages;
                 if (data && data.length > 0) {
                     let html = '';
-                    let hasNewMessage = false; // Flag untuk mendeteksi pesan baru benar-benar masuk
+                    let hasNewMessage = false;
 
                     data.forEach(m => {
                         const msgId = parseInt(m.id_chat_materi);
 
                         if (msgId > lastDisplayedId) {
                             lastDisplayedId = msgId;
-                            hasNewMessage = true; // Tandai ada pesan yang baru di-render
+                            hasNewMessage = true;
 
                             const isMe = (m.email === currentEmailGuru);
                             const time = new Date(m.date_created * 1000).toLocaleTimeString([], {
@@ -397,31 +317,41 @@
                             });
 
                             if (isMe) {
-                                // TAMPILAN SISWA/SAYA (KANAN)
+                                // TAMPILAN SAYA (KANAN) - Menggunakan komponen Metronic Native
                                 html += `
-                                <div class="d-flex flex-row-reverse align-items-end mb-4">
-                                    <div class="ml-2">
-                                        <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(m.nama)}&background=0086a7&color=fff" class="avatar-circle shadow-sm">
-                                    </div>
-                                    
-                                    <div class="bubble-me shadow-sm">
-                                        <div class="chat-name text-info-custom">${m.nama}</div>
-                                        <div class="chat-message-text">${urlify(m.text)}</div>
-                                        <div class="chat-time">${time}</div>
+                                <div class="d-flex justify-content-end mb-10">
+                                    <div class="d-flex flex-column align-items-end">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <div class="me-3">
+                                                <span class="text-muted fs-8 mb-1">${time}</span>
+                                                <a href="#" class="fs-6 fw-bold text-gray-900 text-hover-primary ms-1">Anda</a>
+                                            </div>
+                                            <div class="symbol symbol-35px symbol-circle">
+                                                <img alt="Pic" src="https://ui-avatars.com/api/?name=${encodeURIComponent(m.nama)}&background=0086a7&color=fff">
+                                            </div>
+                                        </div>
+                                        <div class="p-4 rounded bg-light-primary text-gray-900 fw-semibold mw-lg-400px text-end chat-message-text">
+                                            ${urlify(m.text)}
+                                        </div>
                                     </div>
                                 </div>`;
                             } else {
-                                // TAMPILAN GURU/ORANG LAIN (KIRI)
+                                // TAMPILAN ORANG LAIN (KIRI) - Menggunakan komponen Metronic Native
                                 html += `
-                                <div class="d-flex align-items-end mb-4">
-                                    <div class="mr-2">
-                                        <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(m.nama)}&background=E8DED3&color=333" class="avatar-circle shadow-sm">
-                                    </div>
-                                    
-                                    <div class="bubble-them shadow-sm">
-                                        <div class="chat-name text-guru-custom">${m.nama}</div>
-                                        <div class="chat-message-text">${urlify(m.text)}</div>
-                                        <div class="chat-time">${time}</div>
+                                <div class="d-flex justify-content-start mb-10">
+                                    <div class="d-flex flex-column align-items-start">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <div class="symbol symbol-35px symbol-circle">
+                                                <img alt="Pic" src="https://ui-avatars.com/api/?name=${encodeURIComponent(m.nama)}&background=E8DED3&color=333">
+                                            </div>
+                                            <div class="ms-3">
+                                                <a href="#" class="fs-6 fw-bold text-gray-900 text-hover-primary me-1">${m.nama}</a>
+                                                <span class="text-muted fs-8 mb-1">${time}</span>
+                                            </div>
+                                        </div>
+                                        <div class="p-4 rounded bg-light-info text-gray-900 fw-semibold mw-lg-400px text-start chat-message-text">
+                                            ${urlify(m.text)}
+                                        </div>
                                     </div>
                                 </div>`;
                             }
@@ -430,10 +360,6 @@
 
                     if (hasNewMessage) {
                         $('#chat_history').append(html);
-
-                        // HANYA SCROLL JIKA:
-                        // 1. Pesan baru masuk
-                        // 2. User sedang berada di area bawah chat (opsional, tapi defaultnya kita scroll jika ada pesan baru)
                         $('#chat_history').animate({
                             scrollTop: $('#chat_history')[0].scrollHeight
                         }, 300);
@@ -451,8 +377,8 @@
         $.post(`<?= base_url('sw-admin/diskusi/send') ?>`, {
             materi: currentMateri,
             text: text,
-            email_guru: currentEmailGuru, // KIRIM EMAIL GURU KE BACKEND
-            nama_guru: currentNamaGuru // KIRIM NAMA GURU KE BACKEND
+            email_guru: currentEmailGuru,
+            nama_guru: currentNamaGuru
         }, function() {
             $('#msg_input').prop('disabled', false).focus();
             fetchMessages(currentMateri);
@@ -462,7 +388,7 @@
     function urlify(text) {
         if (!text) return "";
         var urlRegex = /(https?:\/\/[^\s]+)/g;
-        return text.replace(urlRegex, url => `<a href="${url}" target="_blank" class="text-white border-bottom">${url}</a>`);
+        return text.replace(urlRegex, url => `<a href="${url}" target="_blank" class="fw-bold text-primary text-hover-dark">${url}</a>`);
     }
 </script>
 <?= $this->endSection(); ?>

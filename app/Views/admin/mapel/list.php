@@ -1,113 +1,163 @@
 <?= $this->extend('template/app'); ?>
-
 <?= $this->section('content'); ?>
-<div class="layout-px-spacing">
-    <div class="row layout-top-spacing">
-        <div class="col-lg-12 layout-spacing">
-            <div class="widget shadow p-4 bg-white">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h5 class="font-weight-bold"><i class="bi bi-book mr-2"></i>Mata Pelajaran</h5>
-                    <button class="btn btn-primary" data-toggle="modal" data-target="#tambah_mapel">
-                        <i class="bi bi-plus-circle mr-1"></i> Tambah Mapel
-                    </button>
+
+<div class="d-flex flex-column flex-column-fluid">
+    <div id="kt_app_content" class="app-content flex-column-fluid">
+        <div id="kt_app_content_container" class="app-container container-xxl">
+            
+            <div class="card card-flush">
+                <div class="card-header align-items-center py-5 gap-2 gap-md-5">
+                    <div class="card-title">
+                        <div class="d-flex align-items-center position-relative my-1">
+                            <i class="ki-duotone ki-magnifier fs-3 position-absolute ms-4">
+                                <span class="path1"></span><span class="path2"></span>
+                            </i>
+                            <input type="text" data-kt-mapel-table-filter="search" class="form-control form-control-solid w-250px ps-12" placeholder="Cari Mapel..." />
+                        </div>
+                    </div>
+                    <div class="card-toolbar">
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tambah_mapel">
+                            <i class="ki-duotone ki-plus fs-2"></i> Tambah Mapel
+                        </button>
+                    </div>
                 </div>
 
-                <div class="table-responsive">
-                    <table id="datatables" class="table table-hover table-bordered table-striped" style="width:100%">
-                        <thead>
-                            <tr>
-                                <th width="50">No</th>
-                                <th>Nama Mapel</th>
-                                <th width="120">Preview</th>
-                                <th class="text-center" width="80">Opsi</th>
-                            </tr>
-                        </thead>
-                    </table>
+                <div class="card-body pt-0">
+                    <div class="table-responsive">
+                        <table id="datatables" class="table align-middle table-row-dashed fs-6 gy-5 text-nowrap w-100">
+                            <thead>
+                                <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
+                                    <th class="w-50px text-center">No</th>
+                                    <th class="min-w-200px">Nama Mapel</th>
+                                    <th class="min-w-150px">Preview</th>
+                                    <th class="min-w-100px text-center">Opsi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="fw-semibold text-gray-600">
+                                </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
+
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="tambah_mapel" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content rounded">
+            
+            <div class="modal-header pb-0 border-0 justify-content-between">
+                <h2 class="fw-bold">Tambah Mapel Baru</h2>
+                <div class="btn btn-sm btn-icon btn-active-color-primary" data-bs-dismiss="modal">
+                    <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i>
+                </div>
+            </div>
+
+            <form action="<?= base_url('sw-admin/mapel/store'); ?>" method="POST" enctype="multipart/form-data" class="form">
+                <?= csrf_field(); ?>
+                
+                <div class="modal-body scroll-y px-10 px-lg-15 pt-5 pb-15">
+                    <div class="d-flex flex-stack mb-5">
+                        <div class="fs-6 fw-semibold text-gray-700">Daftar Mata Pelajaran</div>
+                        <button type="button" class="btn btn-sm btn-light-primary tambah-baris-mapel">
+                            <i class="ki-duotone ki-plus fs-2"></i> Tambah Baris
+                        </button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table align-middle table-row-dashed fs-6 gy-3">
+                            <thead>
+                                <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
+                                    <th class="min-w-200px">Nama Mapel</th>
+                                    <th class="min-w-250px">File Gambar</th>
+                                    <th class="w-50px text-end"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-mapel">
+                                <tr>
+                                    <td>
+                                        <input type="text" name="nama_mapel[]" required class="form-control form-control-solid" placeholder="Nama Mapel">
+                                    </td>
+                                    <td>
+                                        <input type="file" name="gambar_mapel[]" required class="form-control form-control-solid" accept="image/*">
+                                    </td>
+                                    <td class="text-end">
+                                        <button type="button" class="btn btn-icon btn-light-danger btn-sm disabled" disabled>
+                                            <i class="ki-duotone ki-trash fs-3"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-muted fs-7 mt-2"><span class="text-danger">*</span> Rekomendasi ukuran gambar: 1280px x 1024px</div>
+
+                    <div class="text-center pt-10">
+                        <button type="button" class="btn btn-light me-3" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="indicator-label">Simpan Semua</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="tambah_mapel" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-xl" role="document">
-        <form action="<?= base_url('sw-admin/mapel/store'); ?>" method="POST" enctype="multipart/form-data">
-            <?= csrf_field(); ?>
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title text-white">Tambah Mapel Baru</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal">×</button>
-                </div>
-                <div class="modal-body">
-                    <button type="button" class="btn btn-outline-success btn-sm mb-3 tambah-baris-mapel">
-                        <i class="bi bi-plus"></i> Tambah Baris
-                    </button>
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Nama Mapel</th>
-                                <th width="40%">File Gambar</th>
-                                <th width="50"></th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbody-mapel">
-                            <tr>
-                                <td><input type="text" name="nama_mapel[]" required class="form-control" placeholder="Nama Mapel"></td>
-                                <td><input type="file" name="gambar_mapel[]" required class="form-control-file border p-1 rounded w-100" accept="image/*"></td>
-                                <td></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <small class="text-muted italic">* Rekomendasi ukuran: 1280px x 1024px</small>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan Semua</button>
+<div class="modal fade" id="edit_mapel_modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered mw-600px">
+        <div class="modal-content rounded">
+            
+            <div class="modal-header pb-0 border-0 justify-content-between">
+                <h2 class="fw-bold">Edit Mata Pelajaran</h2>
+                <div class="btn btn-sm btn-icon btn-active-color-primary" data-bs-dismiss="modal">
+                    <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i>
                 </div>
             </div>
-        </form>
+
+            <form action="<?= base_url('sw-admin/mapel/update'); ?>" method="POST" enctype="multipart/form-data" class="form">
+                <?= csrf_field(); ?>
+                <input type="hidden" name="id_mapel" id="id_mapel">
+                <input type="hidden" name="gambar_mapel_lama" id="gambar_mapel_lama">
+                
+                <div class="modal-body scroll-y px-10 px-lg-15 pt-5 pb-15">
+                    
+                    <div class="fv-row mb-7">
+                        <label class="required fs-6 fw-semibold mb-2">Nama Mata Pelajaran</label>
+                        <input type="text" name="nama_mapel" id="nama_mapel" class="form-control form-control-solid" required>
+                    </div>
+                    
+                    <div class="fv-row mb-7">
+                        <label class="fs-6 fw-semibold mb-2">Ganti Gambar <span class="text-muted fs-7">(Opsional)</span></label>
+                        <input type="file" name="gambar_mapel" class="form-control form-control-solid" accept="image/*">
+                    </div>
+                    
+                    <div class="border border-dashed border-gray-300 rounded p-5 bg-light text-center mt-5">
+                        <label class="d-block text-gray-600 fw-bold mb-3 fs-6">Gambar Saat Ini:</label>
+                        <div id="preview_gambar_lama"></div>
+                    </div>
+
+                    <div class="text-center pt-10">
+                        <button type="button" class="btn btn-light me-3" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="indicator-label">Update Data</span>
+                        </button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
-<div class="modal fade" id="edit_mapel_modal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <form action="<?= base_url('sw-admin/mapel/update'); ?>" method="POST" enctype="multipart/form-data">
-            <?= csrf_field(); ?>
-            <input type="hidden" name="id_mapel" id="id_mapel">
-            <input type="hidden" name="gambar_mapel_lama" id="gambar_mapel_lama">
-            <div class="modal-content">
-                <div class="modal-header bg-info text-white">
-                    <h5 class="modal-title text-white">Edit Mata Pelajaran</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal">×</button>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label>Nama Mata Pelajaran</label>
-                        <input type="text" name="nama_mapel" id="nama_mapel" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Ganti Gambar (Opsional)</label>
-                        <input type="file" name="gambar_mapel" class="form-control-file border p-1 rounded w-100" accept="image/*">
-                    </div>
-                    <div class="text-center p-2 border rounded bg-light">
-                        <label class="d-block text-muted mb-2">Gambar Saat Ini:</label>
-                        <div id="preview_gambar_lama"></div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-info text-white">Update Data</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
 <?= $this->endSection(); ?>
 
 <?= $this->section('scripts'); ?>
 <script>
     $(document).ready(function() {
-        // Server-side DataTable
+        
+        // Server-side DataTable (Metronic Styled)
         var table = $('#datatables').DataTable({
             "processing": true,
             "serverSide": true,
@@ -121,38 +171,55 @@
                 },
                 "dataSrc": function(json) {
                     // Update token di seluruh halaman dengan token baru yang dikirim server
-                    // Pastikan Controller datatables juga mengirimkan 'token' => csrf_hash()
                     if (json.token) {
                         $('input[name="<?= csrf_token() ?>"]').val(json.token);
                     }
                     return json.data;
                 }
             },
-            "columnDefs": [{
+            "columnDefs": [
+                {
                     "targets": [0, 2, 3],
                     "orderable": false
                 },
                 {
-                    "targets": [3],
+                    "targets": [0, 3],
                     "className": "text-center"
                 }
             ],
+            // Initialize Tooltips/Menus dynamically added by datatables
+            "drawCallback": function(settings) {
+                if (typeof KTMenu !== 'undefined') {
+                    KTMenu.createInstances();
+                }
+            }
         });
 
-        // Tambah Baris
+        // Search Datatables
+        $('[data-kt-mapel-table-filter="search"]').on('keyup', function() {
+            table.search(this.value).draw();
+        });
+
+        // Tambah Baris (Dengan penyesuaian kelas form-control-solid)
         $('.tambah-baris-mapel').click(function() {
             let baris = `<tr>
-            <td><input type="text" name="nama_mapel[]" required class="form-control"></td>
-            <td><input type="file" name="gambar_mapel[]" required class="form-control-file border p-1 rounded w-100"></td>
-            <td class="text-center"><button type="button" class="btn btn-danger btn-sm btn-remove-row"><i class="bi bi-x-lg"></i></button></td>
+            <td><input type="text" name="nama_mapel[]" required class="form-control form-control-solid" placeholder="Nama Mapel"></td>
+            <td><input type="file" name="gambar_mapel[]" required class="form-control form-control-solid" accept="image/*"></td>
+            <td class="text-end">
+                <button type="button" class="btn btn-icon btn-light-danger btn-sm btn-remove-row">
+                    <i class="ki-duotone ki-trash fs-3"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i>
+                </button>
+            </td>
         </tr>`;
             $('#tbody-mapel').append(baris);
         });
 
+        // Hapus Baris
         $(document).on('click', '.btn-remove-row', function() {
             $(this).closest('tr').remove();
         });
 
+        // Edit AJAX
         $(document).on('click', '.edit-mapel', function() {
             const id = $(this).data('id');
 
@@ -175,14 +242,15 @@
                     $('#gambar_mapel_lama').val(res.mapel.file);
 
                     let url_preview = "<?= base_url('uploads/mapel') ?>/" + res.mapel.file;
-                    $('#preview_gambar_lama').html(`<img src="${url_preview}" class="img-fluid rounded border shadow-sm" style="max-height: 150px;">`);
+                    // Styling preview gambar agar terlihat estetik
+                    $('#preview_gambar_lama').html(`<img src="${url_preview}" class="img-fluid rounded shadow-sm" style="max-height: 150px; object-fit: contain;">`);
 
                     // 3. UPDATE TOKEN CSRF DI HALAMAN (Paling Penting!)
-                    // Kita pasang Kunci B (res.token) ke input hidden untuk request selanjutnya
                     if (res.token) {
                         $('input[name="<?= csrf_token() ?>"]').val(res.token);
                     }
 
+                    // Gunakan data-bs-target native BS5 (Metronic 8)
                     $('#edit_mapel_modal').modal('show');
                 }
             });

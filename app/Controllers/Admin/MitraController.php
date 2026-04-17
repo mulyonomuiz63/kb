@@ -27,8 +27,9 @@ class MitraController extends BaseController
 
     public function index()
     {
-        $data = [
-            'title' => 'List Mitra',
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'List Mitra', 'url' => '#'],
         ];
         return view('admin/mitra/list', $data);
     }
@@ -73,28 +74,40 @@ class MitraController extends BaseController
             foreach ($list as $m) {
                 $row = [];
                 $row[] = $no++;
-                $row[] = '<div class="fw-bold text-dark">' . esc($m->nama_mitra) . '</div>';
-                $row[] = esc($m->email);
-                $row[] = '<span class="badge bg-light-success text-success">' . $m->komisi . '%</span>';
 
-                // Tombol Aksi
+                // Teks nama mitra dipertegas dengan warna standar text-gray-800 Metronic
+                $row[] = '<div class="text-gray-800 fw-bold">' . esc($m->nama_mitra) . '</div>';
+
+                $row[] = esc($m->email);
+
+                // Badge komisi disesuaikan padding dan ketebalan font-nya
+                $row[] = '<span class="badge badge-light-success fw-bold px-3 py-2">' . $m->komisi . '%</span>';
+
+                // Tombol Aksi menggunakan KTMenu (Sistem Dropdown Metronic)
+                // Perhatikan atribut data-bs-toggle dan data-bs-target untuk Bootstrap 5
                 $row[] = '
-                <div class="dropdown custom-dropdown text-center">
-                    <a class="dropdown-toggle badge badge-primary border-0" href="#" role="button" id="dropdownMenu' . $m->idmitra . '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <i class="bi bi-three-dots-vertical"></i>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-right shadow border-0" aria-labelledby="dropdownMenu' . $m->idmitra . '">
-                        <a class="dropdown-item py-2" href="' . base_url('sw-admin/mitra/voucher/' . encrypt_url($m->idmitra)) . '">
-                            <i class="bi bi-eye me-2 text-info"></i> Lihat Voucher
-                        </a>
-                        <a class="dropdown-item py-2 edit-mitra" href="javascript:void(0)" 
-                        data-toggle="modal" 
-                        data-target="#edit_mitra" 
-                        data-mitra="' . encrypt_url($m->idmitra) . '">
-                            <i class="bi bi-gear me-2 text-primary"></i> Pengaturan Mitra
-                        </a>
-                    </div>
-                </div>';
+                        <div class="text-center">
+                            <a href="#" class="btn btn-sm btn-light btn-flex btn-center btn-active-light-primary" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+                                Aksi <i class="ki-duotone ki-down fs-5 ms-1"></i>
+                            </a>
+                            
+                            <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-200px py-4 text-start" data-kt-menu="true">
+                                <div class="menu-item px-3">
+                                    <a href="' . base_url('sw-admin/mitra/voucher/' . encrypt_url($m->idmitra)) . '" class="menu-link px-3">
+                                        <i class="ki-duotone ki-discount fs-4 me-2 text-info"><span class="path1"></span><span class="path2"></span></i> Lihat Voucher
+                                    </a>
+                                </div>
+                                
+                                <div class="menu-item px-3">
+                                    <a href="javascript:void(0)" class="menu-link px-3 edit-mitra" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#edit_mitra" 
+                                    data-mitra="' . encrypt_url($m->idmitra) . '">
+                                        <i class="ki-duotone ki-setting-2 fs-4 me-2 text-primary"><span class="path1"></span><span class="path2"></span></i> Pengaturan
+                                    </a>
+                                </div>
+                            </div>
+                        </div>';
 
                 $data[] = $row;
             }
@@ -259,15 +272,15 @@ class MitraController extends BaseController
                 $this->voucherModel->update($voucher->idvoucher, ['status' => 'T']);
             }
         }
-        $data = [
-            'title' => 'List Voucher Mitra',
-            'parent_title' => 'Mitra',
-            'parent_url'   => base_url('sw-admin/mitra'),
-            'voucher' => $dataVoucher,
-            'mitra' => $this->mitraModel->where('idmitra', $idmitra)->get()->getResultObject(),
-            'paket' => $this->paketModel->get()->getResultObject(),
-            'idmitra' => $id,
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'Data Mitra', 'url' => base_url('sw-admin/mitra')],
+            ['title' => 'List Voucher', 'url' => '#'],
         ];
+        $data['voucher'] = $dataVoucher;
+        $data['mitra'] = $this->mitraModel->where('idmitra', $idmitra)->get()->getResultObject();
+        $data['paket'] = $this->paketModel->get()->getResultObject();
+        $data['idmitra'] = $id;
 
         return view('admin/voucher/list', $data);
     }
@@ -407,6 +420,7 @@ class MitraController extends BaseController
                 'idvoucher'     => $this->request->getVar('idvoucher'),
                 'idmitra'        => $this->request->getVar('idmitra'),
                 'diskon_voucher'        => $this->request->getVar('diskon_voucher'),
+                'tgl_aktif'        => date('Y-m-d'),
                 'tgl_exp'        => date('Y-m-d', strtotime($this->request->getVar('tgl_exp'))),
                 'status'        => $this->request->getVar('status')
 
@@ -446,6 +460,11 @@ class MitraController extends BaseController
                 ->get()->getResultObject();
 
             // 4. Data Pendukung
+            $data['breadcrumbs'] = [
+                ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+                ['title' => 'Data Mitra', 'url' => base_url('sw-admin/mitra')],
+                ['title' => 'List Paket', 'url' => '#'],
+            ];
             $data['idvoucher'] = $idvoucher;
             $data['id_raw']    = $id; // Tetap simpan ID terenkripsi jika butuh di view
             $data['paket']     = $this->paketModel->orderBy('nama_paket', 'ASC')->get()->getResultObject();
@@ -526,6 +545,11 @@ class MitraController extends BaseController
                 ->orderBy('transaksi.status', 'esc')
                 ->get()->getResultObject();
 
+            $data['breadcrumbs'] = [
+                ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+                ['title' => 'Data Mitra', 'url' => base_url('sw-admin/mitra')],
+                ['title' => 'List Laporan Komisi', 'url' => '#'],
+            ];
             $data['voucher'] = $this->voucherModel->join('mitra', 'voucher.idmitra=mitra.idmitra')->where('voucher.kode_voucher', $kode_voucher)->groupBy('voucher.kode_voucher')->get()->getRowObject();
             return view('admin/voucher/detail_komisi', $data);
         } catch (\Exception $e) {

@@ -1,163 +1,165 @@
 <?= $this->extend('template/app'); ?>
 <?= $this->section('content'); ?>
+<?php $db = Config\Database::connect(); ?>
 
-<div class="layout-px-spacing">
-    <div class="row layout-top-spacing">
-        <div class="col-lg-12 layout-spacing">
-            <div class="widget shadow-sm p-4 bg-white rounded">
-                
-                <div class="widget-heading">
-                    <div class="row align-items-center mb-4">
-                        <div class="col-md-8">
-                            <h5 class="font-weight-bold text-dark">Laporan Voucher & Komisi</h5>
-                            <p class="text-muted small">Data penggunaan voucher dan perhitungan komisi mitra secara real-time.</p>
-                        </div>
-                        <div class="col-md-4 text-right">
-                            <a href="javascript:window.history.go(-1);" class="btn btn-outline-secondary btn-sm">
-                                <i class="flaticon-arrow-left"></i> Kembali
-                            </a>
-                        </div>
-                    </div>
+<div class="d-flex flex-column flex-column-fluid">
+    <div id="kt_app_content" class="app-content flex-column-fluid">
+        <div id="kt_app_content_container" class="app-container container-xxl">
+            
+            <?php 
+                $nama = !empty($voucher) ? $voucher->nama_mitra : '-';
+                $kode_voucher = !empty($voucher) ? $voucher->kode_voucher : '-';
+                $komisi = !empty($voucher) ? $voucher->komisi : 0;
+                $total_pengguna = 0;
+                $total_harga = 0;
 
-                    <?php 
-                        $nama = !empty($voucher) ? $voucher->nama_mitra : '-';
-                        $kode_voucher = !empty($voucher) ? $voucher->kode_voucher : '-';
-                        $komisi = !empty($voucher) ? $voucher->komisi : 0;
-                        $total_pengguna = 0;
-                        $total_harga = 0;
+                foreach ($transaksi as $s) {
+                    $diskon = ($s->nominal * $s->diskon) / 100;
+                    $totalSetelahDiskon = $s->nominal - $diskon;
+                    $diskon_voucher = ($totalSetelahDiskon * $s->voucher) / 100;
+                    $jumlah = $totalSetelahDiskon - $diskon_voucher;
+                    
+                    $total_pengguna += 1;
+                    $total_harga += $jumlah;
+                }
+            ?>
 
-                        foreach ($transaksi as $s) {
-                            $diskon = ($s->nominal * $s->diskon) / 100;
-                            $totalSetelahDiskon = $s->nominal - $diskon;
-                            $diskon_voucher = ($totalSetelahDiskon * $s->voucher) / 100;
-                            $jumlah = $totalSetelahDiskon - $diskon_voucher;
-                            
-                            $total_pengguna += 1;
-                            $total_harga += $jumlah;
-                        }
-                    ?>
-
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="card bg-light border-0">
-                                <div class="card-body p-3">
-                                    <ul class="list-group list-group-flush bg-transparent">
-                                        <li class="list-group-item d-flex justify-content-between bg-transparent px-0">
-                                            <span>Mitra:</span> <span class="font-weight-bold"><?= $nama ?></span>
-                                        </li>
-                                        <li class="list-group-item d-flex justify-content-between bg-transparent px-0">
-                                            <span>Kode Voucher:</span> <span class="badge badge-primary"><?= $kode_voucher ?></span>
-                                        </li>
-                                        <li class="list-group-item d-flex justify-content-between bg-transparent px-0">
-                                            <span>Total Pengguna:</span> <span class="text-dark"><?= $total_pengguna ?> Peserta</span>
-                                        </li>
-                                    </ul>
+            <div class="row g-5 g-xl-8 mb-8">
+                <div class="col-xl-6">
+                    <div class="card card-flush bg-light-primary border-0 h-md-100">
+                        <div class="card-body py-9">
+                            <div class="row gx-9">
+                                <div class="col-sm-6 mb-10 mb-sm-0">
+                                    <div class="fs-6 fw-semibold text-gray-600 mb-2">Nama Mitra</div>
+                                    <div class="fs-2 fw-bold text-gray-900"><?= $nama ?></div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="fs-6 fw-semibold text-gray-600 mb-2">Kode Voucher</div>
+                                    <div class="badge badge-primary fs-4 px-3 py-2"><?= $kode_voucher ?></div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card bg-light border-0">
-                                <div class="card-body p-3">
-                                    <ul class="list-group list-group-flush bg-transparent">
-                                        <li class="list-group-item d-flex justify-content-between bg-transparent px-0">
-                                            <span>Total Transaksi:</span> <span class="font-weight-bold">Rp <?= number_format($total_harga, 0, '.', '.') ?></span>
-                                        </li>
-                                        <li class="list-group-item d-flex justify-content-between bg-transparent px-0">
-                                            <span>% Komisi:</span> <span class="text-success font-weight-bold"><?= $komisi ?> %</span>
-                                        </li>
-                                        <li class="list-group-item d-flex justify-content-between bg-transparent px-0 border-top mt-1">
-                                            <span class="font-weight-bold">Nilai Komisi:</span> 
-                                            <span class="h5 mb-0 font-weight-bold text-danger">Rp <?= number_format(($total_harga * $komisi)/100, 0, '.', '.') ?></span>
-                                        </li>
-                                    </ul>
-                                </div>
+                            <div class="separator separator-dashed border-primary opacity-25 my-5"></div>
+                            <div class="d-flex flex-stack">
+                                <div class="text-gray-700 fw-semibold fs-6">Total Pengguna Voucher:</div>
+                                <div class="fw-bold text-gray-900 fs-5"><?= $total_pengguna ?> Peserta</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="table-responsive">
-                    <table id="datatable-table" class="table table-hover">
-                        <thead class="bg-light">
-                            <tr>
-                                <th>Siswa</th>
-                                <th>Paket</th>
-                                <th>Tgl Pembayaran</th>
-                                <th class="text-right">Nominal</th>
-                                <th class="text-center">Status</th>
-                                <th class="text-center">Opsi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php
-                            $currentMonth = null;
-                            $currentYear  = null;
-                            $totalBulan   = 0;
-                            
-                            foreach ($transaksi as $s) : 
-                                $dateObj = strtotime($s->tgl_pembayaran);
-                                $month = date('n', $dateObj);
-                                $year  = date('Y', $dateObj);
-
-                                $diskon = ($s->nominal * $s->diskon) / 100;
-                                $totalDiskon = $s->nominal - $diskon;
-                                $diskon_voucher = ($totalDiskon * $s->voucher) / 100;
-                                $nominalBersih = $totalDiskon - $diskon_voucher;
-
-                                // Subtotal per bulan
-                                if ($currentMonth !== null && ($currentMonth !== $month || $currentYear !== $year)) {
-                                    echo "<tr class='table-warning'>
-                                            <td colspan='3' class='text-right font-weight-bold'>SUBTOTAL KOMISI BULAN SEBELUMNYA</td>
-                                            <td colspan='3' class='font-weight-bold text-danger'>Rp " . number_format(($totalBulan * $komisi)/100, 0, '.', '.') . "</td>
-                                          </tr>";
-                                    $totalBulan = 0;
-                                }
-
-                                $currentMonth = $month;
-                                $currentYear  = $year;
-                                $totalBulan  += $nominalBersih;
-                            ?>
-                                <tr>
-                                    <td><div class="text-wrap" style="width: 150px;"><?= $s->nama_siswa; ?></div></td>
-                                    <td><?= $s->nama_paket; ?></td>
-                                    <td><?= date('d M Y', $dateObj); ?></td>
-                                    <td class="text-right font-weight-bold">Rp <?= number_format($nominalBersih, 0, '.', '.'); ?></td>
-                                    <td class="text-center">
-                                        <?php if ($s->status == 'V') : ?>
-                                            <span class="badge badge-info">Waiting</span>
-                                        <?php else : ?>
-                                            <span class="badge badge-success">Approved</span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td class="text-center">
-                                        <button data-transaksi="<?= encrypt_url($s->idtransaksi); ?>"
-                                           class="btn btn-sm btn-primary validasi-transaksi">Detail</button>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-
-                            <?php if ($currentMonth !== null): ?>
-                                <tr class="table-warning">
-                                    <td colspan="3" class="text-right font-weight-bold">SUBTOTAL KOMISI BULAN TERAKHIR</td>
-                                    <td colspan="3" class="font-weight-bold text-danger">Rp <?= number_format(($totalBulan * $komisi)/100, 0, '.', '.'); ?></td>
-                                </tr>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
+                <div class="col-xl-6">
+                    <div class="card card-flush h-md-100 border-0 shadow-sm">
+                        <div class="card-body py-9">
+                            <div class="d-flex flex-stack mb-5">
+                                <div class="text-gray-600 fw-semibold fs-6">Total Transaksi Masuk:</div>
+                                <div class="fw-bold text-gray-900 fs-4">Rp <?= number_format($total_harga, 0, '.', '.') ?></div>
+                            </div>
+                            <div class="d-flex flex-stack mb-5">
+                                <div class="text-gray-600 fw-semibold fs-6">Persentase Komisi Mitra:</div>
+                                <div class="badge badge-light-success fs-5 px-3 py-1"><?= $komisi ?> %</div>
+                            </div>
+                            <div class="separator separator-dashed my-5"></div>
+                            <div class="d-flex flex-stack">
+                                <div class="text-gray-800 fw-bold fs-5">Estimasi Pendapatan Komisi:</div>
+                                <div class="fw-bold text-danger fs-2x">Rp <?= number_format(($total_harga * $komisi)/100, 0, '.', '.') ?></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            <div class="card card-flush shadow-sm">
+                <div class="card-header align-items-center py-5">
+                    <div class="card-title">
+                        <h3 class="fw-bold mb-0">Rincian Transaksi Pengguna</h3>
+                    </div>
+                    <div class="card-toolbar">
+                        </div>
+                </div>
+                
+                <div class="card-body pt-0">
+                    <div class="table-responsive">
+                        <table id="datatable-table" class="table align-middle table-row-dashed fs-6 gy-5 text-nowrap">
+                            <thead>
+                                <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
+                                    <th class="min-w-200px">Siswa</th>
+                                    <th class="min-w-150px">Paket</th>
+                                    <th class="min-w-150px">Tgl Pembayaran</th>
+                                    <th class="text-end min-w-125px">Nominal</th>
+                                    <th class="text-center min-w-100px">Status</th>
+                                    <th class="text-center min-w-100px">Opsi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="fw-semibold text-gray-600">
+                                <?php
+                                    $currentMonth = null;
+                                    $currentYear  = null;
+                                    $totalBulan   = 0;
+                                    
+                                    foreach ($transaksi as $s) : 
+                                        $dateObj = strtotime($s->tgl_pembayaran);
+                                        $month = date('n', $dateObj);
+                                        $year  = date('Y', $dateObj);
+
+                                        $diskon = ($s->nominal * $s->diskon) / 100;
+                                        $totalDiskon = $s->nominal - $diskon;
+                                        $diskon_voucher = ($totalDiskon * $s->voucher) / 100;
+                                        $nominalBersih = $totalDiskon - $diskon_voucher;
+
+                                        // Subtotal per bulan
+                                        if ($currentMonth !== null && ($currentMonth !== $month || $currentYear !== $year)) {
+                                            echo "<tr class='bg-light-warning'>
+                                                    <td colspan='3' class='text-end fw-bold text-gray-800 text-uppercase fs-7'>Subtotal Komisi Bulan Sebelumnya</td>
+                                                    <td colspan='3' class='fw-bold text-danger fs-5'>Rp " . number_format(($totalBulan * $komisi)/100, 0, '.', '.') . "</td>
+                                                  </tr>";
+                                            $totalBulan = 0;
+                                        }
+
+                                        $currentMonth = $month;
+                                        $currentYear  = $year;
+                                        $totalBulan  += $nominalBersih;
+                                ?>
+                                    <tr>
+                                        <td>
+                                            <span class="text-gray-800 fw-bold"><?= $s->nama_siswa; ?></span>
+                                        </td>
+                                        <td><?= $s->nama_paket; ?></td>
+                                        <td><?= date('d M Y', $dateObj); ?></td>
+                                        <td class="text-end fw-bold text-gray-900">Rp <?= number_format($nominalBersih, 0, '.', '.'); ?></td>
+                                        <td class="text-center">
+                                            <?php if ($s->status == 'V') : ?>
+                                                <span class="badge badge-light-info fw-bold px-4 py-2">Waiting</span>
+                                            <?php else : ?>
+                                                <span class="badge badge-light-success fw-bold px-4 py-2">Approved</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td class="text-center">
+                                            <button data-transaksi="<?= encrypt_url($s->idtransaksi); ?>" class="btn btn-sm btn-light-primary validasi-transaksi">Detail</button>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+
+                                <?php if ($currentMonth !== null): ?>
+                                    <tr class="bg-light-warning">
+                                        <td colspan="3" class="text-end fw-bold text-gray-800 text-uppercase fs-7">Subtotal Komisi Bulan Terakhir</td>
+                                        <td colspan="3" class="fw-bold text-danger fs-5">Rp <?= number_format(($totalBulan * $komisi)/100, 0, '.', '.'); ?></td>
+                                    </tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
-
-<div class="modal fade" id="validasi_transaksi" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
+<div class="modal fade" id="validasi_transaksi" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered mw-600px">
         <form id="formValidasi" method="POST" action="<?= base_url('App/proses_validasi') ?>">
             <?= csrf_field() ?>
-            <div class="modal-content border-0">
-                <div id="isiKonten">
-                    </div>
-            </div>
+            <div class="modal-content rounded shadow-sm" id="isiKonten">
+                </div>
         </form>
     </div>
 </div>
@@ -167,6 +169,7 @@
 <?= $this->section('scripts'); ?>
 <script>
     $(document).ready(function() {
+        // AJAX Request untuk menampilkan detail transaksi
         $('.validasi-transaksi').click(function() {
             const idtransaksi = $(this).data('transaksi');
             const base_url_thumb = '<?php echo base_url('uploads/transaksi/thumbnails'); ?>';
@@ -186,57 +189,72 @@
                     var button = '';
                     var informasi = '';
 
+                    // Menyesuaikan struktur HTML form di dalam modal dengan gaya Metronic
                     if (data.status == 'V') {
                         pilihstatus = `
-                            <label class="font-weight-bold">Tindakan Validasi</label>
-                            <select name="status" class="form-control mb-3" required>
-                                <option value="">-- Pilih Status --</option>
-                                <option value="S">Selesai (Approve)</option>
-                                <option value="P">Upload Ulang (Reject)</option>
-                            </select>`;
-                        button = `<button type="submit" class="btn btn-primary btn-block">Simpan Perubahan</button>`;
+                            <div class="fv-row mb-5">
+                                <label class="fs-6 fw-bold mb-2">Tindakan Validasi</label>
+                                <select name="status" class="form-select form-select-solid" required>
+                                    <option value="">-- Pilih Status --</option>
+                                    <option value="S">Selesai (Approve)</option>
+                                    <option value="P">Upload Ulang (Reject)</option>
+                                </select>
+                            </div>`;
+                        button = `<button type="submit" class="btn btn-primary w-100">Simpan Perubahan</button>`;
                         informasi = `
-                            <div class="form-group">
-                                <label class="small text-muted">Keterangan (Opsional jika reject)</label>
-                                <textarea class="form-control" name="keterangan" rows="2"></textarea>
+                            <div class="fv-row mb-5">
+                                <label class="fs-6 fw-semibold mb-2">Keterangan <span class="text-muted fs-8">(Opsional jika reject)</span></label>
+                                <textarea class="form-control form-control-solid" name="keterangan" rows="3" placeholder="Tuliskan alasan penolakan..."></textarea>
                             </div>
-                            <div class="text-center bg-light p-2 rounded">
-                                <label class="d-block small font-weight-bold">Bukti Pembayaran:</label>
-                                <a href="${'<?= base_url() ?>' + '/' + data.bukti_pembayaran}" target="_blank">
-                                    <img src="${'<?= base_url() ?>' + '/' + data.bukti_pembayaran}" class="img-fluid rounded border" style="max-height:200px">
+                            <div class="text-center bg-light-primary border border-primary border-dashed p-4 rounded mt-5">
+                                <div class="fs-6 fw-bold text-gray-800 mb-3">Bukti Pembayaran:</div>
+                                <a href="${'<?= base_url() ?>' + '/' + data.bukti_pembayaran}" target="_blank" class="d-block">
+                                    <img src="${'<?= base_url() ?>' + '/' + data.bukti_pembayaran}" class="img-fluid rounded shadow-sm" style="max-height: 250px; object-fit: contain;">
                                 </a>
                             </div>`;
                     } else {
-                        pilihstatus = `<div class="alert alert-success text-center">Transaksi ini sudah <b>Approved</b></div>`;
+                        pilihstatus = `<div class="notice d-flex bg-light-success rounded border-success border border-dashed p-4 mt-4">
+                                            <i class="ki-duotone ki-check-circle fs-2tx text-success me-4"><span class="path1"></span><span class="path2"></span></i>
+                                            <div class="d-flex flex-stack flex-grow-1">
+                                                <div class="fw-semibold">
+                                                    <div class="fs-6 text-gray-700">Transaksi ini sudah <b>Approved</b></div>
+                                                </div>
+                                            </div>
+                                        </div>`;
                     }
 
                     var jenis_bayar = (data.jenis_bayar != 'online') ? 'Manual Transfer' : 'Midtrans / Online';
 
                     $("#isiKonten").html(`
-                        <div class="modal-header bg-primary text-white">
-                            <h5 class="modal-title text-white">Validasi Pembayaran</h5>
-                            <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+                        <div class="modal-header pb-0 border-0 justify-content-between">
+                            <h2 class="fw-bold">Validasi Pembayaran</h2>
+                            <div class="btn btn-sm btn-icon btn-active-color-primary" data-bs-dismiss="modal">
+                                <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i>
+                            </div>
                         </div>
-                        <div class="modal-body">
-                            <div class="row mb-3">
+                        
+                        <div class="modal-body scroll-y px-10 px-lg-15 pt-5 pb-10">
+                            
+                            <div class="row mb-7">
                                 <div class="col-6">
-                                    <small class="text-muted d-block">Siswa</small>
-                                    <span class="font-weight-bold">${data.nama_siswa}</span>
+                                    <div class="fs-7 text-muted fw-semibold mb-1">Nama Siswa</div>
+                                    <div class="fs-5 fw-bold text-gray-900">${data.nama_siswa}</div>
                                 </div>
-                                <div class="col-6 text-right">
-                                    <small class="text-muted d-block">Metode</small>
-                                    <span class="badge badge-secondary">${jenis_bayar}</span>
+                                <div class="col-6 text-end">
+                                    <div class="fs-7 text-muted fw-semibold mb-1">Metode Bayar</div>
+                                    <div class="badge badge-light-dark fw-bold px-3 py-2">${jenis_bayar}</div>
                                 </div>
                             </div>
                             
-                            <div class="p-3 mb-3" style="background: #f1f2f3; border-radius: 8px;">
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span class="small">Paket:</span>
-                                    <span class="small font-weight-bold">${data.nama_paket}</span>
+                            <div class="border border-dashed border-gray-300 bg-light rounded p-5 mb-7">
+                                <div class="d-flex flex-stack mb-2">
+                                    <span class="text-gray-600 fw-semibold">Paket:</span>
+                                    <span class="text-gray-800 fw-bold">${data.nama_paket}</span>
                                 </div>
-                                <div class="d-flex justify-content-between">
-                                    <span class="small">Total Bayar:</span>
-                                    <span class="text-primary font-weight-bold">Rp ${numberFormat(nett, 0, ',', '.')}</span>
+                                <div class="separator separator-dashed border-gray-300 my-3"></div>
+                                <div class="d-flex flex-stack">
+                                    <span class="text-gray-600 fw-semibold">Total Bayar:</span>
+                                    <span class="text-primary fw-bold fs-4">Rp ${numberFormat(nett, 0, ',', '.')}</span>
                                 </div>
                             </div>
 
@@ -245,7 +263,7 @@
 
                             <input type="hidden" name="idtransaksi" value="${data.idtransaksi}">
                         </div>
-                        <div class="modal-footer border-0">
+                        <div class="modal-footer border-0 p-5 p-lg-10 pt-0">
                             ${button}
                         </div>
                     `);
@@ -255,12 +273,13 @@
         });
     });
 
+    // Helper: Number Format 
     function numberFormat(number, decimals, dec_point, thousands_sep) {
         number = (number + '').replace(/[^0-9+\-Ee.]/g, '');
         var n = !isFinite(+number) ? 0 : +number,
             prec = !isFinite(+decimals) ? 0 : Math.abs(decimals),
-            sep = (typeof thousands_sep === 'undefined') ? ',' : thousands_sep,
-            dec = (typeof dec_point === 'undefined') ? '.' : dec_point,
+            sep = (typeof thousands_sep === 'undefined') ? '.' : thousands_sep,
+            dec = (typeof dec_point === 'undefined') ? ',' : dec_point,
             s = '',
             toFixedFix = function(n, prec) {
                 var k = Math.pow(10, prec);
@@ -273,18 +292,5 @@
         return s.join(dec);
     }
 </script>
-
-<style>
-    .widget-heading h5 { font-size: 1.25rem; color: #3b3f5c; }
-    .table thead th { 
-        background-color: #f8f9fa; 
-        border-bottom: 1px solid #e0e6ed;
-        color: #515365;
-        font-size: 13px;
-    }
-    .list-group-item { font-size: 0.9rem; color: #515365; }
-    .badge { padding: 5px 10px; font-weight: 500; }
-    .table-warning td { background-color: #fff9e6 !important; border-top: 2px solid #ffecc0; border-bottom: 2px solid #ffecc0; }
-</style>
 
 <?= $this->endSection(); ?>

@@ -17,8 +17,9 @@ class DiskonController extends BaseController
 
     public function index()
     {
-        $data = [
-            'title' => 'Diskon',
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'List Diskon', 'url' => '#'],
         ];
 
         // Data 'diskon' tidak lagi dipanggil di sini karena menggunakan Server-Side
@@ -61,15 +62,36 @@ class DiskonController extends BaseController
 
         $data = [];
         foreach ($records as $record) {
-            $data[] = [
-                "nama"   => $record->nama,
-                "diskon" => $record->diskon . '%',
-                "opsi"   => '
+            // Enkripsi ID
+            $id_encrypt = encrypt_url($record->iddiskon);
+
+            // Styling Diskon (Badge Soft)
+            // Menggunakan warna yang berbeda berdasarkan besaran diskon bisa menjadi ide bagus
+            $diskon_val = (int)$record->diskon;
+            $badge_color = ($diskon_val > 50) ? 'badge-light-danger' : 'badge-light-success';
+
+            $diskon_display = '<span class="badge ' . $badge_color . ' fw-bold fs-7">' . $diskon_val . '%</span>';
+
+            // Opsi: Menggunakan Button Icon yang lebih bersih atau link bergaya modern
+            $opsi = '
+            <div class="d-flex justify-content-end">
                 <a href="javascript:void(0)" 
-                   data-diskon="' . encrypt_url($record->iddiskon) . '" 
-                   class="badge bg-primary edit-diskon">
-                   <i class="bi bi-gear"></i> Edit
-                </a>'
+                    data-diskon="' . $id_encrypt . '" 
+                    class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1 edit-diskon"
+                    data-bs-toggle="tooltip" 
+                    data-bs-placement="top" 
+                    title="Edit Diskon">
+                    <i class="ki-duotone ki-pencil fs-2">
+                        <span class="path1"></span>
+                        <span class="path2"></span>
+                    </i>
+                </a>
+            </div>';
+
+            $data[] = [
+                "nama"   => '<div class="text-gray-800 fw-bold text-hover-primary mb-1 fs-6">' . $record->nama . '</div>',
+                "diskon" => $diskon_display,
+                "opsi"   => $opsi
             ];
         }
 

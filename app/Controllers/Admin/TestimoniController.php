@@ -15,10 +15,11 @@ class TestimoniController extends BaseController
     // Halaman Utama
     public function index()
     {
-        $data = [
-            'title' => 'Data Testimoni',
-            'siswa' => (new \App\Models\SiswaModel())->asObject()->findAll()
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'List Testimoni', 'url' => '#'],
         ];
+        $data['siswa'] = (new \App\Models\SiswaModel())->asObject()->findAll();
         return view('admin/testimoni/list', $data);
     }
 
@@ -74,29 +75,41 @@ class TestimoniController extends BaseController
 
             if ($is_long) {
                 $short_text = implode(" ", array_slice($words, 0, 20)) . '...';
-                // Bungkus dengan span agar bisa dimanipulasi JS
+                // Menggunakan styling Metronic 8 (text-gray-800)
                 $display_keterangan = '
-            <div class="text-wrap" style="min-width:250px;">
-                <span class="txt-short">' . $short_text . '</span>
-                <span class="txt-full d-none">' . $full_text . '</span>
-                <br>
-                <a href="javascript:void(0)" class="btn-read-more text-primary font-weight-bold" style="font-size:11px;">Lihat Selengkapnya</a>
-            </div>';
+                <div class="text-wrap min-w-250px">
+                    <span class="txt-short text-gray-800">' . $short_text . '</span>
+                    <span class="txt-full d-none text-gray-800">' . $full_text . '</span>
+                    <br>
+                    <a href="javascript:void(0)" class="btn-read-more btn btn-link btn-color-primary btn-active-color-primary fw-bold p-0 h-auto fs-8">Lihat Selengkapnya</a>
+                </div>';
             } else {
-                $display_keterangan = '<div class="text-wrap">' . $full_text . '</div>';
+                $display_keterangan = '<div class="text-wrap text-gray-800">' . $full_text . '</div>';
             }
 
-            $opsi = '<div class="dropdown custom-dropdown">
-                        <a class="dropdown-toggle" href="javascript:void(0)" role="button" data-toggle="dropdown" id="drop' . $row->idtestimoni . '"><i class="bi bi-three-dots-vertical"></i></a>
-                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="drop' . $row->idtestimoni . '">
-                            <a class="dropdown-item edit-testimoni" href="javascript:void(0)" data-id="' . $id_encrypt . '">Edit</a>
-                            <a class="dropdown-item text-danger btn-delete" href="javascript:void(0)" data-url="' . base_url('sw-admin/testimoni/delete/' . $id_encrypt) . '">Hapus</a>
-                        </div>
-                    </div>';
+            // Opsi menggunakan Dropdown Menu Metronic 8 (Metronic Menu)
+            $opsi = '
+            <div class="ms-2">
+                <a href="#" class="btn btn-sm btn-light btn-flex btn-center btn-active-light-primary" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+                    Aksi <i class="ki-duotone ki-down fs-5 ms-1"></i>
+                </a>
+                <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg-light-primary fw-semibold py-4 w-125px fs-7" data-kt-menu="true">
+                    <div class="menu-item px-3">
+                        <a href="javascript:void(0)" class="menu-link px-3 edit-testimoni" data-id="' . $id_encrypt . '">
+                            Edit
+                        </a>
+                    </div>
+                    <div class="menu-item px-3">
+                        <a href="javascript:void(0)" class="menu-link px-3 text-danger btn-delete" data-url="' . base_url('sw-admin/testimoni/delete/' . $id_encrypt) . '">
+                            Hapus
+                        </a>
+                    </div>
+                </div>
+            </div>';
 
             $data[] = [
                 "no"         => $no++,
-                "nama_siswa" => $row->nama_siswa,
+                "nama_siswa" => '<span class="text-gray-900 fw-bold fs-6">' . $row->nama_siswa . '</span>', // Styling Metronic untuk nama
                 "keterangan" => $display_keterangan,
                 "opsi"       => $opsi,
             ];

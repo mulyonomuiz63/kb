@@ -1,90 +1,117 @@
 <?= $this->extend('template/app'); ?>
 <?= $this->section('content'); ?>
 
-<div class="layout-px-spacing">
-    <div class="row layout-top-spacing">
-        <div class="col-lg-12 layout-spacing">
-            <div class="widget shadow-sm p-4 bg-white rounded">
-                <div class="widget-heading d-flex justify-content-between align-items-center mb-4">
-                    <div>
-                        <h5 class="font-weight-bold text-dark">Manajemen Diskon</h5>
-                        <p class="text-muted small">Kelola persentase diskon untuk paket kursus/layanan.</p>
+<div class="d-flex flex-column flex-column-fluid">
+    <div id="kt_app_content" class="app-content flex-column-fluid">
+        <div id="kt_app_content_container" class="app-container container-xxl">
+            
+            <div class="card card-flush shadow-sm border-0">
+                <div class="card-header align-items-center py-5 gap-2 gap-md-5">
+                    <div class="card-title flex-column align-items-start">
+                        <span class="card-label fw-bold text-gray-800">Daftar Diskon</span>
+                        <span class="text-gray-500 mt-1 fw-semibold fs-7">Kelola persentase diskon untuk paket kursus/layanan.</span>
                     </div>
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#tambah_diskon">
-                        <i class="flaticon-plus-1"></i> Tambah Diskon
-                    </button>
+                    
+                    <div class="card-toolbar flex-row-fluid justify-content-end gap-5">
+                        <div class="d-flex align-items-center position-relative my-1">
+                            <i class="ki-duotone ki-magnifier fs-3 position-absolute ms-4">
+                                <span class="path1"></span><span class="path2"></span>
+                            </i>
+                            <input type="text" data-kt-diskon-table-filter="search" class="form-control form-control-solid w-250px ps-12" placeholder="Cari Diskon..." />
+                        </div>
+
+                        <button type="button" class="btn btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#tambah_diskon">
+                            <i class="ki-duotone ki-plus fs-2"></i> Tambah Diskon
+                        </button>
+                    </div>
                 </div>
 
-                <div class="table-responsive">
-                    <table id="datatables-list" class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Nama Diskon</th>
-                                <th>Besar Diskon (%)</th>
-                                <th class="text-right">Opsi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
+                <div class="card-body pt-0">
+                    <div class="table-responsive">
+                        <table id="datatables-list" class="table align-middle table-row-dashed fs-6 gy-5 text-nowrap w-100">
+                            <thead>
+                                <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
+                                    <th class="min-w-200px">Nama Diskon</th>
+                                    <th class="min-w-150px">Besar Diskon (%)</th>
+                                    <th class="text-end min-w-100px">Opsi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="fw-semibold text-gray-600">
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
+
         </div>
     </div>
 </div>
-
-<div class="modal fade" id="tambah_diskon" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content border-0">
+<div class="modal fade" id="tambah_diskon" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered mw-600px">
+        <div class="modal-content rounded border-0">
             <form action="<?= base_url('sw-admin/diskon/store'); ?>" method="POST" class="needs-validation">
                 <input type="hidden" name="<?= csrf_token() ?>" class="csrf-token" value="<?= csrf_hash() ?>" />
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title text-white">Tambah Diskon Baru</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label class="font-weight-bold">Nama Diskon</label>
-                        <input type="text" name="nama" class="form-control" placeholder="Contoh: Promo Ramadhan" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="font-weight-bold">Persentase Diskon (%)</label>
-                        <input type="text" name="diskon" id="diskon" class="form-control" placeholder="0.00" required>
-                        <small class="text-muted text-italic">*Gunakan titik untuk desimal</small>
+                
+                <div class="modal-header pb-0 border-0 justify-content-between">
+                    <h2 class="fw-bold">Tambah Diskon Baru</h2>
+                    <div class="btn btn-sm btn-icon btn-active-color-primary" data-bs-dismiss="modal">
+                        <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan Data</button>
+                
+                <div class="modal-body scroll-y px-10 px-lg-15 pt-5 pb-10">
+                    <div class="fv-row mb-7">
+                        <label class="required fs-6 fw-semibold mb-2">Nama Diskon</label>
+                        <input type="text" name="nama" class="form-control form-control-solid" placeholder="Contoh: Promo Ramadhan" required>
+                    </div>
+                    <div class="fv-row mb-7">
+                        <label class="required fs-6 fw-semibold mb-2">Persentase Diskon (%)</label>
+                        <input type="text" name="diskon" id="diskon" class="form-control form-control-solid" placeholder="0.00" required>
+                        <div class="text-muted fs-7 mt-2"><i class="ki-duotone ki-information-5 text-gray-500 fs-6 me-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i> Gunakan titik untuk desimal.</div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer border-0 p-5 p-lg-10 pt-0">
+                    <button type="button" class="btn btn-light me-3 fw-bold" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary fw-bold">
+                        <span class="indicator-label"><i class="ki-duotone ki-save-2 fs-3 me-1"><span class="path1"></span><span class="path2"></span></i> Simpan Data</span>
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="edit_diskon" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content border-0">
+<div class="modal fade" id="edit_diskon" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered mw-600px">
+        <div class="modal-content rounded border-0">
             <form action="<?= base_url('sw-admin/diskon/update'); ?>" method="POST">
                 <input type="hidden" name="<?= csrf_token() ?>" class="csrf-token" value="<?= csrf_hash() ?>" />
                 <input type="hidden" name="iddiskon" id="iddiskon">
-                <div class="modal-header bg-info text-white">
-                    <h5 class="modal-title text-white">Ubah Data Diskon</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label class="font-weight-bold">Nama Diskon</label>
-                        <input type="text" name="nama" id="nama" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="font-weight-bold">Persentase Diskon (%)</label>
-                        <input type="text" name="diskon" id="e_diskon" class="form-control" required>
+                
+                <div class="modal-header pb-0 border-0 justify-content-between">
+                    <h2 class="fw-bold">Ubah Data Diskon</h2>
+                    <div class="btn btn-sm btn-icon btn-active-color-primary" data-bs-dismiss="modal">
+                        <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i>
                     </div>
                 </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-light" data-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-info">Update Diskon</button>
+                
+                <div class="modal-body scroll-y px-10 px-lg-15 pt-5 pb-10">
+                    <div class="fv-row mb-7">
+                        <label class="required fs-6 fw-semibold mb-2">Nama Diskon</label>
+                        <input type="text" name="nama" id="nama" class="form-control form-control-solid" required>
+                    </div>
+                    <div class="fv-row mb-7">
+                        <label class="required fs-6 fw-semibold mb-2">Persentase Diskon (%)</label>
+                        <input type="text" name="diskon" id="e_diskon" class="form-control form-control-solid" required>
+                    </div>
+                </div>
+                
+                <div class="modal-footer border-0 p-5 p-lg-10 pt-0">
+                    <button type="button" class="btn btn-light me-3 fw-bold" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-info fw-bold text-white">
+                        <span class="indicator-label"><i class="ki-duotone ki-check fs-3 me-1"></i> Update Diskon</span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -96,13 +123,14 @@
 <?= $this->section('scripts'); ?>
 <script>
     $(document).ready(function() {
+        
         // 1. Inisialisasi DataTables Server Side
         var table = $('#datatables-list').DataTable({
             "processing": true,
             "serverSide": true,
             "order": [],
             "ajax": {
-                "url": "<?= base_url('sw-admin/diskon/datatables') ?>", // Buat method ini di Controller
+                "url": "<?= base_url('sw-admin/diskon/datatables') ?>",
                 "type": "POST",
                 "data": function(d) {
                     d.<?= csrf_token() ?> = $('.csrf-token').val();
@@ -113,21 +141,25 @@
                     return json.data;
                 }
             },
-            "columns": [{
-                    "data": "nama"
-                }, // Sesuai dengan key "nama" di Controller
-                {
-                    "data": "diskon"
-                }, // Sesuai dengan key "diskon" di Controller
-                {
-                    "data": "opsi"
-                } // Sesuai dengan key "opsi" di Controller
+            "columns": [
+                { "data": "nama", "className": "text-gray-800 fw-bold" },
+                { "data": "diskon" },
+                { "data": "opsi" }
             ],
             "columnDefs": [{
-                "targets": [2], // Kolom Opsi
+                "targets": [2],
                 "orderable": false,
-                "className": "text-right"
+                "className": "text-end" // Bootstrap 5 Metronic: text-right diganti text-end
             }],
+            "drawCallback": function(settings) {
+                // Inisialisasi ulang tooltip & menu metronic tiap kali tabel refresh
+                if (typeof KTMenu !== 'undefined') { KTMenu.createInstances(); }
+            }
+        });
+
+        // Fitur Pencarian Custom yang menyatu dengan UI Card Header Metronic
+        $('[data-kt-diskon-table-filter="search"]').on('keyup', function() {
+            table.search(this.value).draw();
         });
 
         // 2. Fungsi Load Data ke Modal Edit (AJAX)
@@ -153,7 +185,7 @@
             });
         });
 
-        // 3. Validasi Input Koma/Titik
+        // 3. Validasi Input Koma/Titik (LOGIKA ASLI TIDAK DIUBAH)
         function commaOnly(input) {
             var value = input.val();
             var update = value.replace(/,/g, '.').replace(/[^0-9.]/g, '');
@@ -168,23 +200,4 @@
         });
     });
 </script>
-
-<style>
-    .widget {
-        border-radius: 10px;
-        border: none;
-    }
-
-    .table thead th {
-        background-color: #f8f9fa;
-        text-transform: uppercase;
-        font-size: 11px;
-        letter-spacing: 1px;
-    }
-
-    .badge-primary {
-        cursor: pointer;
-        padding: 8px 12px;
-    }
-</style>
 <?= $this->endSection(); ?>

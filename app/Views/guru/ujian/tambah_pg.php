@@ -1,198 +1,196 @@
 <?= $this->extend('template/app'); ?>
 <?= $this->section('content'); ?>
-<!--  BEGIN CONTENT AREA  -->
-<div class="layout-px-spacing">
-    <a href="javascript:void(0);" class="btn btn-primary tambah-pg" style="position: fixed; right: -10px; top: 50%; z-index: 9999;">Tambah Soal</a>
-    <form action="<?= base_url('sw-guru/ujian/store'); ?>" method="POST" enctype="multipart/form-data">
-        <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>" />
-        <div class="row layout-top-spacing">
-            <div class="col-lg-12 layout-spacing">
-                <div class="widget shadow p-3">
-                    <div class="widget-heading">
-                        <h5 class="">Ujian Pilihan Ganda</h5>
-                        <a href="javascript:void(0);" class="btn btn-primary my-2" data-toggle="modal" data-target="#excel_ujian">Import Excel</a>
-                        <a href="javascript:void(0);" class="btn btn-primary my-2" data-toggle="modal" data-target="#bank_soal">Bank Soal</a>
-                        <div class="row mt-2">
-                            <div class="col-lg-4">
-                                <div class="form-group">
-                                    <label for="">Nama Ujian</label>
-                                    <input type="text" name="nama_ujian" class="form-control" required>
-                                </div>
-                            </div>
-                            <div class="col-lg-4">
-                                <div class="form-group">
-                                    <label for="">Kelas</label>
-                                    <select class="form-control" name="kelas" id="mapel_materi" required>
-                                        <option value="">Pilih</option>
-                                        <?php foreach ($guru_kelas as $gk) : ?>
-                                            <option value="<?= $gk->id_kelas; ?>"><?= $gk->nama_kelas; ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-lg-4">
-                                <div class="form-group">
-                                    <label for="">Mapel</label>
-                                    <select class="form-control" name="mapel" id="mapel_materi" required>
-                                        <option value="">Pilih</option>
-                                        <?php foreach ($guru_mapel as $gm) : ?>
-                                            <option value="<?= $gm->id_mapel; ?>"><?= $gm->nama_mapel; ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-lg-4">
-                                <div class="form-group">
-                                    <label for="">Status Ujian</label>
-                                    <select class="form-control" name="status_ujian" required>
-                                        <option value="">Pilih</option>
-                                        <option value="A">Aktif</option>
-                                        <option value="T">Tidak Aktif</option>
-                                    </select>
-                                </div>
-                            </div>
 
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row layout-top-spacing">
-            <div class="col-lg-12 layout-spacing">
-                <div class="widget shadow p-3">
-                    <div class="widget-heading">
-                        <h5 class="">Soal Ujian</h5>
-                    </div>
-                    <div id="soal_pg">
-                    </div>
-                    <div class="mt-4">
-                        <button class="btn btn-primary">Submit</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </form>
-</div>
-<!--  END CONTENT AREA  -->
+<div id="kt_app_content" class="app-content flex-column-fluid">
+    <div id="kt_app_content_container" class="app-container container-xxl">
+        
+        <a href="javascript:void(0);" class="btn btn-primary tambah-pg shadow-sm" style="position: fixed; right: 20px; top: 50%; z-index: 9999; border-radius: 50px;">
+            <i class="ki-duotone ki-plus fs-2"></i> Tambah Soal
+        </a>
 
-<!-- MODAL -->
-<!-- Modal Tambah -->
-<div class="modal fade" id="excel_ujian" tabindex="-1" role="dialog" aria-labelledby="excel_ujianLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <form action="<?= base_url('sw-guru/ujian/import-soal-excel'); ?>" method="POST" enctype="multipart/form-data">
+        <form action="<?= base_url('sw-guru/ujian/store'); ?>" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>" />
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="excel_ujianLabel">Import Soal via Excel</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        x
-                    </button>
+            
+            <div class="card card-flush shadow-sm mb-5">
+                <div class="card-header border-0 pt-6">
+                    <div class="card-title">
+                        <h3 class="card-label fw-bold text-dark">Ujian Pilihan Ganda</h3>
+                    </div>
+                    <div class="card-toolbar gap-3">
+                        <a href="javascript:void(0);" class="btn btn-light-primary btn-sm" data-bs-toggle="modal" data-bs-target="#bank_soal">
+                            <i class="ki-duotone ki-folder fs-2"><span class="path1"></span><span class="path2"></span></i> Bank Soal
+                        </a>
+                        <a href="javascript:void(0);" class="btn btn-light-success btn-sm" data-bs-toggle="modal" data-bs-target="#excel_ujian">
+                            <i class="ki-duotone ki-file-up fs-2"><span class="path1"></span><span class="path2"></span></i> Import Excel
+                        </a>
+                    </div>
                 </div>
-                <div class="modal-body">
-                    <div class="row mt-2">
-                        <div class="col-lg-4">
-                            <div class="form-group">
-                                <label for="">Nama Ujian / Quiz</label>
-                                <input type="text" name="e_nama_ujian" class="form-control" required>
-                            </div>
+                <div class="card-body">
+                    <div class="row g-9">
+                        <div class="col-md-3">
+                            <label class="required fs-6 fw-semibold mb-2">Nama Ujian</label>
+                            <input type="text" name="nama_ujian" class="form-control form-control-solid" required>
                         </div>
-                        <div class="col-lg-4">
-                            <div class="form-group">
-                                <label for="">Kelas</label>
-                                <select class="form-control" name="e_kelas" id="mapel_materi" required>
-                                    <option value="">Pilih</option>
-                                    <?php foreach ($guru_kelas as $gk) : ?>
-                                        <option value="<?= $gk->id_kelas; ?>"><?= $gk->nama_kelas; ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
+                        <div class="col-md-3">
+                            <label class="required fs-6 fw-semibold mb-2">Kelas</label>
+                            <select class="form-select form-select-solid" name="kelas" required>
+                                <option value="">Pilih</option>
+                                <?php foreach ($guru_kelas as $gk) : ?>
+                                    <option value="<?= $gk->id_kelas; ?>"><?= $gk->nama_kelas; ?></option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
-                        <div class="col-lg-4">
-                            <div class="form-group">
-                                <label for="">Mapel</label>
-                                <select class="form-control" name="e_mapel" id="mapel_materi" required>
-                                    <option value="">Pilih</option>
-                                    <?php foreach ($guru_mapel as $gm) : ?>
-                                        <option value="<?= $gm->id_mapel; ?>"><?= $gm->nama_mapel; ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
+                        <div class="col-md-3">
+                            <label class="required fs-6 fw-semibold mb-2">Mapel</label>
+                            <select class="form-select form-select-solid" name="mapel" required>
+                                <option value="">Pilih</option>
+                                <?php foreach ($guru_mapel as $gm) : ?>
+                                    <option value="<?= $gm->id_mapel; ?>"><?= $gm->nama_mapel; ?></option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
+                        <div class="col-md-3">
+                            <label class="required fs-6 fw-semibold mb-2">Status Ujian</label>
+                            <select class="form-select form-select-solid" name="status_ujian" required>
+                                <option value="">Pilih</option>
+                                <option value="A">Aktif</option>
+                                <option value="T">Tidak Aktif</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-6">
-                            <div class="form-group">
-                                <label for="">File Excel</label><br>
-                                <input type="file" name="excel" accept=".xls, .xlsx">
-                            </div>
-                        </div>
-                        <div class="col-lg-6">
-                            <label for="">Template</label><br>
-                            <a href="<?= base_url('sw-guru/ujian/download-template'); ?>" class="btn btn-success">Download Template</a>
-                        </div>
-                    </div>
+            <div class="card card-flush shadow-sm">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold">Soal Ujian</h3>
                 </div>
-                <div class="modal-footer">
-                    <button type="reset" value="reset" class="btn" data-dismiss="modal"><i class="flaticon-cancel-12"></i> Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save</button>
+                <div class="card-body">
+                    <div id="soal_pg">
+                        </div>
+                    
+                    <div class="separator separator-dashed my-10"></div>
+                    
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary px-10">
+                            <i class="ki-duotone ki-save-2 fs-2"><span class="path1"></span><span class="path2"></span></i> Submit Ujian
+                        </button>
+                    </div>
                 </div>
             </div>
         </form>
     </div>
 </div>
 
-<!-- bank soal modal -->
-<div class="modal fade" id="bank_soal" tabindex="-1" role="dialog" aria-labelledby="bank_soalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="bank_soalLabel">Bank Soal</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    x
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="row mt-2">
-                    <div class="col-lg-4">
-                        <div class="form-group">
-                            <label for="">Kategori</label>
-                            <select class="form-control" name="id_kategori" id="id_kategori">
+<div class="modal fade" id="excel_ujian" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <form action="<?= base_url('sw-guru/ujian/import-soal-excel'); ?>" method="POST" enctype="multipart/form-data" class="w-100">
+            <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>" />
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="fw-bold">Import Soal via Excel</h2>
+                    <div class="btn btn-icon btn-sm btn-active-icon-primary" data-bs-dismiss="modal">
+                        <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-9 mb-5">
+                        <div class="col-md-4">
+                            <label class="required fs-6 fw-semibold mb-2">Nama Ujian / Quiz</label>
+                            <input type="text" name="e_nama_ujian" class="form-control form-control-solid" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="required fs-6 fw-semibold mb-2">Kelas</label>
+                            <select class="form-select form-select-solid" name="e_kelas" required>
                                 <option value="">Pilih</option>
-                                <?php foreach ($kategori as $rows) : ?>
-                                    <option value="<?= $rows->id_kategori; ?>"><?= $rows->nama_kategori; ?></option>
+                                <?php foreach ($guru_kelas as $gk) : ?>
+                                    <option value="<?= $gk->id_kelas; ?>"><?= $gk->nama_kelas; ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="required fs-6 fw-semibold mb-2">Mapel</label>
+                            <select class="form-select form-select-solid" name="e_mapel" required>
+                                <option value="">Pilih</option>
+                                <?php foreach ($guru_mapel as $gm) : ?>
+                                    <option value="<?= $gm->id_mapel; ?>"><?= $gm->nama_mapel; ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
                     </div>
-                    <div class="col-lg-4">
-                        <div class="form-group">
-                            <label for="">Soal</label>
-                            <input type="text" name="nama_soal" id="nama_soal" class="form-control">
+                    <div class="row g-9">
+                        <div class="col-md-6">
+                            <label class="fs-6 fw-semibold mb-2">File Excel</label>
+                            <input type="file" name="excel" class="form-control form-control-solid" accept=".xls, .xlsx" required>
+                        </div>
+                        <div class="col-md-6 text-center">
+                            <label class="fs-6 fw-semibold mb-2 d-block">Template</label>
+                            <a href="<?= base_url('sw-guru/ujian/download-template'); ?>" class="btn btn-success">
+                                <i class="ki-duotone ki-cloud-download fs-2"><span class="path1"></span><span class="path2"></span></i> Download Template
+                            </a>
                         </div>
                     </div>
+                </div>
+                <div class="modal-footer flex-center">
+                    <button type="reset" class="btn btn-light me-3" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Start Import</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-striped table-condesed" id="table">
-                            <thead>
-                                <tr class="success" style="background-color:#055F93; color: white;">
-                                    <th style="text-align: center;"></th>
-                                    <th style="width: 95%;text-align: center;" class=" text-white">Soal</th>
-                                </tr>
-                            </thead>
-                        </table>
+<div class="modal fade" id="bank_soal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="fw-bold">Ambil dari Bank Soal</h2>
+                <div class="btn btn-icon btn-sm btn-active-icon-primary" data-bs-dismiss="modal">
+                    <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="row g-9 mb-8">
+                    <div class="col-md-4">
+                        <label class="fs-6 fw-semibold mb-2">Filter Kategori</label>
+                        <select class="form-select form-select-solid" id="id_kategori">
+                            <option value="">Semua Kategori</option>
+                            <?php foreach ($kategori as $rows) : ?>
+                                <option value="<?= $rows->id_kategori; ?>"><?= $rows->nama_kategori; ?></option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
+                    <div class="col-md-8">
+                        <label class="fs-6 fw-semibold mb-2">Cari Nama Soal</label>
+                        <div class="position-relative d-flex align-items-center">
+                            <i class="ki-duotone ki-magnifier fs-3 position-absolute ms-4"></i>
+                            <input type="text" id="nama_soal" class="form-control form-control-solid ps-12" placeholder="Ketik kata kunci soal...">
+                        </div>
+                    </div>
+                </div>
 
+                <div class="table-responsive">
+                    <table class="table align-middle table-row-dashed fs-6 gy-5 shadow-sm" id="table">
+                        <thead>
+                            <tr class="text-start text-muted fw-bold fs-7 text-uppercase gs-0 bg-light">
+                                <th class="w-50px px-3 text-center">Pilih</th>
+                                <th class="min-w-200px">Detail Isi Soal</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-gray-600 fw-semibold">
+                            </tbody>
+                    </table>
                 </div>
-                <div class="modal-footer">
-                    <button type="reset" value="reset" class="btn" data-dismiss="modal"><i class="flaticon-cancel-12"></i> Cancel</button>
-                </div>
+            </div>
+            <div class="modal-footer flex-center">
+                <button type="button" class="btn btn-light-primary" data-bs-dismiss="modal">Selesai Memilih</button>
             </div>
         </div>
     </div>
 </div>
-<!-- bank soal modal -->
+
 <?= $this->endSection(); ?>
+
 <?= $this->section('scripts'); ?>
 <script>
     function updateCsrfToken(newToken) {
@@ -201,16 +199,15 @@
             $('input[name="' + csrfName + '"]').val(newToken);
         }
     }
-    $(document).ready(function() {
 
-        //defenisi datatable
+    $(document).ready(function() {
+        // DataTable Bank Soal
         var t = $('#table').DataTable({
             "select": true,
             "processing": true,
             "serverSide": true,
             "order": [],
             "bLengthChange": false,
-            "bFilter": true,
             "bInfo": false,
             "bAutoWidth": false,
             "searching": false,
@@ -218,110 +215,65 @@
                 "url": "<?php echo site_url('sw-guru/ujian/get-bank-soal') ?>",
                 "type": "POST",
                 "data": function(d) {
-                    // Injeksi CSRF Token terbaru ke setiap request
                     d[csrfName] = csrfHash;
-
-                    // Custom Filter Anda
-                    d.nama_soal = $('input[name=nama_soal]').val();
+                    d.nama_soal = $('#nama_soal').val();
                     d.id_kategori = $('#id_kategori').val();
                 },
                 "dataSrc": function(json) {
-                    // Tangkap token baru dari response controller
-                    if (json.token) {
-                        updateCsrfToken(json.token);
-                    }
+                    if (json.token) updateCsrfToken(json.token);
                     return json.data;
                 },
                 "error": function(xhr) {
-                    if (xhr.status === 403) {
-                        alert('Sesi keamanan habis, halaman akan dimuat ulang.');
-                        location.reload();
-                    }
+                    if (xhr.status === 403) { location.reload(); }
                 }
             },
-            "columnDefs": [{
-                    "targets": [0],
-                    "orderable": false,
-                    "className": 'text-center',
-                },
-                {
-                    "targets": [1],
-                    "orderable": false,
-                    "className": 'dt-body-center'
-                },
-            ],
-            "language": {
-                "infoFiltered": "",
-                "processing": '<span class="spinner-border text-primary"></span>'
-            }
-        });
-        $('#nama_soal').on('keyup', function(e) {
-            t.draw();
-            e.preventDefault();
+            "columnDefs": [
+                { "targets": [0], "orderable": false, "className": 'text-center' },
+                { "targets": [1], "orderable": false }
+            ]
         });
 
-        $('#id_kategori').on('change', function(e) {
-            t.draw();
-            e.preventDefault();
-        });
+        $('#nama_soal').on('keyup', function() { t.draw(); });
+        $('#id_kategori').on('change', function() { t.draw(); });
 
-    });
-
-    $(document).ready(function() {
-        // SUMMERNOTE
-        setInterval(() => {
-            $('.summernote').summernote({
-                placeholder: 'Hello stand alone ui',
-                tabsize: 2,
-                height: 120,
-                toolbar: [
-                    ['style', ['style']],
-                    ['font', ['bold', 'underline', 'clear']],
-                    ['color', ['color']],
-                    ['para', ['ul', 'ol', 'paragraph']],
-                    ['table', ['table']],
-                    ['insert', ['link', 'picture', 'video']],
-                    ['view', ['fullscreen', 'help']]
-                ],
-                callbacks: {
-                    onImageUpload: function(image, which_sum = this) {
-                        uploadImage(image[0], which_sum);
-                    },
-                    onMediaDelete: function(target) {
-                        deleteImage(target[0].src);
-                    }
+        // Summernote Global Initializer
+        function initSummernote() {
+            $('.summernote').each(function() {
+                if (!$(this).next().hasClass('note-editor')) {
+                    $(this).summernote({
+                        height: 120,
+                        toolbar: [
+                            ['style', ['style']],
+                            ['font', ['bold', 'underline', 'clear']],
+                            ['color', ['color']],
+                            ['para', ['ul', 'ol', 'paragraph']],
+                            ['table', ['table']],
+                            ['insert', ['link', 'picture', 'video']],
+                            ['view', ['fullscreen', 'help']]
+                        ],
+                        callbacks: {
+                            onImageUpload: function(image) { uploadImage(image[0], this); },
+                            onMediaDelete: function(target) { deleteImage(target[0].src); }
+                        }
+                    });
                 }
             });
-        }, 1000);
+        }
+
+        setInterval(initSummernote, 2000);
 
         function uploadImage(image, which_sum) {
             var data = new FormData();
-
-            // SUNTIKKAN CSRF KE FORMDATA
             data.append(csrfName, csrfHash);
             data.append("image", image);
-
             $.ajax({
                 url: "<?= base_url('sw-guru/ujian/upload-summernote') ?>",
-                cache: false,
-                contentType: false,
-                processData: false,
-                data: data,
-                type: "POST",
+                cache: false, contentType: false, processData: false,
+                data: data, type: "POST",
                 success: function(response) {
-                    // Kita asumsikan response sekarang berupa JSON agar bisa update token
                     var res = JSON.parse(response);
-
-                    if (res.token) {
-                        updateCsrfToken(res.token);
-                    }
-
+                    if (res.token) updateCsrfToken(res.token);
                     $(which_sum).summernote("insertImage", res.url);
-                },
-                error: function(xhr) {
-                    if (xhr.status === 403) {
-                        console.error("CSRF Expired saat upload gambar");
-                    }
                 }
             });
         }
@@ -330,248 +282,106 @@
             $.ajax({
                 url: "<?= base_url('sw-guru/ujian/delete-image') ?>",
                 type: "POST",
-                data: {
-                    // SUNTIKKAN CSRF
-                    [csrfName]: csrfHash,
-                    src: src
-                },
-                cache: false,
-                dataType: "JSON", // Ubah ke JSON agar bisa membaca token baru
+                data: { [csrfName]: csrfHash, src: src },
+                dataType: "JSON",
                 success: function(response) {
-                    // UPDATE TOKEN GLOBAL
-                    if (response.token) {
-                        updateCsrfToken(response.token);
-                    }
-                },
-                error: function(xhr) {
-                    if (xhr.status === 403) {
-                        console.error("Gagal menghapus: Sesi keamanan berakhir.");
-                    }
+                    if (response.token) updateCsrfToken(response.token);
                 }
             });
         }
 
-        // TAMBAH SOAL PG
-        // SISWA
         var no_soal = 1;
+
+        // TAMBAH SOAL MANUAL
         $('.tambah-pg').click(function() {
             const pg = `
-            <div class="isi_soal">
-            <hr>
-                <div class="form-group">
-                    <label for="">Soal No . ` + no_soal + `</label>
-                    <textarea name="nama_soal[]" cols="30" rows="2" class="summernote" wrap="hard" required></textarea>
+            <div class="isi_soal mb-10 p-5 border rounded bg-light-neutral">
+                <div class="d-flex justify-content-between align-items-center mb-5">
+                    <h4 class="fw-bold">Soal No. ${no_soal}</h4>
+                    <button type="button" class="btn btn-sm btn-icon btn-light-danger hapus-pg">
+                        <i class="ki-duotone ki-trash fs-2"><span class="path1"></span><span class="path2"></span></i>
+                    </button>
                 </div>
-                <div class="row mt-2">
-                    <div class="col-lg-4">
-                        <div class="form-group">
-                            <label for="">Pilihan A</label>
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text" id="basic-addon5">A</span>
-                                </div>
-                                <input type="text" name="pg_1[]" class="form-control" placeholder="Opsi A" autocomplete="off" >
+                <div class="form-group mb-5">
+                    <textarea name="nama_soal[]" class="summernote" required></textarea>
+                </div>
+                <div class="row g-5">
+                    ${['A', 'B', 'C', 'D', 'E'].map((opt, i) => `
+                        <div class="col-md-4">
+                            <div class="input-group input-group-solid">
+                                <span class="input-group-text">${opt}</span>
+                                <input type="text" name="pg_${i+1}[]" class="form-control" placeholder="Opsi ${opt}">
                             </div>
                         </div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="form-group">
-                            <label for="">Pilihan B</label>
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text" id="basic-addon5">B</span>
-                                </div>
-                                <input type="text" name="pg_2[]" class="form-control" placeholder="Opsi B" autocomplete="off" >
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="form-group">
-                            <label for="">Pilihan C</label>
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text" id="basic-addon5">C</span>
-                                </div>
-                                <input type="text" name="pg_3[]" class="form-control" placeholder="Opsi C" autocomplete="off" >
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="form-group">
-                            <label for="">Pilihan D</label>
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text" id="basic-addon5">D</span>
-                                </div>
-                                <input type="text" name="pg_4[]" class="form-control" placeholder="Opsi D" autocomplete="off" >
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="form-group">
-                            <label for="">Pilihan E</label>
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text" id="basic-addon5">E</span>
-                                </div>
-                                <input type="text" name="pg_5[]" class="form-control" placeholder="Opsi E" autocomplete="off" >
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="form-group">
-                            <label for="">Jawaban</label>
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text" id="basic-addon5">
-                                        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
-                                            <polyline points="20 6 9 17 4 12"></polyline>
-                                        </svg>
-                                    </span>
-                                </div>
-                                <input type="text" name="jawaban[]" class="form-control" placeholder="Contoh : A" autocomplete="off" required>
-                            </div>
+                    `).join('')}
+                    <div class="col-md-4">
+                        <div class="input-group input-group-solid border border-primary">
+                            <span class="input-group-text bg-primary text-white">Jawaban</span>
+                            <input type="text" name="jawaban[]" class="form-control" placeholder="Contoh: A" required>
                         </div>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="">Penjelasan</label>
-                    <textarea name="penjelasan[]" cols="30" rows="2" class="summernote" wrap="hard" required></textarea>
+                <div class="mt-5">
+                    <label class="fw-bold mb-2">Penjelasan</label>
+                    <textarea name="penjelasan[]" class="summernote"></textarea>
                 </div>
-                <a href="javascript:void(0);" class="btn btn-danger hapus-pg">Hapus</a>
-            </div>
-           `;
-
+            </div>`;
             $('#soal_pg').append(pg);
             no_soal++;
         });
 
-
-        $('#table').on('click', 'tbody input#tambahSoal', function() {
+        // TAMBAH DARI BANK SOAL
+        $('#table').on('click', 'input#tambahSoal', function() {
             if ($(this).is(':checked')) {
                 var id_bank_soal = $(this).data('id_bank_soal');
-
-                // Pastikan variabel no_soal sudah terdefinisi di luar fungsi ini
-
                 $.ajax({
                     type: 'POST',
                     url: "<?= base_url('sw-guru/ujian/tambah-bank-soal') ?>",
-                    data: {
-                        // SUNTIKKAN CSRF DISINI
-                        [csrfName]: csrfHash,
-                        id_bank_soal: id_bank_soal
-                    },
+                    data: { [csrfName]: csrfHash, id_bank_soal: id_bank_soal },
                     dataType: 'JSON',
                     success: function(data) {
-                        // UPDATE TOKEN GLOBAL AGAR REQUEST SELANJUTNYA VALID
-                        if (data.token) {
-                            updateCsrfToken(data.token);
-                        }
-
-                        var nama_soal = data.nama_soal;
-                        var pg_1 = data.pg_1;
-                        var pg_2 = data.pg_2;
-                        var pg_3 = data.pg_3;
-                        var pg_4 = data.pg_4;
-                        var pg_5 = data.pg_5;
-                        var jawaban = data.jawaban;
-                        var penjelasan = data.penjelasan;
-
+                        if (data.token) updateCsrfToken(data.token);
                         var pg = `
-                    <div class="isi_soal">
-                        <hr>
-                        <div class="form-group">
-                            <label for="">Soal No. ` + no_soal + `</label>
-                            <textarea name="nama_soal[]" cols="30" rows="2" class="summernote" required>` + nama_soal + `</textarea>
-                        </div>
-                        <div class="row mt-2">
-                            <div class="col-lg-4">
-                                <div class="form-group">
-                                    <label>Pilihan A</label>
-                                    <div class="input-group">
-                                        <div class="input-group-prepend"><span class="input-group-text">A</span></div>
-                                        <input type="text" name="pg_1[]" value="` + pg_1 + `" class="form-control">
+                        <div class="isi_soal mb-10 p-5 border rounded bg-light-primary">
+                            <div class="d-flex justify-content-between align-items-center mb-5">
+                                <h4 class="fw-bold text-primary">Soal No. ${no_soal} (Bank Soal)</h4>
+                                <button type="button" class="btn btn-sm btn-icon btn-light-danger hapus-pg">
+                                    <i class="ki-duotone ki-trash fs-2"></i>
+                                </button>
+                            </div>
+                            <textarea name="nama_soal[]" class="summernote">${data.nama_soal}</textarea>
+                            <div class="row g-5 mt-2">
+                                ${[1,2,3,4,5].map(i => `
+                                    <div class="col-md-4">
+                                        <div class="input-group input-group-solid">
+                                            <span class="input-group-text">${String.fromCharCode(64+i)}</span>
+                                            <input type="text" name="pg_${i}[]" value="${data['pg_'+i]}" class="form-control">
+                                        </div>
+                                    </div>
+                                `).join('')}
+                                <div class="col-md-4">
+                                    <div class="input-group input-group-solid border border-primary">
+                                        <span class="input-group-text bg-primary text-white">Jawaban</span>
+                                        <input type="text" name="jawaban[]" value="${data.jawaban}" class="form-control" required>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-lg-4">
-                                <div class="form-group">
-                                    <label>Pilihan B</label>
-                                    <div class="input-group">
-                                        <div class="input-group-prepend"><span class="input-group-text">B</span></div>
-                                        <input type="text" name="pg_2[]" value="` + pg_2 + `" class="form-control">
-                                    </div>
-                                </div>
+                            <div class="mt-5">
+                                <label class="fw-bold mb-2">Penjelasan</label>
+                                <textarea name="penjelasan[]" class="summernote">${data.penjelasan}</textarea>
                             </div>
-                            <div class="col-lg-4">
-                                <div class="form-group">
-                                    <label>Pilihan C</label>
-                                    <div class="input-group">
-                                        <div class="input-group-prepend"><span class="input-group-text">C</span></div>
-                                        <input type="text" name="pg_3[]" value="` + pg_3 + `" class="form-control">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-4">
-                                <div class="form-group">
-                                    <label>Pilihan D</label>
-                                    <div class="input-group">
-                                        <div class="input-group-prepend"><span class="input-group-text">D</span></div>
-                                        <input type="text" name="pg_4[]" value="` + pg_4 + `" class="form-control">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-4">
-                                <div class="form-group">
-                                    <label>Pilihan E</label>
-                                    <div class="input-group">
-                                        <div class="input-group-prepend"><span class="input-group-text">E</span></div>
-                                        <input type="text" name="pg_5[]" value="` + pg_5 + `" class="form-control">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-4">
-                                <div class="form-group">
-                                    <label>Jawaban</label>
-                                    <input type="text" name="jawaban[]" value="` + jawaban + `" class="form-control" placeholder="Contoh: A" required>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group mt-2">
-                            <label>Penjelasan</label>
-                            <textarea name="penjelasan[]" cols="30" rows="2" class="summernote">` + penjelasan + `</textarea>
-                        </div>
-                        <a href="javascript:void(0);" class="btn btn-sm btn-light-danger hapus-pg mt-2">Hapus Soal Ini</a>
-                    </div>`;
-
+                        </div>`;
                         $('#soal_pg').append(pg);
-
-                        // Inisialisasi ulang Summernote jika Anda menggunakannya
-                        if (typeof $('.summernote').summernote === "function") {
-                            $('.summernote').summernote({
-                                height: 150
-                            });
-                        }
-
                         no_soal++;
-                    },
-                    error: function(xhr) {
-                        if (xhr.status === 403) {
-                            Swal.fire('Error', 'Sesi keamanan kadaluarsa, silakan refresh halaman.', 'error');
-                        }
                     }
                 });
             }
         });
 
-        $('#soal_pg').on('click', '.isi_soal a', function() {
-            $(this).parents('.isi_soal').remove();
-            no_soal = no_soal - 1;
+        $('#soal_pg').on('click', '.hapus-pg', function() {
+            $(this).closest('.isi_soal').remove();
+            no_soal--;
         });
-
-
-    })
+    });
 </script>
-
-
 <?= $this->endSection(); ?>

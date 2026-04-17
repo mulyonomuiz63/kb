@@ -35,19 +35,26 @@ class UjianController extends BaseController
         $this->ujianSiswaModel = new \App\Models\UjianSiswaModel();
         $this->gurukelasModel = new \App\Models\GurukelasModel();
         $this->ujianModel = new \App\Models\UjianModel();
-
     }
 
     // START = UJIAN PG
     public function index()
     {
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-guru')],
+            ['title' => 'List Ujian', 'url' => '#'],
+        ];
         $data['ujian'] = $this->ujianMasterModel->getAllBykodeGuru(session()->get('id'))->get()->getResultObject();
         return view('guru/ujian/list', $data);
     }
 
     public function create()
     {
-
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-guru')],
+            ['title' => 'Data Ujian', 'url' => base_url('sw-guru/ujian')],
+            ['title' => 'List Ujian', 'url' => '#'],
+        ];
         $data['guru_kelas'] = $this->guruKelasModel->getALLByGuru(session()->get('id'));
         $data['guru_mapel'] = $this->guruMapelModel->getALLByGuru(session()->get('id'));
         $data['guru'] = $this->guruModel->asObject()->find(session()->get('id'));
@@ -242,14 +249,13 @@ class UjianController extends BaseController
     }
 
 
-     public function lihatUjian($kode_ujian)
+    public function lihatUjian($kode_ujian)
     {
-        $data = [
-            'title'        => 'Data Ujian',
-            'parent_title' => 'Ujian ',
-            'parent_url'   => base_url('sw-guru/ujian'),
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-guru')],
+            ['title' => 'Data Ujian', 'url' => base_url('sw-guru/ujian')],
+             ['title' => 'List Peserta Ujian', 'url' => '#'],
         ];
-
         $kode_ujian = decrypt_url($kode_ujian);
         $data['kode_ujian_encrypt'] = $kode_ujian; // Kirim untuk AJAX
 
@@ -305,32 +311,54 @@ class UjianController extends BaseController
             $skor = ($total_soal_dikerjakan > 0) ? round(($benar / $total_soal_dikerjakan) * 100) : 0;
 
             $data_json[] = [
-                // Kolom 1: Profil
+                // Kolom 1: Profil (Metronic Style with Symbol)
                 '<div class="d-flex align-items-center">
-                <img src="' . base_url('assets/app-assets/user/' . $s->avatar) . '" class="rounded-circle mr-3" style="width:45px; height:45px; object-fit:cover;">
-                <div>
-                    <h6 class="mb-0 font-weight-bold">' . $s->nama_siswa . '</h6>
-                    <small class="text-muted">' . ($s->date_send == 0 ? 'Selesai' : date('d M Y, H:i', $s->date_send)) . '</small>
-                </div>
-            </div>',
-                // Kolom 2: Statistik
-                '<div class="d-flex justify-content-around text-center">
-                <div class="px-2"><b>' . $skor . '</b><br><small>Skor</small></div>
-                <div class="px-2 text-success"><b>' . $benar . '</b><br><small>Benar</small></div>
-                <div class="px-2 text-danger"><b>' . $salah . '</b><br><small>Salah</small></div>
-            </div>',
-                // Kolom 3: Aksi
-                '<div class="dropdown custom-dropdown text-center">
-                    <a class="dropdown-toggle badge badge-primary border-0" href="#" role="button" id="dropdownMenuLink' . $s->id_siswa . '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-more-vertical"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                    <div class="symbol symbol-circle symbol-50px overflow-hidden me-3">
+                        <a href="#">
+                            <div class="symbol-label">
+                                <img src="' . base_url('assets/app-assets/user/' . $s->avatar) . '" class="w-100" style="object-fit:cover;">
+                            </div>
+                        </a>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <a href="#" class="text-gray-800 text-hover-primary mb-1 fw-bold">' . $s->nama_siswa . '</a>
+                        <span class="text-muted fs-7">' . ($s->date_send == 0 ? 'Selesai' : date('d M Y, H:i', $s->date_send)) . '</span>
+                    </div>
+                </div>',
+
+                // Kolom 2: Statistik (Modern Minimalist Badge)
+                '<div class="d-flex justify-content-center text-center gap-2">
+                    <div class="border border-dashed border-gray-300 rounded min-w-50px py-2 px-3">
+                        <div class="fs-6 fw-bold text-gray-800">' . $skor . '</div>
+                        <div class="fw-semibold text-muted fs-8">Skor</div>
+                    </div>
+                    <div class="border border-dashed border-success rounded min-w-50px py-2 px-3 bg-light-success">
+                        <div class="fs-6 fw-bold text-success">' . $benar . '</div>
+                        <div class="fw-semibold text-success fs-8">Benar</div>
+                    </div>
+                    <div class="border border-dashed border-danger rounded min-w-50px py-2 px-3 bg-light-danger">
+                        <div class="fs-6 fw-bold text-danger">' . $salah . '</div>
+                        <div class="fw-semibold text-danger fs-8">Salah</div>
+                    </div>
+                </div>',
+
+                // Kolom 3: Aksi (Metronic Menu Dropdown)
+                '<div class="text-center">
+                    <a href="#" class="btn btn-sm btn-light btn-active-light-primary btn-flex btn-center" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+                        Aksi
+                        <i class="ki-duotone ki-down fs-5 ms-1"></i>
                     </a>
-                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuLink' . $s->id_siswa . '">
-                        <a class="dropdown-item" href="' . $url_detail . '">
-                            <i class="bi bi-eye me-2 text-primary"></i> Lihat Detail
-                        </a>
-                        <a class="dropdown-item" target="_blank" href="' . $url_cetak . '">
-                            <i class="bi bi-printer me-2 text-success"></i> Cetak Hasil
-                        </a>
+                    <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-150px py-4" data-kt-menu="true">
+                        <div class="menu-item px-3">
+                            <a href="' . $url_detail . '" class="menu-link px-3">
+                                <i class="ki-duotone ki-eye fs-4 me-2 text-primary"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i> Lihat Detail
+                            </a>
+                        </div>
+                        <div class="menu-item px-3">
+                            <a target="_blank" href="' . $url_cetak . '" class="menu-link px-3 text-success">
+                                <i class="ki-duotone ki-printer fs-4 me-2 text-success"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i> Cetak Hasil
+                            </a>
+                        </div>
                     </div>
                 </div>'
             ];
@@ -347,10 +375,10 @@ class UjianController extends BaseController
 
     public function lihatUjianSiswa($id_siswa, $kode_ujian)
     {
-        $data = [
-            'title'        => 'Data Ujian',
-            'parent_title' => 'List ujian',
-            'parent_url'   => base_url('sw-guru/ujian'),
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-guru')],
+            ['title' => 'Data Ujian', 'url' => base_url('sw-guru/ujian')],
+             ['title' => 'List Soal Ujian', 'url' => '#'],
         ];
         $data['ujian'] = $this->ujianMasterModel->getBykode(decrypt_url($kode_ujian));
         $data['detail_ujian'] = $this->ujianDetailModel->getAllBykodeUjian(decrypt_url($kode_ujian));
@@ -452,6 +480,11 @@ class UjianController extends BaseController
 
     public function editUjian($kode_ujian)
     {
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-guru')],
+            ['title' => 'Data Ujian', 'url' => base_url('sw-guru/ujian')],
+             ['title' => 'List Soal Ujian', 'url' => '#'],
+        ];
         $data['detail_ujian'] = $this->ujianDetailModel->getAllBykodeUjian(decrypt_url($kode_ujian));
         $data['ujian'] = $this->ujianMasterModel->getBykode(decrypt_url($kode_ujian));
         $data['siswa'] = $this->siswaModel->getAllbyKelas($data['ujian']->kelas);
@@ -476,26 +509,26 @@ class UjianController extends BaseController
 
 
         $this->ujianMasterModel->set($data_ujian)->where('id_ujian', $this->request->getVar('id_ujian'))->update();
-        
-        $dataUjianUpdate = $this->ujianModel->where('kode_ujian', $this->request->getVar('kode_ujian'))->where('status', 'B')->get()->getResultObject();
-        foreach($dataUjianUpdate as $rowsUjian){
-            $update_ujian= [
-                            'kode_ujian' => $this->request->getVar('kode_ujian'),
-                            'nama_ujian' => $this->request->getVar('nama_ujian'),
-                            'guru' => session()->get('id'),
-                            'kelas' => $this->request->getVar('kelas'),
-                            'mapel' => $this->request->getVar('mapel'),
-                            'date_created' => time(),
-                        ];
 
-                $this->ujianModel->set($update_ujian)->where('id_ujian', $rowsUjian->id_ujian)->update();
+        $dataUjianUpdate = $this->ujianModel->where('kode_ujian', $this->request->getVar('kode_ujian'))->where('status', 'B')->get()->getResultObject();
+        foreach ($dataUjianUpdate as $rowsUjian) {
+            $update_ujian = [
+                'kode_ujian' => $this->request->getVar('kode_ujian'),
+                'nama_ujian' => $this->request->getVar('nama_ujian'),
+                'guru' => session()->get('id'),
+                'kelas' => $this->request->getVar('kelas'),
+                'mapel' => $this->request->getVar('mapel'),
+                'date_created' => time(),
+            ];
+
+            $this->ujianModel->set($update_ujian)->where('id_ujian', $rowsUjian->id_ujian)->update();
         }
 
         if ($this->request->getVar('id_siswa') !== null) {
             $id_siswa = $this->request->getVar('id_siswa');
             //membuat ujian ke peserta
             foreach ($id_siswa as $rows) {
-                $data_ujian_per_siswa= [
+                $data_ujian_per_siswa = [
                     'id_siswa' => $rows,
                     'kode_ujian' => $this->request->getVar('kode_ujian'),
                     'nama_ujian' => $this->request->getVar('nama_ujian'),
@@ -504,11 +537,11 @@ class UjianController extends BaseController
                     'mapel' => $this->request->getVar('mapel'),
                     'date_created' => time(),
                 ];
-                  $this->ujianModel->save($data_ujian_per_siswa);
+                $this->ujianModel->save($data_ujian_per_siswa);
             }
-            
-            
-            
+
+
+
             $ujian_detail = $this->ujianDetailModel->getAllBykodeUjian($this->request->getVar('kode_ujian'));
             $data_detail_ujian = array();
             $index = 0;
@@ -528,10 +561,6 @@ class UjianController extends BaseController
                 }
             }
             $this->ujianSiswaModel->insertBatch($data_detail_ujian);
-            
-            
-            
-            
         }
 
         //untuk mereset ujian
@@ -549,15 +578,15 @@ class UjianController extends BaseController
                     $this->ujianSiswaModel->set($data_detail_siswa)->where('id_ujian_siswa', $rows->id_ujian_siswa)->update();
                 }
                 //untuk membuat ujian remedial
-                $data_ujian_per_siswa= [
-                            'id_siswa' => $row,
-                            'kode_ujian' => $this->request->getVar('kode_ujian'),
-                            'nama_ujian' => $this->request->getVar('nama_ujian'),
-                            'guru' => session()->get('id'),
-                            'kelas' => $this->request->getVar('kelas'),
-                            'mapel' => $this->request->getVar('mapel'),
-                            'date_created' => time(),
-                        ];
+                $data_ujian_per_siswa = [
+                    'id_siswa' => $row,
+                    'kode_ujian' => $this->request->getVar('kode_ujian'),
+                    'nama_ujian' => $this->request->getVar('nama_ujian'),
+                    'guru' => session()->get('id'),
+                    'kelas' => $this->request->getVar('kelas'),
+                    'mapel' => $this->request->getVar('mapel'),
+                    'date_created' => time(),
+                ];
 
                 $this->ujianModel->insert($data_ujian_per_siswa);
                 //end ujian remedial
@@ -568,6 +597,11 @@ class UjianController extends BaseController
 
     public function editSoal($id_detail_ujian)
     {
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-guru')],
+            ['title' => 'Data Ujian', 'url' => base_url('sw-guru/ujian')],
+             ['title' => 'Edit Soal Ujian', 'url' => '#'],
+        ];
         $data['detail_ujian'] = $this->ujianDetailModel->getAllByiddetailujian(decrypt_url($id_detail_ujian));
         $data['guru'] = $this->guruModel->asObject()->find(session()->get('id'));
         $data['guru_kelas'] = $this->gurukelasModel->getALLByGuru(session()->get('id'));
@@ -594,7 +628,7 @@ class UjianController extends BaseController
         return redirect()->to('sw-guru/ujian/edit-ujian/' . encrypt_url($this->request->getVar('kode_ujian')))->with('success', 'Soal telah diubah');
     }
 
-    
+
     public function downloadTemplate()
     {
         return $this->response->download('assets/app-assets/file-excel/template.xlsx', NULL);

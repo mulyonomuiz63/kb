@@ -1,275 +1,224 @@
 <?= $this->extend('template/app'); ?>
 <?= $this->section('content'); ?>
-<div class="layout-px-spacing">
-    <div class="row layout-top-spacing">
-        <div class="col-lg-12 layout-spacing">
-            <div class="widget shadow p-3">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="d-flex justify-content-between">
-                            <h4>Komisi Affiliate</h4>
-                            <a href="<?= base_url('sw-admin/affiliate') ?>" class="btn btn-secondary px-4">
-                                Kembali
-                            </a>
+
+<div class="d-flex flex-column flex-column-fluid">
+    <div id="kt_app_content" class="app-content flex-column-fluid">
+        <div id="kt_app_content_container" class="app-container container-xxl">
+
+            <?php if (!empty($affiliate)): ?>
+                <div class="card shadow-sm border-0 border-start border-primary border-4 mb-7">
+                    <div class="card-body">
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-5">
+                            <h3 class="card-title fw-bold text-gray-800 m-0 d-flex align-items-center">
+                                <i class="ki-duotone ki-bank fs-2 text-primary me-2"><span class="path1"></span><span class="path2"></span></i>
+                                Informasi Rekening Affiliate
+                            </h3>
+                            <span class="badge badge-light-success fw-bold px-4 py-2 fs-7">Aktif</span>
                         </div>
-                        
-                        <?php if (!empty($affiliate)): ?>
-                            <div class="card border-left-primary shadow-sm my-4">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <h5 class="font-weight-bold mb-0">
-                                            <i class="fas fa-university mr-2 text-primary"></i>
-                                            Informasi Rekening Affiliate
-                                        </h5>
-                            
-                                        <span class="badge badge-success px-3 py-2">
-                                            Aktif
-                                        </span>
-                                    </div>
-                            
-                                    <div class="row">
-                                        <div class="col-md-3 mb-2">
-                                            <small class="text-muted">Nama Pemilik</small>
-                                            <div class="font-weight-bold">
-                                                <?= esc($affiliate['nama_akun_bank']) ?>
-                                            </div>
-                                        </div>
-                            
-                                        <div class="col-md-3 mb-2">
-                                            <small class="text-muted">Bank</small>
-                                            <div class="font-weight-bold">
-                                                <?= esc($affiliate['bank']) ?>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="col-md-3 mb-2">
-                                            <small class="text-muted">Cabang Bank</small>
-                                            <div class="font-weight-bold">
-                                                <?= esc($affiliate['cabang_bank'] ?? '-') ?>
-                                            </div>
-                                        </div>
-                            
-                                        <div class="col-md-3 mb-2">
-                                            <small class="text-muted">Nomor Rekening</small>
-                                            <div class="font-weight-bold">
-                                                <?= esc($affiliate['norek']) ?>
-                                            </div>
-                                        </div>
-                                    </div>
-                            
-                                    <hr class="my-3">
-                            
-                                    <small class="text-muted">
-                                        <i class="fas fa-info-circle mr-1"></i>
-                                        Dana komisi akan dikirim ke rekening ini
-                                    </small>
-                                </div>
+
+                        <div class="row g-5">
+                            <div class="col-md-3">
+                                <div class="text-muted fw-semibold fs-7 mb-1">Nama Pemilik</div>
+                                <div class="fw-bold text-gray-900 fs-5"><?= esc($affiliate['nama_akun_bank']) ?></div>
                             </div>
-                            <?php else: ?>
-                            <div class="alert alert-warning">
-                                <i class="fas fa-exclamation-triangle mr-1"></i>
-                                Data rekening affiliate belum tersedia
+                            <div class="col-md-3">
+                                <div class="text-muted fw-semibold fs-7 mb-1">Bank</div>
+                                <div class="fw-bold text-gray-900 fs-5"><?= esc($affiliate['bank']) ?></div>
                             </div>
-                            <?php endif; ?>
-
-                        <!--//unyuk komisi-->
-                        <div class="card  mt-4">
-                            <div class="card-body">
-                        
-                                <!-- HEADER -->
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <div>
-                                        <h5 class="mb-1 font-weight-bold">Komisi Affiliate</h5>
-                                        <p class="text-muted small mb-0">
-                                            Riwayat komisi yang Anda peroleh
-                                        </p>
-                                
-                                        <!-- KETERANGAN PENCAIRAN -->
-                                        <p class="text-muted small mt-2 mb-0">
-                                            <i class="fas fa-info-circle mr-1"></i>
-                                            Pencairan komisi minimal 
-                                            <strong>Rp 100.000</strong> Di proses setiap awal bulan pada hari kerja
-                                        </p>
-                                    </div>
-                                    
-                                    <?php
-                                        $totalKomisi = 0;
-                                        
-                                        if (!empty($komisi)) {
-                                            foreach ($komisi as $k) {
-                                                // hitung hanya komisi yang valid (misalnya approved / paid)
-                                                if (in_array($k['status'], ['approved', 'paid'])) {
-                                                    $totalKomisi += ($k['harga'] * $k['komisi'] / 100);
-                                                }
-                                            }
-                                        }
-                                    ?>
-                                
-                                    <!-- TOTAL KOMISI -->
-                                    <div class="text-right">
-                                        <h6 class="mb-0 text-muted">Total Komisi Dipilih</h6>
-                                        <h4 class="mb-1 font-weight-bold text-success" id="totalKomisi">
-                                            Rp 0
-                                        </h4>
-                                        <small class="text-muted">
-                                            Minimal pencairan <strong>Rp 100.000</strong>
-                                        </small>
-                                    </div>
-
-                                </div>
-
-
-                        
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-hover table-sm mb-0">
-                                        <thead class="thead-light">
-                                            <tr class="text-center">
-                                                <th class="text-center">
-                                                    <input type="checkbox" id="checkAll">
-                                                </th>
-                                                <th width="5%">No</th>
-                                                <th>ID Transaksi</th>
-                                                <th>Harga</th>
-                                                <th>Komisi %</th>
-                                                <th>Total</th>
-                                                <th>Status</th>
-                                                <th>Status Pencairan</th>
-                                                <th>Tanggal Pencairan</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                        
-                                        <?php if (!empty($komisi)): ?>
-                                            <?php
-                                                $no = 1 + ($pager->getCurrentPage('komisi') - 1) * $pager->getPerPage('komisi');
-                                            ?>
-                                            <?php foreach ($komisi as $k): ?>
-                                                <tr>
-                                                    <td class="text-center">
-                                                        <?php if ($k['status'] == 'approved' && $k['status_penarikan'] == 'pending'): ?>
-                                                            <input type="checkbox"
-                                                                    class="komisi-check"
-                                                                    data-id="<?= $k['id'] ?>"
-                                                                    data-total="<?= ($k['harga'] * $k['komisi'] / 100) ?>">
-                                                        <?php endif; ?>
-                                                    </td>
-                                                    <td class="text-center"><?= $no++ ?></td>
-                        
-                                                    <td class="text-center">
-                                                        <?= esc($k['id_transaksi']) ?>
-                                                    </td>
-                        
-                                                    <td class="text-right">
-                                                        Rp <?= number_format($k['harga'], 0, ',', '.') ?>
-                                                    </td>
-                        
-                                                    <td class="text-right font-weight-bold text-success">
-                                                        <?= $k['komisi'] ?>
-                                                    </td>
-                                                    <td class="text-right">
-                                                        Rp <?= number_format($k['harga'] * $k['komisi']/100, 0, ',', '.') ?>
-                                                    </td>
-                                                    
-                        
-                                                    <!-- STATUS TRANSAKSI -->
-                                                    <td class="text-center">
-                                                        <?php if ($k['status'] == 'approved'): ?>
-                                                            <span class="badge badge-success">Success</span>
-                                                        <?php elseif ($k['status'] == 'pending'): ?>
-                                                            <span class="badge badge-warning">Pending</span>
-                                                        <?php elseif ($k['status'] == 'paid'): ?>
-                                                            <span class="badge badge-primary">Paid</span>
-                                                        <?php elseif ($k['status'] == 'rejected'): ?>
-                                                            <span class="badge badge-danger">Rejected</span>
-                                                        <?php else: ?>
-                                                            -
-                                                        <?php endif ?>
-                                                    </td>
-                        
-                                                    <!-- STATUS PENARIKAN -->
-                                                    <td class="text-center">
-                                                        <?php
-                                                            switch ($k['status_penarikan']) {
-                                                                case 'pending':
-                                                                    $badge = 'badge-warning';
-                                                                    $text  = 'Pending';
-                                                                    break;
-                                                    
-                                                                case 'approved':
-                                                                    $badge = 'badge-primary';
-                                                                    $text  = 'Approved';
-                                                                    break;
-                                                    
-                                                                case 'processing':
-                                                                    $badge = 'badge-info';
-                                                                    $text  = 'Processing';
-                                                                    break;
-                                                    
-                                                                case 'paid':
-                                                                    $badge = 'badge-success';
-                                                                    $text  = 'Paid';
-                                                                    break;
-                                                    
-                                                                default:
-                                                                    $badge = '';
-                                                                    $text  = '-';
-                                                                    break;
-                                                            }
-                                                        ?>
-                                                        <span class="badge <?= $badge ?>">
-                                                            <?= $text ?>
-                                                        </span>
-                                                    </td>
-        
-                        
-                                                    <td class="text-center">
-                                                        <?= $k['tgl_pembayaran'] ? date('d-m-Y', strtotime($k['tgl_pembayaran'])) :'-' ?>
-                                                    </td>
-                                                </tr>
-                                            <?php endforeach ?>
-                                        <?php else: ?>
-                                            <tr>
-                                                <td colspan="9" class="text-center text-muted py-3">
-                                                    Belum ada data komisi
-                                                </td>
-                                            </tr>
-                                        <?php endif ?>
-                        
-                                        </tbody>
-                                    </table>
-                                    <div class="mt-3 text-right">
-                                        <button class="btn btn-success"
-                                                id="btnUpdateKomisi"
-                                                disabled>
-                                            <i class="fas fa-check-circle"></i>
-                                            Proses Pencairan
-                                        </button>
-                                    </div>
-
-                                </div>
-                        
-                                <!-- PAGINATION -->
-                                <div class="d-flex justify-content-between align-items-center mt-3">
-                                    <small class="text-muted">
-                                        Menampilkan <?= count($komisi) ?> data
-                                    </small>
-                                    <?php if ($pager): ?>
-                                        <?php echo $pager->links('komisi', 'bootstrap') ?>
-                                    <?php endif; ?>
-        
-                                </div>
-                        
+                            <div class="col-md-3">
+                                <div class="text-muted fw-semibold fs-7 mb-1">Cabang Bank</div>
+                                <div class="fw-bold text-gray-900 fs-5"><?= esc($affiliate['cabang_bank'] ?? '-') ?></div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-muted fw-semibold fs-7 mb-1">Nomor Rekening</div>
+                                <div class="fw-bold text-gray-900 fs-5"><?= esc($affiliate['norek']) ?></div>
                             </div>
                         </div>
 
+                        <div class="separator separator-dashed my-5"></div>
+                        
+                        <div class="d-flex align-items-center text-muted fs-7">
+                            <i class="ki-duotone ki-information-5 fs-4 text-info me-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
+                            Dana komisi akan dikirim ke rekening ini
+                        </div>
+                        
                     </div>
                 </div>
+            <?php else: ?>
+                <div class="notice d-flex bg-light-warning rounded border-warning border border-dashed p-6 mb-7">
+                    <i class="ki-duotone ki-information fs-2tx text-warning me-4"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
+                    <div class="d-flex flex-stack flex-grow-1">
+                        <div class="fw-semibold">
+                            <h4 class="text-gray-900 fw-bold">Perhatian!</h4>
+                            <div class="fs-6 text-gray-700">Data rekening affiliate belum tersedia.</div>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-header pt-7">
+                    <div class="card-title flex-column">
+                        <h2 class="fw-bold text-gray-800 mb-2">Riwayat Komisi</h2>
+                        <div class="d-flex align-items-center text-muted fw-semibold fs-7">
+                            <i class="ki-duotone ki-information-5 fs-5 text-info me-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
+                            Pencairan komisi minimal <strong class="text-gray-800 ms-1 me-1">Rp 100.000</strong>. Diproses setiap awal bulan pada hari kerja.
+                        </div>
+                    </div>
+
+                    <?php
+                        $totalKomisi = 0;
+                        if (!empty($komisi)) {
+                            foreach ($komisi as $k) {
+                                if (in_array($k['status'], ['approved', 'paid'])) {
+                                    $totalKomisi += ($k['harga'] * $k['komisi'] / 100);
+                                }
+                            }
+                        }
+                    ?>
+                    
+                    <div class="card-toolbar">
+                        <div class="d-flex flex-column align-items-end">
+                            <span class="text-muted fw-semibold fs-7 mb-1">Total Komisi Dipilih</span>
+                            <span class="text-success fw-bold fs-2" id="totalKomisi">Rp 0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body pt-5">
+                    <div class="table-responsive">
+                        <table class="table align-middle table-row-dashed fs-6 gy-5 text-nowrap">
+                            <thead>
+                                <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
+                                    <th class="w-10px pe-2 text-center">
+                                        <div class="form-check form-check-sm form-check-custom form-check-solid justify-content-center">
+                                            <input class="form-check-input" type="checkbox" id="checkAll" />
+                                        </div>
+                                    </th>
+                                    <th class="w-50px text-center">No</th>
+                                    <th class="min-w-150px">ID Transaksi</th>
+                                    <th class="text-end min-w-125px">Harga</th>
+                                    <th class="text-end min-w-100px">Komisi %</th>
+                                    <th class="text-end min-w-125px">Total</th>
+                                    <th class="text-center min-w-100px">Status</th>
+                                    <th class="text-center min-w-150px">Status Pencairan</th>
+                                    <th class="text-center min-w-150px">Tgl Pencairan</th>
+                                </tr>
+                            </thead>
+                            <tbody class="fw-semibold text-gray-600">
+                                <?php if (!empty($komisi)): ?>
+                                    <?php $no = 1 + ($pager->getCurrentPage('komisi') - 1) * $pager->getPerPage('komisi'); ?>
+                                    <?php foreach ($komisi as $k): ?>
+                                        <tr>
+                                            <td class="text-center">
+                                                <?php if ($k['status'] == 'approved' && $k['status_penarikan'] == 'pending'): ?>
+                                                    <div class="form-check form-check-sm form-check-custom form-check-solid justify-content-center">
+                                                        <input class="form-check-input komisi-check" type="checkbox" 
+                                                               data-id="<?= $k['id'] ?>" 
+                                                               data-total="<?= ($k['harga'] * $k['komisi'] / 100) ?>" />
+                                                    </div>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td class="text-center text-gray-800 fw-bold"><?= $no++ ?></td>
+                                            <td>
+                                                <span class="text-gray-800 fw-bold"><?= esc($k['id_transaksi']) ?></span>
+                                            </td>
+                                            <td class="text-end">
+                                                Rp <?= number_format($k['harga'], 0, ',', '.') ?>
+                                            </td>
+                                            <td class="text-end fw-bold text-success">
+                                                <?= $k['komisi'] ?>%
+                                            </td>
+                                            <td class="text-end text-gray-900 fw-bold">
+                                                Rp <?= number_format($k['harga'] * $k['komisi']/100, 0, ',', '.') ?>
+                                            </td>
+                                            
+                                            <td class="text-center">
+                                                <?php if ($k['status'] == 'approved'): ?>
+                                                    <span class="badge badge-light-success fw-bold px-3 py-2">Success</span>
+                                                <?php elseif ($k['status'] == 'pending'): ?>
+                                                    <span class="badge badge-light-warning fw-bold px-3 py-2">Pending</span>
+                                                <?php elseif ($k['status'] == 'paid'): ?>
+                                                    <span class="badge badge-light-primary fw-bold px-3 py-2">Paid</span>
+                                                <?php elseif ($k['status'] == 'rejected'): ?>
+                                                    <span class="badge badge-light-danger fw-bold px-3 py-2">Rejected</span>
+                                                <?php else: ?>
+                                                    -
+                                                <?php endif ?>
+                                            </td>
+                    
+                                            <td class="text-center">
+                                                <?php
+                                                    switch ($k['status_penarikan']) {
+                                                        case 'pending':
+                                                            $badge = 'badge-light-warning';
+                                                            $text  = 'Pending';
+                                                            break;
+                                                        case 'approved':
+                                                            $badge = 'badge-light-primary';
+                                                            $text  = 'Approved';
+                                                            break;
+                                                        case 'processing':
+                                                            $badge = 'badge-light-info';
+                                                            $text  = 'Processing';
+                                                            break;
+                                                        case 'paid':
+                                                            $badge = 'badge-light-success';
+                                                            $text  = 'Paid';
+                                                            break;
+                                                        default:
+                                                            $badge = 'badge-light';
+                                                            $text  = '-';
+                                                            break;
+                                                    }
+                                                ?>
+                                                <span class="badge <?= $badge ?> fw-bold px-3 py-2">
+                                                    <?= $text ?>
+                                                </span>
+                                            </td>
+
+                                            <td class="text-center">
+                                                <?= $k['tgl_pembayaran'] ? date('d-m-Y', strtotime($k['tgl_pembayaran'])) : '-' ?>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach ?>
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="9" class="text-center text-muted py-10 fs-6">
+                                            Belum ada data komisi
+                                        </td>
+                                    </tr>
+                                <?php endif ?>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="row align-items-center mt-5">
+                        <div class="col-sm-12 col-md-6 d-flex align-items-center justify-content-center justify-content-md-start mb-3 mb-md-0">
+                            <button class="btn btn-success fw-bold" id="btnUpdateKomisi" disabled>
+                                <i class="ki-duotone ki-check-circle fs-2 me-1"><span class="path1"></span><span class="path2"></span></i>
+                                Proses Pencairan
+                            </button>
+                        </div>
+                        <div class="col-sm-12 col-md-6 d-flex flex-column flex-md-row align-items-center justify-content-center justify-content-md-end gap-3">
+                            <span class="text-muted fw-semibold fs-7">
+                                Menampilkan <?= count($komisi) ?> data
+                            </span>
+                            <?php if ($pager): ?>
+                                <?= $pager->links('komisi', 'bootstrap') ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                </div>
             </div>
+
         </div>
     </div>
 </div>
-
 <?= $this->endSection(); ?>
+
 <?= $this->section('scripts'); ?>
 <script>
 $(function () {
@@ -303,7 +252,7 @@ $(function () {
         hitungTotal();
     });
 
-    // Submit bulk
+    // Submit bulk (Sama persis tidak ada yang dirubah)
     $('#btnUpdateKomisi').on('click', function () {
 
         let ids = [];
@@ -355,5 +304,4 @@ $(function () {
 
 });
 </script>
-
 <?= $this->endSection(); ?>

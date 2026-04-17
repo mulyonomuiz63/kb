@@ -33,19 +33,12 @@ class MateriController extends BaseController
     }
 
     // START::MATERI
-    public function index()
-    {
-        $data['mapel'] = $this->guruMapelModel->join('guru_kelas', 'guru_kelas.guru=guru_mapel.guru')->where('guru_mapel.guru', session()->get('id'))->groupBy('guru_mapel.mapel')->get()->getResultObject();
-
-        $data['guru_kelas'] = $this->guruKelasModel->getALLByGuru(session()->get('id'));
-        $data['guru_mapel'] = $this->guruMapelModel->getALLByGuru(session()->get('id'));
-
-        return view('guru/materi/index', $data);
-    }
-
-    // START::MATERI
     public function lihat($id, $kelas)
     {
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-guru')],
+            ['title' => 'List Materi', 'url' => '#'],
+        ];
 
         $data['idmapel'] = $id;
         $data['idkelas'] = $kelas;
@@ -210,6 +203,10 @@ class MateriController extends BaseController
         $data['guru'] = $this->guruModel->asObject()->find(session()->get('id'));
         $data['file'] = $this->fileModel->getMateriWithFile(decrypt_url($idmapel), decrypt_url($idkelas));
 
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-guru')],
+            ['title' => 'List Materi', 'url' => '#'],
+        ];
         return view('guru/materi/lihat-materi', $data);
     }
     public function getChatMateri()

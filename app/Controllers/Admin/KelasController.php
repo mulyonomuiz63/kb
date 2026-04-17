@@ -16,8 +16,9 @@ class KelasController extends BaseController
 
     public function index()
     {
-        $data = [
-            'title'        => 'Data Kelas',
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'List Kelas', 'url' => '#'],
         ];
         $data['kelas'] = $this->kelasModel->asObject()->findAll();
         return view('admin/kelas/list', $data);

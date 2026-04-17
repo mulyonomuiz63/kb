@@ -15,12 +15,12 @@ class KategoriController extends BaseController
     //Kategori
     public function index()
     {
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-guru')],
+            ['title' => 'List Kategori', 'url' => '#'],
+        ];
         $data['kategori'] = $this->kategoriModel->getAll();
         return view('guru/kategori/list', $data);
-    }
-    public function create()
-    {
-        return view('guru/kategori/tambah_');
     }
     public function store()
     {

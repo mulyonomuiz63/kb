@@ -32,6 +32,10 @@ class ProfileController extends BaseController
     // START::PROFILE & SETTING
     public function index()
     {
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-mitra')],
+            ['title' => 'Edit Profile', 'url' => '#'],
+        ];
        $data['mitra'] = $this->mitraModel->where('idmitra',session('id'))->get()->getRowObject();
         return view('mitra/profile-setting', $data);
     }

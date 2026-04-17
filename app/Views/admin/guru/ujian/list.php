@@ -1,23 +1,42 @@
 <?= $this->extend('template/app'); ?>
 <?= $this->section('content'); ?>
-<div class="layout-px-spacing">
-    <div class="row layout-top-spacing">
-        <div class="col-lg-12 layout-spacing">
-            <div class="widget shadow p-3 bg-white">
-                <div class="table-responsive">
-                    <table id="datatable-list" class="table text-left text-nowrap w-100">
-                        <thead>
-                            <tr>
-                                <th>Nama Ujian</th>
-                                <th>Kelas</th>
-                                <th>Status</th>
-                                <th width="10%">Opsi</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
+
+<div class="d-flex flex-column flex-column-fluid">
+    <div id="kt_app_content" class="app-content flex-column-fluid">
+        <div id="kt_app_content_container" class="app-container container-xxl">
+            
+            <div class="card card-flush shadow-sm">
+                
+                <div class="card-header align-items-center py-5 gap-2 gap-md-5">
+                    <div class="card-title">
+                        <div class="d-flex align-items-center position-relative my-1">
+                            <i class="ki-duotone ki-magnifier fs-3 position-absolute ms-4">
+                                <span class="path1"></span><span class="path2"></span>
+                            </i>
+                            <input type="text" data-kt-ujian-table-filter="search" class="form-control form-control-solid w-250px ps-12" placeholder="Cari Ujian..." />
+                        </div>
+                    </div>
                 </div>
+
+                <div class="card-body pt-0">
+                    <div class="table-responsive">
+                        <table id="datatable-list" class="table align-middle table-row-dashed fs-6 gy-5 text-nowrap w-100">
+                            <thead>
+                                <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
+                                    <th class="min-w-200px">Nama Ujian</th>
+                                    <th class="min-w-150px">Kelas</th>
+                                    <th class="min-w-150px text-center">Status</th>
+                                    <th class="text-center min-w-100px">Opsi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="fw-semibold text-gray-600">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
             </div>
+
         </div>
     </div>
 </div>
@@ -26,49 +45,62 @@
 <?= $this->section('scripts'); ?>
 <script>
     $(document).ready(function() {
-        $('#datatable-list').DataTable({
+        var table = $('#datatable-list').DataTable({
             processing: true,
             serverSide: true,
-            order: [[0, 'desc']], // Urutkan berdasarkan kolom pertama secara default
+            order: [[0, 'desc']],
             ajax: {
-                url: "<?= base_url('sw-admin/guru/ajaxUjianGuru'); ?>", // URL ke controller
+                url: "<?= base_url('sw-admin/guru/ajaxUjianGuru'); ?>",
                 type: "POST",
                 data: function(d) {
-                    // Perbaikan: hapus titik setelah d
                     d.id_guru = "<?= $id_guru_enc ?>";
                     d['<?= csrf_token() ?>'] = "<?= csrf_hash() ?>";
                 },
                 dataSrc: function(json) {
-                    // Update CSRF jika regenerasi aktif
                     if (json.token) {
                         $('input[name="<?= csrf_token() ?>"]').val(json.token);
-                        // Jika Anda pakai meta tag global:
-                        // $('meta[name="X-CSRF-TOKEN"]').attr('content', json.token);
                     }
                     return json.data;
                 }
             },
-            // Menggunakan "columns" lebih rapi untuk Server-side
-            "columns": [
-                { "data": "nama_ujian" },
-                { "data": "nama_kelas" },
-                { "data": "status" },
-                { "data": "opsi" }
-            ],
-            "columnDefs": [{
-                "targets": [2, 3], // Kolom status dan opsi
-                "orderable": false, // Matikan fitur sorting untuk kolom ini
-                "searchable": false // Matikan fitur pencarian untuk kolom ini
-            }],
-            "language": {
-                "paginate": {
-                    "previous": "<",
-                    "next": ">"
+            
+            columns: [
+                { 
+                    data: "nama_ujian",
+                    className: "text-gray-800 fw-bold" 
                 },
-                "search": "Cari:",
-                "lengthMenu": "Tampilkan _MENU_ data",
+                { 
+                    data: "nama_kelas" 
+                },
+                { 
+                    data: "status",
+                    className: "text-center"
+                },
+                { 
+                    data: "opsi",
+                    className: "text-end" 
+                }
+            ],
+            
+            columnDefs: [{
+                targets: [2, 3],
+                orderable: false,
+                searchable: false
+            }],
+
+            // Inisialisasi ulang komponen menu bawaan Metronic jika terdapat di tombol Opsi
+            drawCallback: function(settings) {
+                if (typeof KTMenu !== 'undefined') {
+                    KTMenu.createInstances();
+                }
             }
         });
+
+        // Fitur Pencarian Custom yang menyatu dengan UI Card Header Metronic
+        $('[data-kt-ujian-table-filter="search"]').on('keyup', function() {
+            table.search(this.value).draw();
+        });
+
     });
 </script>
 <?= $this->endSection(); ?>

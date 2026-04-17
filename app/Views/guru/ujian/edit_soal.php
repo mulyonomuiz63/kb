@@ -1,122 +1,103 @@
 <?= $this->extend('template/app'); ?>
 <?= $this->section('content'); ?>
 
-<!--  BEGIN CONTENT AREA  -->
-    <div class="layout-px-spacing">
+<div id="kt_app_content" class="app-content flex-column-fluid">
+    <div id="kt_app_content_container" class="app-container container-xxl">
         <form action="<?= base_url('sw-guru/ujian/update-soal'); ?>" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>" />
-            <div class="row layout-top-spacing">
-                <div class="col-lg-12 layout-spacing">
-                    <div class="widget shadow p-3">
-                        <div class="widget-heading">
-                            <h5 class="">Edit Soal Ujian</h5>
-                        </div>
-                        <div id="soal_pg">
-                            <div class="isi_soal">
-                                <div class="form-group">
-                                    <label for="">Soal No. 1</label>
-                                    <textarea name="nama_soal" cols="30" rows="2" class="summernote" wrap="hard" required><?= $detail_ujian->nama_soal; ?></textarea>
-                                    <input type="hidden" name="id_detail_ujian" value="<?= $detail_ujian->id_detail_ujian; ?>" id="">
-                                    <input type="hidden" name="kode_ujian" value="<?= $detail_ujian->kode_ujian; ?>" id="">
-                                </div>
-                                <div class="row mt-2">
-                                    <div class="col-lg-4">
-                                        <div class="form-group">
-                                            <label for="">Pilihan A</label>
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text" id="basic-addon5">A</span>
-                                                </div>
-                                                <input type="text" name="pg_1" class="form-control" value="<?= substr("$detail_ujian->pg_1", 3); ?>" placeholder="Opsi A" autocomplete="off" required>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-4">
-                                        <div class="form-group">
-                                            <label for="">Pilihan B</label>
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text" id="basic-addon5">B</span>
-                                                </div>
-                                                <input type="text" name="pg_2" class="form-control" value="<?= substr("$detail_ujian->pg_2", 3); ?>" placeholder="Opsi B" autocomplete="off">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-4">
-                                        <div class="form-group">
-                                            <label for="">Pilihan C</label>
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text" id="basic-addon5">C</span>
-                                                </div>
-                                                <input type="text" name="pg_3" class="form-control" value="<?= substr("$detail_ujian->pg_3", 3); ?>" placeholder="Opsi C" autocomplete="off">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-4">
-                                        <div class="form-group">
-                                            <label for="">Pilihan D</label>
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text" id="basic-addon5">D</span>
-                                                </div>
-                                                <input type="text" name="pg_4" class="form-control" value="<?= substr("$detail_ujian->pg_4", 3); ?>" placeholder="Opsi D" autocomplete="off">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-4">
-                                        <div class="form-group">
-                                            <label for="">Pilihan E</label>
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text" id="basic-addon5">E</span>
-                                                </div>
-                                                <input type="text" name="pg_5" class="form-control" value="<?= substr("$detail_ujian->pg_5", 3); ?>" placeholder="Opsi E" autocomplete="off">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-4">
-                                        <div class="form-group">
-                                            <label for="">Jawaban</label>
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text" id="basic-addon5">
-                                                        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
-                                                            <polyline points="20 6 9 17 4 12"></polyline>
-                                                        </svg>
-                                                    </span>
-                                                </div>
-                                                <input type="text" name="jawaban" class="form-control" value="<?= $detail_ujian->jawaban; ?>" placeholder="Contoh : A" autocomplete="off" readonly>
-                                            </div>
-                                        </div>
+            
+            <div class="card card-flush shadow-sm">
+                <div class="card-header border-0 pt-6">
+                    <div class="card-title">
+                        <h3 class="card-label fw-bold text-dark">Edit Soal Ujian</h3>
+                    </div>
+                </div>
+
+                <div class="card-body pt-0">
+                    <div id="soal_pg">
+                        <div class="isi_soal">
+                            <div class="fv-row mb-7">
+                                <label class="fs-6 fw-semibold mb-2">Isi Soal</label>
+                                <textarea name="nama_soal" class="summernote" required><?= $detail_ujian->nama_soal; ?></textarea>
+                                <input type="hidden" name="id_detail_ujian" value="<?= $detail_ujian->id_detail_ujian; ?>">
+                                <input type="hidden" name="kode_ujian" value="<?= $detail_ujian->kode_ujian; ?>">
+                            </div>
+
+                            <div class="row g-9 mb-7">
+                                <?php 
+                                    $options = [
+                                        '1' => 'A', 
+                                        '2' => 'B', 
+                                        '3' => 'C', 
+                                        '4' => 'D', 
+                                        '5' => 'E'
+                                    ];
+                                    foreach($options as $key => $label): 
+                                    $field = "pg_".$key;
+                                ?>
+                                <div class="col-md-4">
+                                    <label class="fs-6 fw-semibold mb-2">Pilihan <?= $label ?></label>
+                                    <div class="input-group input-group-solid">
+                                        <span class="input-group-text"><?= $label ?></span>
+                                        <input type="text" name="pg_<?= $key ?>" class="form-control form-control-solid" 
+                                               value="<?= substr($detail_ujian->$field, 3); ?>" 
+                                               placeholder="Opsi <?= $label ?>" autocomplete="off" <?= ($key == '1') ? 'required' : '' ?>>
                                     </div>
                                 </div>
-                                <div class="form-group">
-                                    <label for="">Penjelasan</label>
-                                    <textarea name="penjelasan" cols="30" rows="2" class="summernote" wrap="hard" required><?= $detail_ujian->penjelasan; ?></textarea>
+                                <?php endforeach; ?>
+
+                                <div class="col-md-4">
+                                    <label class="fs-6 fw-semibold mb-2 text-primary">Jawaban Benar</label>
+                                    <div class="input-group input-group-solid border border-primary">
+                                        <span class="input-group-text bg-light-primary">
+                                            <i class="ki-duotone ki-check-circle fs-2 text-primary"><span class="path1"></span><span class="path2"></span></i>
+                                        </span>
+                                        <input type="text" name="jawaban" class="form-control form-control-solid" 
+                                               value="<?= $detail_ujian->jawaban; ?>" readonly>
+                                    </div>
+                                    <div class="text-muted fs-7 mt-1">Status: Terkunci (Readonly)</div>
                                 </div>
                             </div>
+
+                            <div class="fv-row mb-7">
+                                <label class="fs-6 fw-semibold mb-2">Penjelasan Jawaban</label>
+                                <textarea name="penjelasan" class="summernote" required><?= $detail_ujian->penjelasan; ?></textarea>
+                            </div>
                         </div>
-                        <div class="mt-4">
-                            <a href="javascript:window.history.go(-1);" class="btn btn-secondary">Kembali</a>
-                            <button class="btn btn-primary">Submit</button>
-                        </div>
+                    </div>
+
+                    <div class="separator separator-dashed my-10"></div>
+                    <div class="d-flex justify-content-end">
+                        <a href="javascript:window.history.go(-1);" class="btn btn-light me-3">
+                            <i class="ki-duotone ki-arrow-left fs-4 me-1"></i> Kembali
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="ki-duotone ki-save-2 fs-4 me-1"><span class="path1"></span><span class="path2"></span></i> Simpan Perubahan
+                        </button>
                     </div>
                 </div>
             </div>
         </form>
     </div>
-<!--  END CONTENT AREA  -->
+</div>
 <?= $this->endSection(); ?>
+
 <?= $this->section('scripts'); ?>
 <script>
+    function updateCsrfToken(newToken) {
+        if (newToken && newToken !== csrfHash) {
+            csrfHash = newToken;
+            $('input[name="' + csrfName + '"]').val(newToken);
+        }
+    }
+
     $(document).ready(function() {
-        // SUMMERNOTE
-        setInterval(() => {
+        // SUMMERNOTE INITIALIZATION
+        function initSummernote() {
             $('.summernote').summernote({
-                placeholder: 'Hello stand alone ui',
+                placeholder: 'Tulis di sini...',
                 tabsize: 2,
-                height: 120,
+                height: 150,
                 toolbar: [
                     ['style', ['style']],
                     ['font', ['bold', 'underline', 'clear']],
@@ -127,20 +108,29 @@
                     ['view', ['fullscreen', 'help']]
                 ],
                 callbacks: {
-                    onImageUpload: function(image, which_sum = this) {
-                        uploadImage(image[0], which_sum);
+                    onImageUpload: function(image) {
+                        uploadImage(image[0], this);
                     },
                     onMediaDelete: function(target) {
                         deleteImage(target[0].src);
                     }
                 }
             });
-        }, 1000);
+        }
+
+        initSummernote();
+
+        // Keep original interval check
+        setInterval(() => {
+            $('.summernote').each(function() {
+                if (!$(this).next().hasClass('note-editor')) {
+                    initSummernote();
+                }
+            });
+        }, 2000);
 
         function uploadImage(image, which_sum) {
             var data = new FormData();
-
-            // SUNTIKKAN CSRF KE FORMDATA
             data.append(csrfName, csrfHash);
             data.append("image", image);
 
@@ -152,19 +142,9 @@
                 data: data,
                 type: "POST",
                 success: function(response) {
-                    // Kita asumsikan response sekarang berupa JSON agar bisa update token
                     var res = JSON.parse(response);
-
-                    if (res.token) {
-                        updateCsrfToken(res.token);
-                    }
-
+                    if (res.token) updateCsrfToken(res.token);
                     $(which_sum).summernote("insertImage", res.url);
-                },
-                error: function(xhr) {
-                    if (xhr.status === 403) {
-                        console.error("CSRF Expired saat upload gambar");
-                    }
                 }
             });
         }
@@ -174,27 +154,15 @@
                 url: "<?= base_url('sw-guru/ujian/delete-image') ?>",
                 type: "POST",
                 data: {
-                    // SUNTIKKAN CSRF
                     [csrfName]: csrfHash,
                     src: src
                 },
-                cache: false,
-                dataType: "JSON", // Ubah ke JSON agar bisa membaca token baru
+                dataType: "JSON",
                 success: function(response) {
-                    // UPDATE TOKEN GLOBAL
-                    if (response.token) {
-                        updateCsrfToken(response.token);
-                    }
-                },
-                error: function(xhr) {
-                    if (xhr.status === 403) {
-                        console.error("Gagal menghapus: Sesi keamanan berakhir.");
-                    }
+                    if (response.token) updateCsrfToken(response.token);
                 }
             });
         }
-    })
+    });
 </script>
-
-
 <?= $this->endSection(); ?>

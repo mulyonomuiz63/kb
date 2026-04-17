@@ -1,48 +1,64 @@
 <?= $this->extend('template/app'); ?>
 <?= $this->section('content'); ?>
-<div class="layout-px-spacing">
-    <div class="row layout-top-spacing">
-        <div class="col-lg-12 layout-spacing">
-            <div class="widget shadow-sm bg-white rounded-lg border-0">
-                <div class="widget-content p-3">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <div>
-                            <h5 class="font-weight-bold text-dark mb-0">Manajemen Transaksi</h5>
-                            <p class="text-muted small">Kelola dan validasi pembayaran peserta ujian secara real-time.</p>
+<?php $db = Config\Database::connect(); ?>
+
+<div class="d-flex flex-column flex-column-fluid">
+    <div id="kt_app_content" class="app-content flex-column-fluid">
+        <div id="kt_app_content_container" class="app-container container-xxl">
+            
+            <div class="card card-flush shadow-sm border-0">
+                
+                <div class="card-header align-items-center py-5 gap-2 gap-md-5">
+                    <div class="card-title flex-column align-items-start">
+                        <span class="card-label fw-bold text-gray-800">Daftar Pembayaran</span>
+                        <span class="text-gray-500 mt-1 fw-semibold fs-7">Kelola dan validasi pembayaran peserta ujian secara real-time.</span>
+                    </div>
+                    
+                    <div class="card-toolbar flex-row-fluid justify-content-end gap-5">
+                        <div class="d-flex align-items-center position-relative my-1">
+                            <i class="ki-duotone ki-magnifier fs-3 position-absolute ms-4">
+                                <span class="path1"></span><span class="path2"></span>
+                            </i>
+                            <input type="text" data-kt-transaksi-table-filter="search" class="form-control form-control-solid w-250px ps-12" placeholder="Cari Transaksi..." />
                         </div>
                     </div>
+                </div>
 
+                <div class="card-body pt-0">
                     <div class="table-responsive">
-                        <table id="datatables-list" class="table table-hover dt-table-hover w-100">
+                        <table id="datatables-list" class="table align-middle table-row-dashed fs-6 gy-5 text-nowrap w-100">
                             <thead>
-                                <tr>
-                                    <th>Peserta</th>
-                                    <th>Paket & Lembaga</th>
-                                    <th>Voucher</th>
-                                    <th>Pembayaran</th>
-                                    <th>Nominal</th>
-                                    <th class="text-center">Status</th>
-                                    <th class="text-center">Aksi</th>
+                                <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
+                                    <th class="min-w-150px">Peserta</th>
+                                    <th class="min-w-200px">Paket & Lembaga</th>
+                                    <th class="min-w-100px">Voucher</th>
+                                    <th class="min-w-125px">Pembayaran</th>
+                                    <th class="text-end min-w-100px">Nominal</th>
+                                    <th class="text-center min-w-100px">Status</th>
+                                    <th class="text-center min-w-100px">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody class="fw-semibold text-gray-600">
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 </div>
-
-<div class="modal fade" id="validasi_transaksi" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content border-0 shadow-lg">
+<div class="modal fade" id="validasi_transaksi" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered mw-600px">
+        <div class="modal-content rounded border-0 shadow-lg">
             <form action="<?= base_url('sw-admin/transaksi/approve-transaksi'); ?>" method="POST">
                 <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>" class="csrf-token" />
                 <div id="isiKonten">
-                    <div class="p-5 text-center">
-                        <div class="spinner-border text-primary"></div>
+                    <div class="p-10 text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <div class="text-muted mt-3 fw-semibold">Memuat data transaksi...</div>
                     </div>
                 </div>
             </form>
@@ -50,59 +66,21 @@
     </div>
 </div>
 
-<div class="modal fade" id="invoice_cetak_modal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
-        <div class="modal-content border-0 shadow">
-            <div class="isiKontenInvoice"></div>
+<div class="modal fade" id="invoice_cetak_modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content rounded border-0 shadow-lg">
+            <div class="isiKontenInvoice">
+                 </div>
         </div>
     </div>
 </div>
 
-<style>
-    .widget {
-        border-radius: 12px;
-    }
-
-    .table thead th {
-        background-color: #f8f9fa;
-        text-transform: uppercase;
-        font-size: 11px;
-        letter-spacing: 0.5px;
-        border-bottom: 1px solid #eee;
-    }
-
-    .badge {
-        padding: 0.5em 0.8em;
-        border-radius: 6px;
-        font-weight: 500;
-    }
-
-    .badge-subtle-success {
-        background: #e6f7e9;
-        color: #28a745;
-    }
-
-    .badge-subtle-warning {
-        background: #fff4e6;
-        color: #fd7e14;
-    }
-
-    .zoom {
-        transition: transform .3s ease;
-        cursor: zoom-in;
-        border-radius: 8px;
-    }
-
-    .zoom:hover {
-        transform: scale(1.05);
-    }
-</style>
-
 <?= $this->endSection(); ?>
+
 <?= $this->section('scripts'); ?>
 <script>
     $(document).ready(function() {
-        // 1. Inisialisasi DataTable Server Side
+        // 1. Inisialisasi DataTable Server Side (Metronic UI)
         var table = $('#datatables-list').DataTable({
             "processing": true,
             "serverSide": true,
@@ -118,34 +96,31 @@
                     return json.data;
                 },
             },
-            "columns": [{
-                    "data": "peserta"
-                },
-                {
-                    "data": "paket"
-                },
-                {
-                    "data": "voucher"
-                },
-                {
-                    "data": "pembayaran"
-                },
-                {
-                    "data": "nominal"
-                },
-                {
-                    "data": "status"
-                },
-                {
-                    "data": "aksi"
-                }
+            "columns": [
+                { "data": "peserta", "className": "text-gray-800 fw-bold" },
+                { "data": "paket" },
+                { "data": "voucher" },
+                { "data": "pembayaran" },
+                { "data": "nominal", "className": "text-end fw-bold text-gray-900" },
+                { "data": "status", "className": "text-center" },
+                { "data": "aksi", "className": "text-center" }
             ],
             "columnDefs": [{
                 "targets": [5, 6],
                 "orderable": false
             }],
+            drawCallback: function(settings) {
+                // Beri tahu Metronic untuk membaca ulang DOM dan mengaktifkan dropdown baru
+                if (typeof KTMenu !== 'undefined') {
+                    KTMenu.createInstances();
+                }
+            }
         });
 
+        // Search Datatable Custom
+        $('[data-kt-transaksi-table-filter="search"]').on('keyup', function() {
+            table.search(this.value).draw();
+        });
 
         // 2. Fungsi Validasi Transaksi (AJAX)
         $(document).on('click', '.validasi-transaksi', function() {
@@ -153,7 +128,8 @@
             const csrfName = "<?= csrf_token() ?>";
             const csrfHash = $('.csrf-token').val();
 
-            $("#isiKonten").html('<div class="p-5 text-center"><div class="spinner-border text-primary"></div></div>');
+            // Set loading state in modal
+            $("#isiKonten").html('<div class="p-10 text-center"><div class="spinner-border text-primary" role="status"></div></div>');
 
             $.ajax({
                 type: 'POST',
@@ -167,7 +143,7 @@
                     // Update CSRF token
                     $('.csrf-token').val(data[csrfName]);
 
-                    // Kalkulasi (Logika Anda tidak berubah)
+                    // Kalkulasi Logika Anda
                     let diskon = (data.nominal * data.diskon) / 100;
                     let totalDiskon = data.nominal - diskon;
                     let diskon_voucher = (totalDiskon * data.voucher) / 100;
@@ -177,71 +153,94 @@
                     let jenisBayar = (data.jenis_bayar == 'online') ? 'Midtrans' : (data.status == 'P' ? 'N/A' : 'Manual');
                     let imgPath = '<?= base_url('uploads/transaksi/thumbnails'); ?>/' + data.bukti_pembayaran;
                     let lampiran = '';
-                    if(data.status === 'V' && data.jenis_bayar === 'manual'){
-                           lampiran = `<div class="form-group mb-0 text-center">
-                                <label class="small d-block text-left text-muted font-weight-bold">Bukti Pembayaran:</label>
-                                <img class="zoom shadow-sm border w-100 mt-2" src="${imgPath}" alt="Bukti">
-                            </div>`;
-                    }else if( data.status === 'S' && data.jenis_bayar === 'manual'){
-                        lampiran = `<div class="form-group mb-0 text-center">
-                                <label class="small d-block text-left text-muted font-weight-bold">Bukti Pembayaran:</label>
-                                <img class="zoom shadow-sm border w-100 mt-2" src="${imgPath}" alt="Bukti">
+                    
+                    if ((data.status === 'V' && data.jenis_bayar === 'manual') || (data.status === 'S' && data.jenis_bayar === 'manual')) {
+                        lampiran = `
+                            <div class="fv-row mt-5 text-center bg-light p-5 rounded border border-dashed border-gray-300">
+                                <label class="fs-7 fw-bold text-gray-700 d-block text-start mb-3 text-uppercase">Bukti Pembayaran:</label>
+                                <a href="${imgPath}" target="_blank">
+                                    <img class="img-fluid rounded shadow-sm w-100" src="${imgPath}" alt="Bukti" style="transition: transform .3s ease; cursor: zoom-in;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                                </a>
                             </div>`;
                     }
                     
+                    // Injeksi HTML dengan UI Metronic 8
                     $("#isiKonten").html(`
-                        <div class="modal-header bg-light">
-                            <h5 class="modal-title font-weight-bold">Validasi Transaksi</h5>
-                            <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="row small mb-3">
-                                <div class="col-6 text-muted">Paket:</div><div class="col-6 font-weight-bold text-right">${data.nama_paket}</div>
-                                <div class="col-6 text-muted">Peserta:</div><div class="col-6 font-weight-bold text-right">${data.nama_siswa}</div>
-                                <hr class="w-100">
-                                <div class="col-6 text-muted">ID Transaksi:</div><div class="col-6 text-right">${data.idtransaksi}</div>
-                                <div class="col-6 text-muted">Jenis Pembayaran:</div><div class="col-6 font-weight-bold text-right text-success">${jenisBayar}</div>
-                                <div class="col-6 text-muted">Nominal:</div><div class="col-6 font-weight-bold text-right text-primary">Rp ${numberFormat(totalFix, 0, ',', '.')}</div>
+                        <div class="modal-header pb-0 border-0 justify-content-between">
+                            <h2 class="fw-bold">Validasi Transaksi</h2>
+                            <div class="btn btn-sm btn-icon btn-active-color-primary" data-bs-dismiss="modal">
+                                <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i>
                             </div>
-                            <div class="mb-3 text-center">${statusBadge}</div>
+                        </div>
+                        
+                        <div class="modal-body scroll-y px-10 px-lg-15 pt-5 pb-10">
+                            <div class="row g-5 fs-6 mb-7">
+                                <div class="col-6 text-gray-600 fw-semibold">Paket:</div>
+                                <div class="col-6 text-end text-gray-900 fw-bold">${data.nama_paket}</div>
+                                
+                                <div class="col-6 text-gray-600 fw-semibold">Peserta:</div>
+                                <div class="col-6 text-end text-gray-900 fw-bold">${data.nama_siswa}</div>
+                                
+                                <div class="col-12"><div class="separator separator-dashed my-1"></div></div>
+                                
+                                <div class="col-6 text-gray-600 fw-semibold">ID Transaksi:</div>
+                                <div class="col-6 text-end text-gray-800 fw-semibold">${data.idtransaksi}</div>
+                                
+                                <div class="col-6 text-gray-600 fw-semibold">Metode:</div>
+                                <div class="col-6 text-end fw-bold text-success">${jenisBayar}</div>
+                                
+                                <div class="col-6 text-gray-600 fw-semibold">Nominal:</div>
+                                <div class="col-6 text-end fw-bold text-primary fs-4">Rp ${numberFormat(totalFix, 0, ',', '.')}</div>
+                            </div>
+                            
+                            <div class="mb-5 text-center">${statusBadge}</div>
+                            
                             ${lampiran}
+                            
                             <input type="hidden" name="idtransaksi" value="${data.idtransaksi}">
                         </div>
-                        <div class="modal-footer bg-light">
-                            <button type="button" class="btn btn-sm btn-link text-dark" data-dismiss="modal">Tutup</button>
+                        
+                        <div class="modal-footer border-0 p-5 p-lg-10 pt-0 justify-content-end">
+                            <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Tutup</button>
                         </div>
                     `);
+                    
+                    // Gunakan native bootstrap modal show (karena ID modal tetap sama)
                 }
             });
         });
 
-        // 3. Helper Status Badge
+        // 3. Helper Status Badge (Metronic 8 Colors)
         function getStatusBadge(status) {
             const map = {
-                'S': '<span class="badge badge-subtle-success">Lunas</span>',
-                'P': '<span class="badge badge-primary">Menunggu Pembayaran</span>',
-                'V': '<span class="badge badge-info">Menunggu Approval</span>',
-                'E': '<span class="badge badge-danger">Expired</span>',
-                'M': '<span class="badge badge-warning">Proses Pembayaran</span>',
-                'DM': '<span class="badge badge-danger">Denied</span>',
-                'PM': '<span class="badge badge-warning">Pending</span>'
+                'S': '<span class="badge badge-light-success px-4 py-2 fs-6">Lunas</span>',
+                'P': '<span class="badge badge-light-primary px-4 py-2 fs-6">Menunggu Pembayaran</span>',
+                'V': '<span class="badge badge-light-info px-4 py-2 fs-6">Menunggu Approval</span>',
+                'E': '<span class="badge badge-light-danger px-4 py-2 fs-6">Expired</span>',
+                'M': '<span class="badge badge-light-warning px-4 py-2 fs-6">Proses Pembayaran</span>',
+                'DM': '<span class="badge badge-light-danger px-4 py-2 fs-6">Denied</span>',
+                'PM': '<span class="badge badge-light-warning px-4 py-2 fs-6">Pending</span>'
             };
-            return map[status] || '<span class="badge badge-danger">Dined</span>';
+            return map[status] || '<span class="badge badge-light-danger px-4 py-2 fs-6">Denied</span>';
         }
 
         // 4. Invoice Cetak
         $(document).on('click', '.invoice_cetak', function() {
             const url = $(this).data('invoice');
             $(".isiKontenInvoice").html(`
-                <div class="modal-header bg-dark text-white">
-                    <h5 class="modal-title text-white">Preview Invoice</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+                <div class="modal-header pb-0 border-0 justify-content-between pt-5 px-7">
+                    <h2 class="fw-bold">Preview Invoice</h2>
+                    <div class="btn btn-sm btn-icon btn-active-color-primary" data-bs-dismiss="modal">
+                        <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i>
+                    </div>
                 </div>
-                <iframe src="${url}" width="100%" height="600px" style="border:none;"></iframe>
+                <div class="modal-body p-0 mt-5 rounded-bottom overflow-hidden">
+                    <iframe src="${url}" width="100%" height="700px" style="border:none; display:block;"></iframe>
+                </div>
             `);
         });
 
-        // 5. Konfirmasi Aksi (SweetAlert Style Native)
+        // 5. Konfirmasi Aksi (SweetAlert)
         $(document).on("click", "#hapus, #approve", function(e) {
             e.preventDefault();
 
@@ -249,7 +248,7 @@
             const isHapus = $(this).attr('id') == 'hapus';
 
             const title = isHapus ? "Batalkan Transaksi?" : "Approve Transaksi?";
-            const text = isHapus ? "Data yang dibatalkan mungkin tidak dapat dikembalikan." : "Pastikan data transaksi sudah sesuai.";
+            const text = isHapus ? "Data yang dibatalkan mungkin tidak dapat dikembalikan." : "Pastikan data transaksi sudah sesuai dan valid.";
             const icon = isHapus ? "warning" : "question";
             const confirmButtonColor = isHapus ? "#d33" : "#3085d6";
             const confirmButtonText = isHapus ? "Ya, Batalkan!" : "Ya, Approve!";
@@ -262,10 +261,13 @@
                 confirmButtonColor: confirmButtonColor,
                 cancelButtonColor: "#aaa",
                 confirmButtonText: confirmButtonText,
-                cancelButtonText: "Kembali"
+                cancelButtonText: "Kembali",
+                customClass: {
+                    confirmButton: "btn fw-bold " + (isHapus ? "btn-danger" : "btn-primary"),
+                    cancelButton: "btn fw-bold btn-active-light-primary"
+                }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Tampilkan loading sebentar sebelum pindah halaman (opsional namun baik untuk UX)
                     Swal.fire({
                         title: 'Memproses...',
                         allowOutsideClick: false,
@@ -273,7 +275,6 @@
                             Swal.showLoading();
                         }
                     });
-
                     window.location.href = url;
                 }
             });

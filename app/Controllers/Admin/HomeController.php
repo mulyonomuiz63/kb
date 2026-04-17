@@ -45,6 +45,9 @@ class HomeController extends BaseController
 
     public function index()
     {
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')]
+        ];
         $data['guru'] = $this->guruModel->asObject()->findAll();
         $data['guru_aktif'] = $this->guruModel
             ->where('is_active', 1)

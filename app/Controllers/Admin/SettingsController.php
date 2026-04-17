@@ -16,6 +16,10 @@ class SettingsController extends BaseController
 
     public function index()
     {
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'Data Pengaturan', 'url' => '#'],
+        ];
         $data['settings'] = $this->settingModel->getAllSettings();
         return view('admin/settings/list', $data);
     }

@@ -1,102 +1,109 @@
 <?= $this->extend('template/app'); ?>
-<?= $this->section('content'); ?>
+<?= $this->section('styles'); ?>
 <style>
-    .select2-container--default .select2-selection--single {
-        height: 45px !important;
-        /* Sesuaikan dengan tinggi input Bootstrap Anda */
-        padding: 8px;
-        border: 1px solid #ced4da;
+    /* Custom CSS untuk halaman create artikel */
+    .select2-container--bootstrap5 .select2-selection--single {
+        min-height: calc(1.5em + 1.65rem + 2px) !important;
+        padding: 0.825rem 1.5rem !important;
+    }
+    .select2-container--bootstrap5 .select2-selection__rendered {
+        line-height: 1.5 !important;
     }
 </style>
-<div class="layout-px-spacing">
-    <div class="row layout-top-spacing">
-        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+<?= $this->endSection(); ?>
+<?= $this->section('content'); ?>
 
-            <div class="widget shadow-sm border-0" style="border-radius: 15px; background: #fff;">
-                <div class="widget-header p-4 border-bottom">
-                    <div class="row">
-                        <div class="col-xl-12 col-md-12 col-sm-12 col-12">
-                            <h4 class="font-weight-bold text-dark"><i class="bi bi-pencil-square mr-2 text-primary"></i>Buat Artikel Baru</h4>
-                            <p class="text-muted small">Isi formulir di bawah ini untuk menerbitkan konten baru.</p>
+<div class="d-flex flex-column flex-column-fluid">
+    <div id="kt_app_content" class="app-content flex-column-fluid">
+        <div id="kt_app_content_container" class="app-container container-xxl">
+
+            <form action="<?= base_url('sw-admin/artikel/store'); ?>" method="POST" enctype="multipart/form-data" class="form d-flex flex-column flex-lg-row gap-7 gap-lg-10">
+                <?= csrf_field() ?>
+
+                <div class="d-flex flex-column flex-row-fluid gap-7 gap-lg-10">
+                    <div class="card card-flush shadow-sm border-0">
+                        <div class="card-header pt-7">
+                            <div class="card-title">
+                                <h2 class="fw-bold">Konten Artikel</h2>
+                            </div>
+                        </div>
+                        <div class="card-body pt-5">
+
+                            <div class="fv-row mb-10">
+                                <label class="required form-label fs-6 fw-bold text-gray-900">Judul Artikel</label>
+                                <input type="text" name="judul" class="form-control form-control-lg form-control-solid" placeholder="Masukkan judul artikel yang menarik..." required>
+                                <div class="text-muted fs-7 mt-2">Judul yang menarik akan meningkatkan minat baca pengunjung.</div>
+                            </div>
+
+                            <div class="fv-row">
+                                <label class="required form-label fs-6 fw-bold text-gray-900 mb-3">Tulis Konten</label>
+                                <textarea name="konten" class="summernote" required></textarea>
+                            </div>
+
                         </div>
                     </div>
                 </div>
-
-                <div class="widget-content p-4">
-                    <form action="<?= base_url('sw-admin/artikel/store'); ?>" method="POST" enctype="multipart/form-data">
-                        <?= csrf_field() ?>
-
-                        <div class="row">
-                            <div class="col-lg-8">
-                                <div class="form-group mb-4">
-                                    <label class="font-weight-bold">Judul Artikel</label>
-                                    <input type="text" name="judul" class="form-control form-control-lg border-primary-light" placeholder="Masukkan judul artikel yang menarik..." required>
-                                </div>
-
-                                <div class="form-group mb-4">
-                                    <label class="font-weight-bold">Konten Artikel</label>
-                                    <textarea name="konten" class="summernote" required></textarea>
-                                </div>
-                            </div>
-
-                            <div class="col-lg-4">
-                                <div class="card border-0 bg-light-primary p-3 mb-4" style="border-radius: 12px; background-color: #f8f9fb;">
-                                    <h6 class="font-weight-bold mb-3 text-primary">Pengaturan Publikasi</h6>
-
-                                    <div class="form-group mb-3">
-                                        <label class="small font-weight-bold">Thumbnail Artikel</label>
-                                        <div class="custom-file">
-                                            <input type="file" name="image_default" class="custom-file-input" id="customFile" accept="image/*" required>
-                                            <label class="custom-file-label" for="customFile">Pilih Gambar</label>
-                                        </div>
-                                        <small class="text-muted">Format: JPG, PNG. Maks: 2MB</small>
-                                    </div>
-
-                                    <div class="form-group mb-3">
-                                        <label class="small font-weight-bold">Kategori</label>
-                                        <select name="idkategori" class="form-control select2-kategori" required>
-                                            <option value="" selected disabled>Pilih atau Ketik Kategori Baru...</option>
-                                            <?php foreach ($kategori as $rows): ?>
-                                                <option value="<?= $rows->id ?>"><?= $rows->kategori ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                        <small class="text-muted">Pilih kategori yang tersedia atau ketik baru lalu tekan <strong>Enter</strong>.</small>
-                                    </div>
-
-                                    <div class="form-group mb-3">
-                                        <label class="small font-weight-bold">Posisi Tampil</label>
-                                        <select name="status" class="form-control custom-select" required>
-                                            <option value="" selected disabled>Pilih Posisi</option>
-                                            <option value="utama_up">Artikel Utama Atas</option>
-                                            <option value="utama_down">Artikel Utama Bawah</option>
-                                            <option value="rekomendasi">Artikel Rekomendasi</option>
-                                        </select>
-                                    </div>
-
-                                    <div class="form-group mb-0">
-                                        <label class="small font-weight-bold">Tag (Pisahkan dengan koma)</label>
-                                        <input type="text" name="tags" class="form-control form-control-sm" placeholder="Contoh: berita, tekno, edukasi">
-                                    </div>
-                                </div>
-
-                                <div class="d-flex flex-column gap-2">
-                                    <button type="submit" class="btn btn-primary btn-block shadow-sm py-2">
-                                        <i class="bi bi-send mr-2"></i> Terbitkan Artikel
-                                    </button>
-                                    <a href="<?= base_url('sw-admin/artikel/artikel'); ?>" class="btn btn-outline-secondary btn-block py-2">
-                                        Batal
-                                    </a>
-                                </div>
+                <div class="d-flex flex-column gap-7 gap-lg-10 w-100 w-lg-300px w-xl-400px">
+                    <div class="card card-flush shadow-sm border-0">
+                        <div class="card-header pt-7">
+                            <div class="card-title">
+                                <h2 class="fw-bold">Pengaturan Publikasi</h2>
                             </div>
                         </div>
-                    </form>
-                </div>
-            </div>
 
+                        <div class="card-body pt-5">
+
+                            <div class="fv-row mb-7">
+                                <label class="required form-label fw-bold">Thumbnail Artikel</label>
+                                <div class="custom-file">
+                                    <input type="file" name="image_default" class="form-control form-control-solid" id="customFile" accept="image/*" required>
+                                    <span class="custom-file-label d-none"></span>
+                                </div>
+                                <div class="text-muted fs-7 mt-2">Format: JPG, PNG. Maks: 2MB</div>
+                            </div>
+
+                            <div class="separator separator-dashed my-7"></div>
+
+                            <div class="fv-row mb-7">
+                                <label class="required form-label fw-bold">Kategori</label>
+                                <select name="idkategori" class="form-select form-select-solid select2-kategori" required>
+                                    <option value="" selected disabled>Pilih atau Ketik Baru...</option>
+                                    <?php foreach ($kategori as $rows): ?>
+                                        <option value="<?= $rows->id ?>"><?= $rows->kategori ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <div class="text-muted fs-7 mt-2">Pilih kategori yang tersedia atau ketik baru lalu tekan <strong>Enter</strong>.</div>
+                            </div>
+
+                            <div class="fv-row mb-7">
+                                <label class="required form-label fw-bold">Posisi Tampil</label>
+                                <select name="status" class="form-select form-select-solid" data-control="select2" data-hide-search="true" required>
+                                    <option value="" selected disabled>Pilih Posisi</option>
+                                    <option value="utama_up">Artikel Utama Atas</option>
+                                    <option value="utama_down">Artikel Utama Bawah</option>
+                                    <option value="rekomendasi">Artikel Rekomendasi</option>
+                                </select>
+                            </div>
+
+                            <div class="fv-row mb-7">
+                                <label class="form-label fw-bold">Tag</label>
+                                <input type="text" name="tags" class="form-control form-control-solid" placeholder="Contoh: berita, tekno, edukasi">
+                                <div class="text-muted fs-7 mt-2">Pisahkan setiap tag dengan koma.</div>
+                            </div>
+
+                        </div>
+
+                        <div class="card-footer pt-0">
+                            <button type="submit" class="btn btn-primary w-100 fw-bold">
+                                <i class="ki-duotone ki-send fs-3 me-1"><span class="path1"></span><span class="path2"></span></i> Terbitkan Artikel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 </div>
-
 <?= $this->endSection(); ?>
 
 <?= $this->section('scripts'); ?>
@@ -104,7 +111,6 @@
     $(document).ready(function() {
 
         // 1. Inisialisasi Summernote
-        // Pastikan library Summernote sudah ter-include di template/app
         $('.summernote').summernote({
             placeholder: 'Mulai menulis konten yang luar biasa disini...',
             tabsize: 2,
@@ -130,9 +136,9 @@
             }
         });
 
-        // 2. Fungsi Preview Gambar Thumbnail sebelum Upload
+        // 2. Fungsi Preview Gambar Thumbnail sebelum Upload (LOGIKA ASLI)
         $("#customFile").on("change", function() {
-            // Tampilkan nama file
+            // Tampilkan nama file (dummy label operation dipertahankan agar tidak error)
             var fileName = $(this).val().split("\\").pop();
             $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
 
@@ -143,7 +149,7 @@
                 reader.onload = function(event) {
                     // Cek apakah element preview sudah ada, jika belum buat baru
                     if ($('#img-preview').length == 0) {
-                        $('.custom-file').after('<img id="img-preview" src="" class="img-fluid rounded mt-2 shadow-sm" style="max-height: 200px;">');
+                        $('.custom-file').after('<img id="img-preview" src="" class="img-fluid rounded mt-4 border border-gray-300 shadow-sm" style="max-height: 200px; width: 100%; object-fit: cover;">');
                     }
                     $('#img-preview').attr('src', event.target.result);
                 }
@@ -151,7 +157,7 @@
             }
         });
 
-        // 3. Fungsi Upload Image Summernote
+        // 3. Fungsi Upload Image Summernote (LOGIKA ASLI)
         function uploadImage(image, editor) {
             var data = new FormData();
             data.append("image", image);
@@ -174,7 +180,6 @@
                     $(editor).summernote("insertImage", response.url);
 
                     // 2. UPDATE TOKEN CSRF di semua input
-                    // Ini kunci agar submit form utama tidak "Action not allowed"
                     $("input[name='" + csrfName + "']").val(response.token);
                 },
                 error: function(data) {
@@ -183,7 +188,7 @@
             });
         }
 
-        // 4. Fungsi Delete Image Summernote
+        // 4. Fungsi Delete Image Summernote (LOGIKA ASLI)
         function deleteImage(src) {
             var csrfName = '<?= csrf_token() ?>';
             // Ambil hash terbaru dari input hidden
@@ -203,24 +208,26 @@
                 }
             });
         }
-    });
-    // Inisialisasi Select2 untuk Kategori
-    $('.select2-kategori').select2({
-        placeholder: "Pilih atau Ketik Kategori Baru...",
-        tags: true, // Ini kunci untuk input manual
-        allowClear: true,
-        width: '100%',
-        createTag: function(params) {
-            var term = $.trim(params.term);
-            if (term === '') {
-                return null;
+
+        // 5. Inisialisasi Select2 untuk Kategori (LOGIKA ASLI tags: true)
+        $('.select2-kategori').select2({
+            placeholder: "Pilih atau Ketik Baru...",
+            tags: true, // Ini kunci untuk input manual
+            allowClear: true,
+            width: '100%',
+            createTag: function(params) {
+                var term = $.trim(params.term);
+                if (term === '') {
+                    return null;
+                }
+                return {
+                    id: term,
+                    text: term,
+                    newTag: true // Tandai bahwa ini adalah tag baru
+                };
             }
-            return {
-                id: term,
-                text: term,
-                newTag: true // Tandai bahwa ini adalah tag baru
-            };
-        }
+        });
+
     });
 </script>
 <?= $this->endSection(); ?>

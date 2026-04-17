@@ -24,30 +24,30 @@ class RelasiController extends BaseController
 
     public function index()
     {
-        $data = [
-            'title'        => 'Data Relasi Pengajar',
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'Data Instruktur', 'url' => base_url('sw-admin/guru')],
+            ['title' => 'Atur Relasi', 'url' => '#'],
         ];
         $data['guru'] = $this->guruModel->asObject()->findAll();
         return view('admin/guru/list-relasi', $data);
     }
     public function aturRelasi($id = '')
     {
-        // Gunakan middleware atau filter sebenarnya lebih baik, tapi ini versi praktisnya
-        if (session()->get('role') != 1) return redirect()->to('auth');
-
         try {
             $id_guru = decrypt_url($id);
             $guru = $this->guruModel->asObject()->find($id_guru);
 
             if (!$guru) return redirect()->back()->with('error', 'Guru tidak ditemukan.');
 
-            $data = [
-                'title' => 'Atur Relasi Pengajar',
-                'kelas' => $this->kelasModel->asObject()->findAll(),
-                'mapel' => $this->mapelModel->asObject()->findAll(),
-                'guru'  => $guru,
+            $data['breadcrumbs'] = [
+                ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+                ['title' => 'Data Relasi', 'url' => base_url('sw-admin/relasi')],
+                ['title' => 'Atur Relasi', 'url' => '#'],
             ];
-
+            $data['kelas'] = $this->kelasModel->asObject()->findAll();
+            $data['mapel'] = $this->mapelModel->asObject()->findAll();
+            $data['guru']  = $guru;
             return view('admin/guru/relasi', $data);
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan.');

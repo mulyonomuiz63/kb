@@ -28,6 +28,9 @@ class HomeController extends BaseController
 
     public function index()
     {
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-guru')],
+        ];
         $data['mapel'] = $this->mapelModel->asObject()->findAll();
         $data['kelas'] = $this->kelasModel->asObject()->findAll();
 

@@ -15,8 +15,9 @@ class TwibbonController extends BaseController
 
     public function index()
     {
-        $data = [
-            'title' => 'Twibbon',
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'List Twibbon', 'url' => '#'],
         ];
         return view('admin/twibbon/list', $data);
     }
@@ -39,9 +40,9 @@ class TwibbonController extends BaseController
                 // Filter Search
                 if ($search) {
                     $builder->groupStart()
-                            ->like('judul', $search)
-                            ->orLike('url', $search)
-                            ->groupEnd();
+                        ->like('judul', $search)
+                        ->orLike('url', $search)
+                        ->groupEnd();
                 }
 
                 $totalFiltered = $builder->countAllResults(false);
@@ -51,24 +52,47 @@ class TwibbonController extends BaseController
                 $no = $start + 1;
                 foreach ($dataRows as $row) {
                     $id_encrypt = encrypt_url($row->idtwibbon);
-                    
+
+                    // Opsi menggunakan Metronic Menu (Dropdown modern)
                     $opsi = '
-                    <div class="dropdown custom-dropdown">
-                        <a class="dropdown-toggle" href="javascript:void(0)" role="button" data-toggle="dropdown" id="drop' . $row->idtwibbon . '"><i class="bi bi-three-dots-vertical"></i></a>
-                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="drop' . $row->idtwibbon . '">
-                            <a class="dropdown-item editBtn" href="javascript:void(0)" data-id="' . $id_encrypt . '">Edit</a>
-                            <a class="dropdown-item text-success shareBtn" href="javascript:void(0)" data-judul="' . $row->judul . '" data-url="' . $row->url . '">Share WA</a>
-                            <a class="dropdown-item text-danger btn-delete" href="javascript:void(0)" data-url="' . base_url('sw-admin/twibbon/delete/' . $id_encrypt) . '">Hapus</a>
+                    <div class="text-center">
+                        <a href="#" class="btn btn-sm btn-light btn-flex btn-center btn-active-light-primary" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+                            Aksi <i class="ki-duotone ki-down fs-5 ms-1"></i>
+                        </a>
+                        <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg-light-primary fw-semibold py-4 w-150px fs-7" data-kt-menu="true">
+                            <div class="menu-item px-3">
+                                <a href="javascript:void(0)" class="menu-link px-3 editBtn" data-id="' . $id_encrypt . '">
+                                    <i class="ki-duotone ki-pencil fs-5 me-2"><span class="path1"></span><span class="path2"></span></i> Edit
+                                </a>
+                            </div>
+                            <div class="menu-item px-3">
+                                <a href="javascript:void(0)" class="menu-link px-3 text-success shareBtn" data-judul="' . $row->judul . '" data-url="' . $row->url . '">
+                                    <i class="ki-duotone ki-whatsapp fs-5 me-2 text-success"><span class="path1"></span><span class="path2"></span></i> Share WA
+                                </a>
+                            </div>
+                            <div class="separator my-2 opacity-75"></div>
+                            <div class="menu-item px-3">
+                                <a href="javascript:void(0)" class="menu-link px-3 text-danger btn-delete" data-url="' . base_url('sw-admin/twibbon/delete/' . $id_encrypt) . '">
+                                    <i class="ki-duotone ki-trash fs-5 me-2 text-danger"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i> Hapus
+                                </a>
+                            </div>
                         </div>
                     </div>';
 
-                    $img = '<img src="' . base_url('uploads/twibbon/thumbnails/' . $row->file) . '" class="img-thumbnail" width="50">';
+                    // Menggunakan Symbol Metronic untuk tampilan gambar yang lebih elegan
+                    $img = '
+                    <div class="symbol symbol-50px">
+                        <img src="' . base_url('uploads/twibbon/thumbnails/' . $row->file) . '" alt="Twibbon" class="rounded shadow-sm" style="object-fit: cover;">
+                    </div>';
 
                     $data[] = [
-                        $no++,
+                        '<span class="text-gray-600 fw-bold d-block fs-7">' . $no++ . '</span>',
                         $img,
-                        "<b>$row->judul</b><br><small class='text-muted'>URL: $row->url</small>",
-                        substr(strip_tags($row->caption), 0, 50) . '...',
+                        '<div>
+                            <span class="text-gray-900 fw-bold text-hover-primary mb-1 fs-6">' . htmlspecialchars($row->judul) . '</span>
+                            <div class="text-muted fw-semibold fs-7">' . $row->url . '</div>
+                        </div>',
+                        '<span class="text-gray-700 fw-semibold fs-7">' . substr(strip_tags($row->caption), 0, 50) . '...</span>',
                         $opsi
                     ];
                 }
@@ -155,7 +179,6 @@ class TwibbonController extends BaseController
                 'message' => $msg,
                 'token'   => csrf_hash()
             ]);
-
         } catch (\Exception $e) {
             return $this->response->setJSON([
                 'status'  => 'error',
@@ -185,7 +208,7 @@ class TwibbonController extends BaseController
                 }
             } catch (\Exception $e) {
                 return $this->response->setJSON([
-                    'status'  => 'error', 
+                    'status'  => 'error',
                     'message' => $e->getMessage(),
                     'token'   => csrf_hash()
                 ]);

@@ -27,8 +27,9 @@ class MapelController extends BaseController
     public function index()
     {
 
-        $data = [
-            'title'        => 'Data Mapel',
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'List Mapel', 'url' => '#'],
         ];
         return view('admin/mapel/list', $data);
     }
@@ -55,25 +56,33 @@ class MapelController extends BaseController
         $no = $start + 1;
         foreach ($data as $row) {
             $imgUrl = base_url('uploads/mapel/' . $row->file);
+
+            // Opsi Dropdown menggunakan KTMenu Metronic 8
             $opsi = '
-            <div class="dropdown custom-dropdown text-center">
-                <a class="dropdown-toggle badge badge-primary border-0" href="#" role="button" data-toggle="dropdown">
-                    <i class="bi bi-three-dots-vertical"></i>
+            <div class="text-center">
+                <a href="#" class="btn btn-sm btn-light btn-flex btn-center btn-active-light-primary" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+                    Aksi <i class="ki-duotone ki-down fs-5 ms-1"></i>
                 </a>
-                <div class="dropdown-menu dropdown-menu-right shadow border-0">
-                    <a class="dropdown-item py-2 edit-mapel" href="javascript:void(0)" data-id="' . encrypt_url($row->id_mapel) . '">
-                        <i class="bi bi-pencil-square text-primary"></i> Edit
-                    </a>
-                    <a class="dropdown-item py-2 btn-delete" href="javascript:void(0)" data-url="' . base_url('sw-admin/mapel/delete/' . encrypt_url($row->id_mapel)) . '">
-                        <i class="bi bi-trash text-danger"></i> Hapus
-                    </a>
+                
+                <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-150px py-4 text-start" data-kt-menu="true">
+                    <div class="menu-item px-3">
+                        <a href="javascript:void(0)" class="menu-link px-3 edit-mapel" data-id="' . encrypt_url($row->id_mapel) . '">
+                            <i class="ki-duotone ki-pencil fs-4 me-2 text-primary"><span class="path1"></span><span class="path2"></span></i> Edit
+                        </a>
+                    </div>
+                    
+                    <div class="menu-item px-3">
+                        <a href="javascript:void(0)" class="menu-link px-3 text-danger btn-delete" data-url="' . base_url('sw-admin/mapel/delete/' . encrypt_url($row->id_mapel)) . '">
+                            <i class="ki-duotone ki-trash fs-4 me-2 text-danger"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i> Hapus
+                        </a>
+                    </div>
                 </div>
             </div>';
 
             $result[] = [
                 $no++,
-                '<strong>' . $row->nama_mapel . '</strong>',
-                '<img src="' . $imgUrl . '" class="img-thumbnail" style="width:80px; height:auto;">',
+                '<span class="text-gray-800 fw-bold">' . esc($row->nama_mapel) . '</span>',
+                '<div class="symbol symbol-50px"><img src="' . $imgUrl . '" class="rounded shadow-sm" style="object-fit: cover;" alt="Mapel Image"></div>',
                 $opsi
             ];
         }
@@ -178,7 +187,7 @@ class MapelController extends BaseController
 
             // 3. Hapus File Fisik
             if (!empty($mapel->file)) {
-                $path = FCPATH . 'uploads/mapel/' . $mapel['file'];
+                $path = FCPATH . 'uploads/mapel/' . $mapel->file;
                 // Gunakan is_file() untuk memastikan itu benar-benar file, bukan folder
                 if (is_file($path) && file_exists($path)) {
                     unlink($path);
@@ -197,9 +206,11 @@ class MapelController extends BaseController
 
     public function mapelGuru($id)
     {
-        if (session()->get('role') != 1) {
-            return redirect()->to('auth');
-        }
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'Data Instruktur', 'url' => base_url('sw-admin/guru')],
+            ['title' => 'List Mapel', 'url' => '#'],
+        ];
         $idGuru = decrypt_url($id);
         $data['mapel'] = $this->guruMapelModel->join('guru_kelas', 'guru_kelas.guru=guru_mapel.guru')->where('guru_mapel.guru', $idGuru)->groupBy('guru_mapel.mapel')->get()->getResultObject();
         $data['idGuru'] = $id;
@@ -215,13 +226,15 @@ class MapelController extends BaseController
         if (empty($materiList)) {
             return redirect()->back()->with('error', 'Materi tidak ditemukan');
         }
-
-        $data = [
-            'materiAll' => $materiList,
-            'materi'    => $materiList[0], // Ambil materi pertama untuk default view
-            'guru'      => $this->guruModel->where('id_guru', decrypt_url($guru))->get()->getRowObject()
+        
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'Data Instruktur', 'url' => base_url('sw-admin/guru')],
+            ['title' => 'List Materi', 'url' => '#'],
         ];
-
+        $data['materiAll'] = $materiList;
+        $data['materi'] = $materiList[0]; // Ambil materi pertama untuk default view
+        $data['guru'] = $this->guruModel->where('id_guru', decrypt_url($guru))->get()->getRowObject();
         return view('admin/guru/materi/lihat-materi', $data);
     }
 

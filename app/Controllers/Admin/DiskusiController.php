@@ -23,6 +23,7 @@ class DiskusiController extends BaseController
     public function index()
     {
         $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
             ['title' => 'Diskusi', 'url' => '#'],
         ];
 

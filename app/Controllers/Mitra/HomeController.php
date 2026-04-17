@@ -33,6 +33,10 @@ class HomeController extends BaseController
     public function index()
     {
         // MASTER DATA
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-mitra')],
+            ['title' => 'List Voucher', 'url' => '#'],
+        ];
         $data['voucher'] = $this->voucherModel->join('mitra','voucher.idmitra=mitra.idmitra')->where('voucher.idmitra', session('id'))->groupBy('voucher.kode_voucher')->get()->getResultObject();
         $data['mitra'] = $this->mitraModel->where('idmitra', session('id'))->get()->getRowObject();
 
@@ -41,6 +45,10 @@ class HomeController extends BaseController
 
     public function detailVoucher($id)
     {
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-mitra')],
+            ['title' => 'List Detail Transaksi Voucher', 'url' => '#'],
+        ];
         $kode_voucher = decrypt_url($id);
         $data['mitra'] = $this->mitraModel->where('mitra.idmitra', session('id'))->get()->getRowObject();
         $data['transaksi'] = $this->transaksiModel

@@ -1,88 +1,85 @@
 <?= $this->extend('template/app'); ?>
-<?= $this->section('styles'); ?>
-<style>
-    /* Tambahan CSS khusus modal */
-    #tambah_kuota .bg-gradient-primary {
-        background: linear-gradient(87deg, #5e72e4 0, #825ee4 100%) !important;
-    }
-    #tambah_kuota .input-group-text { border-radius: 8px 0 0 8px; }
-    #tambah_kuota .form-control { border-radius: 0 8px 8px 0; height: 45px; transition: all 0.2s; }
-    #tambah_kuota .form-control:focus { background-color: #fff !important; border-color: #5e72e4; box-shadow: none; }
-    #tambah_kuota .uppercase-label { letter-spacing: 0.5px; text-transform: uppercase; font-size: 11px; color: #8898aa !important; }
-    .text-nowrap { white-space: nowrap; }
-</style>
-<?= $this->endSection(); ?>
 
 <?= $this->section('content'); ?>
-<div class="layout-px-spacing">
-    <div class="row layout-top-spacing">
-        <div class="col-lg-12 layout-spacing">
-            <div class="widget shadow p-3">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="widget-heading d-flex justify-content-between mb-4">
-                            <h5>List Ujian</h5>
+<div class="d-flex flex-column flex-column-fluid">
+    <div id="kt_app_content" class="app-content flex-column-fluid">
+        <div id="kt_app_content_container" class="app-container container-xxl">
+            
+            <div class="card card-flush">
+                
+                <div class="card-header align-items-center py-5 gap-2 gap-md-5">
+                    <div class="card-title">
+                        <div class="d-flex align-items-center position-relative my-1">
+                            <i class="ki-duotone ki-magnifier fs-3 position-absolute ms-4">
+                                <span class="path1"></span><span class="path2"></span>
+                            </i>
+                            <input type="text" data-kt-ujian-table-filter="search" class="form-control form-control-solid w-250px ps-12" placeholder="Cari Ujian..." />
                         </div>
-                        <div class="table-responsive">
-                            <table id="tableUjian" data-idsiswa="<?= $idsiswa ?>" class="table table-bordered table-hover" style="width:100%">
-                                <thead>
-                                    <tr>
-                                        <th>Nama Ujian</th>
-                                        <th>Kelas</th>
-                                        <th>Kuota</th>
-                                        <th>Durasi</th>
-                                        <th>Nilai</th>
-                                        <th>Status</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body pt-0">
+                    <div class="table-responsive">
+                        <table id="tableUjian" data-idsiswa="<?= $idsiswa ?>" class="table align-middle table-row-dashed fs-6 gy-5 text-nowrap" style="width:100%">
+                            <thead>
+                                <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
+                                    <th class="min-w-200px">Nama Ujian</th>
+                                    <th class="min-w-125px">Kelas</th>
+                                    <th class="min-w-100px text-center">Kuota</th>
+                                    <th class="min-w-100px text-center">Durasi</th>
+                                    <th class="min-w-100px text-center">Nilai</th>
+                                    <th class="min-w-125px text-center">Status</th>
+                                    <th class="min-w-100px text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="fw-semibold text-gray-600"></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 </div>
-
-<div class="modal fade" id="tambah_kuota" data-focus="false" tabindex="-1" role="dialog" aria-labelledby="tambah_kuotaLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+<div class="modal fade" id="tambah_kuota" data-focus="false" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered mw-400px">
         <form action="<?= base_url('sw-admin/siswa/updateKuota'); ?>" method="POST" id="formUpdateKuota" class="w-100">
             <?= csrf_field(); ?>
-            <div class="modal-content border-0 shadow-lg" style="border-radius: 15px; overflow: hidden;">
-                <div class="modal-header bg-gradient-primary text-white border-0">
-                    <h5 class="modal-title font-weight-bold" id="tambah_kuotaLabel">
-                        <i class="fas fa-plus-circle mr-2"></i>Tambah Kuota
-                    </h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body p-4">
-                    <input type="hidden" name="id_ujian" id="modal_id_ujian">
-                    <input type="hidden" name="id_siswa" id="modal_id_siswa">
-                    <div class="form-group mb-0">
-                        <label for="modal_kuota" class="text-dark small font-weight-bold uppercase-label">Jumlah Kuota Ujian</label>
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text bg-light border-right-0">
-                                    <i class="fas fa-ticket-alt text-primary"></i>
-                                </span>
-                            </div>
-                            <input type="number" name="kuota" class="form-control border-left-0 bg-light font-weight-bold" id="modal_kuota" value="0" min="1" required>
-                        </div>
-                        <small class="text-muted mt-2 d-block">
-                            <i class="fas fa-info-circle mr-1"></i> Masukkan jumlah kuota tambahan.
-                        </small>
+            <div class="modal-content rounded">
+                
+                <div class="modal-header pb-0 border-0 justify-content-between">
+                    <h2 class="fw-bold">Tambah Kuota</h2>
+                    <div class="btn btn-sm btn-icon btn-active-color-primary" data-dismiss="modal">
+                        <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i>
                     </div>
                 </div>
-                <div class="modal-footer border-0 bg-light p-3">
-                    <button type="button" class="btn btn-link text-muted font-weight-bold text-decoration-none" data-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary px-4 shadow-sm" style="border-radius: 8px;" id="btnSimpanKuota">
-                        <i class="fas fa-save mr-1"></i> Simpan
-                    </button>
+
+                <div class="modal-body scroll-y px-10 px-lg-15 pt-5 pb-15">
+                    <input type="hidden" name="id_ujian" id="modal_id_ujian">
+                    <input type="hidden" name="id_siswa" id="modal_id_siswa">
+                    
+                    <div class="d-flex flex-column mb-8 fv-row">
+                        <label class="d-flex align-items-center fs-6 fw-semibold mb-2">
+                            <span class="required">Jumlah Kuota Ujian</span>
+                            <i class="fas fa-exclamation-circle ms-2 fs-7" data-toggle="tooltip" title="Masukkan jumlah kuota tambahan untuk ujian ini"></i>
+                        </label>
+                        
+                        <div class="input-group input-group-solid">
+                            <span class="input-group-text">
+                                <i class="ki-duotone ki-ticket fs-2"><span class="path1"></span><span class="path2"></span></i>
+                            </span>
+                            <input type="number" name="kuota" id="modal_kuota" class="form-control form-control-solid fw-bold" value="0" min="1" required />
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <button type="button" class="btn btn-light me-3" data-dismiss="modal">Batal</button>
+                        <button type="submit" id="btnSimpanKuota" class="btn btn-primary">
+                            <i class="fas fa-save mr-1"></i> Simpan
+                        </button>
+                    </div>
                 </div>
+
             </div>
         </form>
     </div>
@@ -99,7 +96,7 @@
             serverSide: true,
             order: [],
             ajax: {
-                url: "<?= base_url('sw-admin/siswa/getDataUjian') ?>",
+                url: "<?= base_url('sw-admin/siswa/get-data-ujian') ?>",
                 type: "POST",
                 data: function(d) {
                     d.id_siswa = idSiswaEnc;
@@ -114,22 +111,23 @@
                 },
             },
             columns: [
-                { data: "nama_ujian" },
+                { data: "nama_ujian", className: "text-gray-800 fw-bold" },
                 { data: "nama_kelas" },
-                { data: "kuota_html" },
-                { data: "durasi_menit" },
-                { data: "nilai" },
-                { data: "status_lulus" },
+                { data: "kuota_html", className: "text-center" },
+                { data: "durasi_menit", className: "text-center" },
+                { data: "nilai", className: "text-center fw-bold" },
+                { data: "status_lulus", className: "text-center" },
                 { 
                     data: "aksi",
                     className: "text-center text-nowrap",
                     orderable: false
                 }
-            ],
-            language: {
-                search: "Cari Ujian:",
-                lengthMenu: "Tampilkan _MENU_ data",
-            }
+            ]
+        });
+
+        // Search Custom DataTables
+        $('[data-kt-ujian-table-filter="search"]').on('keyup', function() {
+            table.search(this.value).draw();
         });
 
         // 2. Klik Tombol Edit Kuota (Munculkan Modal)

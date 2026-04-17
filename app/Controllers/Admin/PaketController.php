@@ -28,6 +28,10 @@ class PaketController extends BaseController
     {
 
         try {
+            $data['breadcrumbs'] = [
+                ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+                ['title' => 'Data Paket', 'url' => '#'],
+            ];
             // MASTER DATA
             $data['paket'] = $this->paketModel->join('diskon b', 'b.iddiskon = paket.iddiskon')
                 ->orderBy('paket.sort_order', 'ASC')

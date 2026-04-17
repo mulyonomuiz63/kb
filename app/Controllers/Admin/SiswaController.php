@@ -32,10 +32,14 @@ class SiswaController extends BaseController
 
     public function index()
     {
-        $data = [
-            'title' => 'List Peserta',
-            'kelas' => $this->kelasModel->asObject()->findAll(), // Asumsi model kelas
+        // 1. Data untuk breadcrumbs
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'List Peserta', 'url' => '#'],
         ];
+
+        // 2. Data kelas dipisah, jangan dimasukkan ke dalam array breadcrumbs
+        $data['kelas'] = $this->kelasModel->asObject()->findAll();
         return view('admin/siswa/list', $data);
     }
 
@@ -75,6 +79,7 @@ class SiswaController extends BaseController
                 "date_created"   => date('d-m-Y', $s->date_created),
                 "is_active"      => $s->is_active,
                 "stats"          => $totalUjian . '/' . $totalSertifikats,
+                "totalUjian"     => $totalSertifikats,
                 "id_siswa_enc"   => encrypt_url($s->id_siswa) // Untuk tombol aksi
             ];
 
@@ -94,12 +99,12 @@ class SiswaController extends BaseController
 
     public function create()
     {
-        $data = [
-            'title'        => 'Tambah Peserta',
-            'parent_title' => 'List Peserta',
-            'parent_url'   => base_url('sw-admin/siswa'),
-            'kelas' => $this->kelasModel->asObject()->findAll(), // Asumsi model kelas
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'Data Peserta', 'url' => base_url('sw-admin/siswa')],
+            ['title' => 'Tambah Peserta', 'url' => '#'],
         ];
+        $data['kelas'] = $this->kelasModel->asObject()->findAll(); // Asumsi model kelas
         return view('admin/siswa/create', $data);
     }
 
@@ -199,7 +204,7 @@ class SiswaController extends BaseController
                     </p>
                 </div>';
 
-                $this->emailer->sendEmail($siswa['email'], 'Selamat Datang di KelasBrevet', $template);
+                $this->emailer->send($siswa['email'], 'Selamat Datang di KelasBrevet', $template);
             }
 
             session()->setFlashdata('success', 'Berhasil! ' . count($data_batch) . ' data peserta telah disimpan dan email notifikasi dikirim.');
@@ -223,13 +228,14 @@ class SiswaController extends BaseController
             return redirect()->back()->with('error', 'Data peserta tidak ditemukan.');
         }
 
-        $data = [
-            'title'        => 'Edit Peserta',
-            'parent_title' => 'List Peserta',
-            'parent_url'   => base_url('sw-admin/siswa'),
-            'siswa'        => $siswa,
-            'kelas'        => $this->kelasModel->asObject()->findAll(), // Asumsi model kelas
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'Data Peserta', 'url' => base_url('sw-admin/siswa')],
+            ['title' => 'Edit Peserta', 'url' => '#'],
         ];
+
+        $data['siswa'] = $siswa;
+        $data['kelas'] = $this->kelasModel->asObject()->findAll(); // Asumsi model kelas
 
         return view('admin/siswa/edit', $data);
     }
@@ -302,6 +308,16 @@ class SiswaController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
         }
     }
+    public function delete($id = '')
+    {
+        try {
+            $id_decoded = decrypt_url($id);
+            $this->siswaModel->delete($id_decoded);
+            return redirect()->to('sw-admin/siswa')->with('success', 'Data peserta berhasil dihapus.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
+        }
+    }
     public function detail()
     {
         if ($this->request->isAJAX()) {
@@ -350,13 +366,13 @@ class SiswaController extends BaseController
 
 
         // MASTER DATA
-        $data = [
-            'title'        => 'List Sertifikat',
-            'parent_title' => 'List Peserta',
-            'parent_url'   => base_url('sw-admin/siswa'),
-            'idsiswa'        => $id,
-            'canDownloadAll' => ($jumlahLulus >= 5)
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'Data Peserta', 'url' => base_url('sw-admin/siswa')],
+            ['title' => 'List Sertifikat', 'url' => '#'],
         ];
+        $data['idsiswa'] = $id;
+        $data['canDownloadAll'] = ($jumlahLulus >= 5); // Logika untuk tombol "Download Semua Sertifikat"
         return view('admin/sertifikat/list', $data);
     }
 
@@ -407,12 +423,12 @@ class SiswaController extends BaseController
 
     public function ujian($id)
     {
-        $data = [
-            'title'        => 'List Ujian',
-            'parent_title' => 'List Peserta',
-            'parent_url'   => base_url('sw-admin/siswa'),
-            'idsiswa'        => $id,
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'Data Peserta', 'url' => base_url('sw-admin/siswa')],
+            ['title' => 'List Ujian', 'url' => '#'],
         ];
+        $data['idsiswa'] = $id;
         return view('admin/ujian/list', $data);
     }
 
@@ -441,28 +457,33 @@ class SiswaController extends BaseController
                 $durasiMenit = $totalSoal * 3;
 
                 // --- LOGIKA TOMBOL AKSI ---
-                $btn_list = []; // Gunakan array untuk menampung tombol agar mudah dikelola
+                $btn_list = [];
 
                 if ($u->status == 'B') {
-                    $btn_list[] = '<a href="javascript:void(0)" class="btn btn-primary btn-sm disabled"><i class="fas fa-play mr-1"></i> Mulai</a>';
+                    // Tombol Mulai (Disabled)
+                    $btn_list[] = '<a href="javascript:void(0)" class="btn btn-light-primary btn-sm disabled"><i class="ki-duotone ki-triangle-right fs-5 me-1"><span class="path1"></span><span class="path2"></span></i> Mulai</a>';
                 } elseif ($u->status == 'U') {
-                    $btn_list[] = '<a href="#" class="btn btn-warning btn-sm"><i class="fas fa-edit mr-1"></i> Sedang Ujian</a>';
+                    // Tombol Sedang Ujian
+                    $btn_list[] = '<a href="#" class="btn btn-light-warning btn-sm"><i class="ki-duotone ki-pencil fs-5 me-1"><span class="path1"></span><span class="path2"></span></i> Sedang Ujian</a>';
                 } else {
                     if ($u->kuota != '0') {
-                        $btn_list[] = '<a href="javascript:void(0)" class="btn btn-danger btn-sm disabled"><i class="fas fa-redo mr-1"></i> Ulang</a>';
+                        // Tombol Ulang (Disabled)
+                        $btn_list[] = '<a href="javascript:void(0)" class="btn btn-light-danger btn-sm disabled"><i class="ki-duotone ki-arrows-circle fs-5 me-1"><span class="path1"></span><span class="path2"></span></i> Ulang</a>';
                     } else {
                         if ($u->nilai >= 60) {
-                            $btn_list[] = '<a href="' . base_url('siswa/sertifikat/') . '" class="btn btn-success btn-sm"><i class="fas fa-certificate mr-1"></i> Selesai</a>';
+                            // Tombol Selesai
+                            $btn_list[] = '<a href="' . base_url('siswa/sertifikat/') . '" class="btn btn-light-success btn-sm"><i class="ki-duotone ki-badge fs-5 me-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i> Selesai</a>';
                         } else {
-                            $btn_list[] = '<a href="' . base_url('/#bimbel') . '" class="btn btn-warning btn-sm btn-ujian-ulang"><i class="fas fa-sync mr-1"></i> Ulang</a>';
+                            // Tombol Ulang
+                            $btn_list[] = '<a href="' . base_url('/#bimbel') . '" class="btn btn-light-warning btn-sm btn-ujian-ulang"><i class="ki-duotone ki-arrows-circle fs-5 me-1"><span class="path1"></span><span class="path2"></span></i> Ulang</a>';
                         }
                     }
                 }
 
                 // Tambahan Tombol Hapus jika kuota == 3
                 if ($u->kuota == 3) {
-                    $url_hapus = base_url('sw-admin/siswa/deleteUjian') . '/' . encrypt_url($u->id_ujian) . '/' . encrypt_url($u->id_siswa);
-                    $btn_list[] = '<a href="javascript:void(0)" data-url="' . $url_hapus . '" class="btn btn-outline-danger btn-sm btn-delete" title="Hapus Data"><i class="bi bi-trash"></i></a>';
+                    $url_hapus = base_url('sw-admin/siswa/delete-ujian') . '/' . encrypt_url($u->id_ujian) . '/' . encrypt_url($u->id_siswa);
+                    $btn_list[] = '<a href="javascript:void(0)" data-url="' . $url_hapus . '" class="btn btn-icon btn-light-danger btn-sm btn-delete" title="Hapus Data"><i class="ki-duotone ki-trash fs-3"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i></a>';
                 }
 
                 // --- BINDING KE OBJECT DATA ---
@@ -470,22 +491,22 @@ class SiswaController extends BaseController
                 $row->nama_ujian = $u->nama_ujian;
                 $row->nama_kelas = $u->nama_kelas;
 
-                // Kolom Kuota (dengan Badge & Modal)
-                $row->kuota_html = '<a href="javascript:void(0)" data-toggle="modal" data-target="#tambah_kuota" class="edit_kuota badge badge-success p-2" 
+                // Kolom Kuota (dengan Badge & Modal Metronic Style)
+                // Menggunakan data-bs-target untuk Bootstrap 5 (bawaan Metronic 8)
+                $row->kuota_html = '<a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#tambah_kuota" class="edit_kuota badge badge-light-primary fw-bold px-3 py-2 cursor-pointer text-hover-primary" 
                         data-idsiswa="' . encrypt_url($u->id_siswa) . '" 
                         data-idujian="' . encrypt_url($u->id_ujian) . '" 
-                        data-kuota="' . $u->kuota . '"><i class="fas fa-ticket-alt mr-1"></i> ' . $u->kuota . ' Kali</a>';
+                        data-kuota="' . $u->kuota . '"><i class="ki-duotone ki-ticket fs-5 text-primary me-1"><span class="path1"></span><span class="path2"></span></i> ' . $u->kuota . ' Kali</a>';
 
                 $row->durasi_menit = $durasiMenit . ' Menit';
                 $row->nilai        = $u->nilai ?? '-';
 
-                // Kolom Lulus/Tidak Lulus
-                $row->status_lulus = $u->nilai === null ? '-' : ($u->nilai >= 60 ? '<span class="badge badge-success">Lulus</span>' : '<span class="badge badge-danger">Tidak Lulus</span>');
+                // Kolom Lulus/Tidak Lulus (Badge Metronic)
+                $row->status_lulus = $u->nilai === null ? '-' : ($u->nilai >= 60 ? '<span class="badge badge-light-success fw-bold px-3 py-2">Lulus</span>' : '<span class="badge badge-light-danger fw-bold px-3 py-2">Tidak Lulus</span>');
 
                 // MENGGABUNGKAN TOMBOL DENGAN FLEXBOX
-                // justify-content-center agar tombol di tengah kolom
-                // Jika Bootstrap 4 belum support 'gap', kita gunakan 'mx-1' pada setiap tombol
-                $row->aksi = '<div class="d-flex justify-content-center align-items-center flex-nowrap" style="gap: 4px;">' . implode('', $btn_list) . '</div>';
+                // Gap sudah didukung penuh oleh Metronic 8 / Bootstrap 5
+                $row->aksi = '<div class="d-flex justify-content-center align-items-center gap-2">' . implode('', $btn_list) . '</div>';
 
                 $data[] = $row;
             }
@@ -831,16 +852,17 @@ class SiswaController extends BaseController
         $this->ujianModel->delete($idujian);
 
         session()->setFlashdata('success', 'Data berhasil dihapus');
-        return redirect()->to('sw-admin/siswa/ujian/'.$id_siswa);
+        return redirect()->to('sw-admin/siswa/ujian/' . $id_siswa);
     }
 
     public function sertifikatAB()
     {
-        $data = [
-            'title'        => 'List Sertifikat',
-            'parent_title' => 'List Peserta',
-            'parent_url'   => base_url('sw-admin/siswa'),
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'Data Peserta', 'url' => base_url('sw-admin/siswa')],
+            ['title' => 'List Sertifikat AB', 'url' => '#'],
         ];
+
         // MASTER DATA
         $data['sertifikatAB'] = $this->siswaModel->getSertifikatAB();
         $data['kelas'] = $this->kelasModel->asObject()->findAll();

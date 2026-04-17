@@ -17,6 +17,10 @@ class ProfileController extends BaseController
     // START::PROFILE
     public function index()
     {
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-guru')],
+             ['title' => 'Edit Profile', 'url' => '#'],
+        ];
         $data['guru'] = $this->guruModel->asObject()->find(session()->get('id'));
 
         return view('guru/profile', $data);

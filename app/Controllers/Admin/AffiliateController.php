@@ -22,8 +22,9 @@ class AffiliateController extends BaseController
 
     public function index()
     {
-        $data = [
-            'title' => 'Affiliate',
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'List Affiliate', 'url' => '#'],
         ];
         return view('admin/affiliate/index', $data);
     }
@@ -362,15 +363,14 @@ class AffiliateController extends BaseController
                 ->orderBy('created_at', 'DESC')
                 ->paginate(15, 'komisi');
 
-            $data = [
-                'title' => 'Komisi Affiliate',
-                'parent_title' => 'List Affiliate',
-                'parent_url'   => base_url('sw-admin/affiliate'),
-                'affiliate' => $affiliate,
-                'komisi'    => $komisi,
-                'pager'     => $this->komisi->pager
+            $data['breadcrumbs'] = [
+                ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+                ['title' => 'Data Affiliate', 'url' => base_url('sw-admin/affiliate')],
+                ['title' => 'Komisi Affiliate', 'url' => '#'],
             ];
-
+            $data['affiliate'] = $affiliate;
+            $data['komisi'] = $komisi;
+            $data['pager'] = $this->komisi->pager;
             return view('admin/affiliate/komisi', $data);
         } catch (\Throwable $e) {
             return redirect()

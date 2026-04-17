@@ -38,7 +38,9 @@
 		<!--begin::Page-->
 		<div class="app-page flex-column flex-column-fluid" id="kt_app_page">
 			<!--begin::Header-->
-			<?= $this->include('siswa/template/partials/_header') ?>
+			<?php if(session()->get('id')): ?>
+				<?= $this->include('siswa/template/partials/_header') ?>
+			<?php endif; ?>
 			<!--end::Header-->
 			<!--begin::Wrapper-->
 			<div class="app-wrapper flex-column flex-row-fluid" id="kt_app_wrapper">

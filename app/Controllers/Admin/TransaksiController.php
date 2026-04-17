@@ -33,8 +33,9 @@ class TransaksiController extends BaseController
     }
     public function index()
     {
-        $data = [
-            'title' => 'Data Transaksi',
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'List Transaksi', 'url' => '#'],
         ];
         return view('admin/transaksi/list', $data);
     }
@@ -71,76 +72,96 @@ class TransaksiController extends BaseController
                     $row = [];
 
                     // Kolom Peserta
-                    $row['peserta'] = '<div class="font-weight-bold">' . esc($s->nama_siswa) . '</div>
-                                   <div class="text-muted small">' . esc($s->email) . '</div>';
+                    $row['peserta'] = '<div class="text-gray-800 fw-bold fs-6">' . esc($s->nama_siswa) . '</div>
+                       <div class="text-muted fw-semibold fs-7">' . esc($s->email) . '</div>';
 
                     // Kolom Paket
-                    $row['paket'] = '<div class="font-weight-bold">' . esc($s->nama_paket) . '</div>
-                                 <div class="text-muted small">' . esc($s->kota_intansi ?? '') . '</div>';
+                    $row['paket'] = '<div class="text-gray-800 fw-bold fs-6">' . esc($s->nama_paket) . '</div>
+                     <div class="text-muted fw-semibold fs-7">' . esc($s->kota_intansi ?? '') . '</div>';
 
                     // Kolom Voucher
                     $row['voucher'] = $s->kode_voucher
-                        ? '<span class="badge badge-info">' . esc($s->kode_voucher) . '</span>'
-                        : '<span class="text-muted small">-</span>';
+                        ? '<span class="badge badge-light-info fw-bold px-3 py-2">' . esc($s->kode_voucher) . '</span>'
+                        : '<span class="text-muted fs-7 fw-semibold">-</span>';
 
                     // Kolom Pembayaran (Format Tanggal)
                     if ($s->tgl_pembayaran) {
                         $date = new \DateTime($s->tgl_pembayaran);
-                        $row['pembayaran'] = $date->format('d M Y, H:i');
+                        $row['pembayaran'] = '<span class="text-gray-700 fw-semibold fs-6">' . $date->format('d M Y, H:i') . '</span>';
                     } else {
-                        $row['pembayaran'] = '<span class="text-muted small">-</span>';
+                        $row['pembayaran'] = '<span class="text-muted fw-semibold fs-7">-</span>';
                     }
+
                     $diskon         = ($s->nominal * $s->diskon) / 100;
                     $totalDiskon    = $s->nominal - $diskon;
                     $diskon_voucher = ($totalDiskon * $s->voucher) / 100;
-                    $nominal = $s->nominal - $diskon - $diskon_voucher;
+                    $nominal        = $s->nominal - $diskon - $diskon_voucher;
 
                     // Kolom Nominal
-                    $row['nominal'] = '<span class="font-weight-bold text-primary">Rp ' . number_format($nominal, 0, ',', '.') . '</span>';
+                    $row['nominal'] = '<span class="text-primary fw-bold fs-6">Rp ' . number_format($nominal, 0, ',', '.') . '</span>';
 
-                    // Kolom Status
+                    // Kolom Status (Menggunakan Badge Metronic)
                     if ($s->status === 'S') {
-                        $row['status'] = '<div class="text-center"><span class="badge badge-success">Lunas</span></div>';
+                        $row['status'] = '<div class="text-center"><span class="badge badge-light-success fw-bold px-3 py-2">Lunas</span></div>';
                     } elseif ($s->status === 'P') {
-                        $row['status'] = '<div class="text-center"><span class="badge badge-info">Menunggu Pembayaran</span></div>';
+                        $row['status'] = '<div class="text-center"><span class="badge badge-light-primary fw-bold px-3 py-2">Menunggu Pembayaran</span></div>';
                     } elseif ($s->status === 'V') {
-                        $row['status'] = '<div class="text-center"><span class="badge badge-warning">Menunggu Approved</span></div>';
+                        $row['status'] = '<div class="text-center"><span class="badge badge-light-info fw-bold px-3 py-2">Menunggu Approval</span></div>';
                     } elseif ($s->status === 'E') {
-                        $row['status'] = '<div class="text-center"><span class="badge badge-danger">Expired</span></div>';
+                        $row['status'] = '<div class="text-center"><span class="badge badge-light-danger fw-bold px-3 py-2">Expired</span></div>';
                     } elseif ($s->status === 'M') {
-                        $row['status'] = '<div class="text-center"><span class="badge badge-warning">Proses Pembayaran</span></div>';
+                        $row['status'] = '<div class="text-center"><span class="badge badge-light-warning fw-bold px-3 py-2">Proses Pembayaran</span></div>';
                     } elseif ($s->status === 'DM') {
-                        $row['status'] = '<div class="text-center"><span class="badge badge-danger">Denied</span></div>';
+                        $row['status'] = '<div class="text-center"><span class="badge badge-light-danger fw-bold px-3 py-2">Denied</span></div>';
                     } elseif ($s->status === 'PM') {
-                        $row['status'] = '<div class="text-center"><span class="badge badge-warning">Pending</span></div>';
+                        $row['status'] = '<div class="text-center"><span class="badge badge-light-warning fw-bold px-3 py-2">Pending</span></div>';
                     } else {
-                        $row['status'] = '<div class="text-center"><span class="badge badge-danger">Expired</span></div>';
+                        $row['status'] = '<div class="text-center"><span class="badge badge-light-danger fw-bold px-3 py-2">Expired</span></div>';
                     }
 
-                    // [6] Kolom Aksi (Dropdown)
-                    $row['aksi'] = '<div class="dropdown custom-dropdown text-center">
-                                <a class="dropdown-toggle" href="javascript:void(0)" role="button" data-toggle="dropdown" id="drop' . $s->idtransaksi . '">
-                                    <i class="bi bi-three-dots-vertical"></i>
+                    // [6] Kolom Aksi (Menggunakan Metronic KTMenu)
+                    $row['aksi'] = '
+                    <div class="text-center">
+                        <a href="#" class="btn btn-sm btn-light btn-flex btn-center btn-active-light-primary" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+                            Aksi <i class="ki-duotone ki-down fs-5 ms-1"></i>
+                        </a>
+                        
+                        <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-200px py-4 text-start" data-kt-menu="true">
+                            
+                            <div class="menu-item px-3">
+                                <a href="javascript:void(0)" class="menu-link px-3 validasi-transaksi" data-bs-toggle="modal" data-bs-target="#validasi_transaksi" data-transaksi="' . $id_enc . '">
+                                    <i class="ki-duotone ki-setting-2 fs-4 me-2 text-gray-500"><span class="path1"></span><span class="path2"></span></i> Detail Transaksi
                                 </a>
-                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="drop' . $s->idtransaksi . '">
-                                    <a class="dropdown-item validasi-transaksi" href="javascript:void(0)" data-toggle="modal" data-target="#validasi_transaksi" data-transaksi="' . $id_enc . '">
-                                        <i class="bi bi-gear mr-2"></i> Detail Transaksi
-                                    </a>';
+                            </div>';
 
-                    if ($s->status == 'S') {
-                        $row['aksi'] .= '<a class="dropdown-item invoice_cetak text-success" href="javascript:void(0)" data-toggle="modal" data-target="#invoice_cetak_modal" data-invoice="' . base_url('sw-admin/transaksi/invoice/' . $id_enc) . '">
-                        <i class="bi bi-download mr-2"></i> Unduh Invoice
-                    </a>';
-                    } else {
-                        $row['aksi'] .= '<a class="dropdown-item text-primary" id="approve" href="' . base_url('sw-admin/transaksi/approve-manual/' . $id_enc) . '">
-                        <i class="bi bi-check-square mr-2"></i> Approve Transaksi
-                    </a>
-                    <a class="dropdown-item text-danger btn-delete" id="hapus" href="' . base_url('sw-admin/transaksi/hapus-transaksi-siswa/' . $id_enc) . '">
-                        <i class="bi bi-trash mr-2"></i> Hapus
-                    </a>';
-                    }
+                                // Opsi bersyarat berdasarkan status S (Lunas)
+                                if ($s->status == 'S') {
+                                    $row['aksi'] .= '
+                            <div class="menu-item px-3">
+                                <a href="javascript:void(0)" class="menu-link px-3 text-success invoice_cetak" data-bs-toggle="modal" data-bs-target="#invoice_cetak_modal" data-invoice="' . base_url('sw-admin/transaksi/invoice/' . $id_enc) . '">
+                                    <i class="ki-duotone ki-file-down fs-4 me-2 text-success"><span class="path1"></span><span class="path2"></span></i> Unduh Invoice
+                                </a>
+                            </div>';
+                                } else {
+                                    $row['aksi'] .= '
+                            <div class="menu-item px-3">
+                                <a href="' . base_url('sw-admin/transaksi/approve-manual/' . $id_enc) . '" class="menu-link px-3 text-primary" id="approve">
+                                    <i class="ki-duotone ki-check-square fs-4 me-2 text-primary"><span class="path1"></span><span class="path2"></span></i> Approve Transaksi
+                                </a>
+                            </div>
+                            
+                            <div class="separator mt-3 opacity-75"></div>
+                            
+                            <div class="menu-item px-3 mt-3">
+                                <a href="' . base_url('sw-admin/transaksi/hapus-transaksi-siswa/' . $id_enc) . '" class="menu-link px-3 text-danger btn-delete" id="hapus">
+                                    <i class="ki-duotone ki-trash fs-4 me-2 text-danger"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i> Hapus Transaksi
+                                </a>
+                            </div>';
+                                }
 
-                    $row['aksi'] .= '</div></div>';
+                                $row['aksi'] .= '
+                        </div>
+                    </div>';
 
                     $results[] = $row;
                 }

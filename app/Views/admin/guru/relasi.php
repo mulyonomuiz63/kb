@@ -1,122 +1,115 @@
 <?= $this->extend('template/app'); ?>
+
 <?= $this->section('content'); ?>
-
-<div class="layout-px-spacing">
-    <div class="row layout-top-spacing">
-
-        <div class="col-md-12 mb-4">
-            <div class="widget shadow p-4 bg-primary text-white br-10">
-                <div class="d-flex align-items-center">
-                    <div class="icon-box mr-3">
-                        <i class="bi bi-person-badge" style="font-size: 2rem;"></i>
+<div class="d-flex flex-column flex-column-fluid">
+    <div id="kt_app_content" class="app-content flex-column-fluid">
+        <div id="kt_app_content_container" class="app-container container-xxl">
+            
+            <div class="card border-0 bg-primary shadow-sm mb-7">
+                <div class="card-body d-flex align-items-center p-7">
+                    <div class="symbol symbol-50px me-5">
+                        <span class="symbol-label bg-white bg-opacity-10">
+                            <i class="ki-duotone ki-user-square fs-2x text-white"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
+                        </span>
                     </div>
-                    <div>
-                        <h5 class="mb-0 text-white">Pengaturan Relasi: <?= $guru->nama_guru ?></h5>
-                        <small class="opacity-75">Kelola akses kelas dan mata pelajaran pengajar secara real-time.</small>
+                    <div class="d-flex flex-column">
+                        <h2 class="text-white fw-bold mb-1">Pengaturan Relasi: <?= esc($guru->nama_guru) ?></h2>
+                        <span class="text-white opacity-75 fs-6">Kelola akses kelas dan mata pelajaran pengajar secara real-time.</span>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-lg-6 layout-spacing">
-            <div class="widget shadow p-3 br-10">
-                <div class="widget-heading border-bottom pb-2 mb-3">
-                    <h5 class="text-primary font-weight-bold"><i class="bi bi-door-open mr-2"></i>Relasi Kelas</h5>
+            <div class="row g-5 g-xl-8">
+                
+                <div class="col-lg-6">
+                    <div class="card card-flush shadow-sm h-100">
+                        <div class="card-header pt-7">
+                            <h3 class="card-title align-items-start flex-column">
+                                <span class="card-label fw-bold text-gray-800">
+                                    <i class="ki-duotone ki-abstract-26 text-primary fs-2 me-2"><span class="path1"></span><span class="path2"></span></i> Relasi Kelas
+                                </span>
+                            </h3>
+                        </div>
+                        
+                        <div class="card-body pt-5">
+                            <div class="table-responsive">
+                                <table class="table align-middle table-row-dashed fs-6 gy-4">
+                                    <thead>
+                                        <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
+                                            <th class="min-w-150px">Nama Kelas</th>
+                                            <th class="text-center min-w-100px">Akses Mengajar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="fw-semibold text-gray-600">
+                                        <?php foreach ($kelas as $kel) : ?>
+                                            <tr>
+                                                <td class="text-gray-800 fw-bold"><?= $kel->nama_kelas; ?></td>
+                                                <td class="text-center">
+                                                    <div class="form-check form-switch form-check-custom form-check-solid form-check-success justify-content-center">
+                                                        <input class="form-check-input check-kelas h-30px w-50px cursor-pointer" 
+                                                               type="checkbox" 
+                                                               id="kelas_<?= $kel->id_kelas; ?>"
+                                                               <?= check_kelas(encrypt_url($guru->id_guru), $kel->id_kelas); ?>
+                                                               data-id_guru="<?= encrypt_url($guru->id_guru); ?>"
+                                                               data-id_kelas="<?= $kel->id_kelas; ?>" />
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Nama Kelas</th>
-                                <th class="text-center">Akses Mengajar</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($kelas as $kel) : ?>
-                                <tr>
-                                    <td class="align-middle font-weight-bold text-dark"><?= $kel->nama_kelas; ?></td>
-                                    <td class="text-center align-middle">
-                                        <div class="form-check form-switch d-flex justify-content-center">
-                                            <input class="form-check-input check-kelas custom-switch-lg"
-                                                type="checkbox"
-                                                role="switch"
-                                                id="kelas_<?= $kel->id_kelas; ?>"
-                                                <?= check_kelas(encrypt_url($guru->id_guru), $kel->id_kelas); ?>
-                                                data-id_guru="<?= encrypt_url($guru->id_guru); ?>"
-                                                data-id_kelas="<?= $kel->id_kelas; ?>"
-                                                style="cursor: pointer; width: 3em; height: 1.5em;">
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
+
+                <div class="col-lg-6">
+                    <div class="card card-flush shadow-sm h-100">
+                        <div class="card-header pt-7">
+                            <h3 class="card-title align-items-start flex-column">
+                                <span class="card-label fw-bold text-gray-800">
+                                    <i class="ki-duotone ki-book-open text-success fs-2 me-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i> Relasi Mapel
+                                </span>
+                            </h3>
+                        </div>
+                        
+                        <div class="card-body pt-5">
+                            <div class="table-responsive">
+                                <table class="table align-middle table-row-dashed fs-6 gy-4">
+                                    <thead>
+                                        <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
+                                            <th class="min-w-150px">Mata Pelajaran</th>
+                                            <th class="text-center min-w-100px">Akses Mengajar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="fw-semibold text-gray-600">
+                                        <?php foreach ($mapel as $m) : ?>
+                                            <tr>
+                                                <td class="text-gray-800 fw-bold"><?= $m->nama_mapel; ?></td>
+                                                <td class="text-center">
+                                                    <div class="form-check form-switch form-check-custom form-check-solid form-check-success justify-content-center">
+                                                        <input class="form-check-input check-mapel h-30px w-50px cursor-pointer" 
+                                                               type="checkbox" 
+                                                               id="mapel_<?= $m->id_mapel; ?>"
+                                                               <?= check_mapel(encrypt_url($guru->id_guru), $m->id_mapel); ?>
+                                                               data-id_guru="<?= encrypt_url($guru->id_guru); ?>"
+                                                               data-id_mapel="<?= $m->id_mapel; ?>" />
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
             </div>
-        </div>
 
-        <div class="col-lg-6 layout-spacing">
-            <div class="widget shadow p-3 br-10">
-                <div class="widget-heading border-bottom pb-2 mb-3">
-                    <h5 class="text-success font-weight-bold"><i class="bi bi-book mr-2"></i>Relasi Mapel</h5>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Mata Pelajaran</th>
-                                <th class="text-center">Akses Mengajar</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($mapel as $m) : ?>
-                                <tr>
-                                    <td class="align-middle font-weight-bold text-dark"><?= $m->nama_mapel; ?></td>
-                                    <td class="text-center align-middle">
-                                        <div class="form-check form-switch d-flex justify-content-center">
-                                            <input class="form-check-input check-mapel custom-switch-lg"
-                                                type="checkbox"
-                                                role="switch"
-                                                id="mapel_<?= $m->id_mapel; ?>"
-                                                <?= check_mapel(encrypt_url($guru->id_guru), $m->id_mapel); ?>
-                                                data-id_guru="<?= encrypt_url($guru->id_guru); ?>"
-                                                data-id_mapel="<?= $m->id_mapel; ?>"
-                                                style="cursor: pointer; width: 3em; height: 1.5em;">
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
         </div>
-
     </div>
 </div>
-
-<style>
-    .br-10 {
-        border-radius: 10px;
-    }
-
-    .widget {
-        border: none;
-    }
-
-    .table thead th {
-        border: none;
-        font-size: 13px;
-        text-transform: uppercase;
-        color: #888ea8;
-    }
-
-    .table tbody td {
-        border-top: 1px solid #f1f2f3;
-        vertical-align: middle;
-    }
-</style>
-
 <?= $this->endSection(); ?>
 
 <?= $this->section('scripts'); ?>
@@ -165,6 +158,7 @@
             });
         }
 
+        // Trigger update relasi kelas
         $('.check-kelas').on('change', function() {
             updateRelasi("<?= base_url('sw-admin/relasi/guru-kelas') ?>", {
                 id_guru: $(this).data('id_guru'),
@@ -172,6 +166,7 @@
             });
         });
 
+        // Trigger update relasi mapel
         $('.check-mapel').on('change', function() {
             updateRelasi("<?= base_url('sw-admin/relasi/guru-mapel') ?>", {
                 id_guru: $(this).data('id_guru'),

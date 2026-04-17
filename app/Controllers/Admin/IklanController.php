@@ -20,8 +20,9 @@ class IklanController extends BaseController
 
     public function index()
     {
-        $data = [
-            'title' => 'Manajemen Iklan'
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'List Iklan', 'url' => '#'],
         ];
         return view('admin/iklan/list', $data);
     }
@@ -69,30 +70,61 @@ class IklanController extends BaseController
 
             $data = [];
             foreach ($list as $s) {
-                // Render Badge HTML (Sama seperti logika di View sebelumnya)
-                $badgeClass = ($s->status_iklan == 'depan') ? 'bg-success' : (($s->status_iklan == 'modal') ? 'bg-warning' : 'bg-info');
-                $badgeLabel = ($s->status_iklan == 'depan') ? 'Iklan Depan' : (($s->status_iklan == 'modal') ? 'Iklan POP UP' : 'Nav-bar');
+                // 1. Logika Badge Metronic (Gaya Soft/Light)
+                // Depan -> Success, Modal -> Warning, Nav -> Info
+                $statusMap = [
+                    'depan' => ['class' => 'badge-light-success', 'label' => 'Iklan Depan'],
+                    'modal' => ['class' => 'badge-light-warning', 'label' => 'Iklan POP UP'],
+                    'nav'   => ['class' => 'badge-light-info', 'label' => 'Nav-bar']
+                ];
+
+                $currentStatus = $statusMap[$s->status_iklan] ?? ['class' => 'badge-light-primary', 'label' => 'Lainnya'];
+                $id_encrypt = encrypt_url($s->id);
 
                 $row = [];
-                $row[] = '<b>' . $s->nama . '</b><br><small>' . $s->text . '</small>';
-                $row[] = '<img src="' . base_url('uploads/iklan/thumbnails/' . $s->file) . '" class="rounded zoom" style="width:70px">';
-                $row[] = '<a href="' . $s->url . '" target="_blank" class="small">Kunjungi Link</a>';
-                $row[] = '<span class="badge ' . $badgeClass . '">' . $badgeLabel . '</span>';
-                $row[] = '<div class="dropdown custom-dropdown text-center">
-                            <a class="dropdown-toggle badge badge-primary border-0" href="javascript:void(0)" role="button" id="dropdownMenu' . $s->id . '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="bi bi-three-dots-vertical"></i>
+
+                // KOLOM 1: Info Iklan (Nama & Sub-teks)
+                $row[] = '
+                <div class="d-flex flex-column">
+                    <a href="javascript:void(0)" class="text-gray-800 text-hover-primary mb-1 fw-bold fs-6">' . htmlspecialchars($s->nama) . '</a>
+                    <span class="text-muted fw-semibold d-block fs-7">' . htmlspecialchars($s->text) . '</span>
+                </div>';
+
+                // KOLOM 2: Thumbnail dengan gaya Symbol Metronic
+                $row[] = '
+                <div class="symbol symbol-50px">
+                    <img src="' . base_url('uploads/iklan/thumbnails/' . $s->file) . '" alt="Thumbnail" class="rounded zoom shadow-sm" style="object-fit: cover;">
+                </div>';
+
+                // KOLOM 3: URL (Gaya Link Button kecil)
+                $row[] = '
+                <a href="' . $s->url . '" target="_blank" class="btn btn-sm btn-light btn-active-light-primary fw-bold">
+                    <i class="ki-duotone ki-external-drive fs-5 me-1"><span class="path1"></span><span class="path2"></span><i class="path3"></i></i> Kunjungi
+                </a>';
+
+                // KOLOM 4: Status Badge
+                $row[] = '<span class="badge ' . $currentStatus['class'] . ' fw-bold px-4 py-3">' . $currentStatus['label'] . '</span>';
+
+                // KOLOM 5: Opsi (Dropdown Metronic 8)
+                $row[] = '
+                <div class="text-center">
+                    <a href="#" class="btn btn-sm btn-light btn-flex btn-center btn-active-light-primary" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+                        Aksi <i class="ki-duotone ki-down fs-5 ms-1"></i>
+                    </a>
+                    <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg-light-primary fw-semibold py-4 w-150px fs-7" data-kt-menu="true">
+                        <div class="menu-item px-3">
+                            <a href="javascript:void(0)" class="menu-link px-3 edit-iklan" data-iklan="' . $id_encrypt . '">
+                                <i class="ki-duotone ki-pencil fs-5 me-2"><span class="path1"></span><span class="path2"></span></i> Edit Iklan
                             </a>
-                            <div class="dropdown-menu dropdown-menu-right shadow border-0" aria-labelledby="dropdownMenu' . $s->id . '" style="border-radius:10px;">
-                                <a class="dropdown-item py-2 edit-iklan" href="javascript:void(0)" 
-                                data-iklan="' . encrypt_url($s->id) . '">
-                                    <i class="bi bi-pencil-square me-2 text-primary"></i> Edit Iklan
-                                </a> 
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item py-2 text-danger btn-delete" href="javascript:void(0)" data-url="' . base_url('sw-admin/iklan/delete/' . encrypt_url($s->id)) . '">
-                                    <i class="bi bi-trash me-2"></i> Hapus Iklan
-                                </a>
-                            </div>
-                        </div>';
+                        </div>
+                        <div class="menu-item px-3">
+                            <a href="javascript:void(0)" class="menu-link px-3 text-danger btn-delete" data-url="' . base_url('sw-admin/iklan/delete/' . $id_encrypt) . '">
+                                <i class="ki-duotone ki-trash fs-5 me-2 text-danger"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i> Hapus Iklan
+                            </a>
+                        </div>
+                    </div>
+                </div>';
+
                 $data[] = $row;
             }
 

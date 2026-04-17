@@ -28,6 +28,10 @@ class MapelController extends BaseController
 
     public function index()
     {
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-guru')],
+            ['title' => 'List Mapel', 'url' => '#'],
+        ];
         $data['mapel'] = $this->guruMapelModel->join('guru_kelas','guru_kelas.guru=guru_mapel.guru')->where('guru_mapel.guru', session()->get('id'))->groupBy('guru_mapel.mapel')->get()->getResultObject();
 
         $data['guru_kelas'] = $this->guruKelasModel->getALLByGuru(session()->get('id'));
@@ -67,7 +71,7 @@ class MapelController extends BaseController
                     <a class="dropdown-item py-2 edit-mapel" href="javascript:void(0)" data-id="' . encrypt_url($row->id_mapel) . '">
                         <i class="bi bi-pencil-square text-primary"></i> Edit
                     </a>
-                    <a class="dropdown-item py-2 btn-delete" href="javascript:void(0)" data-url="' . base_url('sw-admin/mapel/delete/' . encrypt_url($row->id_mapel)) . '">
+                    <a class="dropdown-item py-2 btn-delete" href="javascript:void(0)" data-url="' . base_url('sw-guru/mapel/delete/' . encrypt_url($row->id_mapel)) . '">
                         <i class="bi bi-trash text-danger"></i> Hapus
                     </a>
                 </div>

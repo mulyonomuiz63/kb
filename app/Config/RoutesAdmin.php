@@ -10,11 +10,12 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
         $routes->post('store', 'Admin\SiswaController::store');
         $routes->get('edit/(:segment)', 'Admin\SiswaController::edit/$1');
         $routes->post('update/(:segment)', 'Admin\SiswaController::update/$1');
+        $routes->get('delete/(:segment)', 'Admin\SiswaController::delete/$1');
         $routes->post('detail', 'Admin\SiswaController::detail');
         $routes->get('sertifikat/(:segment)', 'Admin\SiswaController::sertifikat/$1');
         $routes->post('get-data-sertifikat', 'Admin\SiswaController::getDataSertifikat');
         $routes->get('ujian/(:segment)', 'Admin\SiswaController::ujian/$1');
-        $routes->post('getDataUjian', 'Admin\SiswaController::getDataUjian');
+        $routes->post('get-data-ujian', 'Admin\SiswaController::getDataUjian');
 
         //cetak sertifikat
         // Route tanpa segmen ketiga
@@ -25,7 +26,7 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
         $routes->get('lihatSertifikatBrevet/(:segment)/(:any)', 'Admin\SiswaController::lihatSertifikatBrevet/$1/$2');
 
         $routes->post('updateKuota', 'Admin\SiswaController::updateKuota');
-        $routes->get('deleteUjian/(:segment)/(:segment)', 'Admin\SiswaController::deleteUjian/$1/$2');
+        $routes->get('delete-ujian/(:segment)/(:segment)', 'Admin\SiswaController::deleteUjian/$1/$2');
         $routes->get('sertifikat-ab', 'Admin\SiswaController::sertifikatAB');
     });
 

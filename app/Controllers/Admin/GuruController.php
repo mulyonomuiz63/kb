@@ -28,10 +28,11 @@ class GuruController extends BaseController
 
     public function index()
     {
-        $data = [
-            'title' => 'List Guru',
-            'kelas' => $this->guruModel->asObject()->findAll(), // Asumsi model kelas
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'List Instruktur', 'url' => '#'],
         ];
+        $data['kelas'] = $this->guruModel->asObject()->findAll(); // Asumsi model kelas
         return view('admin/guru/list', $data);
     }
 
@@ -79,19 +80,35 @@ class GuruController extends BaseController
                 $id_enc = encrypt_url($g->id_guru);
 
                 $row = [];
-                $row['nama']  = $g->nama_guru;
-                $row['email'] = $g->email;
-                $row['mapel'] = '<a href="' . base_url("sw-admin/guru/mapel-guru/" . $id_enc) . '" class="badge bg-success"><i class="bi bi-eye"></i></a>';
-                $row['soal']  = '<a href="' . base_url("sw-admin/guru/ujian-guru/" . $id_enc) . '" class="badge bg-success"><i class="bi bi-eye"></i></a>';
+
+                // Teks nama dipertegas dengan warna standar text-gray-800 Metronic
+                $row['nama']  = '<span class="text-gray-800 fw-bold">' . esc($g->nama_guru) . '</span>';
+
+                $row['email'] = esc($g->email);
+
+                // Tombol Lihat Mapel (Warna Hijau Lembut)
+                $row['mapel'] = '
+                <a href="' . base_url("sw-admin/guru/mapel-guru/" . $id_enc) . '" class="btn btn-icon btn-light-success btn-sm" data-bs-toggle="tooltip" title="Lihat Mapel">
+                    <i class="ki-duotone ki-eye fs-3"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
+                </a>';
+
+                // Tombol Lihat Soal (Warna Biru Lembut)
+                $row['soal']  = '
+                <a href="' . base_url("sw-admin/guru/ujian-guru/" . $id_enc) . '" class="btn btn-icon btn-light-info btn-sm" data-bs-toggle="tooltip" title="Lihat Soal">
+                    <i class="ki-duotone ki-document fs-3"><span class="path1"></span><span class="path2"></span></i>
+                </a>';
+
+                // Tombol Opsi Edit & Hapus disejajarkan dengan Gap Flexbox
                 $row['opsi']  = '
-                <div class="d-flex" style="gap:5px;">
-                    <a href="' . base_url('sw-admin/guru/edit/') . $id_enc . '"class="badge bg-primary">
-                        <i class="bi bi-gear"></i>
+                <div class="d-flex justify-content-center gap-2">
+                    <a href="' . base_url('sw-admin/guru/edit/') . $id_enc . '" class="btn btn-icon btn-light-primary btn-sm" data-bs-toggle="tooltip" title="Pengaturan">
+                        <i class="ki-duotone ki-setting-2 fs-3"><span class="path1"></span><span class="path2"></span></i>
                     </a>
-                    <a href="javascript:void(0)" data-url="' . base_url('sw-admin/guru/delete/' . $id_enc) . '" class="badge bg-danger btn-delete">
-                        <i class="bi bi-trash"></i>
+                    <a href="javascript:void(0)" data-url="' . base_url('sw-admin/guru/delete/' . $id_enc) . '" class="btn btn-icon btn-light-danger btn-sm btn-delete" data-bs-toggle="tooltip" title="Hapus">
+                        <i class="ki-duotone ki-trash fs-3"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i>
                     </a>
                 </div>';
+
                 $data[] = $row;
             }
 
@@ -108,10 +125,10 @@ class GuruController extends BaseController
 
     public function create()
     {
-        $data = [
-            'title'        => 'Tambah Instruktur',
-            'parent_title' => 'List Instruktur',
-            'parent_url'   => base_url('sw-admin/guru'),
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'Data Instruktur', 'url' => base_url('sw-admin/guru')],
+            ['title' => 'Tambah Instruktur', 'url' => '#'],
         ];
         return view('admin/guru/create', $data);
     }
@@ -205,12 +222,12 @@ class GuruController extends BaseController
             return redirect()->back()->with('error', 'Data instruktur tidak ditemukan.');
         }
 
-        $data = [
-            'title'        => 'Edit Peserta',
-            'parent_title' => 'List Peserta',
-            'parent_url'   => base_url('sw-admin/guru'),
-            'guru'        => $guru,
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'Data Instruktur', 'url' => base_url('sw-admin/guru')],
+            ['title' => 'Edit Instruktur', 'url' => '#'],
         ];
+        $data['guru'] = $guru; 
 
         return view('admin/guru/edit', $data);
     }
@@ -320,12 +337,11 @@ class GuruController extends BaseController
 
     public function ujianGuru($id)
     {
-        $data = [
-            'title'        => 'Data Ujian',
-            'parent_title' => 'List Instuktur',
-            'parent_url'   => base_url('sw-admin/guru'),
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'Data Instruktur', 'url' => base_url('sw-admin/guru')],
+            ['title' => 'List Ujian', 'url' => '#'],
         ];
-        // Cukup kirim ID terenkripsi ke view untuk digunakan AJAX
         $data['id_guru_enc'] = $id;
         return view('admin/guru/ujian/list', $data);
     }
@@ -380,35 +396,47 @@ class GuruController extends BaseController
 
         foreach ($results as $u) {
 
-            // Status Badge
-            $statusBadge = '<span class="badge bg-danger">Tidak Aktif</span>';
+            // 1. Status Badge (Metronic Style: Light Background)
+            $statusBadge = '<span class="badge badge-light-danger fs-7 fw-bold">Tidak Aktif</span>';
             if (!empty($u->status_ujian) && $u->status_ujian == 'A') {
-                $statusBadge = '<span class="badge bg-success">Aktif</span>';
+                $statusBadge = '<span class="badge badge-light-success fs-7 fw-bold">Aktif</span>';
             }
 
+            // 2. Tombol Lihat (Hanya jika jenis_ujian != 1)
             $btnLihat = '';
             if ($u->jenis_ujian != 1) {
-                $btnLihat = '<a class="dropdown-item" href="' .
-                    base_url('sw-admin/guru/lihat-ujian/' .
-                        encrypt_url($u->kode_ujian)) . '"><i class="bi bi-eye me-2 text-primary"></i> Lihat</a>';
+                $btnLihat = '
+            <div class="menu-item px-3">
+                <a href="' . base_url('sw-admin/guru/lihat-ujian/' . encrypt_url($u->kode_ujian)) . '" class="menu-link px-3">
+                    <i class="ki-duotone ki-eye fs-4 me-2 text-primary">
+                        <span class="path1"></span><span class="path2"></span><span class="path3"></span>
+                    </i> Lihat
+                </a>
+            </div>';
             }
 
+            // 3. Action Dropdown (Metronic 8 Menu System)
             $action = '
-        <div class="dropdown custom-dropdown">
-            <a class="dropdown-toggle badge badge-secondary border-0" href="#" role="button" data-toggle="dropdown">
-                <i class="bi bi-three-dots-vertical"></i>
-            </a> 
-            <div class="dropdown-menu">
+        <div class="text-center">
+            <a href="#" class="btn btn-sm btn-light btn-flex btn-center btn-active-light-primary" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+                Aksi <i class="ki-duotone ki-down fs-5 ms-1"></i>
+            </a>
+            <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-150px py-4" data-kt-menu="true">
                 ' . $btnLihat . '
-                <a class="dropdown-item" target="_blank" href="' .
-                base_url('sw-admin/guru/cetak-soal/' . encrypt_url($u->kode_ujian)) .
-                '"><i class="bi bi-printer me-2 text-success"></i> Cetak Soal</a>
+                
+                <div class="menu-item px-3">
+                    <a target="_blank" href="' . base_url('sw-admin/guru/cetak-soal/' . encrypt_url($u->kode_ujian)) . '" class="menu-link px-3">
+                        <i class="ki-duotone ki-printer fs-4 me-2 text-success">
+                            <span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span>
+                        </i> Cetak Soal
+                    </a>
+                </div>
             </div>
         </div>';
 
             $data[] = [
                 "nama_ujian" => $u->nama_ujian,
-                "nama_kelas" => $u->nama_kelas, // ✅ diperbaiki
+                "nama_kelas" => $u->nama_kelas,
                 "status"     => $statusBadge,
                 "opsi"       => $action
             ];
@@ -425,10 +453,10 @@ class GuruController extends BaseController
 
     public function lihatUjian($kode_ujian)
     {
-        $data = [
-            'title'        => 'Data Ujian',
-            'parent_title' => 'List Instuktur',
-            'parent_url'   => base_url('sw-admin/guru'),
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'Data Instruktur', 'url' => base_url('sw-admin/guru')],
+            ['title' => 'List Ujian', 'url' => '#'],
         ];
 
         $kode_ujian = decrypt_url($kode_ujian);
@@ -487,32 +515,53 @@ class GuruController extends BaseController
             $skor = ($total_soal_dikerjakan > 0) ? round(($benar / $total_soal_dikerjakan) * 100) : 0;
 
             $data_json[] = [
-                // Kolom 1: Profil
+                // Kolom 1: Profil (Metronic Style with Symbol)
                 '<div class="d-flex align-items-center">
-                <img src="' . base_url('assets/app-assets/user/' . $s->avatar) . '" class="rounded-circle mr-3" style="width:45px; height:45px; object-fit:cover;">
-                <div>
-                    <h6 class="mb-0 font-weight-bold">' . $s->nama_siswa . '</h6>
-                    <small class="text-muted">' . ($s->date_send == 0 ? 'Selesai' : date('d M Y, H:i', $s->date_send)) . '</small>
-                </div>
-            </div>',
-                // Kolom 2: Statistik
-                '<div class="d-flex justify-content-around text-center">
-                <div class="px-2"><b>' . $skor . '</b><br><small>Skor</small></div>
-                <div class="px-2 text-success"><b>' . $benar . '</b><br><small>Benar</small></div>
-                <div class="px-2 text-danger"><b>' . $salah . '</b><br><small>Salah</small></div>
-            </div>',
-                // Kolom 3: Aksi
-                '<div class="dropdown custom-dropdown text-center">
-                    <a class="dropdown-toggle badge badge-primary border-0" href="#" role="button" id="dropdownMenuLink' . $s->id_siswa . '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-more-vertical"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                    <div class="symbol symbol-45px me-5">
+                        <img src="' . base_url('assets/app-assets/user/' . $s->avatar) . '" alt="' . $s->nama_siswa . '" style="object-fit:cover;">
+                    </div>
+                    <div class="d-flex justify-content-start flex-column">
+                        <a href="#" class="text-gray-900 fw-bold text-hover-primary mb-1 fs-6">' . $s->nama_siswa . '</a>
+                        <span class="text-muted fw-semibold d-block fs-7">' . ($s->date_send == 0 ? 'Selesai' : date('d M Y, H:i', $s->date_send)) . '</span>
+                    </div>
+                </div>',
+
+                // Kolom 2: Statistik (Badge style & Bold colors)
+                '<div class="d-flex justify-content-around align-items-center">
+                    <div class="text-center px-2">
+                        <span class="text-gray-900 fw-bold d-block fs-5">' . $skor . '</span>
+                        <span class="text-muted fs-8 fw-semibold uppercase">Skor</span>
+                    </div>
+                    <div class="text-center px-2">
+                        <span class="text-success fw-bold d-block fs-5">' . $benar . '</span>
+                        <span class="text-muted fs-8 fw-semibold uppercase">Benar</span>
+                    </div>
+                    <div class="text-center px-2">
+                        <span class="text-danger fw-bold d-block fs-5">' . $salah . '</span>
+                        <span class="text-muted fs-8 fw-semibold uppercase">Salah</span>
+                    </div>
+                </div>',
+
+                // Kolom 3: Aksi (Metronic Dropdown Menu)
+                '<div class="text-center">
+                    <a href="#" class="btn btn-sm btn-light btn-flex btn-center btn-active-light-primary" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+                        Aksi <i class="ki-duotone ki-down fs-5 ms-1"></i>
                     </a>
-                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuLink' . $s->id_siswa . '">
-                        <a class="dropdown-item" href="' . $url_detail . '">
-                            <i class="bi bi-eye me-2 text-primary"></i> Lihat Detail
-                        </a>
-                        <a class="dropdown-item" target="_blank" href="' . $url_cetak . '">
-                            <i class="bi bi-printer me-2 text-success"></i> Cetak Hasil
-                        </a>
+                    <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg-light-primary fw-semibold fs-7 w-150px py-4" data-kt-menu="true">
+                        <div class="menu-item px-3">
+                            <a href="' . $url_detail . '" class="menu-link px-3">
+                                <i class="ki-duotone ki-eye text-primary fs-4 me-2">
+                                    <span class="path1"></span><span class="path2"></span><span class="path3"></span>
+                                </i> Lihat Detail
+                            </a>
+                        </div>
+                        <div class="menu-item px-3">
+                            <a target="_blank" href="' . $url_cetak . '" class="menu-link px-3">
+                                <i class="ki-duotone ki-printer text-success fs-4 me-2">
+                                    <span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span>
+                                </i> Cetak Hasil
+                            </a>
+                        </div>
                     </div>
                 </div>'
             ];
@@ -529,15 +578,11 @@ class GuruController extends BaseController
 
     public function lihatUjianSiswa($id_siswa, $kode_ujian)
     {
-        $data = [
-            'title'        => 'Data Ujian',
-            'parent_title' => 'List Instuktur',
-            'parent_url'   => base_url('sw-admin/guru'),
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'Data Instruktur', 'url' => base_url('sw-admin/guru')],
+            ['title' => 'List Ujian', 'url' => '#'],
         ];
-
-        if (session()->get('role') != 1) {
-            return redirect()->to('auth');
-        }
 
         $data['ujian'] = $this->ujianMasterModel->getBykode(decrypt_url($kode_ujian));
         $data['detail_ujian'] = $this->ujianDetailModel->getAllBykodeUjian(decrypt_url($kode_ujian));
