@@ -163,7 +163,7 @@ class AffiliateController extends BaseController
         } else {
             // --- PROTEKSI INSERT ---
             // Pastikan status selalu Pending (0) saat pendaftaran baru
-            $data['status'] = '0';
+            $data['status'] = '1';
             $data['total_edit'] = 0;
             
             send_notif(

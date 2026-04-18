@@ -120,7 +120,7 @@ class DiskusiController extends BaseController
                         '1',
                         'Pesan baru: ' . session()->get('nama'),
                         mb_strimwidth($dataMateri['nama_materi'], 0, 40, "..."),
-                        base_url('sw-admin/guru/lihat-materi/' . $linkadmin)
+                        base_url('sw-admin/diskusi')
                     );
                 }
 

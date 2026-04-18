@@ -12,6 +12,7 @@ use CodeIgniter\Router\RouteCollection;
  * Route Definitions
  * --------------------------------------------------------------------
  */
+$routes->set404Override('App\Controllers\Errors::show404');
 
 $routes->group('auth', ['filter' => 'isGuest'], function ($routes) {
     $routes->get('/', 'AuthController::index'); // Penamaan route: login
