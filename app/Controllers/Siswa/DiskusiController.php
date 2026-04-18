@@ -43,7 +43,7 @@ class DiskusiController extends BaseController
             ->get()
             ->getResultArray();
 
-        $data['materi'] = $this->materiModel->groupBy('kode_materi')->get()->getResultArray();
+        $data['materi'] = $this->materiModel->join('materi_siswa', 'materi_siswa.materi = materi.kode_materi')->where('materi_siswa.siswa', session('id'))->groupBy('kode_materi')->get()->getResultArray();
 
         return view('siswa/diskusi/list', $data);
     }

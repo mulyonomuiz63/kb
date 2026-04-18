@@ -131,7 +131,7 @@
 
     /* Bubble untuk Siswa (Kanan) */
     .bubble-me {
-        background-color: #9da3ac; 
+        background-color: #9da3ac;
         color: #fff;
         border-radius: 8px 8px 0 8px;
         padding: 8px 10px;
@@ -155,18 +155,20 @@
         font-weight: bold;
         font-size: 0.8rem;
         margin-bottom: 2px;
-        color: #00d1ff; /* Warna nama */
+        color: #00d1ff;
+        /* Warna nama */
     }
 
     .chat-message-text {
         font-size: 0.9rem;
-        margin-bottom: 10px; /* Ruang untuk waktu di bawah */
+        margin-bottom: 10px;
+        /* Ruang untuk waktu di bawah */
         word-wrap: break-word;
     }
 
     .chat-time {
         font-size: 0.65rem;
-        color: rgba(255,255,255,0.5);
+        color: rgba(255, 255, 255, 0.5);
         position: absolute;
         bottom: 4px;
         right: 8px;
@@ -238,15 +240,44 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3 class="fw-bold">Pilih Materi</h3>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i>
+                </div>
             </div>
-            <div class="modal-body scroll-y mh-300px">
-                <?php foreach ($materi as $m): ?>
-                    <div class="materi-item" onclick="startNewChat('<?= $m['kode_materi'] ?>', '<?= $m['nama_materi'] ?>')">
-                        <div class="fw-bold"><?= $m['nama_materi'] ?></div>
-                        <div class="text-muted fs-7">Klik untuk buka diskusi</div>
+
+            <div class="modal-body">
+                <div class="position-relative mb-5">
+                    <i class="ki-duotone ki-magnifier fs-2 position-absolute top-50 translate-middle-y ms-4">
+                        <span class="path1"></span><span class="path2"></span>
+                    </i>
+                    <input type="text" id="search_materi" class="form-control form-control-solid ps-12" placeholder="Cari nama materi..." />
+                </div>
+
+                <div class="scroll-y mh-300px pe-5" id="list_materi">
+                    <?php foreach ($materi as $m): ?>
+                        <div class="materi-item card card-bordered border-gray-200 p-4 mb-3 cursor-pointer hover-elevate-up bg-hover-light-primary"
+                            onclick="startNewChat('<?= $m['kode_materi'] ?>', '<?= $m['nama_materi'] ?>')"
+                            data-search="<?= strtolower($m['nama_materi']) ?>">
+
+                            <div class="d-flex align-items-center">
+                                <div class="symbol symbol-35px me-3">
+                                    <span class="symbol-label bg-light-primary text-primary fw-bold">
+                                        <?= strtoupper(substr($m['nama_materi'], 0, 1)) ?>
+                                    </span>
+                                </div>
+                                <div class="d-flex flex-column">
+                                    <div class="fw-bold fs-6 text-gray-800 nama-materi-text"><?= $m['nama_materi'] ?></div>
+                                    <div class="text-muted fs-7">Klik untuk buka diskusi</div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+
+                    <div id="no_results" class="text-center py-5 d-none">
+                        <i class="ki-duotone ki-search-list fs-3x text-gray-400 mb-3"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
+                        <div class="text-muted">Materi tidak ditemukan</div>
                     </div>
-                <?php endforeach; ?>
+                </div>
             </div>
         </div>
     </div>
@@ -443,6 +474,39 @@
             return '<a href="' + url + '" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: underline;">' + url + '</a>';
         });
     }
+
+    $(document).ready(function() {
+        // Fungsi Pencarian Real-time
+        $('#search_materi').on('keyup', function() {
+            let value = $(this).val().toLowerCase();
+            let items = $('.materi-item');
+            let found = false;
+
+            items.each(function() {
+                // Cek apakah data-search mengandung kata kunci
+                if ($(this).attr('data-search').indexOf(value) > -1) {
+                    $(this).removeClass('d-none');
+                    found = true;
+                } else {
+                    $(this).addClass('d-none');
+                }
+            });
+
+            // Tampilkan pesan jika materi tidak ditemukan
+            if (found) {
+                $('#no_results').addClass('d-none');
+            } else {
+                $('#no_results').removeClass('d-none');
+            }
+        });
+
+        // Reset pencarian saat modal ditutup
+        $('#modal_materi').on('hidden.bs.modal', function() {
+            $('#search_materi').val('');
+            $('.materi-item').removeClass('d-none');
+            $('#no_results').addClass('d-none');
+        });
+    });
 </script>
 
 <?= $this->endSection(); ?>

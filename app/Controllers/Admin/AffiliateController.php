@@ -165,6 +165,10 @@ class AffiliateController extends BaseController
                 throw new \Exception('Data affiliate tidak ditemukan.');
             }
 
+            $data['breadcrumbs'] = [
+                ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+                ['title' => 'List Affiliate', 'url' => '#'],
+            ];
             $data['affiliate'] = $affiliate;
             return view('admin/affiliate/form', $data);
         } catch (\Throwable $e) {

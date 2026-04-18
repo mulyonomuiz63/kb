@@ -29,7 +29,6 @@
     /* Memastikan text URL wrap */
     .chat-message-text {
         word-wrap: break-word;
-        white-space: pre-wrap;
     }
 </style>
 <style>
