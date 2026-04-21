@@ -457,7 +457,7 @@ class TransaksiController extends BaseController
                         // LULUS SEMUA SYARAT AI
                         if ($namaValid && $rekeningValid && $nominalValid) {
                             // Jalankan fungsi approve manual bawaan sistem
-                            if ($this->approveManual($idTransaksi)) {
+                            if ($this->approveManual($idTransaksi, $newName)) {
                                 $statusPembayaran = 'S';
                                 $pesanFlashData = 'Upload berhasil dan pembayaran Anda telah diverifikasi secara otomatis!';
                             }
@@ -692,7 +692,7 @@ class TransaksiController extends BaseController
         }
     }
 
-    private function approveManual($id)
+    private function approveManual($id, $newName)
     {
         // Pastikan koneksi DB terpanggil dengan benar
         $db = \Config\Database::connect();
@@ -705,7 +705,8 @@ class TransaksiController extends BaseController
             // 1. Update Status Transaksi Utama
             $this->transaksiModel->update($idtransaksi, [
                 'status'         => 'S',
-                'tgl_pembayaran' => $now
+                'tgl_pembayaran' => $now,
+                'bukti_pembayaran' => $newName
             ]);
 
             // 2. Ambil data transaksi
