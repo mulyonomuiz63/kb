@@ -370,7 +370,17 @@ class TransaksiController extends BaseController
             $mimeType = mime_content_type($fullFilePath);
 
             // PERINGATAN: Sangat disarankan memindahkan API Key ke file .env (getenv('GEMINI_API_KEY'))
-            $apiKey = "AIzaSyC6zEDURg90VA1fok34s3_jlzZQ8pylTls";
+            $apiKeys = [
+                "AIzaSyC6zEDURg90VA1fok34s3_jlzZQ8pylTls",
+                "AIzaSyD28WIFDcbPiO7I1mGCEoCdIZi-ygOUvhE",
+                "AIzaSyC8hA6tLGm6d0O4v7Pzbvk8WxrIQoTawfA",
+                "AIzaSyAZXRit1RuZCnoQmlj7Cv5wtHqkoC_Lfp8",
+                "AIzaSyC8mqlCRjA1VpIX-P7IGe6vetxz_edCzeU",
+                "AIzaSyBJp35Gn3viB6x-bcI8Y9eEfptOmTnq2qE"
+            ];
+
+            // 2. Pilih satu API Key secara acak (Random)
+            $apiKey = $apiKeys[array_rand($apiKeys)];
             $apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent";
 
             $promptText = "Anda adalah sistem ekstraksi OCR keuangan. Baca bukti transfer bank ini dan ekstrak ke JSON: " .
