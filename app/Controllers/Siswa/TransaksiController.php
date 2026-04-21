@@ -380,7 +380,7 @@ class TransaksiController extends BaseController
 
             // 2. Pilih satu API Key secara acak (Random)
             $apiKey = $apiKeys[array_rand($apiKeys)];
-            $apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent";
+            $apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
             $promptText = "Anda adalah sistem ekstraksi OCR keuangan. Baca bukti transfer bank ini dan ekstrak ke JSON: " .
                 "1. 'nama_penerima' (nama orang/perusahaan penerima uang), " .
