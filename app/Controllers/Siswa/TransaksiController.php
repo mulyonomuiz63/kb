@@ -371,12 +371,11 @@ class TransaksiController extends BaseController
 
             // PERINGATAN: Sangat disarankan memindahkan API Key ke file .env (getenv('GEMINI_API_KEY'))
             $apiKeys = [
-                "AIzaSyC6zEDURg90VA1fok34s3_jlzZQ8pylTls",
-                "AIzaSyD28WIFDcbPiO7I1mGCEoCdIZi-ygOUvhE",
-                "AIzaSyC8hA6tLGm6d0O4v7Pzbvk8WxrIQoTawfA",
-                "AIzaSyAZXRit1RuZCnoQmlj7Cv5wtHqkoC_Lfp8",
-                "AIzaSyC8mqlCRjA1VpIX-P7IGe6vetxz_edCzeU",
-                "AIzaSyBJp35Gn3viB6x-bcI8Y9eEfptOmTnq2qE"
+                getenv('GEMINI_API_KEY_1'),
+                getenv('GEMINI_API_KEY_2'),
+                getenv('GEMINI_API_KEY_3'),
+                getenv('GEMINI_API_KEY_4'),
+                getenv('GEMINI_API_KEY_5'),
             ];
 
             // 2. Pilih satu API Key secara acak (Random)
