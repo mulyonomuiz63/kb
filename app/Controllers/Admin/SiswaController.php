@@ -402,7 +402,7 @@ class SiswaController extends BaseController
                     'id_ujian'     => encrypt_url($t->id_ujian),
                     'status'       => $t->status,
                     'verifikasi'   => $t->verifikasi,
-                    'foto_profil'  => session()->get('avatar'), // Asumsi foto profil disimpan di session, sesuaikan jika berbeda
+                    'foto_profil'  => $siswa['avatar'], // Asumsi foto profil disimpan di session, sesuaikan jika berbeda
                     'start_ujian'  => $t->start_ujian,
                     'end_ujian'    => $t->end_ujian,
                     'nilai'        => (int)$t->nilai,
