@@ -12,7 +12,7 @@
                         <div class="card-body pt-15">
                             <div class="d-flex flex-center flex-column mb-5">
                                 <div class="symbol symbol-150px symbol-circle mb-7 position-relative">
-                                    <?= img_lazy('assets/app-assets/user/'.$siswa->avatar, "loading", ['class' => 'img-user border border-3 border-secondary', 'id' => 'profile_avatar_preview']) ?>
+                                    <?= img_lazy('assets/app-assets/user/' . $siswa->avatar, "loading", ['class' => 'img-user border border-3 border-secondary', 'id' => 'profile_avatar_preview']) ?>
                                     <div class="position-absolute translate-middle bottom-0 start-100 mb-6 bg-success rounded-circle border border-4 border-body h-20px w-20px"></div>
                                 </div>
                                 <h3 class="fs-3 text-gray-800 text-hover-primary fw-bold mb-1"><?= $siswa->nama_siswa; ?></h3>
@@ -77,21 +77,40 @@
                             <form action="<?= base_url('sw-siswa/profile/update-data-diri'); ?>" method="post" enctype="multipart/form-data" class="form">
                                 <?= csrf_field(); ?>
                                 <input type="hidden" name="id_siswa" value="<?= decrypt_url($siswa->id_siswa); ?>">
-                                
+
                                 <div class="card-body border-top p-9">
                                     <div class="row mb-8">
                                         <label class="col-lg-4 col-form-label fw-semibold fs-6 text-gray-700">Pas Foto</label>
                                         <div class="col-lg-8">
-                                            <div class="image-input image-input-outline shadow-sm" data-kt-image-input="true">
-                                                <div class="image-input-wrapper w-125px h-125px" id="preview_wrapper" style="background-image: url(<?= base_url('assets/app-assets/user/'.$siswa->avatar) ?>)"></div>
-                                                <label class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow" data-kt-image-input-action="change" data-bs-toggle="tooltip" title="Ubah Foto">
-                                                    <i class="bi bi-pencil-fill fs-7"></i>
-                                                    <input type="file" name="avatar" id="customFile" accept=".png, .jpg, .jpeg" onchange="previewImg()" />
-                                                    <input type="hidden" name="gambar_lama" value="<?= $siswa->avatar; ?>">
-                                                </label>
+                                            <div class="d-flex flex-column gap-3">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="image-input image-input-outline shadow-sm" data-kt-image-input="true">
+                                                        <div class="image-input-wrapper w-125px h-125px" id="preview_wrapper" style="background-image: url(<?= base_url('assets/app-assets/user/' . $siswa->avatar) ?>)"></div>
+                                                        <label class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow" data-kt-image-input-action="change" data-bs-toggle="tooltip" title="Ubah Foto">
+                                                            <i class="bi bi-pencil-fill fs-7"></i>
+                                                            <input type="file" name="avatar" id="customFile" accept=".png, .jpg, .jpeg" onchange="previewImg()" />
+                                                            <input type="hidden" name="gambar_lama" value="<?= $siswa->avatar; ?>">
+                                                        </label>
+                                                    </div>
+                                                    <div class="ms-5">
+                                                        <div class="form-text text-muted mb-2">Format 3x4 (Background Merah)<br>Ukuran maksimal: 1MB.</div>
+                                                        <div id="file-result" class="fw-bold text-danger"></div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="notice d-flex bg-light-warning rounded border-warning border border-dashed p-4 mt-2">
+                                                    <i class="ki-outline ki-information-5 fs-2tx text-warning me-3"></i>
+                                                    <div class="d-flex flex-stack flex-grow-1">
+                                                        <div class="fw-semibold">
+                                                            <h4 class="text-gray-900 fw-bold fs-6 mb-1">Penting: Verifikasi Keaslian</h4>
+                                                            <div class="fs-7 text-gray-700">
+                                                                Gunakan pas foto resmi terbaru. Sistem AI kami akan mencocokkan wajah pada foto profil ini dengan wajah Anda saat ujian berlangsung. <b>Ketidaksesuaian dapat menyebabkan penangguhan sertifikat Brevet Anda.</b>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
                                             </div>
-                                            <div class="form-text text-muted">Format 3x4 (Background Merah), Max 1MB.</div>
-                                            <div id="file-result" class="mt-2 fw-bold text-danger"></div>
                                         </div>
                                     </div>
 
@@ -136,7 +155,7 @@
                                     <div class="separator separator-dashed my-10"></div>
 
                                     <h4 class="fw-bold text-gray-800 mb-7"><i class="bi bi-geo-alt-fill me-2"></i>Alamat Lengkap</h4>
-                                    
+
                                     <div class="row mb-6">
                                         <label class="col-lg-4 col-form-label fw-bold fs-6">Alamat KTP</label>
                                         <div class="col-lg-8">
@@ -234,7 +253,7 @@
     });
 
     // Validasi Ukuran File
-    document.getElementById("customFile").addEventListener("change", function () {
+    document.getElementById("customFile").addEventListener("change", function() {
         const fileResult = document.getElementById("file-result");
         const fileSubmit = document.getElementById("file-submit");
         if (this.files.length > 0) {
@@ -260,7 +279,9 @@
                 title: 'Format NIK Salah',
                 text: 'NIK harus tepat 16 digit. Harap periksa kembali.',
                 buttonsStyling: false,
-                customClass: { confirmButton: "btn btn-primary" }
+                customClass: {
+                    confirmButton: "btn btn-primary"
+                }
             });
         }
     });

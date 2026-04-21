@@ -15,6 +15,10 @@ class TransaksiController extends BaseController
     protected $affiliateCommissionModel;
     protected $voucherModel;
     protected $emailer;
+    protected $ujianModel;
+    protected $mapelSiswaModel;
+    protected $ujianSiswaModel;
+    protected $siswaModel;
 
     public function __construct()
     {
@@ -26,6 +30,10 @@ class TransaksiController extends BaseController
         $this->affiliateLinkModel = new \App\Models\AffiliateLinkModel();
         $this->affiliateCommissionModel = new \App\Models\AffiliateCommissionModel();
         $this->voucherModel = new \App\Models\VoucherModel();
+        $this->ujianModel = new \App\Models\UjianModel();
+        $this->mapelSiswaModel = new \App\Models\MapelSiswaModel();
+        $this->ujianSiswaModel = new \App\Models\UjianSiswaModel();
+        $this->siswaModel = new \App\Models\SiswaModel();
         $this->emailer = new \App\Libraries\Emailer();
     }
     public function index()
@@ -302,91 +310,206 @@ class TransaksiController extends BaseController
     public function UploadBuktibayar()
     {
         $db = \Config\Database::connect();
-        // Inisialisasi library Emailer
+
+        // 1. Ambil Input & Validasi Awal (Keamanan Lapis 1)
+        $file = $this->request->getFile('bukti_bayar');
+        $idTransaksi = $this->request->getVar('idtransaksi');
+
+        if (!$file || !$file->isValid()) {
+            return redirect()->back()->with('error', "File bukti pembayaran tidak valid atau tidak ditemukan.");
+        }
+
+        $transaksi = $this->transaksiModel->find($idTransaksi);
+        if (!$transaksi) {
+            return redirect()->back()->with('error', "Data transaksi tidak ditemukan di sistem.");
+        }
+
+        // Normalisasi akses data (Mencegah error campuran Object/Array)
+        $trx_nominal = is_object($transaksi) ? $transaksi->nominal : $transaksi['nominal'];
+        $trx_diskon  = is_object($transaksi) ? $transaksi->diskon : $transaksi['diskon'];
+        $trx_voucher = is_object($transaksi) ? $transaksi->voucher : $transaksi['voucher'];
+
+        // 2. Cegah Double Upload jika sudah Lunas (Keamanan Lapis 2)
+        $CekTransaksi = $this->transaksiModel->where('idtransaksi', $idTransaksi)->where('status', 'S')->first();
+        if ($CekTransaksi) {
+            return redirect()->to('sw-siswa/transaksi')->with('info', 'Transaksi ini sudah berstatus Lunas. Tidak perlu upload ulang.');
+        }
+
         try {
             $db->transBegin();
 
-            $file = $this->request->getFile('bukti_bayar');
-            if (!$file || !$file->isValid()) {
-                throw new \Exception("File bukti pembayaran tidak valid atau tidak ditemukan.");
-            }
-
-            // 1. Proses Upload & Resizing
+            // ====================================================================
+            // 3. PROSES UPLOAD & RESIZING
+            // ====================================================================
             $newName = $file->getRandomName();
             $path = FCPATH . 'uploads/transaksi';
             $thumbnail_path = $path . '/thumbnails';
+            $fullFilePath = $thumbnail_path . '/' . $newName;
 
             if ($file->move($path, $newName)) {
-                // Manipulasi Gambar (Thumbnail & Resize)
                 $this->image->withFile($path . '/' . $newName)
                     ->resize(1012, 1012, true, 'auto')
-                    ->save($thumbnail_path . '/' . $newName, 80);
+                    ->save($fullFilePath, 80);
 
-                // Hapus file asli untuk menghemat storage (sesuai logika lama Anda)
                 if (file_exists($path . '/' . $newName)) {
                     unlink($path . '/' . $newName);
                 }
+            } else {
+                throw new \Exception("Gagal memproses file gambar.");
             }
 
-            // 2. Update Database (Transaksi & Affiliate)
-            $idTransaksi = $this->request->getVar('idtransaksi');
+            // Default Status (Jika AI error/timeout, transaksi tetap aman dengan status Menunggu Verifikasi)
+            $statusPembayaran = 'V';
+            $pesanFlashData = 'Upload bukti pembayaran berhasil, mohon tunggu verifikasi manual oleh admin.';
 
-            $this->transaksiModel->update($idTransaksi, [
-                'status'           => 'V',
-                'tgl_pembayaran'   => date("Y-m-d H:i:s"),
-                'bukti_pembayaran' => $newName
+
+            // ====================================================================
+            // 4. BLOK AI VERIFIKASI (Terisolasi dalam Try-Catch)
+            // ====================================================================
+            $imageData = base64_encode(file_get_contents($fullFilePath));
+            $mimeType = mime_content_type($fullFilePath);
+
+            // PERINGATAN: Sangat disarankan memindahkan API Key ke file .env (getenv('GEMINI_API_KEY'))
+            $apiKey = "AIzaSyC6zEDURg90VA1fok34s3_jlzZQ8pylTls";
+            $apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent";
+
+            $promptText = "Anda adalah sistem ekstraksi OCR keuangan. Baca bukti transfer bank ini dan ekstrak ke JSON: " .
+                "1. 'nama_penerima' (nama orang/perusahaan penerima uang), " .
+                "2. 'rekening_tujuan' (ambil 4 digit angka terakhir saja dari rekening tujuan), " .
+                "3. 'nominal' (nominal yang ditransfer, hanya angka integer murni), " .
+                "4. 'tanggal' (format YYYY-MM-DD, opsional berikan null jika tidak ada).";
+
+            $payload = [
+                "contents" => [
+                    [
+                        "parts" => [
+                            ["text" => $promptText],
+                            ["inline_data" => ["mime_type" => $mimeType, "data" => $imageData]]
+                        ]
+                    ]
+                ],
+                "generationConfig" => [
+                    "temperature" => 0.1,
+                    "responseMimeType" => "application/json"
+                ]
+            ];
+
+            $ch = curl_init($apiUrl);
+            curl_setopt_array($ch, [
+                CURLOPT_HTTPHEADER => [
+                    'Content-Type: application/json',
+                    'x-goog-api-key: ' . $apiKey
+                ],
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => json_encode($payload),
+                CURLOPT_TIMEOUT => 15, // Toleransi 15 detik agar koneksi tidak hang
+                CURLOPT_SSL_VERIFYPEER => true
             ]);
 
-            $this->affiliateCommissionModel
-                ->where('id_transaksi', $idTransaksi)
-                ->set('status', 'paid')
-                ->update();
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
 
-            // 3. Notifikasi Admin (Internal)
-            send_notif(
-                '1',
-                "Menunggu verifikasi pembayaran",
-                "Silahkan admin untuk verifikasi pembayaran.",
-                base_url('sw-admin/transaksi')
-            );
+            if ($httpCode == 200 && $response) {
+                $resultData = json_decode($response, true);
 
-            // Commit Transaksi Database
-            if ($db->transStatus() === false) {
-                $db->transRollback();
-                throw new \Exception("Gagal menyimpan data transaksi.");
+                if (isset($resultData['candidates'][0]['content']['parts'][0]['text'])) {
+                    $aiRawText = $resultData['candidates'][0]['content']['parts'][0]['text'];
+                    $dataAI = json_decode(trim($aiRawText));
+
+                    if ($dataAI && isset($dataAI->nama_penerima) && isset($dataAI->rekening_tujuan) && isset($dataAI->nominal)) {
+
+                        // 1. Validasi Nama Penerima (Fuzzy Logic)
+                        $expectedNama = "LEGALYN KONSULTAN IN";
+                        $namaParts = explode(' ', strtoupper($expectedNama));
+                        $namaValid = false;
+
+                        foreach ($namaParts as $part) {
+                            if (strlen($part) > 2 && stripos(strtoupper($dataAI->nama_penerima), $part) !== false) {
+                                $namaValid = true;
+                                break;
+                            }
+                        }
+
+                        // 2. Validasi Rekening Tujuan
+                        $expectedRekening = "7846";
+                        $rekeningValid = (substr($dataAI->rekening_tujuan, -4) === $expectedRekening);
+
+                        // 3. Validasi Nominal (Menggunakan variabel yang sudah dinormalisasi)
+                        $diskon         = ((int)$trx_nominal * (int)$trx_diskon) / 100;
+                        $totalDiskon    = (int)$trx_nominal - $diskon;
+                        $diskon_voucher = ($totalDiskon * (int)$trx_voucher) / 100;
+                        $expectedNominal = (int)$trx_nominal - $diskon - $diskon_voucher;
+
+                        $aiNominal = (int)$dataAI->nominal;
+                        $nominalValid = ($aiNominal >= $expectedNominal);
+
+                        // LULUS SEMUA SYARAT AI
+                        if ($namaValid && $rekeningValid && $nominalValid) {
+                            // Jalankan fungsi approve manual bawaan sistem
+                            if ($this->approveManual($idTransaksi)) {
+                                $statusPembayaran = 'S';
+                                $pesanFlashData = 'Upload berhasil dan pembayaran Anda telah diverifikasi secara otomatis!';
+                            }
+                        }
+                    }
+                }
             }
 
+            if($statusPembayaran === 'V') {
+                $this->transaksiModel->update($idTransaksi, [
+                    'status'           => $statusPembayaran,
+                    'tgl_pembayaran'   => date("Y-m-d H:i:s"),
+                    'bukti_pembayaran' => $newName
+                ]);
+                // Update affiliate khusus jika statusnya sukses
+                $this->affiliateCommissionModel
+                    ->where('id_transaksi', $idTransaksi)
+                    ->set('status', 'paid')
+                    ->update();
+                send_notif('1', "Menunggu verifikasi pembayaran", $pesanFlashData, base_url('sw-admin/transaksi'));
+            }
+
+            // Pastikan tidak ada kegagalan query
+            if ($db->transStatus() === false) {
+                $db->transRollback();
+                throw new \Exception("Gagal menyimpan data transaksi ke database.");
+            }
             $db->transCommit();
 
-            // 4. Kirim Email ke Siswa menggunakan Library Emailer
-            $subject = 'BUKTI PEMBAYARAN BERHASIL DIUPLOAD';
+            // --------------------------------------------------------------------
+            // KIRIM EMAIL KE SISWA
+            // --------------------------------------------------------------------
+            $subject = ($statusPembayaran === 'S') ? 'PEMBAYARAN BERHASIL DIVERIFIKASI' : 'BUKTI PEMBAYARAN BERHASIL DIUPLOAD';
+            $teksIsiEmail = ($statusPembayaran === 'S')
+                ? 'Bukti pembayaran Anda telah <b>berhasil diverifikasi secara otomatis</b> oleh sistem AI. Transaksi Anda berstatus LUNAS.'
+                : 'Anda berhasil melakukan upload bukti pembayaran. Mohon tunggu, admin kami akan segera memverifikasi transaksi tersebut secara manual.';
+
             $message = '
             <div style="color: #000; padding: 20px; font-family: sans-serif; line-height: 1.6;">
-                <div style="font-size: 20px; color: #1C3FAA; font-weight: bold; margin-bottom: 20px;">
-                    BUKTI PEMBAYARAN BERHASIL DIUPLOAD
-                </div>
+                <div style="font-size: 20px; color: #1C3FAA; font-weight: bold; margin-bottom: 20px;">' . $subject . '</div>
                 <p>Halo, <strong>' . session('nama') . '</strong></p>
-                <p>Anda telah berhasil melakukan upload bukti pembayaran. Mohon tunggu, admin kami akan segera memverifikasi transaksi tersebut.</p>
-                
+                <p>' . $teksIsiEmail . '</p>
                 <div style="margin: 30px 0;">
-                    <a href="' . base_url('sw-siswa/transaksi') . '" style="background: #1C3FAA; color: #fff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">
-                        Buka Dashboard
-                    </a>
+                    <a href="' . base_url('sw-siswa/transaksi') . '" style="background: #1C3FAA; color: #fff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">Buka Dashboard</a>
                 </div>
-
-                <p style="font-size: 13px; color: #666;">
-                    Salam,<br>
-                    <strong>Team KelasBrevet</strong><br>
-                    KBIG Office - Jl. Sawo Raya, Lampung<br>
-                    Whatsapp: 0821-8074-4966
-                </p>
+                <p style="font-size: 13px; color: #666;">Salam,<br><strong>Team KelasBrevet</strong></p>
             </div>';
 
-            // Panggil library global
             $this->emailer->send(session('email'), $subject, $message);
-            return redirect()->to('sw-siswa/transaksi')->with('success', 'Upload bukti pembayaran berhasil, mohon tunggu verifikasi admin.');
+
+            // Alur Berakhir Sempurna
+            return redirect()->to('sw-siswa/transaksi')->with('success', $pesanFlashData);
         } catch (\Exception $e) {
+            // Jika terjadi error sistem (contoh: Database mati / Upload gagal)
             $db->transRollback();
+
+            // Hapus file yang terlanjur terupload jika gagal menyimpan ke database
+            if (isset($fullFilePath) && file_exists($fullFilePath)) {
+                unlink($fullFilePath);
+            }
+
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
@@ -557,6 +680,93 @@ class TransaksiController extends BaseController
                 'status'  => 'error',
                 'message' => $e->getMessage()
             ])->setStatusCode(500);
+        }
+    }
+
+    private function approveManual($id)
+    {
+        // Pastikan koneksi DB terpanggil dengan benar
+        $db = \Config\Database::connect();
+        $idtransaksi = $id;
+        $now = date("Y-m-d H:i:s");
+
+        $db->transBegin();
+
+        try {
+            // 1. Update Status Transaksi Utama
+            $this->transaksiModel->update($idtransaksi, [
+                'status'         => 'S',
+                'tgl_pembayaran' => $now
+            ]);
+
+            // 2. Ambil data transaksi
+            $datatransaksi = $this->transaksiModel
+                ->join('detail_transaksi', 'detail_transaksi.idtransaksi=transaksi.idtransaksi')
+                ->where('transaksi.idtransaksi', $idtransaksi)
+                ->where('transaksi.status', 'S')
+                ->groupBy('detail_transaksi.idpaket')
+                ->get()->getResultObject();
+
+            if (empty($datatransaksi)) {
+                return false;
+            }
+
+            foreach ($datatransaksi as $rowst) {
+                // Mapping Mapel Siswa
+                if ($rowst->idmapel != '0') {
+                    // Sebaiknya gunakan insert() jika ini data baru, atau pastikan save() tidak menimpa data lain
+                    $this->mapelSiswaModel->insert([
+                        'idmapel' => $rowst->idmapel,
+                        'idsiswa' => $rowst->idsiswa
+                    ]);
+                }
+
+                // Ambil Paket
+                $datapaket = $this->detailPaketModel
+                    ->join('ujian_master', 'detail_paket.id_ujian=ujian_master.id_ujian')
+                    ->where('idpaket', $rowst->idpaket)
+                    ->groupBy('detail_paket.id_ujian')
+                    ->get()->getResultObject();
+
+                foreach ($datapaket as $rowsp) {
+                    // Menambah ujian ke siswa
+                    $this->ujianModel->insert([
+                        'id_siswa'     => $rowst->idsiswa,
+                        'kode_ujian'   => $rowsp->kode_ujian,
+                        'nama_ujian'   => $rowsp->nama_ujian,
+                        'guru'         => $rowsp->guru,
+                        'kelas'        => $rowsp->kelas,
+                        'mapel'        => $rowsp->mapel,
+                        'date_created' => time(),
+                    ]);
+
+                    // Reset status ujian siswa jika sebelumnya sudah ada
+                    $this->ujianSiswaModel
+                        ->where('ujian', $rowsp->kode_ujian)
+                        ->where('siswa', $rowst->idsiswa)
+                        ->set([
+                            'jawaban' => null,
+                            'benar'   => null,
+                            'jam'     => null,
+                            'status'  => null,
+                        ])->update();
+                }
+            }
+
+            // 3. Update Afiliasi
+            $this->affiliateCommissionModel->where('id_transaksi', $idtransaksi)
+                ->set([
+                    'status'           => 'approved', // Pastikan kata ini sama dengan sistem Anda ('paid' atau 'approved')
+                    'tgl_approved'     => $now,
+                    'status_penarikan' => 'pending'
+                ])->update();
+
+            // Simpan semua perubahan ke database secara permanen
+            $db->transCommit();
+            return true;
+        } catch (\Exception $e) {
+            $db->transRollback();
+            return false;
         }
     }
 }

@@ -1,4 +1,33 @@
 <script>
+$(document).ready(function() {
+    // Ambil pesan dari flashdata PHP
+    <?php if (session()->getFlashdata('pesan')) : ?>
+        Swal.fire({
+            text: "<?= session()->getFlashdata('pesan') ?>",
+            icon: "info",
+            buttonsStyling: false,
+            confirmButtonText: "Ok",
+            customClass: {
+                confirmButton: "btn btn-primary"
+            }
+        });
+    <?php endif; ?>
+
+    // Jika Anda punya pesan sukses (misal setelah simpan data)
+    <?php if (session()->getFlashdata('success')) : ?>
+        Swal.fire({
+            text: "<?= session()->getFlashdata('success') ?>",
+            icon: "success",
+            buttonsStyling: false,
+            confirmButtonText: "Ok",
+            customClass: {
+                confirmButton: "btn btn-success"
+            }
+        });
+    <?php endif; ?>
+});
+</script>
+<script>
      // 4. Konfirmasi Hapus Ujian
     $(document).on('click', '.btn-delete', function(e) {
         e.preventDefault();

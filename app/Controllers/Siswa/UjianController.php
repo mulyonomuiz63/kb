@@ -294,13 +294,13 @@ class UjianController extends BaseController
                     $db->transRollback();
                     return $this->response->setJSON([
                         'status' => false,
-                        'error' => 'Gagal menyimpan data'
+                        'error' => 'Jawaban gagal disimpan.'
                     ]);
                 } else {
                     $db->transCommit();
                     return $this->response->setJSON([
                         'status' => true,
-                        'error' => 'Berhasil di simpan'
+                        'pesan' => 'Jawaban berhasil disimpan.'
                     ]);
                 }
             } catch (\Throwable $e) {

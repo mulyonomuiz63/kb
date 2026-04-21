@@ -350,8 +350,8 @@ class TransaksiController extends BaseController
                 // Kirim Email (Disederhanakan)
                 $this->serviceEmail->send(
                     $this->request->getVar('email'),
-                    "Verifikasi Akun - KelasBrevet",
-                    "Terima kasih telah mendaftar di KelasBrevet."
+                    "Verifikasi Pembayaran - KelasBrevet",
+                    "Pembayaran Anda telah berhasil diverifikasi."
                 );
             } else {
                 // Logic Penolakan / Expired

@@ -203,7 +203,7 @@
               </div>
             </div>
 
-            <form action="<?= base_url('sw-siswa/transaksi/upload-bukti-bayar'); ?>" method="POST" enctype="multipart/form-data">
+            <form id="form-pembayaran" action="<?= base_url('sw-siswa/transaksi/upload-bukti-bayar'); ?>" method="POST" enctype="multipart/form-data">
               <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>" />
               <input type="hidden" name="idtransaksi" value="<?= $transaksi->idtransaksi; ?>">
 
@@ -226,8 +226,9 @@
               </div>
 
               <div class="d-flex flex-column gap-3">
-                <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm mb-3">
-                  <i class="fas fa-paper-plane mr-2"></i> Konfirmasi Pembayaran
+                <button type="submit" id="btn-submit" class="btn btn-primary btn-lg w-100 shadow-sm mb-3">
+                  <i id="btn-icon" class="fas fa-paper-plane mr-2"></i>
+                  <span id="btn-text">Konfirmasi Pembayaran</span>
                 </button>
 
                 <button type="button"
@@ -501,5 +502,24 @@
       }
     });
   }
+</script>
+<script>
+  document.getElementById('form-pembayaran').addEventListener('submit', function(e) {
+    // Tombol hanya akan berubah jika form sudah lolos validasi HTML (contoh: file required sudah diisi)
+    
+    let btn = document.getElementById('btn-submit');
+    let icon = document.getElementById('btn-icon');
+    let text = document.getElementById('btn-text');
+
+    // 1. Disable tombol agar tidak bisa diklik lagi
+    btn.disabled = true;
+    btn.classList.add('disabled');
+
+    // 2. Ganti ikon menjadi spinner loading (menggunakan spinner bawaan Bootstrap)
+    icon.className = 'spinner-border spinner-border-sm mr-2';
+
+    // 3. Ubah teks
+    text.innerText = 'Memproses...';
+  });
 </script>
 <?= $this->endSection(); ?>

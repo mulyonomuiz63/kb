@@ -152,12 +152,7 @@ class AuthController extends BaseController
                     'role'  => $user->role,
                     'avatar'=> $user->avatar,
                 ];
-
-                
                 session()->set($sessionData);
-                if($type != 'siswa'):
-                    session()->setFlashdata('pesan', "swal({title: 'Berhasil!', text: 'Selamat Datang', type: 'success', padding: '2em'});");
-                endif;
 
                 // Redirect sesuai role
                 switch ($type) {
@@ -168,16 +163,20 @@ class AuthController extends BaseController
                         return redirect()->to($redirectTo)->with('success', $pesan);
 
                     case 'guru':
-                        return redirect()->to('sw-guru');
+                        $pesan = ucwords('Selamat Datang '. session()->get('nama'));
+                        return redirect()->to('sw-guru')->with('success', $pesan);
 
                     case 'admin':
-                        return redirect()->to('sw-admin'); // Pastikan ini sesuai group routes admin
+                        $pesan = ucwords('Selamat Datang '. session()->get('nama'));
+                        return redirect()->to('sw-admin')->with('success', $pesan); // Pastikan ini sesuai group routes admin
 
                     case 'mitra':
-                        return redirect()->to('sw-mitra');
+                        $pesan = ucwords('Selamat Datang '. session()->get('nama'));
+                        return redirect()->to('sw-mitra')->with('success', $pesan);
 
                     case 'pic':
-                        return redirect()->to('sw-pic');
+                        $pesan = ucwords('Selamat Datang '. session()->get('nama'));
+                        return redirect()->to('sw-pic')->with('success', $pesan);
 
                     default:
                         return redirect()->to('/');

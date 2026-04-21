@@ -6,8 +6,11 @@
     .animate-blink {
         animation: blink-animation 1.2s steps(5, start) infinite;
     }
+
     @keyframes blink-animation {
-        to { visibility: hidden; }
+        to {
+            visibility: hidden;
+        }
     }
 
     /* Memastikan video memenuhi container kamera */
@@ -15,7 +18,8 @@
         width: 100% !important;
         height: 100% !important;
         object-fit: cover !important;
-        transform: scaleX(-1); /* Efek Cermin */
+        transform: scaleX(-1);
+        /* Efek Cermin */
     }
 
     /* Styling Tombol di Dalam Kamera agar lebih stand out */
@@ -23,7 +27,7 @@
         border-radius: 12px;
         transition: all 0.2s ease;
     }
-    
+
     #btn_capture_start:hover {
         transform: scale(1.02);
     }
@@ -33,25 +37,169 @@
         z-index: 10;
     }
 </style>
+<style>
+    .biometric-container {
+        position: relative;
+        width: 100%;
+        max-width: 500px;
+        margin: 0 auto;
+        aspect-ratio: 4/3;
+        background: #1e1e2d;
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        border: 4px solid #ffffff;
+    }
+
+    /* Video dan Canvas menyatu */
+    .biometric-video,
+    .biometric-canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transform: scaleX(-1);
+        /* Mirror effect agar natural */
+    }
+
+    /* Efek gelap di luar wajah */
+    .biometric-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle at center, transparent 30%, rgba(0, 0, 0, 0.7) 80%);
+        z-index: 2;
+    }
+
+    /* Sudut Penargetan (Targeting Corners) */
+    .scan-corner {
+        position: absolute;
+        width: 40px;
+        height: 40px;
+        border-color: #00ff00;
+        border-style: solid;
+        z-index: 3;
+        transition: border-color 0.3s;
+    }
+
+    .scan-corner.top-left {
+        top: 15%;
+        left: 15%;
+        border-width: 4px 0 0 4px;
+        border-top-left-radius: 10px;
+    }
+
+    .scan-corner.top-right {
+        top: 15%;
+        right: 15%;
+        border-width: 4px 4px 0 0;
+        border-top-right-radius: 10px;
+    }
+
+    .scan-corner.bottom-left {
+        bottom: 25%;
+        left: 15%;
+        border-width: 0 0 4px 4px;
+        border-bottom-left-radius: 10px;
+    }
+
+    .scan-corner.bottom-right {
+        bottom: 25%;
+        right: 15%;
+        border-width: 0 4px 4px 0;
+        border-bottom-right-radius: 10px;
+    }
+
+    /* Garis Laser Animasi */
+    .laser-line {
+        position: absolute;
+        left: 15%;
+        width: 70%;
+        height: 2px;
+        background: #00ff00;
+        box-shadow: 0 0 15px 2px #00ff00;
+        z-index: 3;
+        animation: scan-laser 2s infinite alternate ease-in-out;
+        display: none;
+        /* Disembunyikan sampai kamera siap */
+    }
+
+    @keyframes scan-laser {
+        0% {
+            top: 15%;
+            opacity: 0;
+        }
+
+        10% {
+            opacity: 1;
+        }
+
+        90% {
+            opacity: 1;
+        }
+
+        100% {
+            top: 75%;
+            opacity: 0;
+        }
+    }
+
+    /* Warna saat error/warning */
+    .biometric-container.warning .scan-corner {
+        border-color: #ffc700;
+    }
+
+    .biometric-container.warning .laser-line {
+        background: #ffc700;
+        box-shadow: 0 0 15px 2px #ffc700;
+    }
+
+    .biometric-container.danger .scan-corner {
+        border-color: #f1416c;
+    }
+
+    .biometric-container.danger .laser-line {
+        display: none;
+    }
+</style>
 <?= $this->endSection(); ?>
 <?= $this->section('content'); ?>
 
 <?php $db = Config\Database::connect(); ?>
 
-<div class="d-flex flex-column flex-column-fluid py-3 py-lg-6 mt-8">
+<div class="d-flex flex-column flex-column-fluid py-3 py-lg-6">
     <div class="row g-6 g-xl-9">
         <?php if (!empty($ujian)) : ?>
             <?php foreach ($ujian as $u) : ?>
                 <?php
-                $total = 0;
-                $ujianDetail = $db->query("select * from ujian_detail where kode_ujian='$u->kode_ujian'")->getResult();
-                foreach ($ujianDetail as $dataRows) {
-                    $total++;
-                }
+                // Peningkatan Performa: Hitung baris langsung di level database, tidak perlu dilooping di PHP
+                // Peningkatan Keamanan: Menggunakan query binding (?) untuk mencegah SQL Injection
+                $total = $db->query("SELECT COUNT(id_detail_ujian) as jml FROM ujian_detail WHERE kode_ujian = ?", [$u->kode_ujian])->getRow()->jml;
+
                 $totalMenit = $total * 3;
                 $start = (date('Y-m-d H:i'));
                 $end_ = (date('Y-m-d H:i', strtotime("+ $totalMenit minutes")));
                 $durasi = date_diff(date_create($start), date_create($end_));
+
+                // === LOGIKA KUOTA DINAMIS ===
+                $sisa_kuota = $u->kuota ?? 0; // Tarik data dari database (bukan manual 2 lagi)
+                $total_kuota = 3;
+
+                // Rumus: mencari berapa kali ujian sudah terpakai
+                $terpakai = $total_kuota - $sisa_kuota;
+                $tampil_kuota = $terpakai . '/' . $total_kuota;
+
+                // Menentukan warna dinamis berdasarkan pemakaian kuota
+                $kuotaColor = 'success'; // Default hijau
+                if ($terpakai >= $total_kuota) {
+                    $kuotaColor = 'danger'; // Merah jika habis
+                } elseif ($terpakai > 0) {
+                    $kuotaColor = 'warning'; // Kuning jika terpakai sebagian
+                }
                 ?>
 
                 <div class="col-md-6 col-xl-4">
@@ -83,16 +231,18 @@
                             <div class="d-flex align-items-center flex-wrap d-grid gap-2 mb-6">
                                 <div class="d-flex align-items-center me-5">
                                     <div class="symbol symbol-35px symbol-circle me-3">
-                                        <span class="symbol-label bg-light-info text-info fw-bold fs-8"><?= $u->kuota ?></span>
+                                        <span class="symbol-label bg-light-<?= $kuotaColor ?> text-<?= $kuotaColor ?> fw-bold fs-8"><?= $tampil_kuota ?></span>
                                     </div>
                                     <div>
-                                        <div class="fs-7 text-gray-800 fw-bold"> Kuota</div>
-                                        <div class="fs-8 text-gray-500 fw-semibold">Sisa Kuota</div>
+                                        <div class="fs-7 text-gray-800 fw-bold"> Penggunaan Kuota</div>
+                                        <div class="fs-8 text-gray-500 fw-semibold">
+                                            <?= ($terpakai == 0) ? 'Kuota penuh' : (($terpakai >= $total_kuota) ? 'Kuota habis' : 'Terpakai ' . $terpakai . 'x') ?>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="d-flex align-items-center">
                                     <div class="symbol symbol-35px symbol-circle me-3">
-                                        <span class="symbol-label bg-light-warning text-warning fw-bold fs-8"><?= $u->nilai == null ? '-' : $u->nilai ?></span>
+                                        <span class="symbol-label bg-light-primary text-primary fw-bold fs-8"><?= $u->nilai == null ? '-' : $u->nilai ?></span>
                                     </div>
                                     <div>
                                         <div class="fs-7 text-gray-800 fw-bold">Nilai</div>
@@ -104,10 +254,17 @@
                             <div class="d-flex gap-2">
                                 <div class="flex-grow-1">
                                     <?php if ($u->status == 'B') : ?>
-                                        <?php $dataStatus = $db->query("select * from status_ujian where kode_ujian='$u->kode_ujian'")->getRow(); ?>
+                                        <?php $dataStatus = $db->query("SELECT * FROM status_ujian WHERE kode_ujian = ?", [$u->kode_ujian])->getRow(); ?>
                                         <?php if (!empty($dataStatus) && $dataStatus->status == 'A') : ?>
+                                            <?php
+                                            $dataAttrs = 'data-idujian="' . encrypt_url($u->id_ujian) . '" ' .
+                                                'data-kuota="' . $tampil_kuota . '" ' .
+                                                'data-warna="' . $kuotaColor . '" ' .
+                                                'data-soal="' . $total . ' soal" ' .
+                                                'data-waktu="' . $totalMenit . ' menit"';
+                                            ?>
                                             <a href="<?= base_url('sw-siswa/ujian/lihat-pg') . '/' . encrypt_url($u->kode_ujian) . '/' . encrypt_url(session()->get('id')) . '/' . encrypt_url($u->id_ujian); ?>"
-                                                data-idujian="<?= encrypt_url($u->id_ujian) ?>"
+                                                <?= $dataAttrs ?>
                                                 class="btn btn-primary w-100 fw-bold btn-informasi-mulai">
                                                 Mulai
                                             </a>
@@ -121,8 +278,15 @@
 
                                     <?php else : ?>
                                         <?php if ($u->kuota != '0') : ?>
+                                            <?php
+                                            $dataAttrs = 'data-idujian="' . encrypt_url($u->id_ujian) . '" ' .
+                                                'data-kuota="' . $tampil_kuota . '" ' .
+                                                'data-warna="' . $kuotaColor . '" ' .
+                                                'data-soal="' . $total . ' soal" ' .
+                                                'data-waktu="' . $totalMenit . ' menit"';
+                                            ?>
                                             <a href="<?= base_url('sw-siswa/ujian/remedial') . '/' . encrypt_url($u->id_ujian) . '/' . encrypt_url($u->kode_ujian) . '/' . $u->status ?>"
-                                                data-idujian="<?= encrypt_url($u->id_ujian) ?>"
+                                                <?= $dataAttrs ?>
                                                 class="btn btn-light-danger w-100 fw-bold btn-informasi text-uppercase">
                                                 Ujian Ulang
                                             </a>
@@ -130,7 +294,7 @@
                                             <?php if ($u->nilai >= 60) : ?>
                                                 <button class="btn btn-light-success w-100 fw-bold cursor-default" disabled>Ujian Selesai</button>
                                             <?php else : ?>
-                                                <a href="<?= base_url('/#bimbel') ?>" class="btn btn-light-warning w-100 fw-bold btn-ujian-ulang text-uppercase">Beli Paket</a>
+                                                <a href="<?= base_url('list-bimbel') ?>" class="btn btn-light-warning w-100 fw-bold btn-ujian-ulang text-uppercase">Beli Paket</a>
                                             <?php endif; ?>
                                         <?php endif; ?>
                                     <?php endif; ?>
@@ -153,7 +317,7 @@
                                 Silakan cek jadwal berkala atau beli paket terlebih dahulu.
                             </p>
 
-                            <a href="<?= base_url('/#bimbel') ?>" class="btn btn-primary fw-bold px-8">
+                            <a href="<?= base_url('list-bimbel') ?>" class="btn btn-primary fw-bold px-8">
                                 <i class="ki-outline ki-basket fs-2 me-2"></i> Lihat Paket
                             </a>
                         </div>
@@ -176,48 +340,65 @@
 
             <div class="modal-body py-5 px-lg-17">
                 <div class="text-center mb-9">
-                    <div class="position-relative d-inline-block shadow-lg rounded-4 overflow-hidden border border-4 border-white" style="width: 100%; max-width: 500px;">
-                        
-                        <div id="camera_preview" style="aspect-ratio: 4/3; background: #1e1e2d;"></div>
-                        
-                        <div class="position-absolute top-0 start-0 m-4">
-                            <span class="badge badge-success d-flex align-items-center px-3 py-2 opacity-75">
-                                <span class="bullet bullet-dot bg-white me-2 animate-blink"></span>
-                                <span class="fw-bold fs-9 text-uppercase">Kamera Aktif</span>
+                    <div id="biometric_box" class="biometric-container warning">
+                        <video id="webcam_video" class="biometric-video d-none" playsinline autoplay></video>
+                        <canvas id="camera_canvas" class="biometric-canvas"></canvas>
+
+                        <div class="biometric-overlay"></div>
+
+                        <div class="scan-corner top-left"></div>
+                        <div class="scan-corner top-right"></div>
+                        <div class="scan-corner bottom-left"></div>
+                        <div class="scan-corner bottom-right"></div>
+
+                        <div class="laser-line" id="laser_scanner"></div>
+
+                        <div class="position-absolute top-0 start-0 m-4 z-index-3">
+                            <span class="badge bg-dark d-flex align-items-center px-3 py-2 bg-opacity-75 border border-secondary">
+                                <span id="cam_indicator" class="bullet bullet-dot bg-warning me-2 animate-blink"></span>
+                                <span class="fw-bold fs-9 text-white text-uppercase">AI Scanner</span>
                             </span>
                         </div>
 
-                        <div class="position-absolute bottom-0 start-0 w-100 p-6" style="background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);">
-                            <button type="button" id="btn_capture_start" class="btn btn-primary fw-bold w-100 py-2 shadow-sm">
-                                <span class="indicator-label">
-                                    <i class="ki-outline ki-camera fs-2 me-2"></i>Ambil Foto & Mulai Ujian
-                                </span>
-                                <span class="indicator-progress">
-                                    Memproses... <span class="spinner-border spinner-border-sm align-middle ms-2"></span>
-                                </span>
-                            </button>
+                        <div class="position-absolute bottom-0 start-0 w-100 p-4 text-center z-index-3" style="background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);">
+                            <h5 class="text-white fw-bold mb-1" id="scan_text">Menginisialisasi Kamera...</h5>
+                            <p class="text-muted fs-8 mb-2" id="scan_subtext">Mohon tunggu sebentar</p>
+                            <div class="progress h-5px bg-dark w-75 mx-auto rounded-pill" id="scan_progress_container">
+                                <div class="progress-bar bg-success rounded-pill transition-none" role="progressbar" id="scan_progress" style="width: 0%"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="row g-7 mb-10">
-                    <?php 
-                        $stats = [
-                            ['icon' => 'ki-book-open', 'color' => 'info', 'label' => 'Total Soal', 'val' => '30 soal', 'id' => 'info_jumlah_soal'],
-                            ['icon' => 'ki-time', 'color' => 'primary', 'label' => 'Waktu', 'val' => '90 menit', 'id' => 'info_durasi'],
-                            ['icon' => 'ki-medal-star', 'color' => 'warning', 'label' => 'Passing Grade', 'val' => '65', 'id' => 'info_passing_grade'],
-                            ['icon' => 'ki-arrows-loop', 'color' => 'danger', 'label' => 'Percobaan', 'val' => '0/3', 'id' => 'info_percobaan'],
-                        ];
-                        foreach($stats as $s): 
-                    ?>
                     <div class="col-6 col-md-3 text-center">
                         <div class="border border-dashed border-gray-300 rounded-3 py-4 px-3 h-100 bg-light-secondary hover-elevate-up transition-3d">
-                            <i class="ki-outline <?= $s['icon'] ?> fs-2x text-<?= $s['color'] ?> mb-2"></i>
-                            <div class="fs-6 fw-bolder text-gray-800 d-block" id="<?= $s['id'] ?>"><?= $s['val'] ?></div>
-                            <div class="fs-9 fw-bold text-gray-500 text-uppercase ls-1"><?= $s['label'] ?></div>
+                            <i class="ki-outline ki-book-open fs-2x text-info mb-2"></i>
+                            <div class="fs-6 fw-bolder text-gray-800 d-block" id="info_jumlah_soal">-</div>
+                            <div class="fs-9 fw-bold text-gray-500 text-uppercase ls-1">Total Soal</div>
                         </div>
                     </div>
-                    <?php endforeach; ?>
+                    <div class="col-6 col-md-3 text-center">
+                        <div class="border border-dashed border-gray-300 rounded-3 py-4 px-3 h-100 bg-light-secondary hover-elevate-up transition-3d">
+                            <i class="ki-outline ki-time fs-2x text-primary mb-2"></i>
+                            <div class="fs-6 fw-bolder text-gray-800 d-block" id="info_durasi">-</div>
+                            <div class="fs-9 fw-bold text-gray-500 text-uppercase ls-1">Waktu</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3 text-center">
+                        <div class="border border-dashed border-gray-300 rounded-3 py-4 px-3 h-100 bg-light-secondary hover-elevate-up transition-3d">
+                            <i class="ki-outline ki-medal-star fs-2x text-warning mb-2"></i>
+                            <div class="fs-6 fw-bolder text-gray-800 d-block" id="info_passing_grade">65</div>
+                            <div class="fs-9 fw-bold text-gray-500 text-uppercase ls-1">Passing Grade</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3 text-center">
+                        <div class="border border-dashed border-gray-300 rounded-3 py-4 px-3 h-100 bg-light-secondary hover-elevate-up transition-3d">
+                            <i class="ki-outline ki-arrows-loop fs-2x mb-2" id="icon_percobaan"></i>
+                            <div class="fs-6 fw-bolder text-gray-800 d-block" id="info_percobaan">-</div>
+                            <div class="fs-9 fw-bold text-gray-500 text-uppercase ls-1">Kuota Ujian</div>
+                        </div>
+                    </div>
                 </div>
                 <div class="notice d-flex bg-light-warning rounded border-warning border border-dashed p-6">
                     <i class="ki-outline ki-information-5 fs-2tx text-warning me-4"></i>
@@ -243,124 +424,266 @@
 <?= $this->endSection(); ?>
 
 <?= $this->section('scripts'); ?>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+
 <script>
     $(document).ready(function() {
         let selectedHref = '';
         let idujian = '';
-        let videoStream = null;
-        const modalWajah = new bootstrap.Modal(document.getElementById('modal_verifikasi_wajah'));
+        let isProcessing = false;
+        
+        let camera = null;
+        let faceMesh = null;
 
-        // Ambil token CSRF awal dari fungsi CI4
+        const modalWajah = new bootstrap.Modal(document.getElementById('modal_verifikasi_wajah'));
+        const videoElement = document.getElementById('webcam_video');
+        const canvasElement = document.getElementById('camera_canvas');
+        const canvasCtx = canvasElement.getContext('2d');
+        const biometricBox = document.getElementById('biometric_box');
+        
         let csrfName = '<?= csrf_token() ?>';
         let csrfHash = '<?= csrf_hash() ?>';
 
+        // --- SISTEM TANTANGAN LIVENESS ---
+        let currentChallenge = null;
+        let challengeTimer = 0;
+        const CHALLENGES = ['SMILE', 'BLINK']; // Senyum atau Kedip
+        
+        // Konstanta untuk mengukur geometri wajah (berdasarkan 468 titik)
+        const LEFT_EYE_TOP = 159;
+        const LEFT_EYE_BOTTOM = 145;
+        const RIGHT_EYE_TOP = 386;
+        const RIGHT_EYE_BOTTOM = 374;
+        const LIP_LEFT = 61;
+        const LIP_RIGHT = 291;
+        const LIP_TOP = 13;
+        const LIP_BOTTOM = 14;
+
+        // 1. Inisialisasi MediaPipe Face Mesh
+        faceMesh = new FaceMesh({locateFile: (file) => {
+            return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
+        }});
+
+        faceMesh.setOptions({
+            maxNumFaces: 1, // Tolak jika ada 2 orang
+            refineLandmarks: true, // Penting untuk deteksi mata presisi
+            minDetectionConfidence: 0.7,
+            minTrackingConfidence: 0.7
+        });
+
+        faceMesh.onResults(handleFaceMeshResults);
+
+        // 2. Trigger Buka Kamera
         $('.btn-informasi-mulai, .btn-informasi').click(function(e) {
             e.preventDefault();
-            selectedHref = $(this).attr('href');
-            idujian = $(this).data('idujian');
+            let btn = $(this); // Tangkap tombol yang sedang diklik
+
+            selectedHref = btn.attr('href');
+            idujian = btn.data('idujian');
+
+            // --- UPDATE DATA MODAL SECARA DINAMIS BERDASARKAN TOMBOL ---
+            $('#info_jumlah_soal').text(btn.data('soal'));
+            $('#info_durasi').text(btn.data('waktu'));
+            $('#info_percobaan').text(btn.data('kuota'));
+
+            // Update warna ikon kuota (menghapus warna lama, memasukkan warna baru)
+            let warna = btn.data('warna');
+            $('#icon_percobaan').removeClass('text-success text-warning text-danger text-info').addClass('text-' + warna);
+            // -----------------------------------------------------------
+
+            resetToDefault();
+            updateUI('warning', 'Menyalakan Kamera...', 'Izinkan akses kamera di browser Anda');
+
             modalWajah.show();
             startCamera();
         });
 
-        $('#btn_capture_start').click(function() {
-            const btn = $(this);
-            const canvas = document.getElementById('snapshot_canvas');
-            const video = document.querySelector('#camera_preview video');
 
-            if (!video) return;
-
-            btn.attr('data-kt-indicator', 'on').prop('disabled', true);
-
-            // Snapshot proses
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0);
-
-            const imageData = canvas.toDataURL('image/jpeg', 0.8);
-            const localTime = new Date().toLocaleString('sv-SE').replace(' ', 'T');
-
-            // Data yang akan dikirim
-            let postData = {
-                'face_image': imageData,
-                'device_time': localTime,
-                'url': selectedHref,
-                'idujian': idujian
-            };
-            postData[csrfName] = csrfHash; // Memasukkan CSRF Token ke dalam data POST
-
-            $.ajax({
-                url: "<?= base_url('sw-siswa/ujian/proses-verifikasi') ?>",
-                type: 'POST',
-                data: postData,
-                dataType: 'json',
-                success: function(response) {
-                    csrfHash = response.csrf_hash;
-
-                    if (response.status === 'success') {
-                        $('#modal_verifikasi_wajah').modal('hide');
-                        Swal.fire({
-                            title: 'Verifikasi Berhasil!',
-                            text: 'Identitas Anda telah terverifikasi. Halaman akan segera dialihkan ke lembar ujian.',
-                            icon: 'success',
-                            showConfirmButton: false, // Sembunyikan tombol OK agar terlihat otomatis
-                            timer: 3000, // Beri jeda 2 detik sebelum redirect
-                            timerProgressBar: true,
-                            customClass: {
-                                popup: 'rounded-4', // Agar sesuai dengan gaya Metronic
-                            }
-                        }).then(() => {
-                            window.location.href = response.redirect;
-                        });
-
-                    } else {
-                        // Menampilkan pesan error spesifik dari Controller
-                        Swal.fire({
-                            title: 'Verifikasi Gagal',
-                            text: response.message || 'Terjadi kesalahan saat memproses data.',
-                            icon: 'error',
-                            customClass: {
-                                confirmButton: "btn btn-primary"
-                            }
-                        });
-                        btn.removeAttr('data-kt-indicator').prop('disabled', false);
+        function startCamera() {
+            camera = new Camera(videoElement, {
+                onFrame: async () => {
+                    if (!isProcessing) {
+                        if (canvasElement.width !== videoElement.videoWidth) {
+                            canvasElement.width = videoElement.videoWidth;
+                            canvasElement.height = videoElement.videoHeight;
+                        }
+                        canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+                        canvasCtx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+                        await faceMesh.send({image: canvasElement});
                     }
                 },
-                error: function(xhr) {
-                    if (xhr.status === 403) {
-                        Swal.fire('Sesi Habis', 'Halaman akan dimuat ulang untuk memperbarui token keamanan.', 'info')
-                            .then(() => location.reload());
-                    } else {
-                        Swal.fire('Error', 'Terjadi kesalahan sistem (Server Error).', 'error');
-                        btn.removeAttr('data-kt-indicator').prop('disabled', false);
-                    }
-                }
+                width: 640,
+                height: 480
             });
-        });
+            
+            camera.start().then(() => {
+                $('#laser_scanner').show();
+            });
+        }
 
-        async function startCamera() {
-            try {
-                videoStream = await navigator.mediaDevices.getUserMedia({
-                    video: true
-                });
-                const video = document.createElement('video');
-                video.srcObject = videoStream;
-                video.setAttribute('autoplay', '');
-                video.setAttribute('muted', '');
-                video.setAttribute('playsinline', '');
-                video.classList.add('w-100', 'h-100', 'object-fit-cover');
-                const previewContainer = document.getElementById('camera_preview');
-                previewContainer.innerHTML = '';
-                previewContainer.appendChild(video);
-            } catch (err) {
-                Swal.fire('Akses Kamera Ditolak', 'Aktifkan izin kamera pada browser Anda.', 'error');
-                modalWajah.hide();
+        // Fungsi Bantuan Matematika: Menghitung jarak antara 2 titik 3D
+        function getDistance(p1, p2) {
+            return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+        }
+
+        // 3. Logika Analisis Face Mesh
+        function handleFaceMeshResults(results) {
+            if (isProcessing) return;
+
+            // Jika wajah hilang / ada banyak wajah
+            if (!results.multiFaceLandmarks || results.multiFaceLandmarks.length === 0) {
+                return resetScan('Arahkan Wajah ke Kamera', 'Tatap layar perangkat Anda', 'warning');
+            }
+            if (results.multiFaceLandmarks.length > 1) {
+                return resetScan('Peringatan: >1 Wajah', 'Pastikan Anda sendirian', 'danger');
+            }
+
+            const landmarks = results.multiFaceLandmarks[0];
+
+            // A. Tentukan Tantangan Jika Belum Ada
+            if (!currentChallenge) {
+                // Pilih acak antara Senyum atau Kedip
+                currentChallenge = CHALLENGES[Math.floor(Math.random() * CHALLENGES.length)];
+                challengeTimer = Date.now();
+                
+                let text = currentChallenge === 'SMILE' ? 'Silakan Tersenyum Lebar' : 'Kedipkan Mata Anda';
+                updateUI('info', text, 'Silahkan ikuti intruksi untuk verifikasi ujian');
+                return; // Tunggu frame berikutnya
+            }
+
+            // B. Evaluasi Tantangan Liveness
+            let challengePassed = false;
+            let timeElapsed = Date.now() - challengeTimer;
+
+            if (currentChallenge === 'SMILE') {
+                // Rasio Lebar Bibir vs Tinggi Bibir
+                const lipWidth = getDistance(landmarks[LIP_LEFT], landmarks[LIP_RIGHT]);
+                const lipHeight = getDistance(landmarks[LIP_TOP], landmarks[LIP_BOTTOM]);
+                // Jika bibir meregang (lebar bertambah proporsional) atau mulut sedikit terbuka
+                if (lipWidth > 0.15 && lipHeight > 0.03) { 
+                    challengePassed = true;
+                }
+            } 
+            else if (currentChallenge === 'BLINK') {
+                // Rasio Bukaan Mata Kiri & Kanan (Mata menutup saat rasio mengecil)
+                const leftEyeOpen = getDistance(landmarks[LEFT_EYE_TOP], landmarks[LEFT_EYE_BOTTOM]);
+                const rightEyeOpen = getDistance(landmarks[RIGHT_EYE_TOP], landmarks[RIGHT_EYE_BOTTOM]);
+                // Mata dianggap menutup jika tinggi bukaan kurang dari threshold (misal 0.015)
+                if (leftEyeOpen < 0.015 || rightEyeOpen < 0.015) {
+                    challengePassed = true;
+                }
+            }
+
+            // C. Jika Tantangan Terlewati
+            if (challengePassed) {
+                isProcessing = true;
+                $('#laser_scanner').hide();
+                $('#scan_progress_container').removeClass('d-none');
+                $('#scan_progress').css('width', '100%');
+                updateUI('success', 'Verifikasi Selesai', 'Foto diambil otomatis. Memproses data...');
+                
+                // Ambil gambar
+                captureAndSend();
+            } 
+            // D. Jika Tantangan Gagal / Waktu Habis (Lebih dari 10 detik diam)
+            else if (timeElapsed > 10000) {
+                resetScan('Waktu Habis', 'Sistem mendeteksi foto statis. Ulangi proses.', 'danger');
+                setTimeout(() => { currentChallenge = null; }, 2000); // Reset tantangan setelah 2 detik
             }
         }
 
+        function resetScan(title, subtitle, status) {
+            currentChallenge = null; 
+            updateUI(status, title, subtitle);
+            $('#scan_progress_container').addClass('d-none');
+            $('#scan_progress').css('width', '0%');
+        }
+
+        function resetToDefault() {
+            isProcessing = false;
+            currentChallenge = null;
+            $('#scan_progress_container').addClass('d-none');
+            $('#scan_progress').css('width', '0%');
+        }
+
+        function updateUI(status, title, subtitle) {
+            biometricBox.className = `biometric-container ${status}`;
+            let indicator = $('#cam_indicator');
+            indicator.removeClass('bg-warning bg-danger bg-success bg-info');
+            if(status === 'warning') indicator.addClass('bg-warning');
+            if(status === 'danger') indicator.addClass('bg-danger');
+            if(status === 'success') indicator.addClass('bg-success');
+            if(status === 'info') indicator.addClass('bg-info');
+
+            $('#scan_text').text(title);
+            $('#scan_subtext').text(subtitle);
+        }
+
+        // 4. Pengiriman AJAX
+        function captureAndSend() {
+            // Kita butuh sedikit delay 500ms agar ekspresi (senyum/kedip) sempurna di kanvas
+            setTimeout(() => {
+                const imageData = canvasElement.toDataURL('image/jpeg', 0.85);
+                const localTime = new Date().toLocaleString('sv-SE').replace(' ', 'T');
+
+                let postData = {
+                    'face_image': imageData,
+                    'device_time': localTime,
+                    'url': selectedHref,
+                    'idujian': idujian
+                };
+                postData[csrfName] = csrfHash;
+
+                $.ajax({
+                    url: "<?= base_url('sw-siswa/ujian/proses-verifikasi') ?>",
+                    type: 'POST',
+                    data: postData,
+                    dataType: 'json',
+                    success: function(response) {
+                        csrfHash = response.csrf_hash;
+                        if (response.status === 'success') {
+                            $(biometricBox).append('<div style="position:absolute;top:0;left:0;width:100%;height:100%;background:white;z-index:99;animation:flash 1s forwards;"></div>');
+                            $('<style>@keyframes flash { 0%{opacity:1;} 100%{opacity:0;} }</style>').appendTo('head');
+
+                            setTimeout(() => {
+                                $('#modal_verifikasi_wajah').modal('hide');
+                                Swal.fire({
+                                    title: 'Verifikasi Berhasil',
+                                    text: 'Mengalihkan ke lembar ujian...',
+                                    icon: 'success',
+                                    showConfirmButton: false,
+                                    timer: 1500
+                                }).then(() => {
+                                    window.location.href = response.redirect;
+                                });
+                            }, 500);
+                            
+                        } else {
+                            Swal.fire('Gagal', response.message, 'error');
+                            resetToDefault();
+                            $('#laser_scanner').show();
+                        }
+                    },
+                    error: function(xhr) {
+                        Swal.fire('Error Server', 'Terjadi kesalahan jaringan.', 'error');
+                        resetToDefault();
+                        $('#laser_scanner').show();
+                    }
+                });
+            }, 500);
+        }
+
         $('#modal_verifikasi_wajah').on('hidden.bs.modal', function() {
-            if (videoStream) {
-                videoStream.getTracks().forEach(track => track.stop());
+            if (camera) {
+                camera.stop(); 
+                camera = null; // Bersihkan dari memori
             }
+            // Kosongkan canvas
+            canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+            
+            resetToDefault();
+            $('#laser_scanner').hide();
         });
     });
 </script>

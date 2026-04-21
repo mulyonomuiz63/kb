@@ -13,6 +13,7 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
         $routes->get('delete/(:segment)', 'Admin\SiswaController::delete/$1');
         $routes->post('detail', 'Admin\SiswaController::detail');
         $routes->get('sertifikat/(:segment)', 'Admin\SiswaController::sertifikat/$1');
+        $routes->post('suspend-action', 'Admin\SiswaController::suspendAction');
         $routes->post('get-data-sertifikat', 'Admin\SiswaController::getDataSertifikat');
         $routes->get('ujian/(:segment)', 'Admin\SiswaController::ujian/$1');
         $routes->post('get-data-ujian', 'Admin\SiswaController::getDataUjian');

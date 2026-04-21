@@ -299,17 +299,53 @@ $ujianSiswaModel = new UjianSiswaModel(); ?>
                 },
                 dataType: 'json', // Pastikan Controller Anda mengembalikan JSON
                 success: function(response) {
-                    // Aktifkan kembali input
-                    $(`input[name="${groupName}"]`).prop('disabled', false);
+                    if (response.status) {
+                        // Aktifkan kembali input
+                        $(`input[name="${groupName}"]`).prop('disabled', false);
 
-                    // Play sound
-                    const sound = document.getElementById("notifSound");
-                    if (sound) sound.play();
+                        // Play sound
+                        const sound = document.getElementById("notifSound");
+                        if (sound) sound.play();
 
-                    // Ubah tombol navigasi menjadi hijau
-                    $('.nav-btn-' + currentNo)
-                        .removeClass('btn-light-primary')
-                        .addClass('btn-success text-white');
+                        // Ubah tombol navigasi menjadi hijau
+                        $('.nav-btn-' + currentNo)
+                            .removeClass('btn-light-primary')
+                            .addClass('btn-success text-white');
+
+                        const Toast = Swal.mixin({
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 3000,
+                            timerProgressBar: true,
+                            didOpen: (toast) => {
+                                toast.addEventListener('mouseenter', Swal.stopTimer)
+                                toast.addEventListener('mouseleave', Swal.resumeTimer)
+                            }
+                        });
+
+                        Toast.fire({
+                            icon: 'success',
+                            title: 'Jawaban Tersimpan!',
+                            text: response.pesan
+                        });
+                    } else {
+                        // JIKA GAGAL: Kembalikan tampilan ke semula
+                        $(`input[name="${groupName}"]`).prop('disabled', false);
+                        radioBtn.prop('checked', false); // Batalkan centang
+
+                        // Tampilkan peringatan keras ke siswa
+                        Swal.fire({
+                            title: 'Gagal Menyimpan!',
+                            text: 'Koneksi internet terganggu. Silakan klik ulang jawaban Anda.',
+                            icon: 'error',
+                            confirmButtonText: 'Coba Lagi',
+                            customClass: {
+                                confirmButton: "btn btn-danger"
+                            }
+                        });
+                    }
+
                 },
                 error: function(xhr, status, error) {
                     // JIKA GAGAL: Kembalikan tampilan ke semula

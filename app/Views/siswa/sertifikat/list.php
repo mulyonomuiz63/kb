@@ -106,7 +106,6 @@
                                                 </div>
                                                 <div class="d-flex flex-column">
                                                     <span class="text-gray-800 text-hover-primary fw-bold fs-6 mb-1"><?= $u->nama_ujian; ?></span>
-                                                    <span class="fs-7 text-muted fw-normal">Kode: <?= $u->kode_ujian ?></span>
                                                 </div>
                                             </div>
                                         </td>
@@ -154,7 +153,7 @@
                                                     <i class="bi bi-star-fill fs-7 me-2"></i> Beri Feedback
                                                 </button>
                                             <?php else: ?>
-                                                <?php if ($u->nilai >= 60): ?>
+                                                <?php if ($u->nilai >= 60 && $u->status === 'S'): ?>
                                                     <button class="btn btn-icon btn-sm btn-light-primary btn-active-primary shadow-sm sertifikat_cetak"
                                                         data-bs-toggle="modal"
                                                         data-bs-target="#sertifikat_cetak_modal"
@@ -162,6 +161,8 @@
                                                         data-sertifikat="<?= base_url("sw-siswa/sertifikat/lihat-sertifikat/" . encrypt_url($u->kode_ujian) . "/" . encrypt_url($u->id_ujian)) ?>">
                                                         <i class="bi bi-file-earmark-pdf fs-3"></i>
                                                     </button>
+                                                <?php elseif ($u->status === 'T'): ?>
+                                                    <span class="badge badge-secondary py-3 px-4 disabled">Sertifikat Ditangguhkan</span>
                                                 <?php else: ?>
                                                     <span class="badge badge-secondary py-3 px-4 disabled">🔒 Terkunci</span>
                                                 <?php endif; ?>

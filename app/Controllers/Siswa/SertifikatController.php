@@ -43,7 +43,7 @@ class SertifikatController extends BaseController
             $totalMapel += $this->ujianMasterModel->where('kelas', $r->kelas)->groupBy('mapel')->countAllResults();
 
             // Hitung Total Lulus (Nilai >= 60)
-            $totalSertifikat += $this->ujianModel->where(['kelas' => $r->kelas, 'id_siswa' => $r->id_siswa, 'ujian.nilai >=' => 60])
+            $totalSertifikat += $this->ujianModel->where(['kelas' => $r->kelas, 'id_siswa' => $r->id_siswa, 'ujian.nilai >=' => 60, 'status' => 'S'])
                 ->groupBy('ujian.mapel')->countAllResults();
         }
 

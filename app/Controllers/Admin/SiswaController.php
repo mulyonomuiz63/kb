@@ -399,7 +399,10 @@ class SiswaController extends BaseController
 
                 $rows[] = [
                     'nama_ujian'   => $t->nama_ujian,
+                    'id_ujian'     => encrypt_url($t->id_ujian),
+                    'status'       => $t->status,
                     'verifikasi'   => $t->verifikasi,
+                    'foto_profil'  => session()->get('avatar'), // Asumsi foto profil disimpan di session, sesuaikan jika berbeda
                     'start_ujian'  => $t->start_ujian,
                     'end_ujian'    => $t->end_ujian,
                     'nilai'        => (int)$t->nilai,
@@ -465,6 +468,9 @@ class SiswaController extends BaseController
                 } elseif ($u->status == 'U') {
                     // Tombol Sedang Ujian
                     $btn_list[] = '<a href="#" class="btn btn-light-warning btn-sm"><i class="ki-duotone ki-pencil fs-5 me-1"><span class="path1"></span><span class="path2"></span></i> Sedang Ujian</a>';
+                } elseif ($u->status == 'T') {
+                    // Tombol Tangguhkan
+                    $btn_list[] = '<a href="#" class="btn btn-light-danger btn-sm"><i class="ki-duotone ki-cross-circle fs-5 me-1"><span class="path1"></span><span class="path2"></span></i> Tangguhkan</a>';
                 } else {
                     if ($u->kuota != '0') {
                         // Tombol Ulang (Disabled)
@@ -475,7 +481,7 @@ class SiswaController extends BaseController
                             $btn_list[] = '<a href="' . base_url('siswa/sertifikat/') . '" class="btn btn-light-success btn-sm"><i class="ki-duotone ki-badge fs-5 me-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i> Selesai</a>';
                         } else {
                             // Tombol Ulang
-                            $btn_list[] = '<a href="' . base_url('/#bimbel') . '" class="btn btn-light-warning btn-sm btn-ujian-ulang"><i class="ki-duotone ki-arrows-circle fs-5 me-1"><span class="path1"></span><span class="path2"></span></i> Ulang</a>';
+                            $btn_list[] = '<a href="javascript:void(0)" class="btn btn-light-warning btn-sm btn-ujian-ulang"><i class="ki-duotone ki-arrows-circle fs-5 me-1"><span class="path1"></span><span class="path2"></span></i> Ulang</a>';
                         }
                     }
                 }
@@ -867,5 +873,49 @@ class SiswaController extends BaseController
         $data['sertifikatAB'] = $this->siswaModel->getSertifikatAB();
         $data['kelas'] = $this->kelasModel->asObject()->findAll();
         return view('admin/siswa/listAB', $data);
+    }
+
+    public function suspendAction()
+    {
+        try {
+            // 1. Tangkap ID Ujian
+            $post_id = $this->request->getPost('id_ujian');
+
+            // karena decrypt_url() pada string biasa akan menghasilkan error/kosong.
+            $idujian = decrypt_url($post_id);
+            // $idujian = $post_id; // <-- Gunakan ini jika ID di DataTable tidak terenkripsi
+
+            // 2. Cari Data Ujian
+            $ujian = $this->ujianModel->asObject()->find($idujian);
+
+            if (!$ujian) {
+                // Kembalikan JSON Error, bukan Redirect
+                return $this->response->setJSON([
+                    'status'    => 'error',
+                    'message'   => 'Data ujian tidak ditemukan di sistem.',
+                    'csrf_hash' => csrf_hash() // Penting untuk memperbarui token keamanan CI4
+                ]);
+            }
+
+            // 3. Toggle status suspend (T = Tangguh, S = Selesai/Aktif)
+            $newStatus = ($ujian->status == 'T') ? 'S' : 'T';
+            $this->ujianModel->update($idujian, ['status' => $newStatus]);
+
+            $message = ($newStatus == 'S') ? 'Ujian berhasil ditangguhkan.' : 'Ujian berhasil diaktifkan kembali.';
+
+            // 4. Kembalikan JSON Success, bukan Redirect
+            return $this->response->setJSON([
+                'status'    => 'success',
+                'message'   => $message,
+                'csrf_hash' => csrf_hash()
+            ]);
+        } catch (\Exception $e) {
+            // Tangkap error server dan kembalikan sebagai JSON
+            return $this->response->setJSON([
+                'status'    => 'error',
+                'message'   => 'Terjadi kesalahan sistem: ' . $e->getMessage(),
+                'csrf_hash' => csrf_hash()
+            ]);
+        }
     }
 }
