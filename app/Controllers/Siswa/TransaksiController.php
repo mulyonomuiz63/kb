@@ -375,8 +375,13 @@ class TransaksiController extends BaseController
 
             // Load Balancing API Key (Pastikan key sudah dimasukkan ke file .env)
             $apiKeys = [
-                getenv('GEMINI_API_KEY_0'),
-                getenv('GEMINI_API_KEY_00'),
+                getenv('GEMINI_API_KEY_1'),
+                getenv('GEMINI_API_KEY_2'),
+                getenv('GEMINI_API_KEY_3'),
+                getenv('GEMINI_API_KEY_4'),
+                getenv('GEMINI_API_KEY_5'),
+                getenv('GEMINI_API_KEY_6'),
+                getenv('GEMINI_API_KEY_7'),
                 // Tambahkan key lainnya jika ada
             ];
 
