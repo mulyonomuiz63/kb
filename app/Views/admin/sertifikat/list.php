@@ -170,7 +170,7 @@ foreach ($modals as $modal): ?>
                             <div class="rounded-3 overflow-hidden shadow-sm border border-2 border-primary w-100 mb-5 bg-light" style="aspect-ratio: 4/3;">
                                 <img src="" alt="Foto Profil" id="img_profile_photo" class="w-100 h-100" style="object-fit: cover; object-position: center;">
                             </div>
-                            <span class="fs-4 fw-bold text-gray-800">Foto Profil DB</span>
+                            <span class="fs-4 fw-bold text-gray-800">Foto Profil</span>
                             <span class="badge badge-light-primary mt-2 px-3 py-2">Data Master</span>
                         </div>
                     </div>
