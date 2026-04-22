@@ -48,14 +48,13 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
         $routes->get('lihat-ujian-siswa/(:segment)/(:segment)', 'Admin\GuruController::lihatUjianSiswa/$1/$2');
         $routes->get('cetak-soal-peserta/(:segment)/(:segment)', 'Admin\GuruController::cetakSoalPeserta/$1/$2');
         $routes->get('cetak-soal/(:segment)', 'Admin\GuruController::cetakSoal/$1');
-        
-        
+
+
         $routes->get('mapel-guru/(:segment)', 'Admin\MapelController::mapelGuru/$1');
         $routes->get('lihat-materi/(:segment)/(:segment)/(:segment)', 'Admin\MapelController::lihatMateri/$1/$2/$3');
         $routes->post('get-file-materi', 'Admin\MapelController::getFileMateri');
         $routes->post('get-chat-materi', 'Admin\MapelController::getChatMateri');
         $routes->post('chat-materi', 'Admin\MapelController::ChatMateri');
-
     });
 
     $routes->group('mitra', function ($routes) {
@@ -192,7 +191,7 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
         $routes->post('update-review', 'Admin\PaketController::updateReview');
     });
 
-    $routes->group('transaksi', function($routes) {
+    $routes->group('transaksi', function ($routes) {
         $routes->get('/', 'Admin\TransaksiController::index');
         $routes->post('datatables', 'Admin\TransaksiController::datatables'); // Server Side
         $routes->get('transaksi-kodevoucher', 'Admin\TransaksiController::transaksiKodevoucher');
@@ -200,7 +199,7 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
         $routes->post('approve-transaksi', 'Admin\TransaksiController::approveTransaksi');
         $routes->get('approve-manual/(:any)', 'Admin\TransaksiController::approveManual/$1');
         $routes->get('hapus-transaksi-siswa/(:any)', 'Admin\TransaksiController::hapusTransaksiSiswa/$1');
-        
+
         $routes->get('invoice/(:any)', 'InvoiceController::invoice/$1'); // Route untuk cetak invoice (modal)   
     });
 
@@ -223,12 +222,19 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
     $routes->group('settings', function ($routes) {
         $routes->get('', 'Admin\SettingsController::index');
         $routes->post('update', 'Admin\SettingsController::update');
-    }); 
+    });
 
     // diskusi
     $routes->group('diskusi', function ($routes) {
         $routes->get('/', 'Admin\DiskusiController::index');
         $routes->get('get-messages/(:any)', 'Admin\DiskusiController::getMessages/$1');
         $routes->post('send', 'Admin\DiskusiController::sendMessage');
+    });
+
+    $routes->group('ikh', function ($routes) {
+        $routes->get('', 'Admin\IkhController::index');
+        $routes->get('review/(:segment)', 'Admin\IkhController::review/$1');
+        $routes->post('update-status', 'Admin\IkhController::updateStatus');
+        $routes->post('upload-kartu', 'Admin\IkhController::uploadKartu');
     });
 });

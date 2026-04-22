@@ -53,12 +53,16 @@ class PerijinanIKHController extends BaseController
             'tempat_lahir'          => $this->request->getPost('tempat_lahir'),
             'tanggal_lahir'         => $this->request->getPost('tanggal_lahir'),
             'pendidikan_terakhir'   => $this->request->getPost('pendidikan_terakhir'),
+            'jurusan'               => $this->request->getPost('jurusan'),
+            'tahun_masuk'           => $this->request->getPost('tahun_masuk'),
+            'tahun_lulus'           => $this->request->getPost('tahun_lulus'),
             'no_wa'                 => $this->request->getPost('no_wa'),
             'email'                 => $this->request->getPost('email'),
             'kategori_kantor'       => $this->request->getPost('kategori_kantor'),
             'nama_kantor'           => $this->request->getPost('nama_kantor'),
             'alamat_ktp'            => $this->request->getPost('alamat_ktp'),
             'alamat_korespondensi'  => $this->request->getPost('alamat_korespondensi'),
+            'is_riwayat_hidup'      => $this->request->getPost('check_riwayat') ? 1 : 0,
             'is_bukan_pns'          => $this->request->getPost('check_pns') ? 1 : 0,
             'is_pakta_integritas'   => $this->request->getPost('check_pakta') ? 1 : 0,
             'is_pernyataan_ikh'     => $this->request->getPost('check_pengajuan') ? 1 : 0,
@@ -81,7 +85,6 @@ class PerijinanIKHController extends BaseController
     // FUNGSI 2: Upload File secara AJAX (Satu per satu)
     public function uploadFileAjax()
     {
-        // Pastikan hanya request AJAX
         if (!$this->request->isAJAX()) {
             return $this->response->setStatusCode(403)->setJSON(['success' => false, 'message' => 'Akses ditolak.']);
         }
@@ -91,22 +94,26 @@ class PerijinanIKHController extends BaseController
         $idIkh     = $this->request->getPost('id_ikh');     // ID dari tabel pendaftaran_ikh
 
         if (empty($idIkh)) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Simpan data diri terlebih dahulu sebelum mengunggah file.']);
+            return $this->response->setJSON(['success' => false, 'message' => 'Simpan data diri terlebih dahulu.']);
         }
 
         $file = $this->request->getFile('file_dokumen');
 
         if ($file && $file->isValid() && !$file->hasMoved()) {
             
-            // Validasi Ekstensi berdasarkan nama input
-            $ext = strtolower($file->getClientExtension());
-            $allowPdfOnly = ['file_skck', 'file_ijazah', 'file_spt', 'file_cv', 'file_sertifikat', 'file_ttd'];
-            
-            if (in_array($namaInput, $allowPdfOnly) && $ext !== 'pdf') {
-                return $this->response->setJSON(['success' => false, 'message' => 'File ini HANYA BOLEH berformat PDF.']);
+            // 1. Validasi Ukuran (Maks 2 MB = 2097152 bytes)
+            if ($file->getSize() > 2097152) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Gagal: Ukuran file melebihi 2 MB.', 'csrf_hash' => csrf_hash()]);
             }
 
-            // Ambil nama folder ('file_ktp' -> 'ktp')
+            // 2. Validasi Ekstensi PDF
+            $ext = strtolower($file->getClientExtension());
+            $allowPdfOnly = ['file_skck', 'file_ijazah', 'file_spt', 'file_sertifikat', 'file_ttd'];
+            
+            if (in_array($namaInput, $allowPdfOnly) && $ext !== 'pdf') {
+                return $this->response->setJSON(['success' => false, 'message' => 'File ini HANYA BOLEH berformat PDF.', 'csrf_hash' => csrf_hash()]);
+            }
+
             $folderName = str_replace('file_', '', $namaInput);
             $basePath   = FCPATH . 'uploads/ikh/' . $folderName . '/';
 
@@ -114,48 +121,82 @@ class PerijinanIKHController extends BaseController
                 mkdir($basePath, 0755, true);
             }
 
+            // =========================================================================
+            // PERBAIKAN: HAPUS FILE LAMA JIKA ADA (Replace)
+            // =========================================================================
+            $dataLama = $this->ikhModel->find($idIkh);
+            
+            // Deteksi otomatis apakah CI4 mengembalikan Array atau Object
+            $namaFileLama = is_array($dataLama) ? ($dataLama[$namaInput] ?? null) : ($dataLama->$namaInput ?? null);
+
+            if (!empty($namaFileLama)) {
+                $pathFileLama = FCPATH . 'uploads/ikh/' . $namaFileLama;
+                
+                // Pastikan file tersebut benar-benar ada di folder sebelum dihapus
+                if (file_exists($pathFileLama) && is_file($pathFileLama)) {
+                    unlink($pathFileLama); // Hapus file fisik dari server
+                }
+            }
+            // =========================================================================
             $newName = strtoupper($folderName) . '_' . $idSiswa . '_' . $file->getRandomName();
             
-            // Simpan file
             try {
                 $file->move($basePath, $newName);
-                
-                // Update ke database
                 $dbPath = $folderName . '/' . $newName;
+                
+                // Update nama file baru ke database
                 $this->ikhModel->update($idIkh, [$namaInput => $dbPath]);
 
-                // Cek apakah semua file sudah terisi (opsional: untuk mengubah status dari draft ke pending validasi)
-                $this->check_all_files_uploaded($idIkh);
+                // =========================================================================
+                // PERBAIKAN: CEK KELENGKAPAN SEMUA FILE UNTUK AUTO-RELOAD
+                // =========================================================================
+                $isComplete = $this->check_all_files_uploaded($idIkh);
 
-                return $this->response->setJSON(['success' => true, 'message' => 'Upload berhasil!']);
+                return $this->response->setJSON([
+                    'success' => true, 
+                    'message' => 'Upload berhasil!',
+                    'is_complete' => $isComplete, // Beritahu JS apakah sudah lengkap
+                    'csrf_hash' => csrf_hash()
+                ]);
 
             } catch (\Exception $e) {
-                return $this->response->setJSON(['success' => false, 'message' => 'Gagal memindahkan file ke server.']);
+                return $this->response->setJSON(['success' => false, 'message' => 'Gagal memindahkan file.', 'csrf_hash' => csrf_hash()]);
             }
         }
 
-        return $this->response->setJSON(['success' => false, 'message' => 'File rusak atau terlalu besar.']);
+        return $this->response->setJSON(['success' => false, 'message' => 'File rusak atau tidak valid.', 'csrf_hash' => csrf_hash()]);
     }
 
-    // Fungsi internal untuk merubah status jika ke-10 file sudah lengkap
+    // Fungsi internal (Diubah sedikit agar mengembalikan nilai true/false)
     private function check_all_files_uploaded($idIkh)
     {
         $data = $this->ikhModel->find($idIkh);
+        
         if ($data) {
-            $requiredFiles = ['file_ktp', 'file_npwp', 'file_kk', 'file_foto', 'file_skck', 'file_ijazah', 'file_spt', 'file_cv', 'file_sertifikat', 'file_ttd'];
+            $requiredFiles = ['file_ktp', 'file_npwp', 'file_kk', 'file_foto', 'file_skck', 'file_ijazah', 'file_spt', 'file_sertifikat', 'file_ttd'];
             $isComplete = true;
 
             foreach ($requiredFiles as $file) {
-                if (empty($data->$file)) {
+                // PERBAIKAN: Deteksi otomatis format Array atau Object
+                $nilaiFile = is_array($data) ? ($data[$file] ?? null) : ($data->$file ?? null);
+                
+                if (empty($nilaiFile)) {
                     $isComplete = false;
                     break;
                 }
             }
 
-            // Jika semua 10 field file tidak kosong dan statusnya masih draft, ubah jadi siap divalidasi admin
-            if ($isComplete && $data->status_validasi_admin == 'draft') {
+            // PERBAIKAN: Ambil status validasi saat ini dengan aman
+            $statusValidasi = is_array($data) ? ($data['status_validasi_admin'] ?? null) : ($data->status_validasi_admin ?? null);
+
+            // Jika ke-10 file terisi dan status masih draft, otomatis ubah ke pending (siap diperiksa admin)
+            if ($isComplete && $statusValidasi === 'draft') {
                 $this->ikhModel->update($idIkh, ['status_validasi_admin' => 'pending']);
             }
+            
+            return $isComplete; // Kembalikan true jika lengkap
         }
+        
+        return false;
     }
 }
