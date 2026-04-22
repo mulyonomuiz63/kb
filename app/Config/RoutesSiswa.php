@@ -73,4 +73,11 @@ $routes->group('sw-siswa', ['filter' => 'roleCheck:2'], function ($routes) {
         $routes->get('get-messages/(:any)', 'Siswa\DiskusiController::getMessages/$1');
         $routes->post('send', 'Siswa\DiskusiController::sendMessage');
     });
+
+
+    $routes->group('perijinan-ikh', function ($routes) {
+        $routes->get('/', 'Siswa\PerijinanIKHController::index');
+        $routes->post('store', 'Siswa\PerijinanIKHController::store');
+        $routes->post('upload-ajax', 'Siswa\PerijinanIKHController::uploadFileAjax');
+    });
 });

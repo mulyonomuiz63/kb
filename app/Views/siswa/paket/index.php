@@ -210,7 +210,7 @@
               </div>
 
               <div class="text-center">
-                <button type="submit" class="btn btn-primary btn-lg w-100 fw-bolder" onclick="submitForm('registrasi')">
+                <button type="button" class="btn btn-primary btn-lg w-100 fw-bolder" onclick="submitForm('registrasi')">
                   <span class="indicator-label">Daftar & Lanjutkan Pembayaran</span>
                 </button>
                 <div class="text-gray-500 text-center fw-bold fs-7 mt-5">

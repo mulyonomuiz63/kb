@@ -126,7 +126,7 @@
                     ['url' => 'sw-siswa/affiliate', 'icon' => 'ki-people', 'color' => 'warning', 'title' => 'Affiliate', 'desc' => 'Bonus referensi'],
                     ['url' => 'sw-siswa/profile', 'icon' => 'ki-user', 'color' => 'dark', 'title' => 'Akun Saya', 'desc' => 'Pengaturan data diri'],
                     ['url' => 'sw-siswa/diskusi', 'icon' => 'ki-messages', 'color' => 'warning', 'title' => 'Diskusi', 'desc' => 'Komunitas belajar'],
-                    ['url' => 'list-bimbel', 'icon' => 'ki-briefcase', 'color' => 'warning', 'title' => 'List Paket', 'desc' => 'Daftar paket tersedia'],
+                    ['url' => 'sw-siswa', 'icon' => 'ki-award', 'color' => 'warning', 'title' => 'Sertifikasi IKH', 'desc' => 'Pengurusan IKH.']
                 ];
                 foreach ($menus as $m): ?>
                     <div class="col-6 d-flex">
