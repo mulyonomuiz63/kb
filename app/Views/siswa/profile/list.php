@@ -234,7 +234,7 @@
 
                                     <h4 class="fw-bold text-primary mb-7"><i class="bi bi-clock-history me-2 text-primary"></i>Riwayat Pekerjaan</h4>
                                     <div class="row mb-6">
-                                        <label class="col-lg-4 col-form-label fw-bold fs-6 required">Daftar Riwayat</label>
+                                        <label class="col-lg-4 col-form-label fw-bold fs-6">Daftar Riwayat</label>
                                         <div class="col-lg-8">
 
                                             <div id="riwayat_container">
