@@ -126,11 +126,11 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
 
                                 <div class="card-body p-9">
                                     <div class="row g-5">
-                                        <div class="col-md-6"><label class="required form-label">NIK</label><input type="number" name="nik" class="form-control" value="<?= $hasData ? $ikh['nik'] : '' ?>" required /></div>
-                                        <div class="col-md-6"><label class="required form-label">NPWP</label><input type="text" name="npwp" class="form-control" value="<?= $hasData ? $ikh['npwp'] : '' ?>" required /></div>
-                                        <div class="col-md-12"><label class="required form-label">Nama Lengkap</label><input type="text" name="nama_lengkap" class="form-control" value="<?= $hasData ? $ikh['nama_lengkap'] : '' ?>" required /></div>
-                                        <div class="col-md-6"><label class="required form-label">Tempat Lahir</label><input type="text" name="tempat_lahir" class="form-control" value="<?= $hasData ? $ikh['tempat_lahir'] : '' ?>" required /></div>
-                                        <div class="col-md-6"><label class="required form-label">Tanggal Lahir</label><input type="date" id="kt_datepicker_lahir" name="tanggal_lahir" class="form-control" value="<?= $hasData ? $ikh['tanggal_lahir'] : '' ?>" required /></div>
+                                        <div class="col-md-6"><label class="required form-label">NIK</label><input type="number" name="nik" id="nik" class="form-control" value="<?= $hasData ? $ikh['nik'] : $siswa['nik'] ?>" required /></div>
+                                        <div class="col-md-6"><label class="required form-label">NPWP</label><input type="text" name="npwp" id="npwp" class="form-control" value="<?= $hasData ? $ikh['npwp'] : '' ?>" required /></div>
+                                        <div class="col-md-12"><label class="required form-label">Nama Lengkap</label><input type="text" name="nama_lengkap" class="form-control" value="<?= $hasData ? $ikh['nama_lengkap'] : $siswa['nama_siswa'] ?>" required /></div>
+                                        <div class="col-md-6"><label class="required form-label">Tempat Lahir</label><input type="text" name="tempat_lahir" class="form-control" value="<?= $hasData ? $ikh['tempat_lahir'] : $siswa['tempat_lahir'] ?>" required /></div>
+                                        <div class="col-md-6"><label class="required form-label">Tanggal Lahir</label><input type="date" id="kt_datepicker_lahir" name="tanggal_lahir" class="form-control" value="<?= $hasData ? $ikh['tanggal_lahir'] : $siswa['tgl_lahir'] ?>" required /></div>
 
                                         <div class="col-md-6">
                                             <label class="required form-label">Pendidikan Terakhir</label>
@@ -144,15 +144,15 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                                             </select>
                                         </div>
                                         <div class="col-md-6"><label class="required form-label">Jurusan</label><input type="text" name="jurusan" class="form-control" value="<?= $hasData ? $ikh['jurusan'] : '' ?>" required /></div>
-                                        <div class="col-md-6"><label class="required form-label">Tahun Masuk</label><input type="number" name="tahun_masuk" class="form-control" value="<?= $hasData ? $ikh['tahun_masuk'] : '' ?>" required /></div>
-                                        <div class="col-md-6"><label class="required form-label">Tahun Lulus</label><input type="number" name="tahun_lulus" class="form-control" value="<?= $hasData ? $ikh['tahun_lulus'] : '' ?>" required /></div>
-                                        <div class="col-md-6"><label class="required form-label">Nomor WhatsApp</label><input type="number" name="no_wa" class="form-control" value="<?= $hasData ? $ikh['no_wa'] : '' ?>" required /></div>
-                                        <div class="col-md-6"><label class="required form-label">Email Aktif</label><input type="email" name="email" class="form-control" value="<?= $hasData ? $ikh['email'] : '' ?>" required /></div>
+                                        <div class="col-md-6"><label class="required form-label">Tahun Masuk</label><input type="number" name="tahun_masuk" id="tahun_masuk" class="form-control" value="<?= $hasData ? $ikh['tahun_masuk'] : '' ?>" required /></div>
+                                        <div class="col-md-6"><label class="required form-label">Tahun Lulus</label><input type="number" name="tahun_lulus" id="tahun_lulus" class="form-control" value="<?= $hasData ? $ikh['tahun_lulus'] : '' ?>" required /></div>
+                                        <div class="col-md-6"><label class="required form-label">Nomor WhatsApp</label><input type="number" name="no_wa" id="no_wa" class="form-control" value="<?= $hasData ? $ikh['no_wa'] : $siswa['hp'] ?>" required /></div>
+                                        <div class="col-md-6"><label class="required form-label">Email Aktif</label><input type="email" name="email" class="form-control" value="<?= $hasData ? $ikh['email'] : $siswa['email'] ?>" required /></div>
                                         <div class="col-md-6">
-                                            <label class="required form-label">Kategori Kantor</label>
+                                            <label class="required form-label">Kategori Kantor</label> 
                                             <select name="kategori_kantor" class="form-select" data-control="select2" required>
                                                 <option></option>
-                                                <?php $kat = $hasData ? $ikh['kategori_kantor'] : ''; ?>
+                                                <?php $kat = $hasData ? $ikh['kategori_kantor'] : $siswa['kantor']; ?>
                                                 <option value="Firma Hukum" <?= $kat == 'Firma Hukum' ? 'selected' : '' ?>>Firma Hukum</option>
                                                 <option value="KAP" <?= $kat == 'KAP' ? 'selected' : '' ?>>KAP</option>
                                                 <option value="KKP" <?= $kat == 'KKP' ? 'selected' : '' ?>>KKP</option>
@@ -160,8 +160,8 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                                                 <option value="Lainnya" <?= $kat == 'Lainnya' ? 'selected' : '' ?>>Lainnya</option>
                                             </select>
                                         </div>
-                                        <div class="col-md-6"><label class="required form-label">Nama Kantor</label><input type="text" name="nama_kantor" class="form-control" value="<?= $hasData ? $ikh['nama_kantor'] : '' ?>" required /></div>
-                                        <div class="col-md-6"><label class="required form-label">Alamat Sesuai KTP</label><textarea name="alamat_ktp" class="form-control" rows="3" required><?= $hasData ? $ikh['alamat_ktp'] : '' ?></textarea></div>
+                                        <div class="col-md-6"><label class="required form-label">Nama Kantor</label><input type="text" name="nama_kantor" class="form-control" value="<?= $hasData ? $ikh['nama_kantor'] : $siswa['nama_kantor'] ?>" required /></div>
+                                        <div class="col-md-6"><label class="required form-label">Alamat Sesuai KTP</label><textarea name="alamat_ktp" class="form-control" rows="3" required><?= $hasData ? $ikh['alamat_ktp'] : $siswa['alamat_ktp'] ?></textarea></div>
                                         <div class="col-md-6"><label class="required form-label">Alamat Korespondensi</label><textarea name="alamat_korespondensi" class="form-control" rows="3" required><?= $hasData ? $ikh['alamat_korespondensi'] : '' ?></textarea></div>
                                     </div>
                                     <div class="separator my-10"></div>
@@ -747,6 +747,20 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                 );
             }
         }, 500); // Jeda setengah detik agar animasi modal mulus
+    });
+
+    document.getElementById('nik').addEventListener('input', function() {
+        if (this.value.length > 16) this.value = this.value.slice(0, 16);
+    });
+    document.getElementById('no_wa').addEventListener('input', function() {
+        if (this.value.length > 15) this.value = this.value.slice(0, 15);
+    });
+
+    document.getElementById('tahun_masuk').addEventListener('input', function() {
+        if (this.value.length > 4) this.value = this.value.slice(0, 4);
+    });
+    document.getElementById('tahun_lulus').addEventListener('input', function() {
+        if (this.value.length > 4) this.value = this.value.slice(0, 4);
     });
 </script>
 <?= $this->endSection(); ?>

@@ -54,7 +54,7 @@
                         <div class="swiper-wrapper">
                             <!-- Single Testimonial Start -->
                             <?php
-                            $data_testi = $db->query("SELECT testimoni.*, siswa.nama_siswa, siswa.kota_intansi, siswa.avatar FROM testimoni join siswa on testimoni.idsiswa=siswa.id_siswa order by idtestimoni desc")->getResult();
+                            $data_testi = $db->query("SELECT testimoni.*, siswa.nama_siswa, siswa.kantor, siswa.avatar FROM testimoni join siswa on testimoni.idsiswa=siswa.id_siswa order by idtestimoni desc")->getResult();
                             foreach ($data_testi as $rows) {
                             ?>
                                 <div class="single-testimonial swiper-slide">
@@ -65,7 +65,7 @@
                                             <i class="icofont-quote-left position-absolute top-100 start-50 translate-middle text-primary fs-1"></i>
                                         </div>
                                         <h4 class="name"><?= $rows->nama_siswa; ?></h4>
-                                        <span class="designation"><?= $rows->kota_intansi; ?></span>
+                                        <span class="designation"><?= $rows->kantor; ?></span>
                                     </div>
                                     <div class="testimonial-content text">
 

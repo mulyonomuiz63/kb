@@ -29,6 +29,9 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
         $routes->post('updateKuota', 'Admin\SiswaController::updateKuota');
         $routes->get('delete-ujian/(:segment)/(:segment)', 'Admin\SiswaController::deleteUjian/$1/$2');
         $routes->get('sertifikat-ab', 'Admin\SiswaController::sertifikatAB');
+
+        //untuk update data siswa menjadi untuk melengkapi data siswa yang belum lengkap
+        $routes->get('update-status-massal/', 'Admin\SiswaController::updateStatusMassal'); 
     });
 
     $routes->group('guru', function ($routes) {

@@ -1,5 +1,17 @@
 <?= $this->extend('siswa/template/app'); ?>
 
+<?= $this->section('styles'); ?>
+<style>
+    .select2-container--bootstrap5 .select2-selection--single {
+        min-height: calc(1.5em + 1.65rem + 2px) !important;
+        padding: 0.825rem 1.5rem !important;
+    }
+
+    .select2-container--bootstrap5 .select2-selection__rendered {
+        line-height: 1.5 !important;
+    }
+</style>
+<?= $this->endSection(); ?>
 <?= $this->section('content'); ?>
 
 <div class="d-flex flex-column flex-column-fluid py-3 py-lg-6 mt-8">
@@ -129,20 +141,26 @@
                                     </div>
 
                                     <div class="row mb-6">
-                                        <label class="col-lg-4 col-form-label fw-bold fs-6">Email & WA</label>
+                                        <label class="col-lg-4 col-form-label fw-bold fs-6 required">Email & WA</label>
                                         <div class="col-lg-4">
                                             <input type="email" class="form-control form-control-lg form-control-solid bg-light-secondary" value="<?= $siswa->email; ?>" readonly />
                                         </div>
                                         <div class="col-lg-4">
-                                            <input type="number" name="hp" class="form-control form-control-lg form-control-solid" value="<?= old('hp', $siswa->hp); ?>" required />
+                                            <input type="number" name="hp" id="hp" class="form-control form-control-lg form-control-solid" value="<?= old('hp', $siswa->hp); ?>" required maxlength="15" placeholder="WhatsApp" />
                                         </div>
                                     </div>
 
                                     <div class="row mb-6">
-                                        <label class="col-lg-4 col-form-label fw-bold fs-6">TTL & Gender</label>
+                                        <label class="col-lg-4 col-form-label fw-bold fs-6 required">Tempat & Tanggal Lahir</label>
+                                        <div class="col-lg-4">
+                                            <input type="text" name="tempat_lahir" class="form-control form-control-lg form-control-solid" value="<?= old('tempat_lahir', $siswa->tempat_lahir); ?>" required placeholder="Tempat Lahir" />
+                                        </div>
                                         <div class="col-lg-4">
                                             <input type="date" name="tgl_lahir" class="form-control form-control-lg form-control-solid" value="<?= old('tgl_lahir', $siswa->tgl_lahir); ?>" required />
                                         </div>
+                                    </div>
+                                    <div class="row mb-6">
+                                        <label class="col-lg-4 col-form-label required fw-bold fs-6 required">Jenis Kelamin</label>
                                         <div class="col-lg-4">
                                             <select name="jenis_kelamin" class="form-select form-select-lg form-select-solid" required>
                                                 <?php $jk = old('jenis_kelamin', $siswa->jenis_kelamin); ?>
@@ -157,7 +175,7 @@
                                     <h4 class="fw-bold text-gray-800 mb-7"><i class="bi bi-geo-alt-fill me-2"></i>Alamat Lengkap</h4>
 
                                     <div class="row mb-6">
-                                        <label class="col-lg-4 col-form-label fw-bold fs-6">Alamat KTP</label>
+                                        <label class="col-lg-4 col-form-label fw-bold fs-6 required">Alamat KTP & Domisili</label>
                                         <div class="col-lg-8">
                                             <input type="text" name="alamat_ktp" class="form-control form-control-lg form-control-solid mb-3" placeholder="Alamat sesuai KTP" value="<?= old('alamat_ktp', $siswa->alamat_ktp); ?>" required />
                                             <input type="text" name="alamat_domisili" class="form-control form-control-lg form-control-solid" placeholder="Alamat Domisili saat ini" value="<?= old('alamat_domisili', $siswa->alamat_domisili); ?>" required />
@@ -188,7 +206,7 @@
 
                                     <h4 class="fw-bold text-primary mb-7"><i class="bi bi-briefcase-fill me-2 text-primary"></i>Profil Profesi</h4>
                                     <div class="row mb-6">
-                                        <label class="col-lg-4 col-form-label fw-bold fs-6">Pekerjaan</label>
+                                        <label class="col-lg-4 col-form-label fw-bold fs-6 required">Pekerjaan</label>
                                         <div class="col-lg-4">
                                             <input type="text" name="profesi" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" placeholder="Profesi saat ini" value="<?= old('profesi', $siswa->profesi); ?>" required />
                                         </div>
@@ -197,10 +215,56 @@
                                         </div>
                                     </div>
                                     <div class="row mb-6">
-                                        <label class="col-lg-4 col-form-label fw-bold fs-6">Instansi</label>
+                                        <label class="col-lg-4 col-form-label fw-bold fs-6 required">Kantor</label>
                                         <div class="col-lg-8">
-                                            <input type="text" name="kota_intansi" class="form-control form-control-lg form-control-solid mb-3" placeholder="Nama Perusahaan/Lembaga" value="<?= old('kota_intansi', $siswa->kota_intansi); ?>" required />
-                                            <input type="text" name="kota_aktifitas_profesi" class="form-control form-control-lg form-control-solid" placeholder="Alamat Perusahaan" value="<?= old('kota_aktifitas_profesi', $siswa->kota_aktifitas_profesi); ?>" />
+                                            <select name="kantor" class="form-select form-select-lg form-select-solid mb-3" data-control="select2" required>
+                                                <option value="">-Pilih Kantor-</option>
+                                                <?php $kat = $siswa->kantor; ?>
+                                                <option value="Firma Hukum" <?= $kat == 'Firma Hukum' ? 'selected' : '' ?>>Firma Hukum</option>
+                                                <option value="KAP" <?= $kat == 'KAP' ? 'selected' : '' ?>>KAP</option>
+                                                <option value="KKP" <?= $kat == 'KKP' ? 'selected' : '' ?>>KKP</option>
+                                                <option value="Mandiri" <?= $kat == 'Mandiri' ? 'selected' : '' ?>>Mandiri</option>
+                                                <option value="Lainnya" <?= $kat == 'Lainnya' ? 'selected' : '' ?>>Lainnya</option>
+                                            </select>
+                                            <input type="text" name="nama_kantor" class="form-control form-control-lg form-control-solid mb-3" placeholder="Nama Perusahaan/Lembaga/Kantor" value="<?= old('kantor', $siswa->kantor); ?>" required />
+                                            <input type="text" name="alamat_kantor" class="form-control form-control-lg form-control-solid" placeholder="Alamat Perusahaan/Lembaga/Kantor" value="<?= old('alamat_kantor', $siswa->alamat_kantor); ?>" />
+                                        </div>
+                                    </div>
+                                    <div class="separator separator-dashed my-10"></div>
+
+                                    <h4 class="fw-bold text-primary mb-7"><i class="bi bi-clock-history me-2 text-primary"></i>Riwayat Pekerjaan</h4>
+                                    <div class="row mb-6">
+                                        <label class="col-lg-4 col-form-label fw-bold fs-6 required">Daftar Riwayat</label>
+                                        <div class="col-lg-8">
+
+                                            <div id="riwayat_container">
+
+                                                <?php
+                                                // Logika jika data sudah ada dari database (misal disimpan dalam bentuk array/JSON)
+                                                // Jika tidak ada, tampilkan 1 baris kosong default
+                                                $riwayat_data = $siswa->riwayat_pekerjaan ? json_decode($siswa->riwayat_pekerjaan, true) : old('riwayat_pekerjaan'); // Sesuaikan dengan cara Anda menyimpan datanya nanti
+                                                if (empty($riwayat_data)):
+                                                ?>
+                                                    <div class="input-group mb-3 riwayat-row">
+                                                        <input type="text" name="riwayat_pekerjaan[]" class="form-control form-control-lg form-control-solid" placeholder="Contoh: PT. Legalyn Indonesia (2015 - 2020)" />
+                                                    </div>
+                                                <?php else: ?>
+                                                    <?php foreach ($riwayat_data as $index => $riwayat): ?>
+                                                        <div class="input-group mb-3 riwayat-row">
+                                                            <input type="text" name="riwayat_pekerjaan[]" class="form-control form-control-lg form-control-solid" value="<?= esc($riwayat) ?>" placeholder="Contoh: PT. Legalyn Indonesia (2015 - 2020)" />
+                                                            <?php if ($index > 0): ?>
+                                                                <button type="button" class="btn btn-icon btn-light-danger btn-hapus-riwayat" title="Hapus Baris"><i class="ki-outline ki-trash fs-2"></i></button>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    <?php endforeach; ?>
+                                                <?php endif; ?>
+
+                                            </div>
+
+                                            <button type="button" class="btn btn-light-primary btn-sm mt-2" id="btn_tambah_riwayat">
+                                                <i class="ki-outline ki-plus fs-2"></i> Tambah Riwayat Pekerjaan
+                                            </button>
+
                                         </div>
                                     </div>
                                 </div>
@@ -251,7 +315,10 @@
     document.getElementById('nik').addEventListener('input', function() {
         if (this.value.length > 16) this.value = this.value.slice(0, 16);
     });
-
+    document.getElementById('hp').addEventListener('input', function() {
+        if (this.value.length > 15) this.value = this.value.slice(0, 15);
+    });
+                                                                
     // Validasi Ukuran File
     document.getElementById("customFile").addEventListener("change", function() {
         const fileResult = document.getElementById("file-result");
@@ -284,6 +351,41 @@
                 }
             });
         }
+    });
+
+    $(document).ready(function() {
+        
+        // Fungsi untuk menambahkan baris input baru
+        $('#btn_tambah_riwayat').click(function(e) {
+            e.preventDefault();
+            
+            // Template HTML untuk baris baru
+            let barisBaru = `
+                <div class="input-group mb-3 riwayat-row" style="display: none;">
+                    <input type="text" name="riwayat_pekerjaan[]" class="form-control form-control-lg form-control-solid" placeholder="Contoh: PT Contoh (2021 - Sekarang)" />
+                    <button type="button" class="btn btn-icon btn-light-danger btn-hapus-riwayat" title="Hapus Baris">
+                        <i class="ki-outline ki-trash fs-2"></i>
+                    </button>
+                </div>
+            `;
+            
+            // Tambahkan ke kontainer dengan efek animasi slide down (turun ke bawah)
+            let el = $(barisBaru);
+            $('#riwayat_container').append(el);
+            el.slideDown('fast');
+        });
+
+        // Fungsi untuk menghapus baris (Menggunakan Event Delegation karena elemen dibuat dinamis)
+        $(document).on('click', '.btn-hapus-riwayat', function(e) {
+            e.preventDefault();
+            let baris = $(this).closest('.riwayat-row');
+            
+            // Berikan efek animasi naik ke atas sebelum dihapus dari DOM
+            baris.slideUp('fast', function() {
+                $(this).remove();
+            });
+        });
+
     });
 </script>
 

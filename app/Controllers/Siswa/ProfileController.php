@@ -109,7 +109,7 @@ class ProfileController extends BaseController
                     'required'            => 'Profesi wajib diisi.',
                 ]
             ],
-            'kota_intansi' => [
+            'kantor' => [
                 'rules'  => 'required',
                 'errors' => [
                     'required'            => 'Nama instansi wajib diisi.',
@@ -167,6 +167,17 @@ class ProfileController extends BaseController
         // 5. Sanitasi Input Nama (Potong 10 huruf untuk tampilan jika perlu, 
         // tapi simpan full di DB sesuai max_length validasi)
         $namaClean = strip_tags($this->request->getVar('nama_siswa'));
+
+        $riwayat = $this->request->getVar('riwayat_pekerjaan'); // Ini akan menjadi array
+        if (!is_array($riwayat)) {
+            $riwayat = [];
+        }
+        $riwayat_bersih = array_values(array_filter($riwayat, function($value) {
+            return !empty(trim($value));
+        }));
+
+        // 4. Encode menjadi format JSON
+        $json_riwayat = json_encode($riwayat_bersih);
     
         // 6. Update Database
         $this->siswaModel
@@ -174,6 +185,7 @@ class ProfileController extends BaseController
             ->set('jenis_kelamin', $this->request->getVar('jenis_kelamin'))
             ->set('avatar', $nama_gambar)
             ->set('nik', $this->request->getVar('nik'))
+            ->set('tempat_lahir', $this->request->getVar('tempat_lahir'))
             ->set('tgl_lahir', $this->request->getVar('tgl_lahir'))
             ->set('alamat_ktp', $this->request->getVar('alamat_ktp'))
             ->set('alamat_domisili', $this->request->getVar('alamat_domisili'))
@@ -183,9 +195,11 @@ class ProfileController extends BaseController
             ->set('kelurahan', $this->request->getVar('kelurahan'))
             ->set('hp', $this->request->getVar('hp'))
             ->set('profesi', $this->request->getVar('profesi'))
-            ->set('kota_intansi', $this->request->getVar('kota_intansi'))
+            ->set('kantor', $this->request->getVar('kantor'))
+            ->set('nama_kantor', $this->request->getVar('nama_kantor'))
             ->set('bidang_usaha', $this->request->getVar('bidang_usaha'))
-            ->set('kota_aktifitas_profesi', $this->request->getVar('kota_aktifitas_profesi'))
+            ->set('alamat_kantor', $this->request->getVar('alamat_kantor'))
+            ->set('riwayat_pekerjaan',  $json_riwayat)
             ->set('status', 'S')
             ->where('id_siswa', session()->get('id'))
             ->update();

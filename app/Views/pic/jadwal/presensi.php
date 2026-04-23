@@ -27,7 +27,7 @@
                                             <tr>
                                                 <td class="text-wrap"><?= $rows->nama_siswa ?></td>
                                                 <td><?= $rows->email ?></td>
-                                                <td><?= $rows->kota_intansi ?></td>
+                                                <td><?= $rows->kantor ?></td>
                                             </tr>
                                        <?php endforeach; ?>
                                     </tbody>

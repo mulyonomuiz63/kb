@@ -6,16 +6,19 @@ use App\Controllers\BaseController;
 class PerijinanIKHController extends BaseController
 {
     protected $ikhModel;
+    protected $siswaModel;
     protected $data;
     public function __construct()
     {
         $this->ikhModel = new \App\Models\IkhModel();
+        $this->siswaModel = new \App\Models\SiswaModel();
         $this->data = [];
     }
 
     public function index()
     {
         $ikh = $this->ikhModel->where('id_siswa', session('id'))->first();
+        $siswa = $this->siswaModel->where('id_siswa', session('id'))->first();
 
         $this->data['breadcrumbs'] = [
             ['title' => 'Dashboard', 'url' => base_url('sw-siswa')],
@@ -23,6 +26,7 @@ class PerijinanIKHController extends BaseController
         ];
 
         $this->data['ikh'] = $ikh;
+        $this->data['siswa'] = $siswa;
         $this->data['title'] = 'Sertifikasi Izin Kuasa Hukum (IKH)';
 
         return view('siswa/ikh/list', $this->data);

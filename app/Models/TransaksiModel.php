@@ -25,7 +25,7 @@ class TransaksiModel extends Model
     }
     public function getBaseQuery()
     {
-        return $this->select('transaksi.*, b.nama_siswa, b.email, b.id_siswa, b.kota_intansi, c.nama_paket')
+        return $this->select('transaksi.*, b.nama_siswa, b.email, b.id_siswa, b.kantor, c.nama_paket')
                     ->join('detail_transaksi d', 'd.idtransaksi=transaksi.idtransaksi')
                     ->join('siswa b', 'b.id_siswa = transaksi.idsiswa')
                     ->join('paket c', 'c.idpaket = d.idpaket')

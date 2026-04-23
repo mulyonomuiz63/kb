@@ -290,7 +290,7 @@ function renderDetailRow($label, $id, $col = 6)
                     $("#alamat_ktp").html(data.alamat_ktp || '-');
                     $("#alamat_domisili").html(data.alamat_domisili || '-');
                     $("#profesi").html(data.profesi || '-');
-                    $("#nama_lembaga").html(data.kota_intansi || '-');
+                    $("#nama_lembaga").html(data.kantor || '-');
                     $("#bidang_usaha").html(data.bidang_usaha || '-');
                     $("#email_pribadi").html(data.email || '-');
                     $("#hp_pribadi").html(data.hp || '-');

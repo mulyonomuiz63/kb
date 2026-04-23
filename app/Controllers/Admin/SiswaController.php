@@ -794,8 +794,8 @@ class SiswaController extends BaseController
             $siswa->kota,
             $siswa->provinsi,
             $siswa->profesi,
-            $siswa->kota_intansi,
-            $this->_limitStr($siswa->kota_aktifitas_profesi),
+            $siswa->kantor,
+            $this->_limitStr($siswa->alamat_kantor),
             $siswa->bidang_usaha,
             $siswa->email,
             $siswa->hp,
@@ -916,6 +916,35 @@ class SiswaController extends BaseController
                 'message'   => 'Terjadi kesalahan sistem: ' . $e->getMessage(),
                 'csrf_hash' => csrf_hash()
             ]);
+        }
+    }
+    public function updateStatusMassal()
+    {
+        // 1. Tentukan status baru yang ingin diubah untuk semua 500 siswa
+        // (Misalnya Anda ingin mengubah semuanya menjadi 'S', 'Aktif', atau 'Lulus')
+        $statusBaru = 'B'; 
+
+        try {
+            // =================================================================
+            // CARA TERBAIK: Menggunakan Builder
+            // Ini akan langsung menjalankan query: UPDATE siswa SET status = 'S'
+            // dan HANYA kolom status yang disentuh, kolom lain dijamin aman.
+            // =================================================================
+            
+            $db = \Config\Database::connect();
+            $builder = $db->table('siswa'); // Ganti 'siswa' dengan nama tabel asli di database Anda
+            
+            // Eksekusi update massal
+            $builder->update(['status' => $statusBaru]);
+
+            // Mengecek berapa baris data yang berhasil terpengaruh (ter-update)
+            $jumlahDiubah = $db->affectedRows();
+
+            return redirect()->back()->with('success', "Berhasil! Sebanyak $jumlahDiubah data siswa telah diubah statusnya menjadi '$statusBaru'.");
+
+        } catch (\Exception $e) {
+            // Jika terjadi error database (misal nama kolom salah)
+            return redirect()->back()->with('error', 'Gagal melakukan update massal: ' . $e->getMessage());
         }
     }
 }

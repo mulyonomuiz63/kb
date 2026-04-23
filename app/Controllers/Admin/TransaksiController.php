@@ -77,7 +77,7 @@ class TransaksiController extends BaseController
 
                     // Kolom Paket
                     $row['paket'] = '<div class="text-gray-800 fw-bold fs-6">' . esc($s->nama_paket) . '</div>
-                     <div class="text-muted fw-semibold fs-7">' . esc($s->kota_intansi ?? '') . '</div>';
+                     <div class="text-muted fw-semibold fs-7">' . esc($s->kantor ?? '') . '</div>';
 
                     // Kolom Voucher
                     $row['voucher'] = $s->kode_voucher
