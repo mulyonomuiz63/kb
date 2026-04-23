@@ -31,6 +31,11 @@ class IkhController extends BaseController
     // 2. Halaman Detail & Review Berkas
     public function review($id)
     {
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'List IKH', 'url' => base_url('sw-admin/ikh')],
+            ['title' => 'Data IKH', 'url' => '#'],
+        ];
         $id_ikh = decrypt_url($id);
         $ikh = $this->ikhModel->find($id_ikh);
         if (!$ikh) {
@@ -50,7 +55,7 @@ class IkhController extends BaseController
 
         $id_ikh = $this->request->getPost('id_ikh');
         $jenis_update = $this->request->getPost('jenis_update'); // 'validasi', 'proses', 'final'
-        
+        $ikh = $this->ikhModel->find($id_ikh);
         $updateData = [];
 
         if ($jenis_update == 'validasi') {
@@ -59,8 +64,21 @@ class IkhController extends BaseController
             
             // Jika valid, otomatis set status_proses ke pending agar masuk antrean
             if($updateData['status_validasi_admin'] == 'valid') {
-                $updateData['status_proses'] = 'selesai';
+                send_notif(
+                    $ikh['id_siswa'],
+                    'Validasi Berkas IKH',
+                    'Pengajuan IKH divalidasi, tunggu proses selanjutnya dari admin',
+                    base_url('sw-siswa/perijinan-ikh')
+                );
+                $updateData['status_proses'] = 'selesai'; 
                 $updateData['status_final'] = 'selesai';
+            }else{
+                send_notif(
+                    $ikh['id_siswa'], 
+                    'Pengajuan IKH Ditolak',
+                    'Pengajuan IKH ditolak, Silahkan cek catatan admin',
+                     base_url('sw-siswa/perijinan-ikh')
+                );
             }
         }
 

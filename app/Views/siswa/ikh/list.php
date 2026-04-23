@@ -96,39 +96,64 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
 
             <?php if ($showForm): ?>
 
-                <ul class="nav nav-custom nav-tabs nav-line-tabs nav-line-tabs-2x border-0 fs-4 fw-semibold mb-8">
-                    <li class="nav-item">
-                        <a class="nav-link text-active-primary pb-4 <?= $activeTab == 'data' ? 'active' : '' ?>" data-bs-toggle="tab" href="#tab_data_diri">
-                            1. Data Diri & Pernyataan
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <?php if ($hasData): ?>
-                            <a class="nav-link text-active-primary pb-4 <?= $activeTab == 'lampiran' ? 'active' : '' ?>" data-bs-toggle="tab" href="#tab_lampiran">
-                                2. Unggah Lampiran
-                            </a>
-                        <?php else: ?>
-                            <a class="nav-link text-muted pb-4 disabled" href="javascript:;" title="Simpan data diri terlebih dahulu">
-                                <i class="ki-outline ki-lock fs-4"></i> 2. Unggah Lampiran
-                            </a>
-                        <?php endif; ?>
-                    </li>
-                </ul>
+                <div class="card shadow-sm border-0 mb-8">
+                    <div class="card-header card-header-stretch">
+
+                        <ul class="nav nav-stretch nav-line-tabs nav-line-tabs-2x border-transparent fs-4 fw-bold w-100">
+
+                            <li class="nav-item">
+                                <a class="nav-link text-active-primary text-gray-600 px-4 <?= $activeTab == 'data' ? 'active' : '' ?>" data-bs-toggle="tab" href="#tab_data_diri">
+                                    <i class="ki-outline ki-profile-user fs-2 me-2 <?= $activeTab == 'data' ? 'text-primary' : 'text-gray-500' ?>"></i>
+                                    1. Data Diri & Pernyataan
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <?php if ($hasData): ?>
+                                    <a class="nav-link text-active-primary text-gray-600 px-4 <?= $activeTab == 'lampiran' ? 'active' : '' ?>" data-bs-toggle="tab" href="#tab_lampiran">
+                                        <i class="ki-outline ki-document fs-2 me-2 <?= $activeTab == 'lampiran' ? 'text-primary' : 'text-gray-500' ?>"></i>
+                                        2. Unggah Lampiran
+                                    </a>
+                                <?php else: ?>
+                                    <a class="nav-link text-muted px-4 disabled bg-light" href="javascript:;" title="Simpan data diri terlebih dahulu">
+                                        <i class="ki-outline ki-lock fs-2 me-2"></i>
+                                        2. Unggah Lampiran <span class="badge badge-light-danger ms-2 fs-8">Terkunci</span>
+                                    </a>
+                                <?php endif; ?>
+                            </li>
+
+                        </ul>
+
+                    </div>
+                </div>
 
                 <div class="tab-content" id="myTabContent">
                     <div class="tab-pane fade <?= $activeTab == 'data' ? 'show active' : '' ?>" id="tab_data_diri" role="tabpanel">
                         <div class="card shadow-sm">
+                            <div class="card-header align-items-center border-0 pt-6">
+
+                                <div class="card-title">
+                                    <h3 class="fw-bold m-0">Data Diri & Persyaratan</h3>
+                                </div>
+                                <?php if ($isEditMode): ?>
+                                    <div class="card-toolbar">
+                                        <a href="<?= base_url('sw-siswa/perijinan-ikh') ?>" class="btn btn-sm btn-light fw-bold hover-elevate-up">
+                                            <i class="ki-outline ki-arrow-left fs-3"></i> Kembali
+                                        </a>
+                                    </div>
+                                <?php endif; ?>
+
+                            </div>
                             <form action="<?= base_url('sw-siswa/perijinan-ikh/store') ?>" method="POST" id="form_data_diri">
                                 <?= csrf_field() ?>
                                 <?php if ($hasData): ?>
                                     <input type="hidden" name="id_ikh" value="<?= $idIkh ?>">
                                 <?php endif; ?>
-
                                 <div class="card-body p-9">
                                     <div class="row g-5">
                                         <div class="col-md-6"><label class="required form-label">NIK</label><input type="number" name="nik" id="nik" class="form-control" value="<?= $hasData ? $ikh['nik'] : $siswa['nik'] ?>" required /></div>
-                                        <div class="col-md-6"><label class="required form-label">NPWP</label><input type="text" name="npwp" id="npwp" class="form-control" value="<?= $hasData ? $ikh['npwp'] : '' ?>" required /></div>
-                                        <div class="col-md-12"><label class="required form-label">Nama Lengkap</label><input type="text" name="nama_lengkap" class="form-control" value="<?= $hasData ? $ikh['nama_lengkap'] : $siswa['nama_siswa'] ?>" required /></div>
+                                        <div class="col-md-6"><label class="required form-label">NPWP</label><input type="number" name="npwp" id="npwp" class="form-control" value="<?= $hasData ? $ikh['npwp'] : '' ?>" required /></div>
+                                        <div class="col-md-12"><label class="required form-label">Nama Lengkap</label><input type="text" name="nama_lengkap" id="nama_lengkap" class="form-control" value="<?= $hasData ? $ikh['nama_lengkap'] : $siswa['nama_siswa'] ?>" required /></div>
                                         <div class="col-md-6"><label class="required form-label">Tempat Lahir</label><input type="text" name="tempat_lahir" class="form-control" value="<?= $hasData ? $ikh['tempat_lahir'] : $siswa['tempat_lahir'] ?>" required /></div>
                                         <div class="col-md-6"><label class="required form-label">Tanggal Lahir</label><input type="date" id="kt_datepicker_lahir" name="tanggal_lahir" class="form-control" value="<?= $hasData ? $ikh['tanggal_lahir'] : $siswa['tgl_lahir'] ?>" required /></div>
 
@@ -149,7 +174,7 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                                         <div class="col-md-6"><label class="required form-label">Nomor WhatsApp</label><input type="number" name="no_wa" id="no_wa" class="form-control" value="<?= $hasData ? $ikh['no_wa'] : $siswa['hp'] ?>" required /></div>
                                         <div class="col-md-6"><label class="required form-label">Email Aktif</label><input type="email" name="email" class="form-control" value="<?= $hasData ? $ikh['email'] : $siswa['email'] ?>" required /></div>
                                         <div class="col-md-6">
-                                            <label class="required form-label">Kategori Kantor</label> 
+                                            <label class="required form-label">Kategori Kantor</label>
                                             <select name="kategori_kantor" class="form-select" data-control="select2" required>
                                                 <option></option>
                                                 <?php $kat = $hasData ? $ikh['kategori_kantor'] : $siswa['kantor']; ?>
@@ -186,11 +211,8 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                                     </div>
                                 </div>
                                 <div class="card-footer text-end">
-                                    <?php if ($isEditMode): ?>
-                                        <a href="<?= base_url('sw-siswa/perijinan-ikh') ?>" class="btn btn-light me-3">Batal Edit</a>
-                                    <?php endif; ?>
                                     <button type="submit" class="btn btn-primary">
-                                        <i class="ki-outline ki-save-2 fs-2"></i> Simpan Data Diri & Lanjut Upload
+                                        <i class="ki-outline ki-save-2 fs-2"></i> Simpan Data Diri & Pernyataan
                                     </button>
                                 </div>
                             </form>
@@ -199,13 +221,24 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
 
                     <div class="tab-pane fade <?= $activeTab == 'lampiran' ? 'show active' : '' ?>" id="tab_lampiran" role="tabpanel">
                         <div class="card shadow-sm">
-                            <div class="card-header border-0 pt-6">
-                                <h3 class="card-title">Unggah Dokumen Persyaratan</h3>
+                            <div class="card-header align-items-center border-0 pt-6">
+
+                                <div class="card-title">
+                                    <h3 class="fw-bold m-0">Unggah Dokumen Lampiran</h3>
+                                </div>
+                                <?php if ($isEditMode): ?>
+                                    <div class="card-toolbar">
+                                        <a href="<?= base_url('sw-siswa/perijinan-ikh') ?>" class="btn btn-sm btn-light fw-bold hover-elevate-up">
+                                            <i class="ki-outline ki-arrow-left fs-3"></i> Kembali
+                                        </a>
+                                    </div>
+                                <?php endif; ?>
+
                             </div>
                             <div class="card-body p-9">
                                 <?php if ($status_validasi == 'draft'): ?>
                                     <div class="alert alert-warning mb-8">
-                                        <strong>Peringatan!</strong> Anda harus menyelesaikan proses upload untuk ke-10 berkas di bawah ini agar berkas otomatis dikirim ke Admin.
+                                        <strong>Peringatan!</strong> Anda harus menyelesaikan proses upload untuk ke-9 berkas di bawah ini agar berkas otomatis dikirim ke Admin.
                                     </div>
                                 <?php endif; ?>
 
@@ -219,21 +252,47 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                                         ['id' => 'file_skck', 'label' => '5. SKCK', 'accept' => '.pdf', 'hint' => 'Hanya PDF', 'danger' => true],
                                         ['id' => 'file_ijazah', 'label' => '6. IJAZAH (ASLI)', 'accept' => '.pdf', 'hint' => 'Hanya PDF', 'danger' => true],
                                         ['id' => 'file_spt', 'label' => '7. BUKTI TANDA TERIMA SPT 2 TAHUN TERAKHIR', 'accept' => '.pdf', 'hint' => 'Hanya PDF', 'danger' => true],
-                                        ['id' => 'file_sertifikat', 'label' => '9. SERTIFIKAT BREVET PAJAK AB', 'accept' => '.pdf', 'hint' => 'Hanya PDF', 'danger' => true],
-                                        ['id' => 'file_ttd', 'label' => '10. TTD ELEKTRONIK', 'accept' => '.pdf', 'hint' => 'Hanya PDF', 'danger' => true],
+                                        ['id' => 'file_sertifikat', 'label' => '8. SERTIFIKAT BREVET PAJAK AB', 'accept' => '.pdf', 'hint' => 'Hanya PDF', 'danger' => true],
+                                        ['id' => 'file_ttd', 'label' => '9. TTD ELEKTRONIK', 'accept' => '.pdf', 'hint' => 'Hanya PDF', 'danger' => true],
                                     ];
                                     ?>
                                     <?php foreach ($fileConfigs as $cfg):
                                         $isUploaded = $hasData && !empty($ikh[$cfg['id']]);
+
+                                        // Siapkan URL dan Ekstensi jika file sudah terunggah
+                                        $fileUrl = '';
+                                        $fileExt = '';
+                                        if ($isUploaded) {
+                                            $fileUrl = base_url('uploads/ikh/' . $ikh[$cfg['id']]);
+                                            $fileExt = strtolower(pathinfo($ikh[$cfg['id']], PATHINFO_EXTENSION));
+                                        }
                                     ?>
                                         <div class="col-md-6">
                                             <div class="border rounded p-5 <?= $isUploaded ? 'border-success bg-light-success' : 'border-gray-300' ?>" id="box_<?= $cfg['id'] ?>">
+
                                                 <div class="d-flex justify-content-between align-items-center mb-4">
                                                     <label class="fw-bold fs-5 text-gray-800 <?= isset($cfg['danger']) ? 'text-danger' : '' ?>"><?= $cfg['label'] ?></label>
-                                                    <span class="badge status-badge <?= $isUploaded ? 'badge-success' : 'badge-light-danger' ?>" id="status_<?= $cfg['id'] ?>">
-                                                        <?= $isUploaded ? '<i class="ki-outline ki-check text-white fs-5 me-1"></i> Tersimpan' : 'Belum Upload' ?>
-                                                    </span>
+
+                                                    <div class="d-flex align-items-center gap-2">
+
+                                                        <?php if ($isUploaded): ?>
+                                                            <a href="javascript:void(0)"
+                                                                class="btn btn-icon btn-sm btn-light-primary hover-elevate-up btn-preview-berkas"
+                                                                data-file-url="<?= $fileUrl ?>"
+                                                                data-file-ext="<?= $fileExt ?>"
+                                                                data-file-name="<?= $cfg['label'] ?>"
+                                                                title="Lihat dokumen tersimpan">
+                                                                <i class="ki-outline ki-eye fs-3"></i>
+                                                            </a>
+                                                        <?php endif; ?>
+
+                                                        <span class="badge status-badge <?= $isUploaded ? 'badge-success' : 'badge-light-danger' ?>" id="status_<?= $cfg['id'] ?>">
+                                                            <?= $isUploaded ? '<i class="ki-outline ki-check text-white fs-5 me-1"></i> Tersimpan' : 'Belum Upload' ?>
+                                                        </span>
+
+                                                    </div>
                                                 </div>
+
                                                 <div class="input-group input-group-sm">
                                                     <input type="file" class="form-control file-input-ajax" id="input_<?= $cfg['id'] ?>" data-name="<?= $cfg['id'] ?>" accept="<?= $cfg['accept'] ?>">
                                                     <button class="btn btn-primary btn-upload-ajax" type="button" data-target="<?= $cfg['id'] ?>">
@@ -354,13 +413,28 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                                         <span class="card-label fw-bold fs-3 mb-1">Formulir Permohonan</span>
                                         <span class="text-muted mt-1 fw-semibold fs-7">Data diri sesuai pengajuan terakhir</span>
                                     </h3>
-                                    <div class="card-toolbar">
+                                    <div class="card-toolbar d-flex flex-wrap gap-2">
                                         <?php if ($canEdit): ?>
-                                            <a href="?edit=true" class="btn btn-sm btn-light-primary fw-bold">
-                                                <i class="ki-outline ki-pencil fs-3"></i> Edit Data
-                                            </a>
+
+                                            <?php if ($stat_val == 'ditolak'): ?>
+                                                <a href="javascript:void(0)" data-url="<?= base_url('sw-siswa/perijinan-ikh/perbaikan/' . encrypt_url($ikh['id_ikh'])) ?>" class="btn btn-sm btn-danger fw-bold hover-elevate-up btn-perbaikan" title="Kirim perbaikan data">
+                                                    <i class="ki-outline ki-arrows-circle fs-3"></i>
+                                                    <span class="d-none d-sm-inline">Kirim Perbaikan</span>
+                                                    <span class="d-inline d-sm-none">Perbaiki</span>
+                                                </a>
+                                                <a href="?edit=true#tab_data_diri" class="btn btn-sm btn-light-primary fw-bold hover-elevate-up">
+                                                    <i class="ki-outline ki-pencil fs-3"></i>
+                                                    <span class="d-none d-sm-inline">Edit Data</span>
+                                                    <span class="d-inline d-sm-none">Edit</span>
+                                                </a>
+                                            <?php endif; ?>
+
                                         <?php else: ?>
-                                            <span class="badge badge-light-success">Data tidak dapat diubah</span>
+                                            <span class="badge badge-light-success px-3 py-2 text-wrap text-center">
+                                                <i class="ki-outline ki-shield-tick fs-4 text-success me-1"></i>
+                                                <span class="d-none d-sm-inline">Data tidak dapat diubah</span>
+                                                <span class="d-inline d-sm-none">Terkunci</span>
+                                            </span>
                                         <?php endif; ?>
                                     </div>
                                 </div>
@@ -603,164 +677,226 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
 
 <?= $this->section('scripts'); ?>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        $("#kt_datepicker_lahir").flatpickr({
-            altInput: true,
-            altFormat: "d-m-Y", // Format yang tampil di layar: 12 Agustus 1990
-            dateFormat: "Y-m-d", // Format yang dikirim ke database: 1990-08-12
-            maxDate: "today", // Cegah user memilih tanggal di masa depan
-            locale: "id" // Opsional: Bahasa Indonesia (jika disetup di Metronic)
-        });
+    // Injeksi CSS Animasi
+    $('<style>@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } } .animate-pulse { animation: pulse 2s infinite; }</style>').appendTo('head');
+
+    $(document).ready(function() {
+
+        // ==========================================================
+        // 1. INISIALISASI PLUGIN & BATASAN INPUT
+        // ==========================================================
+        // Cek apakah elemen ada sebelum mengaktifkan flatpickr agar tidak error
+        if ($("#kt_datepicker_lahir").length) {
+            $("#kt_datepicker_lahir").flatpickr({
+                altInput: true,
+                altFormat: "d-m-Y",
+                dateFormat: "Y-m-d",
+                maxDate: "today",
+                locale: "id"
+            });
+        }
+
+        // Pembatas Karakter menggunakan jQuery (Anti-Error meskipun elemen tidak ada di halaman)
+        $('#nik, #npwp').on('input', function() { if (this.value.length > 16) this.value = this.value.slice(0, 16); });
+        $('#nama_lengkap').on('input', function() { if (this.value.length > 60) this.value = this.value.slice(0, 60); });
+        $('#no_wa').on('input', function() { if (this.value.length > 15) this.value = this.value.slice(0, 15); });
+        $('#tahun_masuk, #tahun_lulus').on('input', function() { if (this.value.length > 4) this.value = this.value.slice(0, 4); });
+
+
         <?php if ($showForm): ?>
-            // SCRIPT KHUSUS FORM & AJAX UPLOAD
-            $('.btn-upload-ajax').click(function() {
-                const idIkh = '<?= $idIkh ?>';
-                let csrfHash = '<?= csrf_hash() ?>';
-                const csrfName = '<?= csrf_token() ?>';
-                let targetId = $(this).data('target');
-                let fileInput = $('#input_' + targetId)[0];
-                let btn = $(this);
+        // ==========================================================
+        // 2. SCRIPT AJAX UPLOAD 
+        // ==========================================================
+        $('.btn-upload-ajax').click(function() {
+            const idIkh = '<?= $idIkh ?>';
+            let csrfHash = '<?= csrf_hash() ?>';
+            const csrfName = '<?= csrf_token() ?>';
+            let targetId = $(this).data('target');
+            let fileInput = $('#input_' + targetId)[0];
+            let btn = $(this);
 
-                if (fileInput.files.length === 0) {
-                    toastr.warning("Silakan pilih file terlebih dahulu.");
-                    return;
+            if (fileInput.files.length === 0) {
+                toastr.warning("Silakan pilih file terlebih dahulu.");
+                return;
+            }
+
+            let fileData = fileInput.files[0];
+            const maxSizeInBytes = 2 * 1024 * 1024; // 2 MB
+            
+            if (fileData.size > maxSizeInBytes) {
+                Swal.fire({
+                    text: "Ukuran file " + fileData.name + " terlalu besar! Maksimal hanya 2 MB.",
+                    icon: "error",
+                    buttonsStyling: false,
+                    confirmButtonText: "Baiklah",
+                    customClass: { confirmButton: "btn btn-danger" }
+                });
+                $(fileInput).val('');
+                return;
+            }
+
+            let formData = new FormData();
+            formData.append('file_dokumen', fileData);
+            formData.append('input_name', targetId);
+            formData.append('id_ikh', idIkh);
+            formData.append(csrfName, csrfHash);
+
+            btn.find('.indicator-label').hide();
+            btn.find('.indicator-progress').show();
+            btn.prop('disabled', true);
+
+            $.ajax({
+                url: '<?= base_url('sw-siswa/perijinan-ikh/upload-ajax') ?>',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(response) {
+                    if (response.csrf_hash) csrfHash = response.csrf_hash;
+
+                    if (response.success) {
+                        toastr.success(response.message);
+
+                        $('#box_' + targetId).removeClass('border-gray-300').addClass('border-success bg-light-success');
+                        $('#status_' + targetId).removeClass('badge-light-danger').addClass('badge-success')
+                            .html('<i class="ki-outline ki-check text-white fs-5 me-1"></i> Tersimpan');
+
+                        // --- UPDATE TOMBOL PREVIEW DINAMIS ---
+                        let localFileUrl = URL.createObjectURL(fileData);
+                        let newFileExt = fileData.name.split('.').pop().toLowerCase();
+                        let fileNameLabel = $('#box_' + targetId).find('label.fs-5').text().trim();
+
+                        let previewBtn = $('#box_' + targetId).find('.btn-preview-berkas');
+
+                        if (previewBtn.length > 0) {
+                            previewBtn.attr('data-file-url', localFileUrl);
+                            previewBtn.attr('data-file-ext', newFileExt);
+                        } else {
+                            let newPreviewBtn = `
+                                <a href="javascript:void(0)" 
+                                   class="btn btn-icon btn-sm btn-light-primary hover-elevate-up btn-preview-berkas me-2" 
+                                   data-file-url="${localFileUrl}" 
+                                   data-file-ext="${newFileExt}" 
+                                   data-file-name="${fileNameLabel}" 
+                                   title="Lihat dokumen tersimpan">
+                                    <i class="ki-outline ki-eye fs-3"></i>
+                                </a>
+                            `;
+                            $('#status_' + targetId).before(newPreviewBtn);
+                        }
+
+                        $(fileInput).val('');
+
+                        if (response.is_complete) {
+                            Swal.fire({
+                                text: "Berhasil! Semua file persyaratan telah berhasil diunggah. Kami akan mengalihkan Anda ke halaman Monitoring.",
+                                icon: "success",
+                                showConfirmButton: false,
+                                timer: 3000
+                            }).then(() => {
+                                window.location.href = '<?= base_url('sw-siswa/perijinan-ikh') ?>';
+                            });
+                        }
+                    } else {
+                        toastr.error(response.message);
+                    }
+                },
+                error: function(xhr) {
+                    toastr.error("Terjadi kesalahan jaringan atau ekstensi tidak didukung.");
+                },
+                complete: function() {
+                    btn.find('.indicator-label').show();
+                    btn.find('.indicator-progress').hide();
+                    btn.prop('disabled', false);
                 }
+            });
+        });
+        <?php endif; ?>
 
-                let fileData = fileInput.files[0];
-                const maxSizeInBytes = 2 * 1024 * 1024; // 2 MB
-                if (fileData.size > maxSizeInBytes) {
+
+        // ==========================================================
+        // 3. SCRIPT MODAL PRATINJAU (TERPISAH & ANTI-GAGAL)
+        // ==========================================================
+        $('body').on('click', '.btn-preview-berkas', function(e) {
+            e.preventDefault();
+
+            let fileUrl = $(this).attr('data-file-url');
+            let fileExt = $(this).attr('data-file-ext');
+            let fileName = $(this).attr('data-file-name');
+
+            if (!fileUrl) {
+                toastr.error("Gagal memuat pratinjau. Silakan refresh halaman.");
+                return;
+            }
+
+            $('#modal_preview_title').text(fileName);
+            $('#btn_download_berkas').attr('href', fileUrl).attr('download', fileName + '.' + fileExt);
+            $('#preview_container').html('<div class="spinner-border text-primary" role="status"></div>');
+
+            let modalElement = document.getElementById('modal_preview_berkas');
+            let myModal = bootstrap.Modal.getInstance(modalElement);
+            if (!myModal) {
+                myModal = new bootstrap.Modal(modalElement);
+            }
+            myModal.show();
+
+            setTimeout(() => {
+                if (fileExt === 'pdf') {
+                    $('#preview_container').html('<embed src="' + fileUrl + '" type="application/pdf" width="100%" height="700px" />');
+                } else if (['jpg', 'jpeg', 'png'].includes(fileExt)) {
+                    $('#preview_container').html('<img src="' + fileUrl + '" class="img-fluid rounded shadow-sm" style="max-height: 700px; object-fit: contain;" />');
+                } else {
+                    $('#preview_container').html('<div class="text-center text-muted"><i class="ki-outline ki-file fs-5x mb-3"></i><br>Pratinjau tidak tersedia untuk format ini.</div>');
+                }
+            }, 500);
+        });
+
+        $('body').on('hidden.bs.modal', '#modal_preview_berkas', function() {
+            $('#preview_container').empty();
+            $('.modal-backdrop').remove();
+            $('body').css('overflow', '');
+        });
+
+
+        // ==========================================================
+        // 4. SCRIPT POPUP PERBAIKAN
+        // ==========================================================
+        $('body').on('click', '.btn-perbaikan', function(e) {
+            e.preventDefault();
+            const targetUrl = $(this).attr('data-url');
+
+            if (!targetUrl) {
+                console.error("URL tujuan tidak ditemukan!");
+                return;
+            }
+
+            Swal.fire({
+                title: "Kirim Ulang Berkas?",
+                text: "Apakah Anda yakin semua data dan dokumen perbaikan sudah benar? Berkas Anda akan masuk kembali ke antrean admin untuk divalidasi ulang.",
+                icon: "info",
+                showCancelButton: true,
+                confirmButtonText: "Ya, Kirim Sekarang!",
+                cancelButtonText: "Batal",
+                customClass: {
+                    confirmButton: "btn btn-danger",
+                    cancelButton: "btn btn-light-primary"
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
                     Swal.fire({
-                        text: "Ukuran file " + fileData.name + " terlalu besar! Maksimal hanya 2 MB.",
-                        icon: "error",
-                        buttonsStyling: false,
-                        confirmButtonText: "Baiklah",
-                        customClass: {
-                            confirmButton: "btn btn-danger"
+                        text: "Meneruskan perbaikan Anda...",
+                        icon: "info",
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
                         }
                     });
-                    $(fileInput).val('');
-                    return;
+                    window.location.href = targetUrl;
                 }
-
-                let formData = new FormData();
-                formData.append('file_dokumen', fileData);
-                formData.append('input_name', targetId);
-                formData.append('id_ikh', idIkh);
-                formData.append('<?= csrf_token() ?>', csrfHash);
-
-                btn.find('.indicator-label').hide();
-                btn.find('.indicator-progress').show();
-                btn.prop('disabled', true);
-
-                $.ajax({
-                    url: '<?= base_url('sw-siswa/perijinan-ikh/upload-ajax') ?>',
-                    type: 'POST',
-                    data: formData,
-                    contentType: false,
-                    processData: false,
-                    success: function(response) {
-                        if (response.csrf_hash) {
-                            csrfHash = response.csrf_hash;
-                        }
-                        if (response.success) {
-                            toastr.success(response.message);
-
-                            // Update UI Box menjadi hijau (Sukses)
-                            $('#box_' + targetId).removeClass('border-gray-300').addClass('border-success bg-light-success');
-                            $('#status_' + targetId).removeClass('badge-light-danger').addClass('badge-success')
-                                .html('<i class="ki-outline ki-check text-white fs-5 me-1"></i> Tersimpan');
-
-                            // Kosongkan input file agar bersih
-                            $(fileInput).val('');
-
-                            // ==========================================================
-                            // PERBAIKAN: AUTO-RELOAD JIKA SEMUA FILE SUDAH LENGKAP
-                            // ==========================================================
-                            if (response.is_complete) {
-                                // Tampilkan pesan popup besar sebelum reload
-                                Swal.fire({
-                                    text: "Berhasil! Semua file persyaratan telah berhasil diunggah. Kami akan mengalihkan Anda ke halaman Monitoring.",
-                                    icon: "success",
-                                    showConfirmButton: false,
-                                    timer: 3000 // Tunggu 3 detik agar user bisa membaca
-                                }).then(() => {
-                                    // Redirect/Reload tanpa query string (?tab=lampiran)
-                                    window.location.href = '<?= base_url('sw-siswa/perijinan-ikh') ?>';
-                                });
-                            }
-                            // ==========================================================
-
-                        } else {
-                            toastr.error(response.message);
-                        }
-                    },
-                    error: function(xhr) {
-                        toastr.error("Terjadi kesalahan jaringan atau ekstensi tidak didukung.");
-                    },
-                    complete: function() {
-                        btn.find('.indicator-label').show();
-                        btn.find('.indicator-progress').hide();
-                        btn.prop('disabled', false);
-                    }
-                });
             });
-        <?php endif; ?>
-    });
+        });
 
-    $('<style>@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } } .animate-pulse { animation: pulse 2s infinite; }</style>').appendTo('head');
-    // Event listener saat tombol/icon preview diklik
-    $('.btn-preview-berkas').on('click', function(e) {
-        e.preventDefault();
-
-        // Ambil data dari atribut HTML
-        let fileUrl = $(this).data('file-url');
-        let fileExt = $(this).data('file-ext');
-        let fileName = $(this).data('file-name');
-
-        // Ubah judul modal dan tombol download
-        $('#modal_preview_title').text(fileName);
-        $('#btn_download_berkas').attr('href', fileUrl);
-
-        // Tampilkan loading spinner terlebih dahulu
-        $('#preview_container').html('<div class="spinner-border text-primary" role="status"></div>');
-
-        // Buka modal
-        var previewModal = new bootstrap.Modal(document.getElementById('modal_preview_berkas'));
-        previewModal.show();
-
-        // Suntikkan konten file (Beda penanganan PDF vs Gambar)
-        setTimeout(function() {
-            if (fileExt === 'pdf') {
-                // Tampilkan PDF menggunakan tag <embed>
-                $('#preview_container').html(
-                    '<embed src="' + fileUrl + '" type="application/pdf" width="100%" height="700px" />'
-                );
-            } else if (fileExt === 'jpg' || fileExt === 'jpeg' || fileExt === 'png') {
-                // Tampilkan Gambar
-                $('#preview_container').html(
-                    '<img src="' + fileUrl + '" class="img-fluid rounded shadow-sm" style="max-height: 700px; object-fit: contain;" alt="Preview" />'
-                );
-            } else {
-                // Fallback jika ekstensi tidak dikenali
-                $('#preview_container').html(
-                    '<div class="text-center text-muted"><i class="ki-outline ki-file fs-5x mb-3"></i><br>Pratinjau tidak tersedia untuk format file ini. Silakan unduh untuk melihat.</div>'
-                );
-            }
-        }, 500); // Jeda setengah detik agar animasi modal mulus
-    });
-
-    document.getElementById('nik').addEventListener('input', function() {
-        if (this.value.length > 16) this.value = this.value.slice(0, 16);
-    });
-    document.getElementById('no_wa').addEventListener('input', function() {
-        if (this.value.length > 15) this.value = this.value.slice(0, 15);
-    });
-
-    document.getElementById('tahun_masuk').addEventListener('input', function() {
-        if (this.value.length > 4) this.value = this.value.slice(0, 4);
-    });
-    document.getElementById('tahun_lulus').addEventListener('input', function() {
-        if (this.value.length > 4) this.value = this.value.slice(0, 4);
     });
 </script>
 <?= $this->endSection(); ?>

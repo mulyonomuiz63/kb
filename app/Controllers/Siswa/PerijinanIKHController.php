@@ -196,11 +196,38 @@ class PerijinanIKHController extends BaseController
             // Jika ke-10 file terisi dan status masih draft, otomatis ubah ke pending (siap diperiksa admin)
             if ($isComplete && $statusValidasi === 'draft') {
                 $this->ikhModel->update($idIkh, ['status_validasi_admin' => 'pending']);
+                send_notif(
+                    '1',
+                    'Pesan baru: ' . session()->get('nama'),
+                    'Pengajuan IKH siap diperiksa',
+                    base_url('sw-admin/ikh')
+                );
+            }else{
+                $isComplete = false;
             }
             
             return $isComplete; // Kembalikan true jika lengkap
         }
         
         return false;
+    }
+
+    public function perbaikan($id)
+    {
+        $idIkh = decrypt_url($id);
+        $ikh = $this->ikhModel->where('id_siswa', session('id'))->first();
+
+        if (!$ikh || $ikh['id_ikh'] != $idIkh) {
+            return redirect()->to('sw-siswa/perijinan-ikh')->with('error', 'Data IKH tidak ditemukan.');
+        }
+
+        $this->ikhModel->update($idIkh, ['status_validasi_admin' => 'pending']);
+        send_notif(
+            '1',
+            'Pesan baru: ' . session()->get('nama'),
+            'Perbaikan berkas IKH siap diperiksa',
+            base_url('sw-admin/ikh')
+        );
+        return redirect()->to('sw-siswa/perijinan-ikh')->with('success', 'Perbaikan berhasil dikirim. Pengajuan Anda akan segera diperiksa kembali.');
     }
 }
