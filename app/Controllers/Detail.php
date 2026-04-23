@@ -3,41 +3,16 @@
 namespace App\Controllers;
 
 use App\Models\UjianModel;
-use App\Models\UjiansiswaModel;
-use App\Models\UjianMasterModel;
-use App\Models\UjiandetailModel;
-use App\Models\SiswaModel;
-
-
-use App\Libraries\Pdf;
-
-use Endroid\QrCode\Color\Color;
-use Endroid\QrCode\Encoding\Encoding;
-use Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelLow;
-use Endroid\QrCode\QrCode;
-use Endroid\QrCode\Label\Label;
-use Endroid\QrCode\Logo\Logo;
-use Endroid\QrCode\RoundBlockSizeMode\RoundBlockSizeModeMargin;
-use Endroid\QrCode\Writer\PngWriter;
 
 class Detail extends BaseController
 {
 
     protected $UjianModel;
-    protected $UjiansiswaModel;
-    protected $UjianMasterModel;
-    protected $UjiandetailModel;
-    protected $SiswaModel;
     
 
     public function __construct()
     {
-        $validation = \Config\Services::validation();
         $this->UjianModel = new UjianModel();
-        $this->UjiansiswaModel = new UjiansiswaModel();
-        $this->UjianMasterModel = new UjianMasterModel();
-        $this->UjiandetailModel = new UjiandetailModel();
-        $this->SiswaModel = new SiswaModel();      
          
     }
 
