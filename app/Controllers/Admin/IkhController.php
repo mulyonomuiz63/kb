@@ -136,6 +136,13 @@ class IkhController extends BaseController
                     'status_sertifikat' => 'terbit' // Otomatis terbit!
                 ]);
 
+                send_notif(
+                    $dataLama['id_siswa'], 
+                    'Kartu IKH Diterbitkan',
+                    'Kartu IKH anda sudah berhasil di terbitkan',
+                     base_url('sw-siswa/perijinan-ikh')
+                );
+
                 return $this->response->setJSON(['success' => true, 'message' => 'Kartu IKH berhasil diterbitkan!', 'csrf_hash' => csrf_hash()]);
 
             } catch (\Exception $e) {
