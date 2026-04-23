@@ -226,7 +226,7 @@
                                                 <option value="Mandiri" <?= $kat == 'Mandiri' ? 'selected' : '' ?>>Mandiri</option>
                                                 <option value="Lainnya" <?= $kat == 'Lainnya' ? 'selected' : '' ?>>Lainnya</option>
                                             </select>
-                                            <input type="text" name="nama_kantor" class="form-control form-control-lg form-control-solid mb-3" placeholder="Nama Perusahaan/Lembaga/Kantor" value="<?= old('kantor', $siswa->kantor); ?>" required />
+                                            <input type="text" name="nama_kantor" class="form-control form-control-lg form-control-solid mb-3" placeholder="Nama Perusahaan/Lembaga/Kantor" value="<?= old('nama_kantor', $siswa->nama_kantor); ?>" required />
                                             <input type="text" name="alamat_kantor" class="form-control form-control-lg form-control-solid" placeholder="Alamat Perusahaan/Lembaga/Kantor" value="<?= old('alamat_kantor', $siswa->alamat_kantor); ?>" />
                                         </div>
                                     </div>
