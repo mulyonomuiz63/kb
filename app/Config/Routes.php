@@ -139,6 +139,11 @@ $routes->group('notif', function ($routes) {
 });
 
 
+$routes->group('detail', function ($routes) {
+    $routes->get('data/(:segment)', 'Detail::data/$1');
+    $routes->get('data_ab/(:segment)', 'Detail::data_ab/$1');
+});
+
 
 //untuk di terapkan di cronjob, hapus transaksi yang sudah lebih dari 1 hari atau expired
 $routes->get('hapus-transaksi', 'Admin\TransaksiController::hapusTransaksi');
