@@ -196,7 +196,7 @@
 
                             <div class="col-md-12 fv-row" id="wrapper_id_mapel">
                                 <label class="fs-6 fw-semibold mb-2">Mapel</label>
-                                <select name="id_mapel[]" id="id_mapel" class="form-select form-select-solid dynamic-req-brevet" data-control="select2" data-dropdown-parent="#wrapper_id_mapel" data-placeholder="Pilih Mapel..." multiple="multiple">
+                                <select name="id_mapel[]" id="id_mapel" class="form-select form-select-solid" data-control="select2" data-dropdown-parent="#wrapper_id_mapel" data-placeholder="Pilih Mapel..." multiple="multiple">
                                     <option></option>
                                 </select>
                             </div>
@@ -296,10 +296,10 @@
                             </div>
                         </div>
 
-                        <div class="row g-5 bg-light-primary p-5 rounded">
+                        <div class="row g-5 bg-light-primary p-5 rounded" id="wrapper_kelas">
                             <div class="col-md-6 fv-row">
                                 <label class="fs-6 fw-semibold mb-2">Ubah Kelas <span class="text-muted fw-normal fs-8">(Opsional)</span></label>
-                                <select name="id_kelas" id="edit_id_kelas" class="form-select form-select-solid" data-control="select2" data-dropdown-parent="#edit_paket" data-placeholder="Pilih Kelas Baru">
+                                <select name="id_kelas" id="edit_id_kelas" class="form-select form-select-solid" data-control="select2" data-dropdown-parent="#wrapper_kelas" data-placeholder="Pilih Kelas Baru">
                                     <option value="">-- Biarkan Kosong --</option>
                                     <?php foreach ($kelas as $rows) : ?>
                                         <option value="<?= $rows->id_kelas; ?>"><?= $rows->nama_kelas; ?></option>
