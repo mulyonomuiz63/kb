@@ -81,9 +81,9 @@
 <?= $this->endSection(); ?>
 <?= $this->section('meta_tags') ?>
     <meta property="og:title" content="<?= $paket->nama_paket ?>" />
-    <meta property="og:description" content="<?= $paket->jenis_paket ?>" />
+    <meta property="og:description" content="<?= $paket->tagline ?>" />
     <meta property="og:url" content="<?= current_url() ?>" />
-    <meta property="og:article:section" content="<?= $paket->jenis_paket ?>" />
+    <meta property="og:article:section" content="<?= $paket->tagline ?>" />
     <meta property="og:image" content="<?= base_url('assets-landing/images/paket/thumbnails/'.$paket->file) ?>" />
     <meta property="og:image:alt" content="<?= $paket->nama_paket ?>" />
     <meta property="og:image:type" content="image/jpeg" />
@@ -107,7 +107,7 @@
               <div class="col-md-4">
                 <div class="bg-light-primary rounded border-primary border border-dashed p-6 text-center">
                   <i class="ki-outline ki-package fs-2tx text-primary mb-2"></i>
-                  <div class="fw-bolder fs-6 text-gray-800 mt-2"><?= $paket->jenis_paket ?></div>
+                  <div class="fw-bolder fs-6 text-gray-800 mt-2"><?= $paket->tagline ?></div>
                   <div class="fw-bold text-muted small">Tipe Paket</div>
                 </div>
               </div>
@@ -232,7 +232,7 @@
           <div class="mb-7 text-center">
             <?= img_lazy('assets-landing/images/paket/thumbnails/' . $paket->file, $paket->nama_paket, ['class' => 'rounded-3 w-100 mb-5 shadow-sm']) ?>
             <h4 class="text-gray-800 fw-bolder mb-0"><?= $paket->nama_paket ?></h4>
-            <span class="badge badge-light-primary fw-bold px-4 py-2 mt-2"><?= $paket->jenis_paket ?></span>
+            <span class="badge badge-light-primary fw-bold px-4 py-2 mt-2"><?= $paket->tagline ?></span>
           </div>
 
           <div class="separator separator-dashed mb-7"></div>
@@ -242,7 +242,7 @@
             <input type="hidden" name="idpaket" id="idpaket" value="<?= $paket->idpaket ?>">
             <input type="hidden" name="idmapel" value="<?= $paket->id_mapel ?>">
             <input type="hidden" name="nama_paket" value="<?= $paket->nama_paket ?>">
-            <input type="hidden" name="jenis_paket" value="<?= $paket->jenis_paket ?>">
+            <input type="hidden" name="tagline" value="<?= $paket->tagline ?>">
             <input type="hidden" name="jumlah_bulan" value="<?= $paket->jumlah_bulan ?>">
             <input type="hidden" name="nominal" id="nominal" value="<?= $paket->nominal_paket ?>">
             <input type="hidden" name="diskon" id="diskon" value="<?= $paket->diskon ?>">

@@ -2,12 +2,10 @@
 <?= $this->section('styles'); ?>
 <style>
     /* Custom CSS untuk halaman create artikel */
-    .select2-container--bootstrap5 .select2-selection--single {
+    .select2-container--bootstrap5 .select2-selection--single,
+    .select2-container--bootstrap5 .select2-selection--multiple {
         min-height: calc(1.5em + 1.65rem + 2px) !important;
-        padding: 0.825rem 1.5rem !important;
-    }
-    .select2-container--bootstrap5 .select2-selection__rendered {
-        line-height: 1.5 !important;
+        padding: 0.4rem 1rem !important;
     }
 </style>
 <?= $this->endSection(); ?>
@@ -61,7 +59,7 @@
                                             </div>
                                         </td>
                                         <td class="text-center">
-                                            <span class="text-muted"><?= $s->jenis_paket; ?></span>
+                                            <span class="text-muted"><?= $s->tagline; ?></span>
                                         </td>
                                         <td class="text-center fw-bold text-danger">
                                             <?= $s->diskon; ?>%
@@ -77,8 +75,8 @@
                                         <td class="text-center text-primary fw-bold">
                                             <?= $s->komisi ?>%
                                         </td>
-                                        <td class="text-center">
-                                            <div class="d-flex justify-content-center gap-2">
+                                        <td class="text-end">
+                                            <div class="d-flex justify-content-end gap-2">
                                                 <?php if ($s->v_ujian == 1 && $s->v_materi == 0): ?>
                                                     <a href="<?= base_url("sw-admin/paket/review/" . $s->slug) ?>" class="btn btn-icon btn-light-info btn-sm" data-bs-toggle="tooltip" title="Review">
                                                         <i class="ki-duotone ki-eye fs-3"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
@@ -92,6 +90,12 @@
                                                 <button type="button" class="btn btn-icon btn-light-primary btn-sm edit-paket" data-bs-toggle="modal" data-bs-target="#edit_paket" data-paket="<?= encrypt_url($s->idpaket); ?>" data-bs-toggle="tooltip" title="Edit Data">
                                                     <i class="ki-duotone ki-pencil fs-3"><span class="path1"></span><span class="path2"></span></i>
                                                 </button>
+
+                                                <a href="javascript:void(0)" class="btn btn-icon btn-light-danger btn-sm btn-delete" data-url="<?= base_url('sw-admin/paket/delete/' . encrypt_url($s->idpaket)) ?>">
+                                                    <i class="ki-duotone ki-trash fs-3">
+                                                        <span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span>
+                                                    </i>
+                                                </a>
                                             </div>
                                         </td>
                                     </tr>
@@ -105,6 +109,7 @@
         </div>
     </div>
 </div>
+
 <div class="modal fade" id="tambah_paket" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered mw-800px">
         <div class="modal-content rounded border-0">
@@ -119,33 +124,15 @@
 
                 <div class="modal-body scroll-y px-10 px-lg-15 pt-5 pb-10">
                     <div class="row g-5">
-                        <div class="col-md-6 fv-row">
-                            <label class="required fs-6 fw-semibold mb-2">Kelas</label>
-                            <select name="id_kelas" id="id_kelas" class="form-select form-select-solid" data-control="select2" data-placeholder="Pilih Kelas" required>
-                                <option value="">Pilih</option>
-                                <?php $kelas = $db->query("select * from kelas")->getResultObject(); ?>
-                                <?php foreach ($kelas as $rows) : ?>
-                                    <option value="<?= $rows->id_kelas; ?>"><?= $rows->nama_kelas; ?></option>
-                                <?php endforeach; ?>
+                        <div class="col-md-12 fv-row mb-5">
+                            <label class="required fs-6 fw-semibold mb-2 text-primary">Pilih Layanan / Jenis Paket</label>
+                            <select name="jenis_paket[]" class="form-select form-select-solid jenis_paket" data-control="select2" data-dropdown-parent="#tambah_paket" data-placeholder="Pilih layanan..." multiple="multiple" required>
+                                <option value="brevet">Kelas Brevet AB</option>
+                                <option value="ikh">Perijinan IKH</option>
                             </select>
+                            <div class="form-text text-muted">Form akan menyesuaikan berdasarkan pilihan di atas. Anda dapat memilih lebih dari satu.</div>
                         </div>
-                        <div class="col-md-6 fv-row">
-                            <label class="fs-6 fw-semibold mb-2">Ujian <span class="text-danger fs-8 fw-normal">(Pilih semua untuk semua ujian)</span></label>
-                            <select name="id_ujian" id="ujian_master" class="form-select form-select-solid" data-control="select2">
-                                <option value="">Pilih Kelas Dahulu</option>
-                            </select>
-                        </div>
-                        <div class="col-md-12 fv-row">
-                            <label class="fs-6 fw-semibold mb-2">Mapel <span class="text-danger fs-8 fw-normal">(Pilih semua untuk semua materi)</span></label>
-                            <select name="id_mapel" id="id_mapel" class="form-select form-select-solid" data-control="select2">
-                                <option value="">Pilih Kelas Dahulu</option>
-                            </select>
-                        </div>
-                    </div>
 
-                    <div class="separator separator-dashed my-7"></div>
-
-                    <div class="row g-5">
                         <div class="col-md-12 fv-row">
                             <label class="required fs-6 fw-semibold mb-2">Gambar Paket</label>
                             <input type="file" name="avatar" class="form-control form-control-solid" required>
@@ -155,8 +142,8 @@
                             <input type="text" name="nama_paket" class="form-control form-control-solid" required>
                         </div>
                         <div class="col-md-6 fv-row">
-                            <label class="required fs-6 fw-semibold mb-2">Jenis Paket</label>
-                            <input type="text" name="jenis_paket" class="form-control form-control-solid" required>
+                            <label class="required fs-6 fw-semibold mb-2">Tagline Paket</label>
+                            <input type="text" name="tagline" class="form-control form-control-solid" required>
                         </div>
                         <div class="col-md-6 fv-row">
                             <label class="required fs-6 fw-semibold mb-2">Nominal Paket (Rp)</label>
@@ -164,7 +151,7 @@
                         </div>
                         <div class="col-md-6 fv-row">
                             <label class="required fs-6 fw-semibold mb-2">Diskon</label>
-                            <select name="iddiskon" class="form-select form-select-solid" required>
+                            <select name="iddiskon" class="form-select form-select-solid" data-control="select2" data-dropdown-parent="#tambah_paket" required>
                                 <option value="">Pilih</option>
                                 <?php $dataDiskon = $db->query("select * from diskon ")->getResultObject(); ?>
                                 <?php foreach ($dataDiskon as $rows) : ?>
@@ -175,7 +162,6 @@
                         <div class="col-md-6 fv-row">
                             <label class="required fs-6 fw-semibold mb-2">Status Paket</label>
                             <select name="status" class="form-select form-select-solid" required>
-                                <option value="">Pilih</option>
                                 <option value="1">Tampil / Aktif</option>
                                 <option value="0">Tidak Tampil / Non-Aktif</option>
                             </select>
@@ -185,12 +171,43 @@
                             <input type="number" name="komisi" class="form-control form-control-solid" value="0">
                         </div>
                     </div>
-                    <input type="hidden" name="jumlah_bulan" value="12">
+
+                    <div class="brevet-fields" style="display: none;">
+                        <div class="separator separator-dashed my-8"></div>
+                        <h4 class="fw-bold text-dark mb-5"><i class="ki-duotone ki-book-open fs-2 me-2"></i> Pengaturan Kelas Brevet</h4>
+                        <div class="row g-5 bg-light-primary p-5 rounded">
+                            <div class="col-md-12 fv-row" id="wrapper_id_kelas">
+                                <label class="required fs-6 fw-semibold mb-2">Kelas</label>
+                                <select name="id_kelas" id="id_kelas" class="form-select form-select-solid dynamic-req-brevet" data-control="select2" data-dropdown-parent="#wrapper_id_kelas" data-placeholder="Pilih Kelas">
+                                    <option value="">Pilih</option>
+                                    <?php $kelas = $db->query("select * from kelas")->getResultObject(); ?>
+                                    <?php foreach ($kelas as $rows) : ?>
+                                        <option value="<?= $rows->id_kelas; ?>"><?= $rows->nama_kelas; ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <div class="col-md-12 fv-row" id="wrapper_id_ujian">
+                                <label class="fs-6 fw-semibold mb-2">Ujian</label>
+                                <select name="id_ujian[]" id="id_ujian" class="form-select form-select-solid dynamic-req-brevet" data-control="select2" data-dropdown-parent="#wrapper_id_ujian" data-placeholder="Pilih Ujian..." multiple="multiple">
+                                    <option></option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-12 fv-row" id="wrapper_id_mapel">
+                                <label class="fs-6 fw-semibold mb-2">Mapel</label>
+                                <select name="id_mapel[]" id="id_mapel" class="form-select form-select-solid dynamic-req-brevet" data-control="select2" data-dropdown-parent="#wrapper_id_mapel" data-placeholder="Pilih Mapel..." multiple="multiple">
+                                    <option></option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="fv-row mt-7">
                         <label class="required fs-6 fw-semibold mb-2">Deskripsi Paket</label>
                         <textarea name="deskripsi" class="summernote form-control" required></textarea>
                     </div>
+                    <input type="hidden" name="jumlah_bulan" value="12">
                 </div>
 
                 <div class="modal-footer border-0 p-5 p-lg-10 pt-0 justify-content-end">
@@ -207,6 +224,8 @@
         <div class="modal-content rounded border-0 shadow-lg">
             <form action="<?= base_url('sw-admin/paket/update'); ?>" method="POST" enctype="multipart/form-data" class="form">
                 <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>" />
+                <input type="hidden" name="idpaket" id="idpaket">
+
                 <div class="modal-header pb-0 border-0 justify-content-between">
                     <h2 class="fw-bold">Edit Paket</h2>
                     <div class="btn btn-sm btn-icon btn-active-color-primary" data-bs-dismiss="modal">
@@ -218,19 +237,26 @@
                     <div class="fv-row mb-7 text-center" id="view_gambar"></div>
 
                     <div class="row g-5">
+                        <div class="col-md-12 fv-row mb-5">
+                            <label class="required fs-6 fw-semibold mb-2 text-primary">Jenis Paket Terkait</label>
+                            <select name="jenis_paket[]" class="form-select form-select-solid jenis_paket" data-control="select2" data-dropdown-parent="#edit_paket" data-placeholder="Pilih layanan..." multiple="multiple" required>
+                                <option value="brevet">Kelas Brevet AB</option>
+                                <option value="ikh">Perijinan IKH</option>
+                            </select>
+                        </div>
+
                         <div class="col-md-12 fv-row">
                             <label class="fs-6 fw-semibold mb-2">Ganti Gambar <span class="text-muted fw-normal fs-8">(Kosongkan jika tidak diganti)</span></label>
                             <input type="file" name="avatar" class="form-control form-control-solid">
                             <input type="hidden" name="gambar_lama" id="gambar_lama">
-                            <input type="hidden" name="idpaket" id="idpaket">
                         </div>
                         <div class="col-md-6 fv-row">
                             <label class="required fs-6 fw-semibold mb-2">Nama Paket</label>
                             <input type="text" name="nama_paket" id="nama_paket" class="form-control form-control-solid" required>
                         </div>
                         <div class="col-md-6 fv-row">
-                            <label class="required fs-6 fw-semibold mb-2">Jenis Paket</label>
-                            <input type="text" name="jenis_paket" id="jenis_paket" class="form-control form-control-solid" required>
+                            <label class="required fs-6 fw-semibold mb-2">Tagline Paket</label>
+                            <input type="text" name="tagline" id="tagline" class="form-control form-control-solid" required>
                         </div>
                         <div class="col-md-6 fv-row">
                             <label class="required fs-6 fw-semibold mb-2">Nominal (Rp)</label>
@@ -238,7 +264,7 @@
                         </div>
                         <div class="col-md-6 fv-row">
                             <label class="required fs-6 fw-semibold mb-2">Diskon</label>
-                            <select name="iddiskon" id="iddiskon" class="form-select form-select-solid" required>
+                            <select name="iddiskon" id="iddiskon" class="form-select form-select-solid" data-control="select2" data-dropdown-parent="#edit_paket" required>
                                 <option value="">Pilih</option>
                                 <?php foreach ($dataDiskon as $rows) : ?>
                                     <option value="<?= $rows->iddiskon; ?>"><?= $rows->diskon; ?>%</option>
@@ -248,7 +274,6 @@
                         <div class="col-md-6 fv-row">
                             <label class="required fs-6 fw-semibold mb-2">Status</label>
                             <select name="status" id="status" class="form-select form-select-solid" required>
-                                <option value="">Pilih</option>
                                 <option value="1">Aktif</option>
                                 <option value="0">Non-Aktif</option>
                             </select>
@@ -258,11 +283,49 @@
                             <input type="number" name="komisi" id="komisi" class="form-control form-control-solid" required>
                         </div>
                     </div>
-                    <input type="hidden" name="jumlah_bulan" id="jumlah_bulan">
+
+                    <div class="brevet-fields" style="display: none;">
+                        <div class="separator separator-dashed my-8"></div>
+                        <h4 class="fw-bold text-dark mb-5"><i class="ki-duotone ki-book-open fs-2 me-2"></i> Update Susunan Kelas Brevet</h4>
+
+                        <div class="alert alert-dismissible bg-light-warning border border-warning d-flex flex-column flex-sm-row p-5 mb-5">
+                            <i class="ki-duotone ki-information fs-2hx text-warning me-4 mb-5 mb-sm-0"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
+                            <div class="d-flex flex-column pe-0 pe-sm-10">
+                                <h5 class="mb-1">Penting!</h5>
+                                <span>Biarkan form di bawah ini <strong>KOSONG</strong> jika Anda tidak ingin mengubah susunan Ujian & Mapel yang sudah ada. Memilih kelas baru akan menghapus dan menimpa susunan yang lama.</span>
+                            </div>
+                        </div>
+
+                        <div class="row g-5 bg-light-primary p-5 rounded">
+                            <div class="col-md-6 fv-row">
+                                <label class="fs-6 fw-semibold mb-2">Ubah Kelas <span class="text-muted fw-normal fs-8">(Opsional)</span></label>
+                                <select name="id_kelas" id="edit_id_kelas" class="form-select form-select-solid" data-control="select2" data-dropdown-parent="#edit_paket" data-placeholder="Pilih Kelas Baru">
+                                    <option value="">-- Biarkan Kosong --</option>
+                                    <?php foreach ($kelas as $rows) : ?>
+                                        <option value="<?= $rows->id_kelas; ?>"><?= $rows->nama_kelas; ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 fv-row" id="wrapper_ujian_edit">
+                                <label class="fs-6 fw-semibold mb-2">Ujian <span class="text-danger fs-8 fw-normal">(Bisa pilih banyak)</span></label>
+                                <select name="id_ujian[]" id="edit_ujian_master" class="form-select form-select-solid" data-control="select2" data-dropdown-parent="#wrapper_ujian_edit" multiple="multiple" data-placeholder="Pilih Ujian...">
+                                    <option></option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-12 fv-row" id="wrapper_mapel_edit">
+                                <label class="fs-6 fw-semibold mb-2">Mapel <span class="text-danger fs-8 fw-normal">(Bisa pilih banyak)</span></label>
+                                <select name="id_mapel[]" id="edit_id_mapel" class="form-select form-select-solid" data-control="select2" data-dropdown-parent="#wrapper_mapel_edit" multiple="multiple" data-placeholder="Pilih Mapel...">
+                                    <option></option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="fv-row mt-7">
                         <label class="required fs-6 fw-semibold mb-2">Deskripsi Paket</label>
-                        <div id="deskripsi"></div>
+                        <div id="deskripsi_wrapper"></div>
                     </div>
                 </div>
 
@@ -279,64 +342,60 @@
 
 <?= $this->section('scripts'); ?>
 <script>
-    // Fungsi Global untuk update CSRF Token
+    // =========================================================
+    // 1. FUNGSI GLOBAL
+    // =========================================================
+
+    // Fungsi Update CSRF Token agar AJAX tidak error 403
     function updateCSRF(token) {
         $('input[name="<?= csrf_token() ?>"]').val(token);
     }
 
+    // Fungsi Menampilkan/Menyembunyikan Form Dinamis (Brevet / IKH)
+    function toggleDynamicFields(modalElement) {
+        let selectedTypes = $(modalElement).find('.jenis_paket').val() || [];
+
+        // Logika Form Brevet
+        if (selectedTypes.includes('brevet')) {
+            $(modalElement).find('.brevet-fields').slideDown();
+            $(modalElement).find('.dynamic-req-brevet').prop('required', true);
+        } else {
+            $(modalElement).find('.brevet-fields').slideUp();
+            $(modalElement).find('.dynamic-req-brevet').prop('required', false).val('').trigger('change');
+        }
+    }
+
+    // =========================================================
+    // 2. KETIKA DOKUMEN SIAP (DOCUMENT READY)
+    // =========================================================
     $(document).ready(function() {
-        // Init DataTables
+
+        // --- Init DataTables ---
         var table = $('#datatable-list').DataTable({
             "ordering": false,
         });
 
-        // Search Control
+        // Custom Search DataTables
         $('[data-kt-paket-table-filter="search"]').on('keyup', function() {
             table.search(this.value).draw();
         });
 
-        // Summernote Init
+        // --- Init Summernote (Form Tambah) ---
         $('.summernote').summernote({
-            placeholder: 'Tulis konten disini..',
+            placeholder: 'Tulis deskripsi paket di sini...',
             height: 300,
             fontSizes: ['8', '9', '10', '11', '12', '14', '18', '24', '36', '48', '64', '82'],
         });
 
-        // AJAX Edit Paket
-        $(document).on('click', '.edit-paket', function() {
-            const idpaket = $(this).data('paket');
-            $.ajax({
-                type: 'POST',
-                url: "<?= base_url('sw-admin/paket/edit') ?>",
-                data: {
-                    idpaket: idpaket,
-                    "<?= csrf_token() ?>": $('input[name="<?= csrf_token() ?>"]').val()
-                },
-                dataType: 'JSON',
-                success: function(data) {
-                    updateCSRF(data.<?= csrf_token() ?>);
-
-                    $("#idpaket").val(data.idpaket);
-                    $("#nama_paket").val(data.nama_paket);
-                    $("#jenis_paket").val(data.jenis_paket);
-                    $("#iddiskon").val(data.iddiskon);
-                    $("#nominal_paket").val(data.nominal_paket);
-                    $("#jumlah_bulan").val(data.jumlah_bulan);
-                    $("#gambar_lama").val(data.file);
-                    $("#status").val(data.status);
-                    $("#komisi").val(data.komisi);
-                    $("#deskripsi").html(`<textarea name="deskripsi" cols="30" rows="2" class="summernote_edit">${data.deskripsi}</textarea>`);
-                    $("#view_gambar").html("<img class='img-fluid rounded shadow-sm w-150px' src='<?= base_url('assets-landing/images/paket/thumbnails'); ?>/" + data.file + "' alt='Thumbnail'>");
-
-                    $('.summernote_edit').summernote({
-                        height: 300,
-                        fontSizes: ['8', '9', '10', '11', '12', '14', '18', '24', '36', '48', '64', '82'],
-                    });
-                }
-            });
+        // --- Event Listener: Jenis Paket ---
+        $('.jenis_paket').on('change', function() {
+            let parentModal = $(this).closest('.modal');
+            toggleDynamicFields(parentModal);
         });
 
-        // AJAX Dynamic Select
+        // =========================================================
+        // 3. AJAX DYNAMIC SELECT (MODAL TAMBAH)
+        // =========================================================
         $('#id_kelas').change(function() {
             var id = $(this).val();
             var csrfName = '<?= csrf_token() ?>';
@@ -352,14 +411,19 @@
                 dataType: 'json',
                 success: function(res) {
                     updateCSRF(res[csrfName]);
-                    var html = '<option value="">Pilih</option><option value="all">Pilih Semua</option>';
+                    var html = '<option></option><option value="all">-- PILIH SEMUA UJIAN --</option>';
                     $.each(res.data, function(i, item) {
                         html += '<option value="' + item.id_ujian + '">' + item.nama_ujian + '</option>';
                     });
-                    $('#ujian_master').html(html);
+
+                    // PERBAIKAN DI SINI: Paksa render ulang dan ikat ke Modal Tambah
+                    $('#id_ujian').html(html).select2({
+                        dropdownParent: $('#wrapper_id_ujian')
+                    });
                 }
             });
 
+            // Ambil Mapel
             $.ajax({
                 url: "<?php echo site_url('sw-admin/paket/get-mapel'); ?>",
                 method: "POST",
@@ -370,17 +434,275 @@
                 dataType: 'json',
                 success: function(res) {
                     updateCSRF(res[csrfName]);
-                    var html = '<option value="">Pilih</option><option value="all">Pilih Semua</option>';
+                    var html = '<option></option><option value="all">-- PILIH SEMUA MAPEL --</option>';
                     $.each(res.data, function(i, item) {
                         html += '<option value="' + item.id_mapel + '">' + item.nama_mapel + '</option>';
                     });
-                    $('#id_mapel').html(html);
+
+                    // PERBAIKAN DI SINI: Paksa render ulang dan ikat ke Modal Tambah
+                    $('#id_mapel').html(html).select2({
+                        dropdownParent: $('#wrapper_id_mapel')
+                    });
                 }
             });
         });
+
+        // =========================================================
+        // 4. AJAX DYNAMIC SELECT (MODAL EDIT)
+        // =========================================================
+        $('#edit_id_kelas').change(function(e) {
+            if (e.preventAjax) return;
+            var id = $(this).val();
+            var csrfName = '<?= csrf_token() ?>';
+            var csrfHash = $('input[name="<?= csrf_token() ?>"]').val();
+
+            if (!id) {
+                // Jika Kelas dikosongkan, reset Ujian dan Mapel ke kosong
+                $('#edit_ujian_master').html('<option></option>').trigger('change');
+                $('#edit_id_mapel').html('<option></option>').trigger('change');
+                return;
+            }
+
+            // Ambil Ujian Master untuk Edit
+            $.ajax({
+                url: "<?php echo site_url('sw-admin/paket/ujian-master'); ?>",
+                method: "POST",
+                data: {
+                    id: id,
+                    [csrfName]: csrfHash
+                },
+                dataType: 'json',
+                success: function(res) {
+                    updateCSRF(res[csrfName]);
+                    var html = '<option></option><option value="all">-- PILIH SEMUA UJIAN --</option>';
+                    $.each(res.data, function(i, item) {
+                        html += '<option value="' + item.id_ujian + '">' + item.nama_ujian + '</option>';
+                    });
+
+                    // PERBAIKAN: Destroy, isi HTML, lalu init ulang ke wrapper
+                    $('#edit_ujian_master').select2('destroy').html(html).select2({
+                        theme: 'bootstrap5',
+                        dropdownParent: $('#wrapper_ujian_edit')
+                    });
+                }
+            });
+
+            // Ambil Mapel untuk Edit
+            $.ajax({
+                url: "<?php echo site_url('sw-admin/paket/get-mapel'); ?>",
+                method: "POST",
+                data: {
+                    id: id,
+                    [csrfName]: $('input[name="<?= csrf_token() ?>"]').val() // Gunakan value terbaru karena mungkin sudah diubah AJAX sebelumnya
+                },
+                dataType: 'json',
+                success: function(res) {
+                    updateCSRF(res[csrfName]);
+                    var html = '<option></option><option value="all">-- PILIH SEMUA MAPEL --</option>';
+                    $.each(res.data, function(i, item) {
+                        html += '<option value="' + item.id_mapel + '">' + item.nama_mapel + '</option>';
+                    });
+
+                    // PERBAIKAN: Destroy, isi HTML, lalu init ulang ke wrapper
+                    $('#edit_id_mapel').select2('destroy').html(html).select2({
+                        theme: 'bootstrap5',
+                        dropdownParent: $('#wrapper_mapel_edit')
+                    });
+                }
+            });
+        });
+
+        // =========================================================
+        // 5. AJAX BUKA MODAL EDIT PAKET
+        // =========================================================
+        // =========================================================
+        // 5. AJAX BUKA MODAL EDIT PAKET
+        // =========================================================
+        $(document).on('click', '.edit-paket', function() {
+            const idpaket = $(this).data('paket');
+
+            // Reset form di modal edit setiap kali dibuka
+            $('#edit_id_kelas').val('');
+            $('#edit_ujian_master').html('<option></option>').trigger('change');
+            $('#edit_id_mapel').html('<option></option>').trigger('change');
+
+            $.ajax({
+                type: 'POST',
+                url: "<?= base_url('sw-admin/paket/edit') ?>",
+                data: {
+                    idpaket: idpaket,
+                    "<?= csrf_token() ?>": $('input[name="<?= csrf_token() ?>"]').val()
+                },
+                dataType: 'JSON',
+                success: function(data) {
+                    var csrfName = '<?= csrf_token() ?>';
+                    updateCSRF(data[csrfName]);
+
+                    // Isi form dasar
+                    $("#idpaket").val(data.idpaket);
+                    $("#nama_paket").val(data.nama_paket);
+                    $("#tagline").val(data.tagline);
+                    $("#iddiskon").val(data.iddiskon).trigger('change');
+                    $("#nominal_paket").val(data.nominal_paket);
+                    $("#gambar_lama").val(data.file);
+                    $("#status").val(data.status);
+                    $("#komisi").val(data.komisi);
+                    $("#deskripsi_wrapper").html(`<textarea name="deskripsi" class="summernote_edit">${data.deskripsi}</textarea>`);
+
+                    if (data.file) {
+                        $("#view_gambar").html("<img class='img-fluid rounded shadow-sm w-150px' src='<?= base_url('assets-landing/images/paket/thumbnails'); ?>/" + data.file + "'>");
+                    } else {
+                        $("#view_gambar").html("");
+                    }
+
+                    // Init ulang Summernote untuk form edit
+                    $('.summernote_edit').summernote({
+                        height: 300,
+                        fontSizes: ['8', '9', '10', '11', '12', '14', '18', '24', '36', '48', '64', '82'],
+                    });
+
+                    // Set Jenis Paket JSON Array ke Select2
+                    let arrPaket = [];
+                    if (data.jenis_paket) {
+                        let parsedData = (typeof data.jenis_paket === 'string') ? JSON.parse(data.jenis_paket) : data.jenis_paket;
+                        if (Array.isArray(parsedData)) {
+                            arrPaket = parsedData.map(item => item.trim().toLowerCase());
+                        }
+                    }
+                    // Trigger otomatis toggle form
+                    $("#edit_paket .jenis_paket").val(arrPaket).trigger('change');
+
+                    // =======================================================
+                    // AUTO-FILL UNTUK KELAS, UJIAN & MAPEL (KHUSUS BREVET)
+                    // =======================================================
+                   if (data.id_kelas) {
+                        // 1. Set ID Kelas dan update Select2 secara SILENT (tanpa tabrakan AJAX)
+                        $("#edit_id_kelas").val(data.id_kelas).trigger({
+                            type: 'change',
+                            preventAjax: true
+                        });
+                        
+                        var tokenUpdate = $('input[name="<?= csrf_token() ?>"]').val();
+
+                        // 2. Fetch Option Ujian dan centang nilainya
+                        $.ajax({
+                            url: "<?php echo site_url('sw-admin/paket/ujian-master'); ?>",
+                            method: "POST",
+                            data: { id: data.id_kelas, [csrfName]: tokenUpdate },
+                            dataType: 'json',
+                            success: function(res) {
+                                updateCSRF(res[csrfName]);
+                                var html = '<option></option><option value="all">-- PILIH SEMUA UJIAN --</option>';
+                                $.each(res.data, function(i, item) {
+                                    html += '<option value="' + item.id_ujian + '">' + item.nama_ujian + '</option>';
+                                });
+
+                                $('#edit_ujian_master').select2('destroy').html(html).select2({
+                                    theme: 'bootstrap5',
+                                    dropdownParent: $('#wrapper_ujian_edit')
+                                });
+
+                                // Centang value lama
+                                if(data.arr_ujian.length > 0) {
+                                    $('#edit_ujian_master').val(data.arr_ujian).trigger('change');
+                                }
+                            }
+                        });
+
+                        // 3. Fetch Option Mapel dan centang nilainya
+                        $.ajax({
+                            url: "<?php echo site_url('sw-admin/paket/get-mapel'); ?>",
+                            method: "POST",
+                            data: { id: data.id_kelas, [csrfName]: $('input[name="<?= csrf_token() ?>"]').val() }, // pakai token terbaru
+                            dataType: 'json',
+                            success: function(res) {
+                                updateCSRF(res[csrfName]);
+                                var html = '<option></option><option value="all">-- PILIH SEMUA MAPEL --</option>';
+                                $.each(res.data, function(i, item) {
+                                    html += '<option value="' + item.id_mapel + '">' + item.nama_mapel + '</option>';
+                                });
+
+                                $('#edit_id_mapel').select2('destroy').html(html).select2({
+                                    theme: 'bootstrap5',
+                                    dropdownParent: $('#wrapper_mapel_edit')
+                                });
+
+                                // Centang value lama
+                                if(data.arr_mapel.length > 0) {
+                                    $('#edit_id_mapel').val(data.arr_mapel).trigger('change');
+                                }
+                            }
+                        });
+                    }
+                    // =======================================================
+                }
+            });
+        });
+
+        // =========================================================
+        // 6. FITUR HAPUS PAKET (SWEETALERT)
+        // =========================================================
+        $(document).on('click', '.btn-delete', function(e) {
+            e.preventDefault();
+            const targetUrl = $(this).data('url');
+
+            Swal.fire({
+                title: "Hapus Paket?",
+                text: "Data paket ini akan dipindahkan ke tempat sampah (Soft Delete).",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Ya, Hapus!",
+                cancelButtonText: "Batal",
+                customClass: {
+                    confirmButton: "btn btn-danger",
+                    cancelButton: "btn btn-light-primary"
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        text: "Menghapus data...",
+                        icon: "info",
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                    // Redirect ke fungsi delete
+                    window.location.href = targetUrl;
+                }
+            });
+        });
+
+        // =========================================================
+        // 7. FITUR PIN PAKET
+        // =========================================================
+        $(document).on('click', '.pin-paket', function() {
+            let id = $(this).data('id');
+            $.ajax({
+                url: "<?= base_url('sw-admin/paket/pin') ?>",
+                type: "POST",
+                data: {
+                    id: id,
+                    "<?= csrf_token() ?>": $('input[name="<?= csrf_token() ?>"]').val()
+                },
+                dataType: "json",
+                success: function(res) {
+                    if (res.status === 'success') {
+                        location.reload();
+                    } else {
+                        updateCSRF(res.<?= csrf_token() ?>);
+                        Swal.fire("Gagal!", res.message, "error");
+                    }
+                }
+            });
+        });
+
     });
 
-    // Drag and Drop Reorder
+    // =========================================================
+    // 8. SORTABLE (DRAG AND DROP REORDER)
+    // =========================================================
     document.addEventListener('DOMContentLoaded', function() {
         let tbody = document.getElementById('sortable-paket');
         if (tbody) {
@@ -413,28 +735,6 @@
                 }
             });
         }
-    });
-
-    // PIN Function
-    $(document).on('click', '.pin-paket', function() {
-        let id = $(this).data('id');
-        $.ajax({
-            url: "<?= base_url('sw-admin/paket/pin') ?>",
-            type: "POST",
-            data: {
-                id: id,
-                "<?= csrf_token() ?>": $('input[name="<?= csrf_token() ?>"]').val()
-            },
-            dataType: "json",
-            success: function(res) {
-                if (res.status === 'success') {
-                    location.reload();
-                } else {
-                    updateCSRF(res.<?= csrf_token() ?>);
-                    Swal.fire("Gagal!", res.message, "error");
-                }
-            }
-        });
     });
 </script>
 <?= $this->endSection(); ?>

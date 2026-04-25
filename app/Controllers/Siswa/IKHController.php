@@ -3,7 +3,7 @@ namespace App\Controllers\Siswa;
 
 use App\Controllers\BaseController;
 
-class PerijinanIKHController extends BaseController
+class IKHController extends BaseController
 {
     protected $ikhModel;
     protected $siswaModel;
@@ -22,9 +22,20 @@ class PerijinanIKHController extends BaseController
 
         $this->data['breadcrumbs'] = [
             ['title' => 'Dashboard', 'url' => base_url('sw-siswa')],
-            ['title' => 'Sertifikasi IKH', 'url' => base_url('sw-siswa/perijinan-ikh')],
+            ['title' => 'Sertifikasi IKH', 'url' => base_url('sw-siswa/ikh')],
         ];
 
+        if(empty($ikh)){
+            session()->setFlashdata('pesan', "
+                        swal({
+                            title: 'Informasi!',
+                            text: 'Anda belum memiliki paket untuk pengajuan IKH',
+                            type: 'info',
+                            padding: '2em'
+                        }); 
+                    ");
+            return redirect()->to('list-bimbel');
+        }
         $this->data['ikh'] = $ikh;
         $this->data['siswa'] = $siswa;
         $this->data['title'] = 'Sertifikasi Izin Kuasa Hukum (IKH)';
@@ -82,7 +93,7 @@ class PerijinanIKHController extends BaseController
             $pesan = "Data diri berhasil disimpan. Silakan lanjutkan mengunggah dokumen.";
         }
 
-        return redirect()->to('sw-siswa/perijinan-ikh?tab=lampiran')->with('success', $pesan);
+        return redirect()->to('sw-siswa/ikh?tab=lampiran')->with('success', $pesan);
     }
 
 
@@ -112,7 +123,7 @@ class PerijinanIKHController extends BaseController
 
             // 2. Validasi Ekstensi PDF
             $ext = strtolower($file->getClientExtension());
-            $allowPdfOnly = ['file_skck', 'file_ijazah', 'file_spt', 'file_sertifikat', 'file_ttd'];
+            $allowPdfOnly = ['file_ktp', 'file_npwp', 'file_kk', '','file_skck', 'file_ijazah', 'file_spt', 'file_sertifikat'];
             
             if (in_array($namaInput, $allowPdfOnly) && $ext !== 'pdf') {
                 return $this->response->setJSON(['success' => false, 'message' => 'File ini HANYA BOLEH berformat PDF.', 'csrf_hash' => csrf_hash()]);
@@ -177,7 +188,7 @@ class PerijinanIKHController extends BaseController
         $data = $this->ikhModel->find($idIkh);
         
         if ($data) {
-            $requiredFiles = ['file_ktp', 'file_npwp', 'file_kk', 'file_foto', 'file_skck', 'file_ijazah', 'file_spt', 'file_sertifikat', 'file_ttd'];
+            $requiredFiles = ['file_ktp', 'file_npwp', 'file_kk', 'file_foto', 'file_ijazah', 'file_spt', 'file_sertifikat', 'file_ttd'];
             $isComplete = true;
 
             foreach ($requiredFiles as $file) {
@@ -218,16 +229,43 @@ class PerijinanIKHController extends BaseController
         $ikh = $this->ikhModel->where('id_siswa', session('id'))->first();
 
         if (!$ikh || $ikh['id_ikh'] != $idIkh) {
-            return redirect()->to('sw-siswa/perijinan-ikh')->with('error', 'Data IKH tidak ditemukan.');
+            return redirect()->to('sw-siswa/ikh')->with('error', 'Data IKH tidak ditemukan.');
         }
 
-        $this->ikhModel->update($idIkh, ['status_validasi_admin' => 'pending']);
+        $this->ikhModel->update($idIkh, 
+        [
+            'status_validasi_admin' => 'pending',
+            'status_sertifikat'     => 'belum',
+            'tgl_aktif'             => null,
+            'tgl_exp'               => null,
+            'file_kartu_ikh'        => ''
+        ],
+        );
         send_notif(
             '1',
             'Pesan baru: ' . session()->get('nama'),
             'Perbaikan berkas IKH siap diperiksa',
             base_url('sw-admin/ikh')
         );
-        return redirect()->to('sw-siswa/perijinan-ikh')->with('success', 'Perbaikan berhasil dikirim. Pengajuan Anda akan segera diperiksa kembali.');
+        return redirect()->to('sw-siswa/ikh')->with('success', 'Perbaikan berhasil dikirim. Pengajuan Anda akan segera diperiksa kembali.');
+    }
+
+    public function perpanjang($id)
+    {
+        $idIkh = decrypt_url($id);
+        $ikh = $this->ikhModel->where('id_siswa', session('id'))->first();
+
+        if (!$ikh || $ikh['id_ikh'] != $idIkh) {
+            return redirect()->to('sw-siswa/ikh')->with('error', 'Data IKH tidak ditemukan.');
+        }
+
+        $this->ikhModel->update($idIkh, ['status_validasi_admin' => 'revisi']);
+        send_notif(
+            '1',
+            'Pesan baru: ' . session()->get('nama'),
+            'Perpanjang Izik Kuasa Hukum',
+            base_url('sw-admin/ikh')
+        );
+        return redirect()->to('sw-siswa/ikh')->with('success', 'Silahkan untuk melengkapi data anda, untuk memperpanjang Izin Kuasa Hukum anda.');
     }
 }

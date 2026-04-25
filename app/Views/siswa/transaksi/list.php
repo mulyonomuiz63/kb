@@ -37,7 +37,7 @@
                                         <td>
                                             <div class="d-flex flex-column">
                                                 <span class="text-gray-800 text-hover-primary mb-1 fw-bold"><?= ucwords(strtolower($s->nama_paket)); ?></span>
-                                                <span class="fs-7 text-muted"><?= $s->jenis_paket; ?></span>
+                                                <span class="fs-7 text-muted"><?= $s->tagline; ?></span>
                                             </div>
                                         </td>
 

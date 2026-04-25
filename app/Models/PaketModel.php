@@ -9,7 +9,7 @@ class PaketModel extends Model
 {
     protected $table            = 'paket';
     protected $primaryKey       = 'idpaket';
-    protected $allowedFields    = ['iddiskon', 'slug', 'nama_paket', 'jenis_paket', 'jumlah_bulan', 'nominal_paket','file', 'status', 'v_ujian', 'v_materi', 'deskripsi', 'is_pinned', 'sort_order', 'komisi'];
+    protected $allowedFields    = ['iddiskon', 'slug', 'nama_paket', 'tagline', 'jenis_paket','jumlah_bulan', 'nominal_paket','file', 'status', 'v_ujian', 'v_materi', 'deskripsi', 'is_pinned', 'sort_order', 'komisi', 'deleted_at'];
     
     protected $beforeInsert = ['generateSlug'];
     // protected $beforeUpdate = ['generateSlug'];

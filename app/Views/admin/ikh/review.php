@@ -67,35 +67,97 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                             <div class="mh-400px scroll-y px-2">
                                 <?php
                                 $berkasList = [
-                                    ['nama' => '1. KTP', 'field' => 'file_ktp'],
+                                    ['nama' => '1. KTP (Scan Asli)', 'field' => 'file_ktp'],
                                     ['nama' => '2. NPWP', 'field' => 'file_npwp'],
                                     ['nama' => '3. Kartu Keluarga', 'field' => 'file_kk'],
-                                    ['nama' => '4. Foto', 'field' => 'file_foto'],
+                                    ['nama' => '4. Pas Foto 4x6', 'field' => 'file_foto'],
                                     ['nama' => '5. SKCK', 'field' => 'file_skck'],
-                                    ['nama' => '6. Ijazah', 'field' => 'file_ijazah'],
-                                    ['nama' => '7. SPT', 'field' => 'file_spt'],
-                                    ['nama' => '8. Brevet', 'field' => 'file_sertifikat'],
-                                    ['nama' => '9. TTD', 'field' => 'file_ttd'],
+                                    ['nama' => '6. Ijazah (Scan Asli)', 'field' => 'file_ijazah'],
+                                    ['nama' => '7. Bukti Terima SPT', 'field' => 'file_spt'],
+                                    ['nama' => '8. Sertifikat Brevet Pajak', 'field' => 'file_sertifikat'],
+                                    ['nama' => '9. TTD Elektronik', 'field' => 'file_ttd'],
+                                    ['nama' => '10. Riwayat Hidup', 'field' => 'file_riwayat_hidup'],
+                                    ['nama' => '11. Pernyataan Bukan PNS', 'field' => 'file_bukan_pns'],
+                                    ['nama' => '12. Integritas', 'field' => 'file_pakta_integritas'],
+                                    ['nama' => '13. Pernyataan Izin Kuasa Hukum', 'field' => 'file_pernyataan_ikh'],
                                 ];
+
+                                // Array khusus untuk file yang disediakan oleh Admin
+                                $fileAdmin = ['file_riwayat_hidup', 'file_bukan_pns', 'file_pakta_integritas', 'file_pernyataan_ikh'];
+
                                 foreach ($berkasList as $berkas):
                                     $isUploaded = !empty($ikh[$berkas['field']]);
-                                    if ($isUploaded):
+                                    $isAdminProvided = in_array($berkas['field'], $fileAdmin);
+
+                                    // Tentukan URL file dan ekstensi (Jika sudah diupload)
+                                    $fileUrl = '';
+                                    $fileExt = '';
+                                    if ($isUploaded) {
                                         $fileUrl = base_url('uploads/ikh/' . $ikh[$berkas['field']]);
                                         $fileExt = strtolower(pathinfo($ikh[$berkas['field']], PATHINFO_EXTENSION));
+                                    }
                                 ?>
-                                        <div class="d-flex align-items-center mb-4">
-                                            <div class="symbol symbol-40px me-3">
-                                                <a href="javascript:void(0)" class="symbol-label bg-light-primary text-primary btn-preview-berkas hover-elevate-up" data-file-url="<?= $fileUrl ?>" data-file-ext="<?= $fileExt ?>" data-file-name="<?= $berkas['nama'] ?>" title="Pratinjau File">
-                                                    <i class="ki-outline ki-eye fs-2"></i>
+                                    <div class="d-flex align-items-center mb-5">
+                                        <div class="symbol symbol-40px me-4">
+                                            <?php if ($isUploaded): ?>
+                                                <a href="javascript:void(0)"
+                                                    class="symbol-label bg-light-primary text-primary hover-elevate-up btn-preview-berkas"
+                                                    data-file-url="<?= $fileUrl ?>"
+                                                    data-file-ext="<?= $fileExt ?>"
+                                                    data-file-name="<?= $berkas['nama'] ?>"
+                                                    title="Klik untuk melihat dokumen">
+                                                    <i class="ki-outline ki-eye fs-2 text-primary"></i>
                                                 </a>
-                                            </div>
-                                            <div class="d-flex flex-column flex-grow-1">
-                                                <a href="javascript:void(0)" class="fs-6 fw-bold text-gray-800 text-hover-primary btn-preview-berkas" data-file-url="<?= $fileUrl ?>" data-file-ext="<?= $fileExt ?>" data-file-name="<?= $berkas['nama'] ?>"><?= $berkas['nama'] ?></a>
-                                                <span class="text-muted fw-semibold fs-8 text-uppercase"><?= $fileExt ?></span>
-                                            </div>
+                                            <?php else: ?>
+                                                <div class="symbol-label <?= $isAdminProvided ? 'bg-light-info' : 'bg-light-danger' ?>">
+                                                    <i class="ki-outline <?= $isAdminProvided ? 'ki-document text-info' : 'ki-file text-danger' ?> fs-2"></i>
+                                                </div>
+                                            <?php endif; ?>
                                         </div>
-                                <?php endif;
-                                endforeach; ?>
+
+                                        <div class="d-flex flex-column flex-grow-1">
+                                            <div class="d-flex align-items-center mb-1">
+                                                <?php if ($isUploaded): ?>
+                                                    <a href="javascript:void(0)"
+                                                        class="fs-6 fw-bold text-gray-800 text-hover-primary btn-preview-berkas"
+                                                        data-file-url="<?= $fileUrl ?>"
+                                                        data-file-ext="<?= $fileExt ?>"
+                                                        data-file-name="<?= $berkas['nama'] ?>">
+                                                        <?= $berkas['nama'] ?>
+                                                    </a>
+                                                <?php else: ?>
+                                                    <span class="fs-6 fw-bold text-gray-800"><?= $berkas['nama'] ?></span>
+                                                <?php endif; ?>
+
+                                                <?php if ($isAdminProvided): ?>
+                                                    <span class="badge badge-light-info ms-2 px-2 py-1 fs-9">Disiapkan Admin</span>
+                                                <?php endif; ?>
+                                            </div>
+
+                                            <span class="text-muted fw-semibold fs-8">
+                                                <?php
+                                                if ($isUploaded) {
+                                                    echo 'Telah diunggah (Klik untuk lihat)';
+                                                } else {
+                                                    echo $isAdminProvided ? 'File ini akan diurus dan diunggah oleh tim Admin' : 'File belum ada';
+                                                }
+                                                ?>
+                                            </span>
+                                        </div>
+
+                                        <div>
+                                            <?php if ($isUploaded): ?>
+                                                <span class="badge badge-light-success fw-bold px-3 py-2"><i class="ki-outline ki-check-circle fs-5 text-success me-1"></i> Valid</span>
+                                            <?php else: ?>
+                                                <?php if ($isAdminProvided): ?>
+                                                    <span class="badge badge-light-info fw-bold px-3 py-2"><i class="ki-outline ki-time fs-5 text-info me-1"></i> Proses</span>
+                                                <?php else: ?>
+                                                    <span class="badge badge-light-danger fw-bold px-3 py-2"><i class="ki-outline ki-cross-circle fs-5 text-danger me-1"></i> Kosong</span>
+                                                <?php endif; ?>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
                             </div>
 
                         </div>
@@ -136,8 +198,59 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                                 </form>
                             </div>
 
+                            <div class="border rounded p-5 border-primary mb-10 <?= !empty($ikh['file_riwayat_hidup']) ? 'border-success bg-light-success' : 'border-primary' ?>">
+                                <h4 class="fw-bold text-gray-800 mb-4">2. Berkas Administrasi IKH</h4>
+
+                                <form id="form_upload_berkas" enctype="multipart/form-data">
+                                    <?= csrf_field() ?>
+                                    <input type="hidden" name="id_ikh" value="<?= $ikh['id_ikh'] ?>">
+
+                                    <div class="row g-5 mb-7">
+                                        <?php
+                                        // KUNCI ARRAY HARUS SAMA DENGAN NAMA KOLOM DI DATABASE
+                                        $berkas = [
+                                            'file_riwayat_hidup'  => 'Daftar Riwayat Hidup',
+                                            'file_bukan_pns'      => 'Surat Pernyataan Bukan PNS',
+                                            'file_pakta_integritas' => 'Pakta Integritas',
+                                            'file_pernyataan_ikh' => 'Surat Pernyataan IKH',
+                                            'file_skck'           => 'File SKCK (Opsional)'
+                                        ];
+
+                                        foreach ($berkas as $name => $label):
+                                        ?>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-bold"><?= $label ?></label>
+                                                <div class="input-group input-group-solid">
+                                                    <input type="file" name="<?= $name ?>" class="form-control" accept=".pdf">
+
+                                                    <?php if (!empty($ikh[$name])): ?>
+                                                        <?php
+                                                        $subFolder = str_replace('file_', '', $name);
+                                                        $fileUrl = base_url("uploads/ikh/" . $ikh[$name]);
+                                                        $ext = pathinfo($ikh[$name], PATHINFO_EXTENSION);
+                                                        ?>
+                                                        <button type="button" class="btn btn-icon btn-light-primary btn-preview-berkas"
+                                                            data-file-url="<?= $fileUrl ?>"
+                                                            data-file-ext="<?= strtolower($ext) ?>"
+                                                            data-file-name="<?= $label ?>">
+                                                            <i class="ki-outline ki-eye fs-2"></i>
+                                                        </button>
+                                                    <?php endif; ?>
+                                                </div>
+                                                <div class="form-text text-muted fs-8">Format: .PDF (Max 2MB)</div>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary" id="btn_simpan_berkas">
+                                        <span class="indicator-label"><i class="ki-outline ki-check-circle fs-2"></i> Simpan & Perbarui Berkas</span>
+                                        <span class="indicator-progress">Mohon tunggu... <span class="spinner-border spinner-border-sm align-middle ms-2"></span></span>
+                                    </button>
+                                </form>
+                            </div>
+
                             <div class="border rounded p-5 <?= $stat_ser == 'terbit' ? 'border-success bg-light-success' : 'border-primary' ?>">
-                                <h4 class="fw-bold text-gray-800 mb-4">2. Terbitkan Kartu IKH</h4>
+                                <h4 class="fw-bold text-gray-800 mb-4">3. Terbitkan Kartu IKH</h4>
 
                                 <?php if ($stat_fin != 'selesai'): ?>
                                     <div class="alert alert-warning"><i class="ki-outline ki-information-5 fs-2 text-warning me-2"></i> Selesaikan Tahap Validasi berkas terlebih dahulu untuk membuka kunci fitur ini.</div>
@@ -154,11 +267,30 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                                                 <input type="date" name="tgl_exp" class="form-control form-control-solid datepicker-admin" value="<?= $ikh['tgl_exp'] ?? date('Y-m-d', strtotime('+1 years')) ?>" required>
                                             </div>
                                             <div class="col-md-12">
-                                                <label class="form-label fw-semibold">Upload File Kartu IKH</label>
-                                                <input type="file" name="file_kartu_ikh" class="form-control" accept="image/*, application/pdf" required>
-                                                <?php if (!empty($ikh['file_kartu_ikh'])): ?>
-                                                    <div class="mt-2"><a href="<?= base_url('uploads/ikh/' . $ikh['file_kartu_ikh']) ?>" target="_blank" class="badge badge-light-success">Lihat Kartu Tersimpan</a></div>
-                                                <?php endif; ?>
+                                                <label class="form-label fw-semibold text-primary">Upload File Kartu IKH <span class="text-muted fs-8">(Bisa pilih banyak file sekaligus)</span></label>
+                                                <input type="file" name="file_kartu_ikh[]" class="form-control" accept="image/*, application/pdf" multiple required>
+
+                                                <?php if (!empty($ikh['file_kartu_ikh'])):
+                                                    $files = json_decode($ikh['file_kartu_ikh'], true) ?? [];
+                                                    if (!empty($files)): ?>
+                                                        <div class="mt-3 d-flex flex-wrap gap-2">
+                                                            <?php foreach ($files as $index => $file):
+                                                                $ext = pathinfo($file, PATHINFO_EXTENSION);
+                                                                $fileUrl = base_url('uploads/ikh/' . $file);
+                                                            ?>
+                                                                <div class="symbol symbol-50px symbol-2by3 position-relative">
+                                                                    <button type="button" class="btn btn-icon btn-light-primary w-100 h-100 btn-preview-berkas"
+                                                                        data-file-url="<?= $fileUrl ?>"
+                                                                        data-file-ext="<?= strtolower($ext) ?>"
+                                                                        data-file-name="Kartu IKH - <?= $index + 1 ?>">
+                                                                        <i class="ki-outline ki-file fs-2x"></i>
+                                                                        <span class="fs-9 position-absolute bottom-0 start-50 translate-middle-x pb-1"><?= strtoupper($ext) ?></span>
+                                                                    </button>
+                                                                </div>
+                                                            <?php endforeach; ?>
+                                                        </div>
+                                                <?php endif;
+                                                endif; ?>
                                             </div>
                                         </div>
                                         <button type="submit" class="btn btn-success w-100" id="btn_terbitkan">
@@ -300,6 +432,80 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                     $('#preview_container').html('<img src="' + fileUrl + '" class="img-fluid rounded" style="max-height: 700px; object-fit: contain;" />');
                 }
             }, 500);
+        });
+    });
+
+    $(document).ready(function() {
+        // 1. Handler Preview Berkas (Gunakan Delegasi agar tombol baru tetap berfungsi)
+        $(document).on('click', '.btn-preview-berkas', function(e) {
+            e.preventDefault();
+            let fileUrl = $(this).data('file-url');
+            let fileExt = $(this).data('file-ext');
+            let fileName = $(this).data('file-name');
+
+            $('#modal_preview_title').text(fileName);
+            $('#btn_download_berkas').attr('href', fileUrl);
+
+            // Tampilkan Spinner
+            $('#preview_container').html('<div class="d-flex justify-content-center p-10"><div class="spinner-border text-primary"></div></div>');
+
+            // Tampilkan Modal (Ganti ID sesuai modal Anda)
+            $('#modal_preview_berkas').modal('show');
+
+            setTimeout(() => {
+                if (fileExt === 'pdf') {
+                    $('#preview_container').html('<iframe src="' + fileUrl + '" width="100%" height="600px" frameborder="0"></iframe>');
+                } else {
+                    $('#preview_container').html('<div class="text-center"><img src="' + fileUrl + '" class="img-fluid rounded" style="max-height: 600px;" /></div>');
+                }
+            }, 500);
+        });
+
+        // 2. Handler Submit Form
+        $('#form_upload_berkas').submit(function(e) {
+            e.preventDefault();
+
+            let btn = $('#btn_simpan_berkas');
+            let formData = new FormData(this);
+
+            // Token CSRF diambil otomatis dari input <?= csrf_field() ?> di dalam form
+
+            btn.attr('data-kt-indicator', 'on').attr('disabled', true);
+
+            $.ajax({
+                url: '<?= base_url("sw-admin/ikh/upload-berkas") ?>',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                dataType: 'json',
+                success: function(res) {
+                    // Update CSRF Hash untuk request selanjutnya
+                    let csrfName = '<?= csrf_token() ?>';
+                    if (res[csrfName]) {
+                        $('input[name="' + csrfName + '"]').val(res[csrfName]);
+                    }
+
+                    btn.removeAttr('data-kt-indicator').attr('disabled', false);
+
+                    if (res.status === 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: res.msg,
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire('Gagal!', res.msg, 'error');
+                    }
+                },
+                error: function(xhr) {
+                    btn.removeAttr('data-kt-indicator').attr('disabled', false);
+                    Swal.fire('Error!', 'Terjadi kesalahan sistem atau file terlalu besar.', 'error');
+                }
+            });
         });
     });
 </script>

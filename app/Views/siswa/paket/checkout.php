@@ -256,7 +256,7 @@
               </div>
               <div class="d-flex flex-column">
                 <a href="#" class="text-gray-800 text-hover-primary fs-6 fw-bold"><?= $transaksi->nama_paket; ?></a>
-                <span class="text-muted fw-semibold">Tipe: <?= $transaksi->jenis_paket; ?></span>
+                <span class="text-muted fw-semibold">Tipe: <?= $transaksi->tagline; ?></span>
               </div>
             </div>
 

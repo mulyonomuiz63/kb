@@ -9,7 +9,7 @@ class TransaksiModel extends Model
 {
     protected $table            = 'transaksi';
     protected $primaryKey       = 'idtransaksi';
-    protected $allowedFields    = ['idsiswa', 'va', 'nominal', 'diskon', 'voucher', 'kode_unik', 'status', 'tgl_exp', 'tgl_drop', 'tgl_pembayaran', 'bukti_pembayaran', 'keterangan','token', 'jenis_bayar', 'kode_voucher', 'referensi_bank'];
+    protected $allowedFields    = ['idsiswa', 'va', 'nominal', 'diskon', 'voucher', 'kode_unik', 'status', 'tgl_exp', 'tgl_drop', 'tgl_pembayaran', 'bukti_pembayaran', 'keterangan','token', 'jenis_bayar', 'kode_voucher', 'referensi_bank', 'jenis_paket'];
 
     public function getAll()
     {
@@ -74,7 +74,7 @@ class TransaksiModel extends Model
     public function getByIdSiswa($id)
     {
         return $this
-            ->select('transaksi.*, c.nama_paket, c.jenis_paket, c.jumlah_bulan, c.nominal_paket')
+            ->select('transaksi.*, c.nama_paket, c.tagline, c.jumlah_bulan, c.nominal_paket')
             ->join('detail_transaksi d', 'd.idtransaksi=transaksi.idtransaksi')
             ->join('siswa b', 'b.id_siswa = transaksi.idsiswa')
             ->join('paket c', 'c.idpaket = d.idpaket')
@@ -86,7 +86,7 @@ class TransaksiModel extends Model
     public function getByIdDropSiswa($id)
     {
         return $this
-            ->select('transaksi.*, c.nama_paket, c.jenis_paket, c.jumlah_bulan, c.nominal_paket')
+            ->select('transaksi.*, c.nama_paket, c.tagline, c.jumlah_bulan, c.nominal_paket')
             ->join('detail_transaksi d', 'd.idtransaksi=transaksi.idtransaksi')
             ->join('siswa b', 'b.id_siswa = transaksi.idsiswa')
             ->join('paket c', 'c.idpaket = d.idpaket')
@@ -100,7 +100,7 @@ class TransaksiModel extends Model
     public function getByIdSiswaAll($id)
     {
         return $this
-            ->select('transaksi.*, b.nama_siswa, b.email, c.nama_paket, c.jenis_paket, c.jumlah_bulan')
+            ->select('transaksi.*, b.nama_siswa, b.email, c.nama_paket, c.tagline, c.jumlah_bulan')
             ->join('detail_transaksi d', 'd.idtransaksi=transaksi.idtransaksi')
             ->join('siswa b', 'b.id_siswa = transaksi.idsiswa')
             ->join('paket c', 'c.idpaket = d.idpaket')

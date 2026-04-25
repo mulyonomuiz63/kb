@@ -19,6 +19,7 @@ class TransaksiController extends BaseController
     protected $mapelSiswaModel;
     protected $ujianSiswaModel;
     protected $siswaModel;
+    protected $ikhModel;
 
     public function __construct()
     {
@@ -34,6 +35,7 @@ class TransaksiController extends BaseController
         $this->mapelSiswaModel = new \App\Models\MapelSiswaModel();
         $this->ujianSiswaModel = new \App\Models\UjianSiswaModel();
         $this->siswaModel = new \App\Models\SiswaModel();
+        $this->ikhModel = new \App\Models\IkhModel();
         $this->emailer = new \App\Libraries\Emailer();
     }
     public function index()
@@ -124,6 +126,7 @@ class TransaksiController extends BaseController
 
         // Mulai Transaksi Database
         $db->transBegin();
+        $dataPaket = $this->paketModel->find($this->request->getVar('idpaket'));
 
         try {
             // 3. Simpan Transaksi Utama
@@ -134,7 +137,8 @@ class TransaksiController extends BaseController
                 'voucher'      => $diskonVoucherInput,
                 'tgl_exp'      => $tgl_exp,
                 'tgl_drop'     => $tgl_exp, // Menggunakan tgl_exp sesuai logika awal
-                'kode_voucher' => $kode_voucher
+                'kode_voucher' => $kode_voucher,
+                'jenis_paket'  => $dataPaket['jenis_paket']
             ];
 
             $this->transaksiModel->insert($dataInsert);
@@ -224,7 +228,7 @@ class TransaksiController extends BaseController
             <p>' . session('nama') . ',<br> Anda telah berhasil memesan paket KelasBrevet dengan detail di bawah ini:</p>
             <ul>
                 <li>Nama Paket: ' . $this->request->getVar('nama_paket') . '</li>
-                <li>Jenis Paket: ' . $this->request->getVar('jenis_paket') . '</li>
+                <li>Tagline Paket: ' . $this->request->getVar('tagline') . '</li>
                 <li>Harga: ' . number_format($this->request->getVar('nominal'), 0, '.', '.') . '</li>
                 <li>Diskon: ' . $this->request->getVar('diskon') . '% (' . number_format($diskon, 0, '.', '.') . ')</li>
                 ' . $diskonVoucherHtml . '
@@ -477,8 +481,8 @@ class TransaksiController extends BaseController
                         if (!empty($refBank) && strtolower($refBank) !== 'null') {
                             $cekDuplikat = $this->transaksiModel->where('referensi_bank', $refBank)->first();
                             if (!$cekDuplikat) {
-                                $refValid = true; 
-                            }else {
+                                $refValid = true;
+                            } else {
                                 $refValid = false; // Referensi sudah pernah digunakan
                             }
                         } else {
@@ -494,11 +498,11 @@ class TransaksiController extends BaseController
                                 $statusPembayaran = 'S';
                                 $pesanFlashData = 'Upload berhasil dan pembayaran Anda telah diverifikasi secara otomatis!';
                             }
-                        } 
+                        }
                     }
                 }
             }
-            
+
 
             // ====================================================================
             // 5. UPDATE DATABASE UTAMA & EMAIL
@@ -793,6 +797,50 @@ class TransaksiController extends BaseController
                         ])->update();
                 }
             }
+
+            // 1. Ambil data transaksi utama
+            $transaksiMaster = $this->transaksiModel
+                ->where('idtransaksi', $idtransaksi)
+                ->where('status', 'S')
+                ->first();
+
+            if ($transaksiMaster) {
+                $jenisPaketArray = json_decode($transaksiMaster['jenis_paket'], true) ?? [];
+
+                if (in_array('ikh', $jenisPaketArray)) {
+
+                    $idsiswa = $transaksiMaster['idsiswa'];
+
+                    // 2. Cek apakah siswa ini sudah punya data di ikhModel
+                    $existingIkh = $this->ikhModel->where('id_siswa', $idsiswa)->first();
+
+                    if ($existingIkh) {
+                        // --- LOGIKA UPDATE ---
+                        // Ambil kuota saat ini dan tambahkan 1
+                        $newKuota = (int)$existingIkh['kuota'] + 1;
+
+                        $dataUpdate = [
+                            'kuota'  => $newKuota // Kuota bertambah
+                        ];
+
+                        // Update berdasarkan ID primary key tabel IKH
+                        $this->ikhModel->update($existingIkh['id_ikh'], $dataUpdate);
+                    } else {
+                        // --- LOGIKA INSERT BARU ---
+                        $dataInsert = [
+                            'id_siswa'            => $idsiswa,
+                            'is_riwayat_hidup'    => '1',
+                            'is_bukan_pns'        => '1',
+                            'is_pakta_integritas' => '1',
+                            'is_pernyataan_ikh'   => '1',
+                            'kuota'               => '1' // Kuota awal
+                        ];
+
+                        $this->ikhModel->insert($dataInsert);
+                    }
+                }
+            }
+
 
             // 3. Update Afiliasi
             $this->affiliateCommissionModel->where('id_transaksi', $idtransaksi)

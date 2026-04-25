@@ -14,6 +14,7 @@ class MidtransController extends BaseController
     protected $ujianSiswaModel;
     protected $paketModel;
     protected $affiliateCommissionModel;
+    protected $ikhModel;
     protected $emailer;
 
     public function __construct()
@@ -26,6 +27,7 @@ class MidtransController extends BaseController
         $this->ujianSiswaModel = new \App\Models\UjianSiswaModel();
         $this->paketModel = new \App\Models\PaketModel();
         $this->affiliateCommissionModel = new \App\Models\AffiliateCommissionModel();
+        $this->ikhModel = new \App\Models\IkhModel();
         $this->emailer = new Emailer();
     }
 
@@ -262,22 +264,64 @@ class MidtransController extends BaseController
                             ->update();
                     }
                 }
+            }
+        }
 
-                // Handle Affiliate Commission
-                $commission = $this->affiliateCommissionModel
-                    ->where('id_transaksi', $idtransaksi)
-                    ->first();
+        $transaksiMaster = $this->transaksiModel
+            ->where('idtransaksi', $idtransaksi)
+            ->where('status', 'S')
+            ->first();
 
-                if ($commission) {
-                    $this->affiliateCommissionModel
-                        ->where('id_transaksi', $idtransaksi)
-                        ->update(null, [
-                            'status'            => 'approved',
-                            'tgl_approved'      => date('Y-m-d H:i:s'),
-                            'status_penarikan'  => 'pending'
-                        ]);
+        if ($transaksiMaster) {
+            $jenisPaketArray = json_decode($transaksiMaster['jenis_paket'], true) ?? [];
+
+            if (in_array('ikh', $jenisPaketArray)) {
+
+                $idsiswa = $transaksiMaster['idsiswa'];
+
+                // 2. Cek apakah siswa ini sudah punya data di ikhModel
+                $existingIkh = $this->ikhModel->where('id_siswa', $idsiswa)->first();
+
+                if ($existingIkh) {
+                    // --- LOGIKA UPDATE ---
+                    // Ambil kuota saat ini dan tambahkan 1
+                    $newKuota = (int)$existingIkh['kuota'] + 1;
+
+                    $dataUpdate = [
+                        'kuota'  => $newKuota // Kuota bertambah
+                    ];
+
+                    // Update berdasarkan ID primary key tabel IKH
+                    $this->ikhModel->update($existingIkh['id_ikh'], $dataUpdate);
+                } else {
+                    // --- LOGIKA INSERT BARU ---
+                    $dataInsert = [
+                        'id_siswa'            => $idsiswa,
+                        'is_riwayat_hidup'    => '1',
+                        'is_bukan_pns'        => '1',
+                        'is_pakta_integritas' => '1',
+                        'is_pernyataan_ikh'   => '1',
+                        'kuota'               => '1' // Kuota awal
+                    ];
+
+                    $this->ikhModel->insert($dataInsert);
                 }
             }
+        }
+
+        // Handle Affiliate Commission
+        $commission = $this->affiliateCommissionModel
+            ->where('id_transaksi', $idtransaksi)
+            ->first();
+
+        if ($commission) {
+            $this->affiliateCommissionModel
+                ->where('id_transaksi', $idtransaksi)
+                ->update(null, [
+                    'status'            => 'approved',
+                    'tgl_approved'      => date('Y-m-d H:i:s'),
+                    'status_penarikan'  => 'pending'
+                ]);
         }
     }
 

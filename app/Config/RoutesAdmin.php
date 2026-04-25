@@ -183,6 +183,7 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
         $routes->post('get-mapel', 'Admin\PaketController::getMapel');
         $routes->post('reorder', 'Admin\PaketController::reorder');
         $routes->post('pin', 'Admin\PaketController::pin');
+        $routes->get('delete/(:segment)', 'Admin\PaketController::delete/$1');
 
         // Route pendukung lainnya (pastikan sudah ada)
         $routes->post('store', 'Admin\PaketController::store');
@@ -192,6 +193,9 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
         $routes->get('review/(:segment)', 'Admin\PaketController::review/$1');
         $routes->post('edit-review', 'Admin\PaketController::editReview');
         $routes->post('update-review', 'Admin\PaketController::updateReview');
+
+        $routes->post('ujian-master', 'Admin\PaketController::getUjianMaster'); // Ganti 'Paket' dengan nama Controller Anda
+        $routes->post('get-mapel', 'Admin\PaketController::getMapel');
     });
 
     $routes->group('transaksi', function ($routes) {
@@ -238,6 +242,7 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
         $routes->get('', 'Admin\IkhController::index');
         $routes->get('review/(:segment)', 'Admin\IkhController::review/$1');
         $routes->post('update-status', 'Admin\IkhController::updateStatus');
+        $routes->post('upload-berkas', 'Admin\IkhController::uploadBerkas');
         $routes->post('upload-kartu', 'Admin\IkhController::uploadKartu');
     });
 });

@@ -33,7 +33,10 @@ class PaketController extends BaseController
                 ['title' => 'Data Paket', 'url' => '#'],
             ];
             // MASTER DATA
-            $data['paket'] = $this->paketModel->join('diskon b', 'b.iddiskon = paket.iddiskon')
+            $data['paket'] = $this->paketModel
+                ->join('diskon b', 'b.iddiskon = paket.iddiskon', 'left')
+                // Penulisan yang benar: null tanpa tanda kutip
+                ->where('paket.deleted_at', null)
                 ->orderBy('paket.sort_order', 'ASC')
                 ->get()->getResultObject();
 
@@ -48,11 +51,6 @@ class PaketController extends BaseController
 
     public function edit()
     {
-        // Proteksi Role
-        if (session()->get('role') != 1) {
-            return $this->response->setStatusCode(403)->setJSON(['error' => 'Unauthorized']);
-        }
-
         if ($this->request->isAJAX()) {
             try {
                 $idRaw = $this->request->getVar('idpaket');
@@ -67,6 +65,55 @@ class PaketController extends BaseController
                 if (!$data_paket) {
                     throw new \Exception('Data paket tidak ditemukan.');
                 }
+
+                // =====================================================
+                // TAMBAHAN: AMBIL DATA DETAIL KELAS/UJIAN/MAPEL
+                // =====================================================
+                $jenis_paket = json_decode($data_paket['jenis_paket'], true) ?? [];
+                
+                $data_paket['id_kelas']  = '';
+                $data_paket['arr_ujian'] = [];
+                $data_paket['arr_mapel'] = [];
+
+                // Cek jika paket ini mengandung layanan brevet
+                if (in_array('brevet', $jenis_paket)) {
+                    $db = \Config\Database::connect();
+                    
+                    // 1. Cari id_kelas dari relasi ujian_master (Lebih Akurat)
+                    $kelasRow = $db->query("
+                        SELECT ujian_master.kelas as id_kelas 
+                        FROM detail_paket 
+                        LEFT JOIN ujian_master 
+                          ON (ujian_master.id_ujian = detail_paket.id_ujian OR ujian_master.mapel = detail_paket.id_mapel) 
+                        WHERE detail_paket.idpaket = ? AND ujian_master.kelas IS NOT NULL 
+                        LIMIT 1
+                    ", [$idDecrypted])->getRow();
+                    
+                    if ($kelasRow) {
+                        $data_paket['id_kelas'] = $kelasRow->id_kelas;
+                    }
+
+                    // 2. Ambil Array ID Ujian (Jika v_ujian = 'all', kirim ['all'])
+                    if ($data_paket['v_ujian'] === 'all') {
+                        $data_paket['arr_ujian'] = ['all'];
+                    } else {
+                        $ujianRows = $db->table('detail_paket')
+                            ->where('idpaket', $idDecrypted)->where('id_ujian !=', 0)
+                            ->select('id_ujian')->get()->getResultArray();
+                        $data_paket['arr_ujian'] = array_column($ujianRows, 'id_ujian');
+                    }
+
+                    // 3. Ambil Array ID Mapel (Jika v_materi = 'all', kirim ['all'])
+                    if ($data_paket['v_materi'] === 'all') {
+                        $data_paket['arr_mapel'] = ['all'];
+                    } else {
+                        $mapelRows = $db->table('detail_paket')
+                            ->where('idpaket', $idDecrypted)->where('id_mapel !=', 0)
+                            ->select('id_mapel')->get()->getResultArray();
+                        $data_paket['arr_mapel'] = array_column($mapelRows, 'id_mapel');
+                    }
+                }
+                // =====================================================
 
                 // Tambahkan Token CSRF baru ke dalam array respons
                 $data_paket[csrf_token()] = csrf_hash();
@@ -85,14 +132,34 @@ class PaketController extends BaseController
 
     public function store()
     {
-
         try {
-            // Validasi Input Wajib
-            if (empty($this->request->getVar('id_ujian')) && empty($this->request->getVar('id_mapel'))) {
-                return redirect()->to('sw-admin/paket')->with('info', 'Salah satu ujian dan mapel harus diisi');
+            // 1. Tangkap dan Bersihkan Input Jenis Paket
+            $jenis_paket_array = $this->request->getVar('jenis_paket');
+            if (!is_array($jenis_paket_array)) {
+                $jenis_paket_array = [];
+            }
+            // Bersihkan duplikat & nilai kosong, lalu jadikan JSON
+            $jenis_paket_bersih = array_values(array_unique(array_filter($jenis_paket_array)));
+            $json_jenis_paket = json_encode($jenis_paket_bersih);
+
+            // 2. Variabel Penampung Logika Khusus Brevet
+            $raw_id_kelas = $this->request->getVar('id_kelas');
+            $raw_id_ujian = $this->request->getVar('id_ujian');
+            $raw_id_mapel = $this->request->getVar('id_mapel');
+            $v_ujian = "0";
+            $v_materi = "0";
+
+            // 3. Validasi Khusus Jika Memilih Layanan Brevet
+            if (in_array('brevet', $jenis_paket_bersih)) {
+                if (empty($raw_id_ujian) && empty($raw_id_mapel)) {
+                    return redirect()->to('sw-admin/paket')->with('info', 'Salah satu ujian atau mapel harus diisi untuk paket Brevet AB.');
+                }
+                // Kalkulasi flag ujian & materi
+                $v_ujian = ($raw_id_ujian === "all") ? "all" : (empty($raw_id_ujian) ? "0" : "1");
+                $v_materi = ($raw_id_mapel === "all") ? "all" : (empty($raw_id_mapel) ? "0" : "1");
             }
 
-            // Handle Upload Gambar
+            // 4. Proses Upload Gambar
             $file = $this->request->getFile('avatar');
             $newName = null;
 
@@ -102,87 +169,132 @@ class PaketController extends BaseController
                 $newName = $file->getRandomName();
 
                 if ($file->move($path, $newName)) {
-                    // Image Processing (Resize)
-                    $this->image->withFile($path . '/' . $newName)
+                    // Resize dan simpan di folder thumbnails
+                    \Config\Services::image()
+                        ->withFile($path . '/' . $newName)
                         ->resize(1012, 1012, true, 'auto')
                         ->save($thumbnail_path . '/' . $newName, 80);
 
-                    // Hapus file asli setelah resize (sesuai logika lama Anda)
+                    // Hapus file asli yang terlalu besar
                     if (file_exists($path . '/' . $newName)) {
                         unlink($path . '/' . $newName);
                     }
                 }
             }
 
-            // Logika v_ujian & v_materi
-            $v_ujian = ($this->request->getVar('id_ujian') == "all") ? "all" : (empty($this->request->getVar('id_ujian')) ? "0" : "1");
-            $v_materi = ($this->request->getVar('id_mapel') == "all") ? "all" : (empty($this->request->getVar('id_mapel')) ? "0" : "1");
-
-            // Database Transaction Start
+            // 5. Mulai Transaksi Database (Anti Data Setengah Masuk)
             $db = \Config\Database::connect();
             $db->transStart();
 
+            // Insert Tabel Utama (Paket)
             $data_paket = [
                 'iddiskon'      => $this->request->getVar('iddiskon'),
                 'nama_paket'    => $this->request->getVar('nama_paket'),
-                'jenis_paket'   => $this->request->getVar('jenis_paket'),
-                'jumlah_bulan'  => $this->request->getVar('jumlah_bulan'),
+                'tagline'       => $this->request->getVar('tagline'),
+                'jenis_paket'   => $json_jenis_paket, // Disimpan sebagai JSON
+                'jumlah_bulan'  => $this->request->getVar('jumlah_bulan') ?? 12,
                 'nominal_paket' => $this->request->getVar('nominal_paket'),
                 'file'          => $newName,
                 'status'        => $this->request->getVar('status'),
                 'v_ujian'       => $v_ujian,
                 'v_materi'      => $v_materi,
                 'deskripsi'     => $this->request->getVar('deskripsi'),
-                'komisi'        => $this->request->getVar('komisi'),
+                'komisi'        => $this->request->getVar('komisi') ?? 0,
             ];
 
             $this->paketModel->insert($data_paket);
             $id_paket = $this->paketModel->insertID();
 
-            // Ambil data ujian untuk detail paket
-            $data_master = $this->ujianMasterModel
-                ->join('mapel', 'mapel.id_mapel=ujian_master.mapel')
-                ->where('ujian_master.kelas', $this->request->getVar('id_kelas'))
-                ->groupBy('ujian_master.id_ujian')
-                ->get()->getResultObject();
+            // 6. Insert Tabel Detail (HANYA JIKA LAYANAN BREVET DIPILIH)
+            if (in_array('brevet', $jenis_paket_bersih) && !empty($raw_id_kelas)) {
 
-            // Loop Detail Paket (Logika dipertahankan)
-            foreach ($data_master as $rows) {
-                $insert_detail = false;
-                $id_u = $this->request->getVar('id_ujian');
-                $id_m = $this->request->getVar('id_mapel');
+                $data_master = $this->ujianMasterModel
+                    ->join('mapel', 'mapel.id_mapel=ujian_master.mapel')
+                    ->where('ujian_master.kelas', $raw_id_kelas)
+                    ->groupBy('ujian_master.id_ujian')
+                    ->get()->getResultObject();
 
-                if ($id_u == 'all' && $id_m == 'all') {
-                    $insert_detail = ['id_ujian' => $rows->id_ujian, 'id_mapel' => $rows->mapel];
-                } elseif ($id_u == 'all' && empty($id_m)) {
-                    $insert_detail = ['id_ujian' => $rows->id_ujian, 'id_mapel' => $id_m];
-                } elseif (empty($id_u) && $id_m == 'all') {
-                    $insert_detail = ['id_ujian' => $id_u, 'id_mapel' => $rows->mapel];
+                // ==========================================================
+                // 1. Ekstrak Data Ujian
+                // ==========================================================
+                $arr_u = [];
+                if ($raw_id_ujian === 'all') {
+                    foreach ($data_master as $row) { $arr_u[] = $row->id_ujian; }
+                    $arr_u = array_values(array_unique($arr_u));
+                } else {
+                    $arr_u = is_array($raw_id_ujian) ? $raw_id_ujian : (!empty($raw_id_ujian) ? [$raw_id_ujian] : []);
                 }
 
-                if ($insert_detail) {
-                    $this->detailPaketModel->insert(array_merge(['idpaket' => $id_paket], $insert_detail));
+                // ==========================================================
+                // 2. Ekstrak Data Mapel
+                // ==========================================================
+                $arr_m = [];
+                if ($raw_id_mapel === 'all') {
+                    foreach ($data_master as $row) { $arr_m[] = $row->mapel; }
+                    $arr_m = array_values(array_unique($arr_m));
+                } else {
+                    $arr_m = is_array($raw_id_mapel) ? $raw_id_mapel : (!empty($raw_id_mapel) ? [$raw_id_mapel] : []);
+                }
+
+                // ==========================================================
+                // 3. Proses Penggabungan Sejajar (Index Pairing)
+                // ==========================================================
+                $detail_batch = [];
+                $max_count = max(count($arr_u), count($arr_m));
+                
+                // Variabel penyesuaian: fungsi store() pakai $id_paket, update() pakai $idpaket
+                $id_paket_target =  $id_paket;
+
+                for ($i = 0; $i < $max_count; $i++) {
+                    $detail_batch[] = [
+                        'idpaket'  => $id_paket_target,
+                        // Ambil sesuai urutan, jika salah satu habis, otomatis isi 0
+                        'id_ujian' => $arr_u[$i] ?? 0, 
+                        'id_mapel' => $arr_m[$i] ?? 0
+                    ];
+                }
+
+                if (!empty($detail_batch)) {
+                    $this->detailPaketModel->insertBatch($detail_batch);
                 }
             }
 
+            // Selesai Transaksi
             $db->transComplete();
 
             if ($db->transStatus() === false) {
-                throw new \Exception("Gagal menyimpan data ke database.");
+                throw new \Exception("Gagal melakukan transaksi database.");
             }
 
-            return redirect()->to('sw-admin/paket')->with('success', 'Data paket berhasil disimpan');
+            return redirect()->to('sw-admin/paket')->with('success', 'Data paket berhasil disimpan!');
         } catch (\Exception $e) {
-            return redirect()->to('sw-admin/paket')->with('error', 'Gagal menyimpan data: ' . $e->getMessage());
+            return redirect()->to('sw-admin/paket')->with('error', 'Gagal menyimpan: ' . $e->getMessage());
         }
     }
 
+
+    // ==========================================================
+    // FUNGSI UPDATE DATA PAKET
+    // ==========================================================
     public function update()
     {
         try {
+            $idpaket_enkripsi = $this->request->getVar('idpaket');
+            $idpaket = $idpaket_enkripsi;
+
+            if (!$idpaket) {
+                return redirect()->to('sw-admin/paket')->with('error', 'ID Paket tidak valid.');
+            }
+
+            $jenis_paket_array = $this->request->getVar('jenis_paket');
+            if (!is_array($jenis_paket_array)) {
+                $jenis_paket_array = [];
+            }
+            $jenis_paket_bersih = array_values(array_unique(array_filter($jenis_paket_array)));
+            $json_jenis_paket = json_encode($jenis_paket_bersih);
+
             $file = $this->request->getFile('avatar');
-            $gambar_lama = $this->request->getVar('gambar_lama');
-            $newName = $gambar_lama;
+            $newName = $this->request->getVar('gambar_lama');
 
             if ($file && $file->isValid() && !$file->hasMoved()) {
                 $path = FCPATH . 'assets-landing/images/paket';
@@ -190,37 +302,104 @@ class PaketController extends BaseController
                 $newName = $file->getRandomName();
 
                 if ($file->move($path, $newName)) {
-                    // Resize
-                    $this->image->withFile($path . '/' . $newName)
+                    \Config\Services::image()
+                        ->withFile($path . '/' . $newName)
                         ->resize(1012, 1012, true, 'auto')
                         ->save($thumbnail_path . '/' . $newName, 80);
 
-                    // Hapus file asli
                     if (file_exists($path . '/' . $newName)) unlink($path . '/' . $newName);
 
-                    // Hapus thumbnail lama
+                    $gambar_lama = $this->request->getVar('gambar_lama');
                     if (!empty($gambar_lama) && file_exists($thumbnail_path . '/' . $gambar_lama)) {
                         unlink($thumbnail_path . '/' . $gambar_lama);
                     }
                 }
             }
 
-            $this->paketModel->save([
-                'idpaket'       => $this->request->getVar('idpaket'),
+            $db = \Config\Database::connect();
+            $db->transStart();
+
+            $data_paket = [
                 'iddiskon'      => $this->request->getVar('iddiskon'),
                 'nama_paket'    => $this->request->getVar('nama_paket'),
-                'jenis_paket'   => $this->request->getVar('jenis_paket'),
-                'jumlah_bulan'  => $this->request->getVar('jumlah_bulan'),
+                'tagline'       => $this->request->getVar('tagline'),
+                'jenis_paket'   => $json_jenis_paket,
                 'nominal_paket' => $this->request->getVar('nominal_paket'),
                 'file'          => $newName,
                 'status'        => $this->request->getVar('status'),
                 'deskripsi'     => $this->request->getVar('deskripsi'),
-                'komisi'        => $this->request->getVar('komisi'),
-            ]);
+                'komisi'        => $this->request->getVar('komisi') ?? 0,
+            ];
 
-            return redirect()->to('sw-admin/paket')->with('success', 'Data paket berhasil diperbarui');
+            $this->paketModel->update($idpaket, $data_paket);
+
+            if (!in_array('brevet', $jenis_paket_bersih)) {
+                $this->detailPaketModel->where('idpaket', $idpaket)->delete();
+                $this->paketModel->update($idpaket, ['v_ujian' => '0', 'v_materi' => '0']);
+            } else {
+                $raw_id_kelas = $this->request->getVar('id_kelas');
+                $raw_id_ujian = $this->request->getVar('id_ujian');
+                $raw_id_mapel = $this->request->getVar('id_mapel');
+
+                if (!empty($raw_id_kelas)) {
+                    $this->detailPaketModel->where('idpaket', $idpaket)->delete();
+
+                    $v_u = ($raw_id_ujian === "all") ? "all" : (empty($raw_id_ujian) ? "0" : "1");
+                    $v_m = ($raw_id_mapel === "all") ? "all" : (empty($raw_id_mapel) ? "0" : "1");
+
+                    $this->paketModel->update($idpaket, ['v_ujian' => $v_u, 'v_materi' => $v_m]);
+
+                    $data_master = [];
+                    if ($raw_id_ujian === 'all' || $raw_id_mapel === 'all') {
+                        $data_master = $this->ujianMasterModel
+                            ->join('mapel', 'mapel.id_mapel=ujian_master.mapel')
+                            ->where('ujian_master.kelas', $raw_id_kelas)
+                            ->groupBy('ujian_master.id_ujian')
+                            ->get()->getResultObject();
+                    }
+
+                    $arr_u = [];
+                    if ($raw_id_ujian === 'all') {
+                        foreach ($data_master as $row) { $arr_u[] = $row->id_ujian; }
+                        $arr_u = array_values(array_unique($arr_u));
+                    } else {
+                        $arr_u = is_array($raw_id_ujian) ? $raw_id_ujian : (!empty($raw_id_ujian) ? [$raw_id_ujian] : []);
+                    }
+
+                    $arr_m = [];
+                    if ($raw_id_mapel === 'all') {
+                        foreach ($data_master as $row) { $arr_m[] = $row->mapel; }
+                        $arr_m = array_values(array_unique($arr_m));
+                    } else {
+                        $arr_m = is_array($raw_id_mapel) ? $raw_id_mapel : (!empty($raw_id_mapel) ? [$raw_id_mapel] : []);
+                    }
+
+                    $detail_batch = [];
+                    $max_count = max(count($arr_u), count($arr_m));
+
+                    for ($i = 0; $i < $max_count; $i++) {
+                        $detail_batch[] = [
+                            'idpaket'  => $idpaket,
+                            'id_ujian' => $arr_u[$i] ?? 0,
+                            'id_mapel' => $arr_m[$i] ?? 0
+                        ];
+                    }
+
+                    if (!empty($detail_batch)) {
+                        $this->detailPaketModel->insertBatch($detail_batch);
+                    }
+                }
+            }
+
+            $db->transComplete();
+
+            if ($db->transStatus() === false) {
+                throw new \Exception("Transaksi database gagal dieksekusi.");
+            }
+
+            return redirect()->to('sw-admin/paket')->with('success', 'Data paket berhasil diupdate!');
         } catch (\Exception $e) {
-            return redirect()->to('sw-admin/paket')->with('error', 'Gagal memperbarui data: ' . $e->getMessage());
+            return redirect()->to('sw-admin/paket')->with('error', 'Gagal update data: ' . $e->getMessage());
         }
     }
     public function ujianMaster()
@@ -380,6 +559,11 @@ class PaketController extends BaseController
                 ->orderBy('d.created_at', 'DESC')
                 ->get()->getResult();
 
+            $data['breadcrumbs'] = [
+                ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+                ['title' => 'Data Paket', 'url' => base_url('sw-admin/paket')],
+                ['title' => 'List Review Peserta', 'url' => '#'],
+            ];
 
             return view('admin/paket/review', $data);
         } catch (\Exception $e) {
@@ -438,4 +622,54 @@ class PaketController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Gagal mengubah data: ' . $e->getMessage());
         }
     }
+
+    public function delete($id)
+    {
+        $idPaket = decrypt_url($id); // Asumsi: Jika fungsi decrypt Anda bernama decrypt_url
+        // Validasi ID
+        if (!$idPaket) {
+            return redirect()->back()->withInput()->with('error', 'Data tidak valid atau tidak ditemukan.');
+        }
+
+        try {
+            // Karena $useSoftDeletes = true di Model, ini HANYA akan mengisi kolom deleted_at!
+            $dataUpdate = [
+                'status'     => '0',
+                'deleted_at' => date('Y-m-d H:i:s')
+            ];
+
+            // 3. Eksekusi Update (Bukan Delete)
+            $this->paketModel->update($idPaket, $dataUpdate);
+
+            return redirect()->back()->withInput()->with('success', "Paket berhasil dihapus");
+        } catch (\Exception $e) {
+            // Tangkap jika ada error database
+            return redirect()->back()->withInput()->with('error', 'Paket gagal dihapus');
+        }
+    }
+
+    public function getUjianMaster()
+    {
+        // Pastikan request ini murni dari AJAX untuk keamanan
+        if ($this->request->isAJAX()) {
+            $id_kelas = $this->request->getPost('id');
+
+            // Ambil data ujian berdasarkan id_kelas
+            // Asumsi: tabel master ujian Anda digabung (join) dengan tabel nama ujian
+            $data = $this->ujianMasterModel
+                ->select('ujian_master.id_ujian, tabel_nama_ujian.nama_ujian') // SESUAIKAN: ganti tabel_nama_ujian dengan nama tabel asli yang menyimpan teks nama ujian
+                ->join('tabel_nama_ujian', 'tabel_nama_ujian.id_ujian = ujian_master.id_ujian')
+                ->where('ujian_master.kelas', $id_kelas)
+                ->groupBy('ujian_master.id_ujian')
+                ->findAll();
+
+            // Kembalikan dalam bentuk JSON beserta CSRF Token baru
+            return $this->response->setJSON([
+                'status' => 'success',
+                'data'   => $data,
+                csrf_token() => csrf_hash() // Wajib ada agar token form ter-update
+            ]);
+        }
+    }
+
 }

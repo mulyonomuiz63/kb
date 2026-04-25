@@ -18,6 +18,7 @@ class TransaksiController extends BaseController
     protected $siswaModel;
     protected $serviceEmail;
     protected $detailTransaksiModel;
+    protected $ikhModel;
     public function __construct()
     {
         $this->transaksiModel = new \App\Models\TransaksiModel();
@@ -30,6 +31,7 @@ class TransaksiController extends BaseController
         $this->siswaModel = new \App\Models\SiswaModel();
         $this->serviceEmail = new \App\Libraries\Emailer();
         $this->detailTransaksiModel = new \App\Models\DetailTransaksiModel();
+        $this->ikhModel  = new \App\Models\IkhModel();
     }
     public function index()
     {
@@ -134,16 +136,16 @@ class TransaksiController extends BaseController
                                 </a>
                             </div>';
 
-                                // Opsi bersyarat berdasarkan status S (Lunas)
-                                if ($s->status == 'S') {
-                                    $row['aksi'] .= '
+                    // Opsi bersyarat berdasarkan status S (Lunas)
+                    if ($s->status == 'S') {
+                        $row['aksi'] .= '
                             <div class="menu-item px-3">
                                 <a href="javascript:void(0)" class="menu-link px-3 text-success invoice_cetak" data-bs-toggle="modal" data-bs-target="#invoice_cetak_modal" data-invoice="' . base_url('sw-admin/transaksi/invoice/' . $id_enc) . '">
                                     <i class="ki-duotone ki-file-down fs-4 me-2 text-success"><span class="path1"></span><span class="path2"></span></i> Unduh Invoice
                                 </a>
                             </div>';
-                                } else {
-                                    $row['aksi'] .= '
+                    } else {
+                        $row['aksi'] .= '
                             <div class="menu-item px-3">
                                 <a href="' . base_url('sw-admin/transaksi/approve-manual/' . $id_enc) . '" class="menu-link px-3 text-primary" id="approve">
                                     <i class="ki-duotone ki-check-square fs-4 me-2 text-primary"><span class="path1"></span><span class="path2"></span></i> Approve Transaksi
@@ -157,9 +159,9 @@ class TransaksiController extends BaseController
                                     <i class="ki-duotone ki-trash fs-4 me-2 text-danger"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i> Hapus Transaksi
                                 </a>
                             </div>';
-                                }
+                    }
 
-                                $row['aksi'] .= '
+                    $row['aksi'] .= '
                         </div>
                     </div>';
 
@@ -277,6 +279,49 @@ class TransaksiController extends BaseController
                             'jam'     => null,
                             'status'  => null,
                         ])->update();
+                }
+            }
+
+            //untuk jenis paket ikh
+            $transaksiMaster = $this->transaksiModel
+                ->where('idtransaksi', $idtransaksi)
+                ->where('status', 'S')
+                ->first();
+
+            if ($transaksiMaster) {
+                $jenisPaketArray = json_decode($transaksiMaster['jenis_paket'], true) ?? [];
+
+                if (in_array('ikh', $jenisPaketArray)) {
+
+                    $idsiswa = $transaksiMaster['idsiswa'];
+
+                    // 2. Cek apakah siswa ini sudah punya data di ikhModel
+                    $existingIkh = $this->ikhModel->where('id_siswa', $idsiswa)->first();
+
+                    if ($existingIkh) {
+                        // --- LOGIKA UPDATE ---
+                        // Ambil kuota saat ini dan tambahkan 1
+                        $newKuota = (int)$existingIkh['kuota'] + 1;
+
+                        $dataUpdate = [
+                            'kuota'  => $newKuota // Kuota bertambah
+                        ];
+
+                        // Update berdasarkan ID primary key tabel IKH
+                        $this->ikhModel->update($existingIkh['id_ikh'], $dataUpdate);
+                    } else {
+                        // --- LOGIKA INSERT BARU ---
+                        $dataInsert = [
+                            'id_siswa'            => $idsiswa,
+                            'is_riwayat_hidup'    => '1',
+                            'is_bukan_pns'        => '1',
+                            'is_pakta_integritas' => '1',
+                            'is_pernyataan_ikh'   => '1',
+                            'kuota'               => '1' // Kuota awal
+                        ];
+
+                        $this->ikhModel->insert($dataInsert);
+                    }
                 }
             }
 

@@ -102,7 +102,7 @@ class Filters extends BaseFilters
                     'sw-siswa/transaksi/cek-kode-voucher',
                     'sw-siswa/materi/get-file-materi',
                     'sw-siswa/diskusi/send',
-                    'sw-siswa/perijinan-ikh/upload-ajax',
+                    'sw-siswa/ikh/upload-ajax',
                     'midtrans/notification', //midtrans handle
                 ]
             ],
