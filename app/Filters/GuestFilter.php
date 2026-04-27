@@ -20,6 +20,7 @@ class GuestFilter implements FilterInterface
                 case 2: return redirect()->to(base_url('sw-siswa'));
                 case 3: return redirect()->to(base_url('sw-guru'));
                 case 4: return redirect()->to(base_url('sw-mitra'));
+                case 5: return redirect()->to(base_url('sw-pic'));
                 default: return redirect()->to(base_url('/'));
             }
         }

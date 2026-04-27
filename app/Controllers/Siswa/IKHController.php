@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controllers\Siswa;
 
 use App\Controllers\BaseController;
@@ -17,7 +18,10 @@ class IKHController extends BaseController
 
     public function index()
     {
-        $ikh = $this->ikhModel->where('id_siswa', session('id'))->first();
+        $ikh = $this->ikhModel->where([
+            'id_siswa' => session('id'),
+            'kuota >=' => 1
+        ])->first();
         $siswa = $this->siswaModel->where('id_siswa', session('id'))->first();
 
         $this->data['breadcrumbs'] = [
@@ -25,7 +29,7 @@ class IKHController extends BaseController
             ['title' => 'Sertifikasi IKH', 'url' => base_url('sw-siswa/ikh')],
         ];
 
-        if(empty($ikh)){
+        if (empty($ikh)) {
             session()->setFlashdata('pesan', "
                         swal({
                             title: 'Informasi!',
@@ -88,7 +92,7 @@ class IKHController extends BaseController
             $pesan = "Data diri berhasil diperbarui.";
         } else {
             // Beri status awal khusus agar tahu ini masih draft (baru isi data diri, file belum lengkap)
-            $dataText['status_validasi_admin'] = 'draft'; 
+            $dataText['status_validasi_admin'] = 'draft';
             $this->ikhModel->insert($dataText);
             $pesan = "Data diri berhasil disimpan. Silakan lanjutkan mengunggah dokumen.";
         }
@@ -115,7 +119,7 @@ class IKHController extends BaseController
         $file = $this->request->getFile('file_dokumen');
 
         if ($file && $file->isValid() && !$file->hasMoved()) {
-            
+
             // 1. Validasi Ukuran (Maks 2 MB = 2097152 bytes)
             if ($file->getSize() > 2097152) {
                 return $this->response->setJSON(['success' => false, 'message' => 'Gagal: Ukuran file melebihi 2 MB.', 'csrf_hash' => csrf_hash()]);
@@ -123,8 +127,8 @@ class IKHController extends BaseController
 
             // 2. Validasi Ekstensi PDF
             $ext = strtolower($file->getClientExtension());
-            $allowPdfOnly = ['file_ktp', 'file_npwp', 'file_kk', '','file_skck', 'file_ijazah', 'file_spt', 'file_sertifikat'];
-            
+            $allowPdfOnly = ['file_ktp', 'file_npwp', 'file_kk', '', 'file_skck', 'file_ijazah', 'file_spt', 'file_sertifikat'];
+
             if (in_array($namaInput, $allowPdfOnly) && $ext !== 'pdf') {
                 return $this->response->setJSON(['success' => false, 'message' => 'File ini HANYA BOLEH berformat PDF.', 'csrf_hash' => csrf_hash()]);
             }
@@ -140,13 +144,13 @@ class IKHController extends BaseController
             // PERBAIKAN: HAPUS FILE LAMA JIKA ADA (Replace)
             // =========================================================================
             $dataLama = $this->ikhModel->find($idIkh);
-            
+
             // Deteksi otomatis apakah CI4 mengembalikan Array atau Object
             $namaFileLama = is_array($dataLama) ? ($dataLama[$namaInput] ?? null) : ($dataLama->$namaInput ?? null);
 
             if (!empty($namaFileLama)) {
                 $pathFileLama = FCPATH . 'uploads/ikh/' . $namaFileLama;
-                
+
                 // Pastikan file tersebut benar-benar ada di folder sebelum dihapus
                 if (file_exists($pathFileLama) && is_file($pathFileLama)) {
                     unlink($pathFileLama); // Hapus file fisik dari server
@@ -154,11 +158,11 @@ class IKHController extends BaseController
             }
             // =========================================================================
             $newName = strtoupper($folderName) . '_' . $idSiswa . '_' . $file->getRandomName();
-            
+
             try {
                 $file->move($basePath, $newName);
                 $dbPath = $folderName . '/' . $newName;
-                
+
                 // Update nama file baru ke database
                 $this->ikhModel->update($idIkh, [$namaInput => $dbPath]);
 
@@ -168,12 +172,11 @@ class IKHController extends BaseController
                 $isComplete = $this->check_all_files_uploaded($idIkh);
 
                 return $this->response->setJSON([
-                    'success' => true, 
+                    'success' => true,
                     'message' => 'Upload berhasil!',
                     'is_complete' => $isComplete, // Beritahu JS apakah sudah lengkap
                     'csrf_hash' => csrf_hash()
                 ]);
-
             } catch (\Exception $e) {
                 return $this->response->setJSON(['success' => false, 'message' => 'Gagal memindahkan file.', 'csrf_hash' => csrf_hash()]);
             }
@@ -186,7 +189,7 @@ class IKHController extends BaseController
     private function check_all_files_uploaded($idIkh)
     {
         $data = $this->ikhModel->find($idIkh);
-        
+
         if ($data) {
             $requiredFiles = ['file_ktp', 'file_npwp', 'file_kk', 'file_foto', 'file_ijazah', 'file_spt', 'file_sertifikat', 'file_ttd'];
             $isComplete = true;
@@ -194,7 +197,7 @@ class IKHController extends BaseController
             foreach ($requiredFiles as $file) {
                 // PERBAIKAN: Deteksi otomatis format Array atau Object
                 $nilaiFile = is_array($data) ? ($data[$file] ?? null) : ($data->$file ?? null);
-                
+
                 if (empty($nilaiFile)) {
                     $isComplete = false;
                     break;
@@ -213,13 +216,13 @@ class IKHController extends BaseController
                     'Pengajuan IKH siap diperiksa',
                     base_url('sw-admin/ikh')
                 );
-            }else{
+            } else {
                 $isComplete = false;
             }
-            
+
             return $isComplete; // Kembalikan true jika lengkap
         }
-        
+
         return false;
     }
 
@@ -232,14 +235,15 @@ class IKHController extends BaseController
             return redirect()->to('sw-siswa/ikh')->with('error', 'Data IKH tidak ditemukan.');
         }
 
-        $this->ikhModel->update($idIkh, 
-        [
-            'status_validasi_admin' => 'pending',
-            'status_sertifikat'     => 'belum',
-            'tgl_aktif'             => null,
-            'tgl_exp'               => null,
-            'file_kartu_ikh'        => ''
-        ],
+        $this->ikhModel->update(
+            $idIkh,
+            [
+                'status_validasi_admin' => 'pending',
+                'status_sertifikat'     => 'belum',
+                'tgl_aktif'             => null,
+                'tgl_exp'               => null,
+                'file_kartu_ikh'        => ''
+            ],
         );
         send_notif(
             '1',

@@ -99,6 +99,11 @@ if (is_file(APPPATH . 'Config/RoutesSiswa.php')) {
     require APPPATH . 'Config/RoutesSiswa.php';
 }
 
+// pic
+if (is_file(APPPATH . 'Config/RoutesPic.php')) {
+    require APPPATH . 'Config/RoutesPic.php';
+}
+
 
 // We get a performance increase by specifying the default
 // route since we don't have to scan directories.

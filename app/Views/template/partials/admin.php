@@ -55,7 +55,7 @@ $is_pengaturan_active = in_array($current_uri, $pengaturan_pool);
         background-color: var(--bs-light) !important;
         border-color: var(--bs-gray-200) !important;
         transform: translateY(-2px);
-        box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
     }
 
     .menu-extended .menu-link:hover .menu-custom-icon {
@@ -64,7 +64,28 @@ $is_pengaturan_active = in_array($current_uri, $pengaturan_pool);
     }
 
     .menu-sub-lg-dropdown {
-        box-shadow: 0 15px 50px rgba(0,0,0,0.1) !important;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1) !important;
+    }
+</style>
+<style>
+    /* Efek hover khusus untuk menu dropdown agar lebih interaktif */
+    .menu-custom-hover {
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
+    }
+    .menu-custom-hover:hover {
+        background-color: #f8f9fa;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        border-color: #f1f1f4;
+    }
+    .menu-custom-hover.active {
+        background-color: #f1faff;
+        border-color: #d8edff;
+    }
+    /* Memastikan icon tidak penyok di layar kecil */
+    .menu-custom-icon {
+        flex-shrink: 0; 
     }
 </style>
 
@@ -87,39 +108,85 @@ $is_pengaturan_active = in_array($current_uri, $pengaturan_pool);
                                     <span class="menu-title">Master Data</span>
                                     <span class="menu-arrow d-lg-none"></span>
                                 </span>
-                                <div class="menu-sub menu-sub-lg-down-accordion menu-sub-lg-dropdown p-0 w-100 w-lg-850px">
-                                    <div class="menu-state-bg menu-extended overflow-hidden py-8 px-8">
-                                        <div class="row g-3">
-                                            <div class="col-lg-4">
-                                                <a href="<?= base_url('sw-admin/siswa') ?>" class="menu-link p-4 mb-2 <?= (in_array($current_uri, $siswa) ? 'active' : '') ?>">
-                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-success"><i class="ki-duotone ki-profile-user text-success fs-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i></span>
-                                                    <span class="d-flex flex-column"><span class="fs-6 fw-bold text-gray-800">Peserta</span><span class="fs-7 fw-semibold text-muted">Siswa & Ujian</span></span>
+                                <div class="menu-sub menu-sub-lg-down-accordion menu-sub-lg-dropdown p-0 w-100 w-lg-850px shadow-lg rounded-4">
+                                    <div class="menu-state-bg menu-extended overflow-hidden py-6 px-6 py-lg-8 px-lg-8 bg-white">
+                                        <div class="row g-4">
+
+                                            <div class="col-12 col-md-6 col-lg-3">
+                                                <a href="<?= base_url('sw-admin/siswa') ?>" class="menu-link p-3 mb-2 rounded-3 menu-custom-hover <?= (in_array($current_uri, $siswa) ? 'active' : '') ?>">
+                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-success">
+                                                        <i class="ki-duotone ki-profile-user text-success fs-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i>
+                                                    </span>
+                                                    <span class="d-flex flex-column">
+                                                        <span class="fs-6 fw-bold text-gray-800">Peserta</span>
+                                                        <span class="fs-8 fw-semibold text-muted">Siswa & Ujian</span>
+                                                    </span>
                                                 </a>
-                                                <a href="<?= base_url('sw-admin/guru') ?>" class="menu-link p-4 mb-2 <?= (in_array($current_uri, $guru) ? 'active' : '') ?>">
-                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-info"><i class="ki-duotone ki-teacher text-info fs-1"><span class="path1"></span><span class="path2"></span></i></span>
-                                                    <span class="d-flex flex-column"><span class="fs-6 fw-bold text-gray-800">Pengajar</span><span class="fs-7 fw-semibold text-muted">Guru & Materi</span></span>
-                                                </a>
-                                            </div>
-                                            <div class="col-lg-4">
-                                                <a href="<?= base_url('sw-admin/mitra') ?>" class="menu-link p-4 mb-2 <?= (in_array($current_uri, $mitra) ? 'active' : '') ?>">
-                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-primary"><i class="ki-duotone ki-handcart text-primary fs-1"><span class="path1"></span><span class="path2"></span></i></span>
-                                                    <span class="d-flex flex-column"><span class="fs-6 fw-bold text-gray-800">Mitra</span><span class="fs-7 fw-semibold text-muted">Voucher & Affiliate</span></span>
-                                                </a>
-                                                <a href="<?= base_url('sw-admin/mapel') ?>" class="menu-link p-4 mb-2 <?= (in_array($current_uri, $mapel) ? 'active' : '') ?>">
-                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-danger"><i class="ki-duotone ki-book text-danger fs-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i></span>
-                                                    <span class="d-flex flex-column"><span class="fs-6 fw-bold text-gray-800">Mata Pelajaran</span><span class="fs-7 fw-semibold text-muted">Modul & Kurikulum</span></span>
-                                                </a>
-                                            </div>
-                                            <div class="col-lg-4">
-                                                <a href="<?= base_url('sw-admin/kelas') ?>" class="menu-link p-4 mb-2 <?= (in_array($current_uri, $kelas) ? 'active' : '') ?>">
-                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-dark"><i class="ki-duotone ki-element-11 text-dark fs-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i></span>
-                                                    <span class="d-flex flex-column"><span class="fs-6 fw-bold text-gray-800">Kelas</span><span class="fs-7 fw-semibold text-muted">Ruang & Level</span></span>
-                                                </a>
-                                                <a href="<?= base_url('sw-admin/relasi') ?>" class="menu-link p-4 mb-2 <?= (in_array($current_uri, $relasi) ? 'active' : '') ?>">
-                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-warning"><i class="ki-duotone ki-graph-3 text-warning fs-1"><span class="path1"></span><span class="path2"></span></i></span>
-                                                    <span class="d-flex flex-column"><span class="fs-6 fw-bold text-gray-800">Relasi</span><span class="fs-7 fw-semibold text-muted">Mapping Sistem</span></span>
+                                                <a href="<?= base_url('sw-admin/guru') ?>" class="menu-link p-3 mb-2 rounded-3 menu-custom-hover <?= (in_array($current_uri, $guru) ? 'active' : '') ?>">
+                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-info">
+                                                        <i class="ki-duotone ki-teacher text-info fs-2"><span class="path1"></span><span class="path2"></span></i>
+                                                    </span>
+                                                    <span class="d-flex flex-column">
+                                                        <span class="fs-6 fw-bold text-gray-800">Pengajar</span>
+                                                        <span class="fs-8 fw-semibold text-muted">Guru & Materi</span>
+                                                    </span>
                                                 </a>
                                             </div>
+
+                                            <div class="col-12 col-md-6 col-lg-3">
+                                                <a href="<?= base_url('sw-admin/mitra') ?>" class="menu-link p-3 mb-2 rounded-3 menu-custom-hover <?= (in_array($current_uri, $mitra) ? 'active' : '') ?>">
+                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-primary">
+                                                        <i class="ki-duotone ki-handcart text-primary fs-2"><span class="path1"></span><span class="path2"></span></i>
+                                                    </span>
+                                                    <span class="d-flex flex-column">
+                                                        <span class="fs-6 fw-bold text-gray-800">Mitra</span>
+                                                        <span class="fs-8 fw-semibold text-muted">Voucher & Affiliate</span>
+                                                    </span>
+                                                </a>
+                                                <a href="<?= base_url('sw-admin/pic') ?>" class="menu-link p-3 mb-2 rounded-3 menu-custom-hover <?= (in_array($current_uri, $pic) ? 'active' : '') ?>">
+                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-primary">
+                                                        <i class="ki-duotone ki-security-user text-primary fs-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
+                                                    </span>
+                                                    <span class="d-flex flex-column">
+                                                        <span class="fs-6 fw-bold text-gray-800">PIC</span>
+                                                        <span class="fs-8 fw-semibold text-muted">Akses PIC</span>
+                                                    </span>
+                                                </a>
+                                            </div>
+
+                                            <div class="col-12 col-md-6 col-lg-3">
+                                                <a href="<?= base_url('sw-admin/mapel') ?>" class="menu-link p-3 mb-2 rounded-3 menu-custom-hover <?= (in_array($current_uri, $mapel) ? 'active' : '') ?>">
+                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-danger">
+                                                        <i class="ki-duotone ki-book text-danger fs-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i>
+                                                    </span>
+                                                    <span class="d-flex flex-column">
+                                                        <span class="fs-6 fw-bold text-gray-800">Mata Pelajaran</span>
+                                                        <span class="fs-8 fw-semibold text-muted">Modul & Kurikulum</span>
+                                                    </span>
+                                                </a>
+                                                <a href="<?= base_url('sw-admin/kelas') ?>" class="menu-link p-3 mb-2 rounded-3 menu-custom-hover <?= (in_array($current_uri, $kelas) ? 'active' : '') ?>">
+                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-dark">
+                                                        <i class="ki-duotone ki-element-11 text-dark fs-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i>
+                                                    </span>
+                                                    <span class="d-flex flex-column">
+                                                        <span class="fs-6 fw-bold text-gray-800">Kelas</span>
+                                                        <span class="fs-8 fw-semibold text-muted">Ruang & Level</span>
+                                                    </span>
+                                                </a>
+                                            </div>
+
+                                            <div class="col-12 col-md-6 col-lg-3"> 
+                                                <a href="<?= base_url('sw-admin/relasi') ?>" class="menu-link p-3 mb-2 rounded-3 menu-custom-hover <?= (in_array($current_uri, $relasi) ? 'active' : '') ?>">
+                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-warning">
+                                                        <i class="ki-duotone ki-graph-3 text-warning fs-2"><span class="path1"></span><span class="path2"></span></i>
+                                                    </span>
+                                                    <span class="d-flex flex-column">
+                                                        <span class="fs-6 fw-bold text-gray-800">Relasi</span>
+                                                        <span class="fs-8 fw-semibold text-muted">Mapping Sistem</span>
+                                                    </span>
+                                                </a>
+                                            </div>
+
                                         </div>
                                     </div>
                                 </div>

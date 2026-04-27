@@ -17,6 +17,10 @@ class PicController extends BaseController
     public function index()
     {
         // MASTER DATA
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'List PIC', 'url' => '#'],
+        ];
         $data['pic'] = $this->picModel->asObject()->findAll();
         return view('admin/pic/list', $data);
     }
