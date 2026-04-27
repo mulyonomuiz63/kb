@@ -203,7 +203,7 @@ class ProfileController extends BaseController
             ->set('status', 'S')
             ->where('id_siswa', session()->get('id'))
             ->update();
-        return redirect()->to('sw-siswa/profile')->with('success','Profile telah diperbarui');
+        return redirect()->to('sw-siswa')->with('success','Profile telah diperbarui');
     }
     public function editPassword()
     {
