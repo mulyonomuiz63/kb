@@ -288,8 +288,6 @@ foreach ($modals as $modal): ?>
 <script>
     $(document).ready(function() {
 
-        <?= session()->getFlashdata('pesan'); ?>
-
         let csrfName = '<?= csrf_token() ?>';
         let csrfHash = '<?= csrf_hash() ?>';
 
