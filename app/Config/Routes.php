@@ -153,3 +153,9 @@ $routes->group('detail', function ($routes) {
 //untuk di terapkan di cronjob, hapus transaksi yang sudah lebih dari 1 hari atau expired
 $routes->get('hapus-transaksi', 'Admin\TransaksiController::hapusTransaksi');
 $routes->get('otomatis-kirim-ujian', 'Siswa\UjianController::otomatisKirimUjian');
+
+
+//untuk autentication buat upload file ke google drive
+// Route untuk Setup Google Drive Admin (Hanya dijalankan sekali oleh Anda)
+$routes->get('auth/admin-drive', 'AuthController::authAdminDrive');
+$routes->get('google-callback-admin', 'AuthController::adminDriveCallback');

@@ -3,14 +3,17 @@
 namespace App\Controllers\Pic;
 
 use App\Controllers\BaseController;
-
+use Google\Client;
+use Google\Service\Drive;
 
 class IkhController extends BaseController
 {
     protected $ikhModel;
+    protected $siswaModel;
     public function __construct()
     {
         $this->ikhModel = new \App\Models\IkhModel();
+        $this->siswaModel = new \App\Models\SiswaModel();
     }
 
     // 1. Tampilkan Tabel Daftar IKH
@@ -107,9 +110,34 @@ class IkhController extends BaseController
             ]);
         }
 
+        // Ambil data siswa untuk penamaan folder server
+        $idSiswa = is_array($existing) ? $existing['id_siswa'] : $existing->id_siswa;
+        $dataSiswa = $this->siswaModel->find($idSiswa);
+
+        if (!$dataSiswa) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'msg' => 'Data Siswa tidak ditemukan',
+                csrf_token() => csrf_hash()
+            ]);
+        }
+
         $fields = ['file_riwayat_hidup', 'file_bukan_pns', 'file_pakta_integritas', 'file_pernyataan_ikh', 'file_skck'];
         $updateData = [];
         $uploadedCount = 0;
+
+        // Persiapan Koneksi & Folder server
+        try {
+            $service = $this->getDriveService();
+            $folderSiswaName = strtoupper($dataSiswa['nama_siswa']) . "_" . $dataSiswa['no_induk_siswa'];
+            $folderSiswaId = $this->getOrCreateFolder($service, $folderSiswaName, setting('folder_id_drive'));
+        } catch (\Exception $e) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'msg' => 'Gagal terhubung ke server: ' . $e->getMessage(),
+                csrf_token() => csrf_hash()
+            ]);
+        }
 
         foreach ($fields as $field) {
             $file = $this->request->getFile($field);
@@ -117,22 +145,44 @@ class IkhController extends BaseController
             // Cek apakah ada file yang diunggah
             if ($file && $file->isValid() && !$file->hasMoved()) {
 
-                $subFolder = str_replace('file_', '', $field);
-                $uploadPath = FCPATH . 'uploads/ikh/' . $subFolder;
-
-                if (!is_dir($uploadPath)) {
-                    mkdir($uploadPath, 0777, true);
+                // 1. Hapus file lama di Drive (jika ada)
+                $fileIdLama = is_array($existing) ? ($existing[$field] ?? null) : ($existing->$field ?? null);
+                if (!empty($fileIdLama)) {
+                    // Cek jika ini ID Drive (tidak memiliki titik / ekstensi lokal)
+                    if (strpos($fileIdLama, '.') === false) {
+                        try {
+                            $service->files->delete($fileIdLama);
+                        } catch (\Exception $e) {
+                            // Abaikan jika file lama tidak ada di Drive
+                        }
+                    } else {
+                        // Jika ternyata file lama masih di folder lokal, kita hapus juga sebagai pembersihan
+                        $pathOld = FCPATH . 'uploads/ikh/' . $fileIdLama;
+                        if (file_exists($pathOld) && is_file($pathOld)) @unlink($pathOld);
+                    }
                 }
 
-                // Hapus file lama jika ada
-                if (!empty($existing[$field]) && file_exists($uploadPath . '/' . $existing[$field])) {
-                    @unlink($uploadPath . '/' . $existing[$field]);
-                }
+                // 2. Upload file baru ke Drive
+                $namaInputBersih = strtoupper(str_replace('file_', '', $field));
+                $newName = $namaInputBersih . "_" . $dataSiswa['no_induk_siswa'] . "_" . time();
 
-                $newName = $file->getRandomName();
-                if ($file->move($uploadPath, $newName)) {
-                    $updateData[$field] = $subFolder . '/' . $newName;
+                $fileMetadata = new \Google\Service\Drive\DriveFile([
+                    'name' => $newName,
+                    'parents' => [$folderSiswaId]
+                ]);
+
+                try {
+                    $uploadedFile = $service->files->create($fileMetadata, [
+                        'data' => file_get_contents($file->getTempName()),
+                        'mimeType' => $file->getClientMimeType(),
+                        'uploadType' => 'multipart',
+                        'fields' => 'id'
+                    ]);
+
+                    $updateData[$field] = $uploadedFile->id; // Simpan ID server
                     $uploadedCount++;
+                } catch (\Exception $e) {
+                    continue; // Skip jika 1 file gagal, lanjut file berikutnya
                 }
             }
         }
@@ -141,7 +191,7 @@ class IkhController extends BaseController
             $this->ikhModel->update($id_ikh, $updateData);
             return $this->response->setJSON([
                 'status' => 'success',
-                'msg' => $uploadedCount . ' Berkas berhasil diperbarui',
+                'msg' => $uploadedCount . ' Berkas berhasil diperbarui ke server',
                 csrf_token() => csrf_hash()
             ]);
         }
@@ -168,14 +218,27 @@ class IkhController extends BaseController
             return $this->response->setJSON(['success' => false, 'message' => 'Data tidak ditemukan.', 'csrf_hash' => csrf_hash()]);
         }
 
+        $idSiswa = is_array($dataLama) ? $dataLama['id_siswa'] : $dataLama->id_siswa;
+        $dataSiswa = $this->siswaModel->find($idSiswa);
+
+        if (!$dataSiswa) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Data Siswa tidak ditemukan.', 'csrf_hash' => csrf_hash()]);
+        }
+
         // 2. Tangkap file multiple
         $files = $this->request->getFileMultiple('file_kartu_ikh');
         $uploadedFiles = [];
-        $basePath = FCPATH . 'uploads/ikh/kartu/';
 
-        if (!is_dir($basePath)) mkdir($basePath, 0755, true);
+        // Persiapan Koneksi & Folder server
+        try {
+            $service = $this->getDriveService();
+            $folderSiswaName = strtoupper($dataSiswa['nama_siswa']) . "_" . $dataSiswa['no_induk_siswa'];
+            $folderSiswaId = $this->getOrCreateFolder($service, $folderSiswaName, setting('folder_id_drive'));
+        } catch (\Exception $e) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Gagal terhubung ke server.', 'csrf_hash' => csrf_hash()]);
+        }
 
-        foreach ($files as $file) {
+        foreach ($files as $index => $file) {
             if ($file->isValid() && !$file->hasMoved()) {
 
                 // Validasi ukuran per file (2MB)
@@ -183,12 +246,23 @@ class IkhController extends BaseController
                     return $this->response->setJSON(['success' => false, 'message' => 'Salah satu file terlalu besar (Max 2MB).', 'csrf_hash' => csrf_hash()]);
                 }
 
-                // Simpan file
-                $newName = 'KARTU_IKH_' . $id_ikh . '_' . $file->getRandomName();
+                // Upload file ke Drive
+                $newName = 'KARTU_IKH_' . $dataSiswa['no_induk_siswa'] . '_' . time() . '_' . $index;
+
+                $fileMetadata = new \Google\Service\Drive\DriveFile([
+                    'name' => $newName,
+                    'parents' => [$folderSiswaId]
+                ]);
+
                 try {
-                    $file->move($basePath, $newName);
-                    // Simpan path relatifnya saja agar konsisten dengan database
-                    $uploadedFiles[] = 'kartu/' . $newName;
+                    $uploadedFileDrive = $service->files->create($fileMetadata, [
+                        'data' => file_get_contents($file->getTempName()),
+                        'mimeType' => $file->getClientMimeType(),
+                        'uploadType' => 'multipart',
+                        'fields' => 'id'
+                    ]);
+                    // Simpan ID Drive ke dalam array
+                    $uploadedFiles[] = $uploadedFileDrive->id;
                 } catch (\Exception $e) {
                     continue; // Skip jika gagal satu
                 }
@@ -208,25 +282,33 @@ class IkhController extends BaseController
             }
 
             foreach ($arrFileLama as $oldFile) {
-                $pathOld = FCPATH . 'uploads/ikh/' . $oldFile;
-                if (file_exists($pathOld) && is_file($pathOld)) {
-                    @unlink($pathOld);
+                // Deteksi apakah ID Drive atau path lokal
+                if (strpos($oldFile, '.') === false) {
+                    try {
+                        $service->files->delete($oldFile);
+                    } catch (\Exception $e) {
+                    }
+                } else {
+                    // Hapus file lokal lama sebagai bentuk pembersihan
+                    $pathOld = FCPATH . 'uploads/ikh/' . $oldFile;
+                    if (file_exists($pathOld) && is_file($pathOld)) {
+                        @unlink($pathOld);
+                    }
                 }
             }
 
             // --- UPDATE DATABASE ---
             $currentStatus = is_array($dataLama) ? $dataLama['status_sertifikat'] : $dataLama->status_sertifikat;
-            $newKuota = (int)$dataLama['kuota'];
+            $newKuota = (int)(is_array($dataLama) ? $dataLama['kuota'] : $dataLama->kuota);
 
             // Kuota hanya dikurangi jika status belum 'terbit'
             if ($currentStatus !== 'terbit') {
-                // Logika: Kurangi 1, tapi hasil minimal adalah 0
                 $newKuota = max(0, $newKuota - 1);
             }
 
             try {
                 $this->ikhModel->update($id_ikh, [
-                    'file_kartu_ikh'    => json_encode($uploadedFiles), // Simpan dalam format JSON
+                    'file_kartu_ikh'    => json_encode($uploadedFiles), // Simpan dalam format JSON ID Drive
                     'tgl_aktif'         => $tgl_aktif,
                     'tgl_exp'           => $tgl_exp,
                     'status_sertifikat' => 'terbit',
@@ -235,15 +317,15 @@ class IkhController extends BaseController
 
                 // Kirim Notifikasi
                 send_notif(
-                    $dataLama['id_siswa'],
+                    $idSiswa,
                     'Kartu IKH Diterbitkan',
-                    'Kartu IKH Anda sudah berhasil diterbitkan (Multiple Files).',
+                    'Kartu IKH Anda sudah berhasil diterbitkan dan tersedia.',
                     base_url('sw-siswa/ikh')
                 );
 
                 return $this->response->setJSON([
                     'success' => true,
-                    'message' => 'Kartu IKH berhasil diterbitkan!',
+                    'message' => 'Kartu IKH berhasil diunggah ke Drive dan diterbitkan!',
                     'csrf_hash' => csrf_hash()
                 ]);
             } catch (\Exception $e) {
@@ -252,5 +334,56 @@ class IkhController extends BaseController
         }
 
         return $this->response->setJSON(['success' => false, 'message' => 'Tidak ada file valid yang terpilih.', 'csrf_hash' => csrf_hash()]);
+    }
+
+    private function getDriveService()
+    {
+        $client = new Client();
+        $client->setAuthConfig(APPPATH . 'ThirdParty/oauth-credentials.json');
+        $client->addScope(Drive::DRIVE);
+
+        $tokenPath = WRITEPATH . 'google-token-admin.json';
+
+        if (!file_exists($tokenPath)) {
+            throw new \Exception("Admin belum melakukan verifikasi Drive. Akses /auth/admin-drive");
+        }
+
+        $accessToken = json_decode(file_get_contents($tokenPath), true);
+        $client->setAccessToken($accessToken);
+
+        // Jika Token Expired, Refresh otomatis
+        if ($client->isAccessTokenExpired()) {
+            if ($client->getRefreshToken()) {
+                $newToken = $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
+                $fullToken = array_merge($accessToken, $newToken);
+                file_put_contents($tokenPath, json_encode($fullToken));
+            }
+        }
+
+        return new Drive($client);
+    }
+    private function getOrCreateFolder($service, $folderName, $parentFolderId)
+    {
+        // Cari folder berdasarkan nama dan parent-nya
+        $query = "name = '$folderName' and mimeType = 'application/vnd.google-apps.folder' and '$parentFolderId' in parents and trashed = false";
+        $results = $service->files->listFiles([
+            'q' => $query,
+            'fields' => 'files(id, name)'
+        ]);
+
+        // Jika ketemu, kembalikan ID-nya
+        if (count($results->getFiles()) > 0) {
+            return $results->getFiles()[0]->id;
+        }
+
+        // Jika tidak ketemu, buat folder baru
+        $folderMetadata = new \Google\Service\Drive\DriveFile([
+            'name' => $folderName,
+            'mimeType' => 'application/vnd.google-apps.folder',
+            'parents' => [$parentFolderId]
+        ]);
+
+        $folder = $service->files->create($folderMetadata, ['fields' => 'id']);
+        return $folder->id;
     }
 }

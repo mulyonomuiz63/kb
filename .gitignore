@@ -63,6 +63,9 @@ writable/uploads/*
 writable/debugbar/*
 !writable/debugbar/index.html
 
+writable/google-token-admin.json
+app/ThirdParty/oauth-credentials.json
+
 php_errors.log
 
 #-------------------------

@@ -183,6 +183,7 @@
                                     <?php inputRow('Client ID','<input type="text" class="form-control form-control-solid" name="client_id" value="'.old('client_id',$settings['client_id']??'').'">'); ?>
                                     <?php inputRow('Client Secret','<input type="text" class="form-control form-control-solid" name="client_secret" value="'.old('client_secret',$settings['client_secret']??'').'">'); ?>
                                     <?php inputRow('Redirect URI','<input type="text" class="form-control form-control-solid bg-light" name="redirect_uri" value="'.old('redirect_uri',$settings['redirect_uri']??'').'" readonly><div class="text-muted fs-7 mt-2">Disesuaikan otomatis oleh sistem.</div>'); ?>
+                                    <?php inputRow('Folder Id Drive','<input type="text" class="form-control form-control-solid bg-light" name="folder_id_drive" value="'.old('folder_id_drive',$settings['folder_id_drive']??'').'">'); ?>
                                     <?php inputRow('Status',
                                         '<select name="client_status" class="form-select form-select-solid" data-control="select2" data-hide-search="true">
                                             <option value="true" '.(($settings['client_status']??'')=='true'?'selected':'').'>Aktif</option>

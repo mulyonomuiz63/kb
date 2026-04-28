@@ -82,19 +82,28 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                                     ['nama' => '13. Pernyataan Izin Kuasa Hukum', 'field' => 'file_pernyataan_ikh'],
                                 ];
 
-                                // Array khusus untuk file yang disediakan oleh Admin
                                 $fileAdmin = ['file_riwayat_hidup', 'file_bukan_pns', 'file_pakta_integritas', 'file_pernyataan_ikh'];
 
                                 foreach ($berkasList as $berkas):
                                     $isUploaded = !empty($ikh[$berkas['field']]);
                                     $isAdminProvided = in_array($berkas['field'], $fileAdmin);
 
-                                    // Tentukan URL file dan ekstensi (Jika sudah diupload)
+                                    // =========================================================
+                                    // PERBAIKAN 1: Deteksi Link G-Drive (Dokumen Terlampir)
+                                    // =========================================================
                                     $fileUrl = '';
                                     $fileExt = '';
                                     if ($isUploaded) {
-                                        $fileUrl = base_url('uploads/ikh/' . $ikh[$berkas['field']]);
-                                        $fileExt = strtolower(pathinfo($ikh[$berkas['field']], PATHINFO_EXTENSION));
+                                        $fileData = $ikh[$berkas['field']];
+                                        $isDrive = (strpos($fileData, '.') === false); // ID Google Drive tidak memiliki titik
+
+                                        if ($isDrive) {
+                                            $fileUrl = 'https://drive.google.com/file/d/' . $fileData . '/preview';
+                                            $fileExt = (strpos($berkas['field'], 'foto') !== false || strpos($berkas['field'], 'ttd') !== false) ? 'jpg' : 'pdf';
+                                        } else {
+                                            $fileUrl = base_url('uploads/ikh/' . $fileData);
+                                            $fileExt = strtolower(pathinfo($fileData, PATHINFO_EXTENSION));
+                                        }
                                     }
                                 ?>
                                     <div class="d-flex align-items-center mb-5">
@@ -207,7 +216,6 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
 
                                     <div class="row g-5 mb-7">
                                         <?php
-                                        // KUNCI ARRAY HARUS SAMA DENGAN NAMA KOLOM DI DATABASE
                                         $berkas = [
                                             'file_riwayat_hidup'  => 'Daftar Riwayat Hidup',
                                             'file_bukan_pns'      => 'Surat Pernyataan Bukan PNS',
@@ -225,13 +233,23 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
 
                                                     <?php if (!empty($ikh[$name])): ?>
                                                         <?php
-                                                        $subFolder = str_replace('file_', '', $name);
-                                                        $fileUrl = base_url("uploads/ikh/" . $ikh[$name]);
-                                                        $ext = pathinfo($ikh[$name], PATHINFO_EXTENSION);
+                                                        // =========================================================
+                                                        // PERBAIKAN 2: Deteksi Link G-Drive (Berkas Admin IKH)
+                                                        // =========================================================
+                                                        $fileData = $ikh[$name];
+                                                        $isDrive = (strpos($fileData, '.') === false);
+
+                                                        if ($isDrive) {
+                                                            $fileUrl = 'https://drive.google.com/file/d/' . $fileData . '/preview';
+                                                            $ext = 'pdf'; // Karena form input hanya menerima .pdf
+                                                        } else {
+                                                            $fileUrl = base_url("uploads/ikh/" . $fileData);
+                                                            $ext = strtolower(pathinfo($fileData, PATHINFO_EXTENSION));
+                                                        }
                                                         ?>
                                                         <button type="button" class="btn btn-icon btn-light-primary btn-preview-berkas"
                                                             data-file-url="<?= $fileUrl ?>"
-                                                            data-file-ext="<?= strtolower($ext) ?>"
+                                                            data-file-ext="<?= $ext ?>"
                                                             data-file-name="<?= $label ?>">
                                                             <i class="ki-outline ki-eye fs-2"></i>
                                                         </button>
@@ -275,8 +293,18 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                                                     if (!empty($files)): ?>
                                                         <div class="mt-3 d-flex flex-wrap gap-2">
                                                             <?php foreach ($files as $index => $file):
-                                                                $ext = pathinfo($file, PATHINFO_EXTENSION);
-                                                                $fileUrl = base_url('uploads/ikh/' . $file);
+                                                                // =========================================================
+                                                                // PERBAIKAN 3: Deteksi Link G-Drive (File Kartu IKH)
+                                                                // =========================================================
+                                                                $isDrive = (strpos($file, '.') === false);
+                                                                
+                                                                if ($isDrive) {
+                                                                    $fileUrl = 'https://drive.google.com/file/d/' . $file . '/preview';
+                                                                    $ext = 'pdf'; // Default tampilan teks ekstensi
+                                                                } else {
+                                                                    $fileUrl = base_url('uploads/ikh/' . $file);
+                                                                    $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+                                                                }
                                                             ?>
                                                                 <div class="symbol symbol-50px symbol-2by3 position-relative">
                                                                     <button type="button" class="btn btn-icon btn-light-primary w-100 h-100 btn-preview-berkas"
@@ -326,7 +354,7 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
 
             <div class="modal-footer">
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal">Tutup</button>
-                <a href="#" id="btn_download_berkas" class="btn btn-primary" download>
+                <a href="#" id="btn_download_berkas" class="btn btn-primary">
                     <i class="ki-outline ki-file-down fs-2"></i> Unduh Dokumen
                 </a>
             </div>
@@ -406,69 +434,12 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
             });
         });
 
-
-        // 3. Logic Modal Preview Berkas
-        $('.btn-preview-berkas').on('click', function(e) {
-            e.preventDefault();
-            let fileUrl = $(this).data('file-url');
-            let fileExt = $(this).data('file-ext');
-            let fileName = $(this).data('file-name');
-
-            // Ubah judul modal
-            $('#modal_preview_title').text(fileName);
-
-            // PERBAIKAN PENTING: Ubah link tujuan tombol download
-            $('#btn_download_berkas').attr('href', fileUrl);
-            // Opsional: Buat nama file rapi saat terdownload
-            $('#btn_download_berkas').attr('download', fileName + '.' + fileExt);
-
-            $('#preview_container').html('<div class="spinner-border text-primary"></div>');
-            new bootstrap.Modal(document.getElementById('modal_preview_berkas')).show();
-
-            setTimeout(() => {
-                if (fileExt === 'pdf') {
-                    $('#preview_container').html('<embed src="' + fileUrl + '" type="application/pdf" width="100%" height="700px" />');
-                } else if (fileExt === 'jpg' || fileExt === 'jpeg' || fileExt === 'png') {
-                    $('#preview_container').html('<img src="' + fileUrl + '" class="img-fluid rounded" style="max-height: 700px; object-fit: contain;" />');
-                }
-            }, 500);
-        });
-    });
-
-    $(document).ready(function() {
-        // 1. Handler Preview Berkas (Gunakan Delegasi agar tombol baru tetap berfungsi)
-        $(document).on('click', '.btn-preview-berkas', function(e) {
-            e.preventDefault();
-            let fileUrl = $(this).data('file-url');
-            let fileExt = $(this).data('file-ext');
-            let fileName = $(this).data('file-name');
-
-            $('#modal_preview_title').text(fileName);
-            $('#btn_download_berkas').attr('href', fileUrl);
-
-            // Tampilkan Spinner
-            $('#preview_container').html('<div class="d-flex justify-content-center p-10"><div class="spinner-border text-primary"></div></div>');
-
-            // Tampilkan Modal (Ganti ID sesuai modal Anda)
-            $('#modal_preview_berkas').modal('show');
-
-            setTimeout(() => {
-                if (fileExt === 'pdf') {
-                    $('#preview_container').html('<iframe src="' + fileUrl + '" width="100%" height="600px" frameborder="0"></iframe>');
-                } else {
-                    $('#preview_container').html('<div class="text-center"><img src="' + fileUrl + '" class="img-fluid rounded" style="max-height: 600px;" /></div>');
-                }
-            }, 500);
-        });
-
-        // 2. Handler Submit Form
+        // 3. Handler Submit Form Berkas Admin
         $('#form_upload_berkas').submit(function(e) {
             e.preventDefault();
 
             let btn = $('#btn_simpan_berkas');
             let formData = new FormData(this);
-
-            // Token CSRF diambil otomatis dari input <?= csrf_field() ?> di dalam form
 
             btn.attr('data-kt-indicator', 'on').attr('disabled', true);
 
@@ -480,7 +451,6 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                 processData: false,
                 dataType: 'json',
                 success: function(res) {
-                    // Update CSRF Hash untuk request selanjutnya
                     let csrfName = '<?= csrf_token() ?>';
                     if (res[csrfName]) {
                         $('input[name="' + csrfName + '"]').val(res[csrfName]);
@@ -507,6 +477,47 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                 }
             });
         });
+
+        // =========================================================
+        // PERBAIKAN 4: Logic Modal Preview Berkas (Dibersihkan dari duplikasi)
+        // =========================================================
+        $(document).on('click', '.btn-preview-berkas', function(e) {
+            e.preventDefault();
+            let fileUrl = $(this).data('file-url');
+            let fileExt = $(this).data('file-ext');
+            let fileName = $(this).data('file-name');
+
+            $('#modal_preview_title').text(fileName);
+            
+            // Logika Link Unduh (Support Google Drive Export)
+            if (fileUrl.includes('drive.google.com')) {
+                let driveId = fileUrl.split('/d/')[1].split('/preview')[0];
+                let downloadUrl = 'https://drive.google.com/uc?export=download&id=' + driveId;
+                $('#btn_download_berkas').attr('href', downloadUrl).removeAttr('download').attr('target', '_blank');
+            } else {
+                $('#btn_download_berkas').attr('href', fileUrl).attr('download', fileName + '.' + fileExt).removeAttr('target');
+            }
+
+            $('#preview_container').html('<div class="d-flex justify-content-center p-10"><div class="spinner-border text-primary"></div></div>');
+            $('#modal_preview_berkas').modal('show');
+
+            setTimeout(() => {
+                // Gunakan iFrame untuk membaca Google Drive dan PDF lokal
+                if (fileUrl.includes('drive.google.com') || fileExt === 'pdf') {
+                    $('#preview_container').html('<iframe src="' + fileUrl + '" width="100%" height="600px" frameborder="0" style="border-radius: 8px;"></iframe>');
+                } else if (fileExt === 'jpg' || fileExt === 'jpeg' || fileExt === 'png') {
+                    $('#preview_container').html('<div class="text-center"><img src="' + fileUrl + '" class="img-fluid rounded shadow-sm" style="max-height: 600px; object-fit: contain;" /></div>');
+                } else {
+                    $('#preview_container').html('<div class="text-center text-muted"><i class="ki-outline ki-file fs-5x mb-3"></i><br>Pratinjau tidak tersedia.</div>');
+                }
+            }, 500);
+        });
+
+        // Hapus sisa iFrame saat modal ditutup agar tidak membebani memori
+        $('#modal_preview_berkas').on('hidden.bs.modal', function () {
+            $('#preview_container').empty();
+        });
+
     });
 </script>
 <?= $this->endSection(); ?>

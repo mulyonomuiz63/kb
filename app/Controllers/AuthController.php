@@ -138,7 +138,7 @@ class AuthController extends BaseController
 
             // RESET COUNTER JIKA SUKSES
             session()->remove(['login_attempts', 'last_attempt_time']);
-          
+
             // Cek Akun Aktif
             if ($user->is_active == 1) {
                 // Mapping ID berdasarkan tipe
@@ -150,7 +150,7 @@ class AuthController extends BaseController
                     'email' => $user->email,
                     'nama'  => $user->$nama_key,
                     'role'  => $user->role,
-                    'avatar'=> $user->avatar,
+                    'avatar' => $user->avatar,
                 ];
                 session()->set($sessionData);
 
@@ -159,23 +159,23 @@ class AuthController extends BaseController
                     case 'siswa':
                         // Jika ada session URL (intended URL), arahkan ke sana, jika tidak ke dashboard siswa
                         $redirectTo = !empty(session('url')) ? session('url') : 'sw-siswa';
-                        $pesan = ucwords('Selamat Datang '. session()->get('nama'));
+                        $pesan = ucwords('Selamat Datang ' . session()->get('nama'));
                         return redirect()->to($redirectTo)->with('success', $pesan);
 
                     case 'guru':
-                        $pesan = ucwords('Selamat Datang '. session()->get('nama'));
+                        $pesan = ucwords('Selamat Datang ' . session()->get('nama'));
                         return redirect()->to('sw-guru')->with('success', $pesan);
 
                     case 'admin':
-                        $pesan = ucwords('Selamat Datang '. session()->get('nama'));
+                        $pesan = ucwords('Selamat Datang ' . session()->get('nama'));
                         return redirect()->to('sw-admin')->with('success', $pesan); // Pastikan ini sesuai group routes admin
 
                     case 'mitra':
-                        $pesan = ucwords('Selamat Datang '. session()->get('nama'));
+                        $pesan = ucwords('Selamat Datang ' . session()->get('nama'));
                         return redirect()->to('sw-mitra')->with('success', $pesan);
 
                     case 'pic':
-                        $pesan = ucwords('Selamat Datang '. session()->get('nama'));
+                        $pesan = ucwords('Selamat Datang ' . session()->get('nama'));
                         return redirect()->to('sw-pic')->with('success', $pesan);
 
                     default:
@@ -308,7 +308,7 @@ class AuthController extends BaseController
                         'email' => $siswa->email,
                         'nama' => $siswa->nama_siswa,
                         'role' => $siswa->role,
-                        'avatar'=> $siswa->avatar,
+                        'avatar' => $siswa->avatar,
                         'status' => $siswa->status,
                     ];
                     session()->set($data);
@@ -466,7 +466,7 @@ class AuthController extends BaseController
     public function recovery_()
     {
         // CEK EMAIL
-        if(setting('recaptcha_status') == 'true') {
+        if (setting('recaptcha_status') == 'true') {
             $token = $this->request->getPost('recaptcha_token');
             if (!$this->verifyRecaptcha($token, 'lupapassword')) {
                 session()->setFlashdata('pesan', "
@@ -480,7 +480,7 @@ class AuthController extends BaseController
                 return redirect()->to('auth/recovery');
             }
         }
-        
+
         // Cek email ke siswa
         $email = $this->request->getVar('email');
         $siswa = $this->SiswaModel->getByEmail($email);
@@ -494,7 +494,7 @@ class AuthController extends BaseController
                 'date_created' => time()
             ];
 
-           $subject = 'Forgot Password';
+            $subject = 'Forgot Password';
             $message = '
                 <div style="color: #000; padding: 10px;">
                     <div style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; font-size: 20px; color: #1C3FAA; font-weight: bold;">
@@ -683,5 +683,36 @@ class AuthController extends BaseController
             ';
 
         return $this->emailer->send($email, $subject, $message);
+    }
+
+    //untuk autentication upload file ke google drive
+    public function authAdminDrive()
+    {
+        $client = new \Google\Client();
+        $client->setAuthConfig(APPPATH . 'ThirdParty/oauth-credentials.json');
+        $client->addScope(\Google\Service\Drive::DRIVE);
+        $client->setAccessType('offline');
+        $client->setPrompt('consent');
+        // Sesuaikan redirect URI dengan yang ada di Google Console
+        $client->setRedirectUri(base_url('google-callback-admin'));
+
+        return redirect()->to($client->createAuthUrl());
+    }
+
+    public function adminDriveCallback()
+    {
+        $client = new \Google\Client();
+        $client->setAuthConfig(APPPATH . 'ThirdParty/oauth-credentials.json');
+        $client->setRedirectUri(base_url('google-callback-admin'));
+
+        $token = $client->fetchAccessTokenWithAuthCode($this->request->getGet('code'));
+
+        if (!isset($token['error'])) {
+            // Simpan token ke folder writable agar aman
+            file_put_contents(WRITEPATH . 'google-token-admin.json', json_encode($token));
+            return "Berhasil! Token Admin tersimpan. Sekarang siswa bisa upload file ke Drive Anda.";
+        }
+
+        return "Gagal mendapatkan token: " . json_encode($token);
     }
 }

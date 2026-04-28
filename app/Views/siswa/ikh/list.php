@@ -37,9 +37,12 @@ $idIkh   = $hasData ? $ikh['id_ikh'] : '';
 $status_validasi = $hasData ? ($ikh['status_validasi_admin'] ?? 'draft') : 'draft';
 
 // 3. Tentukan apakah user harus melihat Form atau melihat Monitoring
-// User melihat Form JIKA belum ada data, ATAU data masih 'draft' (file belum lengkap), ATAU menekan tombol Edit
 $isEditMode = isset($_GET['edit']) && $_GET['edit'] == 'true';
-$showForm   = !$hasData || $status_validasi == 'draft' || $isEditMode;
+$showForm = (
+    !$hasData ||
+    $status_validasi === 'draft' ||
+    $isEditMode
+) && (isset($ikh['kuota']) && (int)$ikh['kuota'] > 0);
 
 // 4. Default Tab
 $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'data';
@@ -49,10 +52,7 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
     <div id="kt_app_content" class="app-content flex-column-fluid">
         <div id="kt_app_content_container" class="app-container container-xxl">
 
-            <?php
-            // Ambil catatan admin jika ada
-            $catatan_admin = $hasData ? ($ikh['catatan_admin'] ?? 'Silakan perbaiki data atau lampiran Anda sesuai instruksi.') : '';
-            ?>
+            <?php $catatan_admin = $hasData ? ($ikh['catatan_admin'] ?? 'Silakan perbaiki data atau lampiran Anda sesuai instruksi.') : ''; ?>
 
             <?php if ($status_validasi == 'ditolak'): ?>
                 <div class="notice d-flex bg-light-danger rounded border-danger border border-dashed p-6 mb-8">
@@ -63,15 +63,12 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                             <div class="fs-6 text-gray-700 pe-7 mb-3">
                                 Mohon maaf, pengajuan Izin Kuasa Hukum Anda tidak dapat dilanjutkan karena ada data atau dokumen yang tidak sesuai. Silakan perbaiki bagian yang salah.
                             </div>
-
                             <div class="bg-body rounded p-4 border border-danger border-dashed w-100">
                                 <div class="d-flex align-items-center mb-1">
                                     <i class="ki-outline ki-message-text-2 text-danger fs-3 me-2"></i>
                                     <span class="fw-bold text-gray-800">Pesan dari Admin:</span>
                                 </div>
-                                <div class="text-danger fs-6 ps-7">
-                                    "<?= esc($catatan_admin) ?>"
-                                </div>
+                                <div class="text-danger fs-6 ps-7">"<?= esc($catatan_admin) ?>"</div>
                             </div>
                         </div>
                     </div>
@@ -85,16 +82,13 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                             <div class="fs-6 text-gray-700 pe-7 mb-3">
                                 Masa berlaku Kartu IKH Anda sudah habis atau akan segera berakhir. Silakan perbarui data diri dan unggah dokumen persyaratan terbaru untuk mengajukan perpanjangan.
                             </div>
-
                             <?php if (!empty($catatan_admin) && $catatan_admin !== 'Silakan perbaiki data atau lampiran Anda sesuai instruksi.'): ?>
                                 <div class="bg-body rounded p-4 border border-warning border-dashed w-100">
                                     <div class="d-flex align-items-center mb-1">
                                         <i class="ki-outline ki-message-text-2 text-warning fs-3 me-2"></i>
                                         <span class="fw-bold text-gray-800">Pesan dari Admin:</span>
                                     </div>
-                                    <div class="text-warning fs-6 ps-7">
-                                        "<?= esc($catatan_admin) ?>"
-                                    </div>
+                                    <div class="text-warning fs-6 ps-7">"<?= esc($catatan_admin) ?>"</div>
                                 </div>
                             <?php endif; ?>
                         </div>
@@ -119,15 +113,11 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
             <?php endif; ?>
 
             <?php
-            // Ambil tanggal hari ini dalam format angka/timestamp untuk perbandingan
             $today = strtotime(date('Y-m-d'));
             $expiredDate = !empty($ikh['tgl_exp']) ? strtotime($ikh['tgl_exp']) : 0;
-
-            // Cek apakah file kartu ada dan tidak kosong (karena format JSON)
             $files = json_decode($ikh['file_kartu_ikh'] ?? '', true);
             $hasFile = (!empty($files) && is_array($files)) ? true : false;
 
-            // KONDISI: Tanggal Expired >= Hari ini DAN File tidak kosong
             if ($expiredDate >= $today && $hasFile && $status_validasi !== 'revisi'):
             ?>
                 <div class="card shadow-sm mb-8 border-top border-success border-3">
@@ -139,11 +129,7 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                     </div>
                     <div class="card-body pt-7 pb-10">
 
-                        <?php if (!empty($ikh['file_kartu_ikh'])):
-                            $fileUrl = base_url('uploads/ikh/' . $ikh['file_kartu_ikh']);
-                            $fileExt = strtolower(pathinfo($ikh['file_kartu_ikh'], PATHINFO_EXTENSION));
-                        ?>
-
+                        <?php if (!empty($ikh['file_kartu_ikh'])): ?>
                             <div class="bg-body border border-success border-dashed rounded p-8">
                                 <div class="d-flex flex-column flex-md-row align-items-center mb-8">
                                     <div class="symbol symbol-100px mb-7 mb-md-0 me-md-10">
@@ -151,7 +137,6 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                                             <i class="ki-outline ki-award fs-5x text-success"></i>
                                         </div>
                                     </div>
-
                                     <div class="d-flex flex-column flex-grow-1 text-center text-md-start">
                                         <h2 class="text-gray-900 fw-bolder mb-2">E-KARTU IZIN KUASA HUKUM</h2>
                                         <div class="d-flex justify-content-center justify-content-md-start align-items-center mb-1">
@@ -162,6 +147,7 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                                         </div>
                                         <span class="text-muted fw-semibold fs-7"><i class="ki-outline ki-information-5 fs-6 me-1"></i> Klik pada ikon file untuk melihat atau mengunduh dokumen.</span>
                                     </div>
+
                                     <div class="d-flex flex-column flex-sm-row gap-3">
                                         <?php
                                         $kuota = (int)($ikh['kuota'] ?? 0);
@@ -186,21 +172,13 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                                             }
                                         }
                                         ?>
-
                                         <?php if ($show_perpanjang): ?>
                                             <?php
-                                            // Siapkan pesan yang berbeda tergantung jalur perpanjangan
                                             $alertTitle = ($kuota > 0) ? "Perpanjang Izin Kuasa Hukum" : "Beli Paket Perpanjangan?";
-                                            $alertText  = ($kuota > 0)
-                                                ? "Masa berlaku IKH Anda akan diperpanjang."
-                                                : "Anda akan dialihkan ke halaman pembelian paket. Lanjutkan?";
+                                            $alertText  = ($kuota > 0) ? "Masa berlaku IKH Anda akan diperpanjang." : "Anda akan dialihkan ke halaman pembelian paket. Lanjutkan?";
                                             ?>
-                                            <a href="<?= $link_perpanjang ?>"
-                                                class="btn btn-warning shadow-sm <?= $class_btn ?> btn-confirm-perpanjang"
-                                                data-title="<?= $alertTitle ?>"
-                                                data-text="<?= $alertText ?>">
-                                                <i class="ki-outline ki-arrows-loop fs-2"></i>
-                                                <?= ($kuota > 0) ? 'Ajukan Perpanjangan IKH' : 'Paket Perpanjangan IKH' ?>
+                                            <a href="<?= $link_perpanjang ?>" class="btn btn-warning shadow-sm <?= $class_btn ?> btn-confirm-perpanjang" data-title="<?= $alertTitle ?>" data-text="<?= $alertText ?>">
+                                                <i class="ki-outline ki-arrows-loop fs-2"></i> <?= ($kuota > 0) ? 'Ajukan Perpanjangan IKH' : 'Paket Perpanjangan IKH' ?>
                                             </a>
                                         <?php endif; ?>
                                     </div>
@@ -211,8 +189,22 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                                     $files = json_decode($ikh['file_kartu_ikh'], true) ?? [];
                                     if (!empty($files)):
                                         foreach ($files as $index => $file):
-                                            $fileUrl = base_url('uploads/ikh/' . $file);
-                                            $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+
+                                            // ---------------------------------------------------------
+                                            // MODIFIKASI: Deteksi & Atur URL Google Drive (E-KARTU)
+                                            // ---------------------------------------------------------
+                                            $isDrive = (strpos($file, '.') === false); // ID Drive tidak punya titik ekstensi
+
+                                            if ($isDrive) {
+                                                $fileUrl = 'https://drive.google.com/file/d/' . $file . '/preview';
+                                                $downloadUrl = 'https://drive.google.com/uc?export=download&id=' . $file;
+                                                $ext = 'pdf'; // Default ekstensi untuk kartu dari drive
+                                            } else {
+                                                $fileUrl = base_url('uploads/ikh/' . $file);
+                                                $downloadUrl = $fileUrl;
+                                                $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+                                            }
+
                                             $icon = ($ext == 'pdf') ? 'ki-pdf-file' : 'ki-picture';
                                             $color = ($ext == 'pdf') ? 'text-danger' : 'text-primary';
                                     ?>
@@ -226,12 +218,11 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
 
                                                     <div class="flex-grow-1 me-2">
                                                         <span class="text-gray-800 fw-bold text-hover-primary mb-1 fs-6">Dokumen <?= $index + 1 ?></span>
-                                                        <span class="text-muted fw-semibold d-block fs-7 text-uppercase">Format: <?= $ext ?></span>
+                                                        <span class="text-muted fw-semibold d-block fs-7 text-uppercase">Tersedia</span>
                                                     </div>
 
                                                     <div class="d-flex gap-2">
-                                                        <button type="button"
-                                                            class="btn btn-sm btn-icon btn-bg-light btn-active-color-success btn-preview-berkas"
+                                                        <button type="button" class="btn btn-sm btn-icon btn-bg-light btn-active-color-success btn-preview-berkas"
                                                             data-file-url="<?= $fileUrl ?>"
                                                             data-file-ext="<?= $ext ?>"
                                                             data-file-name="Kartu IKH - <?= $ikh['nama_lengkap'] ?> (<?= $index + 1 ?>)"
@@ -239,11 +230,7 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                                                             <i class="ki-outline ki-eye fs-3"></i>
                                                         </button>
 
-                                                        <a href="<?= $fileUrl ?>"
-                                                            target="_blank"
-                                                            download="Kartu_IKH_<?= $index + 1 ?>.<?= $ext ?>"
-                                                            class="btn btn-sm btn-icon btn-bg-light btn-active-color-primary"
-                                                            title="Unduh">
+                                                        <a href="<?= $downloadUrl ?>" target="_blank" class="btn btn-sm btn-icon btn-bg-light btn-active-color-primary" title="Unduh">
                                                             <i class="ki-outline ki-file-down fs-3"></i>
                                                         </a>
                                                     </div>
@@ -258,7 +245,6 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                                 </div>
                             </div>
                         <?php else: ?>
-
                             <div class="alert alert-warning d-flex align-items-center p-5 mb-0">
                                 <i class="ki-outline ki-information-5 fs-2hx text-warning me-4"></i>
                                 <div class="d-flex flex-column">
@@ -266,7 +252,6 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                                     <span>Status Anda sudah selesai, namun file E-Kartu IKH sedang dalam proses unggah oleh Admin. Mohon cek kembali secara berkala.</span>
                                 </div>
                             </div>
-
                         <?php endif; ?>
 
                     </div>
@@ -277,16 +262,13 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
 
                 <div class="card shadow-sm border-0 mb-8">
                     <div class="card-header card-header-stretch">
-
                         <ul class="nav nav-stretch nav-line-tabs nav-line-tabs-2x border-transparent fs-4 fw-bold w-100">
-
                             <li class="nav-item">
                                 <a class="nav-link text-active-primary text-gray-600 px-4 <?= $activeTab == 'data' ? 'active' : '' ?>" data-bs-toggle="tab" href="#tab_data_diri">
                                     <i class="ki-outline ki-profile-user fs-2 me-2 <?= $activeTab == 'data' ? 'text-primary' : 'text-gray-500' ?>"></i>
                                     1. Data Diri & Pernyataan
                                 </a>
                             </li>
-
                             <li class="nav-item">
                                 <?php if ($hasData): ?>
                                     <a class="nav-link text-active-primary text-gray-600 px-4 <?= $activeTab == 'lampiran' ? 'active' : '' ?>" data-bs-toggle="tab" href="#tab_lampiran">
@@ -300,9 +282,7 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                                     </a>
                                 <?php endif; ?>
                             </li>
-
                         </ul>
-
                     </div>
                 </div>
 
@@ -310,7 +290,6 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                     <div class="tab-pane fade <?= $activeTab == 'data' ? 'show active' : '' ?>" id="tab_data_diri" role="tabpanel">
                         <div class="card shadow-sm">
                             <div class="card-header align-items-center border-0 pt-6">
-
                                 <div class="card-title">
                                     <h3 class="fw-bold m-0">Data Diri & Persyaratan</h3>
                                 </div>
@@ -321,7 +300,6 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                                         </a>
                                     </div>
                                 <?php endif; ?>
-
                             </div>
                             <form action="<?= base_url('sw-siswa/ikh/store') ?>" method="POST" id="form_data_diri">
                                 <?= csrf_field() ?>
@@ -401,7 +379,6 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                     <div class="tab-pane fade <?= $activeTab == 'lampiran' ? 'show active' : '' ?>" id="tab_lampiran" role="tabpanel">
                         <div class="card shadow-sm">
                             <div class="card-header align-items-center border-0 pt-6">
-
                                 <div class="card-title">
                                     <h3 class="fw-bold m-0">Unggah Dokumen Lampiran</h3>
                                 </div>
@@ -412,7 +389,6 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                                         </a>
                                     </div>
                                 <?php endif; ?>
-
                             </div>
                             <div class="card-body p-9">
                                 <?php if ($status_validasi == 'draft'): ?>
@@ -438,12 +414,22 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                                     <?php foreach ($fileConfigs as $cfg):
                                         $isUploaded = $hasData && !empty($ikh[$cfg['id']]);
 
-                                        // Siapkan URL dan Ekstensi jika file sudah terunggah
+                                        // ---------------------------------------------------------
+                                        // MODIFIKASI: Deteksi & Atur URL Google Drive (UPLOAD TAB)
+                                        // ---------------------------------------------------------
                                         $fileUrl = '';
                                         $fileExt = '';
                                         if ($isUploaded) {
-                                            $fileUrl = base_url('uploads/ikh/' . $ikh[$cfg['id']]);
-                                            $fileExt = strtolower(pathinfo($ikh[$cfg['id']], PATHINFO_EXTENSION));
+                                            $fileData = $ikh[$cfg['id']];
+                                            $isDrive = (strpos($fileData, '.') === false); // Cek ID Drive
+
+                                            if ($isDrive) {
+                                                $fileUrl = 'https://drive.google.com/file/d/' . $fileData . '/preview';
+                                                $fileExt = str_replace('.', '', $cfg['accept']); // Ambil ekspektasi format
+                                            } else {
+                                                $fileUrl = base_url('uploads/ikh/' . $fileData);
+                                                $fileExt = strtolower(pathinfo($fileData, PATHINFO_EXTENSION));
+                                            }
                                         }
                                     ?>
                                         <div class="col-md-6">
@@ -453,7 +439,6 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                                                     <label class="fw-bold fs-5 text-gray-800 <?= isset($cfg['danger']) ? 'text-danger' : '' ?>"><?= $cfg['label'] ?></label>
 
                                                     <div class="d-flex align-items-center gap-2">
-
                                                         <?php if ($isUploaded): ?>
                                                             <a href="javascript:void(0)"
                                                                 class="btn btn-icon btn-sm btn-light-primary hover-elevate-up btn-preview-berkas"
@@ -468,7 +453,6 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                                                         <span class="badge status-badge <?= $isUploaded ? 'badge-success' : 'badge-light-danger' ?>" id="status_<?= $cfg['id'] ?>">
                                                             <?= $isUploaded ? '<i class="ki-outline ki-check text-white fs-5 me-1"></i> Tersimpan' : 'Belum Upload' ?>
                                                         </span>
-
                                                     </div>
                                                 </div>
 
@@ -491,55 +475,36 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
 
             <?php else: ?>
                 <?php
-                // 1. Ambil Semua Status Langsung dari Database
+                // Logika Status STEP (Tetap sama)
                 $stat_val = $ikh['status_validasi_admin'] ?? 'draft';
                 $stat_pro = $ikh['status_proses'] ?? 'pending';
                 $stat_fin = $ikh['status_final'] ?? 'pending';
                 $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
 
-                // 2. Pemetaan Logika STEP 1 (Pendaftaran & Validasi)
                 $step1_done    = ($stat_val === 'valid');
-
-                // 3. Pemetaan Logika STEP 2 (Proses)
                 $step2_done    = ($stat_pro === 'selesai');
                 $step2_active  = ($stat_pro === 'proses');
-
-                // 4. Pemetaan Logika STEP 3 (Final)
                 $step3_done    = ($stat_fin === 'selesai');
                 $step3_active  = ($stat_fin === 'proses');
-
-                // 5. Pemetaan Logika STEP 4 (Sertifikat)
                 $step4_done    = ($stat_ser === 'terbit');
                 $step4_active  = ($step3_done && !$step4_done);
-
-                // 6. Kunci Tombol Edit (Hanya boleh edit jika draft, pending, ditolak, atau revisi)
                 $canEdit = in_array($stat_val, ['draft', 'pending', 'ditolak', 'revisi']);
                 ?>
                 <?php if ($stat_ser != 'terbit' || $stat_val == 'revisi'): ?>
+
                     <div class="card shadow-sm mb-8">
                         <div class="card-body pt-10 pb-10">
-
                             <div class="d-flex flex-center flex-nowrap w-100 stepper-mobile-scroll">
-
                                 <div class="d-flex flex-column align-items-center position-relative w-150px step-item-mobile">
                                     <div class="symbol symbol-50px symbol-circle mb-3">
-                                        <span class="symbol-label bg-primary text-inverse-primary fs-2 fw-bold">
-                                            <i class="ki-outline ki-check fs-1 text-white"></i>
-                                        </span>
+                                        <span class="symbol-label bg-primary text-inverse-primary fs-2 fw-bold"><i class="ki-outline ki-check fs-1 text-white"></i></span>
                                     </div>
                                     <span class="fw-bold text-gray-800 text-center">Pendaftaran</span>
-
-                                    <?php if ($stat_val == 'pending'): ?>
-                                        <span class="badge badge-light-primary mt-2 animate-pulse">Menunggu Validasi</span>
-                                    <?php elseif ($stat_val == 'ditolak'): ?>
-                                        <span class="badge badge-light-danger mt-2">Perbaikan Persyaratan</span>
-                                    <?php elseif ($stat_val == 'revisi'): ?>
-                                        <span class="badge badge-light-warning mt-2">Proses Perpanjangan</span>
-                                    <?php endif; ?>
+                                    <?php if ($stat_val == 'pending'): ?><span class="badge badge-light-primary mt-2 animate-pulse">Menunggu Validasi</span>
+                                    <?php elseif ($stat_val == 'ditolak'): ?><span class="badge badge-light-danger mt-2">Perbaikan Persyaratan</span>
+                                    <?php elseif ($stat_val == 'revisi'): ?><span class="badge badge-light-warning mt-2">Proses Perpanjangan</span><?php endif; ?>
                                 </div>
-
                                 <div class="step-line <?= $step1_done ? 'active' : '' ?>"></div>
-
                                 <div class="d-flex flex-column align-items-center position-relative w-150px step-item-mobile <?= (!$step1_done) ? 'opacity-50' : '' ?>">
                                     <div class="symbol symbol-50px symbol-circle mb-3 <?= $step2_done ? '' : ($step2_active ? 'border border-primary border-dashed' : 'bg-light') ?>">
                                         <span class="symbol-label <?= $step2_done ? 'bg-primary text-white' : ($step2_active ? 'bg-light-primary text-primary' : 'text-muted') ?> fs-2 fw-bold">
@@ -547,13 +512,9 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                                         </span>
                                     </div>
                                     <span class="fw-bold <?= $step2_done ? 'text-gray-800' : ($step2_active ? 'text-primary' : 'text-gray-600') ?> text-center">Validasi Berkas</span>
-                                    <?php if ($step2_active): ?>
-                                        <span class="badge badge-light-primary mt-2 animate-pulse">In Progress</span>
-                                    <?php endif; ?>
+                                    <?php if ($step2_active): ?><span class="badge badge-light-primary mt-2 animate-pulse">In Progress</span><?php endif; ?>
                                 </div>
-
                                 <div class="step-line <?= $step2_done ? 'active' : '' ?>"></div>
-
                                 <div class="d-flex flex-column align-items-center position-relative w-150px step-item-mobile <?= (!$step2_done) ? 'opacity-50' : '' ?>">
                                     <div class="symbol symbol-50px symbol-circle mb-3 <?= $step3_done ? '' : ($step3_active ? 'border border-primary border-dashed' : 'bg-light') ?>">
                                         <span class="symbol-label <?= $step3_done ? 'bg-primary text-white' : ($step3_active ? 'bg-light-primary text-primary' : 'text-muted') ?> fs-2 fw-bold">
@@ -561,13 +522,9 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                                         </span>
                                     </div>
                                     <span class="fw-bold <?= $step3_done ? 'text-gray-800' : ($step3_active ? 'text-primary' : 'text-gray-600') ?> text-center">Tahap Final</span>
-                                    <?php if ($step3_active): ?>
-                                        <span class="badge badge-light-primary mt-2 animate-pulse">In Progress</span>
-                                    <?php endif; ?>
+                                    <?php if ($step3_active): ?><span class="badge badge-light-primary mt-2 animate-pulse">In Progress</span><?php endif; ?>
                                 </div>
-
                                 <div class="step-line <?= $step3_done ? 'active' : '' ?>"></div>
-
                                 <div class="d-flex flex-column align-items-center position-relative w-150px step-item-mobile <?= (!$step4_done) ? 'opacity-50' : '' ?>">
                                     <div class="symbol symbol-50px symbol-circle mb-3 <?= $step4_done ? '' : ($step4_active ? 'border border-primary border-dashed' : 'bg-light') ?>">
                                         <span class="symbol-label <?= $step4_done ? 'bg-primary text-white' : ($step4_active ? 'bg-light-primary text-primary' : 'text-muted') ?> fs-2 fw-bold">
@@ -575,17 +532,12 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                                         </span>
                                     </div>
                                     <span class="fw-bold <?= $step4_done ? 'text-gray-800' : ($step4_active ? 'text-primary' : 'text-gray-600') ?> text-center">Kartu IKH Terbit</span>
-                                    <?php if ($step4_done): ?>
-                                        <span class="badge badge-light-primary mt-2">Selesai</span>
-                                    <?php elseif ($step4_active): ?>
-                                        <span class="badge badge-light-primary mt-2 animate-pulse">Penerbitan</span>
-                                    <?php endif; ?>
+                                    <?php if ($step4_done): ?><span class="badge badge-light-primary mt-2">Selesai</span>
+                                    <?php elseif ($step4_active): ?><span class="badge badge-light-primary mt-2 animate-pulse">Penerbitan</span><?php endif; ?>
                                 </div>
-
                             </div>
                         </div>
                     </div>
-
 
                     <div class="row g-5 g-xxl-8">
                         <div class="col-xl-7">
@@ -597,10 +549,8 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                                     </h3>
                                     <div class="card-toolbar d-flex flex-wrap gap-2">
                                         <?php if ($canEdit): ?>
-
                                             <?php if ($stat_val == 'ditolak' || $stat_val == 'revisi'): ?>
                                                 <?php
-                                                // Setel teks, ikon, dan warna berdasarkan status
                                                 $btnColor = ($stat_val == 'revisi') ? 'btn-warning' : 'btn-danger';
                                                 $btnIcon = ($stat_val == 'revisi') ? 'ki-arrows-loop' : 'ki-arrows-circle';
                                                 $btnTextLg = ($stat_val == 'revisi') ? 'Ajukan Perpanjangan' : 'Kirim Perbaikan';
@@ -610,8 +560,7 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                                                 ?>
                                                 <a href="javascript:void(0)" data-url="<?= base_url('sw-siswa/ikh/perbaikan/' . encrypt_url($ikh['id_ikh'])) ?>"
                                                     class="btn btn-sm <?= $btnColor ?> fw-bold hover-elevate-up btn-perbaikan"
-                                                    data-title="<?= $swalTitle ?>" data-text="<?= $swalText ?>"
-                                                    title="<?= $btnTextLg ?>">
+                                                    data-title="<?= $swalTitle ?>" data-text="<?= $swalText ?>" title="<?= $btnTextLg ?>">
                                                     <i class="ki-outline <?= $btnIcon ?> fs-3"></i>
                                                     <span class="d-none d-sm-inline"><?= $btnTextLg ?></span>
                                                     <span class="d-inline d-sm-none"><?= $btnTextSm ?></span>
@@ -622,7 +571,6 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                                                     <span class="d-inline d-sm-none">Edit</span>
                                                 </a>
                                             <?php endif; ?>
-
                                         <?php else: ?>
                                             <span class="badge badge-light-success px-3 py-2 text-wrap text-center">
                                                 <i class="ki-outline ki-shield-tick fs-4 text-success me-1"></i>
@@ -714,19 +662,28 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                                             ['nama' => '13. Pernyataan Izin Kuasa Hukum', 'field' => 'file_pernyataan_ikh'],
                                         ];
 
-                                        // Array khusus untuk file yang disediakan oleh Admin
                                         $fileAdmin = ['file_riwayat_hidup', 'file_bukan_pns', 'file_pakta_integritas', 'file_pernyataan_ikh'];
 
                                         foreach ($berkasList as $berkas):
                                             $isUploaded = !empty($ikh[$berkas['field']]);
                                             $isAdminProvided = in_array($berkas['field'], $fileAdmin);
 
-                                            // Tentukan URL file dan ekstensi (Jika sudah diupload)
+                                            // ---------------------------------------------------------
+                                            // MODIFIKASI: Deteksi & Atur URL Google Drive (STATUS TAB)
+                                            // ---------------------------------------------------------
                                             $fileUrl = '';
                                             $fileExt = '';
                                             if ($isUploaded) {
-                                                $fileUrl = base_url('uploads/ikh/' . $ikh[$berkas['field']]);
-                                                $fileExt = strtolower(pathinfo($ikh[$berkas['field']], PATHINFO_EXTENSION));
+                                                $fileData = $ikh[$berkas['field']];
+                                                $isDrive = (strpos($fileData, '.') === false);
+
+                                                if ($isDrive) {
+                                                    $fileUrl = 'https://drive.google.com/file/d/' . $fileData . '/preview';
+                                                    $fileExt = (strpos($berkas['field'], 'foto') !== false || strpos($berkas['field'], 'ttd') !== false) ? 'jpg' : 'pdf';
+                                                } else {
+                                                    $fileUrl = base_url('uploads/ikh/' . $fileData);
+                                                    $fileExt = strtolower(pathinfo($fileData, PATHINFO_EXTENSION));
+                                                }
                                             }
                                         ?>
                                             <div class="d-flex align-items-center mb-5">
@@ -822,7 +779,7 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
 
             <div class="modal-footer">
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal">Tutup</button>
-                <a href="#" id="btn_download_berkas" class="btn btn-primary" download>
+                <a href="#" id="btn_download_berkas" class="btn btn-primary">
                     <i class="ki-outline ki-file-down fs-2"></i> Unduh Dokumen
                 </a>
             </div>
@@ -833,14 +790,10 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
 
 <?= $this->section('scripts'); ?>
 <script>
-    // Injeksi CSS Animasi
     $('<style>@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } } .animate-pulse { animation: pulse 2s infinite; }</style>').appendTo('head');
 
     $(document).ready(function() {
 
-        // ==========================================================
-        // 1. INISIALISASI PLUGIN & BATASAN INPUT
-        // ==========================================================
         if ($("#kt_datepicker_lahir").length) {
             $("#kt_datepicker_lahir").flatpickr({
                 altInput: true,
@@ -850,7 +803,6 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                 locale: "id"
             });
         }
-
         $('#nik, #npwp').on('input', function() {
             if (this.value.length > 16) this.value = this.value.slice(0, 16);
         });
@@ -864,11 +816,7 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
             if (this.value.length > 4) this.value = this.value.slice(0, 4);
         });
 
-
         <?php if ($showForm): ?>
-            // ==========================================================
-            // 2. SCRIPT AJAX UPLOAD 
-            // ==========================================================
             $('.btn-upload-ajax').click(function() {
                 const idIkh = '<?= $idIkh ?>';
                 let csrfHash = '<?= csrf_hash() ?>';
@@ -883,14 +831,10 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                 }
 
                 let fileData = fileInput.files[0];
-                const maxSizeInBytes = 2 * 1024 * 1024; // 2 MB
-
-                if (fileData.size > maxSizeInBytes) {
+                if (fileData.size > 2 * 1024 * 1024) {
                     Swal.fire({
                         text: "Ukuran file " + fileData.name + " terlalu besar! Maksimal hanya 2 MB.",
                         icon: "error",
-                        buttonsStyling: false,
-                        confirmButtonText: "Baiklah",
                         customClass: {
                             confirmButton: "btn btn-danger"
                         }
@@ -917,40 +861,24 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                     processData: false,
                     success: function(response) {
                         if (response.csrf_hash) csrfHash = response.csrf_hash;
-
                         if (response.success) {
                             toastr.success(response.message);
-
                             $('#box_' + targetId).removeClass('border-gray-300').addClass('border-success bg-light-success');
-                            $('#status_' + targetId).removeClass('badge-light-danger').addClass('badge-success')
-                                .html('<i class="ki-outline ki-check text-white fs-5 me-1"></i> Tersimpan');
+                            $('#status_' + targetId).removeClass('badge-light-danger').addClass('badge-success').html('<i class="ki-outline ki-check text-white fs-5 me-1"></i> Tersimpan');
 
-                            // --- UPDATE TOMBOL PREVIEW DINAMIS ---
+                            // Update Preview lokal (Tetap jalan pakai URL Blob lokal)
                             let localFileUrl = URL.createObjectURL(fileData);
                             let newFileExt = fileData.name.split('.').pop().toLowerCase();
                             let fileNameLabel = $('#box_' + targetId).find('label.fs-5').text().trim();
-
                             let previewBtn = $('#box_' + targetId).find('.btn-preview-berkas');
 
                             if (previewBtn.length > 0) {
-                                previewBtn.attr('data-file-url', localFileUrl);
-                                previewBtn.attr('data-file-ext', newFileExt);
+                                previewBtn.attr('data-file-url', localFileUrl).attr('data-file-ext', newFileExt);
                             } else {
-                                let newPreviewBtn = `
-                                <a href="javascript:void(0)" 
-                                   class="btn btn-icon btn-sm btn-light-primary hover-elevate-up btn-preview-berkas me-2" 
-                                   data-file-url="${localFileUrl}" 
-                                   data-file-ext="${newFileExt}" 
-                                   data-file-name="${fileNameLabel}" 
-                                   title="Lihat dokumen tersimpan">
-                                    <i class="ki-outline ki-eye fs-3"></i>
-                                </a>
-                            `;
+                                let newPreviewBtn = `<a href="javascript:void(0)" class="btn btn-icon btn-sm btn-light-primary hover-elevate-up btn-preview-berkas me-2" data-file-url="${localFileUrl}" data-file-ext="${newFileExt}" data-file-name="${fileNameLabel}" title="Lihat dokumen tersimpan"><i class="ki-outline ki-eye fs-3"></i></a>`;
                                 $('#status_' + targetId).before(newPreviewBtn);
                             }
-
                             $(fileInput).val('');
-
                             if (response.is_complete) {
                                 Swal.fire({
                                     text: "Berhasil! Semua file persyaratan telah berhasil diunggah. Kami akan mengalihkan Anda ke halaman Monitoring.",
@@ -965,7 +893,7 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                             toastr.error(response.message);
                         }
                     },
-                    error: function(xhr) {
+                    error: function() {
                         toastr.error("Terjadi kesalahan jaringan atau ekstensi tidak didukung.");
                     },
                     complete: function() {
@@ -977,10 +905,9 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
             });
         <?php endif; ?>
 
-
-        // ==========================================================
-        // 3. SCRIPT MODAL PRATINJAU
-        // ==========================================================
+        // ---------------------------------------------------------
+        // MODIFIKASI: SCRIPT MODAL PRATINJAU & UNDUH (Mendukung G-Drive)
+        // ---------------------------------------------------------
         $('body').on('click', '.btn-preview-berkas', function(e) {
             e.preventDefault();
 
@@ -994,23 +921,33 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
             }
 
             $('#modal_preview_title').text(fileName);
-            $('#btn_download_berkas').attr('href', fileUrl).attr('download', fileName + '.' + fileExt);
             $('#preview_container').html('<div class="spinner-border text-primary" role="status"></div>');
 
-            let modalElement = document.getElementById('modal_preview_berkas');
-            let myModal = bootstrap.Modal.getInstance(modalElement);
-            if (!myModal) {
-                myModal = new bootstrap.Modal(modalElement);
+            // Logika Link Unduh (Jika Google Drive, gunakan format unduh langsung /uc?export)
+            if (fileUrl.includes('drive.google.com')) {
+                let driveId = fileUrl.split('/d/')[1].split('/preview')[0];
+                let downloadUrl = 'https://drive.google.com/uc?export=download&id=' + driveId;
+                $('#btn_download_berkas').attr('href', downloadUrl).removeAttr('download').attr('target', '_blank');
+            } else {
+                $('#btn_download_berkas').attr('href', fileUrl).attr('download', fileName + '.' + fileExt).removeAttr('target');
             }
+
+            let myModal = new bootstrap.Modal(document.getElementById('modal_preview_berkas'));
             myModal.show();
 
             setTimeout(() => {
-                if (fileExt === 'pdf') {
-                    $('#preview_container').html('<embed src="' + fileUrl + '" type="application/pdf" width="100%" height="700px" />');
-                } else if (['jpg', 'jpeg', 'png'].includes(fileExt)) {
-                    $('#preview_container').html('<img src="' + fileUrl + '" class="img-fluid rounded shadow-sm" style="max-height: 700px; object-fit: contain;" />');
+                if (fileUrl.includes('drive.google.com')) {
+                    // Gunakan iFrame untuk Google Drive (Google Viewer otomatis menampilkan PDF/Gambar)
+                    $('#preview_container').html('<iframe src="' + fileUrl + '" width="100%" height="700px" style="border: none; border-radius: 8px;"></iframe>');
                 } else {
-                    $('#preview_container').html('<div class="text-center text-muted"><i class="ki-outline ki-file fs-5x mb-3"></i><br>Pratinjau tidak tersedia untuk format ini.</div>');
+                    // Logika bawaan untuk file lokal / file blob lokal setelah upload ajax
+                    if (fileExt === 'pdf') {
+                        $('#preview_container').html('<embed src="' + fileUrl + '" type="application/pdf" width="100%" height="700px" />');
+                    } else if (['jpg', 'jpeg', 'png'].includes(fileExt)) {
+                        $('#preview_container').html('<img src="' + fileUrl + '" class="img-fluid rounded shadow-sm" style="max-height: 700px; object-fit: contain;" />');
+                    } else {
+                        $('#preview_container').html('<div class="text-center text-muted"><i class="ki-outline ki-file fs-5x mb-3"></i><br>Pratinjau tidak tersedia.</div>');
+                    }
                 }
             }, 500);
         });
@@ -1021,23 +958,13 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
             $('body').css('overflow', '');
         });
 
-
-        // ==========================================================
-        // 4. SCRIPT POPUP PERBAIKAN & PERPANJANGAN DINAMIS
-        // ==========================================================
         $('body').on('click', '.btn-perbaikan', function(e) {
+            /* SCRIPT LAMA... */
             e.preventDefault();
             const targetUrl = $(this).attr('data-url');
-
-            // Ambil teks khusus dari attribute (disesuaikan dengan status di view)
             const swalTitle = $(this).attr('data-title') || "Kirim Ulang Berkas?";
             const swalText = $(this).attr('data-text') || "Apakah Anda yakin semua data dan dokumen perbaikan sudah benar?";
-
-            if (!targetUrl) {
-                console.error("URL tujuan tidak ditemukan!");
-                return;
-            }
-
+            if (!targetUrl) return;
             Swal.fire({
                 title: swalTitle,
                 text: swalText,
@@ -1065,43 +992,37 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
             });
         });
 
-    });
-
-    // Script Konfirmasi Tombol Perpanjang
-    $('body').on('click', '.btn-confirm-perpanjang', function(e) {
-        e.preventDefault();
-
-        let targetUrl = $(this).attr('href');
-        let title = $(this).attr('data-title');
-        let text = $(this).attr('data-text');
-
-        // Tampilkan SweetAlert Konfirmasi
-        Swal.fire({
-            title: title,
-            text: text,
-            icon: "question",
-            showCancelButton: true,
-            confirmButtonText: "Ya, Lanjutkan!",
-            cancelButtonText: "Batal",
-            customClass: {
-                confirmButton: "btn btn-primary",
-                cancelButton: "btn btn-light-primary"
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Tampilkan loading saat halaman mau berpindah
-                Swal.fire({
-                    text: "Mengalihkan halaman...",
-                    icon: "info",
-                    allowOutsideClick: false,
-                    showConfirmButton: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-                // Eksekusi pindah halaman
-                window.location.href = targetUrl;
-            }
+        $('body').on('click', '.btn-confirm-perpanjang', function(e) {
+            /* SCRIPT LAMA... */
+            e.preventDefault();
+            let targetUrl = $(this).attr('href');
+            let title = $(this).attr('data-title');
+            let text = $(this).attr('data-text');
+            Swal.fire({
+                title: title,
+                text: text,
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonText: "Ya, Lanjutkan!",
+                cancelButtonText: "Batal",
+                customClass: {
+                    confirmButton: "btn btn-primary",
+                    cancelButton: "btn btn-light-primary"
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        text: "Mengalihkan halaman...",
+                        icon: "info",
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                    window.location.href = targetUrl;
+                }
+            });
         });
     });
 </script>
