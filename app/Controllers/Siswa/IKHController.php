@@ -119,7 +119,10 @@ class IKHController extends BaseController
 
         $namaSiswa = $dataSiswa['nama_siswa'];
         $noInduk   = $dataSiswa['no_induk_siswa'];
-        $folderSiswaName = strtoupper($namaSiswa) . "_" . $noInduk;
+        $namaArray = explode(' ', $namaSiswa);
+        $duaKataPertama = array_slice($namaArray, 0, 2);
+        $namaDepan = implode('_', $duaKataPertama);
+        $folderSiswaName = strtoupper($namaDepan) . "_" . $noInduk;
 
         $file = $this->request->getFile('file_dokumen');
 

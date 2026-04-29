@@ -129,7 +129,12 @@ class IkhController extends BaseController
         // Persiapan Koneksi & Folder server
         try {
             $service = $this->getDriveService();
-            $folderSiswaName = strtoupper($dataSiswa['nama_siswa']) . "_" . $dataSiswa['no_induk_siswa'];
+            $namaSiswa = $dataSiswa['nama_siswa'];
+            $noInduk   = $dataSiswa['no_induk_siswa'];
+            $namaArray = explode(' ', $namaSiswa);
+            $duaKataPertama = array_slice($namaArray, 0, 2);
+            $namaDepan = implode('_', $duaKataPertama);
+            $folderSiswaName = strtoupper($namaDepan) . "_" . $noInduk;
             $folderSiswaId = $this->getOrCreateFolder($service, $folderSiswaName, setting('folder_id_drive'));
         } catch (\Exception $e) {
             return $this->response->setJSON([
