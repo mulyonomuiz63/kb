@@ -172,7 +172,20 @@ function renderDetailRow($label, $id, $col = 6)
                     data: 'email'
                 },
                 {
-                    data: 'hp'
+                    data: 'hp',
+                    render: function(data, type, row) {
+                        // Hilangkan karakter selain angka agar link wa.me valid
+                        let cleanNumber = data.replace(/[^0-9]/g, '');
+
+                        // Pastikan nomor diawali kode negara (misal 62)
+                        if (cleanNumber.startsWith('0')) {
+                            cleanNumber = '62' + cleanNumber.slice(1);
+                        }
+
+                        return `<a href="https://wa.me/${cleanNumber}" target="_blank" class="btn btn-success btn-sm">
+                    <i class="fab fa-whatsapp"></i> ${data}
+                </a>`;
+                    }
                 },
                 {
                     data: 'date_created',
