@@ -174,16 +174,21 @@ function renderDetailRow($label, $id, $col = 6)
                 {
                     data: 'hp',
                     render: function(data, type, row) {
-                        // Hilangkan karakter selain angka agar link wa.me valid
+                        // Cek jika data kosong, null, atau hanya berisi '0'
+                        if (!data || data === '0' || data === '') {
+                            return '<span class="text-muted">-</span>';
+                        }
+
+                        // Membersihkan nomor dari karakter non-angka
                         let cleanNumber = data.replace(/[^0-9]/g, '');
 
-                        // Pastikan nomor diawali kode negara (misal 62)
+                        // Konversi awalan 0 menjadi 62 (Kode Negara Indonesia)
                         if (cleanNumber.startsWith('0')) {
                             cleanNumber = '62' + cleanNumber.slice(1);
                         }
 
-                        return `<a href="https://wa.me/${cleanNumber}" target="_blank" class="btn btn-success btn-sm">
-                    <i class="fab fa-whatsapp"></i> ${data}
+                        return `<a href="https://wa.me/${cleanNumber}" target="_blank" style="text-decoration: none;">
+                    <i class="fab fa-whatsapp" style="color: #25D366;"></i> ${data}
                 </a>`;
                     }
                 },
