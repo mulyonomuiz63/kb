@@ -216,54 +216,109 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
 
                                     <div class="row g-5 mb-7">
                                         <?php
+                                        // Array disederhanakan, deskripsi dihilangkan
                                         $berkas = [
-                                            'file_riwayat_hidup'  => 'Daftar Riwayat Hidup',
-                                            'file_bukan_pns'      => 'Surat Pernyataan Bukan PNS',
-                                            'file_pakta_integritas' => 'Pakta Integritas',
-                                            'file_pernyataan_ikh' => 'Surat Pernyataan IKH',
-                                            'file_skck'           => 'File SKCK (Opsional)'
+                                            'file_riwayat_hidup' => [
+                                                'label'    => 'Daftar Riwayat Hidup',
+                                                'template' => base_url('sw-admin/cetak-pdf/cv/' . encrypt_url($ikh['id_ikh']))
+                                            ],
+                                            'file_bukan_pns' => [
+                                                'label'    => 'Surat Pernyataan Bukan PNS',
+                                                'template' => base_url('sw-admin/cetak-pdf/pernyataan-bukan-pns/' . encrypt_url($ikh['id_ikh']))
+                                            ],
+                                            'file_pakta_integritas' => [
+                                                'label'    => 'Pakta Integritas',
+                                                'template' => base_url('sw-admin/cetak-pdf/pakta-integritas/' . encrypt_url($ikh['id_ikh']))
+                                            ],
+                                            'file_pernyataan_ikh' => [
+                                                'label'    => 'Surat Pernyataan IKH',
+                                                'template' => base_url('sw-admin/cetak-pdf/pernyataan-pengajuan-ikh/' . encrypt_url($ikh['id_ikh']))
+                                            ],
+                                            'file_skck' => [
+                                                'label'    => 'File SKCK (Opsional)',
+                                                'template' => ''
+                                            ]
                                         ];
 
-                                        foreach ($berkas as $name => $label):
+                                        foreach ($berkas as $name => $item):
+                                            $isUploaded = !empty($ikh[$name]);
                                         ?>
                                             <div class="col-md-6">
-                                                <label class="form-label fw-bold"><?= $label ?></label>
-                                                <div class="input-group input-group-solid">
-                                                    <input type="file" name="<?= $name ?>" class="form-control" accept=".pdf">
+                                                <div class="border border-dashed border-gray-300 rounded p-4 h-100 bg-body d-flex flex-column">
 
-                                                    <?php if (!empty($ikh[$name])): ?>
-                                                        <?php
-                                                        // =========================================================
-                                                        // PERBAIKAN 2: Deteksi Link G-Drive (Berkas Admin IKH)
-                                                        // =========================================================
-                                                        $fileData = $ikh[$name];
-                                                        $isDrive = (strpos($fileData, '.') === false);
+                                                    <!-- Header: Hanya Label & Tombol Download Format -->
+                                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                                        <label class="form-label fw-bolder text-dark mb-0 fs-5"><?= $item['label'] ?></label>
 
-                                                        if ($isDrive) {
-                                                            $fileUrl = 'https://drive.google.com/file/d/' . $fileData . '/preview';
-                                                            $ext = 'pdf'; // Karena form input hanya menerima .pdf
-                                                        } else {
-                                                            $fileUrl = base_url("uploads/ikh/" . $fileData);
-                                                            $ext = strtolower(pathinfo($fileData, PATHINFO_EXTENSION));
-                                                        }
-                                                        ?>
-                                                        <button type="button" class="btn btn-icon btn-light-primary btn-preview-berkas"
-                                                            data-file-url="<?= $fileUrl ?>"
-                                                            data-file-ext="<?= $ext ?>"
-                                                            data-file-name="<?= $label ?>">
-                                                            <i class="ki-outline ki-eye fs-2"></i>
-                                                        </button>
-                                                    <?php endif; ?>
+                                                        <?php if (!empty($item['template'])): ?>
+                                                            <a href="<?= $item['template'] ?>" download class="btn btn-sm btn-light-info fw-bold px-3 py-2" title="Unduh Format Kosong">
+                                                                <i class="ki-outline ki-file-down fs-4"></i>
+                                                            </a>
+                                                        <?php endif; ?>
+                                                    </div>
+
+                                                    <!-- Area Custom Upload (Kotak Persegi) -->
+                                                    <div class="mt-auto d-flex align-items-center">
+
+                                                        <!-- Wrapper Posisi Relatif untuk Kotak & Badge Centang -->
+                                                        <div class="position-relative me-4">
+                                                            <!-- Input Asli Disembunyikan -->
+                                                            <input type="file" name="<?= $name ?>" id="file_<?= $name ?>" class="d-none input-file-custom" accept=".pdf">
+
+                                                            <!-- Label sebagai pengganti tombol upload (Kotak Persegi) -->
+                                                            <label for="file_<?= $name ?>"
+                                                                class="btn btn-outline btn-outline-dashed p-0 d-flex align-items-center justify-content-center transition-all <?= $isUploaded ? 'border-success bg-light-success text-success' : 'border-primary text-primary btn-active-light-primary' ?>"
+                                                                style="width: 70px; height: 70px; border-radius: 12px; cursor: pointer;"
+                                                                title="Klik untuk memilih file">
+                                                                <i class="ki-outline ki-document <?= $isUploaded ? 'text-success' : 'text-primary' ?> fs-2x"></i>
+                                                            </label>
+
+                                                            <!-- Tanda Centang Jika Sudah Terupload -->
+                                                            <?php if ($isUploaded): ?>
+                                                                <span class="position-absolute top-0 start-100 translate-middle badge badge-circle badge-success shadow-sm" style="width: 22px; height: 22px;">
+                                                                    <i class="ki-outline ki-check text-white fs-8"></i>
+                                                                </span>
+                                                            <?php endif; ?>
+                                                        </div>
+
+                                                        <!-- Area Status & Tombol Lihat -->
+                                                        <div class="flex-grow-1">
+                                                            <?php if ($isUploaded): ?>
+                                                                <?php
+                                                                $fileData = $ikh[$name];
+                                                                $isDrive = (strpos($fileData, '.') === false);
+                                                                $fileUrl = $isDrive ? 'https://drive.google.com/file/d/' . $fileData . '/preview' : base_url("uploads/ikh/" . $fileData);
+                                                                $ext = $isDrive ? 'pdf' : strtolower(pathinfo($fileData, PATHINFO_EXTENSION));
+                                                                ?>
+                                                                <div class="text-success fs-8 fw-bold mb-2"><i class="ki-outline ki-verify fs-6 text-success me-1"></i> Telah Terunggah</div>
+                                                                <button type="button" class="btn btn-sm btn-light-success btn-preview-berkas py-2 px-3"
+                                                                    data-file-url="<?= $fileUrl ?>"
+                                                                    data-file-ext="<?= $ext ?>"
+                                                                    data-file-name="<?= $item['label'] ?>">
+                                                                    <i class="ki-outline ki-eye fs-5"></i> Lihat Berkas
+                                                                </button>
+                                                            <?php else: ?>
+                                                                <!-- Menampilkan nama label agar pengguna tahu file apa ini -->
+                                                                <div class="text-muted fs-8 mb-1">Unggah <b><?= $item['label'] ?></b> di sini.</div>
+                                                                <div class="text-muted fs-9">Format: .PDF (Maks 2MB)</div>
+                                                            <?php endif; ?>
+
+                                                            <!-- Tempat menampilkan nama file yang baru dipilih (Javascript dibutuhkan) -->
+                                                            <div id="filename_<?= $name ?>" class="text-primary fs-8 fw-bold mt-1" style="display: none;"></div>
+                                                        </div>
+
+                                                    </div>
                                                 </div>
-                                                <div class="form-text text-muted fs-8">Format: .PDF (Max 2MB)</div>
                                             </div>
                                         <?php endforeach; ?>
                                     </div>
 
-                                    <button type="submit" class="btn btn-primary" id="btn_simpan_berkas">
-                                        <span class="indicator-label"><i class="ki-outline ki-check-circle fs-2"></i> Simpan & Perbarui Berkas</span>
-                                        <span class="indicator-progress">Mohon tunggu... <span class="spinner-border spinner-border-sm align-middle ms-2"></span></span>
-                                    </button>
+                                    <div class="d-flex justify-content-end">
+                                        <button type="submit" class="btn btn-primary" id="btn_simpan_berkas">
+                                            <span class="indicator-label"><i class="ki-outline ki-cloud-download fs-2"></i> Simpan & Unggah Berkas</span>
+                                            <span class="indicator-progress">Mengunggah... <span class="spinner-border spinner-border-sm align-middle ms-2"></span></span>
+                                        </button>
+                                    </div>
                                 </form>
                             </div>
 
@@ -297,7 +352,7 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                                                                 // PERBAIKAN 3: Deteksi Link G-Drive (File Kartu IKH)
                                                                 // =========================================================
                                                                 $isDrive = (strpos($file, '.') === false);
-                                                                
+
                                                                 if ($isDrive) {
                                                                     $fileUrl = 'https://drive.google.com/file/d/' . $file . '/preview';
                                                                     $ext = 'pdf'; // Default tampilan teks ekstensi
@@ -478,6 +533,37 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
             });
         });
 
+        // Script untuk menampilkan nama file yang dipilih
+        $(document).on('change', '.input-file-custom', function(e) {
+            // Ambil ID dari input file yang sedang diubah
+            let inputId = $(this).attr('id'); // contoh: "file_file_riwayat_hidup"
+
+            // Karena ID input pakai awalan "file_", kita sesuaikan untuk mencari target div filename-nya
+            let nameTarget = inputId.replace('file_', ''); // menjadi: "file_riwayat_hidup"
+
+            // Cek apakah ada file yang dipilih
+            if (this.files && this.files.length > 0) {
+                let fileName = this.files[0].name;
+
+                // Tampilkan nama file dan ubah display menjadi block
+                $('#filename_' + nameTarget).text('Pilihan: ' + fileName).slideDown(200);
+
+                // Opsional: Ubah warna kotak menjadi sedikit berbeda (contoh menjadi border-info)
+                // untuk menandakan file sudah 'tersangkut' di input tapi belum disubmit
+                $('label[for="' + inputId + '"]').removeClass('border-primary text-primary').addClass('border-info text-info');
+                $('label[for="' + inputId + '"] i').removeClass('text-primary').addClass('text-info');
+            } else {
+                // Jika file batal dipilih, sembunyikan kembali
+                $('#filename_' + nameTarget).hide().text('');
+
+                // Kembalikan warna ke semula (jika sebelumnya belum terupload)
+                if (!$('label[for="' + inputId + '"]').hasClass('bg-light-success')) {
+                    $('label[for="' + inputId + '"]').removeClass('border-info text-info').addClass('border-primary text-primary');
+                    $('label[for="' + inputId + '"] i').removeClass('text-info').addClass('text-primary');
+                }
+            }
+        });
+
         // =========================================================
         // PERBAIKAN 4: Logic Modal Preview Berkas (Dibersihkan dari duplikasi)
         // =========================================================
@@ -488,7 +574,7 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
             let fileName = $(this).data('file-name');
 
             $('#modal_preview_title').text(fileName);
-            
+
             // Logika Link Unduh (Support Google Drive Export)
             if (fileUrl.includes('drive.google.com')) {
                 let driveId = fileUrl.split('/d/')[1].split('/preview')[0];
@@ -514,7 +600,7 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
         });
 
         // Hapus sisa iFrame saat modal ditutup agar tidak membebani memori
-        $('#modal_preview_berkas').on('hidden.bs.modal', function () {
+        $('#modal_preview_berkas').on('hidden.bs.modal', function() {
             $('#preview_container').empty();
         });
 

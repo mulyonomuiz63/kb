@@ -29,8 +29,8 @@
 
 <?= $this->section('content'); ?>
 <?php
-// 1. Cek apakah ada data di database
-$hasData = !empty($ikh);
+// 1. Cek apakah ada data di database (Pastikan id_ikh benar-benar ada nilainya)
+$hasData = (!empty($ikh) && !empty($ikh['id_ikh']));
 $idIkh   = $hasData ? $ikh['id_ikh'] : '';
 
 // 2. Tentukan status dari database (Default: 'draft' jika baru simpan text)
@@ -44,8 +44,8 @@ $showForm = (
     $isEditMode
 ) && (isset($ikh['kuota']) && (int)$ikh['kuota'] > 0);
 
-// 4. Default Tab
-$activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'data';
+// 4. Default Tab (Hanya boleh buka lampiran jika data Step 1 benar-benar tersimpan)
+$activeTab = (isset($_GET['tab']) && $_GET['tab'] == 'lampiran' && $hasData) ? 'lampiran' : 'data';
 ?>
 
 <div class="d-flex flex-column flex-column-fluid py-3 py-lg-6 mt-8">
@@ -270,13 +270,21 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <?php if ($hasData): ?>
+                                <?php
+                                // LOGIKA KUNCI STEP 2 (SESUAI PERMINTAAN)
+                                // Hanya bisa dibuka JIKA Step 1 tersimpan (ada data) DAN:
+                                // - User di-redirect ke tab lampiran secara aktif setelah klik tombol simpan, ATAU
+                                // - Statusnya sudah bukan draft lagi
+                                $canOpenStep2 = $hasData && ($activeTab === 'lampiran' || $status_validasi !== 'draft');
+                                ?>
+                                <?php if ($canOpenStep2): ?>
                                     <a class="nav-link text-active-primary text-gray-600 px-4 <?= $activeTab == 'lampiran' ? 'active' : '' ?>" data-bs-toggle="tab" href="#tab_lampiran">
                                         <i class="ki-outline ki-document fs-2 me-2 <?= $activeTab == 'lampiran' ? 'text-primary' : 'text-gray-500' ?>"></i>
                                         2. Unggah Lampiran
                                     </a>
                                 <?php else: ?>
-                                    <a class="nav-link text-muted px-4 disabled bg-light" href="javascript:;" title="Simpan data diri terlebih dahulu">
+                                    <!-- Terkunci total, pointer-events: none memastikan JS bootstrap tidak bisa memaksanya terbuka -->
+                                    <a class="nav-link text-muted px-4 disabled bg-light" href="javascript:void(0);" title="Selesaikan dan Simpan Data Diri di Step 1 terlebih dahulu" style="pointer-events: none; cursor: not-allowed;">
                                         <i class="ki-outline ki-lock fs-2 me-2"></i>
                                         2. Unggah Lampiran <span class="badge badge-light-danger ms-2 fs-8">Terkunci</span>
                                     </a>
@@ -457,7 +465,13 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                                                 </div>
 
                                                 <div class="input-group input-group-sm">
-                                                    <input type="file" class="form-control file-input-ajax" id="input_<?= $cfg['id'] ?>" data-name="<?= $cfg['id'] ?>" accept="<?= $cfg['accept'] ?>">
+                                                    <!-- TAMBAHAN: Kita tambahkan pengecekan class khusus 'input-ttd-crop' jika ID-nya file_ttd -->
+                                                    <input type="file"
+                                                        class="form-control file-input-ajax <?= $cfg['id'] == 'file_ttd' ? 'input-ttd-crop' : '' ?>"
+                                                        id="input_<?= $cfg['id'] ?>"
+                                                        data-name="<?= $cfg['id'] ?>"
+                                                        accept="<?= $cfg['accept'] ?>">
+
                                                     <button class="btn btn-primary btn-upload-ajax" type="button" data-target="<?= $cfg['id'] ?>">
                                                         <span class="indicator-label">Upload</span>
                                                         <span class="indicator-progress" style="display:none;">... <span class="spinner-border spinner-border-sm align-middle"></span></span>
@@ -786,9 +800,61 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
         </div>
     </div>
 </div>
+
+
+
+<!-- Modal untuk Crop TTD -->
+<div class="modal fade" id="modalCropTtd" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered mw-600px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="fw-bold">Sesuaikan Tanda Tangan</h3>
+                <div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal">
+                    <i class="ki-outline ki-cross fs-1"></i>
+                </div>
+            </div>
+            <div class="modal-body text-center">
+                <div class="text-muted mb-3">Posisikan TTD di dalam kotak. Background putih akan otomatis dihapus.</div>
+
+                <!-- Area Gambar Crop -->
+                <div style="max-height: 400px; overflow: hidden; display: inline-block; width: 100%; border: 1px dashed #ccc; border-radius: 8px;">
+                    <img id="imageToCrop" src="" style="max-width: 100%; display: block;">
+                </div>
+
+                <!-- TAMBAHAN: Slider Rotasi Manual -->
+                <div class="mt-5 px-4">
+                    <label class="form-label fs-7 fw-bold text-muted d-block text-start mb-2">Geser untuk memutar gambar (Rotasi Manual):</label>
+                    <input type="range" id="sliderRotasi" class="form-range" min="-180" max="180" value="0">
+                </div>
+            </div>
+            <div class="modal-footer d-flex justify-content-between align-items-center w-100">
+                <!-- Tombol Rotasi Kiri & Kanan -->
+                <div>
+                    <button type="button" class="btn btn-icon btn-light-info me-2" id="btnRotateLeft" title="Putar Kiri 90 Derajat">
+                        <i class="ki-outline ki-arrow-circle-left fs-2"></i>
+                    </button>
+                    <button type="button" class="btn btn-icon btn-light-info" id="btnRotateRight" title="Putar Kanan 90 Derajat">
+                        <i class="ki-outline ki-arrow-circle-right fs-2"></i>
+                    </button>
+                </div>
+
+                <!-- Tombol Aksi -->
+                <div>
+                    <button type="button" class="btn btn-light me-2" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" id="btnProsesCrop">
+                        <i class="ki-outline ki-magic fs-2"></i> Crop & Hapus Latar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <?= $this->endSection(); ?>
 
 <?= $this->section('scripts'); ?>
+<!-- Load CSS & JS Cropper.js -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script>
     $('<style>@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } } .animate-pulse { animation: pulse 2s infinite; }</style>').appendTo('head');
 
@@ -1024,6 +1090,150 @@ $activeTab = isset($_GET['tab']) && $_GET['tab'] == 'lampiran' ? 'lampiran' : 'd
                 }
             });
         });
+    });
+</script>
+<script>
+    $(document).ready(function() {
+        let cropper;
+        const cropModal = $('#modalCropTtd');
+        const image = document.getElementById('imageToCrop');
+
+        // 1. Deteksi saat input TTD dipilih
+        $(document).on('change', '.input-ttd-crop', function(e) {
+            let files = e.target.files;
+            if (files && files.length > 0) {
+                let file = files[0];
+                let reader = new FileReader();
+
+                reader.onload = function(evt) {
+                    image.src = evt.target.result;
+                    cropModal.modal('show'); // Tampilkan modal
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // 2. Inisialisasi Cropper.js saat modal terbuka
+        cropModal.on('shown.bs.modal', function() {
+            cropper = new Cropper(image, {
+                aspectRatio: 1 / 1, // Memaksa ukuran 1:1 (Persegi)
+                viewMode: 1,
+                autoCropArea: 0.8,
+                dragMode: 'move',
+            });
+        }).on('hidden.bs.modal', function() {
+            // Hancurkan cropper saat modal ditutup agar tidak error saat dibuka lagi
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+            image.src = '';
+            $('#sliderRotasi').val(0);
+        });
+
+        // 3. Proses Crop & Hapus Background Putih
+        $('#btnProsesCrop').on('click', function() {
+            if (!cropper) return;
+
+            // Ambil hasil crop dengan resolusi tajam
+            let canvas = cropper.getCroppedCanvas({
+                width: 500,
+                height: 500
+            });
+
+            // --- ALGORITMA PENGHAPUS BACKGROUND PUTIH ---
+            let ctx = canvas.getContext('2d');
+            let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            let data = imageData.data;
+
+            for (let i = 0; i < data.length; i += 4) {
+                let r = data[i];
+                let g = data[i + 1];
+                let b = data[i + 2];
+
+                // Jika warna piksel terang/mendekati putih (R, G, B di atas 200)
+                if (r > 200 && g > 200 && b > 200) {
+                    data[i + 3] = 0; // Ubah nilai Alpha menjadi 0 (Transparan)
+                } else {
+                    // (Opsional) Ubah sisa tinta yang tidak terhapus menjadi hitam pekat 
+                    // agar hasil TTD di PDF nanti sangat jelas
+                    data[i] = 0; // R
+                    data[i + 1] = 0; // G
+                    data[i + 2] = 0; // B
+                }
+            }
+            ctx.putImageData(imageData, 0, 0);
+            // --------------------------------------------
+
+            // Ubah canvas menjadi file Blob (.png agar transparansi tersimpan)
+            canvas.toBlob(function(blob) {
+                // Kita manipulasi input file asli menggunakan DataTransfer
+                let dataTransfer = new DataTransfer();
+                let file = new File([blob], "ttd_siap_upload.png", {
+                    type: "image/png"
+                });
+                dataTransfer.items.add(file);
+
+                // Suntikkan file hasil crop ini ke input file_ttd asli Anda
+                document.getElementById('input_file_ttd').files = dataTransfer.files;
+
+                cropModal.modal('hide');
+
+                // Beri tahu user bahwa file sudah siap diupload
+                Swal.fire({
+                    text: "Tanda tangan berhasil di-crop dan background dihapus! Silakan klik tombol Upload.",
+                    icon: "success",
+                    buttonsStyling: false,
+                    confirmButtonText: "Ok, Mengerti!",
+                    customClass: {
+                        confirmButton: "btn btn-primary"
+                    }
+                });
+
+            }, 'image/png'); // Format harus PNG untuk menyimpan transparan
+        });
+
+        // ==========================================
+        // FITUR TAMBAHAN: ROTASI SLIDER & TOMBOL
+        // ==========================================
+
+        // 1. Putar gambar secara mulus saat slider digeser
+        $('#sliderRotasi').on('input', function() {
+            if (cropper) {
+                let derajat = $(this).val();
+                cropper.rotateTo(derajat); // rotateTo memutar ke sudut absolut yang spesifik
+            }
+        });
+
+        // 2. Tombol Putar Kiri (-90 derajat)
+        $('#btnRotateLeft').on('click', function() {
+            if (cropper) {
+                let nilaiSekarang = parseInt($('#sliderRotasi').val());
+                let nilaiBaru = nilaiSekarang - 90;
+
+                // Batasi agar tidak lewat dari batas minimum slider (-180)
+                if (nilaiBaru < -180) nilaiBaru = nilaiBaru + 360;
+
+                $('#sliderRotasi').val(nilaiBaru); // Update posisi slider
+                cropper.rotateTo(nilaiBaru); // Putar gambar
+            }
+        });
+
+        // 3. Tombol Putar Kanan (+90 derajat)
+        $('#btnRotateRight').on('click', function() {
+            if (cropper) {
+                let nilaiSekarang = parseInt($('#sliderRotasi').val());
+                let nilaiBaru = nilaiSekarang + 90;
+
+                // Batasi agar tidak lewat dari batas maksimum slider (180)
+                if (nilaiBaru > 180) nilaiBaru = nilaiBaru - 360;
+
+                $('#sliderRotasi').val(nilaiBaru); // Update posisi slider
+                cropper.rotateTo(nilaiBaru); // Putar gambar
+            }
+        });
+
+        // ==========================================
     });
 </script>
 <?= $this->endSection(); ?>
