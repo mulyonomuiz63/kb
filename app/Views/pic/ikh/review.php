@@ -220,19 +220,19 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                                         $berkas = [
                                             'file_riwayat_hidup' => [
                                                 'label'    => 'Daftar Riwayat Hidup',
-                                                'template' => base_url('sw-admin/cetak-pdf/cv/' . encrypt_url($ikh['id_ikh']))
+                                                'template' => base_url('sw-pic/cetak-pdf/cv/' . encrypt_url($ikh['id_ikh']))
                                             ],
                                             'file_bukan_pns' => [
                                                 'label'    => 'Surat Pernyataan Bukan PNS',
-                                                'template' => base_url('sw-admin/cetak-pdf/pernyataan-bukan-pns/' . encrypt_url($ikh['id_ikh']))
+                                                'template' => base_url('sw-pic/cetak-pdf/pernyataan-bukan-pns/' . encrypt_url($ikh['id_ikh']))
                                             ],
                                             'file_pakta_integritas' => [
                                                 'label'    => 'Pakta Integritas',
-                                                'template' => base_url('sw-admin/cetak-pdf/pakta-integritas/' . encrypt_url($ikh['id_ikh']))
+                                                'template' => base_url('sw-pic/cetak-pdf/pakta-integritas/' . encrypt_url($ikh['id_ikh']))
                                             ],
                                             'file_pernyataan_ikh' => [
                                                 'label'    => 'Surat Pernyataan IKH',
-                                                'template' => base_url('sw-admin/cetak-pdf/pernyataan-pengajuan-ikh/' . encrypt_url($ikh['id_ikh']))
+                                                'template' => base_url('sw-pic/cetak-pdf/pernyataan-pengajuan-ikh/' . encrypt_url($ikh['id_ikh']))
                                             ],
                                             'file_skck' => [
                                                 'label'    => 'File SKCK (Opsional)',
@@ -441,7 +441,7 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
             let formData = form.serialize() + '&' + csrfName + '=' + csrfHash;
 
             btn.prop('disabled', true);
-            $.post('<?= base_url('sw-admin/ikh/update-status') ?>', formData, function(res) {
+            $.post('<?= base_url('sw-pic/ikh/update-status') ?>', formData, function(res) {
                 csrfHash = res.csrf_hash;
                 if (res.success) {
                     Swal.fire({
@@ -467,7 +467,7 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
             btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm align-middle ms-2"></span> Mengunggah...');
 
             $.ajax({
-                url: '<?= base_url('sw-admin/ikh/upload-kartu') ?>',
+                url: '<?= base_url('sw-pic/ikh/upload-kartu') ?>',
                 type: 'POST',
                 data: formData,
                 contentType: false,
@@ -499,7 +499,7 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
             btn.attr('data-kt-indicator', 'on').attr('disabled', true);
 
             $.ajax({
-                url: '<?= base_url("sw-admin/ikh/upload-berkas") ?>',
+                url: '<?= base_url("sw-pic/ikh/upload-berkas") ?>',
                 type: 'POST',
                 data: formData,
                 contentType: false,
