@@ -251,7 +251,7 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                                                         <label class="form-label fw-bolder text-dark mb-0 fs-5"><?= $item['label'] ?></label>
 
                                                         <?php if (!empty($item['template'])): ?>
-                                                            <a href="<?= $item['template'] ?>" download class="btn btn-sm btn-light-info fw-bold px-3 py-2" title="Unduh Format Kosong">
+                                                            <a href="<?= $item['template'] ?>" terget="_blank" class="btn btn-sm btn-light-info fw-bold px-3 py-2" title="Unduh Format Kosong">
                                                                 <i class="ki-outline ki-file-down fs-4"></i>
                                                             </a>
                                                         <?php endif; ?>
