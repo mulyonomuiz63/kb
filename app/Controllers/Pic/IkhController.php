@@ -31,6 +31,78 @@ class IkhController extends BaseController
         return view('pic/ikh/list', $data);
     }
 
+    public function updatePemohon()
+    {
+        // 1. Validasi Input (disesuaikan dengan kebutuhan)
+        $rules = [
+            'id_ikh' => 'required',
+            'nik'    => 'required|numeric|min_length[16]',
+            'npwp'   => 'required',
+            'email'  => 'required|valid_email',
+            'no_wa'  => 'required|numeric',
+        ];
+
+        // Jika validasi gagal, kembalikan pesan error dalam format JSON
+        if (!$this->validate($rules)) {
+            return $this->response->setJSON([
+                'success'   => false,
+                'message'   => 'Gagal menyimpan. Pastikan NIK, NPWP, Email, dan No WhatsApp valid.',
+                'csrf_hash' => csrf_hash() // Penting: Kirim balik token CSRF terbaru
+            ]);
+        }
+
+        // 2. Ambil ID Data yang akan diedit
+        $idIkh = $this->request->getPost('id_ikh');
+        $riwayat = $this->request->getVar('riwayat_pekerjaan'); // Ini akan menjadi array
+        if (!is_array($riwayat)) {
+            $riwayat = [];
+        }
+        $riwayat_bersih = array_values(array_filter($riwayat, function($value) {
+            return !empty(trim($value));
+        }));
+
+        // 4. Encode menjadi format JSON
+        $json_riwayat = json_encode($riwayat_bersih);
+
+        // 3. Kumpulkan data dari form view admin
+        $dataUpdate = [
+            'nama_lengkap'         => $this->request->getPost('nama_lengkap'),
+            'nik'                  => $this->request->getPost('nik'),
+            'npwp'                 => $this->request->getPost('npwp'),
+            'tempat_lahir'         => $this->request->getPost('tempat_lahir'),
+            'tanggal_lahir'        => $this->request->getPost('tanggal_lahir'),
+            'pendidikan_terakhir'  => $this->request->getPost('pendidikan_terakhir'),
+            'jurusan'              => $this->request->getPost('jurusan'),
+            'tahun_masuk'          => $this->request->getPost('tahun_masuk'),
+            'tahun_lulus'          => $this->request->getPost('tahun_lulus'),
+            'no_wa'                => $this->request->getPost('no_wa'),
+            'email'                => $this->request->getPost('email'),
+            'kategori_kantor'      => $this->request->getPost('kategori_kantor'),
+            'nama_kantor'          => $this->request->getPost('nama_kantor'),
+            'alamat_ktp'           => $this->request->getPost('alamat_ktp'),
+            'alamat_korespondensi' => $this->request->getPost('alamat_korespondensi'),
+            'riwayat_pekerjaan'    => $json_riwayat,
+        ];
+
+        // 4. Proses Update ke Database
+        $updated = $this->ikhModel->update($idIkh, $dataUpdate);
+
+        // 5. Kembalikan Response Sukses ke Frontend
+        if ($updated) {
+            return $this->response->setJSON([
+                'success'   => true,
+                'message'   => 'Seluruh data pemohon berhasil diperbarui.',
+                'csrf_hash' => csrf_hash()
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'success'   => false,
+                'message'   => 'Terjadi kesalahan sistem saat menyimpan ke database.',
+                'csrf_hash' => csrf_hash()
+            ]);
+        }
+    }
+
     // 2. Halaman Detail & Review Berkas
     public function review($id)
     {
@@ -46,6 +118,7 @@ class IkhController extends BaseController
         }
 
         $data['ikh'] = $ikh;
+        $data['idIkh'] = $id_ikh;
         $data['title'] = 'Review Berkas IKH - ' . $ikh['nama_lengkap'];
 
         return view('pic/ikh/review', $data);
@@ -339,6 +412,81 @@ class IkhController extends BaseController
         }
 
         return $this->response->setJSON(['success' => false, 'message' => 'Tidak ada file valid yang terpilih.', 'csrf_hash' => csrf_hash()]);
+    }
+
+    public function uploadFileAjax()
+    {
+
+        $namaInput = $this->request->getPost('input_name');
+        $idIkh     = $this->request->getPost('id_ikh');
+
+        // Ambil data siswa untuk nama folder
+        $dataSiswa = $this->siswaModel
+        ->join('pendaftaran_ikh', 'pendaftaran_ikh.id_siswa = siswa.id_siswa')
+        ->where('pendaftaran_ikh.id_ikh', $idIkh)
+        ->first();
+        if (!$dataSiswa) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Data siswa tidak ditemukan.']);
+        }
+
+        $namaSiswa = $dataSiswa['nama_siswa'];
+        $noInduk   = $dataSiswa['no_induk_siswa'];
+        $namaArray = explode(' ', $namaSiswa);
+        $duaKataPertama = array_slice($namaArray, 0, 2);
+        $namaDepan = implode('_', $duaKataPertama);
+        $folderSiswaName = strtoupper($namaDepan) . "_" . $noInduk;
+
+        $file = $this->request->getFile('file_dokumen');
+
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            try {
+                $service = $this->getDriveService();
+
+                // --- LOGIKA FOLDER KHUSUS SISWA ---
+                // 1. Cari atau Buat Folder Siswa
+                $folderSiswaId = $this->getOrCreateFolder($service, $folderSiswaName, setting('folder_id_drive'));
+
+                // 2. Hapus File Lama (jika ada di DB)
+                $dataLama = $this->ikhModel->find($idIkh);
+                $fileIdLama = is_array($dataLama) ? ($dataLama[$namaInput] ?? null) : ($dataLama->$namaInput ?? null);
+                if ($fileIdLama) {
+                    try {
+                        $service->files->delete($fileIdLama);
+                    } catch (\Exception $e) {
+                        // Abaikan jika file lama tidak ditemukan di drive
+                    }
+                }
+
+                // 3. Upload Baru ke dalam folderSiswaId
+                $fileName = strtoupper(str_replace('file_', '', $namaInput)) . "_" . $noInduk . "_" . time();
+
+                $fileMetadata = new \Google\Service\Drive\DriveFile([
+                    'name' => $fileName,
+                    'parents' => [$folderSiswaId] // Masuk ke folder siswa
+                ]);
+
+                $uploadedFile = $service->files->create($fileMetadata, [
+                    'data' => file_get_contents($file->getTempName()),
+                    'mimeType' => $file->getClientMimeType(),
+                    'uploadType' => 'multipart',
+                    'fields' => 'id'
+                ]);
+
+                // 4. Update Database
+                $this->ikhModel->update($idIkh, [$namaInput => $uploadedFile->id]);
+
+                return $this->response->setJSON([
+                    'success'     => true,
+                    'message'     => "Berhasil upload ke folder $folderSiswaName",
+                    'csrf_hash'   => csrf_hash()
+                ]);
+
+            } catch (\Exception $e) {
+                return $this->response->setJSON(['success' => false, 'message' => $e->getMessage()]);
+            }
+        }
+        
+        return $this->response->setJSON(['success' => false, 'message' => 'File tidak valid.']);
     }
 
     private function getDriveService()

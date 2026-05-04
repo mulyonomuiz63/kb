@@ -4,6 +4,8 @@ $routes->group('sw-pic', ['filter' => 'roleCheck:5'], function ($routes) {
     $routes->get('/', 'Pic\IkhController::index');
     $routes->group('ikh', function ($routes) {
         $routes->get('', 'Pic\IkhController::index');
+        $routes->post('update-pemohon', 'Pic\IkhController::updatePemohon');
+        $routes->post('upload-ajax', 'Pic\IkhController::uploadFileAjax');
         $routes->get('review/(:segment)', 'Pic\IkhController::review/$1');
         $routes->post('update-status', 'Pic\IkhController::updateStatus');
         $routes->post('upload-berkas', 'Pic\IkhController::uploadBerkas');

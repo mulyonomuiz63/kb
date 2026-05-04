@@ -58,7 +58,7 @@ class PdfController extends BaseController
         // 7. AMBIL DATA DARI DATABASE DAN FORMAT
         // =====================================================================
         $dataPeserta = $this->ikhModel
-            ->select('pendaftaran_ikh.*, siswa.profesi, siswa.riwayat_pekerjaan, siswa.kota')
+            ->select('pendaftaran_ikh.*, siswa.profesi, siswa.kota')
             ->join('siswa', 'pendaftaran_ikh.id_siswa = siswa.id_siswa')
             ->where('pendaftaran_ikh.id_ikh', $id) // Ganti 'id_ikh' dengan nama primary key tabel pendaftaran_ikh Anda
             ->first();

@@ -60,7 +60,6 @@
 			</div>
 		</div>
 	</div>
-	<script src="https://topcs.id/widget.js" data-tenant="kelas-brevet" data-mode="bubble" data-position="right" data-color="#2563eb"></script>
 	<?= $this->include('template/partials/footer_js') ?>
 	<?= $this->renderSection('scripts') ?>
 	<?= $this->include('template/partials/notification') ?>
