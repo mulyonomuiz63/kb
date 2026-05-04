@@ -79,7 +79,7 @@ class PdfController extends BaseController
         $tahunLulus  = strtoupper($peserta->tahun_lulus ?? '-');
         $jurusan     = strtoupper($peserta->jurusan ?? '-');
         $pekerjaan   = strtoupper($peserta->profesi ?? '-');
-        $email       = strtoupper($peserta->email ?? '-');
+        $email       = strtoupper($peserta->email_custom ?? '-');
         $kota        = strtoupper($peserta->kota ?? '-');
 
         $pengalaman = '-';

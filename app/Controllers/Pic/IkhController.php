@@ -77,6 +77,7 @@ class IkhController extends BaseController
             'tahun_lulus'          => $this->request->getPost('tahun_lulus'),
             'no_wa'                => $this->request->getPost('no_wa'),
             'email'                => $this->request->getPost('email'),
+            'email_custom'         => $this->request->getPost('email_custom'),
             'kategori_kantor'      => $this->request->getPost('kategori_kantor'),
             'nama_kantor'          => $this->request->getPost('nama_kantor'),
             'alamat_ktp'           => $this->request->getPost('alamat_ktp'),
@@ -89,17 +90,9 @@ class IkhController extends BaseController
 
         // 5. Kembalikan Response Sukses ke Frontend
         if ($updated) {
-            return $this->response->setJSON([
-                'success'   => true,
-                'message'   => 'Seluruh data pemohon berhasil diperbarui.',
-                'csrf_hash' => csrf_hash()
-            ]);
+            return redirect()->to('sw-pic/ikh/review/'. encrypt_url($idIkh))->with('success', 'Data berhasil diperbarui.');
         } else {
-            return $this->response->setJSON([
-                'success'   => false,
-                'message'   => 'Terjadi kesalahan sistem saat menyimpan ke database.',
-                'csrf_hash' => csrf_hash()
-            ]);
+            return redirect()->to('sw-pic/ikh/review/'. encrypt_url($idIkh))->with('error', 'Terjadi kesalahan sistem saat menyimpan.');
         }
     }
 

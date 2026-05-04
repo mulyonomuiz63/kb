@@ -52,6 +52,7 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                                 <div class="d-flex flex-column gap-4 mb-6">
                                     <div class="d-flex flex-stack"><span class="fw-semibold text-gray-500">WhatsApp</span><span class="fw-bold text-primary"><?= $ikh['no_wa'] ?></span></div>
                                     <div class="d-flex flex-stack"><span class="fw-semibold text-gray-500">Email</span><span class="fw-bold text-gray-800"><?= $ikh['email'] ?></span></div>
+                                    <div class="d-flex flex-stack"><span class="fw-semibold text-gray-500">Email Custom</span><span class="fw-bold text-gray-800"><?= $ikh['email_custom'] ?></span></div>
                                     <div class="d-flex flex-stack"><span class="fw-semibold text-gray-500">Kategori Kantor</span><span class="fw-bold text-gray-800"><?= $ikh['kategori_kantor'] ?></span></div>
                                     <div class="d-flex flex-stack"><span class="fw-semibold text-gray-500">Nama Kantor</span><span class="fw-bold text-gray-800"><?= $ikh['nama_kantor'] ?></span></div>
                                 </div>
@@ -104,7 +105,7 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                             <!-- ========================================== -->
                             <!-- BAGIAN DATA PEMOHON (FORM EDIT)            -->
                             <!-- ========================================== -->
-                            <form id="form_edit_pemohon" class="d-none">
+                            <form action="<?= base_url('sw-pic/ikh/update-pemohon') ?>" method="POST" id="form_edit_pemohon" class="d-none">
                                 <?= csrf_field() ?>
                                 <input type="hidden" name="id_ikh" value="<?= $ikh['id_ikh'] ?>">
 
@@ -161,6 +162,10 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                                     <div class="col-md-6">
                                         <label class="form-label fs-8 fw-semibold text-muted mb-1">Email</label>
                                         <input type="email" name="email" class="form-control form-control-sm form-control-solid" value="<?= $ikh['email'] ?>">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fs-8 fw-semibold text-muted mb-1">Email Custom</label>
+                                        <input type="email" name="email_custom" class="form-control form-control-sm form-control-solid" value="<?= $ikh['email_custom'] ?>">
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label fs-8 fw-semibold text-muted mb-1">Kategori Kantor</label>
@@ -646,12 +651,14 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
             dateFormat: "Y-m-d"
         });
 
-        let csrfName = '<?= csrf_token() ?>';
-        let csrfHash = '<?= csrf_hash() ?>';
-
        // =========================================================
         // SCRIPT: FUNGSI TOGGLE EDIT DOKUMEN PESERTA (Admin)
         // =========================================================
+        $('#btn_edit_pemohon, #btn_batal_pemohon').on('click', function(e) {
+            e.preventDefault();
+            $('#view_pemohon').toggleClass('d-none');
+            $('#form_edit_pemohon').toggleClass('d-none');
+        });
         $('#btn_edit_dokumen_peserta').on('click', function(e) {
             e.preventDefault();
             $('.view-text-dokumen').addClass('d-none'); // Sembunyikan read-only
