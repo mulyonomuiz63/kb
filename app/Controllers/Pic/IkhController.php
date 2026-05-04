@@ -10,10 +10,12 @@ class IkhController extends BaseController
 {
     protected $ikhModel;
     protected $siswaModel;
+    protected $emailer;
     public function __construct()
     {
         $this->ikhModel = new \App\Models\IkhModel();
         $this->siswaModel = new \App\Models\SiswaModel();
+        $this->emailer = new \App\Libraries\Emailer();
     }
 
     // 1. Tampilkan Tabel Daftar IKH
@@ -57,7 +59,7 @@ class IkhController extends BaseController
         if (!is_array($riwayat)) {
             $riwayat = [];
         }
-        $riwayat_bersih = array_values(array_filter($riwayat, function($value) {
+        $riwayat_bersih = array_values(array_filter($riwayat, function ($value) {
             return !empty(trim($value));
         }));
 
@@ -90,9 +92,9 @@ class IkhController extends BaseController
 
         // 5. Kembalikan Response Sukses ke Frontend
         if ($updated) {
-            return redirect()->to('sw-pic/ikh/review/'. encrypt_url($idIkh))->with('success', 'Data berhasil diperbarui.');
+            return redirect()->to('sw-pic/ikh/review/' . encrypt_url($idIkh))->with('success', 'Data berhasil diperbarui.');
         } else {
-            return redirect()->to('sw-pic/ikh/review/'. encrypt_url($idIkh))->with('error', 'Terjadi kesalahan sistem saat menyimpan.');
+            return redirect()->to('sw-pic/ikh/review/' . encrypt_url($idIkh))->with('error', 'Terjadi kesalahan sistem saat menyimpan.');
         }
     }
 
@@ -141,6 +143,49 @@ class IkhController extends BaseController
                 );
                 $updateData['status_proses'] = 'selesai';
                 $updateData['status_final'] = 'selesai';
+                $subject = 'Pemberitahuan Validasi Dokumen Berhasil - Kelas Brevet';
+
+                // Link diarahkan ke halaman login atau langsung ke menu monitoring/dashboard siswa
+                $link_login = base_url('sw-siswa/ikh');
+
+                $message = '
+                    <div style="color: #333; padding: 20px; font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 1px solid #ddd; border-radius: 8px;">
+                        
+                        <div style="font-size: 20px; color: #2e7d32; font-weight: bold; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px;">
+                            VALIDASI DOKUMEN BERHASIL
+                        </div>
+
+                        <p style="line-height: 1.6;">Halo <b>' . $ikh['nama_lengkap'] . '</b>,</p>
+                        
+                        <p style="line-height: 1.6;">
+                            Selamat! Kami ingin memberitahukan bahwa seluruh dokumen persyaratan yang Anda unggah di <b>Kelas Brevet</b> telah <b>berhasil divalidasi</b> dan dinyatakan lengkap.
+                        </p>
+
+                        <!-- Kotak Informasi Langkah Selanjutnya -->
+                        <div style="background-color: #e8f5e9; border-left: 5px solid #4caf50; padding: 15px; margin: 25px 0; border-radius: 4px;">
+                            <p style="margin: 0; font-size: 15px; color: #1b5e20;"><b>Tahap Selanjutnya:</b></p>
+                            <p style="margin: 8px 0 0 0; font-size: 14px; color: #333; line-height: 1.5;">
+                                Pengajuan Anda kini masuk ke tahap proses berikutnya (misalnya: penyiapan atau penerbitan Kartu IKH). 
+                                <b>Harap lakukan pengecekan secara berkala</b> untuk melihat pembaruan status pengajuan Anda.
+                            </p>
+                        </div>
+                        
+                        <br>
+                        <div style="text-align: center;">
+                            <a href="' . $link_login . '" style="display: inline-block; background: #1C3FAA; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; letter-spacing: 0.5px;">
+                                Cek Status Pengajuan
+                            </a>
+                        </div>
+                        <br><br>
+
+                        <div style="border-top: 1px solid #eee; padding-top: 15px; margin-top: 20px; font-size: 12px; color: #888; text-align: center;">
+                            Email ini dibuat otomatis oleh sistem Kelas Brevet. Mohon tidak membalas email ini.<br>
+                            Terima kasih atas kerja sama Anda.
+                        </div>
+                    </div>
+                ';
+
+                return $this->emailer->send($ikh['email'], $subject, $message);
             } else {
                 send_notif(
                     $ikh['id_siswa'],
@@ -148,6 +193,53 @@ class IkhController extends BaseController
                     'Pengajuan IKH ditolak, Silahkan cek catatan admin',
                     base_url('sw-siswa/ikh')
                 );
+                $subject = 'Pemberitahuan Revisi Dokumen Persyaratan - Kelas Brevet';
+
+                // Link diarahkan ke halaman login atau langsung ke dashboard siswa
+                $link_login = base_url('sw-siswa/ikh');
+
+                $message = '
+                    <div style="color: #333; padding: 20px; font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 1px solid #ddd; border-radius: 8px;">
+                        
+                        <div style="font-size: 20px; color: #d9534f; font-weight: bold; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px;">
+                            REVISI DOKUMEN PERSYARATAN
+                        </div>
+
+                        <p style="line-height: 1.6;">Halo <b>' . $ikh['nama_lengkap'] . '</b>,</p>
+                        
+                        <p style="line-height: 1.6;">
+                            Terima kasih telah mengunggah dokumen persyaratan di <b>Kelas Brevet</b>. 
+                            Setelah tim kami melakukan pengecekan, terdapat berkas yang <b>memerlukan perbaikan (revisi)</b> agar proses validasi dapat dilanjutkan.
+                        </p>
+
+                        <!-- Kotak Catatan Admin -->
+                        <div style="background-color: #fff8e1; border-left: 5px solid #ffb300; padding: 15px; margin: 25px 0; border-radius: 4px;">
+                            <p style="margin: 0; font-size: 14px; color: #d84315;"><b>Catatan dari Admin:</b></p>
+                            <p style="margin: 8px 0 0 0; font-size: 15px; font-style: italic; color: #333;">
+                                "' . $ikh['catatan_admin'] . '"
+                            </p>
+                        </div>
+
+                        <p style="line-height: 1.6;">
+                            Silakan masuk ke portal siswa untuk memperbaiki dan mengunggah kembali dokumen yang diminta.
+                        </p>
+                        
+                        <br>
+                        <div style="text-align: center;">
+                            <a href="' . $link_login . '" style="display: inline-block; background: #1C3FAA; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; letter-spacing: 0.5px;">
+                                Masuk & Perbaiki Dokumen
+                            </a>
+                        </div>
+                        <br><br>
+
+                        <div style="border-top: 1px solid #eee; padding-top: 15px; margin-top: 20px; font-size: 12px; color: #888; text-align: center;">
+                            Email ini dibuat otomatis oleh sistem Kelas Brevet. Mohon tidak membalas email ini.<br>
+                            Jika Anda memiliki pertanyaan, silakan hubungi admin kami.
+                        </div>
+                    </div>
+                ';
+
+                return $this->emailer->send($ikh['email'], $subject, $message);
             }
         }
 
@@ -415,9 +507,9 @@ class IkhController extends BaseController
 
         // Ambil data siswa untuk nama folder
         $dataSiswa = $this->siswaModel
-        ->join('pendaftaran_ikh', 'pendaftaran_ikh.id_siswa = siswa.id_siswa')
-        ->where('pendaftaran_ikh.id_ikh', $idIkh)
-        ->first();
+            ->join('pendaftaran_ikh', 'pendaftaran_ikh.id_siswa = siswa.id_siswa')
+            ->where('pendaftaran_ikh.id_ikh', $idIkh)
+            ->first();
         if (!$dataSiswa) {
             return $this->response->setJSON(['success' => false, 'message' => 'Data siswa tidak ditemukan.']);
         }
@@ -473,12 +565,11 @@ class IkhController extends BaseController
                     'message'     => "Berhasil upload ke folder $folderSiswaName",
                     'csrf_hash'   => csrf_hash()
                 ]);
-
             } catch (\Exception $e) {
                 return $this->response->setJSON(['success' => false, 'message' => $e->getMessage()]);
             }
         }
-        
+
         return $this->response->setJSON(['success' => false, 'message' => 'File tidak valid.']);
     }
 

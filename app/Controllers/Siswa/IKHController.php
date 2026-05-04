@@ -5,16 +5,24 @@ namespace App\Controllers\Siswa;
 use App\Controllers\BaseController;
 use Google\Client;
 use Google\Service\Drive;
+use App\Libraries\Pdf;
+use Endroid\QrCode\Logo\Logo;
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
 
 class IKHController extends BaseController
 {
     protected $ikhModel;
     protected $siswaModel;
     protected $data;
+    protected $ujianModel;
+    protected $ujianMasterModel;
     public function __construct()
     {
         $this->ikhModel = new \App\Models\IkhModel();
         $this->siswaModel = new \App\Models\SiswaModel();
+        $this->ujianModel = new \App\Models\UjianModel();
+        $this->ujianMasterModel = new \App\Models\UjianMasterModel();
         $this->data = [];
     }
 
@@ -66,6 +74,17 @@ class IKHController extends BaseController
 
         $idIkh = $this->request->getPost('id_ikh');
         $isEdit = !empty($idIkh);
+        $riwayat = $this->request->getVar('riwayat_pekerjaan'); // Ini akan menjadi array
+        if (!is_array($riwayat)) {
+            $riwayat = [];
+        }
+        $riwayat_bersih = array_values(array_filter($riwayat, function($value) {
+            return !empty(trim($value));
+        }));
+
+        // 4. Encode menjadi format JSON
+        $json_riwayat = json_encode($riwayat_bersih);
+
 
         $dataText = [
             'id_siswa'              => session('id'),
@@ -84,6 +103,7 @@ class IKHController extends BaseController
             'nama_kantor'           => $this->request->getPost('nama_kantor'),
             'alamat_ktp'            => $this->request->getPost('alamat_ktp'),
             'alamat_korespondensi'  => $this->request->getPost('alamat_korespondensi'),
+            'riwayat_pekerjaan'     => $json_riwayat,
             'is_riwayat_hidup'      => $this->request->getPost('check_riwayat') ? 1 : 0,
             'is_bukan_pns'          => $this->request->getPost('check_pns') ? 1 : 0,
             'is_pakta_integritas'   => $this->request->getPost('check_pakta') ? 1 : 0,
@@ -319,5 +339,184 @@ class IKHController extends BaseController
             base_url('sw-admin/ikh')
         );
         return redirect()->to('sw-siswa/ikh')->with('success', 'Silahkan untuk melengkapi data anda, untuk memperpanjang Izin Kuasa Hukum anda.');
+    }
+
+    // =====================================================================
+    // FUNGSI BARU: GENERATE SERTIFIKAT & UPLOAD KE GOOGLE DRIVE (VIA AJAX)
+    // =====================================================================
+    public function generateSertifikatDrive()
+    {
+        if (!$this->request->isAJAX()) return $this->response->setStatusCode(403);
+
+        $idSiswa = session('id');
+        $idIkh   = $this->request->getPost('id_ikh');
+
+        // 1. DATA PREPARATION
+        $hasilUjian = $this->ujianModel->getByIdsiswaSertifikat($idSiswa);
+        $siswa = $this->siswaModel->where('id_siswa', $idSiswa)->get()->getRowObject();
+
+        if (!$hasilUjian || !$siswa) {
+            return $this->response->setJSON([
+                'success' => false, 
+                'message' => 'Anda belum lulus atau belum memiliki sertifikat brevet AB di sistem.',
+                'csrf_hash' => csrf_hash()
+            ]);
+        }
+
+        // Kalkulasi Nilai & Tanggal
+        $totalNilaiUjian = 0;
+        $countMateri = count($hasilUjian);
+        $tgl_awal = null;
+        $tgl_akhir = null;
+
+        foreach ($hasilUjian as $row) {
+            $totalNilaiUjian += $row->nilai_ujian;
+            $currentStart = strtotime($row->start_ujian);
+            $currentEnd = strtotime($row->end_ujian);
+            if (!$tgl_awal || $currentStart < $tgl_awal) $tgl_awal = $currentStart;
+            if (!$tgl_akhir || $currentEnd > $tgl_akhir) $tgl_akhir = $currentEnd;
+        }
+
+        $hasilTotal = ($countMateri > 0) ? round($totalNilaiUjian / $countMateri) : 0;
+        $predikat = $this->_getPredikat($hasilTotal); 
+
+        // 2. PDF INITIALIZATION
+        new Pdf();
+        $pdf = new \setasign\Fpdi\Fpdi();
+        $pdf->SetCompression(true); // Kompresi Aktif
+        $pdf->SetAutoPageBreak(false, 0);
+        $bulanNomor = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+        $bulanIndo = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+        $strTglAkhir = date('d', $tgl_akhir) . ' ' . $bulanIndo[(int)date('m', $tgl_akhir)] . ' ' . date('Y', $tgl_akhir);
+        $noSertifikat = "{$hasilUjian[0]->id_ujian}/ALC-BREVET-AB/{$bulanNomor[(int)date('m',$tgl_akhir)]}/" . date('Y', $tgl_akhir);
+
+        // 3. GENERATE QR CODE
+        $writer = new PngWriter();
+        $qrCode = QrCode::create(base_url('detail/data_ab/' . encrypt_url($idSiswa)))->setSize(300)->setMargin(0);
+        $logoQr = Logo::create(FCPATH . 'assets/img/logo-brevet.png')->setResizeToWidth(60);
+        $qrResult = $writer->write($qrCode, $logoQr);
+        $qrUri = $qrResult->getDataUri();
+
+        // PAGE 1: SERTIFIKAT UTAMA
+        $pdf->AddPage('L');
+        $pdf->Image(FCPATH . 'uploads/sertifikat/brevet-ab.jpg', 0, 0, 297, 210);
+        $pdf->SetTextColor(51, 49, 49);
+        $pdf->SetFont('Arial', '', 10);
+        $pdf->SetXY(28, 12);
+        $pdf->Cell(100, 5, "Izin Operasional LKP: 500.16.7.2/0003/SPNF-LKP/IV.7/I/2025", 0, 1, 'L');
+        $pdf->SetFont('Arial', 'B', 15);
+        $pdf->SetXY(28, 70);
+        $pdf->Cell(0, 5, "Nomor : " . $noSertifikat, 0, 1, 'L');
+        $pdf->SetFont('Arial', 'B', 24);
+        $pdf->SetXY(28, 118);
+        $pdf->Cell(0, 15, strtoupper($siswa->nama_siswa), 0, 1, 'L');
+        $pdf->SetFont('Arial', 'B', 14);
+        $pdf->SetXY(28, 134);
+        $pdf->Cell(0, 10, "NIP : " . $siswa->no_induk_siswa, 0, 1, 'L');
+        $pdf->SetFont('Arial', '', 14);
+        $pdf->SetXY(28, 150);
+        $pdf->Cell(0, 8, "Dinyatakan LULUS dengan nilai " . $hasilTotal, 0, 1, 'L');
+        $pdf->SetX(28);
+        $pdf->Cell(0, 8, "Predikat kelulusan " . $predikat['huruf'] . " ({$predikat['teks']})", 0, 1, 'L');
+        $pdf->SetX(28);
+        $pdf->Cell(0, 8, "Pada tanggal " . $strTglAkhir, 0, 1, 'L');
+        $pdf->Image($qrUri, 30, 175, 28, 28, 'png');
+
+        // PAGE 2: TRANSKRIP NILAI
+        $pdf->AddPage('L');
+        $pdf->Image(FCPATH . 'uploads/sertifikat/brevet-ab-2.jpg', 0, 0, 297, 210);
+        $pdf->SetFont('Arial', 'B', 14);
+        $pdf->SetXY(55, 57);
+        $pdf->Cell(0, 5, strtoupper($siswa->nama_siswa), 0, 1, 'L');
+        $pdf->SetXY(25, 65);
+        $pdf->SetFont('Arial', 'B', 12);
+        $pdf->Cell(15, 6, 'No', 1, 0, 'C');
+        $pdf->Cell(140, 6, 'Materi Pelatihan', 1, 0, 'C');
+        $pdf->Cell(75, 6, 'Nilai', 1, 1, 'C');
+        $pdf->SetFont('Arial', '', 10);
+        $no = 1;
+        foreach ($hasilUjian as $row) {
+            $pdf->SetX(25);
+            $pdf->Cell(15, 6, $no++, 1, 0, 'C');
+            $pdf->Cell(140, 6, $row->nama_mapel, 1, 0, 'L');
+            $pdf->Cell(75, 6, $row->nilai_ujian, 1, 1, 'C');
+        }
+        $pdf->SetX(25);
+        $pdf->SetFont('Arial', 'B', 12);
+        $pdf->Cell(155, 6, 'NILAI RATA-RATA', 1, 0, 'C');
+        $pdf->Cell(75, 6, $hasilTotal, 1, 1, 'C');
+        $pdf->Image($qrUri, 240, 145, 25, 25, 'png');
+        $pdf->SetXY(138, 174);
+        $pdf->Cell(0, 5, $strTglAkhir, 0, 1, 'L');
+
+        // =====================================================================
+        // 4. PROSES UPLOAD KE GOOGLE DRIVE DARI STRING PDF
+        // =====================================================================
+        try {
+            // "S" merender PDF menjadi string di dalam RAM (tidak didownload ke browser)
+            $pdfStringData = $pdf->Output('', 'S'); 
+
+            // Panggil Service Google Drive (Pastikan fungsi getDriveService() ada di controller ini)
+            $service = $this->getDriveService(); 
+            
+            // Format folder siswa
+            $namaArray = explode(' ', $siswa->nama_siswa);
+            $duaKataPertama = array_slice($namaArray, 0, 2);
+            $namaDepan = implode('_', $duaKataPertama);
+            $folderSiswaName = strtoupper($namaDepan) . "_" . $siswa->no_induk_siswa;
+            
+            // Dapatkan ID Folder Siswa (Pastikan fungsi getOrCreateFolder() ada di controller ini)
+            $folderSiswaId = $this->getOrCreateFolder($service, $folderSiswaName, setting('folder_id_drive'));
+
+            // Hapus file lama di Drive jika sudah ada
+            $dataLama = $this->ikhModel->find($idIkh);
+            $fileIdLama = is_array($dataLama) ? ($dataLama['file_sertifikat'] ?? null) : ($dataLama->file_sertifikat ?? null);
+            if ($fileIdLama && strpos($fileIdLama, '.') === false) {
+                try {
+                    $service->files->delete($fileIdLama);
+                } catch (\Exception $e) {}
+            }
+
+            // Upload PDF ke Drive
+            $fileName = "SERTIFIKAT_SISTEM_" . $siswa->no_induk_siswa . "_" . time() . ".pdf";
+            $fileMetadata = new \Google\Service\Drive\DriveFile([
+                'name' => $fileName,
+                'parents' => [$folderSiswaId]
+            ]);
+
+            $uploadedFile = $service->files->create($fileMetadata, [
+                'data'       => $pdfStringData, // Data diambil dari string PDF
+                'mimeType'   => 'application/pdf',
+                'uploadType' => 'multipart',
+                'fields'     => 'id'
+            ]);
+
+            // Update Database IKH dengan ID Drive yang baru
+            $this->ikhModel->update($idIkh, ['file_sertifikat' => $uploadedFile->id]);
+
+            return $this->response->setJSON([
+                'success'   => true,
+                'message'   => "Sertifikat berhasil dibuat & diunggah ke sistem.",
+                'file_url'  => 'https://drive.google.com/file/d/' . $uploadedFile->id . '/preview',
+                'csrf_hash' => csrf_hash()
+            ]);
+
+        } catch (\Exception $e) {
+            log_message('error', '[Upload Drive Error] ' . $e->getMessage());
+            return $this->response->setJSON([
+                'success' => false, 
+                'message' => 'Gagal mengunggah ke Google Drive. Coba lagi nanti.',
+                'csrf_hash' => csrf_hash()
+            ]);
+        }
+    }
+    private function _getPredikat($nilai)
+    {
+        if ($nilai < 60) return ['huruf' => 'D', 'teks' => 'Kurang'];
+        if ($nilai < 70) return ['huruf' => 'C', 'teks' => 'Cukup'];
+        if ($nilai < 80) return ['huruf' => 'B', 'teks' => 'Cukup Baik'];
+        if ($nilai < 90) return ['huruf' => 'A', 'teks' => 'Baik'];
+        return ['huruf' => 'A+', 'teks' => 'Sangat Baik'];
     }
 }

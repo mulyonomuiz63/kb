@@ -245,7 +245,7 @@ $checkInvalid = function ($val) use ($isStatusB) {
                                     <div class="row mb-6">
                                         <label class="col-12 col-lg-4 col-form-label fw-bold fs-6 required">Tempat & Tanggal Lahir</label>
                                         <div class="col-12 col-lg-4 mb-3 mb-lg-0">
-                                            <input type="text" name="tempat_lahir" class="form-control form-control-lg form-control-solid <?= $checkInvalid(old('tempat_lahir', $siswa->tempat_lahir)) ?>" value="<?= old('tempat_lahir', $siswa->tempat_lahir); ?>" required placeholder="Kota Tempat Lahir" />
+                                            <input type="text" name="tempat_lahir" class="form-control form-control-lg form-control-solid <?= $checkInvalid(old('tempat_lahir', $siswa->tempat_lahir)) ?>" value="<?= old('tempat_lahir', $siswa->tempat_lahir); ?>" required placeholder="Tempat Lahir" />
                                         </div>
                                         <div class="col-12 col-lg-4">
                                             <input type="date" name="tgl_lahir" max="<?= date('Y-m-d', strtotime('-10 years')); ?>" class="form-control form-control-lg form-control-solid <?= $checkInvalid(old('tgl_lahir', $siswa->tgl_lahir)) ?>" value="<?= old('tgl_lahir', $siswa->tgl_lahir); ?>" required />
@@ -331,7 +331,7 @@ $checkInvalid = function ($val) use ($isStatusB) {
 
                                     <h4 class="fw-bold text-primary mb-7"><i class="bi bi-clock-history me-2 text-primary"></i>Riwayat Pekerjaan</h4>
                                     <div class="row mb-6">
-                                        <label class="col-12 col-lg-4 col-form-label fw-bold fs-6">Daftar Riwayat</label>
+                                        <label class="col-12 col-lg-4 col-form-label fw-bold fs-6 required">Daftar Riwayat</label>
                                         <div class="col-12 col-lg-8">
                                             <div id="riwayat_container">
                                                 <?php
@@ -339,12 +339,12 @@ $checkInvalid = function ($val) use ($isStatusB) {
                                                 if (empty($riwayat_data)):
                                                 ?>
                                                     <div class="input-group mb-3 riwayat-row">
-                                                        <input type="text" name="riwayat_pekerjaan[]" class="form-control form-control-lg form-control-solid" placeholder="Contoh: PT. Legalyn Indonesia (2015 - 2020)" />
+                                                        <input type="text" name="riwayat_pekerjaan[]" class="form-control form-control-lg form-control-solid" placeholder="Contoh: PT. Legalyn Indonesia (2015 - 2020)" required />
                                                     </div>
                                                 <?php else: ?>
                                                     <?php foreach ($riwayat_data as $index => $riwayat): ?>
                                                         <div class="input-group mb-3 riwayat-row">
-                                                            <input type="text" name="riwayat_pekerjaan[]" class="form-control form-control-lg form-control-solid" value="<?= esc($riwayat) ?>" placeholder="Contoh: PT. Legalyn Indonesia (2015 - 2020)" />
+                                                            <input type="text" name="riwayat_pekerjaan[]" class="form-control form-control-lg form-control-solid" value="<?= esc($riwayat) ?>" placeholder="Contoh: PT. Legalyn Indonesia (2015 - 2020)" required/>
                                                             <?php if ($index > 0): ?>
                                                                 <button type="button" class="btn btn-icon btn-light-danger btn-hapus-riwayat" title="Hapus Baris"><i class="ki-outline ki-trash fs-2"></i></button>
                                                             <?php endif; ?>

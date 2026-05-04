@@ -352,7 +352,48 @@ $activeTab = (isset($_GET['tab']) && $_GET['tab'] == 'lampiran' && $hasData) ? '
                                         </div>
                                         <div class="col-md-6"><label class="required form-label">Nama Kantor</label><input type="text" name="nama_kantor" class="form-control" value="<?= !empty($ikh['nama_kantor']) ? $ikh['nama_kantor'] : $siswa['nama_kantor'] ?>" required /></div>
                                         <div class="col-md-6"><label class="required form-label">Alamat Sesuai KTP</label><textarea name="alamat_ktp" class="form-control" rows="3" required><?= !empty($ikh['alamat_ktp']) ? $ikh['alamat_ktp'] : $siswa['alamat_ktp'] ?></textarea></div>
-                                        <div class="col-md-6"><label class="required form-label">Alamat Korespondensi</label><textarea name="alamat_korespondensi" class="form-control" rows="3" required><?= !empty($ikh['alamat_korespondensi']) ? $ikh['alamat_korespondensi'] : '' ?></textarea></div>
+                                        <div class="col-md-6">
+                                            <!-- Judul Label (Margin bottom diubah jadi 0 agar menempel dengan petunjuk) -->
+                                            <label class="form-label fs-8 fw-bold text-dark mb-0">Alamat Korespondensi</label>
+
+                                            <!-- Teks Petunjuk di bawah judul, di atas kotak isian -->
+                                            <span class="d-block text-danger fs-9 mb-2">
+                                                <i>(Mohon tuliskan alamat domisili saat ini selengkap mungkin beserta RT/RW untuk pengiriman dokumen)</i>
+                                            </span>
+
+                                            <!-- Kotak Isian -->
+                                            <textarea name="alamat_korespondensi" class="form-control" rows="3"><?= $ikh['alamat_korespondensi'] ?></textarea>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="row mb-6">
+                                                <div class="col-12 col-lg-8">
+                                                    <label class="form-label fs-8 fw-semibold text-muted mb-1">Pengalaman Pekerjaan</label>
+                                                    <div id="riwayat_container">
+                                                        <?php
+                                                        $riwayat_data = $ikh['riwayat_pekerjaan'] ? json_decode($ikh['riwayat_pekerjaan'], true) : old('riwayat_pekerjaan');
+                                                        if (empty($riwayat_data)):
+                                                        ?>
+                                                            <div class="input-group mb-3 riwayat-row">
+                                                                <input type="text" name="riwayat_pekerjaan[]" class="form-control" placeholder="Contoh: PT. Legalyn Indonesia (2015 - 2020)" required />
+                                                            </div>
+                                                        <?php else: ?>
+                                                            <?php foreach ($riwayat_data as $index => $riwayat): ?>
+                                                                <div class="input-group mb-3 riwayat-row">
+                                                                    <input type="text" name="riwayat_pekerjaan[]" class="form-control" value="<?= esc($riwayat) ?>" placeholder="Contoh: PT. Legalyn Indonesia (2015 - 2020)" required />
+                                                                    <?php if ($index > 0): ?>
+                                                                        <button type="button" class="btn btn-icon btn-light-danger btn-hapus-riwayat" title="Hapus Baris"><i class="ki-outline ki-trash fs-2"></i></button>
+                                                                    <?php endif; ?>
+                                                                </div>
+                                                            <?php endforeach; ?>
+                                                        <?php endif; ?>
+                                                    </div>
+
+                                                    <button type="button" class="btn btn-light-primary btn-sm mt-2 w-100 w-sm-auto" id="btn_tambah_riwayat">
+                                                        <i class="ki-outline ki-plus fs-2"></i> Tambah Riwayat Pekerjaan
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="separator my-10"></div>
                                     <h3 class="fw-bold fs-4 mb-5">Persetujuan (Dokumen pendukung disiapkan oleh tim Legal KelasBrevet)</h3>
@@ -443,10 +484,21 @@ $activeTab = (isset($_GET['tab']) && $_GET['tab'] == 'lampiran' && $hasData) ? '
                                         <div class="col-md-6">
                                             <div class="border rounded p-5 <?= $isUploaded ? 'border-success bg-light-success' : 'border-gray-300' ?>" id="box_<?= $cfg['id'] ?>">
 
-                                                <div class="d-flex justify-content-between align-items-center mb-4">
-                                                    <label class="fw-bold fs-5 text-gray-800 <?= isset($cfg['danger']) ? 'text-danger' : '' ?>"><?= $cfg['label'] ?></label>
+                                                <div class="d-flex justify-content-between align-items-start mb-4">
+                                                    <!-- Bungkus label dan petunjuk dalam satu kolom -->
+                                                    <div class="d-flex flex-column me-2">
+                                                        <label class="fw-bold fs-5 text-gray-800 mb-0 <?= isset($cfg['danger']) ? 'text-danger' : '' ?>"><?= $cfg['label'] ?></label>
 
-                                                    <div class="d-flex align-items-center gap-2">
+                                                        <!-- TAMBAHAN: Petunjuk khusus hanya untuk Sertifikat -->
+                                                        <?php if ($cfg['id'] == 'file_sertifikat'): ?>
+                                                            <span class="text-muted fs-9 mt-1" style="line-height: 1.3;">
+                                                                <i>* Masukkan file & klik <b>Upload</b> untuk sertifikat dari luar.<br>
+                                                                    * Klik <b>Gunakan Sertifikat Brevet AB </b> untuk sertifikat dari Kelas Brevet.</i>
+                                                            </span>
+                                                        <?php endif; ?>
+                                                    </div>
+
+                                                    <div class="d-flex align-items-center gap-2 mt-1">
                                                         <?php if ($isUploaded): ?>
                                                             <a href="javascript:void(0)"
                                                                 class="btn btn-icon btn-sm btn-light-primary hover-elevate-up btn-preview-berkas"
@@ -476,6 +528,14 @@ $activeTab = (isset($_GET['tab']) && $_GET['tab'] == 'lampiran' && $hasData) ? '
                                                         <span class="indicator-label">Upload</span>
                                                         <span class="indicator-progress" style="display:none;">... <span class="spinner-border spinner-border-sm align-middle"></span></span>
                                                     </button>
+
+                                                    <!-- TAMBAHAN BARU: Tombol otomatis khusus Sertifikat -->
+                                                    <?php if ($cfg['id'] == 'file_sertifikat'): ?>
+                                                        <button class="btn btn-success btn-generate-sertifikat" type="button" data-target="<?= $cfg['id'] ?>">
+                                                            <span class="indicator-label"><i class="ki-outline ki-setting-2"></i> Gunakan Sertifikat Sistem</span>
+                                                            <span class="indicator-progress" style="display:none;">Memproses... <span class="spinner-border spinner-border-sm align-middle ms-2"></span></span>
+                                                        </button>
+                                                    <?php endif; ?>
                                                 </div>
                                                 <div class="form-text mt-2 <?= isset($cfg['danger']) ? 'text-danger fw-bold' : '' ?>">Format: <?= $cfg['hint'] ?> (Maks 2MB)</div>
                                             </div>
@@ -626,11 +686,42 @@ $activeTab = (isset($_GET['tab']) && $_GET['tab'] == 'lampiran' && $hasData) ? '
                                     <div class="separator my-5"></div>
                                     <div class="row mb-5">
                                         <div class="col-lg-5 fw-semibold text-muted">Alamat KTP</div>
-                                        <div class="col-lg-7"><span class="fw-semibold text-gray-800"><?= $ikh['alamat_ktp'] ?></span></div>
+                                        <div class="col-lg-7"><span class="fw-bold fs-6 text-gray-800"><?= $ikh['alamat_ktp'] ?></span></div>
                                     </div>
                                     <div class="row mb-5">
                                         <div class="col-lg-5 fw-semibold text-muted">Alamat Korespondensi</div>
-                                        <div class="col-lg-7"><span class="fw-semibold text-gray-800"><?= $ikh['alamat_korespondensi'] ?></span></div>
+                                        <div class="col-lg-7"><span class="fw-bold fs-6 text-gray-800"><?= $ikh['alamat_korespondensi'] ?></span></div>
+                                    </div>
+                                    <div class="row mb-5">
+                                        <!-- Label di sebelah kiri (Lebar 5 kolom) -->
+                                        <div class="col-lg-5 fw-semibold text-muted">Pengalaman Pekerjaan</div>
+
+                                        <!-- Data di sebelah kanan (Lebar 7 kolom) -->
+                                        <div class="col-lg-7">
+                                            <?php
+                                            // 1. Ambil data JSON (Sesuaikan 'riwayat_pekerjaan' dengan nama kolom di database Anda)
+                                            $json_data = $ikh['riwayat_pekerjaan'] ?? '[]';
+
+                                            // 2. Decode JSON menjadi Array PHP biasa
+                                            $riwayat_array = json_decode($json_data, true);
+
+                                            // 3. Cek apakah array valid dan ada isinya
+                                            if (!empty($riwayat_array) && is_array($riwayat_array)) {
+                                                // Gunakan px-3 atau ms-3 agar list bullet tidak terlalu menjorok ke dalam
+                                                echo '<ul class="m-0 px-3" style="list-style-type: disc;">';
+
+                                                foreach ($riwayat_array as $pekerjaan) {
+                                                    // Cetak langsung stringnya sebagai list item (li)
+                                                    // Ditambahkan esc() untuk keamanan dari XSS
+                                                    echo "<li class='mb-1 fw-bold text-gray-800'>" . esc($pekerjaan) . "</li>";
+                                                }
+
+                                                echo '</ul>';
+                                            } else {
+                                                echo '<span class="text-muted fw-normal"><i>Tidak ada riwayat pekerjaan.</i></span>';
+                                            }
+                                            ?>
+                                        </div>
                                     </div>
                                     <div class="separator my-5"></div>
                                     <div class="row mb-5">
@@ -1234,6 +1325,98 @@ $activeTab = (isset($_GET['tab']) && $_GET['tab'] == 'lampiran' && $hasData) ? '
         });
 
         // ==========================================
+    });
+
+    $('#btn_tambah_riwayat').click(function(e) {
+        e.preventDefault();
+        let barisBaru = `
+                <div class="input-group mb-3 riwayat-row" style="display: none;">
+                    <input type="text" name="riwayat_pekerjaan[]" class="form-control" placeholder="Contoh: PT Contoh (2021 - Sekarang)" />
+                    <button type="button" class="btn btn-icon btn-light-danger btn-hapus-riwayat" title="Hapus Baris">
+                        <i class="ki-outline ki-trash fs-2"></i>
+                    </button>
+                </div>
+            `;
+        let el = $(barisBaru);
+        $('#riwayat_container').append(el);
+        el.slideDown('fast');
+    });
+
+    // Fungsi Hapus Baris (Event Delegation)
+    $(document).on('click', '.btn-hapus-riwayat', function(e) {
+        e.preventDefault();
+        let baris = $(this).closest('.riwayat-row');
+        baris.slideUp('fast', function() {
+            $(this).remove();
+        });
+    });
+
+    // =========================================================
+    // SCRIPT BARU: GENERATE & UPLOAD SERTIFIKAT OTOMATIS
+    // =========================================================
+    $('.btn-generate-sertifikat').click(function() {
+        let btn = $(this);
+        let targetId = btn.data('target');
+        const idIkh = '<?= $ikh['id_ikh'] ?>';
+        let csrfName = '<?= csrf_token() ?>';
+        let csrfHash = '<?= csrf_hash() ?>';
+        Swal.fire({
+            title: 'Gunakan Sertifikat Sistem?',
+            text: "Sistem akan membuat sertifikat kelulusan Anda dan otomatis mengunggahnya ke server.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            confirmButtonText: 'Ya, Buat & Unggah',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                btn.find('.indicator-label').hide();
+                btn.find('.indicator-progress').show();
+                btn.prop('disabled', true);
+
+                let formData = new FormData();
+                formData.append('id_ikh', idIkh);
+                formData.append(csrfName, csrfHash);
+
+                $.ajax({
+                    url: '<?= base_url('sw-siswa/ikh/generate-sertifikat-drive') ?>', // Pastikan rute ini benar
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.csrf_hash) csrfHash = response.csrf_hash;
+
+                        if (response.success) {
+                            toastr.success(response.message);
+
+                            // Update tampilan kotak menjadi hijau (Tersimpan)
+                            $('#box_' + targetId).removeClass('border-gray-300').addClass('border-success bg-light-success');
+                            $('#status_' + targetId).removeClass('badge-light-danger').addClass('badge-success').html('<i class="ki-outline ki-check text-white fs-5 me-1"></i> Tersimpan');
+
+                            // Update tombol Preview
+                            let fileNameLabel = $('#box_' + targetId).find('label.fw-bold').text().trim();
+                            let previewBtn = $('#box_' + targetId).find('.btn-preview-berkas');
+
+                            if (previewBtn.length > 0) {
+                                previewBtn.attr('data-file-url', response.file_url).attr('data-file-ext', 'pdf');
+                            } else {
+                                let newPreviewBtn = `<a href="javascript:void(0)" class="btn btn-icon btn-sm btn-light-primary hover-elevate-up btn-preview-berkas me-2" data-file-url="${response.file_url}" data-file-ext="pdf" data-file-name="${fileNameLabel}" title="Lihat dokumen tersimpan"><i class="ki-outline ki-eye fs-3"></i></a>`;
+                                $('#status_' + targetId).before(newPreviewBtn);
+                            }
+                        } else {
+                            Swal.fire('Gagal!', response.message, 'error');
+                        }
+                    },
+                    complete: function() {
+                        btn.find('.indicator-label').show();
+                        btn.find('.indicator-progress').hide();
+                        btn.prop('disabled', false);
+                    }
+                });
+            }
+        });
     });
 </script>
 <?= $this->endSection(); ?>

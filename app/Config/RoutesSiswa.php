@@ -78,6 +78,7 @@ $routes->group('sw-siswa', ['filter' => 'roleCheck:2'], function ($routes) {
     $routes->group('ikh',['filter' => 'cekData'] , function ($routes) {
         $routes->get('/', 'Siswa\IKHController::index');
         $routes->post('store', 'Siswa\IKHController::store');
+        $routes->post('generate-sertifikat-drive', 'Siswa\IKHController::generateSertifikatDrive');
         $routes->post('upload-ajax', 'Siswa\IKHController::uploadFileAjax');
         $routes->get('perbaikan/(:segment)', 'Siswa\IKHController::perbaikan/$1');
         $routes->get('perpanjang/(:segment)', 'Siswa\IKHController::perpanjang/$1');

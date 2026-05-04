@@ -435,11 +435,17 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                                             <option value="ditolak" <?= $stat_val == 'ditolak' ? 'selected' : '' ?>>REVISI (Ada Berkas Salah)</option>
                                         </select>
                                     </div>
-                                    <div class="mb-5">
+
+                                    <!-- Tambahkan ID container_catatan di sini -->
+                                    <div class="mb-5" id="container_catatan" style="display: none;">
                                         <label class="form-label fw-semibold">Catatan untuk Siswa (Wajib jika direvisi)</label>
                                         <textarea name="catatan_admin" class="form-control form-control-solid" rows="3" placeholder="Contoh: KTP buram, harap foto ulang..."><?= $ikh['catatan_admin'] ?></textarea>
                                     </div>
-                                    <button type="submit" class="btn btn-primary w-100 btn-submit-admin"><span class="indicator-label">Simpan Keputusan</span><span class="indicator-progress" style="display:none;">Menyimpan...</span></button>
+
+                                    <button type="submit" class="btn btn-primary w-100 btn-submit-admin">
+                                        <span class="indicator-label">Simpan Keputusan</span>
+                                        <span class="indicator-progress" style="display:none;">Menyimpan...</span>
+                                    </button>
                                 </form>
                             </div>
 
@@ -651,7 +657,7 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
             dateFormat: "Y-m-d"
         });
 
-       // =========================================================
+        // =========================================================
         // SCRIPT: FUNGSI TOGGLE EDIT DOKUMEN PESERTA (Admin)
         // =========================================================
         $('#btn_edit_pemohon, #btn_batal_pemohon').on('click', function(e) {
@@ -663,7 +669,7 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
             e.preventDefault();
             $('.view-text-dokumen').addClass('d-none'); // Sembunyikan read-only
             $('.edit-input-dokumen').removeClass('d-none'); // Munculkan kotak upload
-            
+
             $(this).addClass('d-none'); // Sembunyikan tombol 'Edit Dokumen'
             $('#btn_batal_dokumen_peserta').removeClass('d-none'); // Munculkan tombol batal
         });
@@ -673,7 +679,7 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
             e.preventDefault();
             $('.edit-input-dokumen').addClass('d-none'); // Sembunyikan kotak upload
             $('.view-text-dokumen').removeClass('d-none'); // Munculkan kembali read-only
-            
+
             $(this).addClass('d-none'); // Sembunyikan tombol 'Batal Edit'
             $('#btn_edit_dokumen_peserta').removeClass('d-none'); // Munculkan tombol edit kembali
         });
@@ -697,7 +703,9 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                 Swal.fire({
                     text: "Ukuran file " + fileData.name + " terlalu besar! Maksimal hanya 2 MB.",
                     icon: "error",
-                    customClass: { confirmButton: "btn btn-danger" }
+                    customClass: {
+                        confirmButton: "btn btn-danger"
+                    }
                 });
                 $(fileInput).val('');
                 return;
@@ -721,10 +729,10 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                 processData: false,
                 success: function(response) {
                     if (response.csrf_hash) csrfHash = response.csrf_hash;
-                    
+
                     if (response.success) {
                         toastr.success(response.message || "File berhasil diunggah.");
-                        
+
                         // 1. UPDATE TAMPILAN KOTAK EDIT (Warna Hijau & Tombol Tersimpan)
                         $('#box_' + targetId).removeClass('border-gray-300').addClass('border-success bg-light-success');
                         $('#status_' + targetId).removeClass('badge-light-danger').addClass('badge-success').html('<i class="ki-outline ki-check text-white fs-8 me-1"></i> Tersimpan');
@@ -733,7 +741,7 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                         let localFileUrl = URL.createObjectURL(fileData);
                         let newFileExt = fileData.name.split('.').pop().toLowerCase();
                         let fileNameLabel = $('#box_' + targetId).find('label.fw-bold').text().trim();
-                        
+
                         // Update tombol Preview di Form Edit
                         let previewBtnEdit = $('#box_' + targetId).find('.btn-preview-berkas');
                         if (previewBtnEdit.length > 0) {
@@ -748,7 +756,7 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                         // Agar ketika di-klik "Batal Edit", tampilan awal sudah terupdate
                         // ----------------------------------------------------------------------
                         let readOnlyRow = $('#box_' + targetId).closest('.col-12').find('.view-text-dokumen');
-                        
+
                         // Update Ikon Mata (Symbol)
                         readOnlyRow.find('.symbol').html(`
                             <a href="javascript:void(0)"
@@ -780,9 +788,9 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                                 <i class="ki-outline ki-check-circle fs-5 text-success me-1"></i> Valid
                             </span>
                         `);
-                        
+
                         // Bersihkan input file setelah berhasil
-                        $(fileInput).val(''); 
+                        $(fileInput).val('');
                     } else {
                         toastr.error(response.message || "Gagal mengunggah file.");
                     }
@@ -978,6 +986,30 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
         baris.slideUp('fast', function() {
             $(this).remove();
         });
+    });
+
+    // =========================================================
+    // SCRIPT: TOGGLE CATATAN VALIDASI ADMIN
+    // =========================================================
+    // Fungsi untuk mengecek dan mengatur tampilan catatan
+    function toggleCatatanValidasi() {
+        let statusVal = $('select[name="status"]').val();
+        if (statusVal === 'ditolak') {
+            $('#container_catatan').slideDown('fast'); // Munculkan dengan animasi
+        } else {
+            $('#container_catatan').slideUp('fast'); // Sembunyikan
+            // Opsional: Kosongkan isi catatan jika diubah kembali ke TERIMA
+            // $('textarea[name="catatan_admin"]').val(''); 
+        }
+    }
+
+    // 1. Jalankan saat halaman pertama kali dimuat (untuk menyesuaikan dengan data awal)
+    toggleCatatanValidasi();
+
+    // 2. Jalankan saat dropdown diubah
+    // Karena Anda menggunakan Select2, kita tangkap event change-nya
+    $('select[name="status"]').on('change', function() {
+        toggleCatatanValidasi();
     });
 </script>
 <?= $this->endSection(); ?>
