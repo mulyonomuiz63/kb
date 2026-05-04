@@ -73,7 +73,7 @@ class PdfController extends BaseController
         $namaLengkap = strtoupper($peserta->nama_lengkap ?? '-');
         $tempatLahir = strtoupper($peserta->tempat_lahir ?? '-');
         $tglLahir    = $peserta->tanggal_lahir ?? '';
-        $alamat      = strtoupper($peserta->alamat_ktp ?? '-');
+        $alamat      = strtoupper($peserta->alamat_korespondensi ?? '-');
         $nik         = strtoupper($peserta->nik ?? '-');
         $pendidikan  = strtoupper($peserta->pendidikan_terakhir ?? '-');
         $tahunLulus  = strtoupper($peserta->tahun_lulus ?? '-');
@@ -301,7 +301,7 @@ class PdfController extends BaseController
         $namaLengkap = strtoupper($peserta->nama_lengkap ?? '-');
         $tempatLahir = strtoupper($peserta->tempat_lahir ?? '-');
         $tglLahir    = $peserta->tanggal_lahir ?? '';
-        $alamat      = strtoupper($peserta->alamat_ktp ?? '-');
+        $alamat      = strtoupper($peserta->alamat_korespondensi ?? '-');
         $nik         = strtoupper($peserta->nik ?? '-');
         $kota        = strtoupper($peserta->kota ?? '-');
 
@@ -510,7 +510,7 @@ class PdfController extends BaseController
         $namaLengkap = strtoupper($peserta->nama_lengkap ?? '-');
         $tempatLahir = strtoupper($peserta->tempat_lahir ?? '-');
         $tglLahir    = $peserta->tanggal_lahir ?? '';
-        $alamat      = strtoupper($peserta->alamat_ktp ?? '-');
+        $alamat      = strtoupper($peserta->alamat_korespondensi ?? '-');
         $nik         = strtoupper($peserta->nik ?? '-');
         $kota        = strtoupper($peserta->kota ?? '-');
 
@@ -727,7 +727,7 @@ class PdfController extends BaseController
         $namaLengkap = strtoupper($peserta->nama_lengkap ?? '-');
         $tempatLahir = strtoupper($peserta->tempat_lahir ?? '-');
         $tglLahir    = $peserta->tanggal_lahir ?? '';
-        $alamat      = strtoupper($peserta->alamat_ktp ?? '-');
+        $alamat      = strtoupper($peserta->alamat_korespondensi ?? '-');
         $nik         = strtoupper($peserta->nik ?? '-');
         $kota        = strtoupper($peserta->kota ?? '-');
 
