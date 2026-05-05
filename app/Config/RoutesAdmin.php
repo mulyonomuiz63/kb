@@ -242,6 +242,8 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
         $routes->get('', 'Admin\IkhController::index');
         $routes->get('review/(:segment)', 'Admin\IkhController::review/$1');
         $routes->post('update-status', 'Admin\IkhController::updateStatus');
+        $routes->post('update-pemohon', 'Admin\IkhController::updatePemohon');
+        $routes->post('upload-ajax', 'Admin\IkhController::uploadFileAjax');
         $routes->post('upload-berkas', 'Admin\IkhController::uploadBerkas');
         $routes->post('upload-kartu', 'Admin\IkhController::uploadKartu');
     });

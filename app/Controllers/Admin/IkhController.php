@@ -10,10 +10,12 @@ class IkhController extends BaseController
 {
     protected $ikhModel;
     protected $siswaModel;
+    protected $emailer;
     public function __construct()
     {
         $this->ikhModel = new \App\Models\IkhModel();
         $this->siswaModel = new \App\Models\SiswaModel();
+        $this->emailer = new \App\Libraries\Emailer();
     }
 
     // 1. Tampilkan Tabel Daftar IKH
@@ -75,6 +77,47 @@ class IkhController extends BaseController
                 );
                 $updateData['status_proses'] = 'selesai';
                 $updateData['status_final'] = 'selesai';
+                $subject = 'Pemberitahuan Validasi Dokumen Berhasil - Kelas Brevet';
+
+                // Link diarahkan ke halaman login atau langsung ke menu monitoring/dashboard siswa
+                $link_login = base_url('sw-siswa/ikh');
+
+                $message = '
+                    <div style="color: #333; padding: 20px; font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 1px solid #ddd; border-radius: 8px;">
+                        
+                        <div style="font-size: 20px; color: #2e7d32; font-weight: bold; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px;">
+                            VALIDASI DOKUMEN BERHASIL
+                        </div>
+
+                        <p style="line-height: 1.6;">Halo <b>' . $ikh['nama_lengkap'] . '</b>,</p>
+                        
+                        <p style="line-height: 1.6;">
+                            Selamat! Kami ingin memberitahukan bahwa seluruh dokumen persyaratan yang Anda unggah di <b>Kelas Brevet</b> telah <b>berhasil divalidasi</b> dan dinyatakan lengkap.
+                        </p>
+
+                        <!-- Kotak Informasi Langkah Selanjutnya -->
+                        <div style="background-color: #e8f5e9; border-left: 5px solid #4caf50; padding: 15px; margin: 25px 0; border-radius: 4px;">
+                            <p style="margin: 0; font-size: 15px; color: #1b5e20;"><b>Tahap Selanjutnya:</b></p>
+                            <p style="margin: 8px 0 0 0; font-size: 14px; color: #333; line-height: 1.5;">
+                                Pengajuan Anda kini masuk ke tahap proses berikutnya (misalnya: penyiapan atau penerbitan Kartu IKH). 
+                                <b>Harap lakukan pengecekan secara berkala</b> untuk melihat pembaruan status pengajuan Anda.
+                            </p>
+                        </div>
+                        
+                        <br>
+                        <div style="text-align: center;">
+                            <a href="' . $link_login . '" style="display: inline-block; background: #1C3FAA; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; letter-spacing: 0.5px;">
+                                Cek Status Pengajuan
+                            </a>
+                        </div>
+                        <br><br>
+
+                        <div style="border-top: 1px solid #eee; padding-top: 15px; margin-top: 20px; font-size: 12px; color: #888; text-align: center;">
+                            Email ini dibuat otomatis oleh sistem Kelas Brevet. Mohon tidak membalas email ini.<br>
+                            Terima kasih atas kerja sama Anda.
+                        </div>
+                    </div>
+                ';
             } else {
                 send_notif(
                     $ikh['id_siswa'],
@@ -82,13 +125,60 @@ class IkhController extends BaseController
                     'Pengajuan IKH ditolak, Silahkan cek catatan admin',
                     base_url('sw-siswa/ikh')
                 );
+                $subject = 'Pemberitahuan Revisi Dokumen Persyaratan - Kelas Brevet';
+
+                // Link diarahkan ke halaman login atau langsung ke dashboard siswa
+                $link_login = base_url('sw-siswa/ikh');
+
+                $message = '
+                    <div style="color: #333; padding: 20px; font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 1px solid #ddd; border-radius: 8px;">
+                        
+                        <div style="font-size: 20px; color: #d9534f; font-weight: bold; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px;">
+                            REVISI DOKUMEN PERSYARATAN
+                        </div>
+
+                        <p style="line-height: 1.6;">Halo <b>' . $ikh['nama_lengkap'] . '</b>,</p>
+                        
+                        <p style="line-height: 1.6;">
+                            Terima kasih telah mengunggah dokumen persyaratan di <b>Kelas Brevet</b>. 
+                            Setelah tim kami melakukan pengecekan, terdapat berkas yang <b>memerlukan perbaikan (revisi)</b> agar proses validasi dapat dilanjutkan.
+                        </p>
+
+                        <!-- Kotak Catatan Admin -->
+                        <div style="background-color: #fff8e1; border-left: 5px solid #ffb300; padding: 15px; margin: 25px 0; border-radius: 4px;">
+                            <p style="margin: 0; font-size: 14px; color: #d84315;"><b>Catatan dari Admin:</b></p>
+                            <p style="margin: 8px 0 0 0; font-size: 15px; font-style: italic; color: #333;">
+                                "' . $ikh['catatan_admin'] . '"
+                            </p>
+                        </div>
+
+                        <p style="line-height: 1.6;">
+                            Silakan masuk ke portal siswa untuk memperbaiki dan mengunggah kembali dokumen yang diminta.
+                        </p>
+                        
+                        <br>
+                        <div style="text-align: center;">
+                            <a href="' . $link_login . '" style="display: inline-block; background: #1C3FAA; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; letter-spacing: 0.5px;">
+                                Masuk & Perbaiki Dokumen
+                            </a>
+                        </div>
+                        <br><br>
+
+                        <div style="border-top: 1px solid #eee; padding-top: 15px; margin-top: 20px; font-size: 12px; color: #888; text-align: center;">
+                            Email ini dibuat otomatis oleh sistem Kelas Brevet. Mohon tidak membalas email ini.<br>
+                            Jika Anda memiliki pertanyaan, silakan hubungi admin kami.
+                        </div>
+                    </div>
+                ';
             }
         }
 
         try {
             $this->ikhModel->update($id_ikh, $updateData);
+            $this->emailer->send($ikh['email'], $subject, $message);
             return $this->response->setJSON(['success' => true, 'message' => 'Status berhasil diperbarui!', 'csrf_hash' => csrf_hash()]);
         } catch (\Exception $e) {
+            $this->emailer->send($ikh['email'], $subject, $message);
             return $this->response->setJSON(['success' => false, 'message' => 'Gagal memperbarui status.', 'csrf_hash' => csrf_hash()]);
         }
     }
@@ -340,6 +430,146 @@ class IkhController extends BaseController
         }
 
         return $this->response->setJSON(['success' => false, 'message' => 'Tidak ada file valid yang terpilih.', 'csrf_hash' => csrf_hash()]);
+    }
+
+    
+
+    public function updatePemohon()
+    {
+        // 1. Validasi Input (disesuaikan dengan kebutuhan)
+        $rules = [
+            'id_ikh' => 'required',
+            'nik'    => 'required|numeric|min_length[16]',
+            'npwp'   => 'required',
+            'email'  => 'required|valid_email',
+            'no_wa'  => 'required|numeric',
+        ];
+
+        // Jika validasi gagal, kembalikan pesan error dalam format JSON
+        if (!$this->validate($rules)) {
+            return $this->response->setJSON([
+                'success'   => false,
+                'message'   => 'Gagal menyimpan. Pastikan NIK, NPWP, Email, dan No WhatsApp valid.',
+                'csrf_hash' => csrf_hash() // Penting: Kirim balik token CSRF terbaru
+            ]);
+        }
+
+        // 2. Ambil ID Data yang akan diedit
+        $idIkh = $this->request->getPost('id_ikh');
+        $riwayat = $this->request->getVar('riwayat_pekerjaan'); // Ini akan menjadi array
+        if (!is_array($riwayat)) {
+            $riwayat = [];
+        }
+        $riwayat_bersih = array_values(array_filter($riwayat, function ($value) {
+            return !empty(trim($value));
+        }));
+
+        // 4. Encode menjadi format JSON
+        $json_riwayat = json_encode($riwayat_bersih);
+
+        // 3. Kumpulkan data dari form view admin
+        $dataUpdate = [
+            'nama_lengkap'         => $this->request->getPost('nama_lengkap'),
+            'nik'                  => $this->request->getPost('nik'),
+            'npwp'                 => $this->request->getPost('npwp'),
+            'tempat_lahir'         => $this->request->getPost('tempat_lahir'),
+            'tanggal_lahir'        => $this->request->getPost('tanggal_lahir'),
+            'pendidikan_terakhir'  => $this->request->getPost('pendidikan_terakhir'),
+            'jurusan'              => $this->request->getPost('jurusan'),
+            'tahun_masuk'          => $this->request->getPost('tahun_masuk'),
+            'tahun_lulus'          => $this->request->getPost('tahun_lulus'),
+            'no_wa'                => $this->request->getPost('no_wa'),
+            'email'                => $this->request->getPost('email'),
+            'email_custom'         => $this->request->getPost('email_custom'),
+            'kategori_kantor'      => $this->request->getPost('kategori_kantor'),
+            'nama_kantor'          => $this->request->getPost('nama_kantor'),
+            'alamat_ktp'           => $this->request->getPost('alamat_ktp'),
+            'alamat_korespondensi' => $this->request->getPost('alamat_korespondensi'),
+            'riwayat_pekerjaan'    => $json_riwayat,
+        ];
+
+        // 4. Proses Update ke Database
+        $updated = $this->ikhModel->update($idIkh, $dataUpdate);
+
+        // 5. Kembalikan Response Sukses ke Frontend
+        if ($updated) {
+            return redirect()->to('sw-pic/ikh/review/' . encrypt_url($idIkh))->with('success', 'Data berhasil diperbarui.');
+        } else {
+            return redirect()->to('sw-pic/ikh/review/' . encrypt_url($idIkh))->with('error', 'Terjadi kesalahan sistem saat menyimpan.');
+        }
+    }
+    public function uploadFileAjax()
+    {
+
+        $namaInput = $this->request->getPost('input_name');
+        $idIkh     = $this->request->getPost('id_ikh');
+
+        // Ambil data siswa untuk nama folder
+        $dataSiswa = $this->siswaModel
+            ->join('pendaftaran_ikh', 'pendaftaran_ikh.id_siswa = siswa.id_siswa')
+            ->where('pendaftaran_ikh.id_ikh', $idIkh)
+            ->first();
+        if (!$dataSiswa) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Data siswa tidak ditemukan.']);
+        }
+
+        $namaSiswa = $dataSiswa['nama_siswa'];
+        $noInduk   = $dataSiswa['no_induk_siswa'];
+        $namaArray = explode(' ', $namaSiswa);
+        $duaKataPertama = array_slice($namaArray, 0, 2);
+        $namaDepan = implode('_', $duaKataPertama);
+        $folderSiswaName = strtoupper($namaDepan) . "_" . $noInduk;
+
+        $file = $this->request->getFile('file_dokumen');
+
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            try {
+                $service = $this->getDriveService();
+
+                // --- LOGIKA FOLDER KHUSUS SISWA ---
+                // 1. Cari atau Buat Folder Siswa
+                $folderSiswaId = $this->getOrCreateFolder($service, $folderSiswaName, setting('folder_id_drive'));
+
+                // 2. Hapus File Lama (jika ada di DB)
+                $dataLama = $this->ikhModel->find($idIkh);
+                $fileIdLama = is_array($dataLama) ? ($dataLama[$namaInput] ?? null) : ($dataLama->$namaInput ?? null);
+                if ($fileIdLama) {
+                    try {
+                        $service->files->delete($fileIdLama);
+                    } catch (\Exception $e) {
+                        // Abaikan jika file lama tidak ditemukan di drive
+                    }
+                }
+
+                // 3. Upload Baru ke dalam folderSiswaId
+                $fileName = strtoupper(str_replace('file_', '', $namaInput)) . "_" . $noInduk . "_" . time();
+
+                $fileMetadata = new \Google\Service\Drive\DriveFile([
+                    'name' => $fileName,
+                    'parents' => [$folderSiswaId] // Masuk ke folder siswa
+                ]);
+
+                $uploadedFile = $service->files->create($fileMetadata, [
+                    'data' => file_get_contents($file->getTempName()),
+                    'mimeType' => $file->getClientMimeType(),
+                    'uploadType' => 'multipart',
+                    'fields' => 'id'
+                ]);
+
+                // 4. Update Database
+                $this->ikhModel->update($idIkh, [$namaInput => $uploadedFile->id]);
+
+                return $this->response->setJSON([
+                    'success'     => true,
+                    'message'     => "Berhasil upload ke folder $folderSiswaName",
+                    'csrf_hash'   => csrf_hash()
+                ]);
+            } catch (\Exception $e) {
+                return $this->response->setJSON(['success' => false, 'message' => $e->getMessage()]);
+            }
+        }
+
+        return $this->response->setJSON(['success' => false, 'message' => 'File tidak valid.']);
     }
 
     private function getDriveService()

@@ -21,153 +21,389 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                         </div>
                         <div class="card-body pt-0">
 
-                            <h6 class="text-uppercase text-muted fw-bold mb-3">Identitas Diri</h6>
-                            <div class="d-flex flex-column gap-4 mb-6">
-                                <div class="d-flex flex-stack"><span class="fw-semibold text-gray-500">Nama Lengkap</span><span class="fw-bold text-gray-800"><?= $ikh['nama_lengkap'] ?></span></div>
-                                <div class="d-flex flex-stack"><span class="fw-semibold text-gray-500">NIK</span><span class="fw-bold text-gray-800"><?= $ikh['nik'] ?></span></div>
-                                <div class="d-flex flex-stack"><span class="fw-semibold text-gray-500">NPWP</span><span class="fw-bold text-gray-800"><?= $ikh['npwp'] ?></span></div>
-                                <div class="d-flex flex-stack"><span class="fw-semibold text-gray-500">Tempat, Tgl Lahir</span><span class="fw-bold text-gray-800"><?= $ikh['tempat_lahir'] ?>, <?= !empty($ikh['tanggal_lahir']) ? date('d M Y', strtotime($ikh['tanggal_lahir'])) : '-' ?></span></div>
-                            </div>
-
-                            <div class="separator border-gray-200 my-5"></div>
-
-                            <h6 class="text-uppercase text-muted fw-bold mb-3">Riwayat Pendidikan</h6>
-                            <div class="d-flex flex-column gap-4 mb-6">
-                                <div class="d-flex flex-stack"><span class="fw-semibold text-gray-500">Pendidikan</span><span class="fw-bold text-gray-800"><?= $ikh['pendidikan_terakhir'] ?> - <?= $ikh['jurusan'] ?></span></div>
-                                <div class="d-flex flex-stack"><span class="fw-semibold text-gray-500">Tahun Studi</span><span class="fw-bold text-gray-800"><?= $ikh['tahun_masuk'] ?> s/d <?= $ikh['tahun_lulus'] ?></span></div>
-                            </div>
-
-                            <div class="separator border-gray-200 my-5"></div>
-
-                            <h6 class="text-uppercase text-muted fw-bold mb-3">Kontak & Instansi</h6>
-                            <div class="d-flex flex-column gap-4 mb-6">
-                                <div class="d-flex flex-stack"><span class="fw-semibold text-gray-500">WhatsApp</span><span class="fw-bold text-primary"><?= $ikh['no_wa'] ?></span></div>
-                                <div class="d-flex flex-stack"><span class="fw-semibold text-gray-500">Email</span><span class="fw-bold text-gray-800"><?= $ikh['email'] ?></span></div>
-                                <div class="d-flex flex-stack"><span class="fw-semibold text-gray-500">Kategori Kantor</span><span class="fw-bold text-gray-800"><?= $ikh['kategori_kantor'] ?></span></div>
-                                <div class="d-flex flex-stack"><span class="fw-semibold text-gray-500">Nama Kantor</span><span class="fw-bold text-gray-800"><?= $ikh['nama_kantor'] ?></span></div>
-                            </div>
-
-                            <div class="separator border-gray-200 my-5"></div>
-
-                            <h6 class="text-uppercase text-muted fw-bold mb-3">Informasi Alamat</h6>
-                            <div class="d-flex flex-column gap-4 mb-8">
-                                <div class="d-flex flex-column">
-                                    <span class="fw-semibold text-gray-500 mb-1">Alamat Sesuai KTP</span>
-                                    <span class="fw-bold text-gray-800"><?= $ikh['alamat_ktp'] ?></span>
+                            <!-- ========================================== -->
+                            <!-- BAGIAN DATA PEMOHON (READ-ONLY VIEW)       -->
+                            <!-- ========================================== -->
+                            <div id="view_pemohon">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="text-uppercase text-muted fw-bold mb-0">Identitas Diri</h6>
+                                    <button class="btn btn-icon btn-sm btn-light-primary" id="btn_edit_pemohon" title="Edit Seluruh Data Pemohon">
+                                        <i class="ki-outline ki-pencil fs-4"></i>
+                                    </button>
                                 </div>
-                                <div class="d-flex flex-column">
-                                    <span class="fw-semibold text-gray-500 mb-1">Alamat Korespondensi</span>
-                                    <span class="fw-bold text-gray-800"><?= $ikh['alamat_korespondensi'] ?></span>
+                                <div class="d-flex flex-column gap-4 mb-6">
+                                    <div class="d-flex flex-stack"><span class="fw-semibold text-gray-500">Nama Lengkap</span><span class="fw-bold text-gray-800"><?= $ikh['nama_lengkap'] ?></span></div>
+                                    <div class="d-flex flex-stack"><span class="fw-semibold text-gray-500">NIK</span><span class="fw-bold text-gray-800"><?= $ikh['nik'] ?></span></div>
+                                    <div class="d-flex flex-stack"><span class="fw-semibold text-gray-500">NPWP</span><span class="fw-bold text-gray-800"><?= $ikh['npwp'] ?></span></div>
+                                    <div class="d-flex flex-stack"><span class="fw-semibold text-gray-500">Tempat, Tgl Lahir</span><span class="fw-bold text-gray-800"><?= $ikh['tempat_lahir'] ?>, <?= !empty($ikh['tanggal_lahir']) ? date('d M Y', strtotime($ikh['tanggal_lahir'])) : '-' ?></span></div>
+                                </div>
+
+                                <div class="separator border-gray-200 my-5"></div>
+
+                                <h6 class="text-uppercase text-muted fw-bold mb-3">Riwayat Pendidikan</h6>
+                                <div class="d-flex flex-column gap-4 mb-6">
+                                    <div class="d-flex flex-stack"><span class="fw-semibold text-gray-500">Pendidikan</span><span class="fw-bold text-gray-800"><?= $ikh['pendidikan_terakhir'] ?> - <?= $ikh['jurusan'] ?></span></div>
+                                    <div class="d-flex flex-stack"><span class="fw-semibold text-gray-500">Tahun Studi</span><span class="fw-bold text-gray-800"><?= $ikh['tahun_masuk'] ?> s/d <?= $ikh['tahun_lulus'] ?></span></div>
+                                </div>
+
+                                <div class="separator border-gray-200 my-5"></div>
+
+                                <h6 class="text-uppercase text-muted fw-bold mb-3">Kontak & Instansi</h6>
+                                <div class="d-flex flex-column gap-4 mb-6">
+                                    <div class="d-flex flex-stack"><span class="fw-semibold text-gray-500">WhatsApp</span><span class="fw-bold text-primary"><?= $ikh['no_wa'] ?></span></div>
+                                    <div class="d-flex flex-stack"><span class="fw-semibold text-gray-500">Email</span><span class="fw-bold text-gray-800"><?= $ikh['email'] ?></span></div>
+                                    <div class="d-flex flex-stack"><span class="fw-semibold text-gray-500">Email Custom</span><span class="fw-bold text-gray-800"><?= $ikh['email_custom'] ?></span></div>
+                                    <div class="d-flex flex-stack"><span class="fw-semibold text-gray-500">Kategori Kantor</span><span class="fw-bold text-gray-800"><?= $ikh['kategori_kantor'] ?></span></div>
+                                    <div class="d-flex flex-stack"><span class="fw-semibold text-gray-500">Nama Kantor</span><span class="fw-bold text-gray-800"><?= $ikh['nama_kantor'] ?></span></div>
+                                </div>
+
+                                <div class="separator border-gray-200 my-5"></div>
+
+                                <h6 class="text-uppercase text-muted fw-bold mb-3">Informasi Alamat</h6>
+                                <div class="d-flex flex-column gap-4 mb-8">
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-semibold text-gray-500 mb-1">Alamat Sesuai KTP</span>
+                                        <span class="fw-bold text-gray-800"><?= $ikh['alamat_ktp'] ?></span>
+                                    </div>
+                                    <div class="d-flex flex-column mt-3">
+                                        <span class="fw-semibold text-gray-500 mb-1">Alamat Korespondensi</span>
+                                        <span class="fw-bold text-gray-800"><?= $ikh['alamat_korespondensi'] ?></span>
+                                    </div>
+                                </div>
+                                <h6 class="text-uppercase text-muted fw-bold mb-3">Pengalaman Kerja</h6>
+                                <div class="d-flex flex-column gap-4 mb-8">
+                                    <div class="d-flex flex-column">
+                                        <div class="fw-bold text-gray-800">
+                                            <?php
+                                            // 1. Ambil data JSON (Sesuaikan 'riwayat_pekerjaan' dengan nama kolom di database Anda)
+                                            $json_data = $ikh['riwayat_pekerjaan'] ?? '[]';
+
+                                            // 2. Decode JSON menjadi Array PHP biasa
+                                            $riwayat_array = json_decode($json_data, true);
+
+                                            // 3. Cek apakah array valid dan ada isinya
+                                            if (!empty($riwayat_array) && is_array($riwayat_array)) {
+                                                echo '<ul class="m-0 px-4" style="list-style-type: disc;">';
+
+                                                foreach ($riwayat_array as $pekerjaan) {
+                                                    // Cetak langsung stringnya sebagai list item (li)
+                                                    echo "<li class='mb-1 fw-bold text-gray-800'>{$pekerjaan}</li>";
+                                                }
+
+                                                echo '</ul>';
+                                            } else {
+                                                echo '<span class="text-muted fw-normal"><i>Tidak ada riwayat pekerjaan.</i></span>';
+                                            }
+                                            ?>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
+                            <!-- ========================================== -->
+
+
+                            <!-- ========================================== -->
+                            <!-- BAGIAN DATA PEMOHON (FORM EDIT)            -->
+                            <!-- ========================================== -->
+                            <form action="<?= base_url('sw-admin/ikh/update-pemohon') ?>" method="POST" id="form_edit_pemohon" class="d-none">
+                                <?= csrf_field() ?>
+                                <input type="hidden" name="id_ikh" value="<?= $ikh['id_ikh'] ?>">
+
+                                <h6 class="text-uppercase text-primary fw-bold mb-3 border-bottom border-primary pb-2"><i class="ki-outline ki-profile-circle fs-4 text-primary me-1"></i> Identitas Diri</h6>
+                                <div class="row g-3 mb-7">
+                                    <div class="col-12">
+                                        <label class="form-label fs-8 fw-semibold text-muted mb-1">Nama Lengkap</label>
+                                        <input type="text" name="nama_lengkap" class="form-control form-control-sm form-control-solid" value="<?= $ikh['nama_lengkap'] ?>">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fs-8 fw-semibold text-muted mb-1">NIK</label>
+                                        <input type="text" name="nik" class="form-control form-control-sm form-control-solid" value="<?= $ikh['nik'] ?>">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fs-8 fw-semibold text-muted mb-1">NPWP</label>
+                                        <input type="text" name="npwp" class="form-control form-control-sm form-control-solid" value="<?= $ikh['npwp'] ?>">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fs-8 fw-semibold text-muted mb-1">Tempat Lahir</label>
+                                        <input type="text" name="tempat_lahir" class="form-control form-control-sm form-control-solid" value="<?= $ikh['tempat_lahir'] ?>">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fs-8 fw-semibold text-muted mb-1">Tanggal Lahir</label>
+                                        <input type="date" name="tanggal_lahir" class="form-control form-control-sm form-control-solid" value="<?= $ikh['tanggal_lahir'] ?>">
+                                    </div>
+                                </div>
+
+                                <h6 class="text-uppercase text-primary fw-bold mb-3 border-bottom border-primary pb-2"><i class="ki-outline ki-book-open fs-4 text-primary me-1"></i> Riwayat Pendidikan</h6>
+                                <div class="row g-3 mb-7">
+                                    <div class="col-md-6">
+                                        <label class="form-label fs-8 fw-semibold text-muted mb-1">Pendidikan Terakhir</label>
+                                        <input type="text" name="pendidikan_terakhir" class="form-control form-control-sm form-control-solid" value="<?= $ikh['pendidikan_terakhir'] ?>">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fs-8 fw-semibold text-muted mb-1">Jurusan</label>
+                                        <input type="text" name="jurusan" class="form-control form-control-sm form-control-solid" value="<?= $ikh['jurusan'] ?>">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fs-8 fw-semibold text-muted mb-1">Tahun Masuk</label>
+                                        <input type="text" name="tahun_masuk" class="form-control form-control-sm form-control-solid" value="<?= $ikh['tahun_masuk'] ?>">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fs-8 fw-semibold text-muted mb-1">Tahun Lulus</label>
+                                        <input type="text" name="tahun_lulus" class="form-control form-control-sm form-control-solid" value="<?= $ikh['tahun_lulus'] ?>">
+                                    </div>
+                                </div>
+
+                                <h6 class="text-uppercase text-primary fw-bold mb-3 border-bottom border-primary pb-2"><i class="ki-outline ki-phone fs-4 text-primary me-1"></i> Kontak & Instansi</h6>
+                                <div class="row g-3 mb-7">
+                                    <div class="col-md-6">
+                                        <label class="form-label fs-8 fw-semibold text-muted mb-1">No. WhatsApp</label>
+                                        <input type="text" name="no_wa" class="form-control form-control-sm form-control-solid" value="<?= $ikh['no_wa'] ?>">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fs-8 fw-semibold text-muted mb-1">Email</label>
+                                        <input type="email" name="email" class="form-control form-control-sm form-control-solid" value="<?= $ikh['email'] ?>">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fs-8 fw-semibold text-muted mb-1">Email Custom</label>
+                                        <input type="email" name="email_custom" class="form-control form-control-sm form-control-solid" value="<?= $ikh['email_custom'] ?>">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fs-8 fw-semibold text-muted mb-1">Kategori Kantor</label>
+                                        <input type="text" name="kategori_kantor" class="form-control form-control-sm form-control-solid" value="<?= $ikh['kategori_kantor'] ?>">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fs-8 fw-semibold text-muted mb-1">Nama Kantor</label>
+                                        <input type="text" name="nama_kantor" class="form-control form-control-sm form-control-solid" value="<?= $ikh['nama_kantor'] ?>">
+                                    </div>
+                                </div>
+
+                                <h6 class="text-uppercase text-primary fw-bold mb-3 border-bottom border-primary pb-2"><i class="ki-outline ki-geolocation fs-4 text-primary me-1"></i> Informasi Alamat</h6>
+                                <div class="row g-3 mb-8">
+                                    <div class="col-12">
+                                        <label class="form-label fs-8 fw-semibold text-muted mb-1">Alamat Sesuai KTP</label>
+                                        <textarea name="alamat_ktp" class="form-control form-control-sm form-control-solid" rows="2"><?= $ikh['alamat_ktp'] ?></textarea>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label fs-8 fw-semibold text-muted mb-1">Alamat Korespondensi</label>
+                                        <textarea name="alamat_korespondensi" class="form-control form-control-sm form-control-solid" rows="2"><?= $ikh['alamat_korespondensi'] ?></textarea>
+                                    </div>
+                                </div>
+
+                                <h4 class="fw-bold text-primary mb-7"><i class="bi bi-clock-history me-2 text-primary"></i>Riwayat Pekerjaan</h4>
+                                <div class="row mb-6">
+                                    <div class="col-12 col-lg-8">
+                                        <label class="form-label fs-8 fw-semibold text-muted mb-1">Daftar Riwayat</label>
+                                        <div id="riwayat_container">
+                                            <?php
+                                            $riwayat_data = $ikh['riwayat_pekerjaan'] ? json_decode($ikh['riwayat_pekerjaan'], true) : old('riwayat_pekerjaan');
+                                            if (empty($riwayat_data)):
+                                            ?>
+                                                <div class="input-group mb-3 riwayat-row">
+                                                    <input type="text" name="riwayat_pekerjaan[]" class="form-control form-control-lg form-control-solid" placeholder="Contoh: PT. Legalyn Indonesia (2015 - 2020)" />
+                                                </div>
+                                            <?php else: ?>
+                                                <?php foreach ($riwayat_data as $index => $riwayat): ?>
+                                                    <div class="input-group mb-3 riwayat-row">
+                                                        <input type="text" name="riwayat_pekerjaan[]" class="form-control form-control-lg form-control-solid" value="<?= esc($riwayat) ?>" placeholder="Contoh: PT. Legalyn Indonesia (2015 - 2020)" />
+                                                        <?php if ($index > 0): ?>
+                                                            <button type="button" class="btn btn-icon btn-light-danger btn-hapus-riwayat" title="Hapus Baris"><i class="ki-outline ki-trash fs-2"></i></button>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </div>
+
+                                        <button type="button" class="btn btn-light-primary btn-sm mt-2 w-100 w-sm-auto" id="btn_tambah_riwayat">
+                                            <i class="ki-outline ki-plus fs-2"></i> Tambah Riwayat Pekerjaan
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-end bg-light p-4 rounded border mb-8">
+                                    <button type="button" class="btn btn-sm btn-light me-3" id="btn_batal_pemohon">Batal Edit</button>
+                                    <button type="submit" class="btn btn-sm btn-primary" id="btn_simpan_pemohon">
+                                        <span class="indicator-label"><i class="ki-outline ki-save-2 fs-4"></i> Simpan Data Pemohon</span>
+                                        <span class="indicator-progress">Menyimpan... <span class="spinner-border spinner-border-sm align-middle ms-2"></span></span>
+                                    </button>
+                                </div>
+                            </form>
+                            <!-- ========================================== -->
+
 
                             <div class="separator border-gray-200 my-8 border-dashed border-2"></div>
 
-                            <h4 class="fw-bold mb-5">Dokumen Terlampir</h4>
-                            <div class="mh-400px scroll-y px-2">
+
+                            <!-- ========================================== -->
+                            <!-- BAGIAN DOKUMEN TERLAMPIR (DITAMBAHKAN EDIT)-->
+                            <!-- ========================================== -->
+                            <div class="d-flex justify-content-between align-items-center mb-5">
+                                <h4 class="fw-bold mb-0">Dokumen Terlampir</h4>
+                                <button class="btn btn-sm btn-light-primary" id="btn_edit_dokumen_peserta">
+                                    <i class="ki-outline ki-pencil fs-4"></i> Edit Dokumen
+                                </button>
+                                <!-- Tombol Batal Edit (Awalnya disembunyikan) -->
+                                <button class="btn btn-sm btn-light-danger d-none" id="btn_batal_dokumen_peserta">
+                                    <i class="ki-outline ki-cross fs-4"></i> Batal Edit
+                                </button>
+                            </div>
+
+                            <div class="mh-400px scroll-y px-2 overflow-x-hidden" id="container_dokumen_peserta">
                                 <?php
-                                $berkasList = [
-                                    ['nama' => '1. KTP (Scan Asli)', 'field' => 'file_ktp'],
-                                    ['nama' => '2. NPWP', 'field' => 'file_npwp'],
-                                    ['nama' => '3. Kartu Keluarga', 'field' => 'file_kk'],
-                                    ['nama' => '4. Pas Foto 4x6', 'field' => 'file_foto'],
-                                    ['nama' => '5. SKCK', 'field' => 'file_skck'],
-                                    ['nama' => '6. Ijazah (Scan Asli)', 'field' => 'file_ijazah'],
-                                    ['nama' => '7. Bukti Terima SPT', 'field' => 'file_spt'],
-                                    ['nama' => '8. Sertifikat Brevet Pajak', 'field' => 'file_sertifikat'],
-                                    ['nama' => '9. TTD Elektronik', 'field' => 'file_ttd'],
-                                    ['nama' => '10. Riwayat Hidup', 'field' => 'file_riwayat_hidup'],
-                                    ['nama' => '11. Pernyataan Bukan PNS', 'field' => 'file_bukan_pns'],
-                                    ['nama' => '12. Integritas', 'field' => 'file_pakta_integritas'],
-                                    ['nama' => '13. Pernyataan Izin Kuasa Hukum', 'field' => 'file_pernyataan_ikh'],
+                                $fileConfigs = [
+                                    ['id' => 'file_ktp', 'label' => '1. KTP (Scan Asli)', 'accept' => '.pdf', 'hint' => 'Hanya PDF'],
+                                    ['id' => 'file_npwp', 'label' => '2. NPWP', 'accept' => '.pdf', 'hint' => 'Hanya PDF'],
+                                    ['id' => 'file_kk', 'label' => '3. Kartu Keluarga', 'accept' => '.pdf', 'hint' => 'Hanya PDF'],
+                                    ['id' => 'file_foto', 'label' => '4. Pas Foto 4x6', 'accept' => '.jpg,.jpeg,.png', 'hint' => 'JPG/PNG'],
+                                    ['id' => 'file_skck', 'label' => '5. SKCK', 'accept' => '.pdf', 'hint' => 'Hanya PDF'],
+                                    ['id' => 'file_ijazah', 'label' => '6. Ijazah (Scan Asli)', 'accept' => '.pdf', 'hint' => 'Hanya PDF'],
+                                    ['id' => 'file_spt', 'label' => '7. Bukti Terima SPT', 'accept' => '.pdf', 'hint' => 'Hanya PDF'],
+                                    ['id' => 'file_sertifikat', 'label' => '8. Sertifikat Brevet Pajak', 'accept' => '.pdf', 'hint' => 'Hanya PDF'],
+                                    ['id' => 'file_ttd', 'label' => '9. TTD Elektronik', 'accept' => '.jpg,.jpeg,.png', 'hint' => 'JPG/PNG'],
+                                    ['id' => 'file_riwayat_hidup', 'label' => '10. Riwayat Hidup', 'accept' => '.pdf', 'hint' => 'Hanya PDF'],
+                                    ['id' => 'file_bukan_pns', 'label' => '11. Pernyataan Bukan PNS', 'accept' => '.pdf', 'hint' => 'Hanya PDF'],
+                                    ['id' => 'file_pakta_integritas', 'label' => '12. Integritas', 'accept' => '.pdf', 'hint' => 'Hanya PDF'],
+                                    ['id' => 'file_pernyataan_ikh', 'label' => '13. Pernyataan Izin Kuasa Hukum', 'accept' => '.pdf', 'hint' => 'Hanya PDF'],
                                 ];
 
                                 $fileAdmin = ['file_riwayat_hidup', 'file_bukan_pns', 'file_pakta_integritas', 'file_pernyataan_ikh'];
-
-                                foreach ($berkasList as $berkas):
-                                    $isUploaded = !empty($ikh[$berkas['field']]);
-                                    $isAdminProvided = in_array($berkas['field'], $fileAdmin);
-
-                                    // =========================================================
-                                    // PERBAIKAN 1: Deteksi Link G-Drive (Dokumen Terlampir)
-                                    // =========================================================
-                                    $fileUrl = '';
-                                    $fileExt = '';
-                                    if ($isUploaded) {
-                                        $fileData = $ikh[$berkas['field']];
-                                        $isDrive = (strpos($fileData, '.') === false); // ID Google Drive tidak memiliki titik
-
-                                        if ($isDrive) {
-                                            $fileUrl = 'https://drive.google.com/file/d/' . $fileData . '/preview';
-                                            $fileExt = (strpos($berkas['field'], 'foto') !== false || strpos($berkas['field'], 'ttd') !== false) ? 'jpg' : 'pdf';
-                                        } else {
-                                            $fileUrl = base_url('uploads/ikh/' . $fileData);
-                                            $fileExt = strtolower(pathinfo($fileData, PATHINFO_EXTENSION));
-                                        }
-                                    }
                                 ?>
-                                    <div class="d-flex align-items-center mb-5">
-                                        <div class="symbol symbol-40px me-4">
-                                            <?php if ($isUploaded): ?>
-                                                <a href="javascript:void(0)"
-                                                    class="symbol-label bg-light-primary text-primary hover-elevate-up btn-preview-berkas"
-                                                    data-file-url="<?= $fileUrl ?>"
-                                                    data-file-ext="<?= $fileExt ?>"
-                                                    data-file-name="<?= $berkas['nama'] ?>"
-                                                    title="Klik untuk melihat dokumen">
-                                                    <i class="ki-outline ki-eye fs-2 text-primary"></i>
-                                                </a>
-                                            <?php else: ?>
-                                                <div class="symbol-label <?= $isAdminProvided ? 'bg-light-info' : 'bg-light-danger' ?>">
-                                                    <i class="ki-outline <?= $isAdminProvided ? 'ki-document text-info' : 'ki-file text-danger' ?> fs-2"></i>
+
+                                <div class="row g-5">
+                                    <?php foreach ($fileConfigs as $cfg):
+                                        $isUploaded = !empty($ikh[$cfg['id']]);
+                                        $isAdminProvided = in_array($cfg['id'], $fileAdmin);
+
+                                        $fileUrl = '';
+                                        $fileExt = '';
+                                        if ($isUploaded) {
+                                            $fileData = $ikh[$cfg['id']];
+                                            $isDrive = (strpos($fileData, '.') === false);
+
+                                            if ($isDrive) {
+                                                $fileUrl = 'https://drive.google.com/file/d/' . $fileData . '/preview';
+                                                $fileExt = (strpos($cfg['id'], 'foto') !== false || strpos($cfg['id'], 'ttd') !== false) ? 'jpg' : 'pdf';
+                                            } else {
+                                                $fileUrl = base_url('uploads/ikh/' . $fileData);
+                                                $fileExt = strtolower(pathinfo($fileData, PATHINFO_EXTENSION));
+                                            }
+                                        }
+                                    ?>
+                                        <div class="col-12">
+
+                                            <!-- ========================================== -->
+                                            <!-- 1. TAMPILAN READ ONLY                      -->
+                                            <!-- ========================================== -->
+                                            <div class="d-flex align-items-center mb-2 view-text-dokumen">
+                                                <div class="symbol symbol-40px me-4">
+                                                    <?php if ($isUploaded): ?>
+                                                        <a href="javascript:void(0)"
+                                                            class="symbol-label bg-light-primary text-primary hover-elevate-up btn-preview-berkas"
+                                                            data-file-url="<?= $fileUrl ?>"
+                                                            data-file-ext="<?= $fileExt ?>"
+                                                            data-file-name="<?= $cfg['label'] ?>"
+                                                            title="Klik untuk melihat dokumen">
+                                                            <i class="ki-outline ki-eye fs-2 text-primary"></i>
+                                                        </a>
+                                                    <?php else: ?>
+                                                        <div class="symbol-label <?= $isAdminProvided ? 'bg-light-info' : 'bg-light-danger' ?>">
+                                                            <i class="ki-outline <?= $isAdminProvided ? 'ki-document text-info' : 'ki-file text-danger' ?> fs-2"></i>
+                                                        </div>
+                                                    <?php endif; ?>
                                                 </div>
-                                            <?php endif; ?>
-                                        </div>
 
-                                        <div class="d-flex flex-column flex-grow-1">
-                                            <div class="d-flex align-items-center mb-1">
-                                                <?php if ($isUploaded): ?>
-                                                    <a href="javascript:void(0)"
-                                                        class="fs-6 fw-bold text-gray-800 text-hover-primary btn-preview-berkas"
-                                                        data-file-url="<?= $fileUrl ?>"
-                                                        data-file-ext="<?= $fileExt ?>"
-                                                        data-file-name="<?= $berkas['nama'] ?>">
-                                                        <?= $berkas['nama'] ?>
-                                                    </a>
-                                                <?php else: ?>
-                                                    <span class="fs-6 fw-bold text-gray-800"><?= $berkas['nama'] ?></span>
-                                                <?php endif; ?>
+                                                <div class="d-flex flex-column flex-grow-1">
+                                                    <div class="d-flex align-items-center mb-1">
+                                                        <?php if ($isUploaded): ?>
+                                                            <a href="javascript:void(0)"
+                                                                class="fs-6 fw-bold text-gray-800 text-hover-primary btn-preview-berkas"
+                                                                data-file-url="<?= $fileUrl ?>"
+                                                                data-file-ext="<?= $fileExt ?>"
+                                                                data-file-name="<?= $cfg['label'] ?>">
+                                                                <?= $cfg['label'] ?>
+                                                            </a>
+                                                        <?php else: ?>
+                                                            <span class="fs-6 fw-bold text-gray-800"><?= $cfg['label'] ?></span>
+                                                        <?php endif; ?>
 
-                                                <?php if ($isAdminProvided): ?>
-                                                    <span class="badge badge-light-info ms-2 px-2 py-1 fs-9">Disiapkan Admin</span>
-                                                <?php endif; ?>
+                                                        <?php if ($isAdminProvided): ?>
+                                                            <span class="badge badge-light-info ms-2 px-2 py-1 fs-9">Disiapkan Admin</span>
+                                                        <?php endif; ?>
+                                                    </div>
+
+                                                    <span class="text-muted fw-semibold fs-8">
+                                                        <?php
+                                                        if ($isUploaded) {
+                                                            echo 'Telah diunggah (Klik untuk lihat)';
+                                                        } else {
+                                                            echo $isAdminProvided ? 'File ini akan diurus oleh tim Admin' : 'File belum ada';
+                                                        }
+                                                        ?>
+                                                    </span>
+                                                </div>
+
+                                                <div>
+                                                    <?php if ($isUploaded): ?>
+                                                        <span class="badge badge-light-success fw-bold px-3 py-2"><i class="ki-outline ki-check-circle fs-5 text-success me-1"></i> Valid</span>
+                                                    <?php else: ?>
+                                                        <?php if ($isAdminProvided): ?>
+                                                            <span class="badge badge-light-info fw-bold px-3 py-2"><i class="ki-outline ki-time fs-5 text-info me-1"></i> Proses</span>
+                                                        <?php else: ?>
+                                                            <span class="badge badge-light-danger fw-bold px-3 py-2"><i class="ki-outline ki-cross-circle fs-5 text-danger me-1"></i> Kosong</span>
+                                                        <?php endif; ?>
+                                                    <?php endif; ?>
+                                                </div>
                                             </div>
 
-                                            <span class="text-muted fw-semibold fs-8">
-                                                <?php
-                                                if ($isUploaded) {
-                                                    echo 'Telah diunggah (Klik untuk lihat)';
-                                                } else {
-                                                    echo $isAdminProvided ? 'File ini akan diurus dan diunggah oleh tim Admin' : 'File belum ada';
-                                                }
-                                                ?>
-                                            </span>
-                                        </div>
 
-                                        <div>
-                                            <?php if ($isUploaded): ?>
-                                                <span class="badge badge-light-success fw-bold px-3 py-2"><i class="ki-outline ki-check-circle fs-5 text-success me-1"></i> Valid</span>
-                                            <?php else: ?>
-                                                <?php if ($isAdminProvided): ?>
-                                                    <span class="badge badge-light-info fw-bold px-3 py-2"><i class="ki-outline ki-time fs-5 text-info me-1"></i> Proses</span>
-                                                <?php else: ?>
-                                                    <span class="badge badge-light-danger fw-bold px-3 py-2"><i class="ki-outline ki-cross-circle fs-5 text-danger me-1"></i> Kosong</span>
-                                                <?php endif; ?>
-                                            <?php endif; ?>
+                                            <!-- ========================================== -->
+                                            <!-- 2. TAMPILAN KOTAK EDIT (Upload Per File)   -->
+                                            <!-- ========================================== -->
+                                            <div class="edit-input-dokumen d-none mt-2 mb-2">
+                                                <div class="border rounded p-5 <?= $isUploaded ? 'border-success bg-light-success' : 'border-gray-300' ?>" id="box_<?= $cfg['id'] ?>">
+
+                                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                                        <label class="fw-bold fs-6 text-gray-800"><?= $cfg['label'] ?></label>
+
+                                                        <div class="d-flex align-items-center gap-2">
+                                                            <?php if ($isUploaded): ?>
+                                                                <a href="javascript:void(0)"
+                                                                    class="btn btn-icon btn-sm btn-light-primary hover-elevate-up btn-preview-berkas"
+                                                                    data-file-url="<?= $fileUrl ?>"
+                                                                    data-file-ext="<?= $fileExt ?>"
+                                                                    data-file-name="<?= $cfg['label'] ?>"
+                                                                    title="Lihat dokumen tersimpan">
+                                                                    <i class="ki-outline ki-eye fs-3"></i>
+                                                                </a>
+                                                            <?php endif; ?>
+
+                                                            <span class="badge status-badge <?= $isUploaded ? 'badge-success' : 'badge-light-danger' ?>" id="status_<?= $cfg['id'] ?>">
+                                                                <?= $isUploaded ? '<i class="ki-outline ki-check text-white fs-8 me-1"></i> Tersimpan' : 'Belum Upload' ?>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="input-group input-group-sm">
+                                                        <input type="file"
+                                                            class="form-control <?= $cfg['id'] == 'file_ttd' ? 'input-ttd-crop' : '' ?>"
+                                                            id="input_<?= $cfg['id'] ?>"
+                                                            data-name="<?= $cfg['id'] ?>"
+                                                            accept="<?= $cfg['accept'] ?>">
+
+                                                        <button class="btn btn-primary btn-upload-ajax-admin" type="button" data-target="<?= $cfg['id'] ?>">
+                                                            <span class="indicator-label">Upload</span>
+                                                            <span class="indicator-progress" style="display:none;">... <span class="spinner-border spinner-border-sm align-middle"></span></span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="form-text mt-2 text-muted fs-8">Format: <?= $cfg['hint'] ?> (Maks 2MB).</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="separator border-gray-200 my-4"></div>
                                         </div>
-                                    </div>
-                                <?php endforeach; ?>
+                                    <?php endforeach; ?>
+                                </div>
                             </div>
+                            <!-- ========================================== -->
 
                         </div>
                     </div>
@@ -185,7 +421,7 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                                     <?php if ($stat_val == 'valid'): ?>
                                         <span class="badge badge-success fs-6"><i class="ki-outline ki-check text-white me-2"></i> Berkas Valid</span>
                                     <?php elseif ($stat_val == 'ditolak'): ?>
-                                        <span class="badge badge-danger fs-6"><i class="ki-outline ki-cross text-white me-2"></i> Berkas Ditolak</span>
+                                        <span class="badge badge-danger fs-6"><i class="ki-outline ki-cross text-white me-2"></i> Berkas Revisi</span>
                                     <?php endif; ?>
                                 </h4>
                                 <form id="form_validasi" class="form-action-admin">
@@ -196,14 +432,20 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                                         <label class="form-label fw-semibold">Keputusan</label>
                                         <select name="status" class="form-select form-select-solid" data-control="select2" data-hide-search="true">
                                             <option value="valid" <?= $stat_val == 'valid' ? 'selected' : '' ?>>TERIMA (Berkas Lengkap & Valid)</option>
-                                            <option value="ditolak" <?= $stat_val == 'ditolak' ? 'selected' : '' ?>>TOLAK (Ada Berkas Salah)</option>
+                                            <option value="ditolak" <?= $stat_val == 'ditolak' ? 'selected' : '' ?>>REVISI (Ada Berkas Salah)</option>
                                         </select>
                                     </div>
-                                    <div class="mb-5">
-                                        <label class="form-label fw-semibold">Catatan untuk Siswa (Wajib jika ditolak)</label>
+
+                                    <!-- Tambahkan ID container_catatan di sini -->
+                                    <div class="mb-5" id="container_catatan" style="display: none;">
+                                        <label class="form-label fw-semibold">Catatan untuk Siswa (Wajib jika direvisi)</label>
                                         <textarea name="catatan_admin" class="form-control form-control-solid" rows="3" placeholder="Contoh: KTP buram, harap foto ulang..."><?= $ikh['catatan_admin'] ?></textarea>
                                     </div>
-                                    <button type="submit" class="btn btn-primary w-100 btn-submit-admin"><span class="indicator-label">Simpan Keputusan</span><span class="indicator-progress" style="display:none;">Menyimpan...</span></button>
+
+                                    <button type="submit" class="btn btn-primary w-100 btn-submit-admin">
+                                        <span class="indicator-label">Simpan Keputusan</span>
+                                        <span class="indicator-progress" style="display:none;">Menyimpan...</span>
+                                    </button>
                                 </form>
                             </div>
 
@@ -216,7 +458,6 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
 
                                     <div class="row g-5 mb-7">
                                         <?php
-                                        // Array disederhanakan, deskripsi dihilangkan
                                         $berkas = [
                                             'file_riwayat_hidup' => [
                                                 'label'    => 'Daftar Riwayat Hidup',
@@ -246,26 +487,19 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                                             <div class="col-md-6">
                                                 <div class="border border-dashed border-gray-300 rounded p-4 h-100 bg-body d-flex flex-column">
 
-                                                    <!-- Header: Hanya Label & Tombol Download Format -->
                                                     <div class="d-flex justify-content-between align-items-center mb-4">
                                                         <label class="form-label fw-bolder text-dark mb-0 fs-5"><?= $item['label'] ?></label>
 
                                                         <?php if (!empty($item['template'])): ?>
-                                                            <a href="<?= $item['template'] ?>" terget="_blank" class="btn btn-sm btn-light-info fw-bold px-3 py-2" title="Unduh Format Kosong">
+                                                            <a href="<?= $item['template'] ?>" terget="_blank" class="btn btn-sm btn-light-info fw-bold px-3 py-2" title="Unduh Format untuk ditempel di e-matrai">
                                                                 <i class="ki-outline ki-file-down fs-4"></i>
                                                             </a>
                                                         <?php endif; ?>
                                                     </div>
 
-                                                    <!-- Area Custom Upload (Kotak Persegi) -->
                                                     <div class="mt-auto d-flex align-items-center">
-
-                                                        <!-- Wrapper Posisi Relatif untuk Kotak & Badge Centang -->
                                                         <div class="position-relative me-4">
-                                                            <!-- Input Asli Disembunyikan -->
                                                             <input type="file" name="<?= $name ?>" id="file_<?= $name ?>" class="d-none input-file-custom" accept=".pdf">
-
-                                                            <!-- Label sebagai pengganti tombol upload (Kotak Persegi) -->
                                                             <label for="file_<?= $name ?>"
                                                                 class="btn btn-outline btn-outline-dashed p-0 d-flex align-items-center justify-content-center transition-all <?= $isUploaded ? 'border-success bg-light-success text-success' : 'border-primary text-primary btn-active-light-primary' ?>"
                                                                 style="width: 70px; height: 70px; border-radius: 12px; cursor: pointer;"
@@ -273,7 +507,6 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                                                                 <i class="ki-outline ki-document <?= $isUploaded ? 'text-success' : 'text-primary' ?> fs-2x"></i>
                                                             </label>
 
-                                                            <!-- Tanda Centang Jika Sudah Terupload -->
                                                             <?php if ($isUploaded): ?>
                                                                 <span class="position-absolute top-0 start-100 translate-middle badge badge-circle badge-success shadow-sm" style="width: 22px; height: 22px;">
                                                                     <i class="ki-outline ki-check text-white fs-8"></i>
@@ -281,7 +514,6 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                                                             <?php endif; ?>
                                                         </div>
 
-                                                        <!-- Area Status & Tombol Lihat -->
                                                         <div class="flex-grow-1">
                                                             <?php if ($isUploaded): ?>
                                                                 <?php
@@ -298,12 +530,10 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                                                                     <i class="ki-outline ki-eye fs-5"></i> Lihat Berkas
                                                                 </button>
                                                             <?php else: ?>
-                                                                <!-- Menampilkan nama label agar pengguna tahu file apa ini -->
                                                                 <div class="text-muted fs-8 mb-1">Unggah <b><?= $item['label'] ?></b> di sini.</div>
                                                                 <div class="text-muted fs-9">Format: .PDF (Maks 2MB)</div>
                                                             <?php endif; ?>
 
-                                                            <!-- Tempat menampilkan nama file yang baru dipilih (Javascript dibutuhkan) -->
                                                             <div id="filename_<?= $name ?>" class="text-primary fs-8 fw-bold mt-1" style="display: none;"></div>
                                                         </div>
 
@@ -348,14 +578,11 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                                                     if (!empty($files)): ?>
                                                         <div class="mt-3 d-flex flex-wrap gap-2">
                                                             <?php foreach ($files as $index => $file):
-                                                                // =========================================================
-                                                                // PERBAIKAN 3: Deteksi Link G-Drive (File Kartu IKH)
-                                                                // =========================================================
                                                                 $isDrive = (strpos($file, '.') === false);
 
                                                                 if ($isDrive) {
                                                                     $fileUrl = 'https://drive.google.com/file/d/' . $file . '/preview';
-                                                                    $ext = 'pdf'; // Default tampilan teks ekstensi
+                                                                    $ext = 'pdf';
                                                                 } else {
                                                                     $fileUrl = base_url('uploads/ikh/' . $file);
                                                                     $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
@@ -418,20 +645,215 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
     </div>
 </div>
 
+
+<!-- Modal untuk Crop TTD -->
+<div class="modal fade" id="modalCropTtd" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered mw-600px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="fw-bold">Sesuaikan Tanda Tangan</h3>
+                <div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal">
+                    <i class="ki-outline ki-cross fs-1"></i>
+                </div>
+            </div>
+            <div class="modal-body text-center">
+                <div class="text-muted mb-3">Posisikan TTD di dalam kotak. Background putih akan otomatis dihapus.</div>
+
+                <!-- Area Gambar Crop -->
+                <div style="max-height: 400px; overflow: hidden; display: inline-block; width: 100%; border: 1px dashed #ccc; border-radius: 8px;">
+                    <img id="imageToCrop" src="" style="max-width: 100%; display: block;">
+                </div>
+
+                <!-- TAMBAHAN: Slider Rotasi Manual -->
+                <div class="mt-5 px-4">
+                    <label class="form-label fs-7 fw-bold text-muted d-block text-start mb-2">Geser untuk memutar gambar (Rotasi Manual):</label>
+                    <input type="range" id="sliderRotasi" class="form-range" min="-180" max="180" value="0">
+                </div>
+            </div>
+            <div class="modal-footer d-flex justify-content-between align-items-center w-100">
+                <!-- Tombol Rotasi Kiri & Kanan -->
+                <div>
+                    <button type="button" class="btn btn-icon btn-light-info me-2" id="btnRotateLeft" title="Putar Kiri 90 Derajat">
+                        <i class="ki-outline ki-arrow-circle-left fs-2"></i>
+                    </button>
+                    <button type="button" class="btn btn-icon btn-light-info" id="btnRotateRight" title="Putar Kanan 90 Derajat">
+                        <i class="ki-outline ki-arrow-circle-right fs-2"></i>
+                    </button>
+                </div>
+
+                <!-- Tombol Aksi -->
+                <div>
+                    <button type="button" class="btn btn-light me-2" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" id="btnProsesCrop">
+                        <i class="ki-outline ki-magic fs-2"></i> Crop & Hapus Latar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <?= $this->endSection(); ?>
 
 <?= $this->section('scripts'); ?>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script>
     $(document).ready(function() {
         $('[data-control="select2"]').select2();
 
-        // Inisialisasi Flatpickr untuk Input Tanggal Admin
+        // Inisialisasi Flatpickr
         $(".datepicker-admin").flatpickr({
             dateFormat: "Y-m-d"
         });
 
-        let csrfName = '<?= csrf_token() ?>';
-        let csrfHash = '<?= csrf_hash() ?>';
+        // =========================================================
+        // SCRIPT: FUNGSI TOGGLE EDIT DOKUMEN PESERTA (Admin)
+        // =========================================================
+        $('#btn_edit_pemohon, #btn_batal_pemohon').on('click', function(e) {
+            e.preventDefault();
+            $('#view_pemohon').toggleClass('d-none');
+            $('#form_edit_pemohon').toggleClass('d-none');
+        });
+        $('#btn_edit_dokumen_peserta').on('click', function(e) {
+            e.preventDefault();
+            $('.view-text-dokumen').addClass('d-none'); // Sembunyikan read-only
+            $('.edit-input-dokumen').removeClass('d-none'); // Munculkan kotak upload
+
+            $(this).addClass('d-none'); // Sembunyikan tombol 'Edit Dokumen'
+            $('#btn_batal_dokumen_peserta').removeClass('d-none'); // Munculkan tombol batal
+        });
+
+        // PERBAIKAN: Batal edit tanpa reload halaman
+        $('#btn_batal_dokumen_peserta').on('click', function(e) {
+            e.preventDefault();
+            $('.edit-input-dokumen').addClass('d-none'); // Sembunyikan kotak upload
+            $('.view-text-dokumen').removeClass('d-none'); // Munculkan kembali read-only
+
+            $(this).addClass('d-none'); // Sembunyikan tombol 'Batal Edit'
+            $('#btn_edit_dokumen_peserta').removeClass('d-none'); // Munculkan tombol edit kembali
+        });
+
+        // =========================================================
+        // SCRIPT: UPLOAD DOKUMEN SATUAN (Seperti Siswa)
+        // =========================================================
+        $('.btn-upload-ajax-admin').click(function() {
+            const idIkh = '<?= $ikh['id_ikh'] ?>';
+            let targetId = $(this).data('target');
+            let fileInput = $('#input_' + targetId)[0];
+            let btn = $(this);
+
+            if (fileInput.files.length === 0) {
+                toastr.warning("Silakan pilih file terlebih dahulu.");
+                return;
+            }
+
+            let fileData = fileInput.files[0];
+            if (fileData.size > 2 * 1024 * 1024) {
+                Swal.fire({
+                    text: "Ukuran file " + fileData.name + " terlalu besar! Maksimal hanya 2 MB.",
+                    icon: "error",
+                    customClass: {
+                        confirmButton: "btn btn-danger"
+                    }
+                });
+                $(fileInput).val('');
+                return;
+            }
+
+            let formData = new FormData();
+            formData.append('file_dokumen', fileData);
+            formData.append('input_name', targetId);
+            formData.append('id_ikh', idIkh);
+            formData.append(csrfName, csrfHash);
+
+            btn.find('.indicator-label').hide();
+            btn.find('.indicator-progress').show();
+            btn.prop('disabled', true);
+
+            $.ajax({
+                url: '<?= base_url('sw-admin/ikh/upload-ajax') ?>', // Pastikan endpoint ini benar
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(response) {
+                    if (response.csrf_hash) csrfHash = response.csrf_hash;
+
+                    if (response.success) {
+                        toastr.success(response.message || "File berhasil diunggah.");
+
+                        // 1. UPDATE TAMPILAN KOTAK EDIT (Warna Hijau & Tombol Tersimpan)
+                        $('#box_' + targetId).removeClass('border-gray-300').addClass('border-success bg-light-success');
+                        $('#status_' + targetId).removeClass('badge-light-danger').addClass('badge-success').html('<i class="ki-outline ki-check text-white fs-8 me-1"></i> Tersimpan');
+
+                        // Buat URL Blob lokal untuk preview sementara
+                        let localFileUrl = URL.createObjectURL(fileData);
+                        let newFileExt = fileData.name.split('.').pop().toLowerCase();
+                        let fileNameLabel = $('#box_' + targetId).find('label.fw-bold').text().trim();
+
+                        // Update tombol Preview di Form Edit
+                        let previewBtnEdit = $('#box_' + targetId).find('.btn-preview-berkas');
+                        if (previewBtnEdit.length > 0) {
+                            previewBtnEdit.attr('data-file-url', localFileUrl).attr('data-file-ext', newFileExt);
+                        } else {
+                            let newPreviewBtn = `<a href="javascript:void(0)" class="btn btn-icon btn-sm btn-light-primary hover-elevate-up btn-preview-berkas me-2" data-file-url="${localFileUrl}" data-file-ext="${newFileExt}" data-file-name="${fileNameLabel}" title="Lihat dokumen tersimpan"><i class="ki-outline ki-eye fs-3"></i></a>`;
+                            $('#status_' + targetId).before(newPreviewBtn);
+                        }
+
+                        // ----------------------------------------------------------------------
+                        // 2. PERBAIKAN: UPDATE TAMPILAN READ-ONLY SECARA REALTIME
+                        // Agar ketika di-klik "Batal Edit", tampilan awal sudah terupdate
+                        // ----------------------------------------------------------------------
+                        let readOnlyRow = $('#box_' + targetId).closest('.col-12').find('.view-text-dokumen');
+
+                        // Update Ikon Mata (Symbol)
+                        readOnlyRow.find('.symbol').html(`
+                            <a href="javascript:void(0)"
+                                class="symbol-label bg-light-primary text-primary hover-elevate-up btn-preview-berkas"
+                                data-file-url="${localFileUrl}"
+                                data-file-ext="${newFileExt}"
+                                data-file-name="${fileNameLabel}"
+                                title="Klik untuk melihat dokumen">
+                                <i class="ki-outline ki-eye fs-2 text-primary"></i>
+                            </a>
+                        `);
+
+                        // Update Judul & Deskripsi Text
+                        let textCol = readOnlyRow.find('.flex-grow-1');
+                        textCol.find('.mb-1').html(`
+                            <a href="javascript:void(0)"
+                                class="fs-6 fw-bold text-gray-800 text-hover-primary btn-preview-berkas"
+                                data-file-url="${localFileUrl}"
+                                data-file-ext="${newFileExt}"
+                                data-file-name="${fileNameLabel}">
+                                ${fileNameLabel}
+                            </a>
+                        `);
+                        textCol.find('.text-muted').text('Telah diunggah (Klik untuk lihat)');
+
+                        // Update Badge Status di ujung kanan menjadi "Valid"
+                        readOnlyRow.find('> div:last-child').html(`
+                            <span class="badge badge-light-success fw-bold px-3 py-2">
+                                <i class="ki-outline ki-check-circle fs-5 text-success me-1"></i> Valid
+                            </span>
+                        `);
+
+                        // Bersihkan input file setelah berhasil
+                        $(fileInput).val('');
+                    } else {
+                        toastr.error(response.message || "Gagal mengunggah file.");
+                    }
+                },
+                error: function() {
+                    toastr.error("Terjadi kesalahan jaringan atau tipe file tidak didukung.");
+                },
+                complete: function() {
+                    btn.find('.indicator-label').show();
+                    btn.find('.indicator-progress').hide();
+                    btn.prop('disabled', false);
+                }
+            });
+        });
 
         // 1. AJAX Untuk Update Status (Validasi, Proses, Final)
         $('.form-action-admin').on('submit', function(e) {
@@ -440,7 +862,7 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
             let btn = form.find('.btn-submit-admin');
             let formData = form.serialize() + '&' + csrfName + '=' + csrfHash;
 
-            btn.prop('disabled', true);
+            btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm align-middle ms-2"></span> Mengunggah...');
             $.post('<?= base_url('sw-admin/ikh/update-status') ?>', formData, function(res) {
                 csrfHash = res.csrf_hash;
                 if (res.success) {
@@ -452,7 +874,7 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                     }).then(() => location.reload());
                 } else {
                     toastr.error(res.message);
-                    btn.prop('disabled', false);
+                    btn.prop('disabled', false).html('<i class="ki-outline ki-cloud-add fs-2"></i> Terbitkan Dokumen');
                 }
             });
         });
@@ -535,28 +957,18 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
 
         // Script untuk menampilkan nama file yang dipilih
         $(document).on('change', '.input-file-custom', function(e) {
-            // Ambil ID dari input file yang sedang diubah
-            let inputId = $(this).attr('id'); // contoh: "file_file_riwayat_hidup"
+            let inputId = $(this).attr('id');
+            let nameTarget = inputId.replace('file_', '');
 
-            // Karena ID input pakai awalan "file_", kita sesuaikan untuk mencari target div filename-nya
-            let nameTarget = inputId.replace('file_', ''); // menjadi: "file_riwayat_hidup"
-
-            // Cek apakah ada file yang dipilih
             if (this.files && this.files.length > 0) {
                 let fileName = this.files[0].name;
-
-                // Tampilkan nama file dan ubah display menjadi block
                 $('#filename_' + nameTarget).text('Pilihan: ' + fileName).slideDown(200);
 
-                // Opsional: Ubah warna kotak menjadi sedikit berbeda (contoh menjadi border-info)
-                // untuk menandakan file sudah 'tersangkut' di input tapi belum disubmit
                 $('label[for="' + inputId + '"]').removeClass('border-primary text-primary').addClass('border-info text-info');
                 $('label[for="' + inputId + '"] i').removeClass('text-primary').addClass('text-info');
             } else {
-                // Jika file batal dipilih, sembunyikan kembali
                 $('#filename_' + nameTarget).hide().text('');
 
-                // Kembalikan warna ke semula (jika sebelumnya belum terupload)
                 if (!$('label[for="' + inputId + '"]').hasClass('bg-light-success')) {
                     $('label[for="' + inputId + '"]').removeClass('border-info text-info').addClass('border-primary text-primary');
                     $('label[for="' + inputId + '"] i').removeClass('text-info').addClass('text-primary');
@@ -564,9 +976,7 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
             }
         });
 
-        // =========================================================
-        // PERBAIKAN 4: Logic Modal Preview Berkas (Dibersihkan dari duplikasi)
-        // =========================================================
+        // Logic Modal Preview Berkas
         $(document).on('click', '.btn-preview-berkas', function(e) {
             e.preventDefault();
             let fileUrl = $(this).data('file-url');
@@ -575,7 +985,6 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
 
             $('#modal_preview_title').text(fileName);
 
-            // Logika Link Unduh (Support Google Drive Export)
             if (fileUrl.includes('drive.google.com')) {
                 let driveId = fileUrl.split('/d/')[1].split('/preview')[0];
                 let downloadUrl = 'https://drive.google.com/uc?export=download&id=' + driveId;
@@ -588,7 +997,6 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
             $('#modal_preview_berkas').modal('show');
 
             setTimeout(() => {
-                // Gunakan iFrame untuk membaca Google Drive dan PDF lokal
                 if (fileUrl.includes('drive.google.com') || fileExt === 'pdf') {
                     $('#preview_container').html('<iframe src="' + fileUrl + '" width="100%" height="600px" frameborder="0" style="border-radius: 8px;"></iframe>');
                 } else if (fileExt === 'jpg' || fileExt === 'jpeg' || fileExt === 'png') {
@@ -599,11 +1007,294 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
             }, 500);
         });
 
-        // Hapus sisa iFrame saat modal ditutup agar tidak membebani memori
         $('#modal_preview_berkas').on('hidden.bs.modal', function() {
             $('#preview_container').empty();
         });
 
+    });
+
+    $('#btn_tambah_riwayat').click(function(e) {
+        e.preventDefault();
+        let barisBaru = `
+                <div class="input-group mb-3 riwayat-row" style="display: none;">
+                    <input type="text" name="riwayat_pekerjaan[]" class="form-control form-control-lg form-control-solid" placeholder="Contoh: PT Contoh (2021 - Sekarang)" />
+                    <button type="button" class="btn btn-icon btn-light-danger btn-hapus-riwayat" title="Hapus Baris">
+                        <i class="ki-outline ki-trash fs-2"></i>
+                    </button>
+                </div>
+            `;
+        let el = $(barisBaru);
+        $('#riwayat_container').append(el);
+        el.slideDown('fast');
+    });
+
+    // Fungsi Hapus Baris (Event Delegation)
+    $(document).on('click', '.btn-hapus-riwayat', function(e) {
+        e.preventDefault();
+        let baris = $(this).closest('.riwayat-row');
+        baris.slideUp('fast', function() {
+            $(this).remove();
+        });
+    });
+
+    // =========================================================
+    // SCRIPT: TOGGLE CATATAN VALIDASI ADMIN
+    // =========================================================
+    // Fungsi untuk mengecek dan mengatur tampilan catatan
+    function toggleCatatanValidasi() {
+        let statusVal = $('select[name="status"]').val();
+        if (statusVal === 'ditolak') {
+            $('#container_catatan').slideDown('fast'); // Munculkan dengan animasi
+        } else {
+            $('#container_catatan').slideUp('fast'); // Sembunyikan
+            // Opsional: Kosongkan isi catatan jika diubah kembali ke TERIMA
+            // $('textarea[name="catatan_admin"]').val(''); 
+        }
+    }
+
+    // 1. Jalankan saat halaman pertama kali dimuat (untuk menyesuaikan dengan data awal)
+    toggleCatatanValidasi();
+
+    // 2. Jalankan saat dropdown diubah
+    // Karena Anda menggunakan Select2, kita tangkap event change-nya
+    $('select[name="status"]').on('change', function() {
+        toggleCatatanValidasi();
+    });
+</script>
+<script>
+    $(document).ready(function() {
+        let cropper;
+        const cropModal = $('#modalCropTtd');
+        const image = document.getElementById('imageToCrop');
+
+        // 1. Deteksi saat input TTD dipilih
+        $(document).on('change', '.input-ttd-crop', function(e) {
+            let files = e.target.files;
+            if (files && files.length > 0) {
+                let file = files[0];
+                let reader = new FileReader();
+
+                reader.onload = function(evt) {
+                    image.src = evt.target.result;
+                    cropModal.modal('show'); // Tampilkan modal
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // 2. Inisialisasi Cropper.js saat modal terbuka
+        cropModal.on('shown.bs.modal', function() {
+            cropper = new Cropper(image, {
+                aspectRatio: 1 / 1, // Memaksa ukuran 1:1 (Persegi)
+                viewMode: 1,
+                autoCropArea: 0.8,
+                dragMode: 'move',
+            });
+        }).on('hidden.bs.modal', function() {
+            // Hancurkan cropper saat modal ditutup agar tidak error saat dibuka lagi
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+            image.src = '';
+            $('#sliderRotasi').val(0);
+        });
+
+        // 3. Proses Crop & Hapus Background Putih
+        $('#btnProsesCrop').on('click', function() {
+            if (!cropper) return;
+
+            // Ambil hasil crop dengan resolusi tajam
+            let canvas = cropper.getCroppedCanvas({
+                width: 500,
+                height: 500
+            });
+
+            // --- ALGORITMA PENGHAPUS BACKGROUND PUTIH ---
+            let ctx = canvas.getContext('2d');
+            let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            let data = imageData.data;
+
+            for (let i = 0; i < data.length; i += 4) {
+                let r = data[i];
+                let g = data[i + 1];
+                let b = data[i + 2];
+
+                // Jika warna piksel terang/mendekati putih (R, G, B di atas 200)
+                if (r > 200 && g > 200 && b > 200) {
+                    data[i + 3] = 0; // Ubah nilai Alpha menjadi 0 (Transparan)
+                } else {
+                    // (Opsional) Ubah sisa tinta yang tidak terhapus menjadi hitam pekat 
+                    // agar hasil TTD di PDF nanti sangat jelas
+                    data[i] = 0; // R
+                    data[i + 1] = 0; // G
+                    data[i + 2] = 0; // B
+                }
+            }
+            ctx.putImageData(imageData, 0, 0);
+            // --------------------------------------------
+
+            // Ubah canvas menjadi file Blob (.png agar transparansi tersimpan)
+            canvas.toBlob(function(blob) {
+                // Kita manipulasi input file asli menggunakan DataTransfer
+                let dataTransfer = new DataTransfer();
+                let file = new File([blob], "ttd_siap_upload.png", {
+                    type: "image/png"
+                });
+                dataTransfer.items.add(file);
+
+                // Suntikkan file hasil crop ini ke input file_ttd asli Anda
+                document.getElementById('input_file_ttd').files = dataTransfer.files;
+
+                cropModal.modal('hide');
+
+                // Beri tahu user bahwa file sudah siap diupload
+                Swal.fire({
+                    text: "Tanda tangan berhasil di-crop dan background dihapus! Silakan klik tombol Upload.",
+                    icon: "success",
+                    buttonsStyling: false,
+                    confirmButtonText: "Ok, Mengerti!",
+                    customClass: {
+                        confirmButton: "btn btn-primary"
+                    }
+                });
+
+            }, 'image/png'); // Format harus PNG untuk menyimpan transparan
+        });
+
+        // ==========================================
+        // FITUR TAMBAHAN: ROTASI SLIDER & TOMBOL
+        // ==========================================
+
+        // 1. Putar gambar secara mulus saat slider digeser
+        $('#sliderRotasi').on('input', function() {
+            if (cropper) {
+                let derajat = $(this).val();
+                cropper.rotateTo(derajat); // rotateTo memutar ke sudut absolut yang spesifik
+            }
+        });
+
+        // 2. Tombol Putar Kiri (-90 derajat)
+        $('#btnRotateLeft').on('click', function() {
+            if (cropper) {
+                let nilaiSekarang = parseInt($('#sliderRotasi').val());
+                let nilaiBaru = nilaiSekarang - 90;
+
+                // Batasi agar tidak lewat dari batas minimum slider (-180)
+                if (nilaiBaru < -180) nilaiBaru = nilaiBaru + 360;
+
+                $('#sliderRotasi').val(nilaiBaru); // Update posisi slider
+                cropper.rotateTo(nilaiBaru); // Putar gambar
+            }
+        });
+
+        // 3. Tombol Putar Kanan (+90 derajat)
+        $('#btnRotateRight').on('click', function() {
+            if (cropper) {
+                let nilaiSekarang = parseInt($('#sliderRotasi').val());
+                let nilaiBaru = nilaiSekarang + 90;
+
+                // Batasi agar tidak lewat dari batas maksimum slider (180)
+                if (nilaiBaru > 180) nilaiBaru = nilaiBaru - 360;
+
+                $('#sliderRotasi').val(nilaiBaru); // Update posisi slider
+                cropper.rotateTo(nilaiBaru); // Putar gambar
+            }
+        });
+
+        // ==========================================
+    });
+
+    $('#btn_tambah_riwayat').click(function(e) {
+        e.preventDefault();
+        let barisBaru = `
+                <div class="input-group mb-3 riwayat-row" style="display: none;">
+                    <input type="text" name="riwayat_pekerjaan[]" class="form-control" placeholder="Contoh: PT Contoh (2021 - Sekarang)" />
+                    <button type="button" class="btn btn-icon btn-light-danger btn-hapus-riwayat" title="Hapus Baris">
+                        <i class="ki-outline ki-trash fs-2"></i>
+                    </button>
+                </div>
+            `;
+        let el = $(barisBaru);
+        $('#riwayat_container').append(el);
+        el.slideDown('fast');
+    });
+
+    // Fungsi Hapus Baris (Event Delegation)
+    $(document).on('click', '.btn-hapus-riwayat', function(e) {
+        e.preventDefault();
+        let baris = $(this).closest('.riwayat-row');
+        baris.slideUp('fast', function() {
+            $(this).remove();
+        });
+    });
+
+    // =========================================================
+    // SCRIPT BARU: GENERATE & UPLOAD SERTIFIKAT OTOMATIS
+    // =========================================================
+    $('.btn-generate-sertifikat').click(function() {
+        let btn = $(this);
+        let targetId = btn.data('target');
+        const idIkh = '<?= $ikh['id_ikh'] ?>';
+        let csrfName = '<?= csrf_token() ?>';
+        let csrfHash = '<?= csrf_hash() ?>';
+        Swal.fire({
+            title: 'Gunakan Sertifikat Sistem?',
+            text: "Sistem akan membuat sertifikat kelulusan Anda dan otomatis mengunggahnya ke server.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            confirmButtonText: 'Ya, Buat & Unggah',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                btn.find('.indicator-label').hide();
+                btn.find('.indicator-progress').show();
+                btn.prop('disabled', true);
+
+                let formData = new FormData();
+                formData.append('id_ikh', idIkh);
+                formData.append(csrfName, csrfHash);
+
+                $.ajax({
+                    url: '<?= base_url('sw-siswa/ikh/generate-sertifikat-drive') ?>', // Pastikan rute ini benar
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.csrf_hash) csrfHash = response.csrf_hash;
+
+                        if (response.success) {
+                            toastr.success(response.message);
+
+                            // Update tampilan kotak menjadi hijau (Tersimpan)
+                            $('#box_' + targetId).removeClass('border-gray-300').addClass('border-success bg-light-success');
+                            $('#status_' + targetId).removeClass('badge-light-danger').addClass('badge-success').html('<i class="ki-outline ki-check text-white fs-5 me-1"></i> Tersimpan');
+
+                            // Update tombol Preview
+                            let fileNameLabel = $('#box_' + targetId).find('label.fw-bold').text().trim();
+                            let previewBtn = $('#box_' + targetId).find('.btn-preview-berkas');
+
+                            if (previewBtn.length > 0) {
+                                previewBtn.attr('data-file-url', response.file_url).attr('data-file-ext', 'pdf');
+                            } else {
+                                let newPreviewBtn = `<a href="javascript:void(0)" class="btn btn-icon btn-sm btn-light-primary hover-elevate-up btn-preview-berkas me-2" data-file-url="${response.file_url}" data-file-ext="pdf" data-file-name="${fileNameLabel}" title="Lihat dokumen tersimpan"><i class="ki-outline ki-eye fs-3"></i></a>`;
+                                $('#status_' + targetId).before(newPreviewBtn);
+                            }
+                        } else {
+                            Swal.fire('Gagal!', response.message, 'error');
+                        }
+                    },
+                    complete: function() {
+                        btn.find('.indicator-label').show();
+                        btn.find('.indicator-progress').hide();
+                        btn.prop('disabled', false);
+                    }
+                });
+            }
+        });
     });
 </script>
 <?= $this->endSection(); ?>

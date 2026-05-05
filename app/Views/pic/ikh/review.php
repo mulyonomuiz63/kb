@@ -862,7 +862,7 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
             let btn = form.find('.btn-submit-admin');
             let formData = form.serialize() + '&' + csrfName + '=' + csrfHash;
 
-            btn.prop('disabled', true);
+            btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm align-middle ms-2"></span> Mengunggah...');
             $.post('<?= base_url('sw-pic/ikh/update-status') ?>', formData, function(res) {
                 csrfHash = res.csrf_hash;
                 if (res.success) {
@@ -874,7 +874,7 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                     }).then(() => location.reload());
                 } else {
                     toastr.error(res.message);
-                    btn.prop('disabled', false);
+                    btn.prop('disabled', false).html('<i class="ki-outline ki-cloud-add fs-2"></i> Terbitkan Dokumen');
                 }
             });
         });

@@ -184,8 +184,6 @@ class IkhController extends BaseController
                         </div>
                     </div>
                 ';
-
-                return $this->emailer->send($ikh['email'], $subject, $message);
             } else {
                 send_notif(
                     $ikh['id_siswa'],
@@ -238,15 +236,15 @@ class IkhController extends BaseController
                         </div>
                     </div>
                 ';
-
-                return $this->emailer->send($ikh['email'], $subject, $message);
             }
         }
 
         try {
             $this->ikhModel->update($id_ikh, $updateData);
+            $this->emailer->send($ikh['email'], $subject, $message);
             return $this->response->setJSON(['success' => true, 'message' => 'Status berhasil diperbarui!', 'csrf_hash' => csrf_hash()]);
         } catch (\Exception $e) {
+            $this->emailer->send($ikh['email'], $subject, $message);
             return $this->response->setJSON(['success' => false, 'message' => 'Gagal memperbarui status.', 'csrf_hash' => csrf_hash()]);
         }
     }
