@@ -645,9 +645,58 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
     </div>
 </div>
 
+
+<!-- Modal untuk Crop TTD -->
+<div class="modal fade" id="modalCropTtd" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered mw-600px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="fw-bold">Sesuaikan Tanda Tangan</h3>
+                <div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal">
+                    <i class="ki-outline ki-cross fs-1"></i>
+                </div>
+            </div>
+            <div class="modal-body text-center">
+                <div class="text-muted mb-3">Posisikan TTD di dalam kotak. Background putih akan otomatis dihapus.</div>
+
+                <!-- Area Gambar Crop -->
+                <div style="max-height: 400px; overflow: hidden; display: inline-block; width: 100%; border: 1px dashed #ccc; border-radius: 8px;">
+                    <img id="imageToCrop" src="" style="max-width: 100%; display: block;">
+                </div>
+
+                <!-- TAMBAHAN: Slider Rotasi Manual -->
+                <div class="mt-5 px-4">
+                    <label class="form-label fs-7 fw-bold text-muted d-block text-start mb-2">Geser untuk memutar gambar (Rotasi Manual):</label>
+                    <input type="range" id="sliderRotasi" class="form-range" min="-180" max="180" value="0">
+                </div>
+            </div>
+            <div class="modal-footer d-flex justify-content-between align-items-center w-100">
+                <!-- Tombol Rotasi Kiri & Kanan -->
+                <div>
+                    <button type="button" class="btn btn-icon btn-light-info me-2" id="btnRotateLeft" title="Putar Kiri 90 Derajat">
+                        <i class="ki-outline ki-arrow-circle-left fs-2"></i>
+                    </button>
+                    <button type="button" class="btn btn-icon btn-light-info" id="btnRotateRight" title="Putar Kanan 90 Derajat">
+                        <i class="ki-outline ki-arrow-circle-right fs-2"></i>
+                    </button>
+                </div>
+
+                <!-- Tombol Aksi -->
+                <div>
+                    <button type="button" class="btn btn-light me-2" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" id="btnProsesCrop">
+                        <i class="ki-outline ki-magic fs-2"></i> Crop & Hapus Latar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <?= $this->endSection(); ?>
 
 <?= $this->section('scripts'); ?>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script>
     $(document).ready(function() {
         $('[data-control="select2"]').select2();
@@ -1010,6 +1059,242 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
     // Karena Anda menggunakan Select2, kita tangkap event change-nya
     $('select[name="status"]').on('change', function() {
         toggleCatatanValidasi();
+    });
+</script>
+<script>
+    $(document).ready(function() {
+        let cropper;
+        const cropModal = $('#modalCropTtd');
+        const image = document.getElementById('imageToCrop');
+
+        // 1. Deteksi saat input TTD dipilih
+        $(document).on('change', '.input-ttd-crop', function(e) {
+            let files = e.target.files;
+            if (files && files.length > 0) {
+                let file = files[0];
+                let reader = new FileReader();
+
+                reader.onload = function(evt) {
+                    image.src = evt.target.result;
+                    cropModal.modal('show'); // Tampilkan modal
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // 2. Inisialisasi Cropper.js saat modal terbuka
+        cropModal.on('shown.bs.modal', function() {
+            cropper = new Cropper(image, {
+                aspectRatio: 1 / 1, // Memaksa ukuran 1:1 (Persegi)
+                viewMode: 1,
+                autoCropArea: 0.8,
+                dragMode: 'move',
+            });
+        }).on('hidden.bs.modal', function() {
+            // Hancurkan cropper saat modal ditutup agar tidak error saat dibuka lagi
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+            image.src = '';
+            $('#sliderRotasi').val(0);
+        });
+
+        // 3. Proses Crop & Hapus Background Putih
+        $('#btnProsesCrop').on('click', function() {
+            if (!cropper) return;
+
+            // Ambil hasil crop dengan resolusi tajam
+            let canvas = cropper.getCroppedCanvas({
+                width: 500,
+                height: 500
+            });
+
+            // --- ALGORITMA PENGHAPUS BACKGROUND PUTIH ---
+            let ctx = canvas.getContext('2d');
+            let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            let data = imageData.data;
+
+            for (let i = 0; i < data.length; i += 4) {
+                let r = data[i];
+                let g = data[i + 1];
+                let b = data[i + 2];
+
+                // Jika warna piksel terang/mendekati putih (R, G, B di atas 200)
+                if (r > 200 && g > 200 && b > 200) {
+                    data[i + 3] = 0; // Ubah nilai Alpha menjadi 0 (Transparan)
+                } else {
+                    // (Opsional) Ubah sisa tinta yang tidak terhapus menjadi hitam pekat 
+                    // agar hasil TTD di PDF nanti sangat jelas
+                    data[i] = 0; // R
+                    data[i + 1] = 0; // G
+                    data[i + 2] = 0; // B
+                }
+            }
+            ctx.putImageData(imageData, 0, 0);
+            // --------------------------------------------
+
+            // Ubah canvas menjadi file Blob (.png agar transparansi tersimpan)
+            canvas.toBlob(function(blob) {
+                // Kita manipulasi input file asli menggunakan DataTransfer
+                let dataTransfer = new DataTransfer();
+                let file = new File([blob], "ttd_siap_upload.png", {
+                    type: "image/png"
+                });
+                dataTransfer.items.add(file);
+
+                // Suntikkan file hasil crop ini ke input file_ttd asli Anda
+                document.getElementById('input_file_ttd').files = dataTransfer.files;
+
+                cropModal.modal('hide');
+
+                // Beri tahu user bahwa file sudah siap diupload
+                Swal.fire({
+                    text: "Tanda tangan berhasil di-crop dan background dihapus! Silakan klik tombol Upload.",
+                    icon: "success",
+                    buttonsStyling: false,
+                    confirmButtonText: "Ok, Mengerti!",
+                    customClass: {
+                        confirmButton: "btn btn-primary"
+                    }
+                });
+
+            }, 'image/png'); // Format harus PNG untuk menyimpan transparan
+        });
+
+        // ==========================================
+        // FITUR TAMBAHAN: ROTASI SLIDER & TOMBOL
+        // ==========================================
+
+        // 1. Putar gambar secara mulus saat slider digeser
+        $('#sliderRotasi').on('input', function() {
+            if (cropper) {
+                let derajat = $(this).val();
+                cropper.rotateTo(derajat); // rotateTo memutar ke sudut absolut yang spesifik
+            }
+        });
+
+        // 2. Tombol Putar Kiri (-90 derajat)
+        $('#btnRotateLeft').on('click', function() {
+            if (cropper) {
+                let nilaiSekarang = parseInt($('#sliderRotasi').val());
+                let nilaiBaru = nilaiSekarang - 90;
+
+                // Batasi agar tidak lewat dari batas minimum slider (-180)
+                if (nilaiBaru < -180) nilaiBaru = nilaiBaru + 360;
+
+                $('#sliderRotasi').val(nilaiBaru); // Update posisi slider
+                cropper.rotateTo(nilaiBaru); // Putar gambar
+            }
+        });
+
+        // 3. Tombol Putar Kanan (+90 derajat)
+        $('#btnRotateRight').on('click', function() {
+            if (cropper) {
+                let nilaiSekarang = parseInt($('#sliderRotasi').val());
+                let nilaiBaru = nilaiSekarang + 90;
+
+                // Batasi agar tidak lewat dari batas maksimum slider (180)
+                if (nilaiBaru > 180) nilaiBaru = nilaiBaru - 360;
+
+                $('#sliderRotasi').val(nilaiBaru); // Update posisi slider
+                cropper.rotateTo(nilaiBaru); // Putar gambar
+            }
+        });
+
+        // ==========================================
+    });
+
+    $('#btn_tambah_riwayat').click(function(e) {
+        e.preventDefault();
+        let barisBaru = `
+                <div class="input-group mb-3 riwayat-row" style="display: none;">
+                    <input type="text" name="riwayat_pekerjaan[]" class="form-control" placeholder="Contoh: PT Contoh (2021 - Sekarang)" />
+                    <button type="button" class="btn btn-icon btn-light-danger btn-hapus-riwayat" title="Hapus Baris">
+                        <i class="ki-outline ki-trash fs-2"></i>
+                    </button>
+                </div>
+            `;
+        let el = $(barisBaru);
+        $('#riwayat_container').append(el);
+        el.slideDown('fast');
+    });
+
+    // Fungsi Hapus Baris (Event Delegation)
+    $(document).on('click', '.btn-hapus-riwayat', function(e) {
+        e.preventDefault();
+        let baris = $(this).closest('.riwayat-row');
+        baris.slideUp('fast', function() {
+            $(this).remove();
+        });
+    });
+
+    // =========================================================
+    // SCRIPT BARU: GENERATE & UPLOAD SERTIFIKAT OTOMATIS
+    // =========================================================
+    $('.btn-generate-sertifikat').click(function() {
+        let btn = $(this);
+        let targetId = btn.data('target');
+        const idIkh = '<?= $ikh['id_ikh'] ?>';
+        let csrfName = '<?= csrf_token() ?>';
+        let csrfHash = '<?= csrf_hash() ?>';
+        Swal.fire({
+            title: 'Gunakan Sertifikat Sistem?',
+            text: "Sistem akan membuat sertifikat kelulusan Anda dan otomatis mengunggahnya ke server.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            confirmButtonText: 'Ya, Buat & Unggah',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                btn.find('.indicator-label').hide();
+                btn.find('.indicator-progress').show();
+                btn.prop('disabled', true);
+
+                let formData = new FormData();
+                formData.append('id_ikh', idIkh);
+                formData.append(csrfName, csrfHash);
+
+                $.ajax({
+                    url: '<?= base_url('sw-siswa/ikh/generate-sertifikat-drive') ?>', // Pastikan rute ini benar
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.csrf_hash) csrfHash = response.csrf_hash;
+
+                        if (response.success) {
+                            toastr.success(response.message);
+
+                            // Update tampilan kotak menjadi hijau (Tersimpan)
+                            $('#box_' + targetId).removeClass('border-gray-300').addClass('border-success bg-light-success');
+                            $('#status_' + targetId).removeClass('badge-light-danger').addClass('badge-success').html('<i class="ki-outline ki-check text-white fs-5 me-1"></i> Tersimpan');
+
+                            // Update tombol Preview
+                            let fileNameLabel = $('#box_' + targetId).find('label.fw-bold').text().trim();
+                            let previewBtn = $('#box_' + targetId).find('.btn-preview-berkas');
+
+                            if (previewBtn.length > 0) {
+                                previewBtn.attr('data-file-url', response.file_url).attr('data-file-ext', 'pdf');
+                            } else {
+                                let newPreviewBtn = `<a href="javascript:void(0)" class="btn btn-icon btn-sm btn-light-primary hover-elevate-up btn-preview-berkas me-2" data-file-url="${response.file_url}" data-file-ext="pdf" data-file-name="${fileNameLabel}" title="Lihat dokumen tersimpan"><i class="ki-outline ki-eye fs-3"></i></a>`;
+                                $('#status_' + targetId).before(newPreviewBtn);
+                            }
+                        } else {
+                            Swal.fire('Gagal!', response.message, 'error');
+                        }
+                    },
+                    complete: function() {
+                        btn.find('.indicator-label').show();
+                        btn.find('.indicator-progress').hide();
+                        btn.prop('disabled', false);
+                    }
+                });
+            }
+        });
     });
 </script>
 <?= $this->endSection(); ?>
