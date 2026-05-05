@@ -448,7 +448,8 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                                     </button>
                                 </form>
                             </div>
-
+                            
+                            <?php if($stat_val == 'valid'): ?>
                             <div class="border rounded p-5 border-primary mb-10 <?= !empty($ikh['file_riwayat_hidup']) ? 'border-success bg-light-success' : 'border-primary' ?>">
                                 <h4 class="fw-bold text-gray-800 mb-4">2. Berkas Administrasi IKH</h4>
 
@@ -609,6 +610,7 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                                     </form>
                                 <?php endif; ?>
                             </div>
+                            <?php endif; ?>
 
                         </div>
                     </div>
