@@ -47,6 +47,7 @@ class TransaksiController extends BaseController
 
         $this->transaksiModel->where('tgl_exp <', date('Y-m-d H:i:s'))
             ->where('idsiswa', session('id'))
+            ->where('status !=', 'S')
             ->set(['status' => 'E'])
             ->update();
         $data['transaksi'] = $this->transaksiModel->getByIdSiswaAll(session('id'));
