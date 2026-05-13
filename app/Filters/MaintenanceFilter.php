@@ -21,7 +21,8 @@ class MaintenanceFilter implements FilterInterface
                 '::1',
                 '193.186.4.147',
                 '103.130.18.252',
-                '46.250.226.163' // <-- Masukkan IP dari gambar ke sini
+                '46.250.226.163',
+                '2407:3640:2227:600::1' // <-- Masukkan IP dari gambar ke sini
             ];
 
             // Dapatkan IP pengunjung saat ini
