@@ -39,6 +39,7 @@ class Filters extends BaseFilters
         'roleCheck'     => \App\Filters\RoleFilter::class,
         'isGuest'       => \App\Filters\GuestFilter::class,
         'cekData'       => \App\Filters\CheckDataSiswa::class,
+        'maintenance' => \App\Filters\MaintenanceFilter::class,
     ];
 
     /**
