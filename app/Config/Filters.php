@@ -81,6 +81,7 @@ class Filters extends BaseFilters
             // 'humangate',
             // 'analytics',
             // 'csrf',
+            'maintenance',
             'csrf' => [
             'except' => [
                     'sw-admin/siswa/updateKuota',

@@ -159,3 +159,7 @@ $routes->get('otomatis-kirim-ujian', 'Siswa\UjianController::otomatisKirimUjian'
 // Route untuk Setup Google Drive Admin (Hanya dijalankan sekali oleh Anda)
 $routes->get('auth/admin-drive', 'AuthController::authAdminDrive');
 $routes->get('google-callback-admin', 'AuthController::adminDriveCallback');
+
+
+//maintenance mode
+$routes->get('maintenance', 'Maintenance::index');
