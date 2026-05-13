@@ -13,13 +13,31 @@ class MaintenanceFilter implements FilterInterface
         // Cek apakah mode maintenance aktif di .env
         if (env('app.maintenanceMode', false)) {
 
-            helper('url'); // Pastikan helper URL di-load
+            // =======================================================
+            // 1. PENGATURAN IP YANG DIIZINKAN (WHITELIST)
+            // =======================================================
+            $allowed_ips = [
+                '127.0.0.1',
+                '::1',
+                '193.186.4.147' // <-- Masukkan IP dari gambar ke sini
+            ];
 
-            $current_url = current_url(); // Dapatkan URL yang sedang diakses user saat ini (Full URL)
-            $target_url  = site_url('maintenance'); // Dapatkan target URL maintenance (Full URL)
+            // Dapatkan IP pengunjung saat ini
+            $user_ip = $request->getIPAddress();
 
-            // Jika URL saat ini BUKAN URL maintenance, maka alihkan!
-            // Ini dijamin mencegah perulangan (loop)
+            // Jika IP pengunjung ada di dalam daftar $allowed_ips, 
+            // hentikan filter di sini dan biarkan mereka masuk!
+            if (in_array($user_ip, $allowed_ips)) {
+                return;
+            }
+            // =======================================================
+
+            // Jika IP TIDAK diizinkan, jalankan logika redirect maintenance
+            helper('url');
+
+            $current_url = current_url();
+            $target_url  = site_url('maintenance');
+
             if ($current_url !== $target_url) {
                 return redirect()->to($target_url);
             }
@@ -28,6 +46,6 @@ class MaintenanceFilter implements FilterInterface
 
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
     {
-        // Tidak perlu aksi setelah request
+        // Tidak ada aksi
     }
 }
