@@ -19,7 +19,8 @@ class MaintenanceFilter implements FilterInterface
             $allowed_ips = [
                 '127.0.0.1',
                 '::1',
-                '193.186.4.147' // <-- Masukkan IP dari gambar ke sini
+                '193.186.4.147',
+                '103.130.18.252' // <-- Masukkan IP dari gambar ke sini
             ];
 
             // Dapatkan IP pengunjung saat ini
