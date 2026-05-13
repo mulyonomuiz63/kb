@@ -10,31 +10,26 @@ class MaintenanceFilter implements FilterInterface
 {
     public function before(RequestInterface $request, $arguments = null)
     {
-        // Cek apakah mode maintenance aktif di .env
         if (env('app.maintenanceMode', false)) {
 
-            // =======================================================
-            // 1. PENGATURAN IP YANG DIIZINKAN (WHITELIST)
-            // =======================================================
-            $allowed_ips = [
-                '127.0.0.1',
-                '::1',
-                '103.47.134.111',
-            ];
+            $session = \Config\Services::session();
 
-            // Dapatkan IP pengunjung saat ini
-            $user_ip = $request->getIPAddress();
-
-            // Jika IP pengunjung ada di dalam daftar $allowed_ips, 
-            // hentikan filter di sini dan biarkan mereka masuk!
-            if (in_array($user_ip, $allowed_ips)) {
-                return;
+            // 1. CEK KUNCI RAHASIA DI URL
+            // Jika Anda mengakses: domainanda.com/?bypass=buka_pintu
+            if ($request->getGet('bypass') === 'buka_pintu') {
+                // Simpan tiket masuk di session
+                $session->set('bebas_maintenance', true);
+                // Redirect ke halaman depan agar URL kembali bersih
+                return redirect()->to('/');
             }
-            // =======================================================
 
-            // Jika IP TIDAK diizinkan, jalankan logika redirect maintenance
+            // 2. JIKA PUNYA TIKET MASUK, IZINKAN LEWAT
+            if ($session->get('bebas_maintenance') === true) {
+                return; // Lolos dari filter!
+            }
+
+            // --- Logika redirect maintenance lama Anda tetap di bawah sini ---
             helper('url');
-
             $current_url = current_url();
             $target_url  = site_url('maintenance');
 
