@@ -10,14 +10,18 @@ class MaintenanceFilter implements FilterInterface
 {
     public function before(RequestInterface $request, $arguments = null)
     {
-        // Tentukan kapan maintenance aktif. 
-        // Anda bisa menggunakan variabel di .env atau database.
-        $isMaintenance = env('app.maintenanceMode', false);
+        // Cek apakah mode maintenance aktif di .env
+        if (env('app.maintenanceMode', false)) {
 
-        if ($isMaintenance) {
-            // Pastikan halaman maintenance itu sendiri tidak ikut ter-redirect (looping)
-            if ($request->getUri()->getPath() !== 'maintenance') {
-                return redirect()->to(site_url('maintenance'));
+            helper('url'); // Pastikan helper URL di-load
+
+            $current_url = current_url(); // Dapatkan URL yang sedang diakses user saat ini (Full URL)
+            $target_url  = site_url('maintenance'); // Dapatkan target URL maintenance (Full URL)
+
+            // Jika URL saat ini BUKAN URL maintenance, maka alihkan!
+            // Ini dijamin mencegah perulangan (loop)
+            if ($current_url !== $target_url) {
+                return redirect()->to($target_url);
             }
         }
     }

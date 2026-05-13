@@ -6,7 +6,12 @@ class Maintenance extends BaseController
 {
     public function index()
     {
-        // Mengirim status HTTP 503 (Service Unavailable) agar SEO Google tahu ini sementara
+        // Pengaman ekstra: Jika maintenance OFF tapi user iseng akses /maintenance, kembalikan ke home
+        if (env('app.maintenanceMode', false) === false) {
+            return redirect()->to('/');
+        }
+
+        // Tampilkan halaman
         $this->response->setStatusCode(503);
         return view('errors/html/maintenance_view');
     }
