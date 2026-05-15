@@ -87,11 +87,21 @@ class TransaksiController extends BaseController
                         : '<span class="text-muted fs-7 fw-semibold">-</span>';
 
                     // Kolom Pembayaran (Format Tanggal)
+                    $label_jenis_bayar = '';
+                    if ($s->jenis_bayar === 'online') {
+                        $label_jenis_bayar = '<div class="text-info fw-semibold fs-7"><i class="ki-duotone ki-credit-cart fs-6 me-1 text-info"><span class="path1"></span><span class="path2"></span></i> Midtrans</div>';
+                    } elseif ($s->jenis_bayar === 'manual') {
+                        $label_jenis_bayar = '<div class="text-primary fw-semibold fs-7"><i class="ki-duotone ki-wallet fs-6 me-1 text-primary"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i> Manual Transfer</div>';
+                    } else {
+                        $label_jenis_bayar = '<div class="text-muted fw-semibold fs-7">Belum memilih</div>';
+                    }
+
+                    // Kolom Pembayaran (Format Tanggal + Jenis Bayar)
                     if ($s->tgl_pembayaran) {
                         $date = new \DateTime($s->tgl_pembayaran);
-                        $row['pembayaran'] = '<span class="text-gray-700 fw-semibold fs-6">' . $date->format('d M Y, H:i') . '</span>';
+                        $row['pembayaran'] = '<div class="text-gray-800 fw-bold fs-6">' . $date->format('d M Y, H:i') . '</div>' . $label_jenis_bayar;
                     } else {
-                        $row['pembayaran'] = '<span class="text-muted fw-semibold fs-7">-</span>';
+                        $row['pembayaran'] = '<div class="text-muted fw-semibold fs-6">-</div>' . $label_jenis_bayar;
                     }
 
                     $diskon         = ($s->nominal * $s->diskon) / 100;
