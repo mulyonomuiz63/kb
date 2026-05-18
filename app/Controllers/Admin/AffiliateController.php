@@ -363,9 +363,12 @@ class AffiliateController extends BaseController
 
             // Ambil data komisi dengan pagination
             $komisi = $this->komisi
-                ->where('kode_affiliate', $id)
-                ->orderBy('created_at', 'DESC')
-                ->paginate(15, 'komisi');
+            ->select('affiliate_commissions.*, siswa.nama_siswa')
+            ->join('transaksi', 'transaksi.idtransaksi=affiliate_commissions.id_transaksi')
+            ->join('siswa', 'siswa.id_siswa=transaksi.idsiswa')
+            ->where('kode_affiliate', $id)
+            ->orderBy('tgl_approved', 'DESC')
+            ->paginate(15, 'komisi');
 
             $data['breadcrumbs'] = [
                 ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
