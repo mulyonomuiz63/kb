@@ -216,7 +216,7 @@ class AffiliateController extends BaseController
         $paket_id       = $this->request->getPost('paket_id');
         $kode_affiliate = $affiliate['kode_affiliate'];
         $now       = date('Y-m-d H:i:s');
-        $expiredAt = date('Y-m-d H:i:s', strtotime('+7 days'));
+        $expiredAt = date('Y-m-d H:i:s', strtotime('+1 months'));
     
         // 🔍 CEK DATA EXISTING
         $existing = $this->affiliateLinkModel

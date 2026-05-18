@@ -322,13 +322,13 @@ class AffiliateController extends BaseController
         if ($affiliate && $affiliate['user_id'] != session()->get('id')) {
 
             // Cek apakah link belum expired
-            if ($affiliateLink['expired_at'] > $now) {
+            // if ($affiliateLink['expired_at'] > $now) {
                 // Simpan session affiliate
                 $data = [
                     'short_code' => $affiliateLink['short_code'],
                 ];
                 session()->set($data);
-            }
+            // }
         }
 
         // Apapun kondisinya (expired atau punya sendiri), tetap redirect ke halaman pesan
