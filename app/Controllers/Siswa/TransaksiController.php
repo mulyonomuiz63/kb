@@ -181,7 +181,7 @@ class TransaksiController extends BaseController
             $shortCode = session()->get('short_code');
             if ($shortCode) {
                 $affiliateLink = $this->affiliateLinkModel->where('short_code', $shortCode)->first();
-                if ($affiliateLink && $affiliateLink['expired_at'] > date('Y-m-d H:i:s')) {
+                // if ($affiliateLink && $affiliateLink['expired_at'] > date('Y-m-d H:i:s')) {
                     $affiliateCek = $this->affiliateModel->where('kode_affiliate', $affiliateLink['kode_affiliate'])->first();
                     if (session()->get('id') != $affiliateCek['user_id']) {
                         $this->affiliateCommissionModel->insert([
@@ -192,7 +192,7 @@ class TransaksiController extends BaseController
                             'harga'          => $totalVoucher,
                         ]);
                     }
-                }
+                // }
             }
 
             // 7. Commit & Kirim Email
