@@ -98,6 +98,7 @@
                                     </th>
                                     <th class="w-50px text-center">No</th>
                                     <th class="min-w-150px">Pemesan</th>
+                                    <th class="min-w-150px">Paket</th>
                                     <th class="text-end min-w-125px">Harga</th>
                                     <th class="text-end min-w-100px">Komisi %</th>
                                     <th class="text-end min-w-125px">Total</th>
@@ -123,6 +124,9 @@
                                             <td class="text-center text-gray-800 fw-bold"><?= $no++ ?></td>
                                             <td>
                                                 <span class="text-gray-800 fw-bold"><?= esc($k['nama_siswa']) ?></span>
+                                            </td>
+                                            <td>
+                                                <span class="text-gray-800 fw-bold"><?= esc($k['nama_paket']) ?></span>
                                             </td>
                                             <td class="text-end">
                                                 Rp <?= number_format($k['harga'], 0, ',', '.') ?>

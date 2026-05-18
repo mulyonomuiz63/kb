@@ -131,6 +131,7 @@
                                     <tr class="text-start text-gray-400 fw-bold fs-7 text-uppercase gs-0">
                                         <th class="w-50px">No</th>
                                         <th class="min-w-125px">Pemesan</th>
+                                        <th class="min-w-125px">Paket</th>
                                         <th class="text-end">Harga</th>
                                         <th class="text-center">Komisi</th>
                                         <th class="text-end">Total</th>
@@ -149,6 +150,13 @@
                                                     <div class="d-flex flex-column">
                                                         <span class="text-gray-800 fw-bold text-hover-primary mb-1 fs-6">
                                                             <?= ucwords(strtolower($k['nama_siswa'])) ?>
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex flex-column">
+                                                        <span class="text-gray-800 fw-bold text-hover-primary mb-1 fs-6">
+                                                            <?= ucwords(strtolower($k['nama_paket'])) ?>
                                                         </span>
                                                     </div>
                                                 </td>

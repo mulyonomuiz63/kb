@@ -46,11 +46,14 @@ class AffiliateController extends BaseController
     
         // Pagination komisi (WAJIB pakai group)
         $data['komisi'] = $this->komisi
-            ->select('affiliate_commissions.*, siswa.nama_siswa')
-            ->join('transaksi', 'transaksi.idtransaksi=affiliate_commissions.id_transaksi')
-            ->join('siswa', 'siswa.id_siswa=transaksi.idsiswa')
-            ->where('kode_affiliate', $affiliate->kode_affiliate)
-            ->orderBy('tgl_approved', 'DESC')
+            ->select('affiliate_commissions.*, siswa.nama_siswa, paket.nama_paket') // Tambahkan kolom paket di sini
+            ->join('transaksi', 'transaksi.idtransaksi = affiliate_commissions.id_transaksi')
+            ->join('detail_transaksi', 'detail_transaksi.idtransaksi = transaksi.idtransaksi')
+            ->join('paket', 'paket.idpaket = detail_transaksi.idpaket')
+            ->join('siswa', 'siswa.id_siswa = transaksi.idsiswa')
+            ->where('affiliate_commissions.kode_affiliate', $affiliate->kode_affiliate)
+            ->groupBy('affiliate_commissions.id') // Group by berdasarkan id unik detail transaksi jika ingin setiap item dalam keranjang punya row sendiri
+            ->orderBy('affiliate_commissions.tgl_approved', 'DESC')
             ->paginate(10, 'komisi');
     
         $data['pager'] = $this->komisi->pager;
