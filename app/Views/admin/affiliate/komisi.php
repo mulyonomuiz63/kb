@@ -241,7 +241,7 @@ $(function () {
 
         $('#totalKomisi').text(formatRupiah(total));
 
-        // enable tombol jika >= 100rb
+        // Enable tombol jika total pencairan >= 100rb
         $('#btnUpdateKomisi').prop('disabled', total < 100000 || checked.length === 0);
     }
 
@@ -256,7 +256,7 @@ $(function () {
         hitungTotal();
     });
 
-    // Submit bulk (Sama persis tidak ada yang dirubah)
+    // Submit bulk
     $('#btnUpdateKomisi').on('click', function () {
 
         let ids = [];
@@ -265,42 +265,56 @@ $(function () {
             ids.push($(this).data('id'));
         });
 
-
-        swal({
-        title: 'Yakin?',
-        text: 'Pengajuan affiliate ini akan dibatalkan',
-        type: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Ya, batalkan',
-        cancelButtonText: 'Batal',
-        padding: '2em'
+        // 1. Perbaikan Wording (sisa copy-paste sebelumnya)
+        // 2. Perbaikan Sintaks SweetAlert (Menggunakan Swal.fire dan icon)
+        Swal.fire({
+            title: 'Proses Pencairan?',
+            text: 'Dana komisi yang dipilih akan diproses untuk pencairan ke rekening affiliate.',
+            icon: 'warning', 
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, Proses Pencairan',
+            cancelButtonText: 'Batal'
         }).then(function (result) {
     
-            if (result.value) {
-                $.post("<?= base_url('sw-admin/affiliate/processKomisi') ?>", {
+            // Mengakomodasi SweetAlert2 (isConfirmed) atau versi lama (value)
+            if (result.isConfirmed || result.value) { 
+                
+                // 3. Perbaikan Object Key CSRF menggunakan Bracket Notation []
+                // Agar terhindar dari Syntax Error jika csrf_token() mengandung karakter tertentu
+                let payload = {
                     ids: ids,
-                    <?= csrf_token() ?>: "<?= csrf_hash() ?>"
-                }, function (response) {
+                    ["<?= csrf_token() ?>"]: "<?= csrf_hash() ?>" 
+                };
+
+                $.post("<?= base_url('sw-admin/affiliate/processKomisi') ?>", payload, function (response) {
     
                     if (response.status === 'success') {
-                        swal({
+                        Swal.fire({
                             title: 'Berhasil!',
                             text: response.message,
-                            type: 'success',
-                            padding: '2em'
+                            icon: 'success'
                         }).then(function () {
                             location.reload();
                         });
                     } else {
-                        swal({
+                        Swal.fire({
                             title: 'Gagal!',
                             text: response.message,
-                            type: 'error',
-                            padding: '2em'
+                            icon: 'error'
                         });
                     }
     
-                }, 'json');
+                }, 'json').fail(function() {
+                    // 4. Tambahkan Penanganan Error AJAX
+                    // Jika token CSRF expired atau controller error, sistem tidak akan "diam" saja.
+                    Swal.fire({
+                        title: 'Terjadi Kesalahan!',
+                        text: 'Gagal terhubung ke server. Silakan muat ulang halaman dan coba lagi.',
+                        icon: 'error'
+                    });
+                });
             }
     
         });

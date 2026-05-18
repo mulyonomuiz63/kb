@@ -46,23 +46,33 @@ class AffiliateController extends BaseController
             affiliates.kode_affiliate,
             affiliates.created_at,
 
+            -- 1. Menghitung Total Komisi yang Menunggu Pencairan (Pending / Proses)
             IFNULL(
                 SUM(
                     CASE 
-                        WHEN c.status = 'approved'
-                         AND c.status_penarikan = 'pending'
+                        WHEN c.status = 'approved' AND c.status_penarikan IN ('pending', 'proses')
                         THEN (c.harga * c.komisi / 100)
                         ELSE 0
                     END
                 ),
-            0) AS total_komisi
+            0) AS total_komisi_pending,
+
+            -- 2. Menghitung Total Komisi yang Sudah Berhasil Dicairkan (Success / Selesai)
+            IFNULL(
+                SUM(
+                    CASE 
+                        WHEN c.status = 'approved' AND c.status_penarikan = 'success'
+                        THEN (c.harga * c.komisi / 100)
+                        ELSE 0
+                    END
+                ),
+            0) AS total_komisi_dicairkan
         ")
             ->join('siswa', 'siswa.id_siswa = affiliates.user_id')
+            // Hapus filter 'pending' di sini agar kita bisa mengambil data yang sudah cair juga
             ->join(
                 'affiliate_commissions c',
-                'c.kode_affiliate = affiliates.kode_affiliate 
-             AND c.status = "approved"
-             AND c.status_penarikan IN ("pending")',
+                'c.kode_affiliate = affiliates.kode_affiliate AND c.status = "approved"',
                 'left'
             )
             ->where('affiliates.status !=', '2')
@@ -77,7 +87,11 @@ class AffiliateController extends BaseController
 
         $totalData = $builder->countAllResults(false);
 
-        $builder->orderBy('affiliates.status', 'asc')
+        // 🔥 LOGIKA SORTING (PENGURUTAN)
+        // 1. Prioritaskan Nominal Pending/Pencairan paling besar di atas.
+        // 2. Yang nominal pendingnya 0 (termasuk yang sudah cair semua) otomatis turun ke bawah.
+        $builder->orderBy('total_komisi_pending', 'desc')
+            ->orderBy('affiliates.status', 'asc')
             ->orderBy('affiliates.id_affiliate', 'desc')
             ->limit($length, $start);
 
@@ -92,25 +106,49 @@ class AffiliateController extends BaseController
                     $badge = 'badge-success';
                     $text  = 'Approved';
                     $btn = '
-                            <a href="' . base_url('sw-admin/affiliate/komisi/' . encrypt_url($row->kode_affiliate)) . '"
-                                class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-eye"></i>
-                            </a>';
+                        <a href="' . base_url('sw-admin/affiliate/komisi/' . encrypt_url($row->kode_affiliate)) . '"
+                            class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-eye"></i>
+                        </a>';
                     break;
                 case '0':
                     $badge = 'badge-warning';
                     $text  = 'Pending';
                     $btn = '
-                            <a href="' . base_url('sw-admin/affiliate/edit/' . encrypt_url($row->id_affiliate)) . '"
-                                class="btn btn-sm btn-outline-warning mr-2">
-                                <i class="bi bi-eye"></i>
-                            </a>';
-            
+                        <a href="' . base_url('sw-admin/affiliate/edit/' . encrypt_url($row->id_affiliate)) . '"
+                            class="btn btn-sm btn-outline-warning mr-2">
+                            <i class="bi bi-eye"></i>
+                        </a>';
                     break;
                 default:
                     $badge = 'badge-secondary';
                     $text  = '-';
                     $btn = '';
+            }
+
+            // 💡 KATA-KATA PROFESIONAL UNTUK TAMPILAN KOMISI
+            $tampilan_komisi = '';
+
+            // Tampilkan Jika ada komisi yang sedang menunggu
+            if ($row->total_komisi_pending > 0) {
+                $tampilan_komisi .= '
+                <div class="text-warning font-weight-bold" title="Menunggu Pencairan">
+                    Rp ' . number_format($row->total_komisi_pending, 0, ',', '.') . ' 
+                    <small>(Menunggu Pencairan)</small>
+                </div>';
+            }
+
+            // Tampilkan Jika ada komisi yang sudah berhasil dicairkan
+            if ($row->total_komisi_dicairkan > 0) {
+                $tampilan_komisi .= '
+                <div class="text-success mt-1" style="font-size: 0.85rem;" title="Sudah Dicairkan">
+                    <i class="bi bi-check-circle-fill"></i> Rp ' . number_format($row->total_komisi_dicairkan, 0, ',', '.') . ' (Telah Dicairkan)
+                </div>';
+            }
+
+            // Jika belum ada komisi sama sekali
+            if ($row->total_komisi_pending == 0 && $row->total_komisi_dicairkan == 0) {
+                $tampilan_komisi = '<span class="text-muted">Rp 0</span>';
             }
 
             $data[] = [
@@ -119,9 +157,7 @@ class AffiliateController extends BaseController
 
                 date('d M Y H:i', strtotime($row->created_at)),
 
-                '<span class="text-success font-weight-bold">
-                Rp ' . number_format($row->total_komisi, 0, ',', '.') . '
-            </span>',
+                $tampilan_komisi, // <-- Menggunakan variabel UI komisi yang baru
 
                 '<span class="badge ' . $badge . ' px-3 py-2">' . $text . '</span>',
 
@@ -323,11 +359,11 @@ class AffiliateController extends BaseController
 
             // Cek apakah link belum expired
             // if ($affiliateLink['expired_at'] > $now) {
-                // Simpan session affiliate
-                $data = [
-                    'short_code' => $affiliateLink['short_code'],
-                ];
-                session()->set($data);
+            // Simpan session affiliate
+            $data = [
+                'short_code' => $affiliateLink['short_code'],
+            ];
+            session()->set($data);
             // }
         }
 
@@ -363,15 +399,15 @@ class AffiliateController extends BaseController
 
             // Ambil data komisi dengan pagination
             $komisi = $this->komisi
-            ->select('affiliate_commissions.*, siswa.nama_siswa, paket.nama_paket') // Tambahkan kolom paket di sini
-            ->join('transaksi', 'transaksi.idtransaksi = affiliate_commissions.id_transaksi')
-            ->join('detail_transaksi', 'detail_transaksi.idtransaksi = transaksi.idtransaksi')
-            ->join('paket', 'paket.idpaket = detail_transaksi.idpaket')
-            ->join('siswa', 'siswa.id_siswa = transaksi.idsiswa')
-            ->where('affiliate_commissions.kode_affiliate', $id)
-            ->groupBy('affiliate_commissions.id') // Group by berdasarkan id unik detail transaksi jika ingin setiap item dalam keranjang punya row sendiri
-            ->orderBy('affiliate_commissions.tgl_approved', 'DESC')
-            ->paginate(15, 'komisi');
+                ->select('affiliate_commissions.*, siswa.nama_siswa, paket.nama_paket') // Tambahkan kolom paket di sini
+                ->join('transaksi', 'transaksi.idtransaksi = affiliate_commissions.id_transaksi')
+                ->join('detail_transaksi', 'detail_transaksi.idtransaksi = transaksi.idtransaksi')
+                ->join('paket', 'paket.idpaket = detail_transaksi.idpaket')
+                ->join('siswa', 'siswa.id_siswa = transaksi.idsiswa')
+                ->where('affiliate_commissions.kode_affiliate', $id)
+                ->groupBy('affiliate_commissions.id') // Group by berdasarkan id unik detail transaksi jika ingin setiap item dalam keranjang punya row sendiri
+                ->orderBy('affiliate_commissions.tgl_approved', 'DESC')
+                ->paginate(15, 'komisi');
 
             $data['breadcrumbs'] = [
                 ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
