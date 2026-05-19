@@ -473,7 +473,7 @@ class TransaksiController extends BaseController
                         $nominalValid = ($aiNominal >= $expectedNominal);
 
                         // --- 4. Validasi Tanggal ---
-                        $tanggalValid = ($dataAI->tanggal === $expectedTanggal);
+                        $tanggalValid = ($dataAI->tanggal <= $expectedTanggal);
 
                         // --- 5. Validasi Anti-Duplikat (ID Referensi) ---
                         $refBank = $dataAI->id_referensi ?? null;
