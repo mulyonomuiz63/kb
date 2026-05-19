@@ -292,9 +292,21 @@
         <label class="fw-semibold">Paket Tersedia</label>
       </div>
       <?php if (session()->get('id') && !empty($affiliate)): ?>
+        <?php
+        $potongan_diskon = ($paket->nominal_paket * $paket->diskon) / 100;
+        $harga_final     = $paket->nominal_paket - $potongan_diskon;
+        $est_komisi      = ($harga_final * $paket->komisi) / 100;
+        ?>
         <div class="affiliate-box p-2 mb-3">
-          💰 <strong class="text-warning">Komisi <?= $paket->komisi ?>%</strong>
-          <div class="text-muted small">
+          <div class="d-flex flex-wrap align-items-center gap-1" style="font-size: 0.75rem;">
+            <span>💰</span>
+            <span class="text-muted fw-bold">Komisi</span>
+            <strong class="text-danger"><?= $paket->komisi ?>%</strong>
+            <span class="text-muted mx-1">|</span>
+            <span class="text-muted fw-bold">Est.</span>
+            <strong class="text-danger">Rp <?= number_format($est_komisi, 0, ',', '.') ?></strong>
+          </div>
+          <div class="text-muted mt-1" style="font-size: 0.75rem;">
             Dari setiap pembelian via link kamu
           </div>
         </div>

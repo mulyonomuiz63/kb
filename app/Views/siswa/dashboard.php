@@ -233,6 +233,21 @@
                                                 </div>
                                             <?php endif; ?>
                                         </div>
+                                        <div class="mb-6" style="min-height: 20px;">
+                                            <?php if (!empty($affiliate)):
+                                                $potongan_diskon = ($rows->nominal_paket * $rows->diskon) / 100;
+                                                $harga_final     = $rows->nominal_paket - $potongan_diskon;
+                                                $est_komisi      = ($harga_final * $rows->komisi) / 100;
+                                            ?>
+                                                <div class="d-flex align-items-center flex-wrap gap-1" style="font-size: 0.80rem;">
+                                                    <span class="text-muted fw-semibold">Komisi Affiliate:</span>
+                                                    <span class="text-danger fw-bolder"><?= $rows->komisi ?>%</span>
+                                                    <span class="text-muted mx-1">|</span>
+                                                    <span class="text-muted fw-semibold">Est:</span>
+                                                    <span class="text-danger fw-bolder">Rp <?= number_format($est_komisi, 0, ',', '.') ?></span>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
 
                                         <?php if (session('role') == 2) : ?>
                                             <div class="d-flex align-items-center gap-2">
