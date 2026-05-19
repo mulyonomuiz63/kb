@@ -106,6 +106,7 @@ class TransaksiModel extends Model
             ->join('paket c', 'c.idpaket = d.idpaket')
             ->where('transaksi.idsiswa', $id)
             ->groupBY('transaksi.idtransaksi')
+            ->orderBy('transaksi.idtransaksi', 'desc')
             ->get()->getResultObject();
     }
 }

@@ -53,7 +53,7 @@ class AffiliateController extends BaseController
             ->join('siswa', 'siswa.id_siswa = transaksi.idsiswa')
             ->where('affiliate_commissions.kode_affiliate', $affiliate->kode_affiliate)
             ->groupBy('affiliate_commissions.id') // Group by berdasarkan id unik detail transaksi jika ingin setiap item dalam keranjang punya row sendiri
-            ->orderBy('affiliate_commissions.tgl_approved', 'DESC')
+            ->orderBy('affiliate_commissions.id', 'DESC')
             ->paginate(10, 'komisi');
     
         $data['pager'] = $this->komisi->pager;
