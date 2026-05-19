@@ -86,6 +86,18 @@ class SiswaController extends BaseController
             $data[] = $row;
         }
 
+        // --- MULAI PERBAIKAN: Sorting Data Array ---
+        usort($data, function ($a, $b) {
+            // 1. Urutkan berdasarkan ujian yang sudah dikerjakan (Descending: 8, 7, 6... 0)
+            if ($a['totalUjian'] != $b['totalUjian']) {
+                return $b['totalUjian'] <=> $a['totalUjian'];
+            }
+            // 2. Jika jumlah ujian sama, urutkan nama dari abjad terkecil (Ascending: A-Z)
+            // Gunakan strcasecmp agar tidak sensitif huruf besar/kecil
+            return strcasecmp($a['nama_siswa'], $b['nama_siswa']);
+        });
+        // --- AKHIR PERBAIKAN ---
+
         $output = [
             "draw"            => intval($postData['draw'] ?? 1),
             "recordsTotal"    => $this->siswaModel->countAllResults(),
@@ -922,7 +934,7 @@ class SiswaController extends BaseController
     {
         // 1. Tentukan status baru yang ingin diubah untuk semua 500 siswa
         // (Misalnya Anda ingin mengubah semuanya menjadi 'S', 'Aktif', atau 'Lulus')
-        $statusBaru = 'B'; 
+        $statusBaru = 'B';
 
         try {
             // =================================================================
@@ -930,10 +942,10 @@ class SiswaController extends BaseController
             // Ini akan langsung menjalankan query: UPDATE siswa SET status = 'S'
             // dan HANYA kolom status yang disentuh, kolom lain dijamin aman.
             // =================================================================
-            
+
             $db = \Config\Database::connect();
             $builder = $db->table('siswa'); // Ganti 'siswa' dengan nama tabel asli di database Anda
-            
+
             // Eksekusi update massal
             $builder->update(['status' => $statusBaru]);
 
@@ -941,7 +953,6 @@ class SiswaController extends BaseController
             $jumlahDiubah = $db->affectedRows();
 
             return redirect()->back()->with('success', "Berhasil! Sebanyak $jumlahDiubah data siswa telah diubah statusnya menjadi '$statusBaru'.");
-
         } catch (\Exception $e) {
             // Jika terjadi error database (misal nama kolom salah)
             return redirect()->back()->with('error', 'Gagal melakukan update massal: ' . $e->getMessage());

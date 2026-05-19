@@ -31,10 +31,17 @@ class SiswaModel extends Model
     private function _get_datatables_query($column_order, $column_search, $order)
     {
         $request = \Config\Services::request();
-        // Gunakan $this->table karena sudah didefinisikan di properti Model
         $builder = $this->db->table($this->table);
 
-        // FILTER STATUS (TAMBAHKAN INI)
+        // --- MULAI PERBAIKAN: Subquery Select ---
+        // Ambil semua kolom dari tabel siswa
+        $builder->select("{$this->table}.*");
+        // Tambahkan kolom buatan (total_ujian) langsung dari database
+        // Asumsi nama tabelnya adalah 'ujian'. Gunakan COUNT(DISTINCT mapel) sebagai pengganti groupBy di controller.
+        $builder->select("(SELECT COUNT(DISTINCT mapel) FROM ujian WHERE ujian.id_siswa = {$this->table}.id_siswa AND ujian.kelas = {$this->table}.kelas) AS total_ujian", false);
+        // --- AKHIR PERBAIKAN ---
+
+        // FILTER STATUS
         $status = $request->getPost('status_filter');
         if ($status !== '' && $status !== null) {
             if($status == '2'){
@@ -59,11 +66,18 @@ class SiswaModel extends Model
             $i++;
         }
 
+        // --- MULAI PERBAIKAN: Order By ---
         if (isset($_POST['order'])) {
+            // Jika ada aksi klik panah sorting dari tabel di tampilan Frontend
             $builder->orderBy($column_order[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
-        } else if (isset($order)) {
-            $builder->orderBy(key($order), $order[key($order)]);
+        } else {
+            // Jika tidak ada aksi klik (Default Order), urutkan berdasarkan:
+            // 1. Total ujian terbanyak ke terdikit (maks 8 ada di atas)
+            $builder->orderBy('total_ujian', 'DESC');
+            // 2. Nama siswa abjad terkecil (A-Z) jika jumlah ujiannya sama
+            $builder->orderBy("{$this->table}.nama_siswa", 'ASC');
         }
+        // --- AKHIR PERBAIKAN ---
 
         return $builder;
     }
