@@ -122,8 +122,8 @@
                     ['url' => 'sw-siswa/materi', 'icon' => 'ki-book-open', 'color' => 'primary', 'title' => 'Materi Belajar', 'desc' => 'Akses semua modul'],
                     ['url' => 'sw-siswa/ujian', 'icon' => 'ki-notepad-edit', 'color' => 'danger', 'title' => 'Ujian & Quiz', 'desc' => 'Evaluasi pemahaman'],
                     ['url' => 'sw-siswa/sertifikat', 'icon' => 'ki-medal-star', 'color' => 'success', 'title' => 'Sertifikat', 'desc' => 'Download bukti lulus'],
-                    ['url' => 'sw-siswa/transaksi', 'icon' => 'ki-time', 'color' => 'info', 'title' => 'Histori', 'desc' => 'Status pembayaran'],
                     ['url' => 'sw-siswa/affiliate', 'icon' => 'ki-people', 'color' => 'warning', 'title' => 'Affiliate', 'desc' => 'Bonus referensi'],
+                    ['url' => 'sw-siswa/transaksi', 'icon' => 'ki-time', 'color' => 'info', 'title' => 'Histori', 'desc' => 'Status pembayaran'],
                     ['url' => 'sw-siswa/profile', 'icon' => 'ki-user', 'color' => 'dark', 'title' => 'Akun Saya', 'desc' => 'Pengaturan data diri'],
                     ['url' => 'sw-siswa/diskusi', 'icon' => 'ki-messages', 'color' => 'warning', 'title' => 'Diskusi', 'desc' => 'Komunitas belajar'],
                     ['url' => 'sw-siswa/ikh', 'icon' => 'ki-award', 'color' => 'warning', 'title' => 'Izin Kuasa Hukum', 'desc' => 'Pengurusan IKH.']
