@@ -114,7 +114,23 @@ $ujianSiswaModel = new UjianSiswaModel(); ?>
                 </div>
 
                 <div class="card-body py-5">
-                    <?php if (time() >= strtotime($ujian->start_ujian)) : ?>
+                    <?php
+                    // Siapkan format waktu standar untuk dibaca JavaScript
+                    $waktu_mulai = str_replace(' ', 'T', $ujian->start_ujian);
+                    ?>
+
+                    <!-- 1. TAMPILAN MENUNGGU (Muncul sebelum ujian mulai) -->
+                    <div id="layar-menunggu" class="text-center py-10">
+                        <h3 class="text-gray-800">Ujian belum dimulai</h3>
+                        <p class="text-muted">Soal akan otomatis muncul saat jam perangkat Anda menunjukkan waktu mulai ujian.</p>
+                        <div class="spinner-border text-primary mt-3" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+
+                    <!-- 2. AREA UJIAN (Disembunyikan dengan d-none secara default) -->
+                    <!-- Kita titipkan waktu_mulai di data-waktu -->
+                    <div id="area-ujian" class="d-none" data-waktu="<?= $waktu_mulai ?>">
                         <?php if (count($ujian_siswa) > 0) : ?>
                             <?php if (($ujian_siswa[0]->status === null)) : ?>
 
@@ -123,6 +139,7 @@ $ujianSiswaModel = new UjianSiswaModel(); ?>
                                     $soal_hidden = '';
                                     $no = 1;
                                     foreach ($detail_ujian as $soal) :
+                                        // (Catatan: Sebaiknya query ke ujianSiswaModel ini dipindah ke Controller agar View tidak berat)
                                         $jawaban_siswa = $ujianSiswaModel
                                             ->join('siswa', 'ujian_siswa.siswa=siswa.id_siswa')
                                             ->where('ujian_siswa.ujian_id', $soal->id_detail_ujian)
@@ -169,7 +186,7 @@ $ujianSiswaModel = new UjianSiswaModel(); ?>
 
                             <?php endif; ?>
                         <?php endif; ?>
-                    <?php endif; ?>
+                    </div>
                 </div>
 
                 <div class="card-footer border-0 d-flex align-items-center justify-content-between px-4 py-6 pb-8" style="gap: 0.5rem;">
@@ -200,7 +217,7 @@ $ujianSiswaModel = new UjianSiswaModel(); ?>
                 <div class="card-header">
                     <h3 class="card-title fw-bold">Navigasi Soal</h3>
                 </div>
-                <div class="card-body">
+                <div class="card-body d-none" id="area-navigasi">
                     <div class="navigator-container pe-2">
                         <div class="row g-3">
                             <?php
@@ -398,26 +415,69 @@ $ujianSiswaModel = new UjianSiswaModel(); ?>
     });
 </script>
 
+<?php
+    // Ganti spasi dengan T agar aman dibaca oleh SEMUA jenis browser
+    $start_ujian_safe = str_replace(' ', 'T', $ujian->start_ujian);
+    $end_ujian_safe   = str_replace(' ', 'T', $ujian->end_ujian);
+?>
+
 <script>
-    <?php if ($ujian_siswa != null && time() >= strtotime($ujian->start_ujian) && $ujian_siswa[0]->status == null) : ?>
-        var countDownDate = new Date("<?= $ujian->end_ujian ?>").getTime();
+    <?php if ($ujian_siswa != null && $ujian_siswa[0]->status == null) : ?>
+        
+        // Tangkap jadwal dari PHP (sudah format ISO yang aman)
+        var jadwalMulai   = new Date("<?= $start_ujian_safe ?>").getTime();
+        var countDownDate = new Date("<?= $end_ujian_safe ?>").getTime();
+
         var x = setInterval(function() {
-            var now = new Date().getTime();
-            var distance = countDownDate - now;
-            var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            // Ambil waktu dari DEVICE siswa saat ini
+            var now = new Date().getTime(); 
+            var distance = 0;
+            var prefixTeks = ""; // Teks tambahan (opsional) untuk membedakan status waktu
 
-            document.getElementById("jam_skrng").innerHTML = hours + " : " + minutes + " : " + seconds;
-
-            if (distance < 0) {
+            // LOGIKA 1: Jika ujian BELUM MULAI (Hitung mundur ke start_ujian)
+            if (now < jadwalMulai) {
+                distance = jadwalMulai - now;
+                prefixTeks = "Mulai dalam: "; // Teks penanda ujian belum mulai
+            } 
+            // LOGIKA 2: Jika ujian SEDANG BERLANGSUNG (Hitung mundur ke end_ujian)
+            else if (now >= jadwalMulai && now <= countDownDate) {
+                distance = countDownDate - now;
+                prefixTeks = ""; // Kosongkan atau isi dengan "Sisa Waktu: " jika mau
+                
+                // (Opsional) Jika sebelumnya soal ujian disembunyikan pakai d-none, 
+                // Anda bisa memunculkannya di sini menggunakan JS:
+                // document.getElementById('area-soal').classList.remove('d-none');
+            } 
+            // LOGIKA 3: Jika waktu ujian HABIS
+            else {
                 clearInterval(x);
                 document.getElementById("jam_skrng").innerHTML = "00 : 00 : 00";
                 document.getElementById("kirim_ujian").submit();
+                return; // Hentikan eksekusi script di bawahnya
             }
+
+            // KALKULASI DAN RENDER WAKTU (Berlaku untuk Logika 1 dan Logika 2)
+            if (distance > 0) {
+                var hours   = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                // Tambahkan angka 0 di depan jika di bawah 10
+                hours   = hours < 10 ? "0" + hours : hours;
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                // Tampilkan ke layar dengan atau tanpa teks penanda
+                document.getElementById("jam_skrng").innerHTML = prefixTeks + hours + " : " + minutes + " : " + seconds;
+            }
+
         }, 1000);
+        
     <?php endif; ?>
 
+    // ==========================================
+    // Kode Stopwatch Anda (Berjalan Normal)
+    // ==========================================
     let hour = 0;
     let minute = 0;
     let second = 0;
@@ -445,7 +505,7 @@ $ujianSiswaModel = new UjianSiswaModel(); ?>
             document.getElementById('minute').innerHTML = minute < 10 ? "0" + minute : minute;
             document.getElementById('second').innerHTML = second < 10 ? "0" + second : second;
             document.getElementById('count').innerHTML = count < 10 ? "0" + count : count;
-            setTimeout(stopWatch, 20);
+            setTimeout(stopWatch, 20); 
         }
     }
 </script>
@@ -562,5 +622,39 @@ $ujianSiswaModel = new UjianSiswaModel(); ?>
             timer: 3000
         });
     };
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const areaUjian = document.getElementById('area-ujian');
+    const areaNavigasi = document.getElementById('area-navigasi');
+    const layarMenunggu = document.getElementById('layar-menunggu');
+    
+    // Jika tidak ada area ujian di HTML, hentikan script
+    if (!areaUjian) return;
+
+    // Ambil jadwal dari HTML
+    const jadwalDb = areaUjian.getAttribute('data-waktu');
+    const jadwalUjian = new Date(jadwalDb).getTime();
+
+    // Buat interval yang mengecek setiap 1 detik
+    const cekWaktu = setInterval(function() {
+        // Ambil waktu LOKAL dari laptop/HP peserta saat ini
+        const waktuDeviceSekarang = new Date().getTime();
+
+        // Jika waktu saat ini sudah melebihi atau sama dengan jadwal
+        if (waktuDeviceSekarang >= jadwalUjian) {
+            
+            // 1. Sembunyikan layar loading/menunggu
+            layarMenunggu.classList.add('d-none');
+            
+            // 2. Munculkan area soal ujian
+            areaUjian.classList.remove('d-none');
+            areaNavigasi.classList.remove('d-none');
+            
+            // 3. Hentikan pengecekan berulang agar browser tidak berat
+            clearInterval(cekWaktu);
+        }
+    }, 1000); 
+});
 </script>
 <?= $this->endSection(); ?>
