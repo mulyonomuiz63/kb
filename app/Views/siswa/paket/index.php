@@ -77,6 +77,26 @@
   #password {
     border-right: none;
   }
+  /* Full-Screen Loading Overlay */
+  #page-loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  .spinner-custom {
+    width: 3rem;
+    height: 3rem;
+    color: var(--kt-primary);
+  }
 </style>
 <?= $this->endSection(); ?>
 <?= $this->section('meta_tags') ?>
@@ -89,6 +109,11 @@
     <meta property="og:image:type" content="image/jpeg" />
 <?= $this->endSection() ?>
 <?= $this->section('content'); ?>
+<div id="page-loader">
+  <div class="spinner-border spinner-custom mb-3" role="status"></div>
+  <h5 class="fw-bolder text-gray-800">Memproses Pesanan Anda...</h5>
+  <span class="text-muted fs-7">Mohon tunggu sebentar, jangan tutup halaman ini.</span>
+</div>
 <div class="container py-10">
   <div class="row g-7">
 
@@ -279,8 +304,11 @@
             </div>
 
             <?php if (session()->get('id')): ?>
-              <button type="submit" class="btn btn-primary w-100 py-4 fw-bolder">
-                Konfirmasi Pemesanan
+              <button type="submit" id="btn-konfirmasi" class="btn btn-danger w-100 py-4 fw-bolder">
+                <span class="indicator-label">Checkout</span>
+                <span class="indicator-progress" style="display: none;">
+                  Memproses... <span class="spinner-border spinner-border-sm align-middle ms-2"></span>
+                </span>
               </button>
             <?php endif; ?>
           </form>
@@ -294,6 +322,20 @@
 <?= $this->section('scripts'); ?>
 <script type="text/javascript">
   <?= session()->getFlashdata('pesan'); ?>
+
+  // Mencegah double submit form checkout
+  $('form[action="<?= base_url('sw-siswa/transaksi/checkout'); ?>"]').on('submit', function(e) {
+    // Tampilkan overlay full-screen
+    $('#page-loader').css('display', 'flex');
+    
+    // Ubah status tombol menjadi loading & disable
+    let btn = $('#btn-konfirmasi');
+    btn.prop('disabled', true);
+    btn.find('.indicator-label').hide();
+    btn.find('.indicator-progress').show();
+    
+    // Form akan otomatis ter-submit seperti biasa
+  });
 
   $(document).ready(function() {
     var kodevoucherInit = "<?= $kodevoucher ?>";
