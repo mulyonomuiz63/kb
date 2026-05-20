@@ -9,7 +9,7 @@ class TransaksiModel extends Model
 {
     protected $table            = 'transaksi';
     protected $primaryKey       = 'idtransaksi';
-    protected $allowedFields    = ['idsiswa', 'va', 'nominal', 'diskon', 'voucher', 'kode_unik', 'status', 'tgl_exp', 'tgl_drop', 'tgl_pembayaran', 'bukti_pembayaran', 'keterangan','token', 'jenis_bayar', 'kode_voucher', 'referensi_bank', 'jenis_paket'];
+    protected $allowedFields    = ['idsiswa', 'va', 'nominal', 'diskon', 'voucher', 'kode_unik', 'status', 'tgl_exp', 'tgl_drop', 'tgl_pembayaran', 'bukti_pembayaran', 'keterangan','token', 'jenis_bayar', 'kode_voucher', 'referensi_bank', 'jenis_paket', 'kode_affiliate'];
 
     public function getAll()
     {

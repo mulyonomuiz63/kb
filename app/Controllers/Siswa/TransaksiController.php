@@ -192,6 +192,11 @@ class TransaksiController extends BaseController
                             'harga'          => $totalVoucher,
                         ]);
                     }
+
+                    $this->transaksiModel
+                        ->where('idtransaksi', $idtransaksi)
+                        ->set('kode_affiliate', $affiliateLink['kode_affiliate'])
+                        ->update();
                 // }
             }
 
