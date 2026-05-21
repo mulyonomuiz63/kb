@@ -32,6 +32,10 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
 
         //untuk update data siswa menjadi untuk melengkapi data siswa yang belum lengkap
         $routes->get('update-status-massal/', 'Admin\SiswaController::updateStatusMassal'); 
+
+        $routes->group('materi', function($routes){
+            $routes->get('(:segment)', 'Admin\MateriController::index/$1');
+        });
     });
 
     $routes->group('guru', function ($routes) {
@@ -237,6 +241,7 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
         $routes->get('get-messages/(:any)', 'Admin\DiskusiController::getMessages/$1');
         $routes->post('send', 'Admin\DiskusiController::sendMessage');
     });
+
 
     $routes->group('ikh', function ($routes) {
         $routes->get('', 'Admin\IkhController::index');
