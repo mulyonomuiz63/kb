@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no">
     <title><?= title(); ?></title>
     <link rel="icon" type="image/x-icon" href="<?= base_url(favicon()); ?>" />
-    
+
     <link href="https://fonts.googleapis.com/css?family=Quicksand:400,500,600,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <link href="<?= base_url('assets/app-assets/template/cbt-malela/bootstrap/css/bootstrap.min.css'); ?>" rel="stylesheet" type="text/css" />
     <link href="<?= base_url('assets/app-assets/template/cbt-malela/plugins/sweetalerts/sweetalert2.min.css'); ?>" rel="stylesheet" type="text/css" />
     <link href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">
@@ -25,7 +26,7 @@
             margin: 0;
             padding: 20px;
         }
-        
+
         .result-card {
             background: #ffffff;
             border-radius: 20px;
@@ -57,7 +58,7 @@
         .result-visual i {
             font-size: 100px;
             margin-bottom: 20px;
-            text-shadow: 2px 4px 10px rgba(0,0,0,0.2);
+            text-shadow: 2px 4px 10px rgba(0, 0, 0, 0.2);
         }
 
         .table-custom {
@@ -93,40 +94,80 @@
             max-width: 200px;
             margin-bottom: 30px;
         }
+
+        /* --- RESPONSIVE TABLE UNTUK MOBILE --- */
+        @media (max-width: 768px) {
+
+            .table-custom,
+            .table-custom tbody,
+            .table-custom tr,
+            .table-custom td {
+                display: block;
+                width: 100%;
+            }
+
+            .table-custom tr {
+                margin-bottom: 15px;
+                border-bottom: 1px solid #e9ecef;
+                padding-bottom: 10px;
+            }
+
+            .table-custom td {
+                padding: 4px 0 !important;
+                border-bottom: none !important;
+                text-align: left !important;
+                /* Paksa rata kiri di HP agar rapi */
+            }
+
+            /* Style untuk Label (Nama Siswa, Keterangan, dll) di Mobile */
+            .table-custom td:first-child {
+                color: #6c757d;
+                font-size: 13px;
+                font-weight: 500;
+                margin-bottom: 2px;
+            }
+
+            /* Style untuk Isi/Value di Mobile */
+            .table-custom td:last-child {
+                font-size: 15px;
+                font-weight: 600;
+                color: #2b2b2b;
+            }
+        }
     </style>
 </head>
 
 <body>
 
-<?php
-// Optimasi PHP Logic
-$nilai = 0;
-$total = 0;
-$nama = '';
-$no_induk_siswa = '';
-$id_ujian = '';
-$tgl_sertifikat_end = $data->end_ujian ?? '-';
+    <?php
+    // Optimasi PHP Logic
+    $nilai = 0;
+    $total = 0;
+    $nama = '';
+    $no_induk_siswa = '';
+    $id_ujian = '';
+    $tgl_sertifikat_end = $data->end_ujian ?? '-';
 
-foreach($hasil as $rows){
-    $nilai += $rows->nilai;
-    $total++;
-    $nama = $rows->nama_siswa;
-    $no_induk_siswa = $rows->no_induk_siswa;
-    $id_ujian = $rows->id_ujian;
-}
+    foreach ($hasil as $rows) {
+        $nilai += $rows->nilai;
+        $total++;
+        $nama = $rows->nama_siswa;
+        $no_induk_siswa = $rows->no_induk_siswa;
+        $id_ujian = $rows->id_ujian;
+    }
 
-$totalNilai = $total > 0 ? round($nilai / $total) : 0;
-$isLulus = $totalNilai >= 60;
-?>
+    $totalNilai = $total > 0 ? round($nilai / $total) : 0;
+    $isLulus = $totalNilai >= 60;
+    ?>
 
     <div class="result-card">
         <div class="result-info">
             <a href="<?= base_url('/'); ?>">
                 <img src="<?= base_url('assets-landing/images/logo.png') ?>" alt="Logo" class="brand-logo" />
             </a>
-            
+
             <h4 class="fw-bold mb-4 text-dark">Detail Hasil Ujian Brevet Pajak A&B</h4>
-            
+
             <table class="table-custom">
                 <tr>
                     <td>Nama Siswa</td>
@@ -187,10 +228,10 @@ $isLulus = $totalNilai >= 60;
     <script src="<?= base_url('assets/app-assets/template/cbt-malela/assets/js/libs/jquery-3.1.1.min.js'); ?>"></script>
     <script src="<?= base_url('assets/app-assets/template/cbt-malela/plugins/sweetalerts/sweetalert2.min.js'); ?>"></script>
     <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
-    
+
     <script type="text/javascript">
         <?= session()->getFlashdata('pesan'); ?>
-        
+
         $(document).ready(function() {
             $("#data-kelas").autocomplete({
                 appendTo: "#suggestion-box",
@@ -199,7 +240,9 @@ $isLulus = $totalNilai >= 60;
                         type: "POST",
                         url: "<?= site_url('Register/autocomplate'); ?>",
                         dataType: "json",
-                        data: { term: request.term },
+                        data: {
+                            term: request.term
+                        },
                         success: function(data) {
                             response(data);
                         }
@@ -218,4 +261,5 @@ $isLulus = $totalNilai >= 60;
         });
     </script>
 </body>
+
 </html>
