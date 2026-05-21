@@ -70,17 +70,24 @@ class SiswaController extends BaseController
                 'id_siswa' => $s->id_siswa
             ])->groupBy('mapel')->countAllResults();
 
-            // PAKAI KEY (Associative Array) agar sinkron dengan JS 'columns'
+            // --- INFO TAMBAHAN: Badge Sedang Ujian ---
+            // Cek nilai subquery 'sedang_ujian' dari model (> 0 berarti sedang ujian)
+            $isSedangUjian = ($s->sedang_ujian > 0) ? true : false;
+            
+            // Buat elemen visual (badge) jika sedang ujian
+            $infoUjian = $isSedangUjian ? '<br><span class="badge badge-light-warning fw-bold px-2 py-1 mt-1 blink">Sedang Ujian</span>' : '';
+
             $row = [
-                "no_induk_siswa" => $s->no_induk_siswa,
-                "nama_siswa"     => $s->nama_siswa,
-                "email"          => $s->email,
-                "hp"             => $s->hp,
-                "date_created"   => date('d-m-Y', $s->date_created),
-                "is_active"      => $s->is_active,
-                "stats"          => $totalUjian . '/' . $totalSertifikats,
-                "totalUjian"     => $totalSertifikats,
-                "id_siswa_enc"   => encrypt_url($s->id_siswa) // Untuk tombol aksi
+                "no_induk_siswa"  => $s->no_induk_siswa,
+                "nama_siswa"      => $s->nama_siswa . $infoUjian, // Info disisipkan di bawah nama
+                "email"           => $s->email,
+                "hp"              => $s->hp,
+                "date_created"    => date('d-m-Y', $s->date_created),
+                "is_active"       => $s->is_active,
+                "stats"           => $totalUjian . '/' . $totalSertifikats,
+                "totalUjian"      => $totalSertifikats,
+                "is_sedang_ujian" => $isSedangUjian ? 1 : 0, // Disimpan untuk usort
+                "id_siswa_enc"    => encrypt_url($s->id_siswa)
             ];
 
             $data[] = $row;
@@ -88,13 +95,17 @@ class SiswaController extends BaseController
 
         // --- MULAI PERBAIKAN: Sorting Data Array ---
         usort($data, function ($a, $b) {
-            // 1. Urutkan berdasarkan ujian yang sudah dikerjakan (Descending: 8, 7, 6... 0)
+            // 1. Prioritas Utama: Sedang ujian ditaruh paling atas (Descending: 1 ke 0)
+            if ($a['is_sedang_ujian'] != $b['is_sedang_ujian']) {
+                return $b['is_sedang_ujian'] <=> $a['is_sedang_ujian'];
+            }
+            // 2. Prioritas Kedua: Urutkan berdasarkan ujian yang sudah dikerjakan (Descending)
             if ($a['totalUjian'] != $b['totalUjian']) {
                 return $b['totalUjian'] <=> $a['totalUjian'];
             }
-            // 2. Jika jumlah ujian sama, urutkan nama dari abjad terkecil (Ascending: A-Z)
-            // Gunakan strcasecmp agar tidak sensitif huruf besar/kecil
-            return strcasecmp($a['nama_siswa'], $b['nama_siswa']);
+            // 3. Jika jumlah ujian sama, urutkan nama dari abjad terkecil (Ascending: A-Z)
+            // Gunakan strip_tags untuk mengabaikan tag HTML (badge) saat mengurutkan nama
+            return strcasecmp(strip_tags($a['nama_siswa']), strip_tags($b['nama_siswa']));
         });
         // --- AKHIR PERBAIKAN ---
 

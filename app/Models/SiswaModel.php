@@ -34,11 +34,14 @@ class SiswaModel extends Model
         $builder = $this->db->table($this->table);
 
         // --- MULAI PERBAIKAN: Subquery Select ---
-        // Ambil semua kolom dari tabel siswa
         $builder->select("{$this->table}.*");
-        // Tambahkan kolom buatan (total_ujian) langsung dari database
-        // Asumsi nama tabelnya adalah 'ujian'. Gunakan COUNT(DISTINCT mapel) sebagai pengganti groupBy di controller.
+        
+        // Subquery 1: Total Ujian
         $builder->select("(SELECT COUNT(DISTINCT mapel) FROM ujian WHERE ujian.id_siswa = {$this->table}.id_siswa AND ujian.kelas = {$this->table}.kelas) AS total_ujian", false);
+        
+        // Subquery 2: Deteksi Sedang Ujian (Status 'U')
+        // Sesuaikan 'ujian.status' dengan nama kolom status di tabel ujian Anda (misal: status_ujian)
+        $builder->select("(SELECT COUNT(id_ujian) FROM ujian WHERE ujian.id_siswa = {$this->table}.id_siswa AND ujian.status = 'U') AS sedang_ujian", false);
         // --- AKHIR PERBAIKAN ---
 
         // FILTER STATUS
@@ -68,13 +71,13 @@ class SiswaModel extends Model
 
         // --- MULAI PERBAIKAN: Order By ---
         if (isset($_POST['order'])) {
-            // Jika ada aksi klik panah sorting dari tabel di tampilan Frontend
             $builder->orderBy($column_order[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
         } else {
-            // Jika tidak ada aksi klik (Default Order), urutkan berdasarkan:
-            // 1. Total ujian terbanyak ke terdikit (maks 8 ada di atas)
+            // 1. Prioritas Utama: Sedang Ujian ada di paling atas
+            $builder->orderBy('sedang_ujian', 'DESC');
+            // 2. Prioritas Kedua: Total ujian terbanyak
             $builder->orderBy('total_ujian', 'DESC');
-            // 2. Nama siswa abjad terkecil (A-Z) jika jumlah ujiannya sama
+            // 3. Prioritas Ketiga: Nama abjad terkecil
             $builder->orderBy("{$this->table}.nama_siswa", 'ASC');
         }
         // --- AKHIR PERBAIKAN ---
