@@ -17,12 +17,10 @@ class MateriController extends BaseController
     public function index($id)
     {
         $userId = decrypt_url($id);
-
-        $data = [
-            'title'       => 'Daftar Materi',
-            'breadcrumbs' => [
-                ['title' => 'Materi', 'url' => base_url('sw-admin/siswa/materi')],
-            ],
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'Data Peserta', 'url' => base_url('sw-admin/siswa')],
+            ['title' => 'List Materi', 'url' => '#'],
         ];
 
         // 1. Ambil semua idmapel milik siswa dalam satu query
