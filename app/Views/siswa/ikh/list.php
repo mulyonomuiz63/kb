@@ -418,7 +418,7 @@ $activeTab = (isset($_GET['tab']) && $_GET['tab'] == 'lampiran' && $hasData) ? '
                                 </div>
                                 <div class="card-footer text-end">
                                     <button type="submit" class="btn btn-primary">
-                                        <i class="ki-outline ki-save-2 fs-2"></i> Simpan Data Diri & Pernyataan
+                                        <i class="ki-outline ki-save-2 fs-2"></i> Simpan Data Diri & Lanjut
                                     </button>
                                 </div>
                             </form>
@@ -532,7 +532,7 @@ $activeTab = (isset($_GET['tab']) && $_GET['tab'] == 'lampiran' && $hasData) ? '
                                                     <!-- TAMBAHAN BARU: Tombol otomatis khusus Sertifikat -->
                                                     <?php if ($cfg['id'] == 'file_sertifikat'): ?>
                                                         <button class="btn btn-success btn-generate-sertifikat" type="button" data-target="<?= $cfg['id'] ?>">
-                                                            <span class="indicator-label"><i class="ki-outline ki-setting-2"></i> Gunakan Sertifikat Sistem</span>
+                                                            <span class="indicator-label"><i class="ki-outline ki-setting-2"></i> Gunakan Sertifikat Dari Kelasbrevet</span>
                                                             <span class="indicator-progress" style="display:none;">Memproses... <span class="spinner-border spinner-border-sm align-middle ms-2"></span></span>
                                                         </button>
                                                     <?php endif; ?>
@@ -1361,7 +1361,7 @@ $activeTab = (isset($_GET['tab']) && $_GET['tab'] == 'lampiran' && $hasData) ? '
         let csrfName = '<?= csrf_token() ?>';
         let csrfHash = '<?= csrf_hash() ?>';
         Swal.fire({
-            title: 'Gunakan Sertifikat Sistem?',
+            title: 'Gunakan Sertifikat Kelasbrevet?',
             text: "Sistem akan membuat sertifikat kelulusan Anda dan otomatis mengunggahnya ke server.",
             icon: 'question',
             showCancelButton: true,
