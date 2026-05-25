@@ -9,7 +9,7 @@
     </div>
 
     <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" class="menu-item menu-lg-down-accordion me-0 me-lg-2">
-        <span class="menu-link <?= (strpos($current_uri, 'sw-siswa/') !== false && $current_uri != 'sw-siswa' && strpos($current_uri, 'sw-siswa/affiliate') === false) ? 'active' : '' ?>">
+        <span class="menu-link <?= (strpos($current_uri, 'sw-siswa/') !== false && $current_uri != 'sw-siswa' && strpos($current_uri, 'sw-siswa/affiliate') === false && strpos($current_uri, 'sw-siswa/ikh') === false) ? 'active' : '' ?>">
             <span class="menu-title">Menu</span>
             <span class="menu-arrow d-lg-none"></span>
         </span>
@@ -120,6 +120,11 @@
         </div>
     </div>
 
+    <div class="menu-item me-0 me-lg-2">
+        <a class="menu-link <?= ($current_uri == 'sw-siswa/ikh') ? 'active' : '' ?>" href="<?= base_url('sw-siswa/ikh') ?>">
+            <span class="menu-title">IKH</span>
+        </a>
+    </div>
     <div class="menu-item me-0 me-lg-2">
         <a class="menu-link <?= ($current_uri == 'sw-siswa/affiliate') ? 'active' : '' ?>" href="<?= base_url('sw-siswa/affiliate') ?>">
             <span class="menu-title">Affiliate</span>
