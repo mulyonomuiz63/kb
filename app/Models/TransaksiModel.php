@@ -29,7 +29,8 @@ class TransaksiModel extends Model
                     ->join('detail_transaksi d', 'd.idtransaksi=transaksi.idtransaksi')
                     ->join('siswa b', 'b.id_siswa = transaksi.idsiswa')
                     ->join('paket c', 'c.idpaket = d.idpaket')
-                    ->groupBy('transaksi.idtransaksi');
+                    ->groupBy('transaksi.idtransaksi')
+                    ->orderBy('transaksi.tgl_pembayaran', 'desc');
     }
 
     public function countAllData()
