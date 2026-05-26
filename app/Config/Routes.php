@@ -163,3 +163,7 @@ $routes->get('google-callback-admin', 'AuthController::adminDriveCallback');
 
 //maintenance mode
 $routes->get('maintenance', 'Maintenance::index');
+
+
+// Sitemap
+$routes->get('sitemap.xml', 'Sitemap::serve');

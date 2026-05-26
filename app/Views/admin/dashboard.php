@@ -124,7 +124,7 @@
                                             $total += ($row->nominal - $diskon - $diskon_voucher);
                                         }
                                         ?>
-                                        <span class="fs-2hx fw-bold text-gray-900 me-2 lh-1 ls-n2">Rp <?= number_format($total, 0, ',', '.'); ?></span>
+                                        <span class="fs-2hx fw-bold text-gray-500 me-2 lh-1 ls-n2">Rp <?= number_format($total, 0, ',', '.'); ?></span>
                                         <span class="text-gray-500 pt-1 fw-semibold fs-6">Total Pendapatan</span>
                                     </div>
                                     <div class="card-toolbar">
