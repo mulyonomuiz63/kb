@@ -15,7 +15,7 @@ class Sitemap extends Controller
 
     public function __construct()
     {
-        $this->filePath = ROOTPATH . 'sitemap.xml';
+        $this->filePath = FCPATH . 'sitemap.xml'; 
         $this->baseUrl = base_url();
         $this->db = \Config\Database::connect();
     }
