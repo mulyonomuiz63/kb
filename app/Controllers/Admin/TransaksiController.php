@@ -81,10 +81,29 @@ class TransaksiController extends BaseController
                     $row['paket'] = '<div class="text-gray-800 fw-bold fs-6">' . esc($s->nama_paket) . '</div>
                      <div class="text-muted fw-semibold fs-7">' . esc($s->kantor ?? '') . '</div>';
 
-                    // Kolom Voucher
-                    $row['voucher'] = $s->kode_voucher
+                    // ==========================================
+                    // LOGIKA AFFILIATE & KOLOM VOUCHER
+                    // ==========================================
+                    $is_affiliate = false;
+                    $kode_affiliate = $s->kode_affiliate ?? null; // Pastikan field ini ada di query getBaseQuery()
+
+                    // Kondisi: Voucher 8173AF4239 (walau affiliate null/ada) ATAU jika kode_affiliate ada isinya
+                    if ($s->kode_voucher === '8173AF4239' || !empty($kode_affiliate)) {
+                        $is_affiliate = true;
+                    }
+
+                    // Tampilan dasar voucher
+                    $html_voucher = $s->kode_voucher
                         ? '<span class="badge badge-light-info fw-bold px-3 py-2">' . esc($s->kode_voucher) . '</span>'
                         : '<span class="text-muted fs-7 fw-semibold">-</span>';
+
+                    // Jika affiliate, tambahkan label info di bawahnya
+                    if ($is_affiliate) {
+                        $html_voucher .= '<div class="mt-2"><span class="badge badge-light-success fs-8 fw-bold px-2 py-1"><i class="ki-duotone ki-shop fs-7 me-1 text-success"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i> Link Affiliate</span></div>';
+                    }
+
+                    $row['voucher'] = $html_voucher;
+                    // ==========================================
 
                     // Kolom Pembayaran (Format Tanggal)
                     $label_jenis_bayar = '';
@@ -187,11 +206,11 @@ class TransaksiController extends BaseController
                 ]);
             } catch (\Exception $e) {
                 return $this->response->setJSON([
-                    'draw' => 0,
-                    'recordsTotal' => 0,
+                    'draw'            => 0,
+                    'recordsTotal'    => 0,
                     'recordsFiltered' => 0,
-                    'data' => [],
-                    'error' => $e->getMessage()
+                    'data'            => [],
+                    'error'           => $e->getMessage()
                 ]);
             }
         }
