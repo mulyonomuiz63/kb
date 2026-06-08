@@ -122,36 +122,51 @@ class TransaksiController extends BaseController
         $tgl_mulai = date('Y-m-d H:i:s');
         $tgl_exp   = date('Y-m-d H:i:s', strtotime('+ 1 day', strtotime($tgl_mulai)));
 
-        $diskonVoucherInput = $this->request->getVar('diskon_voucher');
-        $kode_voucher = ($diskonVoucherInput == '' || $diskonVoucherInput == '0') ? '' : $this->request->getVar('kode_voucher');
 
+        $today = date('Y-m-d');
+        $input_kode = $this->request->getPost('kode_voucher');
+
+        // Pastikan input tidak kosong sebelum query
+        if (!empty($input_kode)) {
+            $voucher = $this->voucherModel->where('kode_voucher', $input_kode)
+                ->where('status', 'A')
+                ->where('tgl_aktif <=', $today)
+                ->where('tgl_exp >=', $today)
+                ->first();
+        } else {
+            $voucher = null;
+        }
+
+        // Gunakan pendekatan aman (Null Coalescing Operator)
+        $diskon_voucher = $voucher ? $voucher['diskon_voucher'] : 0;
+        $kode_voucher   = ($voucher && $diskon_voucher > 0) ? $voucher['kode_voucher'] : '';
         // Mulai Transaksi Database
         $db->transBegin();
-        $dataPaket = $this->paketModel->find($this->request->getVar('idpaket'));
+        $dataPaket = $this->paketModel->join('diskon', 'paket.iddiskon=diskon.iddiskon')->where('paket.idpaket', $this->request->getVar('idpaket'))->get()->getRow();
 
         try {
             // 3. Simpan Transaksi Utama
             $dataInsert = [
                 'idsiswa'      => session('id'),
-                'nominal'      => $this->request->getVar('total'),
-                'diskon'       => $this->request->getVar('diskon'),
-                'voucher'      => $diskonVoucherInput,
+                'nominal'      => $dataPaket->nominal_paket,
+                'diskon'       => $dataPaket->diskon,
+                'voucher'      => $diskon_voucher,
                 'tgl_exp'      => $tgl_exp,
                 'tgl_drop'     => $tgl_exp, // Menggunakan tgl_exp sesuai logika awal
                 'kode_voucher' => $kode_voucher,
-                'jenis_paket'  => $dataPaket['jenis_paket']
+                'jenis_paket'  => $dataPaket->jenis_paket
             ];
 
             $this->transaksiModel->insert($dataInsert);
             $idtransaksi = $this->transaksiModel->insertID();
 
             // 4. Kalkulasi Harga Satuan (Logic Asli)
-            $totalRaw      = $this->request->getVar('total');
-            $diskonPersen  = $this->request->getVar('diskon');
-            $voucherPersen = ($diskonVoucherInput != '') ? $diskonVoucherInput : 0;
+            $totalRaw      = $dataPaket->nominal_paket;
+            $diskonPersen  = $dataPaket->diskon;
+            $voucherPersen = ($diskon_voucher != '') ? $diskon_voucher : 0;
 
             $diskon        = $totalRaw - ($totalRaw - ($totalRaw * $diskonPersen / 100));
-            $totalDiskon   = $totalRaw - $diskon;
+            $totalDiskon   = $totalRaw - $diskon; 
             $diskon_voucher = $totalDiskon - ($totalDiskon - ($totalDiskon * $voucherPersen / 100));
             $totalVoucher  = $totalDiskon - $diskon_voucher;
 
@@ -182,21 +197,21 @@ class TransaksiController extends BaseController
             if ($shortCode) {
                 $affiliateLink = $this->affiliateLinkModel->where('short_code', $shortCode)->first();
                 // if ($affiliateLink && $affiliateLink['expired_at'] > date('Y-m-d H:i:s')) {
-                    $affiliateCek = $this->affiliateModel->where('kode_affiliate', $affiliateLink['kode_affiliate'])->first();
-                    if (session()->get('id') != $affiliateCek['user_id']) {
-                        $this->affiliateCommissionModel->insert([
-                            'kode_affiliate' => $affiliateLink['kode_affiliate'],
-                            'id_transaksi'   => $idtransaksi,
-                            'id_paket'       => $this->request->getVar('idpaket'),
-                            'komisi'         => $this->request->getVar('komisi'),
-                            'harga'          => $totalVoucher,
-                        ]);
-                    }
+                $affiliateCek = $this->affiliateModel->where('kode_affiliate', $affiliateLink['kode_affiliate'])->first();
+                if (session()->get('id') != $affiliateCek['user_id']) {
+                    $this->affiliateCommissionModel->insert([
+                        'kode_affiliate' => $affiliateLink['kode_affiliate'],
+                        'id_transaksi'   => $idtransaksi,
+                        'id_paket'       => $this->request->getVar('idpaket'),
+                        'komisi'         => $dataPaket->komisi,
+                        'harga'          => $totalVoucher,
+                    ]);
+                }
 
-                    $this->transaksiModel
-                        ->where('idtransaksi', $idtransaksi)
-                        ->set('kode_affiliate', $affiliateLink['kode_affiliate'])
-                        ->update();
+                $this->transaksiModel
+                    ->where('idtransaksi', $idtransaksi)
+                    ->set('kode_affiliate', $affiliateLink['kode_affiliate'])
+                    ->update();
                 // }
             }
 
