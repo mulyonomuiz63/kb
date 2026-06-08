@@ -12,6 +12,7 @@ class Sitemap extends Controller
     // File sitemap akan disimpan di sini
     protected $filePath;
     protected $db;
+    protected $baseUrl;
 
     public function __construct()
     {
@@ -111,9 +112,18 @@ class Sitemap extends Controller
     
         $xml .= '</urlset>';
     
-        // Simpan file ke public/sitemap.xml
-        file_put_contents(FCPATH . 'sitemap.xml', $xml);
-    
+        // Jalur file
+        $filePath = FCPATH . 'sitemap.xml';
+
+        // Hapus file lama jika sudah ada
+        if (file_exists($filePath)) {
+            if (!unlink($filePath)) {
+            }
+        }
+
+        // Simpan file baru
+        file_put_contents($filePath, $xml);
+
         return $this->response
             ->setHeader('Content-Type', 'application/xml')
             ->setBody($xml);
