@@ -128,10 +128,16 @@ class TransaksiController extends BaseController
 
         // Pastikan input tidak kosong sebelum query
         if (!empty($input_kode)) {
-            $voucher = $this->voucherModel->where('kode_voucher', $input_kode)
-                ->where('status', 'A')
-                ->where('tgl_aktif <=', $today)
-                ->where('tgl_exp >=', $today)
+            $voucher = $this->voucherModel
+                ->select('voucher.*') // Ambil kolom dari tabel utama
+                ->join('detail_voucher', 'voucher.idvoucher = detail_voucher.idvoucher')
+                ->where('voucher.kode_voucher', $input_kode)
+                ->where('detail_voucher.idpaket', $this->request->getVar('idpaket'))
+                ->where('voucher.status', 'A')
+                ->where('voucher.tgl_aktif <=', $today)
+                ->where('voucher.tgl_exp >=', $today)
+                // Menambahkan group by untuk memastikan hanya 1 hasil unik
+                ->groupBy('voucher.idvoucher') 
                 ->first();
         } else {
             $voucher = null;
