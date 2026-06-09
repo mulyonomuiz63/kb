@@ -166,4 +166,4 @@ $routes->get('maintenance', 'Maintenance::index');
 
 
 // Sitemap
-$routes->get('sitemap.xml', 'Sitemap::serve');
+$routes->get('sitemap', 'Sitemap::serve');

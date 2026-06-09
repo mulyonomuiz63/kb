@@ -16,7 +16,7 @@ class Sitemap extends Controller
 
     public function __construct()
     {
-        $this->filePath = FCPATH . 'sitemap.xml'; 
+        $this->filePath = FCPATH . 'sitemap.xml';
         $this->baseUrl = base_url();
         $this->db = \Config\Database::connect();
     }
@@ -27,17 +27,22 @@ class Sitemap extends Controller
      */
     public function serve()
     {
-        // Jika file belum ada atau lebih dari 6 jam, buat baru
-        if (!file_exists($this->filePath) || (time() - filemtime($this->filePath)) > 6 * 3600) {
+        // Cek apakah file TIDAK ada ATAU umur file sudah > 6 jam (21600 detik)
+        if (!file_exists($this->filePath) || (time() - filemtime($this->filePath)) > (6 * 3600)) {
             $this->generate();
         }
 
+        // Ping Search Engines setelah sitemap dipastikan ada/terupdate
         $this->pingSearchEngines();
 
-        // Kirim file sitemap.xml ke browser
-        return $this->response
-            ->setHeader('Content-Type', 'application/xml')
-            ->setBody(file_get_contents($this->filePath));
+        // Pastikan file benar-benar ada sebelum dibaca
+        if (file_exists($this->filePath)) {
+            return $this->response
+                ->setHeader('Content-Type', 'application/xml')
+                ->setBody(file_get_contents($this->filePath));
+        } else {
+            return $this->response->setStatusCode(404)->setBody('Sitemap tidak ditemukan.');
+        }
     }
 
     /**
@@ -47,24 +52,24 @@ class Sitemap extends Controller
     {
         $kategori = $this->db->query("select DISTINCT slug_kategori from kategori_artikel")->getResult();
         $artikel = $this->db->query("select DISTINCT slug_judul from artikel")->getResult();
-        $paket =$this->db->query("select DISTINCT slug from paket where status='1'")->getResult();
-        $twibbon =$this->db->query("select DISTINCT url from twibbon")->getResult();
-        
+        $paket = $this->db->query("select DISTINCT slug from paket where status='1'")->getResult();
+        $twibbon = $this->db->query("select DISTINCT url from twibbon")->getResult();
+
         $baseUrl = rtrim(base_url(), '/') . '/';
-    
-      
-    
+
+
+
         // Mulai XML
         $xml  = '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL;
         $xml .= '<urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9">' . PHP_EOL;
-    
+
         // Halaman utama
         $xml .= '<url>
             <loc>' . $baseUrl . '</loc>
             <priority>1.0</priority>
             <changefreq>daily</changefreq>
         </url>' . PHP_EOL;
-    
+
         // Kategori unik
         foreach ($kategori as $kat) {
             $xml .= '<url>
@@ -73,7 +78,7 @@ class Sitemap extends Controller
                 <priority>0.8</priority>
             </url>' . PHP_EOL;
         }
-    
+
         // artikel
         foreach ($artikel as $ar) {
             $xml .= '<url>
@@ -82,7 +87,7 @@ class Sitemap extends Controller
                 <priority>0.7</priority>
             </url>' . PHP_EOL;
         }
-        
+
         //untuk paket
         foreach ($paket as $pak) {
             $xml .= '<url>
@@ -91,7 +96,7 @@ class Sitemap extends Controller
                 <priority>0.7</priority>
             </url>' . PHP_EOL;
         }
-        
+
         //untuk twibbon
         foreach ($twibbon as $twi) {
             $xml .= '<url>
@@ -100,7 +105,7 @@ class Sitemap extends Controller
                 <priority>0.7</priority>
             </url>' . PHP_EOL;
         }
-    
+
         // Halaman tambahan
         $extraPages = ['tentangkami', 'pelatihan', 'penilaian', 'testimoni', 'artikel', 'jadwal', 'galeri', 'media-kelasbrevet', 'siap-kerja', 'twibbon', 'term', 'privasi', 'quiz'];
         foreach ($extraPages as $page) {
@@ -109,9 +114,9 @@ class Sitemap extends Controller
                 <priority>0.5</priority>
             </url>' . PHP_EOL;
         }
-    
+
         $xml .= '</urlset>';
-    
+
         // Jalur file
         $filePath = FCPATH . 'sitemap.xml';
 
@@ -150,5 +155,4 @@ class Sitemap extends Controller
             }
         }
     }
-
 }
