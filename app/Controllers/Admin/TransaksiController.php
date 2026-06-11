@@ -328,52 +328,68 @@ class TransaksiController extends BaseController
 
                     if ($existingIkh) {
                         // --- LOGIKA UPDATE ---
-                        // Ambil kuota saat ini dan tambahkan 1
                         $newKuota = (int)$existingIkh['kuota'] + 1;
 
                         $dataUpdate = [
-                            'kuota'  => $newKuota // Kuota bertambah
+                            'kuota'  => $newKuota
                         ];
 
-                        // Update berdasarkan ID primary key tabel IKH
                         $this->ikhModel->update($existingIkh['id_ikh'], $dataUpdate);
                     } else {
                         // --- LOGIKA INSERT BARU ---
 
-                        // 1. Definisikan data utama yang wajib diisi sesuai logika bisnis
+                        // 1. Data utama yang kita butuhkan
                         $dataInsertBaru = [
                             'id_siswa'            => $idsiswa,
                             'is_riwayat_hidup'    => '1',
                             'is_bukan_pns'        => '1',
                             'is_pakta_integritas' => '1',
                             'is_pernyataan_ikh'   => '1',
-                            'kuota'               => '1' // Kuota awal
+                            'kuota'               => '1'
                         ];
 
-                        // 2. KODE TAMBAHAN OTOMATIS (Mengatasi Error NOT NULL Database)
-                        // Membaca semua allowedFields dari Model dan mengisi field yang kosong
+                        // 2. MELENGKAPI DATA (Perbaikan Logika ENUM & DATE)
                         $dataInsertLengkap = [];
+
+                        // Daftar field yang SUDAH PUNYA default di database atau BOLEH NULL.
+                        // Field ini tidak akan kita kirim, biarkan MySQL yang isi otomatis.
+                        $skipFields = [
+                            'tanggal_lahir',
+                            'status_validasi_admin',
+                            'status_proses',
+                            'status_final',
+                            'status_sertifikat',
+                            'catatan_admin',
+                            'tgl_aktif',
+                            'tgl_exp'
+                        ];
+
                         foreach ($this->ikhModel->allowedFields as $field) {
                             if (array_key_exists($field, $dataInsertBaru)) {
-                                // Jika field ada di data utama, masukkan nilainya
+                                // Jika field ada di data utama kita, masukkan.
                                 $dataInsertLengkap[$field] = $dataInsertBaru[$field];
                             } else {
-                                // Jika field tidak ada, beri nilai default agar tidak ditolak database
-                                // Handle khusus untuk field tipe ENUM (tidak boleh string kosong)
+                                // Jika masuk dalam daftar skip, lewati (jangan masukan ke array)
+                                if (in_array($field, $skipFields)) {
+                                    continue;
+                                }
+
+                                // Handle ENUM yang dari gambar pertama TIDAK PUNYA default
                                 if ($field === 'pendidikan_terakhir') {
-                                    $dataInsertLengkap[$field] = 'S1'; // Nilai default enum pertama
+                                    $dataInsertLengkap[$field] = 'S1';
                                 } elseif ($field === 'kategori_kantor') {
-                                    $dataInsertLengkap[$field] = 'Lain...'; // Nilai default enum terakhir
+                                    $dataInsertLengkap[$field] = 'Lain...';
                                 } else {
-                                    $dataInsertLengkap[$field] = ''; // Isi string kosong untuk varchar/text
+                                    // Sisa field varchar/text/int diisi string kosong agar tidak error NOT NULL
+                                    $dataInsertLengkap[$field] = '';
                                 }
                             }
                         }
 
-                        // 3. Jalankan perintah insert dengan data yang sudah dilengkapi
+                        // 3. Jalankan perintah insert
                         $insertResult = $this->ikhModel->insert($dataInsertLengkap);
 
-                        // 4. KODE PREVENTIF / DEBUGGING (Bisa dihapus jika sudah lancar)
+                        // 4. Debugging (Bisa kamu hapus/komentari kalau sudah berhasil masuk DB)
                         if ($insertResult === false) {
                             dd([
                                 'Pesan Gagal Model' => $this->ikhModel->errors(),
