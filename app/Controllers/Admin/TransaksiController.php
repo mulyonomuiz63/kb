@@ -311,7 +311,6 @@ class TransaksiController extends BaseController
                 }
             }
 
-            //untuk jenis paket ikh
             $transaksiMaster = $this->transaksiModel
                 ->where('idtransaksi', $idtransaksi)
                 ->where('status', 'S')
@@ -340,7 +339,9 @@ class TransaksiController extends BaseController
                         $this->ikhModel->update($existingIkh['id_ikh'], $dataUpdate);
                     } else {
                         // --- LOGIKA INSERT BARU ---
-                        $dataInsert = [
+
+                        // 1. Definisikan data utama yang wajib diisi sesuai logika bisnis
+                        $dataInsertBaru = [
                             'id_siswa'            => $idsiswa,
                             'is_riwayat_hidup'    => '1',
                             'is_bukan_pns'        => '1',
@@ -349,7 +350,36 @@ class TransaksiController extends BaseController
                             'kuota'               => '1' // Kuota awal
                         ];
 
-                        $this->ikhModel->insert($dataInsert);
+                        // 2. KODE TAMBAHAN OTOMATIS (Mengatasi Error NOT NULL Database)
+                        // Membaca semua allowedFields dari Model dan mengisi field yang kosong
+                        $dataInsertLengkap = [];
+                        foreach ($this->ikhModel->allowedFields as $field) {
+                            if (array_key_exists($field, $dataInsertBaru)) {
+                                // Jika field ada di data utama, masukkan nilainya
+                                $dataInsertLengkap[$field] = $dataInsertBaru[$field];
+                            } else {
+                                // Jika field tidak ada, beri nilai default agar tidak ditolak database
+                                // Handle khusus untuk field tipe ENUM (tidak boleh string kosong)
+                                if ($field === 'pendidikan_terakhir') {
+                                    $dataInsertLengkap[$field] = 'S1'; // Nilai default enum pertama
+                                } elseif ($field === 'kategori_kantor') {
+                                    $dataInsertLengkap[$field] = 'Lain...'; // Nilai default enum terakhir
+                                } else {
+                                    $dataInsertLengkap[$field] = ''; // Isi string kosong untuk varchar/text
+                                }
+                            }
+                        }
+
+                        // 3. Jalankan perintah insert dengan data yang sudah dilengkapi
+                        $insertResult = $this->ikhModel->insert($dataInsertLengkap);
+
+                        // 4. KODE PREVENTIF / DEBUGGING (Bisa dihapus jika sudah lancar)
+                        if ($insertResult === false) {
+                            dd([
+                                'Pesan Gagal Model' => $this->ikhModel->errors(),
+                                'Pesan Gagal DB Server' => $this->ikhModel->db->error()
+                            ]);
+                        }
                     }
                 }
             }
