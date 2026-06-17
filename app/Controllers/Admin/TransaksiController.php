@@ -62,6 +62,9 @@ class TransaksiController extends BaseController
 
                 $totalFiltered = $query->countAllResults(false);
 
+                // ==========================================
+                // PENGURUTAN (SORTING) YANG SUDAH DIPERBAIKI
+                // ==========================================
                 $data = $query->orderBy("transaksi.status = 'S'", "ASC", FALSE)
                         ->orderBy("transaksi.tgl_pembayaran IS NULL", "DESC", FALSE)
                         ->orderBy('transaksi.tgl_pembayaran', 'DESC')
@@ -86,9 +89,9 @@ class TransaksiController extends BaseController
                     // LOGIKA AFFILIATE & KOLOM VOUCHER
                     // ==========================================
                     $is_affiliate = false;
-                    $kode_affiliate = $s->kode_affiliate ?? null; // Pastikan field ini ada di query getBaseQuery()
+                    $kode_affiliate = $s->kode_affiliate ?? null; 
 
-                    // Kondisi: Voucher 8173AF4239 (walau affiliate null/ada) ATAU jika kode_affiliate ada isinya
+                    // Kondisi: Voucher 8173AF4239 ATAU jika kode_affiliate ada isinya
                     if ($s->kode_voucher === '8173AF4239' || !empty($kode_affiliate)) {
                         $is_affiliate = true;
                     }
@@ -104,26 +107,48 @@ class TransaksiController extends BaseController
                     }
 
                     $row['voucher'] = $html_voucher;
-                    // ==========================================
 
-                    // Kolom Pembayaran (Format Tanggal)
+                    // ==========================================
+                    // KOLOM PEMBAYARAN (TGL PESAN, TGL BAYAR, METODE BAYAR)
+                    // ==========================================
                     $label_jenis_bayar = '';
                     if ($s->jenis_bayar === 'online') {
-                        $label_jenis_bayar = '<div class="text-info fw-semibold fs-7"><i class="ki-duotone ki-credit-cart fs-6 me-1 text-info"><span class="path1"></span><span class="path2"></span></i> Midtrans</div>';
+                        $label_jenis_bayar = '<div class="text-info fw-semibold fs-8"><i class="ki-duotone ki-credit-cart fs-7 me-1 text-info"><span class="path1"></span><span class="path2"></span></i> Midtrans</div>';
                     } elseif ($s->jenis_bayar === 'manual') {
-                        $label_jenis_bayar = '<div class="text-primary fw-semibold fs-7"><i class="ki-duotone ki-wallet fs-6 me-1 text-primary"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i> Manual Transfer</div>';
+                        $label_jenis_bayar = '<div class="text-primary fw-semibold fs-8"><i class="ki-duotone ki-wallet fs-7 me-1 text-primary"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i> Manual Transfer</div>';
                     } else {
-                        $label_jenis_bayar = '<div class="text-muted fw-semibold fs-7">Belum memilih</div>';
+                        $label_jenis_bayar = '<div class="text-muted fw-semibold fs-8">Belum memilih</div>';
                     }
 
-                    // Kolom Pembayaran (Format Tanggal + Jenis Bayar)
-                    if ($s->tgl_pembayaran) {
-                        $date = new \DateTime($s->tgl_pembayaran);
-                        $row['pembayaran'] = '<div class="text-gray-800 fw-bold fs-6">' . $date->format('d M Y, H:i') . '</div>' . $label_jenis_bayar;
+                    // 1. Label Waktu Pesanan (menggunakan created_at)
+                    $html_tgl_pesan = '';
+                    if (!empty($s->created_at)) {
+                        $datePesan = new \DateTime($s->created_at);
+                        $html_tgl_pesan = '<div class="text-gray-800 fw-bold fs-7" title="Waktu Pesanan Dibuat">
+                                            <i class="ki-duotone ki-time fs-6 me-1"><span class="path1"></span><span class="path2"></span></i>' 
+                                            . $datePesan->format('d M Y, H:i') . 
+                                          '</div>';
                     } else {
-                        $row['pembayaran'] = '<div class="text-muted fw-semibold fs-6">-</div>' . $label_jenis_bayar;
+                        $html_tgl_pesan = '<div class="text-muted fw-semibold fs-7"><i class="ki-duotone ki-time fs-6 me-1"><span class="path1"></span><span class="path2"></span></i>-</div>';
                     }
 
+                    // 2. Label Waktu Pembayaran (tgl_pembayaran)
+                    $html_tgl_bayar = '';
+                    if (!empty($s->tgl_pembayaran)) {
+                        $dateBayar = new \DateTime($s->tgl_pembayaran);
+                        $html_tgl_bayar = '<div class="text-success fw-semibold fs-8 mt-1" title="Waktu Pembayaran Berhasil">
+                                            Lunas: ' . $dateBayar->format('d M Y, H:i') . 
+                                          '</div>';
+                    } else {
+                        $html_tgl_bayar = '<div class="text-danger fw-semibold fs-8 mt-1">Belum bayar</div>';
+                    }
+
+                    // 3. Gabungkan semua informasi waktu dan metode ke kolom 'pembayaran'
+                    $row['pembayaran'] = $html_tgl_pesan . $html_tgl_bayar . '<div class="mt-1">' . $label_jenis_bayar . '</div>';
+
+                    // ==========================================
+                    // PERHITUNGAN DISKON & NOMINAL
+                    // ==========================================
                     $diskon         = ($s->nominal * $s->diskon) / 100;
                     $totalDiskon    = $s->nominal - $diskon;
                     $diskon_voucher = ($totalDiskon * $s->voucher) / 100;
@@ -151,7 +176,7 @@ class TransaksiController extends BaseController
                         $row['status'] = '<div class="text-center"><span class="badge badge-light-danger fw-bold px-3 py-2">Expired</span></div>';
                     }
 
-                    // [6] Kolom Aksi (Menggunakan Metronic KTMenu)
+                    // Kolom Aksi (Menggunakan Metronic KTMenu)
                     $row['aksi'] = '
                     <div class="text-center">
                         <a href="#" class="btn btn-sm btn-light btn-flex btn-center btn-active-light-primary" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
