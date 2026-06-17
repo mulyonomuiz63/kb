@@ -110,7 +110,7 @@ class TransaksiController extends BaseController
         if ($this->request->isAJAX()) {
             $kode_voucher = $this->request->getVar('kode_voucher');
             $idpaket = $this->request->getVar('idpaket');
-            $data = $this->voucherModel->join('detail_voucher', 'voucher.idvoucher=detail_voucher.idvoucher')->where('detail_voucher.idpaket', $idpaket)->where('voucher.kode_voucher', $kode_voucher)->where('voucher.tgl_exp >', date('Y-m-d H:i:s'))->where('voucher.status', 'A')->groupBy('voucher.idvoucher')->get()->getResultObject();
+            $data = $this->voucherModel->join('detail_voucher', 'voucher.idvoucher=detail_voucher.idvoucher')->where('detail_voucher.idpaket', $idpaket)->where('voucher.kode_voucher', $kode_voucher)->where('voucher.tgl_exp >=', date('Y-m-d H:i:s'))->where('voucher.status', 'A')->groupBy('voucher.idvoucher')->get()->getResultObject();
             echo json_encode($data);
         }
     }
