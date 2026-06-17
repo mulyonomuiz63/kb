@@ -62,11 +62,12 @@ class TransaksiController extends BaseController
 
                 $totalFiltered = $query->countAllResults(false);
 
-                $data = $query->orderBy('transaksi.status', 'asc')
-                    ->orderBy('transaksi.tgl_pembayaran', 'desc')
-                    ->limit($length, $start)
-                    ->get()
-                    ->getResultObject();
+                $data = $query->orderBy("transaksi.status = 'S'", "ASC", FALSE)
+                        ->orderBy("transaksi.tgl_pembayaran IS NULL", "DESC", FALSE)
+                        ->orderBy('transaksi.tgl_pembayaran', 'DESC')
+                        ->limit($length, $start)
+                        ->get()
+                        ->getResultObject();
 
                 $results = [];
                 foreach ($data as $s) {
