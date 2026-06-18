@@ -76,42 +76,59 @@
 
             <div class="modal-body scroll-y pt-0 pb-15 px-5 px-xl-20">
                 <div class="mb-13 text-center">
-                    <h1 class="mb-3">Detail Informasi Peserta</h1>
-                    <div class="text-muted fw-semibold fs-5">Informasi lengkap terkait identitas dan instansi peserta</div>
+                    <h1 class="mb-3">Detail Informasi Siswa</h1>
+                    <div class="text-muted fw-semibold fs-5">Informasi lengkap terkait biodata, kontak, dan instansi siswa</div>
                 </div>
 
                 <div class="row g-9">
                     <div class="col-md-4 text-center mb-4">
                         <div class="symbol symbol-150px symbol-circle mb-5" id="file_profile">
-                            <img src="<?= base_url('assets/admin/media/avatars/blank.png') ?>" alt="image" />
+                            <img src="<?= base_url('assets/admin/media/avatars/blank.png') ?>" alt="image" id="avatar_detail" />
                         </div>
-                        <h4 class="fw-bold text-gray-900 mb-1" id="nama_peserta_top">Loading...</h4>
+                        <h4 class="fw-bold text-gray-900 mb-1" id="nama_siswa_top">Loading...</h4>
+                        <span class="badge badge-light-primary fw-bold" id="no_induk_top">Loading...</span>
                     </div>
 
                     <div class="col-md-8">
 
                         <div class="fs-5 fw-bold text-gray-900 mb-4 border-bottom pb-2">Identitas Pribadi</div>
                         <div class="row mb-7">
-                            <?= renderDetailRow('ID Peserta', 'idpeserta') ?>
-                            <?= renderDetailRow('NIK', 'nik') ?>
-                            <?= renderDetailRow('Nama Lengkap', 'nama_peserta') ?>
-                            <?= renderDetailRow('Tgl Lahir', 'tgl_lahir') ?>
-                            <?= renderDetailRow('Jenis Kelamin', 'jenis_kelamin') ?>
+                            <?= renderDetailRow('No. Induk Siswa', 'no_induk_siswa', 6) ?>
+                            <?= renderDetailRow('NIK', 'nik', 6) ?>
+                            <?= renderDetailRow('Nama Lengkap', 'nama_siswa', 12) ?>
+                            <?= renderDetailRow('Tempat Lahir', 'tempat_lahir', 6) ?>
+                            <?= renderDetailRow('Tanggal Lahir', 'tgl_lahir', 6) ?>
+                            <?= renderDetailRow('Jenis Kelamin', 'jenis_kelamin', 6) ?>
                         </div>
 
                         <div class="fs-5 fw-bold text-gray-900 mb-4 border-bottom pb-2 mt-8">Kontak & Alamat</div>
                         <div class="row mb-7">
-                            <?= renderDetailRow('Email', 'email_pribadi') ?>
-                            <?= renderDetailRow('No. HP', 'hp_pribadi') ?>
+                            <?= renderDetailRow('Email', 'email', 6) ?>
+                            <?= renderDetailRow('No. HP', 'hp', 6) ?>
+                            <?= renderDetailRow('Provinsi', 'provinsi', 6) ?>
+                            <?= renderDetailRow('Kota/Kabupaten', 'kota', 6) ?>
+                            <?= renderDetailRow('Kecamatan', 'kecamatan', 6) ?>
+                            <?= renderDetailRow('Kelurahan', 'kelurahan', 6) ?>
                             <?= renderDetailRow('Alamat KTP', 'alamat_ktp', 12) ?>
-                            <?= renderDetailRow('Domisili', 'alamat_domisili', 12) ?>
+                            <?= renderDetailRow('Alamat Domisili', 'alamat_domisili', 12) ?>
                         </div>
 
-                        <div class="fs-5 fw-bold text-gray-900 mb-4 border-bottom pb-2 mt-8">Pekerjaan / Lembaga</div>
+                        <div class="fs-5 fw-bold text-gray-900 mb-4 border-bottom pb-2 mt-8">Data Akademik & Akun</div>
+                        <div class="row mb-7">
+                            <?= renderDetailRow('Kelas', 'kelas', 6) ?>
+                            <?= renderDetailRow('Status Akun', 'is_active', 6) ?>
+                            <?= renderDetailRow('Tgl. Terdaftar', 'date_created', 6) ?>
+                            <?= renderDetailRow('Status Siswa', 'status', 6) ?>
+                        </div>
+
+                        <div class="fs-5 fw-bold text-gray-900 mb-4 border-bottom pb-2 mt-8">Pekerjaan / Instansi</div>
                         <div class="row">
-                            <?= renderDetailRow('Profesi', 'profesi') ?>
-                            <?= renderDetailRow('Lembaga', 'nama_lembaga') ?>
-                            <?= renderDetailRow('Bidang Usaha', 'bidang_usaha') ?>
+                            <?= renderDetailRow('Profesi', 'profesi', 6) ?>
+                            <?= renderDetailRow('Bidang Usaha', 'bidang_usaha', 6) ?>
+                            <?= renderDetailRow('Tipe Kantor', 'kantor', 6) ?>
+                            <?= renderDetailRow('Nama Kantor', 'nama_kantor', 6) ?>
+                            <?= renderDetailRow('Alamat Kantor', 'alamat_kantor', 12) ?>
+                            <?= renderDetailRow('Riwayat Pekerjaan', 'riwayat_pekerjaan', 12) ?>
                         </div>
 
                     </div>
@@ -293,30 +310,56 @@ function renderDetailRow($label, $id, $col = 6)
                 },
                 dataType: 'JSON',
                 success: function(data) {
+                    // Update CSRF Token
                     if (data.csrf_hash) {
                         csrfHash = data.csrf_hash;
                         $('input[name="' + csrfName + '"]').val(csrfHash);
                     }
 
-                    // Render Foto Profil (Menggunakan classes Metronic)
+                    // Render Foto Profil & Header
                     let imgSource = data.avatar ? 'https://kelasbrevet.com/assets/app-assets/user/' + data.avatar : '<?= base_url('assets/admin/media/avatars/blank.png') ?>';
-                    $("#file_profile").html('<img src="' + imgSource + '" alt="avatar" />');
+                    $("#file_profile").html('<img src="' + imgSource + '" alt="avatar" id="avatar_detail" />');
 
-                    // Render Data
-                    $("#nama_peserta_top").html(data.nama_siswa);
+                    $("#nama_siswa_top").html(data.nama_siswa || '-');
+                    $("#no_induk_top").html(data.no_induk_siswa || '-');
 
-                    $("#idpeserta").html(data.id_siswa);
-                    $("#nama_peserta").html(data.nama_siswa);
+                    // Render Data - Identitas Pribadi
+                    $("#no_induk_siswa").html(data.no_induk_siswa || '-');
                     $("#nik").html(data.nik || '-');
+                    $("#nama_siswa").html(data.nama_siswa || '-');
+                    $("#tempat_lahir").html(data.tempat_lahir || '-');
                     $("#tgl_lahir").html(data.tgl_lahir || '-');
                     $("#jenis_kelamin").html(data.jenis_kelamin || '-');
+
+                    // Render Data - Kontak & Alamat
+                    $("#email").html(data.email || '-');
+                    $("#hp").html(data.hp || '-');
+                    $("#provinsi").html(data.provinsi || '-');
+                    $("#kota").html(data.kota || '-');
+                    $("#kecamatan").html(data.kecamatan || '-');
+                    $("#kelurahan").html(data.kelurahan || '-');
                     $("#alamat_ktp").html(data.alamat_ktp || '-');
                     $("#alamat_domisili").html(data.alamat_domisili || '-');
+
+                    // Render Data - Akademik & Akun
+                    $("#kelas").html(data.kelas || '-');
+                    // Contoh ternary operator jika is_active menyimpan angka 1 (aktif) dan 0 (tidak aktif)
+                    $("#is_active").html(data.is_active == 1 ? '<span class="badge badge-light-success">Aktif</span>' : '<span class="badge badge-light-danger">Non-Aktif</span>');
+                    $("#date_created").html(data.date_created || '-');
+                    // Contoh memetakan status enum B/S (Jika B = Baru, S = Selesai, dsb. Silakan disesuaikan)
+                    $("#status").html(data.status === 'B' ? 'Baru' : (data.status === 'S' ? 'Selesai' : data.status || '-'));
+
+                    // Render Data - Pekerjaan / Instansi
                     $("#profesi").html(data.profesi || '-');
-                    $("#nama_lembaga").html(data.kantor || '-');
                     $("#bidang_usaha").html(data.bidang_usaha || '-');
-                    $("#email_pribadi").html(data.email || '-');
-                    $("#hp_pribadi").html(data.hp || '-');
+                    $("#kantor").html(data.kantor || '-');
+                    $("#nama_kantor").html(data.nama_kantor || '-');
+                    $("#alamat_kantor").html(data.alamat_kantor || '-');
+                    $("#riwayat_pekerjaan").html(data.riwayat_pekerjaan || '-');
+                },
+                error: function(xhr, status, error) {
+                    console.error("Terjadi kesalahan: " + error);
+                    // Tambahkan alert atau notifikasi error di sini jika perlu
                 }
             });
         });
