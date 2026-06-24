@@ -131,6 +131,5 @@ _modules/*
 
 public/uploads/
 public/assets/
-public/assets-landing/*
-!public/assets-landing/images/peserta/
+public/assets-landing/
 public/sitemap.xml
