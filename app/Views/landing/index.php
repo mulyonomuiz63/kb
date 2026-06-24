@@ -605,7 +605,19 @@
                                 'hisotex.png',
                                 'abeng.png',
                                 'UnMal.png',
-                                'interactive.png'
+                                'interactive.png',
+                                'banyualam.png',
+                                'bromelain.png',
+                                'ebara.png',
+                                'fiscaro.png',
+                                'gokomodo.png',
+                                'sabaindomedika.png',
+                                'machung.png',
+                                'mowin.png',
+                                'teknokrat.png',
+                                'ums.png',
+                                'ut.png',
+                                'yppembangunanbogor.png',
                             ];
                             ?>
                             <ul class="swiper-wrapper list">
