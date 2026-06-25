@@ -27,7 +27,7 @@ class IkhController extends BaseController
         ];
 
         // Ambil semua data pendaftaran (kecuali yang masih draft awal)
-        $data['list_ikh'] = $this->ikhModel->where('status_validasi_admin !=', 'draft')
+        $data['list_ikh'] = $this->ikhModel->select('pendaftaran_ikh.*, siswa.nama_siswa')->join('siswa','siswa.id_siswa=pendaftaran_ikh.id_siswa')
             ->orderBy('created_at', 'DESC')->findAll();
 
         return view('admin/ikh/list', $data);

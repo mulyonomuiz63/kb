@@ -38,7 +38,7 @@
                                 <tr>
                                     <td>
                                         <div class="d-flex flex-column">
-                                            <a href="<?= base_url('admin/ikh/review/'.$row['id_ikh']) ?>" class="text-gray-800 text-hover-primary mb-1 fw-bold"><?= $row['nama_lengkap'] ?></a>
+                                            <a href="<?= base_url('admin/ikh/review/'.$row['id_ikh']) ?>" class="text-gray-800 text-hover-primary mb-1 fw-bold"><?= $row['nama_lengkap'] == ''? $row['nama_siswa']:$row['nama_lengkap'] ?></a>
                                             <span><?= $row['nik'] ?></span>
                                         </div>
                                     </td>
@@ -59,9 +59,13 @@
                                         <?php endif; ?>
                                     </td>
                                     <td class="text-end">
-                                        <a href="<?= base_url('sw-admin/ikh/review/'.encrypt_url($row['id_ikh'])) ?>" class="btn btn-sm btn-light-primary">
-                                            <i class="ki-outline ki-eye fs-3"></i> Review
-                                        </a>
+                                        <?php if($row['status_validasi_admin'] != 'draft'): ?>
+                                            <a href="<?= base_url('sw-admin/ikh/review/'.encrypt_url($row['id_ikh'])) ?>" class="btn btn-sm btn-light-primary">
+                                                <i class="ki-outline ki-eye fs-3"></i> Review
+                                            </a>
+                                        <?php else: ?>
+                                            <span>-</span>
+                                        <?php endif ?>
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>
