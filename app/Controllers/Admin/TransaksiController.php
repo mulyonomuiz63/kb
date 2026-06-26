@@ -49,7 +49,13 @@ class TransaksiController extends BaseController
                 $start  = (int) $request->getPost('start');
                 $length = (int) $request->getPost('length');
                 $search = $request->getPost('search')['value'];
+                
+                // Tangkap Parameter Filter
+                $filter_bulan = $request->getPost('filter_bulan'); 
 
+                // ==========================================
+                // 1. BUILDER UNTUK MENAMPILKAN DATA TABEL
+                // ==========================================
                 $query = $this->transaksiModel->getBaseQuery();
 
                 if (!empty($search)) {
@@ -60,11 +66,14 @@ class TransaksiController extends BaseController
                         ->groupEnd();
                 }
 
+                if (!empty($filter_bulan)) {
+                    $query->like('transaksi.created_at', $filter_bulan, 'after');
+                }
+
+                // Menghitung total data terfilter TANPA mereset builder (bawaan kode aslimu)
                 $totalFiltered = $query->countAllResults(false);
 
-                // ==========================================
-                // PENGURUTAN (SORTING) YANG SUDAH DIPERBAIKI
-                // ==========================================
+                // Ambil data untuk baris tabel (Ini akan otomatis mereset builder $query)
                 $data = $query->orderBy("transaksi.status = 'S'", "ASC", FALSE)
                         ->orderBy("transaksi.tgl_pembayaran IS NULL", "DESC", FALSE)
                         ->orderBy('transaksi.tgl_pembayaran', 'DESC')
@@ -72,6 +81,42 @@ class TransaksiController extends BaseController
                         ->get()
                         ->getResultObject();
 
+
+                // ==========================================
+                // 2. BUILDER TERPISAH UNTUK TOTAL PENDAPATAN
+                // ==========================================
+                // Panggil ulang dari model agar tidak merusak $query di atas
+                $queryTotal = $this->transaksiModel->getBaseQuery();
+                
+                if (!empty($search)) {
+                    $queryTotal->groupStart()
+                        ->like('b.nama_siswa', $search)
+                        ->orLike('c.nama_paket', $search)
+                        ->orLike('transaksi.idtransaksi', $search)
+                        ->groupEnd();
+                }
+
+                if (!empty($filter_bulan)) {
+                    $queryTotal->like('transaksi.created_at', $filter_bulan, 'after');
+                }
+
+                // Ambil semua data hanya yang berstatus Lunas (S)
+                $dataTotalLunas = $queryTotal->where('transaksi.status', 'S')->get()->getResultObject();
+                
+                // Kalkulasi omset murni
+                $totalPendapatan = 0;
+                foreach ($dataTotalLunas as $dt) {
+                    $diskon         = ($dt->nominal * $dt->diskon) / 100;
+                    $totalDiskon    = $dt->nominal - $diskon;
+                    $diskon_voucher = ($totalDiskon * $dt->voucher) / 100;
+                    $nominal_bersih = $dt->nominal - $diskon - $diskon_voucher;
+                    
+                    $totalPendapatan += $nominal_bersih;
+                }
+
+                // ==========================================
+                // 3. PEMBENTUKAN BARIS TABEL (HTML)
+                // ==========================================
                 $results = [];
                 foreach ($data as $s) {
                     $id_enc = encrypt_url($s->idtransaksi);
@@ -85,32 +130,25 @@ class TransaksiController extends BaseController
                     $row['paket'] = '<div class="text-gray-800 fw-bold fs-6">' . esc($s->nama_paket) . '</div>
                      <div class="text-muted fw-semibold fs-7">' . esc($s->kantor ?? '') . '</div>';
 
-                    // ==========================================
                     // LOGIKA AFFILIATE & KOLOM VOUCHER
-                    // ==========================================
                     $is_affiliate = false;
                     $kode_affiliate = $s->kode_affiliate ?? null; 
 
-                    // Kondisi: Voucher 8173AF4239 ATAU jika kode_affiliate ada isinya
                     if ($s->kode_voucher === '8173AF4239' || !empty($kode_affiliate)) {
                         $is_affiliate = true;
                     }
 
-                    // Tampilan dasar voucher
                     $html_voucher = $s->kode_voucher
                         ? '<span class="badge badge-light-info fw-bold px-3 py-2">' . esc($s->kode_voucher) . '</span>'
                         : '<span class="text-muted fs-7 fw-semibold">-</span>';
 
-                    // Jika affiliate, tambahkan label info di bawahnya
                     if ($is_affiliate) {
                         $html_voucher .= '<div class="mt-2"><span class="badge badge-light-success fs-8 fw-bold px-2 py-1"><i class="ki-duotone ki-shop fs-7 me-1 text-success"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i> Link Affiliate</span></div>';
                     }
 
                     $row['voucher'] = $html_voucher;
 
-                    // ==========================================
-                    // KOLOM PEMBAYARAN (TGL PESAN, TGL BAYAR, METODE BAYAR)
-                    // ==========================================
+                    // KOLOM PEMBAYARAN
                     $label_jenis_bayar = '';
                     if ($s->jenis_bayar === 'online') {
                         $label_jenis_bayar = '<div class="text-info fw-semibold fs-8"><i class="ki-duotone ki-credit-cart fs-7 me-1 text-info"><span class="path1"></span><span class="path2"></span></i> Midtrans</div>';
@@ -120,7 +158,6 @@ class TransaksiController extends BaseController
                         $label_jenis_bayar = '<div class="text-muted fw-semibold fs-8">Belum memilih</div>';
                     }
 
-                    // 1. Label Waktu Pesanan (menggunakan created_at)
                     $html_tgl_pesan = '';
                     if (!empty($s->created_at)) {
                         $datePesan = new \DateTime($s->created_at);
@@ -132,7 +169,6 @@ class TransaksiController extends BaseController
                         $html_tgl_pesan = '<div class="text-muted fw-semibold fs-7"><i class="ki-duotone ki-time fs-6 me-1"><span class="path1"></span><span class="path2"></span></i>-</div>';
                     }
 
-                    // 2. Label Waktu Pembayaran (tgl_pembayaran)
                     $html_tgl_bayar = '';
                     if (!empty($s->tgl_pembayaran)) {
                         $dateBayar = new \DateTime($s->tgl_pembayaran);
@@ -143,21 +179,17 @@ class TransaksiController extends BaseController
                         $html_tgl_bayar = '<div class="text-danger fw-semibold fs-8 mt-1">Belum bayar</div>';
                     }
 
-                    // 3. Gabungkan semua informasi waktu dan metode ke kolom 'pembayaran'
                     $row['pembayaran'] = $html_tgl_pesan . $html_tgl_bayar . '<div class="mt-1">' . $label_jenis_bayar . '</div>';
 
-                    // ==========================================
                     // PERHITUNGAN DISKON & NOMINAL
-                    // ==========================================
                     $diskon         = ($s->nominal * $s->diskon) / 100;
                     $totalDiskon    = $s->nominal - $diskon;
                     $diskon_voucher = ($totalDiskon * $s->voucher) / 100;
                     $nominal        = $s->nominal - $diskon - $diskon_voucher;
 
-                    // Kolom Nominal
                     $row['nominal'] = '<span class="text-primary fw-bold fs-6">Rp ' . number_format($nominal, 0, ',', '.') . '</span>';
 
-                    // Kolom Status (Menggunakan Badge Metronic)
+                    // STATUS
                     if ($s->status === 'S') {
                         $row['status'] = '<div class="text-center"><span class="badge badge-light-success fw-bold px-3 py-2">Lunas</span></div>';
                     } elseif ($s->status === 'P') {
@@ -176,7 +208,7 @@ class TransaksiController extends BaseController
                         $row['status'] = '<div class="text-center"><span class="badge badge-light-danger fw-bold px-3 py-2">Expired</span></div>';
                     }
 
-                    // Kolom Aksi (Menggunakan Metronic KTMenu)
+                    // AKSI
                     $row['aksi'] = '
                     <div class="text-center">
                         <a href="#" class="btn btn-sm btn-light btn-flex btn-center btn-active-light-primary" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
@@ -191,7 +223,6 @@ class TransaksiController extends BaseController
                                 </a>
                             </div>';
 
-                    // Opsi bersyarat berdasarkan status S (Lunas)
                     if ($s->status == 'S') {
                         $row['aksi'] .= '
                             <div class="menu-item px-3">
@@ -224,19 +255,21 @@ class TransaksiController extends BaseController
                 }
 
                 return $this->response->setJSON([
-                    'draw'            => (int) $request->getPost('draw'),
-                    'recordsTotal'    => $this->transaksiModel->countAllData(),
-                    'recordsFiltered' => $totalFiltered,
-                    'data'            => $results,
-                    'csrf_hash'       => csrf_hash()
+                    'draw'             => (int) $request->getPost('draw'),
+                    'recordsTotal'     => $this->transaksiModel->countAllData(),
+                    'recordsFiltered'  => $totalFiltered,
+                    'data'             => $results,
+                    'total_pendapatan' => number_format($totalPendapatan, 0, ',', '.'),
+                    'csrf_hash'        => csrf_hash()
                 ]);
             } catch (\Exception $e) {
                 return $this->response->setJSON([
-                    'draw'            => 0,
-                    'recordsTotal'    => 0,
-                    'recordsFiltered' => 0,
-                    'data'            => [],
-                    'error'           => $e->getMessage()
+                    'draw'             => 0,
+                    'recordsTotal'     => 0,
+                    'recordsFiltered'  => 0,
+                    'data'             => [],
+                    'total_pendapatan' => '0',
+                    'error'            => $e->getMessage()
                 ]);
             }
         }

@@ -12,9 +12,29 @@
                     <div class="card-title flex-column align-items-start">
                         <span class="card-label fw-bold text-gray-800">Daftar Pembayaran</span>
                         <span class="text-gray-500 mt-1 fw-semibold fs-7">Kelola dan validasi pembayaran peserta ujian secara real-time.</span>
+                        <div class="mt-3">
+                            <span class="badge badge-light-success fs-6 fw-bold px-4 py-2 border border-success border-dashed">
+                                Total Lunas: Rp <span id="ui_total_pendapatan">0</span>
+                            </span>
+                        </div>
                     </div>
                     
                     <div class="card-toolbar flex-row-fluid justify-content-end gap-5">
+                        <div class="w-150px">
+                            <select id="filter_bulan" class="form-select form-select-solid" data-control="select2" data-hide-search="true">
+                                <option value="">Semua Bulan</option>
+                                <?php
+                                for ($i = 0; $i < 12; $i++) {
+                                    $val = date('Y-m', strtotime("-$i months"));
+                                    $label = date('F Y', strtotime("-$i months"));
+                                    $bulanEng = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                                    $bulanInd = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                                    $label = str_replace($bulanEng, $bulanInd, $label);
+                                    echo "<option value=\"$val\">$label</option>";
+                                }
+                                ?>
+                            </select>
+                        </div>
                         <div class="d-flex align-items-center position-relative my-1">
                             <i class="ki-duotone ki-magnifier fs-3 position-absolute ms-4">
                                 <span class="path1"></span><span class="path2"></span>
@@ -90,9 +110,11 @@
                 "type": "POST",
                 "data": function(d) {
                     d["<?= csrf_token() ?>"] = $('.csrf-token').val();
+                    d.filter_bulan = $('#filter_bulan').val();
                 },
                 "dataSrc": function(json) {
                     $('.csrf-token').val(json.csrf_hash);
+                    $('#ui_total_pendapatan').text(json.total_pendapatan);
                     return json.data;
                 },
             },
@@ -115,6 +137,11 @@
                     KTMenu.createInstances();
                 }
             }
+        });
+
+        // Trigger reload saat filter bulan diubah
+        $('#filter_bulan').on('change', function() {
+            table.ajax.reload();
         });
 
         // Search Datatable Custom
