@@ -4,10 +4,56 @@
 
 <div class="d-flex flex-column flex-column-fluid">
     <div id="kt_app_content" class="app-content flex-column-fluid">
+
         <div id="kt_app_content_container" class="app-container container-xxl">
-            
+
+            <div class="row g-5 g-xl-8 mb-8">
+
+                <div class="col-xl-4">
+                    <div class="card card-flush shadow-sm border-0 h-100">
+                        <div class="card-header pt-5 border-0">
+                            <h3 class="card-title align-items-start flex-column">
+                                <span class="card-label fw-bold text-gray-800 fs-4">Paket Terlaris</span>
+                                <span class="text-gray-500 mt-1 fw-semibold fs-7">Top 5 Paket Terpopuler</span>
+                            </h3>
+                        </div>
+                        <div class="card-body d-flex align-items-end pt-0">
+                            <div id="chart_paket_terlaris" class="w-100 min-h-250px"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-4">
+                    <div class="card card-flush shadow-sm border-0 h-100">
+                        <div class="card-header pt-5 border-0">
+                            <h3 class="card-title align-items-start flex-column">
+                                <span class="card-label fw-bold text-gray-800 fs-4">Metode Bayar</span>
+                                <span class="text-gray-500 mt-1 fw-semibold fs-7">Rasio Online vs Manual</span>
+                            </h3>
+                        </div>
+                        <div class="card-body d-flex flex-center pt-0">
+                            <div id="chart_metode_bayar" class="w-100 min-h-250px"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-4">
+                    <div class="card card-flush shadow-sm border-0 h-100">
+                        <div class="card-header pt-5 border-0">
+                            <h3 class="card-title align-items-start flex-column">
+                                <span class="card-label fw-bold text-gray-800 fs-4">Performa Voucher</span>
+                                <span class="text-gray-500 mt-1 fw-semibold fs-7">Mitra vs Voucher Affiliate</span>
+                            </h3>
+                        </div>
+                        <div class="card-body d-flex flex-center pt-0">
+                            <div id="chart_performa_voucher" class="w-100 min-h-250px"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
             <div class="card card-flush shadow-sm border-0">
-                
+
                 <div class="card-header align-items-center py-5 gap-2 gap-md-5">
                     <div class="card-title flex-column align-items-start">
                         <span class="card-label fw-bold text-gray-800">Daftar Pembayaran</span>
@@ -18,7 +64,7 @@
                             </span>
                         </div>
                     </div>
-                    
+
                     <div class="card-toolbar flex-row-fluid justify-content-end gap-5">
                         <div class="w-150px">
                             <select id="filter_bulan" class="form-select form-select-solid" data-control="select2" data-hide-search="true">
@@ -90,7 +136,7 @@
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content rounded border-0 shadow-lg">
             <div class="isiKontenInvoice">
-                 </div>
+            </div>
         </div>
     </div>
 </div>
@@ -118,14 +164,31 @@
                     return json.data;
                 },
             },
-            "columns": [
-                { "data": "peserta", "className": "text-gray-800 fw-bold" },
-                { "data": "paket" },
-                { "data": "voucher" },
-                { "data": "pembayaran" },
-                { "data": "nominal", "className": "text-end fw-bold text-gray-900" },
-                { "data": "status", "className": "text-center" },
-                { "data": "aksi", "className": "text-center" }
+            "columns": [{
+                    "data": "peserta",
+                    "className": "text-gray-800 fw-bold"
+                },
+                {
+                    "data": "paket"
+                },
+                {
+                    "data": "voucher"
+                },
+                {
+                    "data": "pembayaran"
+                },
+                {
+                    "data": "nominal",
+                    "className": "text-end fw-bold text-gray-900"
+                },
+                {
+                    "data": "status",
+                    "className": "text-center"
+                },
+                {
+                    "data": "aksi",
+                    "className": "text-center"
+                }
             ],
             "columnDefs": [{
                 "targets": [5, 6],
@@ -180,7 +243,7 @@
                     let jenisBayar = (data.jenis_bayar == 'online') ? 'Midtrans' : (data.status == 'P' ? 'N/A' : 'Manual');
                     let imgPath = '<?= base_url('uploads/transaksi/thumbnails'); ?>/' + data.bukti_pembayaran;
                     let lampiran = '';
-                    
+
                     if ((data.status === 'V' && data.jenis_bayar === 'manual') || (data.status === 'S' && data.jenis_bayar === 'manual')) {
                         lampiran = `
                             <div class="fv-row mt-5 text-center bg-light p-5 rounded border border-dashed border-gray-300">
@@ -190,7 +253,7 @@
                                 </a>
                             </div>`;
                     }
-                    
+
                     // Injeksi HTML dengan UI Metronic 8
                     $("#isiKonten").html(`
                         <div class="modal-header pb-0 border-0 justify-content-between">
@@ -231,7 +294,7 @@
                             <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Tutup</button>
                         </div>
                     `);
-                    
+
                     // Gunakan native bootstrap modal show (karena ID modal tetap sama)
                 }
             });
@@ -318,5 +381,93 @@
             j = (j = i.length) > 3 ? j % 3 : 0;
         return s + (j ? i.substr(0, j) + t : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) + (c ? d + Math.abs(n - i).toFixed(c).slice(2) : "");
     }
+</script>
+<script>
+    // Ambil data JSON dari PHP
+    const dataTopPaket = <?= $topPaket ?? '[]' ?>;
+    const dataMetodeBayar = <?= $metodeBayar ?? '[]' ?>;
+    const dataVoucher = <?= $analisisVoucher ?? '[]' ?>;
+
+    // --- 1. Chart Paket Terlaris (Horizontal Bar) ---
+    function initChartPaket() {
+        if(dataTopPaket.length === 0) return;
+        let categories = dataTopPaket.map(item => item.label);
+        let seriesData = dataTopPaket.map(item => parseInt(item.total));
+
+        var options = {
+            series: [{ name: 'Transaksi', data: seriesData }],
+            chart: { fontFamily: 'inherit', type: 'bar', height: 250, toolbar: { show: false } },
+            plotOptions: { bar: { borderRadius: 4, horizontal: true, distributed: true } },
+            colors: ['#009EF7', '#50CD89', '#F1416C', '#FFC700', '#7239EA'],
+            dataLabels: { enabled: true, style: { fontSize: '11px' } },
+            xaxis: { categories: categories, labels: { style: { colors: '#A1A5B7' } } },
+            yaxis: { labels: { style: { colors: '#3F4254', fontWeight: 500 } } },
+            legend: { show: false }
+        };
+        new ApexCharts(document.querySelector("#chart_paket_terlaris"), options).render();
+    }
+
+    // --- 2. Chart Metode Bayar (Donut) ---
+    function initChartMetodeBayar() {
+        if(dataMetodeBayar.length === 0) return;
+        let labels = dataMetodeBayar.map(item => item.label.toUpperCase());
+        let series = dataMetodeBayar.map(item => parseInt(item.total));
+
+        var options = {
+            series: series,
+            labels: labels,
+            chart: { fontFamily: 'inherit', type: 'donut', height: 250 },
+            colors: ['#009EF7', '#50CD89'], 
+            plotOptions: { pie: { donut: { size: '65%' } } },
+            dataLabels: { enabled: false },
+            legend: { position: 'bottom' }
+        };
+        new ApexCharts(document.querySelector("#chart_metode_bayar"), options).render();
+    }
+
+    // --- 3. Chart Performa Voucher (Donut - BARU) ---
+    function initChartVoucher() {
+        if(dataVoucher.length === 0) return;
+        let labels = dataVoucher.map(item => item.label);
+        let series = dataVoucher.map(item => parseInt(item.total));
+
+        var options = {
+            series: series,
+            labels: labels,
+            chart: { fontFamily: 'inherit', type: 'donut', height: 250 },
+            colors: ['#7239EA', '#50CD89', '#E4E6EF'], // Purple untuk Mitra, Green untuk Affiliate, Light Gray untuk tanpa voucher
+            plotOptions: { 
+                pie: { 
+                    donut: { 
+                        size: '65%',
+                        labels: {
+                            show: true,
+                            total: {
+                                show: true,
+                                label: 'Total Sukses',
+                                fontSize: '12px',
+                                fontWeight: 'bold',
+                                color: '#A1A5B7',
+                                formatter: function (w) {
+                                    return w.globals.seriesTotals.reduce((a, b) => a + b, 0)
+                                }
+                            }
+                        }
+                    } 
+                } 
+            },
+            dataLabels: { enabled: false },
+            legend: { position: 'bottom' },
+            stroke: { show: true, width: 2, colors: ['#ffffff'] }
+        };
+        new ApexCharts(document.querySelector("#chart_performa_voucher"), options).render();
+    }
+
+    // Render semua chart setelah DOM siap
+    document.addEventListener("DOMContentLoaded", function () {
+        initChartPaket();
+        initChartMetodeBayar();
+        initChartVoucher();
+    });
 </script>
 <?= $this->endSection(); ?>

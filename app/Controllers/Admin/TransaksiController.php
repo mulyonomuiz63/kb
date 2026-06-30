@@ -35,10 +35,48 @@ class TransaksiController extends BaseController
     }
     public function index()
     {
+        $db = \Config\Database::connect();
+
+        // 1. Dapatkan Data Top 5 Paket Terlaris (Status Lunas 'S')
+        $topPaket = $db->table('detail_transaksi dt')
+            ->select('p.nama_paket as label, COUNT(dt.idtransaksi) as total')
+            ->join('paket p', 'p.idpaket = dt.idpaket') // Menggunakan alias 'p' untuk paket
+            ->groupBy('dt.idpaket') // Cukup panggil satu kali saja
+            ->orderBy('total', 'DESC')
+            ->limit(5)
+            ->get()->getResultArray();
+
+        // 2. Dapatkan Data Metode Pembayaran Terpopuler (Online vs Manual)
+        $metodeBayar = $db->table('transaksi')
+            ->select('jenis_bayar as label, COUNT(idtransaksi) as total')
+            ->where('status', 'S')
+            ->where('jenis_bayar !=', null)
+            ->groupBy('jenis_bayar')
+            ->get()->getResultArray();
+
+        $analisisVoucher = $db->table('transaksi')
+            ->select("
+            SUM(CASE WHEN (kode_voucher = '8173AF4239' OR (kode_affiliate IS NOT NULL AND kode_affiliate != '')) THEN 1 ELSE 0 END) as affiliate,
+            SUM(CASE WHEN (kode_voucher IS NOT NULL AND kode_voucher != '' AND kode_voucher != '8173AF4239') AND (kode_affiliate IS NULL OR kode_affiliate = '') THEN 1 ELSE 0 END) as mitra,
+            SUM(CASE WHEN (kode_voucher IS NULL OR kode_voucher = '') AND (kode_affiliate IS NULL OR kode_affiliate = '') THEN 1 ELSE 0 END) as tanpa_voucher
+        ")
+            ->where('status', 'S')
+            ->get()->getRowArray();
+
         $data['breadcrumbs'] = [
             ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
             ['title' => 'List Transaksi', 'url' => '#'],
         ];
+
+        // Parsing data ke View
+        $data['topPaket']        = json_encode($topPaket);
+        $data['metodeBayar'] = json_encode($metodeBayar);
+        $data['analisisVoucher'] = json_encode([
+            ['label' => 'Voucher Mitra', 'total' => (int)($analisisVoucher['mitra'] ?? 0)],
+            ['label' => 'Voucher Affiliate', 'total' => (int)($analisisVoucher['affiliate'] ?? 0)],
+            ['label' => 'Tanpa Voucher', 'total' => (int)($analisisVoucher['tanpa_voucher'] ?? 0)]
+        ]);
+
         return view('admin/transaksi/list', $data);
     }
     public function datatables()
@@ -49,9 +87,9 @@ class TransaksiController extends BaseController
                 $start  = (int) $request->getPost('start');
                 $length = (int) $request->getPost('length');
                 $search = $request->getPost('search')['value'];
-                
+
                 // Tangkap Parameter Filter
-                $filter_bulan = $request->getPost('filter_bulan'); 
+                $filter_bulan = $request->getPost('filter_bulan');
 
                 // ==========================================
                 // 1. BUILDER UNTUK MENAMPILKAN DATA TABEL
@@ -75,11 +113,11 @@ class TransaksiController extends BaseController
 
                 // Ambil data untuk baris tabel (Ini akan otomatis mereset builder $query)
                 $data = $query->orderBy("transaksi.status = 'S'", "ASC", FALSE)
-                        ->orderBy("transaksi.tgl_pembayaran IS NULL", "DESC", FALSE)
-                        ->orderBy('transaksi.tgl_pembayaran', 'DESC')
-                        ->limit($length, $start)
-                        ->get()
-                        ->getResultObject();
+                    ->orderBy("transaksi.tgl_pembayaran IS NULL", "DESC", FALSE)
+                    ->orderBy('transaksi.tgl_pembayaran', 'DESC')
+                    ->limit($length, $start)
+                    ->get()
+                    ->getResultObject();
 
 
                 // ==========================================
@@ -87,7 +125,7 @@ class TransaksiController extends BaseController
                 // ==========================================
                 // Panggil ulang dari model agar tidak merusak $query di atas
                 $queryTotal = $this->transaksiModel->getBaseQuery();
-                
+
                 if (!empty($search)) {
                     $queryTotal->groupStart()
                         ->like('b.nama_siswa', $search)
@@ -102,7 +140,7 @@ class TransaksiController extends BaseController
 
                 // Ambil semua data hanya yang berstatus Lunas (S)
                 $dataTotalLunas = $queryTotal->where('transaksi.status', 'S')->get()->getResultObject();
-                
+
                 // Kalkulasi omset murni
                 $totalPendapatan = 0;
                 foreach ($dataTotalLunas as $dt) {
@@ -110,7 +148,7 @@ class TransaksiController extends BaseController
                     $totalDiskon    = $dt->nominal - $diskon;
                     $diskon_voucher = ($totalDiskon * $dt->voucher) / 100;
                     $nominal_bersih = $dt->nominal - $diskon - $diskon_voucher;
-                    
+
                     $totalPendapatan += $nominal_bersih;
                 }
 
@@ -132,7 +170,7 @@ class TransaksiController extends BaseController
 
                     // LOGIKA AFFILIATE & KOLOM VOUCHER
                     $is_affiliate = false;
-                    $kode_affiliate = $s->kode_affiliate ?? null; 
+                    $kode_affiliate = $s->kode_affiliate ?? null;
 
                     if ($s->kode_voucher === '8173AF4239' || !empty($kode_affiliate)) {
                         $is_affiliate = true;
@@ -162,9 +200,9 @@ class TransaksiController extends BaseController
                     if (!empty($s->created_at)) {
                         $datePesan = new \DateTime($s->created_at);
                         $html_tgl_pesan = '<div class="text-gray-800 fw-bold fs-7" title="Waktu Pesanan Dibuat">
-                                            <i class="ki-duotone ki-time fs-6 me-1"><span class="path1"></span><span class="path2"></span></i>' 
-                                            . $datePesan->format('d M Y, H:i') . 
-                                          '</div>';
+                                            <i class="ki-duotone ki-time fs-6 me-1"><span class="path1"></span><span class="path2"></span></i>'
+                            . $datePesan->format('d M Y, H:i') .
+                            '</div>';
                     } else {
                         $html_tgl_pesan = '<div class="text-muted fw-semibold fs-7"><i class="ki-duotone ki-time fs-6 me-1"><span class="path1"></span><span class="path2"></span></i>-</div>';
                     }
@@ -173,8 +211,8 @@ class TransaksiController extends BaseController
                     if (!empty($s->tgl_pembayaran)) {
                         $dateBayar = new \DateTime($s->tgl_pembayaran);
                         $html_tgl_bayar = '<div class="text-success fw-semibold fs-8 mt-1" title="Waktu Pembayaran Berhasil">
-                                            Lunas: ' . $dateBayar->format('d M Y, H:i') . 
-                                          '</div>';
+                                            Lunas: ' . $dateBayar->format('d M Y, H:i') .
+                            '</div>';
                     } else {
                         $html_tgl_bayar = '<div class="text-danger fw-semibold fs-8 mt-1">Belum bayar</div>';
                     }
