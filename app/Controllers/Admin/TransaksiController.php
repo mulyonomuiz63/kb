@@ -38,12 +38,16 @@ class TransaksiController extends BaseController
         $db = \Config\Database::connect();
 
         // 1. Dapatkan Data Top 5 Paket Terlaris (Status Lunas 'S')
+        // 1. Dapatkan Data Top 5 Paket Terlaris (Perbaikan Duplikasi Data)
         $topPaket = $db->table('detail_transaksi dt')
-            ->select('p.nama_paket as label, COUNT(dt.idtransaksi) as total')
-            ->join('paket p', 'p.idpaket = dt.idpaket') // Menggunakan alias 'p' untuk paket
-            ->groupBy('dt.idpaket') // Cukup panggil satu kali saja
+            // TAMBAHKAN DISTINCT DI SINI ↓
+            ->select('p.nama_paket as label, COUNT(DISTINCT dt.idtransaksi) as total') 
+            ->join('paket p', 'p.idpaket = dt.idpaket')
+            ->join('transaksi t', 't.idtransaksi = dt.idtransaksi') 
+            ->where('t.status', 'S')                                
+            ->where('t.jenis_bayar !=', null)                       
+            ->groupBy('dt.idpaket, p.nama_paket') 
             ->orderBy('total', 'DESC')
-            ->limit(5)
             ->get()->getResultArray();
 
         // 2. Dapatkan Data Metode Pembayaran Terpopuler (Online vs Manual)
