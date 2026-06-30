@@ -52,20 +52,24 @@ class TransaksiController extends BaseController
             ->get()->getResultArray();
 
         // 2. Dapatkan Data Metode Pembayaran Terpopuler (Online vs Manual)
-        $metodeBayar = $db->table('transaksi')
-            ->select('jenis_bayar as label, COUNT(idtransaksi) as total')
-            ->where('status', 'S')
-            ->where('jenis_bayar !=', null)
-            ->groupBy('jenis_bayar')
+        $metodeBayar = $db->table('transaksi as t')
+            ->select('t.jenis_bayar as label, COUNT(DISTINCT t.idtransaksi) as total')
+            ->join('detail_transaksi dt', 'dt.idtransaksi=t.idtransaksi')
+            ->join('paket p', 'p.idpaket = dt.idpaket')
+            ->where('t.status', 'S')
+            ->where('t.jenis_bayar !=', null)
+            ->groupBy('t.jenis_bayar')
             ->get()->getResultArray();
 
-        $analisisVoucher = $db->table('transaksi')
+        $analisisVoucher = $this->transaksiModel
             ->select("
-            SUM(CASE WHEN (kode_voucher = '8173AF4239' OR (kode_affiliate IS NOT NULL AND kode_affiliate != '')) THEN 1 ELSE 0 END) as affiliate,
-            SUM(CASE WHEN (kode_voucher IS NOT NULL AND kode_voucher != '' AND kode_voucher != '8173AF4239') AND (kode_affiliate IS NULL OR kode_affiliate = '') THEN 1 ELSE 0 END) as mitra,
-            SUM(CASE WHEN (kode_voucher IS NULL OR kode_voucher = '') AND (kode_affiliate IS NULL OR kode_affiliate = '') THEN 1 ELSE 0 END) as tanpa_voucher
-        ")
-            ->where('status', 'S')
+                COUNT(DISTINCT CASE WHEN (transaksi.kode_voucher = '8173AF4239' OR (transaksi.kode_affiliate IS NOT NULL AND transaksi.kode_affiliate != '')) THEN transaksi.idtransaksi ELSE NULL END) as affiliate,
+                COUNT(DISTINCT CASE WHEN (transaksi.kode_voucher IS NOT NULL AND transaksi.kode_voucher != '' AND transaksi.kode_voucher != '8173AF4239') AND (transaksi.kode_affiliate IS NULL OR transaksi.kode_affiliate = '') THEN transaksi.idtransaksi ELSE NULL END) as mitra,
+                COUNT(DISTINCT CASE WHEN (transaksi.kode_voucher IS NULL OR transaksi.kode_voucher = '') AND (transaksi.kode_affiliate IS NULL OR transaksi.kode_affiliate = '') THEN transaksi.idtransaksi ELSE NULL END) as tanpa_voucher
+            ")
+            ->join('detail_transaksi d', 'd.idtransaksi = transaksi.idtransaksi')
+            ->join('paket c', 'c.idpaket = d.idpaket')
+            ->where('transaksi.status', 'S')
             ->get()->getRowArray();
 
         $data['breadcrumbs'] = [

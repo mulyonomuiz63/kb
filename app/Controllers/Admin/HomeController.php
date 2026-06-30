@@ -74,7 +74,6 @@ class HomeController extends BaseController
             ->get()->getResultObject();
 
         $data['transaksi'] = $this->transaksiModel->join('detail_transaksi d', 'd.idtransaksi=transaksi.idtransaksi')
-            // ->select('count(idtransaksi) as transaksi, sum(nominal) as nominal, diskon, voucher')
             ->where('transaksi.status', 'S')
             ->join('paket c', 'c.idpaket = d.idpaket')
             ->groupBy('transaksi.idtransaksi')
