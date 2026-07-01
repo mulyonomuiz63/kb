@@ -38,7 +38,7 @@
                                     <tr>
                                         <td>
                                             <div class="d-flex flex-column">
-                                                <a href="<?= base_url('admin/ikh/review/' . $row['id_ikh']) ?>" class="text-gray-800 text-hover-primary mb-1 fw-bold"><?= $row['nama_lengkap'] ?></a>
+                                                <a href="<?= base_url('sw-pic/ikh/review/' . encrypt_url($row['id_ikh'])) ?>" class="text-gray-800 text-hover-primary mb-1 fw-bold"><?= $row['nama_lengkap'] == '' ? $row['nama_siswa'] : $row['nama_lengkap'] ?></a>
                                                 <span><?= $row['nik'] ?></span>
                                             </div>
                                         </td>
@@ -67,8 +67,8 @@
                                         </td>
                                         <td class="text-end">
                                             <div class="d-flex justify-content-end gap-2">
-                                                <a href="<?= base_url('sw-pic/ikh/review/' . encrypt_url($row['id_ikh'])) ?>" class="btn btn-sm btn-light-primary fw-bold">
-                                                    <i class="ki-outline ki-eye fs-3 me-1"></i> Review
+                                                <a href="<?= base_url('sw-pic/ikh/review/' . encrypt_url($row['id_ikh'])) ?>" class="btn btn-sm btn-light-primary">
+                                                    <i class="ki-outline ki-eye fs-3"></i> Review
                                                 </a>
 
                                                 <button type="button"
