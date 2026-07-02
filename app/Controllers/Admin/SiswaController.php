@@ -38,11 +38,102 @@ class SiswaController extends BaseController
             ['title' => 'List Peserta', 'url' => '#'],
         ];
 
-        // 2. Data kelas dipisah, jangan dimasukkan ke dalam array breadcrumbs
+        $db = \Config\Database::connect();
+
+        // 2. QUERY UTAMA DENGAN SUBQUERY
+        $sql = "
+            SELECT 
+                t.id_siswa, 
+                s.nama_siswa, 
+                COUNT(t.mapel) as total_mapel, 
+                AVG(t.max_nilai) as rata_rata_siswa
+            FROM (
+                SELECT id_siswa, mapel, MAX(nilai) as max_nilai
+                FROM ujian
+                WHERE status = 'S' AND nilai >= 60
+                GROUP BY id_siswa, mapel
+            ) t
+            JOIN siswa s ON s.id_siswa = t.id_siswa
+            GROUP BY t.id_siswa
+            HAVING COUNT(t.mapel) >= 8
+        ";
+
+        $siswaStats = $db->query($sql)->getResult();
+
+        // 3. VARIABEL WADAH STATISTIK
+        $totalMengerjakan = 0;
+        $sumRataRataKelas = 0;
+        $nilaiTertinggi   = 0;
+        $namaTertinggi    = '-';
+
+        $distribusi = [
+            '< 50'   => 0,
+            '50-59'  => 0,
+            '60-69'  => 0,
+            '70-79'  => 0,
+            '80-89'  => 0,
+            '90-100' => 0,
+        ];
+
+        // WADAH UNTUK LIST TOP 5 SISWA
+        $listSiswa = [];
+
+        // 4. OLAH DATA STATISTIK
+        foreach ($siswaStats as $row) {
+            $rataRataSiswa = (float) $row->rata_rata_siswa;
+
+            $totalMengerjakan++;
+            $sumRataRataKelas += $rataRataSiswa;
+
+            // Cari Nilai Tertinggi (Opsional karena nanti juga di-sort, tapi kita simpan untuk widget)
+            if ($rataRataSiswa > $nilaiTertinggi) {
+                $nilaiTertinggi = $rataRataSiswa;
+                $namaTertinggi  = $row->nama_siswa;
+            }
+
+            // Kelompokkan Distribusi Chart
+            if ($rataRataSiswa < 50) $distribusi['< 50']++;
+            elseif ($rataRataSiswa < 60) $distribusi['50-59']++;
+            elseif ($rataRataSiswa < 70) $distribusi['60-69']++;
+            elseif ($rataRataSiswa < 80) $distribusi['70-79']++;
+            elseif ($rataRataSiswa < 90) $distribusi['80-89']++;
+            else $distribusi['90-100']++;
+
+            // Simpan data siswa ke array untuk di-ranking
+            $listSiswa[] = [
+                'nama'  => $row->nama_siswa,
+                'nilai' => round($rataRataSiswa)
+            ];
+        }
+
+        // Hitung rata-rata kelas
+        $rataRataKelas = $totalMengerjakan > 0 ? ($sumRataRataKelas / $totalMengerjakan) : 0;
+
+        // --- SORTING (RANKING) TOP 5 SISWA ---
+        // Urutkan dari nilai tertinggi ke terendah
+        usort($listSiswa, function ($a, $b) {
+            return $b['nilai'] <=> $a['nilai'];
+        });
+
+        // Potong array agar hanya mengambil 5 urutan pertama
+        $data['top_siswa'] = array_slice($listSiswa, 0, 5);
+        // -------------------------------------
+
+        // 5. BUNGKUS KE JSON UNTUK DIKIRIM KE VIEW (WIDGET & CHART)
+        $data['statistik'] = json_encode([
+            'total_mengerjakan' => $totalMengerjakan,
+            'nilai_tertinggi'   => round($nilaiTertinggi),
+            'nama_tertinggi'    => $namaTertinggi,
+            'rata_rata'         => round($rataRataKelas),
+            'chart_categories'  => array_keys($distribusi),
+            'chart_data'        => array_values($distribusi)
+        ]);
+
+        // 6. Data kelas
         $data['kelas'] = $this->kelasModel->asObject()->findAll();
+
         return view('admin/siswa/list', $data);
     }
-
     // Di App\Models\SiswaModel.php
     public function datatable()
     {
@@ -73,7 +164,7 @@ class SiswaController extends BaseController
             // --- INFO TAMBAHAN: Badge Sedang Ujian ---
             // Cek nilai subquery 'sedang_ujian' dari model (> 0 berarti sedang ujian)
             $isSedangUjian = ($s->sedang_ujian > 0) ? true : false;
-            
+
             // Buat elemen visual (badge) jika sedang ujian
             $infoUjian = $isSedangUjian ? '<br><span class="badge badge-light-warning fw-bold px-2 py-1 mt-1 blink">Sedang Ujian</span>' : '';
 
