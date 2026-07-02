@@ -92,12 +92,20 @@ class SiswaController extends BaseController
             }
 
             // Kelompokkan Distribusi Chart
-            if ($rataRataSiswa < 50) $distribusi['< 50']++;
-            elseif ($rataRataSiswa < 60) $distribusi['50-59']++;
-            elseif ($rataRataSiswa < 70) $distribusi['60-69']++;
-            elseif ($rataRataSiswa < 80) $distribusi['70-79']++;
-            elseif ($rataRataSiswa < 90) $distribusi['80-89']++;
-            else $distribusi['90-100']++;
+            // Kelompokkan Distribusi Chart
+            if ($rataRataSiswa < 50) {
+                $distribusi['< 50']++;
+            } elseif ($rataRataSiswa >= 50 && $rataRataSiswa < 60) {
+                $distribusi['50-59']++;
+            } elseif ($rataRataSiswa >= 60 && $rataRataSiswa < 70) {
+                $distribusi['60-69']++;
+            } elseif ($rataRataSiswa >= 70 && $rataRataSiswa < 80) {
+                $distribusi['70-79']++;
+            } elseif ($rataRataSiswa >= 80 && $rataRataSiswa < 90) {
+                $distribusi['80-89']++;
+            } elseif ($rataRataSiswa >= 90) {
+                $distribusi['90-100']++;
+            }
 
             // Simpan data siswa ke array untuk di-ranking
             $listSiswa[] = [
