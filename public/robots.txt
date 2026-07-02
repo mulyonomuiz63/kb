@@ -1,2 +1,6 @@
 User-agent: *
-Disallow: 
+
+Disallow: /sw-admin/
+Disallow: /sw-siswa/
+Disallow: /sw-pic
+Disallow: /writable/
