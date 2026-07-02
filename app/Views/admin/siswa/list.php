@@ -97,7 +97,9 @@
                                             </div>
                                         </div>
                                         <span class="badge badge-light-success fs-6 fw-bold">
-                                            <?= number_format($siswa['nilai']) ?>
+                                            <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#sertifikat_all_cetak_modal" data-sertifikat_all="<?= base_url("sw-admin/siswa/lihatSertifikatBrevet/" . encrypt_url($siswa['id_siswa'])) ?>" class="btn btn-sm btn-light-success sertifikat_all_cetak" title="Unduh Sertifikat Brevet AB">
+                                                <?= number_format($siswa['nilai']) ?>
+                                            </a>
                                         </span>
                                     </div>
                                 <?php endforeach; ?>
@@ -242,7 +244,19 @@
         </div>
     </div>
 </div>
-
+<?php
+$modals = [
+    ['id' => 'sertifikat_all_cetak_modal', 'class' => 'isiKontenSertifikatAll']
+];
+foreach ($modals as $modal): ?>
+    <div class="modal fade" id="<?= $modal['id'] ?>" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="<?= $modal['class'] ?>"></div>
+            </div>
+        </div>
+    </div>
+<?php endforeach; ?>
 <?php
 function renderDetailRow($label, $id, $col = 6)
 {
@@ -564,5 +578,21 @@ function renderDetailRow($label, $id, $col = 6)
             chartInstance.render();
         }
     }
+</script>
+<script>
+    function renderModalContent(title, url) {
+        return `
+                <div class="modal-header pb-0 border-0 justify-content-between">
+                    <h2 class="fw-bold">${title}</h2>
+                    <div class="btn btn-sm btn-icon btn-active-color-primary" data-bs-dismiss="modal">
+                        <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i>
+                    </div>
+                </div>
+                <div class="modal-body p-5">
+                    <iframe src="${url}" width="100%" height="600px" style="border:none; border-radius: 8px; box-shadow: 0 0 15px rgba(0,0,0,0.05);"></iframe>
+                </div>
+            `;
+    }
+    $(document).on('click', '.sertifikat_all_cetak', function() { $(".isiKontenSertifikatAll").html(renderModalContent('Sertifikat Brevet AB', $(this).data('sertifikat_all'))); });
 </script>
 <?= $this->endSection(); ?>
