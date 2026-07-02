@@ -109,8 +109,9 @@ class SiswaController extends BaseController
 
             // Simpan data siswa ke array untuk di-ranking
             $listSiswa[] = [
-                'nama'  => $row->nama_siswa,
-                'nilai' => round($rataRataSiswa)
+                'id_siswa'  => $row->id_siswa,
+                'nama'      => $row->nama_siswa,
+                'nilai'     => round($rataRataSiswa)
             ];
         }
 

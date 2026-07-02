@@ -134,7 +134,8 @@ class SiswaModel extends Model
     public function getId($id_siswa)
     {
         return $this
-            ->select('siswa.*, siswa.status as status_data')
+            ->select('siswa.*, siswa.status as status_data, kelas.nama_kelas as kelas')
+            ->join('kelas', 'kelas.id_kelas = siswa.kelas')
             ->where('siswa.id_siswa', $id_siswa)
             ->get()->getRowObject();
     }

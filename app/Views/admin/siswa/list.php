@@ -90,7 +90,7 @@
                                         </div>
                                         <div class="flex-grow-1">
                                             <div class="fw-bold text-gray-800 fs-6">
-                                                <?= esc($siswa['nama']) ?>
+                                                <a href="javascript:void(0);" class="detail-siswa" data-siswa="<?= esc(encrypt_url($siswa['id_siswa'])) ?>" data-bs-toggle="modal" data-bs-target="#detail_siswa"><?= esc($siswa['nama']) ?></a>
                                             </div>
                                             <div class="text-muted fs-7">
                                                 Nilai Akhir
@@ -372,12 +372,53 @@ function renderDetailRow($label, $id, $col = 6)
                         csrfHash = data.csrf_hash;
                         $('input[name="' + csrfName + '"]').val(csrfHash);
                     }
+
+                    // 1. Format Tanggal (dari timestamp ke format d/m/Y H:i)
+                    if (data.date_created) {
+                        let date = new Date(data.date_created * 1000); // Kali 1000 karena JS pakai milidetik
+                        let formattedDate = ('0' + date.getDate()).slice(-2) + '/' +
+                            ('0' + (date.getMonth() + 1)).slice(-2) + '/' +
+                            date.getFullYear() + ' ' +
+                            ('0' + date.getHours()).slice(-2) + ':' +
+                            ('0' + date.getMinutes()).slice(-2);
+                        $("#date_created").html(formattedDate);
+                    } else {
+                        $("#date_created").html('-');
+                    }
+
+                    // 2. Format Riwayat Pekerjaan (Array ke List)
+                    if (data.riwayat_pekerjaan) {
+                        try {
+                            // Jika data dalam bentuk JSON string, parse dulu
+                            let riwayat = typeof data.riwayat_pekerjaan === 'string' ? JSON.parse(data.riwayat_pekerjaan) : data.riwayat_pekerjaan;
+
+                            if (Array.isArray(riwayat) && riwayat.length > 0) {
+                                let htmlList = '<ul class="ps-5">';
+                                riwayat.forEach(item => {
+                                    htmlList += `<li class="mb-1">${item}</li>`;
+                                });
+                                htmlList += '</ul>';
+                                $("#riwayat_pekerjaan").html(htmlList);
+                            } else {
+                                $("#riwayat_pekerjaan").html('-');
+                            }
+                        } catch (e) {
+                            $("#riwayat_pekerjaan").html(data.riwayat_pekerjaan); // Fallback jika bukan array
+                        }
+                    } else {
+                        $("#riwayat_pekerjaan").html('-');
+                    }
+
+                    // 3. Render elemen lainnya (exclude field yang sudah dihandle di atas)
+                    const fields = ['no_induk_siswa', 'nik', 'nama_siswa', 'tempat_lahir', 'tgl_lahir', 'jenis_kelamin', 'email', 'hp', 'provinsi', 'kota', 'kecamatan', 'kelurahan', 'alamat_ktp', 'alamat_domisili', 'kelas', 'profesi', 'bidang_usaha', 'kantor', 'nama_kantor', 'alamat_kantor'];
+
+                    fields.forEach(f => {
+                        if (data[f] !== undefined) $(`#${f}`).html(data[f] || '-');
+                    });
+
+                    // ... sisanya (avatar, status, dll) tetap sama
                     let imgSource = data.avatar ? 'https://kelasbrevet.com/assets/app-assets/user/' + data.avatar : '<?= base_url('assets/admin/media/avatars/blank.png') ?>';
                     $("#file_profile").html('<img src="' + imgSource + '" alt="avatar" id="avatar_detail" />');
-
-                    const fields = ['no_induk_siswa', 'nik', 'nama_siswa', 'tempat_lahir', 'tgl_lahir', 'jenis_kelamin', 'email', 'hp', 'provinsi', 'kota', 'kecamatan', 'kelurahan', 'alamat_ktp', 'alamat_domisili', 'kelas', 'date_created', 'profesi', 'bidang_usaha', 'kantor', 'nama_kantor', 'alamat_kantor', 'riwayat_pekerjaan'];
-
-                    fields.forEach(f => $(`#${f}`).html(data[f] || '-'));
                     $("#nama_siswa_top").html(data.nama_siswa || '-');
                     $("#no_induk_top").html(data.no_induk_siswa || '-');
                     $("#is_active").html(data.is_active == 1 ? '<span class="badge badge-light-success">Aktif</span>' : '<span class="badge badge-light-danger">Non-Aktif</span>');
