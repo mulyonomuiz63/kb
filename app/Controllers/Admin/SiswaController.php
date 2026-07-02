@@ -91,19 +91,19 @@ class SiswaController extends BaseController
                 $namaTertinggi  = $row->nama_siswa;
             }
 
+            $nilaiBulat = round($rataRataSiswa);
             // Kelompokkan Distribusi Chart
-            // Kelompokkan Distribusi Chart
-            if ($rataRataSiswa < 50) {
+            if ($nilaiBulat < 50) {
                 $distribusi['< 50']++;
-            } elseif ($rataRataSiswa >= 50 && $rataRataSiswa < 60) {
+            } elseif ($nilaiBulat >= 50 && $nilaiBulat < 60) {
                 $distribusi['50-59']++;
-            } elseif ($rataRataSiswa >= 60 && $rataRataSiswa < 70) {
+            } elseif ($nilaiBulat >= 60 && $nilaiBulat < 70) {
                 $distribusi['60-69']++;
-            } elseif ($rataRataSiswa >= 70 && $rataRataSiswa < 80) {
+            } elseif ($nilaiBulat >= 70 && $nilaiBulat < 80) {
                 $distribusi['70-79']++;
-            } elseif ($rataRataSiswa >= 80 && $rataRataSiswa < 90) {
+            } elseif ($nilaiBulat >= 80 && $nilaiBulat < 90) {
                 $distribusi['80-89']++;
-            } elseif ($rataRataSiswa >= 90) {
+            } elseif ($nilaiBulat >= 90) {
                 $distribusi['90-100']++;
             }
 
