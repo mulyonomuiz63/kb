@@ -116,7 +116,7 @@ class SiswaController extends BaseController
         });
 
         // Potong array agar hanya mengambil 5 urutan pertama
-        $data['top_siswa'] = array_slice($listSiswa, 0, 5);
+        $data['top_siswa'] = array_slice($listSiswa, 0, 7);
         // -------------------------------------
 
         // 5. BUNGKUS KE JSON UNTUK DIKIRIM KE VIEW (WIDGET & CHART)

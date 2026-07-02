@@ -66,7 +66,7 @@
                         <div class="card-header">
                             <div class="card-title flex-column align-items-start">
                                 <h3 class="fw-bold text-gray-800 mb-1">
-                                    Top 5 Peserta
+                                    Top 7 Peserta
                                 </h3>
                                 <span class="text-muted fs-7">
                                     Berdasarkan nilai tertinggi
