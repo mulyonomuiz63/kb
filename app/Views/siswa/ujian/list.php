@@ -173,6 +173,28 @@
 
 <div class="d-flex flex-column flex-column-fluid py-3 py-lg-6">
     <div class="row g-6 g-xl-9">
+        <div class="col-12 mb-5">
+            <!-- Menggunakan bg-light-primary dan border dashed agar terlihat elegan di kedua mode -->
+            <div class="alert bg-light-primary border border-primary border-dashed d-flex align-items-center p-5 mb-0">
+
+                <!-- Ikon Informasi -->
+                <i class="ki-duotone ki-information-5 fs-2hx text-primary me-4">
+                    <span class="path1"></span><span class="path2"></span><span class="path3"></span>
+                </i>
+
+                <!-- Teks Informasi -->
+                <div class="d-flex flex-column">
+                    <!-- text-gray-900 akan menjadi gelap di light mode dan putih/terang di dark mode -->
+                    <h4 class="mb-1 text-gray-900">Informasi Sertifikasi</h4>
+
+                    <!-- text-gray-700/600 memberikan kontras yang nyaman dibaca pada kedua mode -->
+                    <span class="text-gray-700">
+                        Untuk memperoleh <strong class="text-gray-900">Sertifikat Brevet AB</strong>, Anda diwajibkan lulus pada 8 materi ujian yang telah ditentukan.
+                    </span>
+                </div>
+
+            </div>
+        </div>
         <?php if (!empty($ujian)) : ?>
             <?php foreach ($ujian as $u) : ?>
                 <?php
@@ -432,7 +454,7 @@
         let selectedHref = '';
         let idujian = '';
         let isProcessing = false;
-        
+
         let camera = null;
         let faceMesh = null;
 
@@ -441,7 +463,7 @@
         const canvasElement = document.getElementById('camera_canvas');
         const canvasCtx = canvasElement.getContext('2d');
         const biometricBox = document.getElementById('biometric_box');
-        
+
         let csrfName = '<?= csrf_token() ?>';
         let csrfHash = '<?= csrf_hash() ?>';
 
@@ -449,7 +471,7 @@
         let currentChallenge = null;
         let challengeTimer = 0;
         const CHALLENGES = ['SMILE', 'BLINK']; // Senyum atau Kedip
-        
+
         // Konstanta untuk mengukur geometri wajah (berdasarkan 468 titik)
         const LEFT_EYE_TOP = 159;
         const LEFT_EYE_BOTTOM = 145;
@@ -461,9 +483,11 @@
         const LIP_BOTTOM = 14;
 
         // 1. Inisialisasi MediaPipe Face Mesh
-        faceMesh = new FaceMesh({locateFile: (file) => {
-            return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
-        }});
+        faceMesh = new FaceMesh({
+            locateFile: (file) => {
+                return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
+            }
+        });
 
         faceMesh.setOptions({
             maxNumFaces: 1, // Tolak jika ada 2 orang
@@ -510,13 +534,15 @@
                         }
                         canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
                         canvasCtx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
-                        await faceMesh.send({image: canvasElement});
+                        await faceMesh.send({
+                            image: canvasElement
+                        });
                     }
                 },
                 width: 640,
                 height: 480
             });
-            
+
             camera.start().then(() => {
                 $('#laser_scanner').show();
             });
@@ -546,7 +572,7 @@
                 // Pilih acak antara Senyum atau Kedip
                 currentChallenge = CHALLENGES[Math.floor(Math.random() * CHALLENGES.length)];
                 challengeTimer = Date.now();
-                
+
                 let text = currentChallenge === 'SMILE' ? 'Silakan Tersenyum Lebar' : 'Kedipkan Mata Anda';
                 updateUI('info', text, 'Silahkan ikuti intruksi untuk verifikasi ujian');
                 return; // Tunggu frame berikutnya
@@ -561,11 +587,10 @@
                 const lipWidth = getDistance(landmarks[LIP_LEFT], landmarks[LIP_RIGHT]);
                 const lipHeight = getDistance(landmarks[LIP_TOP], landmarks[LIP_BOTTOM]);
                 // Jika bibir meregang (lebar bertambah proporsional) atau mulut sedikit terbuka
-                if (lipWidth > 0.15 && lipHeight > 0.03) { 
+                if (lipWidth > 0.15 && lipHeight > 0.03) {
                     challengePassed = true;
                 }
-            } 
-            else if (currentChallenge === 'BLINK') {
+            } else if (currentChallenge === 'BLINK') {
                 // Rasio Bukaan Mata Kiri & Kanan (Mata menutup saat rasio mengecil)
                 const leftEyeOpen = getDistance(landmarks[LEFT_EYE_TOP], landmarks[LEFT_EYE_BOTTOM]);
                 const rightEyeOpen = getDistance(landmarks[RIGHT_EYE_TOP], landmarks[RIGHT_EYE_BOTTOM]);
@@ -582,19 +607,21 @@
                 $('#scan_progress_container').removeClass('d-none');
                 $('#scan_progress').css('width', '100%');
                 updateUI('success', 'Verifikasi Selesai', 'Foto diambil otomatis. Memproses data...');
-                
+
                 // Ambil gambar
                 captureAndSend();
-            } 
+            }
             // D. Jika Tantangan Gagal / Waktu Habis (Lebih dari 10 detik diam)
             else if (timeElapsed > 10000) {
                 resetScan('Waktu Habis', 'Sistem mendeteksi foto statis. Ulangi proses.', 'danger');
-                setTimeout(() => { currentChallenge = null; }, 2000); // Reset tantangan setelah 2 detik
+                setTimeout(() => {
+                    currentChallenge = null;
+                }, 2000); // Reset tantangan setelah 2 detik
             }
         }
 
         function resetScan(title, subtitle, status) {
-            currentChallenge = null; 
+            currentChallenge = null;
             updateUI(status, title, subtitle);
             $('#scan_progress_container').addClass('d-none');
             $('#scan_progress').css('width', '0%');
@@ -611,10 +638,10 @@
             biometricBox.className = `biometric-container ${status}`;
             let indicator = $('#cam_indicator');
             indicator.removeClass('bg-warning bg-danger bg-success bg-info');
-            if(status === 'warning') indicator.addClass('bg-warning');
-            if(status === 'danger') indicator.addClass('bg-danger');
-            if(status === 'success') indicator.addClass('bg-success');
-            if(status === 'info') indicator.addClass('bg-info');
+            if (status === 'warning') indicator.addClass('bg-warning');
+            if (status === 'danger') indicator.addClass('bg-danger');
+            if (status === 'success') indicator.addClass('bg-success');
+            if (status === 'info') indicator.addClass('bg-info');
 
             $('#scan_text').text(title);
             $('#scan_subtext').text(subtitle);
@@ -658,7 +685,7 @@
                                     window.location.href = response.redirect;
                                 });
                             }, 500);
-                            
+
                         } else {
                             Swal.fire('Gagal', response.message, 'error');
                             resetToDefault();
@@ -676,12 +703,12 @@
 
         $('#modal_verifikasi_wajah').on('hidden.bs.modal', function() {
             if (camera) {
-                camera.stop(); 
+                camera.stop();
                 camera = null; // Bersihkan dari memori
             }
             // Kosongkan canvas
             canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-            
+
             resetToDefault();
             $('#laser_scanner').hide();
         });
