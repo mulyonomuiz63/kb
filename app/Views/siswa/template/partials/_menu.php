@@ -1,7 +1,7 @@
 <?php $current_uri = uri_string(); ?>
 
 <div class="menu menu-rounded menu-active-bg menu-state-primary menu-column menu-lg-row menu-title-gray-700 menu-icon-gray-500 menu-arrow-gray-500 menu-bullet-gray-500 my-5 my-lg-0 align-items-stretch fw-semibold px-2 px-lg-0" id="kt_app_header_menu" data-kt-menu="true">
-    
+
     <div class="menu-item me-0 me-lg-2">
         <a class="menu-link <?= ($current_uri == 'sw-siswa') ? 'active' : '' ?>" href="<?= base_url('sw-siswa') ?>">
             <span class="menu-title">Dashboards</span>
@@ -19,7 +19,7 @@
                 <div class="row g-0">
                     <div class="col-lg-12 py-3 px-3 py-lg-6 px-lg-6">
                         <div class="row">
-                            
+
                             <div class="col-lg-6 mb-3">
                                 <div class="menu-item p-0 m-0">
                                     <a href="<?= base_url('sw-siswa/materi') ?>" class="menu-link <?= ($current_uri == 'sw-siswa/materi') ? 'active' : '' ?>">
@@ -104,7 +104,8 @@
                                 </div>
                             </div>
 
-                        </div> <div class="separator separator-dashed my-5"></div>
+                        </div>
+                        <div class="separator separator-dashed my-5"></div>
 
                         <div class="d-flex flex-stack flex-wrap gap-2 px-5">
                             <div class="d-flex flex-column">
@@ -119,10 +120,71 @@
             </div>
         </div>
     </div>
+    <?php
+    $db = \Config\Database::connect();
+
+    // Mengambil data pendaftaran
+    $ikh = $db->table('pendaftaran_ikh')->where([
+        'id_siswa' => session('id'), 'status_validasi_admin' => 'draft'
+    ])->get()->getRow();
+
+    // 1. Cek apakah ada data pendaftaran IKH
+    $adaData = !empty($ikh);
+
+    // 2. Cek kelengkapan data (Sesuaikan nama kolomnya)
+    $isLengkap = false;
+    if ($adaData) {
+        if (!empty($ikh->kolom_1) && !empty($ikh->kolom_2) && !empty($ikh->kolom_3)) {
+            $isLengkap = true;
+        }
+    }
+
+    // 3. Cek apakah saat ini user sedang membuka halaman IKH
+    $isHalamanIKH = ($current_uri == 'sw-siswa/ikh');
+
+    // 4. Kondisi tampilkan alert
+    $tampilkanAlert = ($adaData && !$isLengkap && !$isHalamanIKH);
+    ?>
+
+    <style>
+        @keyframes pulse-alert {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.05);
+                opacity: 0.7;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .animate-pulse {
+            animation: pulse-alert 1.5s infinite ease-in-out;
+            display: inline-flex;
+            /* Memastikan transform berjalan dengan baik */
+        }
+    </style>
 
     <div class="menu-item me-0 me-lg-2">
-        <a class="menu-link <?= ($current_uri == 'sw-siswa/ikh') ? 'active' : '' ?>" href="<?= base_url('sw-siswa/ikh') ?>">
+        <a class="menu-link <?= ($isHalamanIKH) ? 'active' : '' ?>" href="<?= base_url('sw-siswa/ikh') ?>">
             <span class="menu-title">IKH</span>
+
+            <?php if ($tampilkanAlert): ?>
+                <span class="menu-badge ms-2">
+                    <span class="badge badge-light-danger fw-bold fs-8 px-2 py-1 animate-pulse" title="Data Pendaftaran IKH belum lengkap">
+                        <i class="ki-duotone ki-information-5 fs-7 text-danger me-1">
+                            <span class="path1"></span><span class="path2"></span><span class="path3"></span>
+                        </i>
+                        Lengkapi
+                    </span>
+                </span>
+            <?php endif; ?>
         </a>
     </div>
     <div class="menu-item me-0 me-lg-2">
