@@ -480,21 +480,14 @@ class UjianController extends BaseController
                 }
             }
 
-            if(!empty($data['ujian'])){
-                for ($i = 0; $i < count($data['ujian']); $i++) {
-                    $ujian_detail = $this->ujianDetailModel->getAllByKodeUjianJumlah($data['ujian'][$i]->kode_ujian);
-                    $nilai = round($data['ujian'][$i]->benar / count($ujian_detail) * 100);
-                     $this->ujianModel
+            for ($i = 0; $i < count($data['ujian']); $i++) {
+                $ujian_detail = $this->ujianDetailModel
+                    ->getAllByKodeUjianJumlah($data['ujian'][$i]->kode_ujian);
+                $nilai = round($data['ujian'][$i]->benar / count($ujian_detail) * 100);
+                $this->ujianModel
                     ->set('status', 'S')
                     ->set('nilai', $nilai)
-                    ->where('id_ujian', $rows->id_ujian)
-                    ->update();
-                    
-                }
-            }else{
-                 $this->ujianModel
-                    ->set('status', 'S')
-                    ->set('nilai', 0)
+                    ->where('kode_ujian', $rows->kode_ujian)
                     ->where('id_ujian', $rows->id_ujian)
                     ->update();
             }
