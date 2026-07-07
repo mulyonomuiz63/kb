@@ -50,11 +50,16 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
 
         $routes->get('ujian-guru/(:segment)', 'Admin\GuruController::ujianGuru/$1');
         $routes->post('ajaxUjianGuru', 'Admin\GuruController::ajaxUjianGuru');
+        $routes->get('edit-ujian/(:segment)', 'Admin\GuruController::editUjian/$1');
+        $routes->get('edit-soal/(:segment)', 'Admin\GuruController::editSoal/$1');
+        $routes->post('update-soal', 'Admin\GuruController::updateSoal');
         $routes->get('lihat-ujian/(:segment)', 'Admin\GuruController::lihatUjian/$1');
         $routes->post('ajaxSiswaUjian/(:segment)', 'Admin\GuruController::ajaxSiswaUjian/$1');
         $routes->get('lihat-ujian-siswa/(:segment)/(:segment)', 'Admin\GuruController::lihatUjianSiswa/$1/$2');
         $routes->get('cetak-soal-peserta/(:segment)/(:segment)', 'Admin\GuruController::cetakSoalPeserta/$1/$2');
         $routes->get('cetak-soal/(:segment)', 'Admin\GuruController::cetakSoal/$1');
+        $routes->post('upload-summernote', 'Admin\GuruController::uploadSummernote');
+        $routes->post('delete-image', 'Admin\GuruController::deleteImage');
 
 
         $routes->get('mapel-guru/(:segment)', 'Admin\MapelController::mapelGuru/$1');

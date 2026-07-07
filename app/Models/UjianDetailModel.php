@@ -10,6 +10,12 @@ class UjianDetailModel extends Model
     protected $primaryKey       = 'id_detail_ujian';
     protected $allowedFields    = ['kode_ujian', 'nama_soal', 'pg_1', 'pg_2', 'pg_3', 'pg_4', 'pg_5', 'jawaban', 'penjelasan'];
 
+    public function getAllBykodeUjianAdmin($kode_ujian)
+    {
+        return $this
+            ->where('kode_ujian', $kode_ujian)->orderBy('id_detail_ujian', 'ASC')
+            ->get()->getResultObject();
+    }
     public function getAllBykodeUjian($kode_ujian)
     {
         return $this

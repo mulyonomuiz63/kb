@@ -12,6 +12,8 @@ use App\Models\UjianSiswaModel;
 class GuruController extends BaseController
 {
     protected $guruModel;
+    protected $guruKelasModel;
+    protected $guruMapelModel;
     protected $ujianMasterModel;
     protected $ujianDetailModel;
     protected $siswaModel;
@@ -24,6 +26,8 @@ class GuruController extends BaseController
         $this->ujianDetailModel = new UjianDetailModel();
         $this->siswaModel = new SiswaModel();
         $this->ujianSiswaModel = new UjianSiswaModel();
+        $this->guruKelasModel = new \App\Models\GuruKelasModel();
+        $this->guruMapelModel = new \App\Models\GuruMapelModel();
     }
 
     public function index()
@@ -425,6 +429,13 @@ class GuruController extends BaseController
                 ' . $btnLihat . '
                 
                 <div class="menu-item px-3">
+                    <a href="' . base_url('sw-admin/guru/edit-ujian/' . encrypt_url($u->kode_ujian)) . '" class="menu-link px-3">
+                        <i class="ki-duotone ki-pencil fs-4 me-2 text-success">
+                            <span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span>
+                        </i> Edit Soal
+                    </a>
+                </div>
+                <div class="menu-item px-3">
                     <a target="_blank" href="' . base_url('sw-admin/guru/cetak-soal/' . encrypt_url($u->kode_ujian)) . '" class="menu-link px-3">
                         <i class="ki-duotone ki-printer fs-4 me-2 text-success">
                             <span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span>
@@ -585,7 +596,7 @@ class GuruController extends BaseController
         ];
 
         $data['ujian'] = $this->ujianMasterModel->getBykode(decrypt_url($kode_ujian));
-        $data['detail_ujian'] = $this->ujianDetailModel->getAllBykodeUjian(decrypt_url($kode_ujian));
+        $data['detail_ujian'] = $this->ujianDetailModel->getAllBykodeUjianAdmin(decrypt_url($kode_ujian));
         $data['siswa'] = $this->siswaModel->asObject()->find(decrypt_url($id_siswa));
 
         $data['ujian_siswa'] = $this->ujianSiswaModel
@@ -629,7 +640,7 @@ class GuruController extends BaseController
             }
 
             // 5. Ambil Detail Soal
-            $detail_ujian = $this->ujianDetailModel->getAllBykodeUjian($kode_ujian);
+            $detail_ujian = $this->ujianDetailModel->getAllBykodeUjianAdmin($kode_ujian);
             if (empty($detail_ujian)) {
                 // Opsional: Tetap lanjut cetak atau stop jika soal kosong
             }
@@ -667,7 +678,7 @@ class GuruController extends BaseController
             $kode_ujian_decrypted = decrypt_url($kode_ujian);
 
             // Ambil Data
-            $data['detail_ujian'] = $this->ujianDetailModel->getAllBykodeUjian($kode_ujian_decrypted);
+            $data['detail_ujian'] = $this->ujianDetailModel->getAllBykodeUjianAdmin($kode_ujian_decrypted);
             $data['ujian'] = $this->ujianMasterModel->getBykode($kode_ujian_decrypted);
 
             // Validasi jika data tidak ditemukan (Antisipasi error property of non-object)
@@ -687,5 +698,101 @@ class GuruController extends BaseController
             log_message('error', '[Cetak Soal Error]: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Gagal memproses cetak soal. Terjadi kesalahan sistem.');
         }
+
+        }
+    public function editUjian($kode_ujian)
+    {
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'Data Ujian', 'url' => base_url('sw-admin/guru')],
+            ['title' => 'List Soal Ujian', 'url' => '#'],
+        ];
+        $data['detail_ujian'] = $this->ujianDetailModel->getAllBykodeUjianAdmin(decrypt_url($kode_ujian));
+        $data['ujian'] = $this->ujianMasterModel->getBykode(decrypt_url($kode_ujian));
+        $data['siswa'] = $this->siswaModel->getAllbyKelas($data['ujian']->kelas);
+        $data['guru'] = $this->guruModel->asObject()->find(session()->get('id'));
+        $data['guru_kelas'] = $this->guruKelasModel->getALLByGuru(session()->get('id'));
+        $data['guru_mapel'] = $this->guruMapelModel->getALLByGuru(session()->get('id'));
+        return view('admin/guru/ujian/edit_pg', $data);
+    }
+
+    public function editSoal($id_detail_ujian)
+    {
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'Data Ujian', 'url' => base_url('sw-admin/guru')],
+             ['title' => 'Edit Soal Ujian', 'url' => '#'],
+        ];
+        $data['detail_ujian'] = $this->ujianDetailModel->getAllByiddetailujian(decrypt_url($id_detail_ujian));
+        $data['guru'] = $this->guruModel->asObject()->find(session()->get('id'));
+        $data['guru_kelas'] = $this->guruKelasModel->getALLByGuru(session()->get('id'));
+        $data['guru_mapel'] = $this->guruMapelModel->getALLByGuru(session()->get('id'));
+        return view('admin/guru/ujian/edit_soal', $data);
+    }
+    public function updateSoal()
+    {
+
+        $data_detail_ujian = [
+            'kode_ujian' => $this->request->getVar('kode_ujian'),
+            'nama_soal' => $this->request->getVar('nama_soal'),
+            'pg_1' => 'A. ' . $this->request->getVar('pg_1'),
+            'pg_2' => 'B. ' . $this->request->getVar('pg_2'),
+            'pg_3' => 'C. ' . $this->request->getVar('pg_3'),
+            'pg_4' => 'D. ' . $this->request->getVar('pg_4'),
+            'pg_5' => 'E. ' . $this->request->getVar('pg_5'),
+            'jawaban' => $this->request->getVar('jawaban'),
+            'penjelasan' => $this->request->getVar('penjelasan'),
+        ];
+
+
+        $this->ujianDetailModel->set($data_detail_ujian)->where('id_detail_ujian', $this->request->getVar('id_detail_ujian'))->update();
+        return redirect()->to('sw-admin/guru/edit-ujian/' . encrypt_url($this->request->getVar('kode_ujian')))->with('success', 'Soal telah diubah');
+    }
+
+    public function uploadSummernote()
+    {
+        $fileGambar = $this->request->getFile('image');
+
+        if ($fileGambar && !$fileGambar->hasMoved()) {
+            // Generate nama file Random
+            $nama_gambar = $fileGambar->getRandomName();
+
+            // Upload Gambar
+            $fileGambar->move('assets/app-assets/file', $nama_gambar);
+
+            // Kirim balik URL dan Token baru
+            return json_encode([
+                'url'   => base_url('assets/app-assets/file/' . $nama_gambar),
+                'token' => csrf_hash()
+            ]);
+        }
+    }
+
+    public function deleteImage()
+    {
+        $src = $this->request->getVar('src');
+
+        // Bersihkan path: pastikan hanya menghapus file di folder yang diizinkan
+        $file_path = str_replace(base_url() . '/', '', $src);
+
+        $status = false;
+        $message = 'File not found';
+
+        // Cek apakah file ada sebelum di-unlink (delete)
+        if (file_exists($file_path)) {
+            if (unlink($file_path)) {
+                $status = true;
+                $message = 'File Deleted Successfully';
+            } else {
+                $message = 'Failed to delete file from server';
+            }
+        }
+
+        // Selalu kembalikan CSRF Hash terbaru
+        return $this->response->setJSON([
+            'status'  => $status,
+            'message' => $message,
+            'token'   => csrf_hash()
+        ]);
     }
 }
