@@ -6,18 +6,21 @@ use App\Controllers\BaseController;
 use App\Models\AffiliateModel;
 use App\Models\AffiliateLinkModel;
 use App\Models\AffiliateCommissionModel;
+use App\Models\AffiliateKlikHarianModel;
 
 class AffiliateController extends BaseController
 {
     protected $affiliate;
     protected $affiliateLinkModel;
     protected $komisi;
+    protected $affiliateKlikHarianModel;
 
     public function __construct()
     {
         $this->affiliate = new AffiliateModel();
         $this->affiliateLinkModel = new AffiliateLinkModel();
         $this->komisi    = new AffiliateCommissionModel();
+        $this->affiliateKlikHarianModel = new AffiliateKlikHarianModel();
     }
 
     public function index()
@@ -364,6 +367,34 @@ class AffiliateController extends BaseController
                 'short_code' => $affiliateLink['short_code'],
             ];
             session()->set($data);
+
+            // --- A. UPDATE GRAND TOTAL DI TABEL UTAMA ---
+            $this->affiliateLinkModel->where('id', $affiliateLink['id'])
+                ->set('klik_link', 'klik_link + 1', false)
+                ->update();
+
+            // --- B. CATAT REKAP KLIK HARIAN ---
+            $tanggalHariIni = date('Y-m-d'); // Ambil tanggal hari ini (Format: 2026-07-10)
+
+            // Cek apakah hari ini link tersebut sudah pernah di-klik
+            $cekHarian = $this->affiliateKlikHarianModel->where([
+                'affiliate_link_id' => $affiliateLink['id'],
+                'tanggal'      => $tanggalHariIni
+            ])->first();
+
+            if ($cekHarian) {
+                // Jika HARI INI sudah ada data, tambahkan jumlah kliknya (+1)
+                $this->affiliateKlikHarianModel->where('id', $cekHarian['id'])
+                    ->set('jumlah_klik', 'jumlah_klik + 1', false)
+                    ->update();
+            } else {
+                // Jika HARI INI belum ada data sama sekali, insert data baru dengan klik = 1
+                $this->affiliateKlikHarianModel->insert([
+                    'affiliate_link_id' => $affiliateLink['id'],
+                    'tanggal'      => $tanggalHariIni,
+                    'jumlah_klik'  => 1
+                ]);
+            }
             // }
         }
 
