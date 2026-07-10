@@ -135,7 +135,7 @@
 
                     <div class="d-flex align-items-center mb-4">
                         <i class="ki-outline ki-trophy text-warning fs-1 me-3"></i>
-                        <h3 class="text-white fw-bold mb-0">Top Peserta Nilai Tertinggi</h3>
+                        <h3 class="text-white fw-bold mb-0">Top 10 Peserta Nilai Tertinggi</h3>
                     </div>
 
                     <!-- Area Scroll (Hanya menampilkan ~3 baris) -->
