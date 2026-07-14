@@ -23,11 +23,6 @@
                             <thead>
                                 <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
                                     <th class="min-w-200px">Nama Paket</th>
-                                    <th class="text-center min-w-100px">Jenis</th>
-                                    <th class="text-center min-w-100px">Diskon</th>
-                                    <th class="text-end min-w-150px">Nominal</th>
-                                    <th class="text-center min-w-100px">Status</th>
-                                    <th class="text-center min-w-100px">Komisi</th>
                                     <th class="text-center min-w-150px">Aksi</th>
                                 </tr>
                             </thead>
@@ -39,23 +34,6 @@
                                                 <i class="ki-duotone ki-element-11 fs-4 text-muted me-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i>
                                                 <?= $s->nama_paket; ?>
                                             </div>
-                                        </td>
-                                        <td class="text-center">
-                                            <span class="text-muted"><?= $s->tagline; ?></span>
-                                        </td>
-                                        <td class="text-center fw-bold text-danger">
-                                            <?= $s->diskon; ?>%
-                                        </td>
-                                        <td class="text-end fw-bold text-gray-900">
-                                            Rp <?= number_format($s->nominal_paket, 0, '.', '.'); ?>
-                                        </td>
-                                        <td class="text-center">
-                                            <?= $s->status == 1
-                                                ? '<span class="badge badge-light-success fw-bold px-3 py-2">Aktif</span>'
-                                                : '<span class="badge badge-light-danger fw-bold px-3 py-2">Non-Aktif</span>'; ?>
-                                        </td>
-                                        <td class="text-center text-primary fw-bold">
-                                            <?= $s->komisi ?>%
                                         </td>
                                         <td class="text-end">
                                             <div class="d-flex justify-content-end gap-2">
