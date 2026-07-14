@@ -595,7 +595,7 @@ $ujianSiswaModel = new UjianSiswaModel(); ?>
             });
 
             // Opsi: Jika sudah 3 kali pindah tab, otomatis submit
-            if (cheatCount >= 3) {
+            if (cheatCount >= 5) {
                 Swal.fire({
                     title: "Ujian Dihentikan!",
                     text: "Anda telah melebihi batas perpindahan halaman.",

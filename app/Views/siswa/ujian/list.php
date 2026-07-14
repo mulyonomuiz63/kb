@@ -207,20 +207,29 @@
                 $end_ = (date('Y-m-d H:i', strtotime("+ $totalMenit minutes")));
                 $durasi = date_diff(date_create($start), date_create($end_));
 
-                // === LOGIKA KUOTA DINAMIS ===
+                // === LOGIKA KUOTA DINAMIS & ROLE ACCESS ===
+                $roleAccess = session()->get('role_access') ?? 0;
                 $sisa_kuota = $u->kuota ?? 0; // Tarik data dari database (bukan manual 2 lagi)
                 $total_kuota = 3;
 
                 // Rumus: mencari berapa kali ujian sudah terpakai
                 $terpakai = $total_kuota - $sisa_kuota;
-                $tampil_kuota = $terpakai . '/' . $total_kuota;
-
-                // Menentukan warna dinamis berdasarkan pemakaian kuota
-                $kuotaColor = 'success'; // Default hijau
-                if ($terpakai >= $total_kuota) {
-                    $kuotaColor = 'danger'; // Merah jika habis
-                } elseif ($terpakai > 0) {
-                    $kuotaColor = 'warning'; // Kuning jika terpakai sebagian
+                
+                if ($roleAccess == 1) {
+                    // Role = 1 (Akses Tanpa Batas / Unlimited)
+                    $tampil_kuota = 'U';
+                    $kuotaColor = 'success';
+                } else {
+                    // Role = 0 (Terbatas Kuota)
+                    $tampil_kuota = $terpakai . '/' . $total_kuota;
+                    
+                    // Menentukan warna dinamis berdasarkan pemakaian kuota
+                    $kuotaColor = 'success'; // Default hijau
+                    if ($terpakai >= $total_kuota) {
+                        $kuotaColor = 'danger'; // Merah jika habis
+                    } elseif ($terpakai > 0) {
+                        $kuotaColor = 'warning'; // Kuning jika terpakai sebagian
+                    }
                 }
                 ?>
 
@@ -258,7 +267,11 @@
                                     <div>
                                         <div class="fs-7 text-gray-800 fw-bold"> Penggunaan Kuota</div>
                                         <div class="fs-8 text-gray-500 fw-semibold">
-                                            <?= ($terpakai == 0) ? 'Kuota penuh' : (($terpakai >= $total_kuota) ? 'Kuota habis' : 'Terpakai ' . $terpakai . 'x') ?>
+                                            <?php if ($roleAccess == 1): ?>
+                                                Akses Tanpa Batas
+                                            <?php else: ?>
+                                                <?= ($terpakai == 0) ? 'Kuota penuh' : (($terpakai >= $total_kuota) ? 'Kuota habis' : 'Terpakai ' . $terpakai . 'x') ?>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 </div>
@@ -299,7 +312,7 @@
                                             class="btn btn-warning w-100 fw-bold">Sedang Ujian</a>
 
                                     <?php else : ?>
-                                        <?php if ($u->kuota != '0') : ?>
+                                        <?php if ($roleAccess == 1 || $u->kuota != '0') : ?>
                                             <?php
                                             $dataAttrs = 'data-idujian="' . encrypt_url($u->id_ujian) . '" ' .
                                                 'data-kuota="' . $tampil_kuota . '" ' .
@@ -309,14 +322,14 @@
                                             ?>
                                             <a href="<?= base_url('sw-siswa/ujian/remedial') . '/' . encrypt_url($u->id_ujian) . '/' . encrypt_url($u->kode_ujian) . '/' . $u->status ?>"
                                                 <?= $dataAttrs ?>
-                                                class="btn btn-light-danger w-100 fw-bold btn-informasi text-uppercase">
+                                                class="btn btn-light-danger w-100 fw-bold btn-informasi btn-ujian-ulang text-uppercase">
                                                 Ujian Ulang
                                             </a>
                                         <?php else : ?>
                                             <?php if ($u->nilai >= 60) : ?>
                                                 <button class="btn btn-light-success w-100 fw-bold cursor-default" disabled>Ujian Selesai</button>
                                             <?php else : ?>
-                                                <a href="<?= base_url('list-bimbel') ?>" class="btn btn-light-warning w-100 fw-bold btn-ujian-ulang text-uppercase">Beli Paket</a>
+                                                <a href="<?= base_url('list-bimbel') ?>" class="btn btn-light-warning w-100 fw-bold text-uppercase">Beli Paket</a>
                                             <?php endif; ?>
                                         <?php endif; ?>
                                     <?php endif; ?>
@@ -448,6 +461,7 @@
 <?= $this->section('scripts'); ?>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
     $(document).ready(function() {
@@ -503,26 +517,50 @@
             e.preventDefault();
             let btn = $(this); // Tangkap tombol yang sedang diklik
 
-            selectedHref = btn.attr('href');
-            idujian = btn.data('idujian');
+            // --- Fungsi untuk menjalankan kamera ---
+            let lanjutkanBukaKamera = function() {
+                selectedHref = btn.attr('href');
+                idujian = btn.data('idujian');
 
-            // --- UPDATE DATA MODAL SECARA DINAMIS BERDASARKAN TOMBOL ---
-            $('#info_jumlah_soal').text(btn.data('soal'));
-            $('#info_durasi').text(btn.data('waktu'));
-            $('#info_percobaan').text(btn.data('kuota'));
+                // --- UPDATE DATA MODAL SECARA DINAMIS BERDASARKAN TOMBOL ---
+                $('#info_jumlah_soal').text(btn.data('soal'));
+                $('#info_durasi').text(btn.data('waktu'));
+                $('#info_percobaan').text(btn.data('kuota'));
 
-            // Update warna ikon kuota (menghapus warna lama, memasukkan warna baru)
-            let warna = btn.data('warna');
-            $('#icon_percobaan').removeClass('text-success text-warning text-danger text-info').addClass('text-' + warna);
-            // -----------------------------------------------------------
+                // Update warna ikon kuota (menghapus warna lama, memasukkan warna baru)
+                let warna = btn.data('warna');
+                $('#icon_percobaan').removeClass('text-success text-warning text-danger text-info').addClass('text-' + warna);
+                // -----------------------------------------------------------
 
-            resetToDefault();
-            updateUI('warning', 'Menyalakan Kamera...', 'Izinkan akses kamera di browser Anda');
+                resetToDefault();
+                updateUI('warning', 'Menyalakan Kamera...', 'Izinkan akses kamera di browser Anda');
 
-            modalWajah.show();
-            startCamera();
+                modalWajah.show();
+                startCamera();
+            };
+
+            // --- Cek apakah tombol yang diklik adalah "Ujian Ulang" ---
+            if (btn.text().toLowerCase().includes('ujian ulang') || btn.hasClass('btn-ujian-ulang')) {
+                // Tampilkan konfirmasi SweetAlert2 sebelum membuka kamera
+                Swal.fire({
+                    title: 'Peringatan!',
+                    text: 'Mengerjakan ujian ulang akan merubah dan menggantikan hasil ujian Anda sebelumnya. Apakah Anda yakin ingin melanjutkan?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#28a745', // Warna Hijau
+                    cancelButtonColor: '#d33',     // Warna Merah
+                    confirmButtonText: '<i class="fas fa-camera"></i> Ya, Setuju',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        lanjutkanBukaKamera(); // Panggil fungsi buka kamera jika setuju
+                    }
+                });
+            } else {
+                // Jika Ujian Baru (Mulai), langsung buka kamera tanpa peringatan
+                lanjutkanBukaKamera();
+            }
         });
-
 
         function startCamera() {
             camera = new Camera(videoElement, {

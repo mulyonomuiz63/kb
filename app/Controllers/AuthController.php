@@ -160,6 +160,10 @@ class AuthController extends BaseController
                         // Jika ada session URL (intended URL), arahkan ke sana, jika tidak ke dashboard siswa
                         $redirectTo = !empty(session('url')) ? session('url') : 'sw-siswa';
                         $pesan = ucwords('Selamat Datang ' . session()->get('nama'));
+                        $roleAccess = [
+                            'role_access'    => $siswa->role_access,
+                        ];
+                        session()->set($roleAccess);
                         return redirect()->to($redirectTo)->with('success', $pesan);
 
                     case 'guru':
@@ -261,6 +265,7 @@ class AuthController extends BaseController
                             'role' => $siswa->role,
                             'avatar' => $siswa->avatar,
                             'status' => $siswa->status,
+                            'role_access'    => $siswa->role_access,
                         ];
                         session()->set($data);
                         // Arahkan Ke halaman siswa
@@ -297,7 +302,7 @@ class AuthController extends BaseController
                         'role' => 2,
                         'is_active' => 1,
                         'date_created' => time(),
-                        'avatar' => 'default.jpg'
+                        'avatar' => 'default.jpg',
                     ];
                     $this->SiswaModel->save($data_siswa);
 
@@ -310,6 +315,7 @@ class AuthController extends BaseController
                         'role' => $siswa->role,
                         'avatar' => $siswa->avatar,
                         'status' => $siswa->status,
+                        'role_access'    => $siswa->role_access,
                     ];
                     session()->set($data);
 
