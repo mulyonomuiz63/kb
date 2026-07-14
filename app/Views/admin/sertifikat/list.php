@@ -8,7 +8,9 @@
     }
 
     @keyframes blink-animation {
-        to { visibility: hidden; }
+        to {
+            visibility: hidden;
+        }
     }
 
     /* Styling Area Biometrik (AI Face Mesh) */
@@ -25,39 +27,70 @@
         border: 4px solid #ffffff;
     }
 
-    .biometric-video, .biometric-canvas {
+    .biometric-video,
+    .biometric-canvas {
         position: absolute;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
         object-fit: cover;
         transform: scaleX(-1);
     }
 
     .biometric-overlay {
         position: absolute;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
         background: radial-gradient(circle at center, transparent 30%, rgba(0, 0, 0, 0.7) 80%);
         z-index: 2;
     }
 
     .scan-corner {
         position: absolute;
-        width: 40px; height: 40px;
+        width: 40px;
+        height: 40px;
         border-color: #00ff00;
         border-style: solid;
         z-index: 3;
         transition: border-color 0.3s;
     }
 
-    .scan-corner.top-left { top: 15%; left: 15%; border-width: 4px 0 0 4px; border-top-left-radius: 10px; }
-    .scan-corner.top-right { top: 15%; right: 15%; border-width: 4px 4px 0 0; border-top-right-radius: 10px; }
-    .scan-corner.bottom-left { bottom: 25%; left: 15%; border-width: 0 0 4px 4px; border-bottom-left-radius: 10px; }
-    .scan-corner.bottom-right { bottom: 25%; right: 15%; border-width: 0 4px 4px 0; border-bottom-right-radius: 10px; }
+    .scan-corner.top-left {
+        top: 15%;
+        left: 15%;
+        border-width: 4px 0 0 4px;
+        border-top-left-radius: 10px;
+    }
+
+    .scan-corner.top-right {
+        top: 15%;
+        right: 15%;
+        border-width: 4px 4px 0 0;
+        border-top-right-radius: 10px;
+    }
+
+    .scan-corner.bottom-left {
+        bottom: 25%;
+        left: 15%;
+        border-width: 0 0 4px 4px;
+        border-bottom-left-radius: 10px;
+    }
+
+    .scan-corner.bottom-right {
+        bottom: 25%;
+        right: 15%;
+        border-width: 0 4px 4px 0;
+        border-bottom-right-radius: 10px;
+    }
 
     .laser-line {
         position: absolute;
-        left: 15%; width: 70%; height: 2px;
+        left: 15%;
+        width: 70%;
+        height: 2px;
         background: #00ff00;
         box-shadow: 0 0 15px 2px #00ff00;
         z-index: 3;
@@ -66,18 +99,50 @@
     }
 
     @keyframes scan-laser {
-        0% { top: 15%; opacity: 0; }
-        10% { opacity: 1; }
-        90% { opacity: 1; }
-        100% { top: 75%; opacity: 0; }
+        0% {
+            top: 15%;
+            opacity: 0;
+        }
+
+        10% {
+            opacity: 1;
+        }
+
+        90% {
+            opacity: 1;
+        }
+
+        100% {
+            top: 75%;
+            opacity: 0;
+        }
     }
 
-    .biometric-container.warning .scan-corner { border-color: #ffc700; }
-    .biometric-container.warning .laser-line { background: #ffc700; box-shadow: 0 0 15px 2px #ffc700; }
-    .biometric-container.danger .scan-corner { border-color: #f1416c; }
-    .biometric-container.danger .laser-line { display: none; }
-    .biometric-container.info .scan-corner { border-color: #7239ea; }
-    .biometric-container.info .laser-line { background: #7239ea; box-shadow: 0 0 15px 2px #7239ea; }
+    .biometric-container.warning .scan-corner {
+        border-color: #ffc700;
+    }
+
+    .biometric-container.warning .laser-line {
+        background: #ffc700;
+        box-shadow: 0 0 15px 2px #ffc700;
+    }
+
+    .biometric-container.danger .scan-corner {
+        border-color: #f1416c;
+    }
+
+    .biometric-container.danger .laser-line {
+        display: none;
+    }
+
+    .biometric-container.info .scan-corner {
+        border-color: #7239ea;
+    }
+
+    .biometric-container.info .laser-line {
+        background: #7239ea;
+        box-shadow: 0 0 15px 2px #7239ea;
+    }
 </style>
 <?= $this->endSection(); ?>
 
@@ -312,8 +377,14 @@ foreach ($modals as $modal): ?>
                 },
             },
             columns: [{
-                    data: 'nama_ujian',
-                    className: 'text-gray-800 fw-bold'
+                    data: null,
+                    render: row => `
+                        <div class="d-flex flex-column">
+                            <span class="text-gray-800 mb-1">${row.nama_ujian}</span>
+                            <span class="text-muted">Waktu Kirim: ${row.status == 'S' ? (row.updated_at ? row.updated_at : '-') : '-'}</span>
+                            <span class="text-primary font-weight-bold">Durasi: ${row.status == 'S' ? (row.updated_at ? row.durasi +' Menit' : '-') : '-'}</span>
+                        </div>
+                    `
                 },
                 {
                     data: null,
@@ -326,7 +397,7 @@ foreach ($modals as $modal): ?>
                         let profilePhotoUrl = row.foto_profil && row.foto_profil.trim() !== "" ?
                             `<?= base_url() ?>/assets/app-assets/user/${row.foto_profil}` :
                             `<?= base_url('assets/app-assets/user/default.jpg') ?>`;
-                            
+
                         let targetIdUjian = row.id_ujian || row.id;
 
                         return `
@@ -360,7 +431,7 @@ foreach ($modals as $modal): ?>
                     render: function(data, type, row) {
                         let nilai = row.nilai || 0;
                         let status = row.status || '';
-                        
+
                         let color = 'danger';
                         let label = 'Tidak Lulus';
 
@@ -422,10 +493,18 @@ foreach ($modals as $modal): ?>
             `;
         }
 
-        $(document).on('click', '.sertifikat_cap_cetak', function() { $(".isiKontenSetifikatCap").html(renderModalContent('Sertifikat (Cap Basah)', $(this).data('sertifikat_cap'))); });
-        $(document).on('click', '.sertifikat_cetak', function() { $(".isiKontenSertifikat").html(renderModalContent('Sertifikat Resmi', $(this).data('sertifikat'))); });
-        $(document).on('click', '.sertifikat_all_cap_cetak', function() { $(".isiKontenSetifikatAllCap").html(renderModalContent('Sertifikat Brevet AB (Cap Basah)', $(this).data('sertifikat_all_cap'))); });
-        $(document).on('click', '.sertifikat_all_cetak', function() { $(".isiKontenSertifikatAll").html(renderModalContent('Sertifikat Brevet AB', $(this).data('sertifikat_all'))); });
+        $(document).on('click', '.sertifikat_cap_cetak', function() {
+            $(".isiKontenSetifikatCap").html(renderModalContent('Sertifikat (Cap Basah)', $(this).data('sertifikat_cap')));
+        });
+        $(document).on('click', '.sertifikat_cetak', function() {
+            $(".isiKontenSertifikat").html(renderModalContent('Sertifikat Resmi', $(this).data('sertifikat')));
+        });
+        $(document).on('click', '.sertifikat_all_cap_cetak', function() {
+            $(".isiKontenSetifikatAllCap").html(renderModalContent('Sertifikat Brevet AB (Cap Basah)', $(this).data('sertifikat_all_cap')));
+        });
+        $(document).on('click', '.sertifikat_all_cetak', function() {
+            $(".isiKontenSertifikatAll").html(renderModalContent('Sertifikat Brevet AB', $(this).data('sertifikat_all')));
+        });
 
         // Tampilkan Modal Verifikasi Foto (Admin)
         $('#datatable-sertifikat').on('click', '.btn-view-verification', function() {
@@ -484,30 +563,35 @@ foreach ($modals as $modal): ?>
                 cancelButtonColor: '#7e8299',
                 confirmButtonText: swalConfirmText,
                 cancelButtonText: 'Batal',
-                customClass: { confirmButton: swalConfirmClass, cancelButton: "btn btn-active-light" }
+                customClass: {
+                    confirmButton: swalConfirmClass,
+                    cancelButton: "btn btn-active-light"
+                }
             }).then((result) => {
                 if (result.isConfirmed) {
                     let btn = $(this);
                     let originalText = btn.html();
                     btn.html('<span class="spinner-border spinner-border-sm align-middle ms-2"></span> Memproses...').prop('disabled', true);
 
-                    let postData = { id_ujian: id_ujian_action };
+                    let postData = {
+                        id_ujian: id_ujian_action
+                    };
                     postData[csrfName] = csrfHash;
 
                     $.ajax({
-                        url: '<?= base_url("sw-admin/siswa/suspend-action") ?>', 
+                        url: '<?= base_url("sw-admin/siswa/suspend-action") ?>',
                         type: 'POST',
                         dataType: 'json',
                         data: postData,
                         success: function(response) {
-                            btn.html(originalText).prop('disabled', false); 
-                            if(response.csrf_hash) csrfHash = response.csrf_hash; 
+                            btn.html(originalText).prop('disabled', false);
+                            if (response.csrf_hash) csrfHash = response.csrf_hash;
 
                             if (response.status === 'success') {
                                 let successMsg = isSuspended ? 'Sertifikat telah diaktifkan kembali.' : 'Sertifikat telah ditangguhkan.';
                                 Swal.fire('Berhasil!', successMsg, 'success');
                                 $('#modal_view_verification').modal('hide');
-                                table.ajax.reload(null, false); 
+                                table.ajax.reload(null, false);
                             } else {
                                 Swal.fire('Gagal!', response.message, 'error');
                             }
@@ -527,7 +611,7 @@ foreach ($modals as $modal): ?>
         let selectedHref = '';
         let idujian = '';
         let isProcessing = false;
-        
+
         let camera = null;
         let faceMesh = null;
 
@@ -539,41 +623,47 @@ foreach ($modals as $modal): ?>
 
         let currentChallenge = null;
         let challengeTimer = 0;
-        const CHALLENGES = ['SMILE', 'BLINK']; 
-        
-        const LEFT_EYE_TOP = 159, LEFT_EYE_BOTTOM = 145;
-        const RIGHT_EYE_TOP = 386, RIGHT_EYE_BOTTOM = 374;
-        const LIP_LEFT = 61, LIP_RIGHT = 291;
-        const LIP_TOP = 13, LIP_BOTTOM = 14;
+        const CHALLENGES = ['SMILE', 'BLINK'];
+
+        const LEFT_EYE_TOP = 159,
+            LEFT_EYE_BOTTOM = 145;
+        const RIGHT_EYE_TOP = 386,
+            RIGHT_EYE_BOTTOM = 374;
+        const LIP_LEFT = 61,
+            LIP_RIGHT = 291;
+        const LIP_TOP = 13,
+            LIP_BOTTOM = 14;
 
         $('.btn-informasi-mulai, .btn-informasi').click(function(e) {
             e.preventDefault();
             let btn = $(this);
-            
+
             selectedHref = btn.attr('href');
             idujian = btn.data('idujian');
-            
+
             $('#info_jumlah_soal').text(btn.data('soal'));
             $('#info_durasi').text(btn.data('waktu'));
             $('#info_percobaan').text(btn.data('kuota'));
-            
+
             let warna = btn.data('warna');
             $('#icon_percobaan').removeClass('text-success text-warning text-danger text-info').addClass('text-' + warna);
-            
+
             resetToDefault();
             updateUI('warning', 'Menyiapkan Keamanan...', 'Memuat AI tingkat lanjut');
-            
+
             modalWajah.show();
             initFaceMeshAndCamera();
         });
 
         function initFaceMeshAndCamera() {
-            if(!faceMesh) {
-                faceMesh = new FaceMesh({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`});
+            if (!faceMesh) {
+                faceMesh = new FaceMesh({
+                    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
+                });
                 faceMesh.setOptions({
-                    maxNumFaces: 1, 
-                    refineLandmarks: true, 
-                    minDetectionConfidence: 0.5, 
+                    maxNumFaces: 1,
+                    refineLandmarks: true,
+                    minDetectionConfidence: 0.5,
                     minTrackingConfidence: 0.5
                 });
                 faceMesh.onResults(handleFaceMeshResults);
@@ -588,13 +678,15 @@ foreach ($modals as $modal): ?>
                         }
                         canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
                         canvasCtx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
-                        await faceMesh.send({image: canvasElement});
+                        await faceMesh.send({
+                            image: canvasElement
+                        });
                     }
                 },
-                width: 320, 
+                width: 320,
                 height: 240
             });
-            
+
             camera.start().then(() => {
                 $('#laser_scanner').show();
             });
@@ -631,8 +723,7 @@ foreach ($modals as $modal): ?>
                 const lipWidth = getDistance(landmarks[LIP_LEFT], landmarks[LIP_RIGHT]);
                 const lipHeight = getDistance(landmarks[LIP_TOP], landmarks[LIP_BOTTOM]);
                 if (lipWidth > 0.15 && lipHeight > 0.03) challengePassed = true;
-            } 
-            else if (currentChallenge === 'BLINK') {
+            } else if (currentChallenge === 'BLINK') {
                 const leftEyeOpen = getDistance(landmarks[LEFT_EYE_TOP], landmarks[LEFT_EYE_BOTTOM]);
                 const rightEyeOpen = getDistance(landmarks[RIGHT_EYE_TOP], landmarks[RIGHT_EYE_BOTTOM]);
                 if (leftEyeOpen < 0.012 || rightEyeOpen < 0.012) challengePassed = true;
@@ -645,15 +736,16 @@ foreach ($modals as $modal): ?>
                 $('#scan_progress').css('width', '100%');
                 updateUI('success', 'Verifikasi Selesai', 'Foto diambil otomatis. Memproses data...');
                 captureAndSend();
-            } 
-            else if (timeElapsed > 10000) { 
+            } else if (timeElapsed > 10000) {
                 resetScan('Waktu Habis', 'Sistem mendeteksi foto statis. Ulangi proses.', 'danger');
-                setTimeout(() => { currentChallenge = null; }, 2000); 
+                setTimeout(() => {
+                    currentChallenge = null;
+                }, 2000);
             }
         }
 
         function resetScan(title, subtitle, status) {
-            currentChallenge = null; 
+            currentChallenge = null;
             updateUI(status, title, subtitle);
             $('#scan_progress_container').addClass('d-none');
             $('#scan_progress').css('width', '0%');
@@ -694,16 +786,24 @@ foreach ($modals as $modal): ?>
                     data: postData,
                     dataType: 'json',
                     success: function(response) {
-                        if(response.csrf_hash) csrfHash = response.csrf_hash;
-                        
+                        if (response.csrf_hash) csrfHash = response.csrf_hash;
+
                         if (response.status === 'success') {
                             $(biometricBox).append('<div style="position:absolute;top:0;left:0;width:100%;height:100%;background:white;z-index:99;animation:flash 1s forwards;"></div>');
                             $('<style>@keyframes flash { 0%{opacity:1;} 100%{opacity:0;} }</style>').appendTo('head');
 
                             setTimeout(() => {
                                 $('#modal_verifikasi_wajah').modal('hide');
-                                Swal.fire({ title: 'Verifikasi Berhasil', text: 'Mengalihkan ke lembar ujian...', icon: 'success', showConfirmButton: false, timer: 1500 })
-                                .then(() => { window.location.href = response.redirect; });
+                                Swal.fire({
+                                        title: 'Verifikasi Berhasil',
+                                        text: 'Mengalihkan ke lembar ujian...',
+                                        icon: 'success',
+                                        showConfirmButton: false,
+                                        timer: 1500
+                                    })
+                                    .then(() => {
+                                        window.location.href = response.redirect;
+                                    });
                             }, 500);
                         } else {
                             Swal.fire('Gagal', response.message, 'error');

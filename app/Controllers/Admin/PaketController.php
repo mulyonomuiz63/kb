@@ -602,7 +602,7 @@ class PaketController extends BaseController
 
             $data['breadcrumbs'] = [
                 ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
-                ['title' => 'Data Paket', 'url' => base_url('sw-admin/review')],
+                ['title' => 'Data Review Paket', 'url' => base_url('sw-admin/review')],
                 ['title' => 'List Review Peserta', 'url' => '#'],
             ];
 

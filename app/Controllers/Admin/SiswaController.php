@@ -519,7 +519,10 @@ class SiswaController extends BaseController
             foreach ($tugas as $t) {
                 // Kita siapkan link cetak di sini agar di JS tinggal panggil
                 $url_base = base_url("sw-admin/siswa/lihatSertifikat") . '/' . encrypt_url($t->kode_ujian) . "/" . encrypt_url($t->id_ujian);
-
+                $waktu_mulai = strtotime($t->start_ujian);
+                $waktu_selesai = strtotime($t->updated_at);
+                $selisih_detik = $waktu_selesai - $waktu_mulai;
+                $durasi = round($selisih_detik / 60);
                 $rows[] = [
                     'nama_ujian'   => $t->nama_ujian,
                     'id_ujian'     => encrypt_url($t->id_ujian),
@@ -528,6 +531,8 @@ class SiswaController extends BaseController
                     'foto_profil'  => $siswa['avatar'], // Asumsi foto profil disimpan di session, sesuaikan jika berbeda
                     'start_ujian'  => $t->start_ujian,
                     'end_ujian'    => $t->end_ujian,
+                    'updated_at'   => $t->updated_at,
+                    'durasi'       => $durasi,
                     'nilai'        => (int)$t->nilai,
                     'url_cetak'    => $url_base,
                     'url_cetak_cap' => $url_base . '/cap',
