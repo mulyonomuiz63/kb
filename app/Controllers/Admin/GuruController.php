@@ -411,7 +411,7 @@ class GuruController extends BaseController
             if ($u->jenis_ujian != 1) {
                 $btnLihat = '
             <div class="menu-item px-3">
-                <a href="' . base_url('sw-admin/guru/lihat-ujian/' . encrypt_url($u->kode_ujian)) . '" class="menu-link px-3">
+                <a href="' . base_url('sw-admin/guru/lihat-ujian/' . ($u->kode_ujian)) . '" class="menu-link px-3">
                     <i class="ki-duotone ki-eye fs-4 me-2 text-primary">
                         <span class="path1"></span><span class="path2"></span><span class="path3"></span>
                     </i> Lihat
@@ -470,7 +470,7 @@ class GuruController extends BaseController
             ['title' => 'List Ujian', 'url' => '#'],
         ];
 
-        $kode_ujian = decrypt_url($kode_ujian);
+        $kode_ujian = $kode_ujian;
         $data['kode_ujian_encrypt'] = $kode_ujian; // Kirim untuk AJAX
 
         // Kita tidak lagi mengirim $data['siswa'] ke view karena akan ditarik via AJAX
@@ -480,7 +480,7 @@ class GuruController extends BaseController
     // Fungsi baru untuk suplai data ke DataTable
     public function ajaxSiswaUjian($kode_ujian_encrypt)
     {
-        $kode_ujian = decrypt_url($kode_ujian_encrypt);
+        $kode_ujian = $kode_ujian_encrypt;
         $request = \Config\Services::request();
 
         // Ambil parameter dari DataTables
