@@ -73,19 +73,22 @@ $is_pengaturan_active = in_array($current_uri, $pengaturan_pool);
         transition: all 0.3s ease;
         border: 1px solid transparent;
     }
+
     .menu-custom-hover:hover {
         background-color: #f8f9fa;
         transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
         border-color: #f1f1f4;
     }
+
     .menu-custom-hover.active {
         background-color: #f1faff;
         border-color: #d8edff;
     }
+
     /* Memastikan icon tidak penyok di layar kecil */
     .menu-custom-icon {
-        flex-shrink: 0; 
+        flex-shrink: 0;
     }
 </style>
 
@@ -175,14 +178,28 @@ $is_pengaturan_active = in_array($current_uri, $pengaturan_pool);
                                                 </a>
                                             </div>
 
-                                            <div class="col-12 col-md-6 col-lg-3"> 
-                                                <a href="<?= base_url('sw-admin/relasi') ?>" class="menu-link p-3 mb-2 rounded-3 menu-custom-hover <?= (in_array($current_uri, $relasi) ? 'active' : '') ?>">
+                                            <div class="col-12 col-md-6 col-lg-3">
+                                                <!-- Menu Relasi (Ikon Graph Tetap) -->
+                                                <a href="<?= base_url('sw-admin/relasi') ?>" class="menu-link p-3 mb-2 rounded-3 menu-custom-hover <?= ($current_uri == 'relasi' ? 'active' : '') ?>">
                                                     <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-warning">
                                                         <i class="ki-duotone ki-graph-3 text-warning fs-2"><span class="path1"></span><span class="path2"></span></i>
                                                     </span>
                                                     <span class="d-flex flex-column">
                                                         <span class="fs-6 fw-bold text-gray-800">Relasi</span>
                                                         <span class="fs-8 fw-semibold text-muted">Mapping Sistem</span>
+                                                    </span>
+                                                </a>
+
+                                                <!-- Menu Review (Ikon diubah ke ki-message-text) -->
+                                                <a href="<?= base_url('sw-admin/review') ?>" class="menu-link p-3 mb-2 rounded-3 menu-custom-hover <?= ($current_uri == 'review' ? 'active' : '') ?>">
+                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-info">
+                                                        <i class="ki-duotone ki-message-text text-info fs-2">
+                                                            <span class="path1"></span><span class="path2"></span><span class="path3"></span>
+                                                        </i>
+                                                    </span>
+                                                    <span class="d-flex flex-column">
+                                                        <span class="fs-6 fw-bold text-gray-800">Review</span>
+                                                        <span class="fs-8 fw-semibold text-muted">Ulasan Pelanggan</span>
                                                     </span>
                                                 </a>
                                             </div>

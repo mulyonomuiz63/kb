@@ -14,6 +14,18 @@
                     </div>
                     
                     <div class="card-toolbar flex-row-fluid justify-content-end gap-5">
+                        
+                        <!-- Filter Dropdown -->
+                        <div class="w-100 mw-200px">
+                            <select id="filter_komentar" class="form-select form-select-solid" data-hide-search="true">
+                                <option value="all">Semua Data</option>
+                                <!-- TAMBAHKAN KATA 'selected' DI BAWAH INI -->
+                                <option value="with_comment" selected>Ada Komentar</option>
+                                <option value="without_comment">Tanpa Komentar</option>
+                            </select>
+                        </div>
+                        <!-- END Filter Dropdown -->
+
                         <div class="d-flex align-items-center position-relative my-1">
                             <i class="ki-duotone ki-magnifier fs-3 position-absolute ms-4">
                                 <span class="path1"></span><span class="path2"></span>
@@ -72,6 +84,7 @@
         </div>
     </div>
 </div>
+
 <div class="modal fade" id="edit_review" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered mw-600px">
         <div class="modal-content rounded border-0">
@@ -127,10 +140,39 @@
 <script>
     $(document).ready(function() {
         
-        // Inisialisasi Tooltips dan Select2
-        $('[data-control="select2"]').select2({ dropdownParent: $('#edit_review') });
+        // 1. Inisialisasi Select2 HANYA untuk form status di dalam modal
+        $('#status').select2({ 
+            dropdownParent: $('#edit_review'),
+            minimumResultsForSearch: -1 // Sembunyikan kotak search
+        });
 
-        // Inisialisasi DataTables dg custom DOM Metronic
+        // 2. Inisialisasi Select2 untuk Filter Dropdown di luar modal
+        $('#filter_komentar').select2({
+            minimumResultsForSearch: -1 // Sembunyikan kotak search
+        });
+
+        // 3. Custom Filter Logic DataTables untuk Filter Komentar
+        $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+            var filterValue = $('#filter_komentar').val();
+            
+            // Ambil teks dari kolom kedua (Index 1) yaitu kolom 'Komentar'
+            // .trim() digunakan untuk menghapus spasi/enter kosong
+            var komentarText = data[1].trim(); 
+
+            if (filterValue === 'all') {
+                return true;
+            } else if (filterValue === 'with_comment') {
+                // Tampilkan jika teks komentar tidak kosong
+                return komentarText !== '' && komentarText !== '-'; 
+            } else if (filterValue === 'without_comment') {
+                // Tampilkan jika teks komentar kosong
+                return komentarText === '' || komentarText === '-'; 
+            }
+            
+            return true;
+        });
+
+        // 4. Inisialisasi DataTables dg custom DOM Metronic
         var table = $('#datatable-list').DataTable({
             "ordering": false,
             "drawCallback": function(settings) {
@@ -141,12 +183,18 @@
             }
         });
 
-        // Fitur Pencarian Custom yang menyatu dengan UI Card Header Metronic
+        // 5. Trigger filter ketika Dropdown Select diubah
+        // Untuk select2, pastikan menangkap event 'change' 
+        $('#filter_komentar').on('change', function() {
+            table.draw();
+        });
+
+        // 6. Fitur Pencarian Custom yang menyatu dengan UI Card Header Metronic
         $('[data-kt-review-table-filter="search"]').on('keyup', function() {
             table.search(this.value).draw();
         });
 
-        // Event delegation untuk AJAX Edit (LOGIKA ASLI)
+        // 7. Event delegation untuk AJAX Edit (LOGIKA ASLI)
         $(document).on('click', '.edit-review', function() {
             const id_review = $(this).data('review');
             const csrfName = "<?= csrf_token() ?>";
@@ -154,7 +202,6 @@
 
             // Feedback visual saat loading
             const btn = $(this);
-            // Simpan icon asli untuk dikembalikan setelah loading
             const originalIcon = '<i class="ki-duotone ki-pencil fs-3"><span class="path1"></span><span class="path2"></span></i>';
             btn.html('<span class="spinner-border spinner-border-sm"></span>').attr('disabled', true);
 
@@ -167,18 +214,18 @@
                 },
                 dataType: 'JSON',
                 success: function(data) {
-                    // 1. Update token CSRF di halaman
+                    // Update token CSRF di halaman
                     $('.csrf-token').val(data[csrfName]);
 
-                    // 2. Isi form
+                    // Isi form
                     $("#id_review").val(data.id_review);
                     $("#komentar").val(data.komentar);
                     $("#rating").val(data.rating);
                     
-                    // Update Select2 UI
+                    // Update Select2 UI di dalam modal
                     $("#status").val(data.status).trigger('change');
 
-                    // 3. Reset Button & Tampilkan Modal
+                    // Reset Button & Tampilkan Modal
                     btn.html(originalIcon).attr('disabled', false);
                     $('#edit_review').modal('show');
                 },

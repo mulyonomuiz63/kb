@@ -265,4 +265,8 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
         $routes->get('pakta-integritas/(:segment)', 'Admin\PdfController::cetakPaktaIntegritas/$1');
         $routes->get('formulir-pemesanan-ikh/(:segment)', 'Admin\PdfController::cetakFormulirPemesananIkh/$1');
     });
+    
+    $routes->group('review', function ($routes) {
+        $routes->get('', 'Admin\ReviewController::index');
+    });
 });
