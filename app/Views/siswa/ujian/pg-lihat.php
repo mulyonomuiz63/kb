@@ -248,6 +248,7 @@ $ujianSiswaModel = new UjianSiswaModel(); ?>
                     <form id="kirim_ujian" action="<?= base_url('sw-siswa/ujian/kirim-ujian-selesai') ?>" method="post">
                         <input type="hidden" name="id_ujian" value="<?= $ujian->id_ujian ?>">
                         <input type="hidden" name="kode_ujian" value="<?= $ujian->kode_ujian ?>">
+                        <input type="hidden" name="waktu_selesai_client" id="waktu_selesai_client" value="">
 
                         <button type="button" id="btn_akhiri_ujian" class="btn btn-danger w-100 fw-bold">
                             Akhiri Ujian
@@ -450,6 +451,8 @@ $ujianSiswaModel = new UjianSiswaModel(); ?>
             } 
             // LOGIKA 3: Jika waktu ujian HABIS
             else {
+                const localTime = new Date().toLocaleString('sv-SE').replace(' ', 'T');
+                $("#waktu_selesai_client").val(localTime);
                 clearInterval(x);
                 document.getElementById("jam_skrng").innerHTML = "00 : 00 : 00";
                 document.getElementById("kirim_ujian").submit();
@@ -537,7 +540,8 @@ $ujianSiswaModel = new UjianSiswaModel(); ?>
         }).then(function(result) {
 
             if (result.isConfirmed) {
-
+                const localTime = new Date().toLocaleString('sv-SE').replace(' ', 'T');
+                $("#waktu_selesai_client").val(localTime);
                 Swal.fire({
                     text: "Ujian sedang dikirim...",
                     icon: "success",
@@ -596,6 +600,8 @@ $ujianSiswaModel = new UjianSiswaModel(); ?>
 
             // Opsi: Jika sudah 3 kali pindah tab, otomatis submit
             if (cheatCount >= 5) {
+                const localTime = new Date().toLocaleString('sv-SE').replace(' ', 'T');
+                $("#waktu_selesai_client").val(localTime);
                 Swal.fire({
                     title: "Ujian Dihentikan!",
                     text: "Anda telah melebihi batas perpindahan halaman.",

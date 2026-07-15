@@ -324,6 +324,7 @@ class UjianController extends BaseController
         try {
             $kode_ujian = $this->request->getVar('kode_ujian');
             $id_ujian = $this->request->getVar('id_ujian');
+            $waktu_selesai_client = $this->request->getVar('waktu_selesai_client');
             $id_siswa   = session('id');
 
             $this->ujianSiswaModel
@@ -369,6 +370,7 @@ class UjianController extends BaseController
                 $this->ujianModel
                     ->set('status', 'S')
                     ->set('nilai', $nilai)
+                    ->set('updated_at', $waktu_selesai_client)
                     ->where('kode_ujian', $kode_ujian)
                     ->where('id_ujian', $id_ujian)
                     ->update();
@@ -487,6 +489,7 @@ class UjianController extends BaseController
                 $this->ujianModel
                     ->set('status', 'S')
                     ->set('nilai', $nilai)
+                    ->set('updated_at', $rows->end_ujian)
                     ->where('kode_ujian', $rows->kode_ujian)
                     ->where('id_ujian', $rows->id_ujian)
                     ->update();
