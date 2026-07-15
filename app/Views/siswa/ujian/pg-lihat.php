@@ -600,8 +600,6 @@ $ujianSiswaModel = new UjianSiswaModel(); ?>
 
             // Opsi: Jika sudah 3 kali pindah tab, otomatis submit
             if (cheatCount >= 5) {
-                const localTime = new Date().toLocaleString('sv-SE').replace(' ', 'T');
-                $("#waktu_selesai_client").val(localTime);
                 Swal.fire({
                     title: "Ujian Dihentikan!",
                     text: "Anda telah melebihi batas perpindahan halaman.",
@@ -609,6 +607,8 @@ $ujianSiswaModel = new UjianSiswaModel(); ?>
                     showConfirmButton: false,
                     timer: 3000
                 }).then(() => {
+                    const localTime = new Date().toLocaleString('sv-SE').replace(' ', 'T');
+                    $("#waktu_selesai_client").val(localTime);
                     document.getElementById("kirim_ujian").submit();
                 });
             }
