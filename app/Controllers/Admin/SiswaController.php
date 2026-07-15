@@ -9,6 +9,7 @@ use App\Models\KelasModel;
 use App\Models\SiswaModel;
 use App\Models\UjianMasterModel;
 use App\Models\UjianModel;
+use App\Models\UjianSiswaModel;
 use Endroid\QrCode\Logo\Logo;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
@@ -18,6 +19,7 @@ class SiswaController extends BaseController
     protected $siswaModel;
     protected $ujianModel;
     protected $ujianMasterModel;
+    protected $ujianSiswaModel;
     protected $kelasModel;
     protected $emailer;
 
@@ -26,6 +28,7 @@ class SiswaController extends BaseController
         $this->siswaModel = new SiswaModel();
         $this->ujianModel = new UjianModel();
         $this->ujianMasterModel = new UjianMasterModel();
+        $this->ujianSiswaModel = new UjianSiswaModel();
         $this->kelasModel = new KelasModel();
         $this->emailer = new Emailer();
     }
@@ -615,10 +618,10 @@ class SiswaController extends BaseController
                 }
 
                 // Tambahan Tombol Hapus jika kuota == 3
-                if ($u->kuota == 3) {
-                    $url_hapus = base_url('sw-admin/siswa/delete-ujian') . '/' . encrypt_url($u->id_ujian) . '/' . encrypt_url($u->id_siswa);
-                    $btn_list[] = '<a href="javascript:void(0)" data-url="' . $url_hapus . '" class="btn btn-icon btn-light-danger btn-sm btn-delete" title="Hapus Data"><i class="ki-duotone ki-trash fs-3"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i></a>';
-                }
+                // if ($u->kuota == 3) {
+                $url_hapus = base_url('sw-admin/siswa/delete-ujian') . '/' . encrypt_url($u->id_ujian) . '/' . encrypt_url($u->id_siswa);
+                $btn_list[] = '<a href="javascript:void(0)" data-url="' . $url_hapus . '" class="btn btn-icon btn-light-danger btn-sm btn-delete" title="Hapus Data"><i class="ki-duotone ki-trash fs-3"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i></a>';
+                // }
 
                 // --- BINDING KE OBJECT DATA ---
                 $row = new \stdClass();
@@ -983,9 +986,51 @@ class SiswaController extends BaseController
     public function deleteUjian($id_ujian, $id_siswa)
     {
         $idujian = decrypt_url($id_ujian);
-        $this->ujianModel->delete($idujian);
+        $db = \Config\Database::connect();
+        $db->transBegin();
 
-        session()->setFlashdata('success', 'Data berhasil dihapus');
+        try {
+            // 1. Ambil baris data ujian (Get Row) untuk memastikan data ada
+            $ujian = $this->ujianModel->find($idujian);
+
+            if ($ujian) {
+                // 2. Cek apakah siswa sudah ujian berdasarkan ujian_id DAN id_siswa
+                // Pastikan nama kolom 'siswa_id' sesuai dengan yang ada di database Anda
+                $cekUjianSiswa = $this->ujianSiswaModel
+                    ->where('ujian', $ujian['kode_ujian'])
+                    ->where('siswa', $ujian['id_siswa'])
+                    ->countAllResults();
+
+                // 3. Jika data ujian_siswa ADA, maka hapus dengan kondisi spesifik
+                if ($cekUjianSiswa > 0) {
+                    $this->ujianSiswaModel
+                        ->where('ujian', $ujian['kode_ujian'])
+                        ->where('siswa', $ujian['id_siswa'])
+                        ->delete();
+                }
+
+                // 4. Hapus data di tabel ujian (tabel utama)
+                $this->ujianModel->delete($idujian);
+
+                // 5. Validasi status transaksi
+                if ($db->transStatus() === false) {
+                    $db->transRollback();
+                    session()->setFlashdata('error', 'Gagal menghapus data.');
+                } else {
+                    $db->transCommit();
+                    session()->setFlashdata('success', 'Data berhasil dihapus');
+                }
+            } else {
+                // Jika data ujian ternyata tidak ditemukan di database
+                $db->transRollback();
+                session()->setFlashdata('error', 'Data ujian tidak ditemukan.');
+            }
+
+        } catch (\Exception $e) {
+            $db->transRollback();
+            session()->setFlashdata('error', 'Terjadi kesalahan sistem saat menghapus data.');
+        }
+
         return redirect()->to('sw-admin/siswa/ujian/' . $id_siswa);
     }
 
