@@ -633,7 +633,7 @@ class SiswaController extends BaseController
                 $row->kuota_html = '<a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#tambah_kuota" class="edit_kuota badge badge-light-primary fw-bold px-3 py-2 cursor-pointer text-hover-primary" 
                         data-idsiswa="' . encrypt_url($u->id_siswa) . '" 
                         data-idujian="' . encrypt_url($u->id_ujian) . '" 
-                        data-kuota="' . $u->kuota . '"><i class="ki-duotone ki-ticket fs-5 text-primary me-1"><span class="path1"></span><span class="path2"></span></i> ' . $u->kuota . ' Kali</a>';
+                        data-kuota="' . $u->kuota . '"><i class="ki-duotone ki-ticket fs-5 text-primary me-1"><span class="path1"></span><span class="path2"></span></i> ' . max(0, $u->kuota) . ' Kali</a>';
 
                 $row->durasi_menit = $durasiMenit . ' Menit' . ($u->start_ujian ? '<br><small class="text-muted">(' . date('d-m-Y H:i', strtotime($u->start_ujian)) . ' s/d ' . date('d-m-Y H:i', strtotime($u->end_ujian)) . ')</small>' : '');
                 $row->nilai        = $u->nilai ?? '-';

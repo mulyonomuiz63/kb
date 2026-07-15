@@ -49,7 +49,7 @@
                 
                 <div class="modal-header pb-0 border-0 justify-content-between">
                     <h2 class="fw-bold">Tambah Kuota</h2>
-                    <div class="btn btn-sm btn-icon btn-active-color-primary" data-dismiss="modal">
+                    <div class="btn btn-sm btn-icon btn-active-color-primary" data-bs-dismiss="modal">
                         <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i>
                     </div>
                 </div>
@@ -73,7 +73,7 @@
                     </div>
 
                     <div class="text-center">
-                        <button type="button" class="btn btn-light me-3" data-dismiss="modal">Batal</button>
+                        <button type="button" class="btn btn-light me-3" data-bs-dismiss="modal">Batal</button>
                         <button type="submit" id="btnSimpanKuota" class="btn btn-primary">
                             <i class="fas fa-save mr-1"></i> Simpan
                         </button>
@@ -164,7 +164,16 @@
 
                     if (response.status === 'success') {
                         $('#tambah_kuota').modal('hide');
-                        Swals.toast(response.message, 'success');
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: '<span style="color: #000000 !important;">' + response.message + '</span>',
+                            showConfirmButton: false,
+                            timer: 3000,
+                            timerProgressBar: true,
+                            background: '#ffffff' 
+                        });
                         
                         // REFRESH DATATABLE TANPA RELOAD PAGE
                         table.ajax.reload(null, false); 
@@ -186,6 +195,9 @@
             $('#modal_kuota').focus().select();
             $(this).removeAttr('aria-hidden');
         });
+    });
+    $(document).on('click', '[data-bs-dismiss="modal"]', function () {
+        $(this).closest('.modal').modal('hide');
     });
 </script>
 <?= $this->endSection(); ?>
