@@ -17,6 +17,8 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
         $routes->post('get-data-sertifikat', 'Admin\SiswaController::getDataSertifikat');
         $routes->get('ujian/(:segment)', 'Admin\SiswaController::ujian/$1');
         $routes->post('get-data-ujian', 'Admin\SiswaController::getDataUjian');
+        
+        $routes->post('processImportBatch', 'Admin\SiswaController::processImportBatch');
 
         //cetak sertifikat
         // Route tanpa segmen ketiga

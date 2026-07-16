@@ -5,8 +5,12 @@ namespace App\Controllers\Admin;
 use App\Controllers\BaseController;
 use App\Libraries\Emailer;
 use App\Libraries\Pdf;
+use App\Models\DetailPaketModel;
+use App\Models\DetailTransaksiModel;
 use App\Models\KelasModel;
+use App\Models\PaketModel;
 use App\Models\SiswaModel;
+use App\Models\TransaksiModel;
 use App\Models\UjianMasterModel;
 use App\Models\UjianModel;
 use App\Models\UjianSiswaModel;
@@ -21,6 +25,10 @@ class SiswaController extends BaseController
     protected $ujianMasterModel;
     protected $ujianSiswaModel;
     protected $kelasModel;
+    protected $transaksiModel;
+    protected $detailTransaksiModel;
+    protected $paketModel;
+    protected $detailPaketModel;
     protected $emailer;
 
     public function __construct()
@@ -30,6 +38,10 @@ class SiswaController extends BaseController
         $this->ujianMasterModel = new UjianMasterModel();
         $this->ujianSiswaModel = new UjianSiswaModel();
         $this->kelasModel = new KelasModel();
+        $this->transaksiModel = new TransaksiModel();
+        $this->detailTransaksiModel = new DetailTransaksiModel();
+        $this->paketModel = new PaketModel();
+        $this->detailPaketModel = new DetailPaketModel();
         $this->emailer = new Emailer();
     }
 
@@ -143,6 +155,7 @@ class SiswaController extends BaseController
 
         // 6. Data kelas
         $data['kelas'] = $this->kelasModel->asObject()->findAll();
+        $data['paket'] = $this->paketModel->asObject()->findAll();
 
         return view('admin/siswa/list', $data);
     }
@@ -1025,7 +1038,6 @@ class SiswaController extends BaseController
                 $db->transRollback();
                 session()->setFlashdata('error', 'Data ujian tidak ditemukan.');
             }
-
         } catch (\Exception $e) {
             $db->transRollback();
             session()->setFlashdata('error', 'Terjadi kesalahan sistem saat menghapus data.');
@@ -1118,5 +1130,183 @@ class SiswaController extends BaseController
             // Jika terjadi error database (misal nama kolom salah)
             return redirect()->back()->with('error', 'Gagal melakukan update massal: ' . $e->getMessage());
         }
+    }
+
+    public function processImportBatch()
+    {
+        if (!$this->request->isAJAX()) return exit('No direct script access allowed');
+
+        helper('text');
+        $db = \Config\Database::connect();
+
+        $idpaket = $this->request->getPost('idpaket');
+        $data_siswa = json_decode($this->request->getPost('data_siswa'), true);
+
+        $success_count = 0;
+        $error_count = 0;
+        $errors = [];
+
+        // Persiapkan data paket yang sama untuk semua siswa di batch ini
+        $dataPaket = $this->paketModel->join('diskon', 'paket.iddiskon=diskon.iddiskon')->where('paket.idpaket', $idpaket)->get()->getRow();
+
+        if (!$dataPaket) {
+            return $this->response->setJSON([
+                'csrf_hash' => csrf_hash(),
+                'success_count' => 0,
+                'error_count' => count($data_siswa),
+                'errors' => [['nama' => 'Global', 'email' => '-', 'reason' => 'Paket Ujian tidak ditemukan']]
+            ]);
+        }
+
+        // Ambil Data Detail Paket (Hanya query 1x per batch agar ringan)
+        $detailPaket = $this->detailPaketModel
+            ->select('detail_paket.*, ujian_master.nama_ujian, mapel.nama_mapel, ujian_master.kode_ujian, ujian_master.guru, ujian_master.kelas, ujian_master.mapel')
+            ->join('ujian_master', 'detail_paket.id_ujian=ujian_master.id_ujian', 'left')
+            ->join('mapel', 'detail_paket.id_mapel=mapel.id_mapel', 'left')
+            ->where('detail_paket.idpaket', $idpaket)
+            ->get()->getResultObject();
+
+        $totalDataCount = $this->detailPaketModel->where('idpaket', $idpaket)->countAllResults();
+
+        foreach ($data_siswa as $row) {
+            $emailClean = filter_var($row['email'], FILTER_SANITIZE_EMAIL);
+            $namaClean  = htmlspecialchars(strip_tags($row['nama']), ENT_QUOTES, 'UTF-8');
+            $jk         = '';
+            $nama_pendek = substr($namaClean, 0, 10);
+
+            // Validasi Email Exists
+            $cekSiswa = $this->siswaModel->where('email', $emailClean)->first();
+            if ($cekSiswa) {
+                $error_count++;
+                $errors[] = ['nama' => $namaClean, 'email' => $emailClean, 'reason' => 'Email sudah terdaftar'];
+                continue; // Skip loop ini, lanjut ke siswa berikutnya
+            }
+
+            // ==========================================
+            // MULAI TRANSACTION PER SISWA
+            // ==========================================
+            $db->transBegin();
+            try {
+                $randomPassword = random_string('alnum', 8);
+                $hashedPassword = password_hash($randomPassword, PASSWORD_DEFAULT);
+
+                // 1. Insert Data Siswa
+                $data_insert_siswa = array(
+                    'no_induk_siswa' => rand(1000000, 9000000),
+                    'nama_siswa'     => $namaClean,
+                    'email'          => $emailClean,
+                    'password'       => $hashedPassword,
+                    'jenis_kelamin'  => $jk,
+                    'kelas'          => 1,
+                    'role'           => 2,
+                    'is_active'      => 1,
+                    'date_created'   => time(),
+                    'avatar'         => 'default.jpg',
+                    'afiliasi'       => 'afiliasi-batch-1',
+                );
+                $this->siswaModel->insert($data_insert_siswa);
+                $id_siswa = $this->siswaModel->insertID();
+
+                // 2. Insert Data Transaksi
+                $tgl_mulai = date('Y-m-d H:i:s');
+                $tgl_exp   = date('Y-m-d H:i:s', strtotime('+ 1 day', strtotime($tgl_mulai)));
+                $dataInsertTrans = [
+                    'idsiswa'        => $id_siswa,
+                    'nominal'        => $dataPaket->nominal_paket,
+                    'diskon'         => $dataPaket->diskon,
+                    'voucher'        => 0,
+                    'status'         => 'S',
+                    'tgl_exp'        => $tgl_exp,
+                    'tgl_drop'       => $tgl_exp,
+                    'tgl_pembayaran' => $tgl_mulai,
+                    'jenis_bayar'    => 'manual',
+                    'kode_voucher'   => '',
+                    'jenis_paket'    => $dataPaket->jenis_paket
+                ];
+                $this->transaksiModel->insert($dataInsertTrans);
+                $idtransaksi = $this->transaksiModel->insertID();
+
+                // 3. Kalkulasi Harga
+                $totalRaw      = $dataPaket->nominal_paket;
+                $diskonPersen  = $dataPaket->diskon;
+                $diskon        = $totalRaw - ($totalRaw - ($totalRaw * $diskonPersen / 100));
+                $totalDiskon   = $totalRaw - $diskon;
+                $diskon_voucher = $totalDiskon - ($totalDiskon - ($totalDiskon * 0 / 100));
+                $hasil         = ($totalRaw - $diskon - $diskon_voucher) / (int)($totalDataCount ?: 1);
+
+                // 4. Insert Detail Transaksi & Ujian Siswa
+                foreach ($detailPaket as $rows) {
+                    // Insert Detail Transaksi
+                    $this->detailTransaksiModel->insert([
+                        'idtransaksi' => $idtransaksi,
+                        'idpaket'     => $rows->idpaket,
+                        'idmapel'     => $rows->id_mapel,
+                        'prince'      => $hasil,
+                        'quantity'    => 1,
+                        'name'        => $rows->nama_ujian . ' ' . $rows->nama_mapel
+                    ]);
+
+                    // Insert Ujian Master ke Siswa
+                    $this->ujianModel->save([
+                        'id_siswa'   => $id_siswa,
+                        'kode_ujian' => $rows->kode_ujian,
+                        'nama_ujian' => $rows->nama_ujian,
+                        'guru'       => $rows->guru,
+                        'kelas'      => $rows->kelas,
+                        'mapel'      => $rows->mapel,
+                        'date_created' => time(),
+                    ]);
+
+                    // Reset / Insert Ujian Siswa (Progress Ujian)
+                    $this->ujianSiswaModel->where('ujian', $rows->kode_ujian)
+                        ->where('siswa', $id_siswa)
+                        ->set([
+                            'jawaban' => null,
+                            'benar'   => null,
+                            'jam'     => null,
+                            'status'  => null,
+                        ])->update();
+                }
+
+                // 5. Send Email
+                $subject = 'SELAMAT ANDA BERHASIL TERDAFTAR DI KELASBREVET';
+                $message = '
+                <div style="color: #000; padding: 10px;">
+                    <div style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; font-size: 20px; color: #1C3FAA; font-weight: bold;">
+                        INFORMASI PENDAFTARAN</div>
+                    <br>
+                    <p style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; color: #000;">Hallo ' . $nama_pendek . ' <br>
+                        <span style="color: #000;">Kami menambahkan anda ke dalam kelasBrevet 
+                        <br>Silahkan login ke website kelasbrevet untuk mengerjakan ujian:</span></p>
+                    <table style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; color: #000;">
+                        <tr><td>Nama</td><td> : ' . $nama_pendek . '</td></tr>
+                        <tr><td>Email</td><td> : ' . $emailClean . '</td></tr>
+                        <!-- NOTE: Password yang dikirim HARUS randomPassword asli, bukan Hash-nya -->
+                        <tr><td>Password</td><td> : ' . $randomPassword . '</td></tr> 
+                    </table>
+                    <br>
+                        <a href="' . base_url("auth/") . '"  style="display: inline-block; background: #1C3FAA; color: #fff;margin:10px; text-decoration: none; border-radius: 5px; text-align: center; line-height: 30px; font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; padding: 5px 20px;">Login</a>
+                </div>';
+
+                // Kirim Email
+                $this->emailer->send($emailClean, $subject, $message);
+
+                // Jika semua lancar, Commit Database
+                $db->transCommit();
+                $success_count++;
+            } catch (\Exception $e) {
+                // Jika ada query yang gagal atau email gagal, Rollback (batalkan simpan)
+                $db->transRollback();
+                $error_count++;
+                $errors[] = ['nama' => $namaClean, 'email' => $emailClean, 'reason' => $e->getMessage()];
+            }
+        }
+
+        return $this->response->setJSON([
+            'csrf_hash'     => csrf_hash(), // Update CSRF token untuk AJAX request berikutnya
+            'success_count' => $success_count,
+            'error_count'   => $error_count,
+            'errors'        => $errors
+        ]);
     }
 }

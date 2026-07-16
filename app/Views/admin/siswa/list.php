@@ -139,6 +139,10 @@
                             </select>
                         </div>
 
+                        <a href="javascript:void(0)" class="btn btn-light-success" data-bs-toggle="modal" data-bs-target="#modal_import_siswa" data-bs-placement="top" title="Import data siswa">
+                            <i class="ki-duotone ki-badge fs-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i>
+                            Import Data Siswa
+                        </a>
                         <a href="<?= base_url('sw-admin/siswa/sertifikat-ab') ?>" class="btn btn-light-success" data-bs-toggle="tooltip" data-bs-placement="top" title="List sertifikat AB seluruh siswa">
                             <i class="ki-duotone ki-badge fs-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i>
                             Sertifikat AB
@@ -244,6 +248,58 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="modal_import_siswa" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered mw-650px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="fw-bold">Import Data Peserta (Excel/CSV)</h2>
+                <div class="btn btn-icon btn-sm btn-active-icon-primary" data-bs-dismiss="modal" id="btn-close-modal">
+                    <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i>
+                </div>
+            </div>
+            <div class="modal-body scroll-y mx-5 mx-xl-15 my-7">
+                <form id="form_import_excel" class="form" action="#">
+                    <div class="fv-row mb-7">
+                        <label class="required fs-6 fw-semibold form-label mb-2">Pilih Paket Ujian</label>
+                        <select name="idpaket" id="import_idpaket" class="form-select form-select-solid" data-control="select2" data-dropdown-parent="#modal_import_siswa" data-placeholder="Pilih Paket Ujian" required>
+                            <option value=""></option>
+                            <!-- NOTE: Looping data paket Anda di sini -->
+                            <?php foreach ($paket as $rowpaket): ?>
+                                <option value="<?= $rowpaket->idpaket ?>"><?= $rowpaket->nama_paket ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    
+                    <div class="fv-row mb-7">
+                        <label class="required fs-6 fw-semibold form-label mb-2">File Excel / CSV</label>
+                        <input type="file" id="file_excel" class="form-control form-control-solid" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" required />
+                        <div class="text-muted fs-7 mt-2">Format kolom wajib (Baris pertama sebagai header): <b>nama, email</b></div>
+                    </div>
+
+                    <!-- Progress Bar (Awalnya disembunyikan) -->
+                    <div id="import_progress_container" class="d-none mb-7">
+                        <div class="d-flex justify-content-between pb-2">
+                            <span class="fs-6 fw-semibold text-gray-800">Proses Import...</span>
+                            <span class="fs-6 fw-bold text-gray-800" id="import_progress_text">0 / 0</span>
+                        </div>
+                        <div class="progress h-6px w-100">
+                            <div class="progress-bar bg-primary" id="import_progress_bar" role="progressbar" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <div class="text-center pt-15">
+                        <button type="reset" class="btn btn-light me-3" data-bs-dismiss="modal" id="btn-cancel-import">Batal</button>
+                        <button type="submit" class="btn btn-primary" id="btn-submit-import">
+                            <span class="indicator-label">Mulai Import</span>
+                            <span class="indicator-progress">Memproses file... 
+                            <span class="spinner-border spinner-border-sm align-middle ms-2"></span></span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 <?php
 $modals = [
     ['id' => 'sertifikat_all_cetak_modal', 'class' => 'isiKontenSertifikatAll']
@@ -271,6 +327,166 @@ function renderDetailRow($label, $id, $col = 6)
 
 
 <?= $this->section('scripts') ?>
+<!-- Load SheetJS untuk membaca Excel di sisi Client -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    let globalErrorList = [];
+    let totalSuccess = 0;
+    let totalFailed = 0;
+
+    $('#form_import_excel').on('submit', function(e) {
+        e.preventDefault();
+        
+        let fileInput = document.getElementById('file_excel');
+        let idpaket = $('#import_idpaket').val();
+
+        if (!fileInput.files.length) {
+            Swal.fire("Error", "Pilih file excel/csv terlebih dahulu", "error");
+            return;
+        }
+
+        let file = fileInput.files[0];
+        let reader = new FileReader();
+
+        // UI Loading
+        $('#btn-submit-import').attr('data-kt-indicator', 'on').prop('disabled', true);
+        $('#btn-cancel-import, #btn-close-modal').prop('disabled', true);
+
+        reader.onload = function(e) {
+            let data = new Uint8Array(e.target.result);
+            let workbook = XLSX.read(data, {type: 'array'});
+            let firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            let excelRows = XLSX.utils.sheet_to_json(firstSheet, {defval: ""}); // Convert to JSON
+
+            if (excelRows.length === 0) {
+                Swal.fire("Error", "File kosong atau format salah.", "error");
+                resetImportUI();
+                return;
+            }
+
+            // Normalisasi nama key (mengubah ke huruf kecil dan menghapus spasi)
+            let normalizedRows = excelRows.map(row => {
+                let newRow = {};
+                for (let key in row) {
+                    newRow[key.toLowerCase().replace(/\s/g, '')] = row[key];
+                }
+                return newRow;
+            });
+
+            // Validasi Header Excel
+            let firstRow = normalizedRows[0];
+            if (!firstRow.hasOwnProperty('nama') || !firstRow.hasOwnProperty('email')) {
+                Swal.fire("Error", "Format kolom salah! Pastikan ada kolom: nama, email", "error");
+                resetImportUI();
+                return;
+            }
+
+            // Reset Counter & Tampilkan Progress
+            globalErrorList = [];
+            totalSuccess = 0;
+            totalFailed = 0;
+            $('#import_progress_container').removeClass('d-none');
+            
+            // Proses Chunking (Membagi data misal 20 data per request agar email & server aman)
+            let chunkSize = 20; 
+            let chunks = [];
+            for (let i = 0; i < normalizedRows.length; i += chunkSize) {
+                chunks.push(normalizedRows.slice(i, i + chunkSize));
+            }
+
+            processChunk(chunks, 0, idpaket, normalizedRows.length);
+        };
+
+        reader.readAsArrayBuffer(file);
+    });
+
+    // FUNGSI REKURSIF UNTUK MENGIRIM DATA PER KELOMPOK
+    function processChunk(chunks, index, idpaket, totalRecords) {
+        if (index >= chunks.length) {
+            finishImport();
+            return;
+        }
+
+        let currentDataProcessed = Math.min((index + 1) * chunks[0].length, totalRecords);
+        let progressPercent = Math.round((currentDataProcessed / totalRecords) * 100);
+        
+        $('#import_progress_text').text(`${currentDataProcessed} / ${totalRecords}`);
+        $('#import_progress_bar').css('width', `${progressPercent}%`);
+
+        $.ajax({
+            url: "<?= base_url('sw-admin/siswa/processImportBatch') ?>",
+            type: "POST",
+            data: {
+                [csrfName]: csrfHash, // Pastikan variabel csrf global Anda sudah ada
+                idpaket: idpaket,
+                data_siswa: JSON.stringify(chunks[index])
+            },
+            dataType: "JSON",
+            success: function(response) {
+                if (response.csrf_hash) {
+                    csrfHash = response.csrf_hash;
+                    $('input[name="' + csrfName + '"]').val(csrfHash);
+                }
+
+                totalSuccess += response.success_count;
+                totalFailed += response.error_count;
+                if(response.errors.length > 0) {
+                    globalErrorList = globalErrorList.concat(response.errors);
+                }
+
+                // Lanjut ke antrian berikutnya
+                processChunk(chunks, index + 1, idpaket, totalRecords);
+            },
+            error: function() {
+                // Jika server RTO, anggap chunk ini gagal, lalu lanjut chunk berikutnya
+                totalFailed += chunks[index].length;
+                chunks[index].forEach(errRow => {
+                    globalErrorList.push({ nama: errRow.nama, email: errRow.email, reason: "Server Error / Timeout" });
+                });
+                processChunk(chunks, index + 1, idpaket, totalRecords);
+            }
+        });
+    }
+
+    function finishImport() {
+        resetImportUI();
+        $('#modal_import_siswa').modal('hide');
+
+        let msgHtml = `<b>Berhasil:</b> ${totalSuccess} data<br><b>Gagal:</b> ${totalFailed} data`;
+        
+        if (globalErrorList.length > 0) {
+            let errorTable = `<div style="max-height: 200px; overflow-y: auto; margin-top: 15px; text-align: left;">
+                              <table class="table table-bordered table-sm fs-7">
+                                <thead class="bg-light"><tr><th>Nama</th><th>Email</th><th>Alasan</th></tr></thead><tbody>`;
+            globalErrorList.forEach(e => {
+                errorTable += `<tr><td>${e.nama}</td><td>${e.email}</td><td class="text-danger">${e.reason}</td></tr>`;
+            });
+            errorTable += `</tbody></table></div>`;
+            msgHtml += errorTable;
+        }
+
+        Swal.fire({
+            title: "Proses Import Selesai!",
+            html: msgHtml,
+            icon: totalFailed > 0 ? "warning" : "success",
+            width: '600px'
+        }).then(() => {
+            // Reload Datatable
+            $('#datatable-list').DataTable().ajax.reload();
+        });
+    }
+
+    function resetImportUI() {
+        $('#btn-submit-import').removeAttr('data-kt-indicator').prop('disabled', false);
+        $('#btn-cancel-import, #btn-close-modal').prop('disabled', false);
+        $('#import_progress_container').addClass('d-none');
+        $('#form_import_excel')[0].reset();
+        $('#import_idpaket').val(null).trigger('change');
+    }
+});
+</script>
 <script>
     var chartInstance = null; // Menyimpan instance chart agar bisa di-update
 
@@ -593,6 +809,8 @@ function renderDetailRow($label, $id, $col = 6)
                 </div>
             `;
     }
-    $(document).on('click', '.sertifikat_all_cetak', function() { $(".isiKontenSertifikatAll").html(renderModalContent('Sertifikat Brevet AB', $(this).data('sertifikat_all'))); });
+    $(document).on('click', '.sertifikat_all_cetak', function() {
+        $(".isiKontenSertifikatAll").html(renderModalContent('Sertifikat Brevet AB', $(this).data('sertifikat_all')));
+    });
 </script>
 <?= $this->endSection(); ?>

@@ -8,7 +8,7 @@ class SiswaModel extends Model
 {
     protected $table            = 'siswa';
     protected $primaryKey       = 'id_siswa';
-    protected $allowedFields    = ['no_induk_siswa', 'nama_siswa', 'email', 'password', 'jenis_kelamin', 'kelas', 'role', 'is_active', 'date_created', 'avatar', 'nik', 'tempat_lahir', 'tgl_lahir', 'alamat_ktp', 'alamat_domisili', 'provinsi', 'kota', 'kecamatan', 'kelurahan', 'hp', 'profesi', 'kantor', 'nama_kantor','bidang_usaha', 'alamat_kantor', 'riwayat_pekerjaan','status','role_access'];
+    protected $allowedFields    = ['no_induk_siswa', 'nama_siswa', 'email', 'password', 'jenis_kelamin', 'kelas', 'role', 'is_active', 'date_created', 'avatar', 'nik', 'tempat_lahir', 'tgl_lahir', 'alamat_ktp', 'alamat_domisili', 'provinsi', 'kota', 'kecamatan', 'kelurahan', 'hp', 'profesi', 'kantor', 'nama_kantor','bidang_usaha', 'alamat_kantor', 'riwayat_pekerjaan','status','role_access','afiliasi'];
 
     public function get_datatables($column_order, $column_search, $order)
     {
