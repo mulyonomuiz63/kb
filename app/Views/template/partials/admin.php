@@ -11,8 +11,10 @@ $pic = array('sw-admin/pic');
 $kelas = array('sw-admin/kelas');
 $mapel = array('sw-admin/mapel');
 $relasi = array('sw-admin/relasi', 'sw-admin/atur_relasi');
+$review = array('sw-admin/review');
+$afiliasi = array('sw-admin/afiliasi');
 
-$master_data_pool = array_merge($siswa, $guru, $mitra, $pic, $kelas, $mapel, $relasi);
+$master_data_pool = array_merge($siswa, $guru, $mitra, $pic, $kelas, $mapel, $relasi, $review, $afiliasi);
 
 // Langganan & Konten
 $iklan = array('sw-admin/iklan');
@@ -115,61 +117,70 @@ $is_pengaturan_active = in_array($current_uri, $pengaturan_pool);
                                     <div class="menu-state-bg menu-extended overflow-hidden py-6 px-6 py-lg-8 px-lg-8 bg-white">
                                         <div class="row g-4">
 
-                                            <div class="col-12 col-md-6 col-lg-3">
+                                            <!-- Kolom 1 (Kiri) -->
+                                            <div class="col-12 col-md-6 col-lg-4">
+                                                <!-- Peserta -->
                                                 <a href="<?= base_url('sw-admin/siswa') ?>" class="menu-link p-3 mb-2 rounded-3 menu-custom-hover <?= (in_array($current_uri, $siswa) ? 'active' : '') ?>">
-                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-success">
-                                                        <i class="ki-duotone ki-profile-user text-success fs-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i>
+                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-success text-success">
+                                                        <i class="ki-duotone ki-profile-user fs-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i>
                                                     </span>
                                                     <span class="d-flex flex-column">
                                                         <span class="fs-6 fw-bold text-gray-800">Peserta</span>
                                                         <span class="fs-8 fw-semibold text-muted">Siswa & Ujian</span>
                                                     </span>
                                                 </a>
+
+                                                <!-- Pengajar -->
                                                 <a href="<?= base_url('sw-admin/guru') ?>" class="menu-link p-3 mb-2 rounded-3 menu-custom-hover <?= (in_array($current_uri, $guru) ? 'active' : '') ?>">
-                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-info">
-                                                        <i class="ki-duotone ki-teacher text-info fs-2"><span class="path1"></span><span class="path2"></span></i>
+                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-info text-info">
+                                                        <i class="ki-duotone ki-teacher fs-2"><span class="path1"></span><span class="path2"></span></i>
                                                     </span>
                                                     <span class="d-flex flex-column">
                                                         <span class="fs-6 fw-bold text-gray-800">Pengajar</span>
                                                         <span class="fs-8 fw-semibold text-muted">Guru & Materi</span>
                                                     </span>
                                                 </a>
-                                            </div>
 
-                                            <div class="col-12 col-md-6 col-lg-3">
+                                                <!-- Mitra -->
                                                 <a href="<?= base_url('sw-admin/mitra') ?>" class="menu-link p-3 mb-2 rounded-3 menu-custom-hover <?= (in_array($current_uri, $mitra) ? 'active' : '') ?>">
-                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-primary">
-                                                        <i class="ki-duotone ki-handcart text-primary fs-2"><span class="path1"></span><span class="path2"></span></i>
+                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-primary text-primary">
+                                                        <i class="ki-duotone ki-briefcase fs-2"><span class="path1"></span><span class="path2"></span></i>
                                                     </span>
                                                     <span class="d-flex flex-column">
                                                         <span class="fs-6 fw-bold text-gray-800">Mitra</span>
                                                         <span class="fs-8 fw-semibold text-muted">Voucher & Affiliate</span>
                                                     </span>
                                                 </a>
+                                            </div>
+
+                                            <!-- Kolom 2 (Tengah) -->
+                                            <div class="col-12 col-md-6 col-lg-4">
+                                                <!-- PIC -->
                                                 <a href="<?= base_url('sw-admin/pic') ?>" class="menu-link p-3 mb-2 rounded-3 menu-custom-hover <?= (in_array($current_uri, $pic) ? 'active' : '') ?>">
-                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-primary">
-                                                        <i class="ki-duotone ki-security-user text-primary fs-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
+                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-dark text-dark">
+                                                        <i class="ki-duotone ki-security-user fs-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
                                                     </span>
                                                     <span class="d-flex flex-column">
                                                         <span class="fs-6 fw-bold text-gray-800">PIC</span>
                                                         <span class="fs-8 fw-semibold text-muted">Akses PIC</span>
                                                     </span>
                                                 </a>
-                                            </div>
 
-                                            <div class="col-12 col-md-6 col-lg-3">
+                                                <!-- Mata Pelajaran -->
                                                 <a href="<?= base_url('sw-admin/mapel') ?>" class="menu-link p-3 mb-2 rounded-3 menu-custom-hover <?= (in_array($current_uri, $mapel) ? 'active' : '') ?>">
-                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-danger">
-                                                        <i class="ki-duotone ki-book text-danger fs-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i>
+                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-danger text-danger">
+                                                        <i class="ki-duotone ki-book fs-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i>
                                                     </span>
                                                     <span class="d-flex flex-column">
                                                         <span class="fs-6 fw-bold text-gray-800">Mata Pelajaran</span>
                                                         <span class="fs-8 fw-semibold text-muted">Modul & Kurikulum</span>
                                                     </span>
                                                 </a>
+
+                                                <!-- Kelas -->
                                                 <a href="<?= base_url('sw-admin/kelas') ?>" class="menu-link p-3 mb-2 rounded-3 menu-custom-hover <?= (in_array($current_uri, $kelas) ? 'active' : '') ?>">
-                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-dark">
-                                                        <i class="ki-duotone ki-element-11 text-dark fs-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i>
+                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-warning text-warning">
+                                                        <i class="ki-duotone ki-element-11 fs-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i>
                                                     </span>
                                                     <span class="d-flex flex-column">
                                                         <span class="fs-6 fw-bold text-gray-800">Kelas</span>
@@ -178,11 +189,12 @@ $is_pengaturan_active = in_array($current_uri, $pengaturan_pool);
                                                 </a>
                                             </div>
 
-                                            <div class="col-12 col-md-6 col-lg-3">
-                                                <!-- Menu Relasi (Ikon Graph Tetap) -->
+                                            <!-- Kolom 3 (Kanan) -->
+                                            <div class="col-12 col-md-6 col-lg-4">
+                                                <!-- Relasi -->
                                                 <a href="<?= base_url('sw-admin/relasi') ?>" class="menu-link p-3 mb-2 rounded-3 menu-custom-hover <?= ($current_uri == 'relasi' ? 'active' : '') ?>">
-                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-warning">
-                                                        <i class="ki-duotone ki-graph-3 text-warning fs-2"><span class="path1"></span><span class="path2"></span></i>
+                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-info text-info">
+                                                        <i class="ki-duotone ki-graph-3 fs-2"><span class="path1"></span><span class="path2"></span></i>
                                                     </span>
                                                     <span class="d-flex flex-column">
                                                         <span class="fs-6 fw-bold text-gray-800">Relasi</span>
@@ -190,16 +202,25 @@ $is_pengaturan_active = in_array($current_uri, $pengaturan_pool);
                                                     </span>
                                                 </a>
 
-                                                <!-- Menu Review (Ikon diubah ke ki-message-text) -->
+                                                <!-- Review -->
                                                 <a href="<?= base_url('sw-admin/review') ?>" class="menu-link p-3 mb-2 rounded-3 menu-custom-hover <?= ($current_uri == 'review' ? 'active' : '') ?>">
-                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-info">
-                                                        <i class="ki-duotone ki-message-text text-info fs-2">
-                                                            <span class="path1"></span><span class="path2"></span><span class="path3"></span>
-                                                        </i>
+                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-secondary text-gray-700">
+                                                        <i class="ki-duotone ki-message-text fs-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
                                                     </span>
                                                     <span class="d-flex flex-column">
                                                         <span class="fs-6 fw-bold text-gray-800">Review</span>
                                                         <span class="fs-8 fw-semibold text-muted">Ulasan Pelanggan</span>
+                                                    </span>
+                                                </a>
+
+                                                <!-- Afiliasi -->
+                                                <a href="<?= base_url('sw-admin/afiliasi') ?>" class="menu-link p-3 mb-2 rounded-3 menu-custom-hover <?= ($current_uri == 'afiliasi' ? 'active' : '') ?>">
+                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-success text-success">
+                                                        <i class="ki-duotone ki-discount fs-2"><span class="path1"></span><span class="path2"></span></i>
+                                                    </span>
+                                                    <span class="d-flex flex-column">
+                                                        <span class="fs-6 fw-bold text-gray-800">Afiliasi</span>
+                                                        <span class="fs-8 fw-semibold text-muted">Program Afiliasi</span>
                                                     </span>
                                                 </a>
                                             </div>

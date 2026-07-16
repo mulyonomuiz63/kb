@@ -5,6 +5,7 @@ namespace App\Controllers\Admin;
 use App\Controllers\BaseController;
 use App\Libraries\Emailer;
 use App\Libraries\Pdf;
+use App\Models\AfiliasiModel;
 use App\Models\DetailPaketModel;
 use App\Models\DetailTransaksiModel;
 use App\Models\KelasModel;
@@ -29,6 +30,7 @@ class SiswaController extends BaseController
     protected $detailTransaksiModel;
     protected $paketModel;
     protected $detailPaketModel;
+    protected $afiliasiModel;
     protected $emailer;
 
     public function __construct()
@@ -42,6 +44,7 @@ class SiswaController extends BaseController
         $this->detailTransaksiModel = new DetailTransaksiModel();
         $this->paketModel = new PaketModel();
         $this->detailPaketModel = new DetailPaketModel();
+        $this->afiliasiModel = new AfiliasiModel();
         $this->emailer = new Emailer();
     }
 
@@ -156,6 +159,7 @@ class SiswaController extends BaseController
         // 6. Data kelas
         $data['kelas'] = $this->kelasModel->asObject()->findAll();
         $data['paket'] = $this->paketModel->asObject()->findAll();
+        $data['afiliasi'] = $this->afiliasiModel->asObject()->findAll();
 
         return view('admin/siswa/list', $data);
     }
@@ -1140,6 +1144,7 @@ class SiswaController extends BaseController
         $db = \Config\Database::connect();
 
         $idpaket = $this->request->getPost('idpaket');
+        $idafiliasi = $this->request->getPost('idafiliasi');
         $data_siswa = json_decode($this->request->getPost('data_siswa'), true);
 
         $success_count = 0;
@@ -1202,7 +1207,7 @@ class SiswaController extends BaseController
                     'is_active'      => 1,
                     'date_created'   => time(),
                     'avatar'         => 'default.jpg',
-                    'afiliasi'       => 'afiliasi-batch-1',
+                    'idafiliasi'       => $idafiliasi,
                 );
                 $this->siswaModel->insert($data_insert_siswa);
                 $id_siswa = $this->siswaModel->insertID();

@@ -104,6 +104,14 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
         $routes->get('delete/(:any)', 'Admin\PicController::delete/$1');
     });
 
+    $routes->group('afiliasi', function ($routes) {
+        $routes->get('', 'Admin\AfiliasiController::index');
+        $routes->post('store', 'Admin\AfiliasiController::store');
+        $routes->post('edit', 'Admin\AfiliasiController::edit'); // Route AJAX untuk ambil data
+        $routes->post('update', 'Admin\AfiliasiController::update'); // Route Proses Update
+        $routes->get('delete/(:any)', 'Admin\AfiliasiController::delete/$1');
+    });
+
     $routes->group('kelas', function ($routes) {
         $routes->get('', 'Admin\KelasController::index');
         $routes->post('store', 'Admin\KelasController::store');

@@ -269,6 +269,16 @@
                             <?php endforeach; ?>
                         </select>
                     </div>
+                    <div class="fv-row mb-7">
+                        <label class="required fs-6 fw-semibold form-label mb-2">Pilih Afiliasi</label>
+                        <select name="idafiliasi" id="import_idafiliasi" class="form-select form-select-solid" data-control="select2" data-dropdown-parent="#modal_import_siswa" data-placeholder="Pilih Afiliasi" required>
+                            <option value=""></option>
+                            <!-- NOTE: Looping data afiliasi Anda di sini -->
+                            <?php foreach ($afiliasi as $rowafiliasi): ?>
+                                <option value="<?= $rowafiliasi->idafiliasi ?>"><?= $rowafiliasi->nama_afiliasi ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
                     
                     <div class="fv-row mb-7">
                         <label class="required fs-6 fw-semibold form-label mb-2">File Excel / CSV</label>
@@ -341,6 +351,7 @@ $(document).ready(function() {
         
         let fileInput = document.getElementById('file_excel');
         let idpaket = $('#import_idpaket').val();
+        let idafiliasi = $('#import_idafiliasi').val();
 
         if (!fileInput.files.length) {
             Swal.fire("Error", "Pilih file excel/csv terlebih dahulu", "error");
@@ -396,14 +407,14 @@ $(document).ready(function() {
                 chunks.push(normalizedRows.slice(i, i + chunkSize));
             }
 
-            processChunk(chunks, 0, idpaket, normalizedRows.length);
+            processChunk(chunks, 0, idpaket, idafiliasi, normalizedRows.length);
         };
 
         reader.readAsArrayBuffer(file);
     });
 
-    // FUNGSI REKURSIF UNTUK MENGIRIM DATA PER KELOMPOK
-    function processChunk(chunks, index, idpaket, totalRecords) {
+    // FUNGSI REKURSIF UNTUK MENGIRIM DATA PER KELOMPOK 
+    function processChunk(chunks, index, idpaket, idafiliasi, totalRecords) {
         if (index >= chunks.length) {
             finishImport();
             return;
@@ -421,6 +432,7 @@ $(document).ready(function() {
             data: {
                 [csrfName]: csrfHash, // Pastikan variabel csrf global Anda sudah ada
                 idpaket: idpaket,
+                idafiliasi: idafiliasi,
                 data_siswa: JSON.stringify(chunks[index])
             },
             dataType: "JSON",
@@ -437,7 +449,7 @@ $(document).ready(function() {
                 }
 
                 // Lanjut ke antrian berikutnya
-                processChunk(chunks, index + 1, idpaket, totalRecords);
+                processChunk(chunks, index + 1, idpaket, idafiliasi, totalRecords);
             },
             error: function() {
                 // Jika server RTO, anggap chunk ini gagal, lalu lanjut chunk berikutnya
@@ -445,7 +457,7 @@ $(document).ready(function() {
                 chunks[index].forEach(errRow => {
                     globalErrorList.push({ nama: errRow.nama, email: errRow.email, reason: "Server Error / Timeout" });
                 });
-                processChunk(chunks, index + 1, idpaket, totalRecords);
+                processChunk(chunks, index + 1, idpaket, idafiliasi, totalRecords);
             }
         });
     }
@@ -484,6 +496,7 @@ $(document).ready(function() {
         $('#import_progress_container').addClass('d-none');
         $('#form_import_excel')[0].reset();
         $('#import_idpaket').val(null).trigger('change');
+        $('#import_idafiliasi').val(null).trigger('change');
     }
 });
 </script>
