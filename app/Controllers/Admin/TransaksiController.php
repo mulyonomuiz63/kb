@@ -99,6 +99,7 @@ class TransaksiController extends BaseController
 
                 // Tangkap Parameter Filter
                 $filter_bulan = $request->getPost('filter_bulan');
+                $status_afiliasi = $request->getPost('filter_status_afiliasi'); // UPGRADE: Tangkap filter afiliasi
 
                 // ==========================================
                 // 1. BUILDER UNTUK MENAMPILKAN DATA TABEL
@@ -115,6 +116,14 @@ class TransaksiController extends BaseController
 
                 if (!empty($filter_bulan)) {
                     $query->like('transaksi.created_at', $filter_bulan, 'after');
+                }
+
+                if ($status_afiliasi === '0') {
+                    $query->where('b.idafiliasi IS NULL');
+                } else {
+                    if ($status_afiliasi != '2') {
+                        $query->where('b.idafiliasi', $status_afiliasi);
+                    }
                 }
 
                 // Menghitung total data terfilter TANPA mereset builder (bawaan kode aslimu)
@@ -145,6 +154,14 @@ class TransaksiController extends BaseController
 
                 if (!empty($filter_bulan)) {
                     $queryTotal->like('transaksi.created_at', $filter_bulan, 'after');
+                }
+
+                if ($status_afiliasi === '0') {
+                    $queryTotal->where('b.idafiliasi IS NULL');
+                } else {
+                    if ($status_afiliasi != '2') {
+                        $queryTotal->where('b.idafiliasi', $status_afiliasi);
+                    }
                 }
 
                 // Ambil semua data hanya yang berstatus Lunas (S)
@@ -180,8 +197,9 @@ class TransaksiController extends BaseController
                     // LOGIKA AFFILIATE & KOLOM VOUCHER
                     $is_affiliate = false;
                     $kode_affiliate = $s->kode_affiliate ?? null;
+                    $nama_afiliasi = $s->nama_afiliasi ?? null;
 
-                    if ($s->kode_voucher === '8173AF4239' || !empty($kode_affiliate)) {
+                    if ($s->kode_voucher === '8173AF4239' || !empty($kode_affiliate) || !empty($s->idafiliasi)) {
                         $is_affiliate = true;
                     }
 
@@ -190,7 +208,16 @@ class TransaksiController extends BaseController
                         : '<span class="text-muted fs-7 fw-semibold">-</span>';
 
                     if ($is_affiliate) {
-                        $html_voucher .= '<div class="mt-2"><span class="badge badge-light-success fs-8 fw-bold px-2 py-1"><i class="ki-duotone ki-shop fs-7 me-1 text-success"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i> Link Affiliate</span></div>';
+                        // Menampilkan nama afiliasi jika ada, jika tidak ada fallback ke teks statis
+                        $display_nama = $nama_afiliasi ? esc($nama_afiliasi) : 'Link Affiliate';
+
+                        $html_voucher .= '<div class="mt-2">
+                            <span class="badge badge-light-success fs-8 fw-bold px-2 py-1">
+                                <i class="ki-duotone ki-shop fs-7 me-1 text-success">
+                                    <span class="path1"></span><span class="path2"></span>
+                                </i> ' . $display_nama . '
+                            </span>
+                        </div>';
                     }
 
                     $row['voucher'] = $html_voucher;
@@ -257,46 +284,46 @@ class TransaksiController extends BaseController
 
                     // AKSI
                     $row['aksi'] = '
-                    <div class="text-center">
-                        <a href="#" class="btn btn-sm btn-light btn-flex btn-center btn-active-light-primary" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
-                            Aksi <i class="ki-duotone ki-down fs-5 ms-1"></i>
-                        </a>
+                <div class="text-center">
+                    <a href="#" class="btn btn-sm btn-light btn-flex btn-center btn-active-light-primary" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+                        Aksi <i class="ki-duotone ki-down fs-5 ms-1"></i>
+                    </a>
+                    
+                    <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-200px py-4 text-start" data-kt-menu="true">
                         
-                        <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-200px py-4 text-start" data-kt-menu="true">
-                            
-                            <div class="menu-item px-3">
-                                <a href="javascript:void(0)" class="menu-link px-3 validasi-transaksi" data-bs-toggle="modal" data-bs-target="#validasi_transaksi" data-transaksi="' . $id_enc . '">
-                                    <i class="ki-duotone ki-setting-2 fs-4 me-2 text-gray-500"><span class="path1"></span><span class="path2"></span></i> Detail Transaksi
-                                </a>
-                            </div>';
+                        <div class="menu-item px-3">
+                            <a href="javascript:void(0)" class="menu-link px-3 validasi-transaksi" data-bs-toggle="modal" data-bs-target="#validasi_transaksi" data-transaksi="' . $id_enc . '">
+                                <i class="ki-duotone ki-setting-2 fs-4 me-2 text-gray-500"><span class="path1"></span><span class="path2"></span></i> Detail Transaksi
+                            </a>
+                        </div>';
 
                     if ($s->status == 'S') {
                         $row['aksi'] .= '
-                            <div class="menu-item px-3">
-                                <a href="javascript:void(0)" class="menu-link px-3 text-success invoice_cetak" data-bs-toggle="modal" data-bs-target="#invoice_cetak_modal" data-invoice="' . base_url('sw-admin/transaksi/invoice/' . $id_enc) . '">
-                                    <i class="ki-duotone ki-file-down fs-4 me-2 text-success"><span class="path1"></span><span class="path2"></span></i> Unduh Invoice
-                                </a>
-                            </div>';
+                        <div class="menu-item px-3">
+                            <a href="javascript:void(0)" class="menu-link px-3 text-success invoice_cetak" data-bs-toggle="modal" data-bs-target="#invoice_cetak_modal" data-invoice="' . base_url('sw-admin/transaksi/invoice/' . $id_enc) . '">
+                                <i class="ki-duotone ki-file-down fs-4 me-2 text-success"><span class="path1"></span><span class="path2"></span></i> Unduh Invoice
+                            </a>
+                        </div>';
                     } else {
                         $row['aksi'] .= '
-                            <div class="menu-item px-3">
-                                <a href="' . base_url('sw-admin/transaksi/approve-manual/' . $id_enc) . '" class="menu-link px-3 text-primary" id="approve">
-                                    <i class="ki-duotone ki-check-square fs-4 me-2 text-primary"><span class="path1"></span><span class="path2"></span></i> Approve Transaksi
-                                </a>
-                            </div>
-                            
-                            <div class="separator mt-3 opacity-75"></div>
-                            
-                            <div class="menu-item px-3 mt-3">
-                                <a href="' . base_url('sw-admin/transaksi/hapus-transaksi-siswa/' . $id_enc) . '" class="menu-link px-3 text-danger btn-delete" id="hapus">
-                                    <i class="ki-duotone ki-trash fs-4 me-2 text-danger"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i> Hapus Transaksi
-                                </a>
-                            </div>';
+                        <div class="menu-item px-3">
+                            <a href="' . base_url('sw-admin/transaksi/approve-manual/' . $id_enc) . '" class="menu-link px-3 text-primary" id="approve">
+                                <i class="ki-duotone ki-check-square fs-4 me-2 text-primary"><span class="path1"></span><span class="path2"></span></i> Approve Transaksi
+                            </a>
+                        </div>
+                        
+                        <div class="separator mt-3 opacity-75"></div>
+                        
+                        <div class="menu-item px-3 mt-3">
+                            <a href="' . base_url('sw-admin/transaksi/hapus-transaksi-siswa/' . $id_enc) . '" class="menu-link px-3 text-danger btn-delete" id="hapus">
+                                <i class="ki-duotone ki-trash fs-4 me-2 text-danger"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i> Hapus Transaksi
+                            </a>
+                        </div>';
                     }
 
                     $row['aksi'] .= '
-                        </div>
-                    </div>';
+                    </div>
+                </div>';
 
                     $results[] = $row;
                 }

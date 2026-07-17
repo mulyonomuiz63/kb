@@ -9,7 +9,7 @@ class TransaksiModel extends Model
 {
     protected $table            = 'transaksi';
     protected $primaryKey       = 'idtransaksi';
-    protected $allowedFields    = ['idsiswa', 'va', 'nominal', 'diskon', 'voucher', 'kode_unik', 'status', 'tgl_exp', 'tgl_drop', 'tgl_pembayaran', 'bukti_pembayaran', 'keterangan','token', 'jenis_bayar', 'kode_voucher', 'referensi_bank', 'jenis_paket', 'kode_affiliate'];
+    protected $allowedFields    = ['idsiswa', 'va', 'nominal', 'diskon', 'voucher', 'kode_unik', 'status', 'tgl_exp', 'tgl_drop', 'tgl_pembayaran', 'bukti_pembayaran', 'keterangan', 'token', 'jenis_bayar', 'kode_voucher', 'referensi_bank', 'jenis_paket', 'kode_affiliate'];
 
     public function getAll()
     {
@@ -25,18 +25,20 @@ class TransaksiModel extends Model
     }
     public function getBaseQuery()
     {
-        return $this->select('transaksi.*, b.nama_siswa, b.email, b.id_siswa, b.kantor, c.nama_paket')
-                    ->join('detail_transaksi d', 'd.idtransaksi=transaksi.idtransaksi')
-                    ->join('siswa b', 'b.id_siswa = transaksi.idsiswa')
-                    ->join('paket c', 'c.idpaket = d.idpaket')
-                    ->groupBy('transaksi.idtransaksi');
+        // UPGRADE: Menambahkan b.idafiliasi pada select untuk mempermudah eksekusi filter di controller
+        return $this->select('transaksi.*, b.nama_siswa, b.email, b.id_siswa, b.kantor, b.idafiliasi, c.nama_paket, a.nama_afiliasi')
+            ->join('detail_transaksi d', 'd.idtransaksi=transaksi.idtransaksi')
+            ->join('siswa b', 'b.id_siswa = transaksi.idsiswa')
+            ->join('paket c', 'c.idpaket = d.idpaket')
+            ->join('afiliasi a', 'a.idafiliasi = b.idafiliasi', 'left')
+            ->groupBy('transaksi.idtransaksi');
     }
 
     public function countAllData()
     {
         return $this->db->table('transaksi')->countAllResults();
     }
-    
+
     public function getAllKodeVoucher()
     {
         return $this

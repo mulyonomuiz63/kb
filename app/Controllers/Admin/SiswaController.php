@@ -173,65 +173,37 @@ class SiswaController extends BaseController
         $column_search = ['nama_siswa', 'no_induk_siswa', 'email'];
         $order         = ['id_siswa' => 'DESC'];
 
-        // Ambil data dari model
         $list = $this->siswaModel->get_datatables($column_order, $column_search, $order);
         $data = [];
 
         foreach ($list as $s) {
-            // Hitung statistik ujian
-            $totalUjian = $this->ujianModel->where([
-                'kelas'    => $s->kelas,
-                'id_siswa' => $s->id_siswa,
-                'nilai >=' => 60
-            ])->groupBy('mapel')->countAllResults();
+            // AMBIL DATA LANGSUNG DARI HASIL QUERY MODEL, BUKAN QUERY LAGI
+            $totalLulus       = $s->total_lulus ?? 0;
+            $totalSertifikats = $s->total_sertifikat ?? 0;
 
-            $totalSertifikats = $this->ujianModel->where([
-                'kelas'    => $s->kelas,
-                'id_siswa' => $s->id_siswa
-            ])->groupBy('mapel')->countAllResults();
+            $isSedangUjian = ($s->sedang_ujian > 0);
+            $infoUjian     = $isSedangUjian ? '<br><span class="badge badge-light-warning fw-bold px-2 py-1 mt-1 blink">Sedang Ujian</span>' : '';
+            $infoAfiliasi  = !empty($s->nama_afiliasi) ? '<br><span class="badge badge-light-info fw-bold px-2 py-1 mt-1"><i class="ki-duotone ki-briefcase fs-8 text-info me-1"></i> ' . $s->nama_afiliasi . '</span>' : '';
 
-            // --- INFO TAMBAHAN: Badge Sedang Ujian ---
-            // Cek nilai subquery 'sedang_ujian' dari model (> 0 berarti sedang ujian)
-            $isSedangUjian = ($s->sedang_ujian > 0) ? true : false;
-
-            // Buat elemen visual (badge) jika sedang ujian
-            $infoUjian = $isSedangUjian ? '<br><span class="badge badge-light-warning fw-bold px-2 py-1 mt-1 blink">Sedang Ujian</span>' : '';
-
-            $row = [
+            $data[] = [
                 "no_induk_siswa"  => $s->no_induk_siswa,
-                "nama_siswa"      => $s->nama_siswa . $infoUjian, // Info disisipkan di bawah nama
+                "nama_siswa"      => $s->nama_siswa . $infoUjian . $infoAfiliasi,
                 "email"           => $s->email,
                 "hp"              => $s->hp,
                 "date_created"    => date('d-m-Y', $s->date_created),
                 "is_active"       => $s->is_active,
-                "stats"           => $totalUjian . '/' . $totalSertifikats,
+                "stats"           => $totalLulus . '/' . $totalSertifikats,
                 "totalUjian"      => $totalSertifikats,
-                "is_sedang_ujian" => $isSedangUjian ? 1 : 0, // Disimpan untuk usort
+                "is_sedang_ujian" => $isSedangUjian ? 1 : 0,
                 "id_siswa_enc"    => encrypt_url($s->id_siswa)
             ];
-
-            $data[] = $row;
         }
 
-        // --- MULAI PERBAIKAN: Sorting Data Array ---
-        usort($data, function ($a, $b) {
-            // 1. Prioritas Utama: Sedang ujian ditaruh paling atas (Descending: 1 ke 0)
-            if ($a['is_sedang_ujian'] != $b['is_sedang_ujian']) {
-                return $b['is_sedang_ujian'] <=> $a['is_sedang_ujian'];
-            }
-            // 2. Prioritas Kedua: Urutkan berdasarkan ujian yang sudah dikerjakan (Descending)
-            if ($a['totalUjian'] != $b['totalUjian']) {
-                return $b['totalUjian'] <=> $a['totalUjian'];
-            }
-            // 3. Jika jumlah ujian sama, urutkan nama dari abjad terkecil (Ascending: A-Z)
-            // Gunakan strip_tags untuk mengabaikan tag HTML (badge) saat mengurutkan nama
-            return strcasecmp(strip_tags($a['nama_siswa']), strip_tags($b['nama_siswa']));
-        });
-        // --- AKHIR PERBAIKAN ---
+        // usort() DIHAPUS. Sorting ditangani sepenuhnya oleh ORDER BY di Model.
 
         $output = [
             "draw"            => intval($postData['draw'] ?? 1),
-            "recordsTotal"    => $this->siswaModel->countAllResults(),
+            "recordsTotal"    => $this->siswaModel->countAllResults(), // Note: lihat Langkah 4 untuk optimasi ini
             "recordsFiltered" => $this->siswaModel->countFiltered($column_order, $column_search, $order),
             "data"            => $data,
             "csrf_hash"       => csrf_hash()

@@ -81,6 +81,13 @@
                                 ?>
                             </select>
                         </div>
+                        <div class="w-100 mw-150px">
+                            <select id="filter-status-afiliasi" class="form-select form-select-solid" data-control="select2" data-hide-search="true" data-placeholder="Status">
+                                <option value="0">Tidak Afiliasi</option>
+                                <option value="1">Afiliasi</option>
+                                <option value="2">Semua Data</option>
+                            </select>
+                        </div>
                         <div class="d-flex align-items-center position-relative my-1">
                             <i class="ki-duotone ki-magnifier fs-3 position-absolute ms-4">
                                 <span class="path1"></span><span class="path2"></span>
@@ -157,6 +164,7 @@
                 "data": function(d) {
                     d["<?= csrf_token() ?>"] = $('.csrf-token').val();
                     d.filter_bulan = $('#filter_bulan').val();
+                    d.filter_status_afiliasi = $('#filter-status-afiliasi').val();
                 },
                 "dataSrc": function(json) {
                     $('.csrf-token').val(json.csrf_hash);
@@ -204,6 +212,11 @@
 
         // Trigger reload saat filter bulan diubah
         $('#filter_bulan').on('change', function() {
+            table.ajax.reload();
+        });
+
+        // Trigger reload saat filter status afiliasi diubah
+        $('#filter-status-afiliasi').on('change', function() {
             table.ajax.reload();
         });
 

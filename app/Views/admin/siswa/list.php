@@ -138,6 +138,13 @@
                                 <option value="2">Data Tidak Lengkap</option>
                             </select>
                         </div>
+                        <div class="w-100 mw-150px">
+                            <select id="filter-status-afiliasi" class="form-select form-select-solid" data-control="select2" data-hide-search="true" data-placeholder="Status">
+                                <option value="0">Tidak Afiliasi</option>
+                                <option value="1">Afiliasi</option>
+                                <option value="2">Semua Data</option>
+                            </select>
+                        </div>
 
                         <a href="javascript:void(0)" class="btn btn-light-success" data-bs-toggle="modal" data-bs-target="#modal_import_siswa" data-bs-placement="top" title="Import data siswa">
                             <i class="ki-duotone ki-badge fs-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i>
@@ -279,7 +286,7 @@
                             <?php endforeach; ?>
                         </select>
                     </div>
-                    
+
                     <div class="fv-row mb-7">
                         <label class="required fs-6 fw-semibold form-label mb-2">File Excel / CSV</label>
                         <input type="file" id="file_excel" class="form-control form-control-solid" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" required />
@@ -301,8 +308,8 @@
                         <button type="reset" class="btn btn-light me-3" data-bs-dismiss="modal" id="btn-cancel-import">Batal</button>
                         <button type="submit" class="btn btn-primary" id="btn-submit-import">
                             <span class="indicator-label">Mulai Import</span>
-                            <span class="indicator-progress">Memproses file... 
-                            <span class="spinner-border spinner-border-sm align-middle ms-2"></span></span>
+                            <span class="indicator-progress">Memproses file...
+                                <span class="spinner-border spinner-border-sm align-middle ms-2"></span></span>
                         </button>
                     </div>
                 </form>
@@ -341,164 +348,172 @@ function renderDetailRow($label, $id, $col = 6)
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <script>
-$(document).ready(function() {
-    let globalErrorList = [];
-    let totalSuccess = 0;
-    let totalFailed = 0;
+    $(document).ready(function() {
+        let globalErrorList = [];
+        let totalSuccess = 0;
+        let totalFailed = 0;
 
-    $('#form_import_excel').on('submit', function(e) {
-        e.preventDefault();
-        
-        let fileInput = document.getElementById('file_excel');
-        let idpaket = $('#import_idpaket').val();
-        let idafiliasi = $('#import_idafiliasi').val();
+        $('#form_import_excel').on('submit', function(e) {
+            e.preventDefault();
 
-        if (!fileInput.files.length) {
-            Swal.fire("Error", "Pilih file excel/csv terlebih dahulu", "error");
-            return;
-        }
+            let fileInput = document.getElementById('file_excel');
+            let idpaket = $('#import_idpaket').val();
+            let idafiliasi = $('#import_idafiliasi').val();
 
-        let file = fileInput.files[0];
-        let reader = new FileReader();
-
-        // UI Loading
-        $('#btn-submit-import').attr('data-kt-indicator', 'on').prop('disabled', true);
-        $('#btn-cancel-import, #btn-close-modal').prop('disabled', true);
-
-        reader.onload = function(e) {
-            let data = new Uint8Array(e.target.result);
-            let workbook = XLSX.read(data, {type: 'array'});
-            let firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-            let excelRows = XLSX.utils.sheet_to_json(firstSheet, {defval: ""}); // Convert to JSON
-
-            if (excelRows.length === 0) {
-                Swal.fire("Error", "File kosong atau format salah.", "error");
-                resetImportUI();
+            if (!fileInput.files.length) {
+                Swal.fire("Error", "Pilih file excel/csv terlebih dahulu", "error");
                 return;
             }
 
-            // Normalisasi nama key (mengubah ke huruf kecil dan menghapus spasi)
-            let normalizedRows = excelRows.map(row => {
-                let newRow = {};
-                for (let key in row) {
-                    newRow[key.toLowerCase().replace(/\s/g, '')] = row[key];
-                }
-                return newRow;
-            });
+            let file = fileInput.files[0];
+            let reader = new FileReader();
 
-            // Validasi Header Excel
-            let firstRow = normalizedRows[0];
-            if (!firstRow.hasOwnProperty('nama') || !firstRow.hasOwnProperty('email')) {
-                Swal.fire("Error", "Format kolom salah! Pastikan ada kolom: nama, email", "error");
-                resetImportUI();
-                return;
-            }
+            // UI Loading
+            $('#btn-submit-import').attr('data-kt-indicator', 'on').prop('disabled', true);
+            $('#btn-cancel-import, #btn-close-modal').prop('disabled', true);
 
-            // Reset Counter & Tampilkan Progress
-            globalErrorList = [];
-            totalSuccess = 0;
-            totalFailed = 0;
-            $('#import_progress_container').removeClass('d-none');
-            
-            // Proses Chunking (Membagi data misal 20 data per request agar email & server aman)
-            let chunkSize = 20; 
-            let chunks = [];
-            for (let i = 0; i < normalizedRows.length; i += chunkSize) {
-                chunks.push(normalizedRows.slice(i, i + chunkSize));
-            }
-
-            processChunk(chunks, 0, idpaket, idafiliasi, normalizedRows.length);
-        };
-
-        reader.readAsArrayBuffer(file);
-    });
-
-    // FUNGSI REKURSIF UNTUK MENGIRIM DATA PER KELOMPOK 
-    function processChunk(chunks, index, idpaket, idafiliasi, totalRecords) {
-        if (index >= chunks.length) {
-            finishImport();
-            return;
-        }
-
-        let currentDataProcessed = Math.min((index + 1) * chunks[0].length, totalRecords);
-        let progressPercent = Math.round((currentDataProcessed / totalRecords) * 100);
-        
-        $('#import_progress_text').text(`${currentDataProcessed} / ${totalRecords}`);
-        $('#import_progress_bar').css('width', `${progressPercent}%`);
-
-        $.ajax({
-            url: "<?= base_url('sw-admin/siswa/processImportBatch') ?>",
-            type: "POST",
-            data: {
-                [csrfName]: csrfHash, // Pastikan variabel csrf global Anda sudah ada
-                idpaket: idpaket,
-                idafiliasi: idafiliasi,
-                data_siswa: JSON.stringify(chunks[index])
-            },
-            dataType: "JSON",
-            success: function(response) {
-                if (response.csrf_hash) {
-                    csrfHash = response.csrf_hash;
-                    $('input[name="' + csrfName + '"]').val(csrfHash);
-                }
-
-                totalSuccess += response.success_count;
-                totalFailed += response.error_count;
-                if(response.errors.length > 0) {
-                    globalErrorList = globalErrorList.concat(response.errors);
-                }
-
-                // Lanjut ke antrian berikutnya
-                processChunk(chunks, index + 1, idpaket, idafiliasi, totalRecords);
-            },
-            error: function() {
-                // Jika server RTO, anggap chunk ini gagal, lalu lanjut chunk berikutnya
-                totalFailed += chunks[index].length;
-                chunks[index].forEach(errRow => {
-                    globalErrorList.push({ nama: errRow.nama, email: errRow.email, reason: "Server Error / Timeout" });
+            reader.onload = function(e) {
+                let data = new Uint8Array(e.target.result);
+                let workbook = XLSX.read(data, {
+                    type: 'array'
                 });
-                processChunk(chunks, index + 1, idpaket, idafiliasi, totalRecords);
-            }
+                let firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                let excelRows = XLSX.utils.sheet_to_json(firstSheet, {
+                    defval: ""
+                }); // Convert to JSON
+
+                if (excelRows.length === 0) {
+                    Swal.fire("Error", "File kosong atau format salah.", "error");
+                    resetImportUI();
+                    return;
+                }
+
+                // Normalisasi nama key (mengubah ke huruf kecil dan menghapus spasi)
+                let normalizedRows = excelRows.map(row => {
+                    let newRow = {};
+                    for (let key in row) {
+                        newRow[key.toLowerCase().replace(/\s/g, '')] = row[key];
+                    }
+                    return newRow;
+                });
+
+                // Validasi Header Excel
+                let firstRow = normalizedRows[0];
+                if (!firstRow.hasOwnProperty('nama') || !firstRow.hasOwnProperty('email')) {
+                    Swal.fire("Error", "Format kolom salah! Pastikan ada kolom: nama, email", "error");
+                    resetImportUI();
+                    return;
+                }
+
+                // Reset Counter & Tampilkan Progress
+                globalErrorList = [];
+                totalSuccess = 0;
+                totalFailed = 0;
+                $('#import_progress_container').removeClass('d-none');
+
+                // Proses Chunking (Membagi data misal 20 data per request agar email & server aman)
+                let chunkSize = 20;
+                let chunks = [];
+                for (let i = 0; i < normalizedRows.length; i += chunkSize) {
+                    chunks.push(normalizedRows.slice(i, i + chunkSize));
+                }
+
+                processChunk(chunks, 0, idpaket, idafiliasi, normalizedRows.length);
+            };
+
+            reader.readAsArrayBuffer(file);
         });
-    }
 
-    function finishImport() {
-        resetImportUI();
-        $('#modal_import_siswa').modal('hide');
+        // FUNGSI REKURSIF UNTUK MENGIRIM DATA PER KELOMPOK 
+        function processChunk(chunks, index, idpaket, idafiliasi, totalRecords) {
+            if (index >= chunks.length) {
+                finishImport();
+                return;
+            }
 
-        let msgHtml = `<b>Berhasil:</b> ${totalSuccess} data<br><b>Gagal:</b> ${totalFailed} data`;
-        
-        if (globalErrorList.length > 0) {
-            let errorTable = `<div style="max-height: 200px; overflow-y: auto; margin-top: 15px; text-align: left;">
+            let currentDataProcessed = Math.min((index + 1) * chunks[0].length, totalRecords);
+            let progressPercent = Math.round((currentDataProcessed / totalRecords) * 100);
+
+            $('#import_progress_text').text(`${currentDataProcessed} / ${totalRecords}`);
+            $('#import_progress_bar').css('width', `${progressPercent}%`);
+
+            $.ajax({
+                url: "<?= base_url('sw-admin/siswa/processImportBatch') ?>",
+                type: "POST",
+                data: {
+                    [csrfName]: csrfHash, // Pastikan variabel csrf global Anda sudah ada
+                    idpaket: idpaket,
+                    idafiliasi: idafiliasi,
+                    data_siswa: JSON.stringify(chunks[index])
+                },
+                dataType: "JSON",
+                success: function(response) {
+                    if (response.csrf_hash) {
+                        csrfHash = response.csrf_hash;
+                        $('input[name="' + csrfName + '"]').val(csrfHash);
+                    }
+
+                    totalSuccess += response.success_count;
+                    totalFailed += response.error_count;
+                    if (response.errors.length > 0) {
+                        globalErrorList = globalErrorList.concat(response.errors);
+                    }
+
+                    // Lanjut ke antrian berikutnya
+                    processChunk(chunks, index + 1, idpaket, idafiliasi, totalRecords);
+                },
+                error: function() {
+                    // Jika server RTO, anggap chunk ini gagal, lalu lanjut chunk berikutnya
+                    totalFailed += chunks[index].length;
+                    chunks[index].forEach(errRow => {
+                        globalErrorList.push({
+                            nama: errRow.nama,
+                            email: errRow.email,
+                            reason: "Server Error / Timeout"
+                        });
+                    });
+                    processChunk(chunks, index + 1, idpaket, idafiliasi, totalRecords);
+                }
+            });
+        }
+
+        function finishImport() {
+            resetImportUI();
+            $('#modal_import_siswa').modal('hide');
+
+            let msgHtml = `<b>Berhasil:</b> ${totalSuccess} data<br><b>Gagal:</b> ${totalFailed} data`;
+
+            if (globalErrorList.length > 0) {
+                let errorTable = `<div style="max-height: 200px; overflow-y: auto; margin-top: 15px; text-align: left;">
                               <table class="table table-bordered table-sm fs-7">
                                 <thead class="bg-light"><tr><th>Nama</th><th>Email</th><th>Alasan</th></tr></thead><tbody>`;
-            globalErrorList.forEach(e => {
-                errorTable += `<tr><td>${e.nama}</td><td>${e.email}</td><td class="text-danger">${e.reason}</td></tr>`;
+                globalErrorList.forEach(e => {
+                    errorTable += `<tr><td>${e.nama}</td><td>${e.email}</td><td class="text-danger">${e.reason}</td></tr>`;
+                });
+                errorTable += `</tbody></table></div>`;
+                msgHtml += errorTable;
+            }
+
+            Swal.fire({
+                title: "Proses Import Selesai!",
+                html: msgHtml,
+                icon: totalFailed > 0 ? "warning" : "success",
+                width: '600px'
+            }).then(() => {
+                // Reload Datatable
+                $('#datatable-list').DataTable().ajax.reload();
             });
-            errorTable += `</tbody></table></div>`;
-            msgHtml += errorTable;
         }
 
-        Swal.fire({
-            title: "Proses Import Selesai!",
-            html: msgHtml,
-            icon: totalFailed > 0 ? "warning" : "success",
-            width: '600px'
-        }).then(() => {
-            // Reload Datatable
-            $('#datatable-list').DataTable().ajax.reload();
-        });
-    }
-
-    function resetImportUI() {
-        $('#btn-submit-import').removeAttr('data-kt-indicator').prop('disabled', false);
-        $('#btn-cancel-import, #btn-close-modal').prop('disabled', false);
-        $('#import_progress_container').addClass('d-none');
-        $('#form_import_excel')[0].reset();
-        $('#import_idpaket').val(null).trigger('change');
-        $('#import_idafiliasi').val(null).trigger('change');
-    }
-});
+        function resetImportUI() {
+            $('#btn-submit-import').removeAttr('data-kt-indicator').prop('disabled', false);
+            $('#btn-cancel-import, #btn-close-modal').prop('disabled', false);
+            $('#import_progress_container').addClass('d-none');
+            $('#form_import_excel')[0].reset();
+            $('#import_idpaket').val(null).trigger('change');
+            $('#import_idafiliasi').val(null).trigger('change');
+        }
+    });
 </script>
 <script>
     var chartInstance = null; // Menyimpan instance chart agar bisa di-update
@@ -519,6 +534,7 @@ $(document).ready(function() {
                 data: function(d) {
                     d[csrfName] = csrfHash;
                     d.status_filter = $('#filter-status').val();
+                    d.status_filter_afiliasi = $('#filter-status-afiliasi').val();
                 },
                 dataSrc: function(json) {
                     if (json.csrf_hash) {
@@ -567,20 +583,20 @@ $(document).ready(function() {
                     className: 'text-end',
                     render: function(row) {
                         return `
-                        <a href="#" class="btn btn-sm btn-light btn-flex btn-center btn-active-light-primary" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
-                            Aksi <i class="ki-duotone ki-down fs-5 ms-1"></i>
-                        </a>
-                        <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-150px py-4" data-kt-menu="true">
-                            <div class="menu-item px-3"><a href="javascript:void(0);" class="menu-link px-3 detail-siswa" data-siswa="${row.id_siswa_enc}" data-bs-toggle="modal" data-bs-target="#detail_siswa">Detail</a></div>
-                            <div class="menu-item px-3"><a href="<?= base_url('sw-admin/siswa/edit') ?>/${row.id_siswa_enc}" class="menu-link px-3">Edit</a></div>
-                            <div class="menu-item px-3"><a href="<?= base_url('sw-admin/siswa/sertifikat') ?>/${row.id_siswa_enc}" class="menu-link px-3">Sertifikat</a></div>
-                            <div class="menu-item px-3"><a href="<?= base_url('sw-admin/siswa/ujian') ?>/${row.id_siswa_enc}" class="menu-link px-3">List Ujian</a></div>
-                            <div class="menu-item px-3"><a href="<?= base_url('sw-admin/siswa/materi') ?>/${row.id_siswa_enc}" class="menu-link px-3">List Materi</a></div>
-                            ${row.totalUjian <= 0 ? `
-                                <div class="separator mt-3 opacity-75"></div>
-                                <div class="menu-item px-3"><a href="<?= base_url('sw-admin/siswa/delete') ?>/${row.id_siswa_enc}" class="menu-link px-3 text-danger btn-hapus">Hapus</a></div>
-                            ` : ''}
-                        </div>`;
+                <a href="#" class="btn btn-sm btn-light btn-flex btn-center btn-active-light-primary" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+                    Aksi <i class="ki-duotone ki-down fs-5 ms-1"></i>
+                </a>
+                <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-150px py-4" data-kt-menu="true">
+                    <div class="menu-item px-3"><a href="javascript:void(0);" class="menu-link px-3 detail-siswa" data-siswa="${row.id_siswa_enc}" data-bs-toggle="modal" data-bs-target="#detail_siswa">Detail</a></div>
+                    <div class="menu-item px-3"><a href="<?= base_url('sw-admin/siswa/edit') ?>/${row.id_siswa_enc}" class="menu-link px-3">Edit</a></div>
+                    <div class="menu-item px-3"><a href="<?= base_url('sw-admin/siswa/sertifikat') ?>/${row.id_siswa_enc}" class="menu-link px-3">Sertifikat</a></div>
+                    <div class="menu-item px-3"><a href="<?= base_url('sw-admin/siswa/ujian') ?>/${row.id_siswa_enc}" class="menu-link px-3">List Ujian</a></div>
+                    <div class="menu-item px-3"><a href="<?= base_url('sw-admin/siswa/materi') ?>/${row.id_siswa_enc}" class="menu-link px-3">List Materi</a></div>
+                    ${row.totalUjian <= 0 ? `
+                        <div class="separator mt-3 opacity-75"></div>
+                        <div class="menu-item px-3"><a href="<?= base_url('sw-admin/siswa/delete') ?>/${row.id_siswa_enc}" class="menu-link px-3 text-danger btn-hapus">Hapus</a></div>
+                    ` : ''}
+                </div>`;
                     }
                 }
             ],
@@ -594,6 +610,9 @@ $(document).ready(function() {
             table.search(this.value).draw();
         });
         $('#filter-status').on('change', function() {
+            table.ajax.reload();
+        });
+        $('#filter-status-afiliasi').on('change', function() {
             table.ajax.reload();
         });
 

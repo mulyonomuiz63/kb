@@ -8,7 +8,7 @@ class SiswaModel extends Model
 {
     protected $table            = 'siswa';
     protected $primaryKey       = 'id_siswa';
-    protected $allowedFields    = ['no_induk_siswa', 'nama_siswa', 'email', 'password', 'jenis_kelamin', 'kelas', 'role', 'is_active', 'date_created', 'avatar', 'nik', 'tempat_lahir', 'tgl_lahir', 'alamat_ktp', 'alamat_domisili', 'provinsi', 'kota', 'kecamatan', 'kelurahan', 'hp', 'profesi', 'kantor', 'nama_kantor','bidang_usaha', 'alamat_kantor', 'riwayat_pekerjaan','status','role_access','idafiliasi'];
+    protected $allowedFields    = ['no_induk_siswa', 'nama_siswa', 'email', 'password', 'jenis_kelamin', 'kelas', 'role', 'is_active', 'date_created', 'avatar', 'nik', 'tempat_lahir', 'tgl_lahir', 'alamat_ktp', 'alamat_domisili', 'provinsi', 'kota', 'kecamatan', 'kelurahan', 'hp', 'profesi', 'kantor', 'nama_kantor', 'bidang_usaha', 'alamat_kantor', 'riwayat_pekerjaan', 'status', 'role_access', 'idafiliasi'];
 
     public function get_datatables($column_order, $column_search, $order)
     {
@@ -27,31 +27,40 @@ class SiswaModel extends Model
         return $builder->countAllResults();
     }
 
-    // Fungsi bantu (Private) agar tidak duplikasi kode query
     private function _get_datatables_query($column_order, $column_search, $order)
     {
         $request = \Config\Services::request();
         $builder = $this->db->table($this->table);
 
-        // --- MULAI PERBAIKAN: Subquery Select ---
-        $builder->select("{$this->table}.*");
-        
-        // Subquery 1: Total Ujian
-        $builder->select("(SELECT COUNT(DISTINCT mapel) FROM ujian WHERE ujian.id_siswa = {$this->table}.id_siswa AND ujian.kelas = {$this->table}.kelas) AS total_ujian", false);
-        
-        // Subquery 2: Deteksi Sedang Ujian (Status 'U')
-        // Sesuaikan 'ujian.status' dengan nama kolom status di tabel ujian Anda (misal: status_ujian)
+        $builder->select("{$this->table}.*, afiliasi.nama_afiliasi");
+        $builder->join('afiliasi', "afiliasi.idafiliasi = {$this->table}.idafiliasi", 'left');
+
+        // Subquery 1: Total Lulus (Nilai >= 60)
+        $builder->select("(SELECT COUNT(DISTINCT mapel) FROM ujian WHERE ujian.id_siswa = {$this->table}.id_siswa AND ujian.kelas = {$this->table}.kelas AND ujian.nilai >= 60) AS total_lulus", false);
+
+        // Subquery 2: Total Sertifikat (Semua Ujian)
+        $builder->select("(SELECT COUNT(DISTINCT mapel) FROM ujian WHERE ujian.id_siswa = {$this->table}.id_siswa AND ujian.kelas = {$this->table}.kelas) AS total_sertifikat", false);
+
+        // Subquery 3: Sedang Ujian
         $builder->select("(SELECT COUNT(id_ujian) FROM ujian WHERE ujian.id_siswa = {$this->table}.id_siswa AND ujian.status = 'U') AS sedang_ujian", false);
-        // --- AKHIR PERBAIKAN ---
 
         // FILTER STATUS
         $status = $request->getPost('status_filter');
         if ($status !== '' && $status !== null) {
-            if($status == '2'){
-                $builder->where('is_active', '1');
-                $builder->where('status', 'B');
-            }else{
-                $builder->where('is_active', $status);
+            if ($status == '2') {
+                $builder->where("{$this->table}.is_active", '1');
+                $builder->where("{$this->table}.status", 'B');
+            } else {
+                $builder->where("{$this->table}.is_active", $status);
+            }
+        }
+
+        $status_afiliasi = $request->getPost('status_filter_afiliasi');
+        if ($status_afiliasi === '0') {
+            $builder->where("{$this->table}.idafiliasi", null);
+        } else {
+            if ($status_afiliasi != '2') {
+                $builder->where("{$this->table}.idafiliasi", $status_afiliasi);
             }
         }
 
@@ -69,18 +78,15 @@ class SiswaModel extends Model
             $i++;
         }
 
-        // --- MULAI PERBAIKAN: Order By ---
+        // ORDER BY (Menggantikan fungsi usort)
         if (isset($_POST['order'])) {
             $builder->orderBy($column_order[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
         } else {
-            // 1. Prioritas Utama: Sedang Ujian ada di paling atas
+            // Sorting diproses langsung oleh database
             $builder->orderBy('sedang_ujian', 'DESC');
-            // 2. Prioritas Kedua: Total ujian terbanyak
-            $builder->orderBy('total_ujian', 'DESC');
-            // 3. Prioritas Ketiga: Nama abjad terkecil
+            $builder->orderBy('total_sertifikat', 'DESC');
             $builder->orderBy("{$this->table}.nama_siswa", 'ASC');
         }
-        // --- AKHIR PERBAIKAN ---
 
         return $builder;
     }
