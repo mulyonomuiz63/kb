@@ -4,6 +4,7 @@ namespace App\Controllers;
 use App\Models\QuizModel;
 use App\Models\HasilModel;
 use App\Libraries\SeoHelper;
+use Config\Database;
 
 class Quiz extends BaseController
 {
@@ -40,6 +41,7 @@ class Quiz extends BaseController
                 $schemaBreadcrumb = $this->seo->breadcrumbSchema($breadcrumbItems);
                 $schema = $schemaBreadcrumb;
                 $data['schema'] = $schema;
+                $data['db'] =  Database::connect();
                 return view('landing/quiz', $data);
             }else{
                 session()->setFlashdata('pesan', "
