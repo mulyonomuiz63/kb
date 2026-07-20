@@ -51,7 +51,20 @@
                                 <?php foreach ($review as $s) : ?>
                                     <tr>
                                         <td>
-                                            <span class="text-gray-800 fw-bold fs-6"><?= $s->nama_siswa; ?></span>
+                                            <div class="d-flex align-items-center">
+                                                <i class="ki-duotone ki-element-11 fs-4 text-muted me-2">
+                                                    <span class="path1"></span>
+                                                    <span class="path2"></span>
+                                                    <span class="path3"></span>
+                                                    <span class="path4"></span>
+                                                </i>
+                                                <div class="d-flex flex-column">
+                                                    <span class="fw-bold"><?= $s->nama_siswa; ?></span>
+                                                    <span class="text-muted fs-7 fw-normal mt-1">
+                                                        Direview: <?= date('d M Y, H:i', strtotime($s->created_at)); ?>
+                                                    </span>
+                                                </div>
+                                            </div>
                                         </td>
                                         <td class="text-wrap text-muted">
                                             <?= $s->komentar; ?>

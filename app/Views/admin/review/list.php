@@ -29,10 +29,24 @@
                             <tbody id="sortable-paket" class="fw-semibold text-gray-600">
                                 <?php foreach ($paket as $s) : ?>
                                     <tr data-id="<?= $s->idpaket ?>" style="cursor: grab;">
-                                        <td class="text-gray-800 fw-bold text-wrap pl-3">
+                                        <td class="text-gray-800 text-wrap pl-3">
                                             <div class="d-flex align-items-center">
-                                                <i class="ki-duotone ki-element-11 fs-4 text-muted me-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i>
-                                                <?= $s->nama_paket; ?>
+                                                <i class="ki-duotone ki-element-11 fs-4 text-muted me-2">
+                                                    <span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span>
+                                                </i>
+
+                                                <!-- Wrapper Nama & Info -->
+                                                <div class="d-flex flex-column">
+                                                    <span class="fw-bold"><?= $s->nama_paket; ?></span>
+
+                                                    <!-- Info Rating & Jumlah Reviewer -->
+                                                    <div class="text-muted fs-7 fw-normal mt-1 d-flex align-items-center">
+                                                        <span class="text-warning me-1">★</span>
+                                                        <span class="text-dark fw-bold me-2"><?= !empty($s->rata_rating) ? $s->rata_rating : '0.0'; ?></span>
+                                                        <span>(<?= $s->jumlah_reviewer; ?> Ulasan)</span>
+                                                    </div>
+                                                </div>
+
                                             </div>
                                         </td>
                                         <td class="text-end">

@@ -33,16 +33,19 @@ class ReviewController extends BaseController
                 ['title' => 'Data Review Paket', 'url' => '#'],
             ];
             // MASTER DATA
-            $data['paket'] = $this->paketModel
-                ->join('diskon b', 'b.iddiskon = paket.iddiskon', 'left')
-                // Penulisan yang benar: null tanpa tanda kutip
+            $data['paket'] = $this->db->table('review_ujian d')
+                ->select('p.idpaket, p.nama_paket, p.slug, p.v_ujian, p.v_materi, p.status, p.sort_order, COUNT(d.rating) as jumlah_reviewer, ROUND(AVG(d.rating), 1) as rata_rating')
+                ->join('ujian_master c', 'c.kode_ujian = d.kode_ujian')
+                ->join('detail_paket b', 'b.id_ujian = c.id_ujian')
+                ->join('paket p', 'p.idpaket = b.idpaket')
                 ->where([
-                    'paket.deleted_at'  => null,
-                    'paket.v_ujian'  => '1',
-                    'paket.v_materi' => '0',
-                    'paket.status'        => '1'
+                    'p.deleted_at'  => null,
+                    'p.v_ujian'     => '1',
+                    'p.v_materi'    => '0',
+                    'p.status'      => '1'
                 ])
-                ->orderBy('paket.sort_order', 'ASC')
+                ->orderBy('p.sort_order', 'ASC')
+                ->groupBy('p.idpaket') // Mengelompokkan berdasarkan idpaket untuk menghindari duplikasi
                 ->get()->getResultObject();
 
             return view('admin/review/list', $data);
