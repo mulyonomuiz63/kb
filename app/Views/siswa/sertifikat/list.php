@@ -70,14 +70,41 @@
                         </div>
                     </div>
                     <div class="card-toolbar">
+                        <?php
+                        $idsiswa = session()->get('id');
+                        $total_materi_wajib = 8;
+                        $cekReviewSiswa = $db->query("
+                            SELECT COUNT(DISTINCT kode_ujian) as jumlah_direview 
+                            FROM review_ujian 
+                            WHERE id_siswa = '$idsiswa'
+                        ")->getRow();
+
+                        $jumlah_sudah_review = $cekReviewSiswa->jumlah_direview;
+
+                        // Tentukan status apakah bisa download atau tidak
+                        $bisa_download = ($jumlah_sudah_review >= $total_materi_wajib);
+                        ?>
                         <?php if ($total != 0 && $totalSertifikat >= $total): ?>
-                            <a href="javascript:void(0)"
-                                data-bs-toggle="modal"
-                                data-bs-target="#sertifikat_cetak_modal"
-                                data-sertifikat_all="<?= base_url("sw-siswa/sertifikat/lihat-sertifikat-brevet/" . encrypt_url(session()->get('id'))) ?>"
-                                class="btn btn-primary btn-download-glow fw-bold sertifikat_all_cetak">
-                                <i class="bi bi-patch-check-fill fs-4 me-2"></i> Unduh Sertifikat Brevet AB (Lengkap)
-                            </a>
+                            <?php if ($bisa_download): ?>
+                                <!-- Tombol Aktif (Jika 8 materi sudah direview) -->
+                                <a href="javascript:void(0)"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#sertifikat_cetak_modal"
+                                    data-sertifikat_all="<?= base_url("sw-siswa/sertifikat/lihat-sertifikat-brevet/" . encrypt_url($idsiswa)) ?>"
+                                    class="btn btn-primary btn-download-glow fw-bold sertifikat_all_cetak">
+                                    <i class="bi bi-patch-check-fill fs-4 me-2"></i> Unduh Sertifikat Brevet AB (Lengkap)
+                                </a>
+
+                            <?php else: ?>
+                                <!-- Tombol Terkunci (Jika ada yang belum direview) -->
+                                <a href="#"
+                                    id="btn-sertifikat-terkunci"
+                                    class="btn btn-secondary fw-bold"
+                                    data-sudah="<?= $jumlah_sudah_review ?? 0 ?>"
+                                    data-total="<?= $total_materi_wajib ?? 8 ?>">
+                                    <i class="bi bi-lock-fill fs-4 me-2"></i> Unduh Sertifikat (Terkunci)
+                                </a>
+                            <?php endif; ?>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -357,6 +384,35 @@
             });
             $('#ratingDesc').text(starDescriptions[val]).addClass('text-success').removeClass('text-warning');
         });
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const btnTerkunci = document.getElementById("btn-sertifikat-terkunci");
+
+        if (btnTerkunci) {
+            btnTerkunci.addEventListener("click", function(e) {
+                e.preventDefault();
+
+                // Ambil data dari atribut tombol HTML
+                let jumlahSudah = this.getAttribute("data-sudah");
+                let jumlahTotal = this.getAttribute("data-total");
+                let pesan = `Sertifikat belum bisa diunduh. Anda baru mengisi feedback untuk ${jumlahSudah} dari ${jumlahTotal} materi.`;
+
+                // Cek apakah custom global 'Swals' sudah ter-load
+                if (typeof Swals !== 'undefined') {
+                    Swals.alert('Perhatian', pesan, 'warning');
+                }
+                // Fallback ke bawaan SweetAlert2 jika custom Swals gagal
+                else if (typeof Swal !== 'undefined') {
+                    Swal.fire('Perhatian', pesan, 'warning');
+                }
+                // Fallback terakhir jika library JS belum ter-load sama sekali
+                else {
+                    alert(pesan);
+                }
+            });
+        }
     });
 </script>
 <?= $this->endSection(); ?>
