@@ -1275,7 +1275,7 @@ class SiswaController extends BaseController
                 </div>';
 
                 // Kirim Email
-                // $this->emailer->send($emailClean, $subject, $message);
+                $this->emailer->send($emailClean, $subject, $message);
 
                 // Jika semua lancar, Commit Database
                 $db->transCommit();
