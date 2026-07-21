@@ -146,14 +146,14 @@ class TransaksiController extends BaseController
                         $query->where('transaksi.created_at <=', $end_date);
                     }
                 }
-                
+
                 // ==========================================
                 // IMPLEMENTASI FILTER PAKET (QUERY 1)
                 // ==========================================
                 if ($filter_paket == '1') {
                     $query->whereIn('c.v_ujian', ['all', '1']);
                 } elseif ($filter_paket == '2') {
-                    $query->whereIn('c.v_materi', ['all','1']);
+                    $query->whereIn('c.v_materi', ['all', '1']);
                 } elseif ($filter_paket == '3') {
                     $query->like('c.jenis_paket', '"ikh"');
                 }
@@ -205,14 +205,14 @@ class TransaksiController extends BaseController
                         $queryTotal->where('transaksi.created_at <=', $end_date);
                     }
                 }
-                
+
                 // ==========================================
                 // IMPLEMENTASI FILTER PAKET (QUERY TOTAL)
                 // ==========================================
                 if ($filter_paket == '1') {
                     $query->whereIn('c.v_ujian', ['all', '1']);
                 } elseif ($filter_paket == '2') {
-                    $query->whereIn('c.v_materi', ['all','1']);
+                    $query->whereIn('c.v_materi', ['all', '1']);
                 } elseif ($filter_paket == '3') {
                     $query->like('c.jenis_paket', '"ikh"');
                 }
@@ -756,5 +756,87 @@ class TransaksiController extends BaseController
             }
             echo "Proses selesai. Berhasil: $berhasil, Gagal: $gagal.";
         }
+    }
+
+    public function exportExcel()
+    {
+        // 1. Tangkap parameter filter yang dikirim dari frontend (sama persis dengan datatables)
+        $request         = $this->request;
+        $filter_bulan    = $request->getGet('filter_bulan_range');
+        $filter_paket    = $request->getGet('filter_paket');
+        $status_afiliasi = $request->getGet('filter_status_afiliasi');
+        $search          = $request->getGet('search'); // Jika ingin menghormati kata kunci pencarian aktif
+
+        // 2. Ambil builder dari model
+        $query = $this->transaksiModel->getBaseQuery();
+
+        // 3. Terapkan Filter Pencarian (Search)
+        if (!empty($search)) {
+            $query->groupStart()
+                ->like('b.nama_siswa', $search)
+                ->orLike('c.nama_paket', $search)
+                ->orLike('transaksi.idtransaksi', $search)
+                ->groupEnd();
+        }
+
+        // 4. Terapkan Filter Range Bulan (created_at)
+        if (!empty($filter_bulan)) {
+            $dates = explode(' - ', $filter_bulan);
+            if (count($dates) == 2) {
+                $start_date = trim($dates[0]) . '-01 00:00:00';
+                $end_date   = date('Y-m-t 23:59:59', strtotime(trim($dates[1]) . '-01'));
+
+                $query->where('transaksi.created_at >=', $start_date);
+                $query->where('transaksi.created_at <=', $end_date);
+            }
+        }
+
+        // 5. Terapkan Filter Paket
+        if ($filter_paket == '1') {
+            $query->whereIn('c.v_ujian', ['all', '1']);
+        } elseif ($filter_paket == '2') {
+            $query->whereIn('c.v_materi', ['all', '1']);
+        } elseif ($filter_paket == '3') {
+            $query->like('c.jenis_paket', '"ikh"');
+        }
+
+        // 6. Terapkan Filter Status Afiliasi
+        if ($status_afiliasi === '0') {
+            $query->where('b.idafiliasi IS NULL');
+        } elseif ($status_afiliasi === '1') {
+            $query->where('b.idafiliasi !=', null);
+        }
+
+        // Ambil data (urutkan berdasarkan data terbaru)
+        $dataTransaksi = $query->orderBy('transaksi.created_at', 'DESC')->get()->getResultObject();
+
+        // 7. Buat Header File CSV untuk Download Excel
+        $filename = 'Laporan_Pembayaran_' . date('Y-m-d_H-i-s') . '.csv';
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+        $output = fopen('php://output', 'w');
+
+        // Tambahkan BOM agar karakter UTF-8 terbaca sempurna di Microsoft Excel
+        fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+        fputcsv($output, ['No', 'Nama Peserta', 'Tanggal Pelatihan', 'Profesi'], ',');
+
+        // Masukkan Data Baris ke CSV: Ubah pemisah akhir menjadi ','
+        $no = 1;
+        foreach ($dataTransaksi as $row) {
+            $tglPelatihan = !empty($row->created_at) ? date('d-m-Y', strtotime($row->created_at)) : '-';
+
+            fputcsv($output, [
+                $no++,
+                $row->nama_siswa ?? '-',
+                $tglPelatihan,
+                $row->profesi ?? '-'
+            ], ',');
+        }
+
+        fclose($output);
+        exit;
     }
 }

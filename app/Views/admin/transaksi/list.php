@@ -82,45 +82,46 @@
             </div>
             <div class="card card-flush shadow-sm border-0">
 
-                <div class="card-header align-items-center py-5 gap-2 gap-md-5">
-                    <div class="card-title flex-column align-items-start">
-                        <span class="card-label fw-bold text-gray-800">Daftar Pembayaran</span>
-                        <span class="text-gray-500 mt-1 fw-semibold fs-7">Kelola dan validasi pembayaran peserta ujian secara real-time.</span>
-                        <div class="mt-3">
-                            <span class="badge badge-light-success fs-6 fw-bold px-4 py-2 border border-success border-dashed">
-                                Total Lunas: Rp <span id="ui_total_pendapatan">0</span>
+                <div class="card-header align-items-center py-4 gap-2">
+                    <!-- Judul & Total Lunas -->
+                    <div class="card-title flex-column align-items-start m-0">
+                        <span class="card-label fw-bold text-gray-800 fs-4">Daftar Pembayaran</span>
+                        <div class="d-flex align-items-center gap-2 mt-1">
+                            <span class="text-gray-500 fs-7">Kelola dan validasi pembayaran.</span>
+                            <span class="badge badge-light-success fw-bold fs-7 px-2 py-1">
+                                Rp <span id="ui_total_pendapatan">0</span>
                             </span>
                         </div>
                     </div>
 
-                    <div class="card-toolbar flex-row-fluid justify-content-end gap-5">
+                    <!-- Kumpulan Filter Minimalis & Rapi di Kanan -->
+                    <div class="card-toolbar flex-row-fluid justify-content-end gap-3 flex-wrap">
+
                         <?php
                         // Siapkan data bulan dan waktu saat ini untuk limitasi
                         $bulanSingkat = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
                         $currentYear = (int) date('Y');
-                        $currentMonth = (int) date('n'); // 1 - 12
+                        $currentMonth = (int) date('n');
                         ?>
 
-                        <!-- UI Input Trigger -->
-                        <div class="dropdown w-250px">
-                            <!-- HAPUS data-bs-* agar tidak bentrok dengan core Metronic -->
-                            <input type="text" id="filter_bulan_range" name="filter_bulan_range" class="form-control form-control-solid cursor-pointer" placeholder="Pilih Range Bulan..." readonly>
+                        <!-- 1. Input Range Bulan (Ringkas) -->
+                        <div class="dropdown">
+                            <input type="text" id="filter_bulan_range" name="filter_bulan_range" class="form-control form-control-sm form-control-solid cursor-pointer w-200px" placeholder="Range Bulan..." readonly>
 
-                            <div class="dropdown-menu p-5 shadow-sm" id="calendar_dropdown" data-cy="<?= $currentYear ?>" data-cm="<?= $currentMonth ?>" style="width: 500px; margin-top: 5px;">
+                            <div class="dropdown-menu p-4 shadow-sm" id="calendar_dropdown" data-cy="<?= $currentYear ?>" data-cm="<?= $currentMonth ?>" style="width: 460px; margin-top: 5px;">
                                 <div class="row">
-
                                     <!-- Sisi Kiri: Mulai Bulan -->
                                     <div class="col-6 border-end border-gray-200">
-                                        <div class="text-center fw-bolder text-gray-800 mb-4">Mulai</div>
-                                        <select id="start_year" class="form-select form-select-sm form-select-solid mb-4">
+                                        <div class="text-center fw-bold text-gray-700 fs-7 mb-2">Mulai</div>
+                                        <select id="start_year" class="form-select form-select-solid form-select-sm mb-3">
                                             <?php foreach ($listTahun as $row): ?>
                                                 <option value="<?= $row['tahun'] ?>"><?= $row['tahun'] ?></option>
                                             <?php endforeach; ?>
                                         </select>
-                                        <div class="row g-3" id="start_months">
+                                        <div class="row g-2" id="start_months">
                                             <?php foreach ($bulanSingkat as $index => $namaBulan): ?>
                                                 <div class="col-4">
-                                                    <div class="btn btn-sm btn-light w-100 start-month-btn" data-month="<?= $index + 1 ?>"><?= $namaBulan ?></div>
+                                                    <div class="btn btn-xs btn-light w-100 start-month-btn py-1 fs-7" data-month="<?= $index + 1 ?>"><?= $namaBulan ?></div>
                                                 </div>
                                             <?php endforeach; ?>
                                         </div>
@@ -128,50 +129,88 @@
 
                                     <!-- Sisi Kanan: Sampai Bulan -->
                                     <div class="col-6">
-                                        <div class="text-center fw-bolder text-gray-800 mb-4">Sampai</div>
-                                        <select id="end_year" class="form-select form-select-sm form-select-solid mb-4">
+                                        <div class="text-center fw-bold text-gray-700 fs-7 mb-2">Sampai</div>
+                                        <select id="end_year" class="form-select form-select-solid form-select-sm mb-3">
                                             <?php foreach ($listTahun as $row): ?>
                                                 <option value="<?= $row['tahun'] ?>"><?= $row['tahun'] ?></option>
                                             <?php endforeach; ?>
                                         </select>
-                                        <div class="row g-3" id="end_months">
+                                        <div class="row g-2" id="end_months">
                                             <?php foreach ($bulanSingkat as $index => $namaBulan): ?>
                                                 <div class="col-4">
-                                                    <div class="btn btn-sm btn-light w-100 end-month-btn" data-month="<?= $index + 1 ?>"><?= $namaBulan ?></div>
+                                                    <div class="btn btn-xs btn-light w-100 end-month-btn py-1 fs-7" data-month="<?= $index + 1 ?>"><?= $namaBulan ?></div>
                                                 </div>
                                             <?php endforeach; ?>
                                         </div>
                                     </div>
-
                                 </div>
 
-                                <div class="d-flex justify-content-end mt-5 pt-4 border-top border-gray-200">
-                                    <button type="button" class="btn btn-light btn-sm me-3" id="btn_clear_range">Reset</button>
-                                    <button type="button" class="btn btn-primary btn-sm" id="btn_apply_range">Terapkan</button>
+                                <div class="d-flex justify-content-end mt-4 pt-3 border-top border-gray-200">
+                                    <button type="button" class="btn btn-light btn-xs me-2" id="btn_clear_range">Reset</button>
+                                    <button type="button" class="btn btn-primary btn-xs" id="btn_apply_range">Terapkan</button>
                                 </div>
                             </div>
                         </div>
-                        <div class="w-100 mw-150px">
-                            <select id="paket-pelatihan" class="form-select form-select-solid" data-control="select2" data-hide-search="true" data-placeholder="Paket Pelaltihan">
+
+                        <!-- 2. Select Paket Pelatihan (Kompak) -->
+                        <div class="w-130px">
+                            <select id="paket-pelatihan" class="form-select form-select-sm form-select-solid" data-control="select2" data-hide-search="true" data-placeholder="Paket">
                                 <option value="0">Semua Paket</option>
                                 <option value="1">Ujian</option>
                                 <option value="2">Pelatihan</option>
                                 <option value="3">IKH</option>
                             </select>
                         </div>
-                        <div class="w-100 mw-150px">
-                            <select id="filter-status-afiliasi" class="form-select form-select-solid" data-control="select2" data-hide-search="true" data-placeholder="Status">
-                                <option value="0">Tidak Afiliasi</option>
+
+                        <!-- 3. Select Status Afiliasi (Kompak) -->
+                        <div class="w-130px">
+                            <select id="filter-status-afiliasi" class="form-select form-select-sm form-select-solid" data-control="select2" data-hide-search="true" data-placeholder="Status">
+                                <option value="0">Non-Afiliasi</option>
                                 <option value="1">Afiliasi</option>
-                                <option value="2">Semua Data</option>
+                                <option value="2">Semua Status</option>
                             </select>
                         </div>
-                        <div class="d-flex align-items-center position-relative my-1">
-                            <i class="ki-duotone ki-magnifier fs-3 position-absolute ms-4">
+
+                        <!-- 4. Search Box (Minimalis) -->
+                        <div class="position-relative">
+                            <i class="ki-duotone ki-magnifier fs-4 position-absolute translate-middle-y top-50 ms-3">
                                 <span class="path1"></span><span class="path2"></span>
                             </i>
-                            <input type="text" data-kt-transaksi-table-filter="search" class="form-control form-control-solid w-250px ps-12" placeholder="Cari Transaksi..." />
+                            <input type="text" data-kt-transaksi-table-filter="search" class="form-control form-control-sm form-control-solid w-200px ps-9" placeholder="Cari..." />
                         </div>
+
+                        <!-- TOMBOL & MENU EXPORT PROFESIONAL -->
+                        <div class="m-0">
+                            <button type="button" class="btn btn-sm btn-light-success fw-bold d-flex align-items-center gap-2 px-3" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+                                <i class="ki-duotone ki-file-down fs-2 m-0 text-success">
+                                    <span class="path1"></span><span class="path2"></span>
+                                </i>
+                                <span>Export</span>
+                                <i class="ki-duotone ki-down fs-5 m-0 text-muted"></i>
+                            </button>
+
+                            <!-- Menu Dropdown dengan Styling Profesional -->
+                            <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg-light-success fw-semibold fs-7 w-200px py-4 shadow-sm" data-kt-menu="true">
+                                <!-- Header Menu -->
+                                <div class="menu-item px-3">
+                                    <div class="menu-content text-muted pb-2 px-3 fs-8 text-uppercase fw-bold">Opsi Unduhan</div>
+                                </div>
+
+                                <!-- Pilihan Excel -->
+                                <div class="menu-item px-3">
+                                    <a href="#" class="menu-link px-3 py-2 rounded-2" id="export_excel">
+                                        <span class="menu-icon me-2">
+                                            <i class="ki-duotone ki-document fs-3 text-primary">
+                                                <span class="path1"></span><span class="path2"></span>
+                                            </i>
+                                        </span>
+                                        <span class="menu-title">CSV File (.csv)</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- END TOMBOL & MENU EXPORT -->
+
                     </div>
                 </div>
 
@@ -786,5 +825,29 @@
     } else {
         initCustomMonthPicker();
     }
+</script>
+<script>
+    document.getElementById('export_excel').addEventListener('click', function(e) {
+        e.preventDefault();
+
+        // Ambil nilai dari filter yang sedang aktif di layar
+        let filterBulan = document.getElementById('filter_bulan_range').value;
+        let filterPaket = document.getElementById('paket-pelatihan').value;
+        let statusAfiliasi = document.getElementById('filter-status-afiliasi').value;
+        
+        // Ambil teks dari kotak pencarian DataTables jika ada
+        let searchValue = document.querySelector('input[data-kt-transaksi-table-filter="search"]').value;
+
+        // Buat URL dengan parameter GET
+        let params = new URLSearchParams({
+            filter_bulan_range: filterBulan,
+            filter_paket: filterPaket,
+            filter_status_afiliasi: statusAfiliasi,
+            search: searchValue
+        });
+
+        // Arahkan browser ke route controller export
+        window.location.href = "<?= base_url('sw-admin/transaksi/export-excel') ?>?" + params.toString();
+    });
 </script>
 <?= $this->endSection(); ?>

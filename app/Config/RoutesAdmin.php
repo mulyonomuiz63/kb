@@ -226,6 +226,9 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
         $routes->get('approve-manual/(:any)', 'Admin\TransaksiController::approveManual/$1');
         $routes->get('hapus-transaksi-siswa/(:any)', 'Admin\TransaksiController::hapusTransaksiSiswa/$1');
 
+        //export data siswa
+        $routes->get('export-excel', 'Admin\TransaksiController::exportExcel');
+
         $routes->get('invoice/(:any)', 'InvoiceController::invoice/$1'); // Route untuk cetak invoice (modal)   
     });
 
