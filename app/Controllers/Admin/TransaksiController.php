@@ -151,11 +151,11 @@ class TransaksiController extends BaseController
                 // IMPLEMENTASI FILTER PAKET (QUERY 1)
                 // ==========================================
                 if ($filter_paket == '1') {
-                    $query->where('c.v_ujian', 'all');
+                    $query->whereIn('c.v_ujian', ['all', '1']);
                 } elseif ($filter_paket == '2') {
-                    $query->where('c.v_materi', 'all');
+                    $query->whereIn('c.v_materi', ['all','1']);
                 } elseif ($filter_paket == '3') {
-                    $query->whereIn('c.jenis_paket', ['ikh']);
+                    $query->like('c.jenis_paket', '"ikh"');
                 }
 
                 if ($status_afiliasi === '0') {
@@ -214,7 +214,7 @@ class TransaksiController extends BaseController
                 } elseif ($filter_paket == '2') {
                     $query->whereIn('c.v_materi', ['all','1']);
                 } elseif ($filter_paket == '3') {
-                    $query->whereIn('c.jenis_paket', ['ikh']);
+                    $query->like('c.jenis_paket', '"ikh"');
                 }
 
                 if ($status_afiliasi === '0') {
