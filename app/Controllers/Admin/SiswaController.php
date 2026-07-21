@@ -1116,7 +1116,9 @@ class SiswaController extends BaseController
         $db = \Config\Database::connect();
 
         $idpaket = $this->request->getPost('idpaket');
-        $idafiliasi = $this->request->getPost('idafiliasi');
+        $input_afiliasi = $this->request->getPost('idafiliasi');
+        $idafiliasi = !empty($input_afiliasi) ? $input_afiliasi : null;
+        $input_tanggal = $this->request->getPost('tanggal_input');
         $data_siswa = json_decode($this->request->getPost('data_siswa'), true);
 
         $success_count = 0;
@@ -1184,9 +1186,15 @@ class SiswaController extends BaseController
                 $this->siswaModel->insert($data_insert_siswa);
                 $id_siswa = $this->siswaModel->insertID();
 
-                // 2. Insert Data Transaksi
-                $tgl_mulai = date('Y-m-d H:i:s');
-                $tgl_exp   = date('Y-m-d H:i:s', strtotime('+ 1 day', strtotime($tgl_mulai)));
+                // 2. Cek apakah user memasukkan tanggal atau tidak
+                if (!empty($input_tanggal)) {
+                    $jam_sekarang = date('H:i:s');
+                    $tgl_mulai = date('Y-m-d H:i:s', strtotime($input_tanggal . ' ' . $jam_sekarang));
+                } else {
+                    $tgl_mulai = date('Y-m-d H:i:s');
+                }
+
+                $tgl_exp = date('Y-m-d H:i:s', strtotime('+ 1 day', strtotime($tgl_mulai)));
                 $dataInsertTrans = [
                     'idsiswa'        => $id_siswa,
                     'nominal'        => $dataPaket->nominal_paket,

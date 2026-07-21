@@ -277,14 +277,19 @@
                         </select>
                     </div>
                     <div class="fv-row mb-7">
-                        <label class="required fs-6 fw-semibold form-label mb-2">Pilih Afiliasi</label>
-                        <select name="idafiliasi" id="import_idafiliasi" class="form-select form-select-solid" data-control="select2" data-dropdown-parent="#modal_import_siswa" data-placeholder="Pilih Afiliasi" required>
+                        <label class="fs-6 fw-semibold form-label mb-2">Pilih Afiliasi</label>
+                        <select name="idafiliasi" id="import_idafiliasi" class="form-select form-select-solid" data-control="select2" data-dropdown-parent="#modal_import_siswa" data-placeholder="Pilih Afiliasi">
                             <option value=""></option>
                             <!-- NOTE: Looping data afiliasi Anda di sini -->
                             <?php foreach ($afiliasi as $rowafiliasi): ?>
                                 <option value="<?= $rowafiliasi->idafiliasi ?>"><?= $rowafiliasi->nama_afiliasi ?></option>
                             <?php endforeach; ?>
                         </select>
+                    </div> 
+
+                    <div class="fv-row mb-7">
+                        <label class="fs-6 fw-semibold form-label mb-2">Tanggal Transaksi</label>
+                        <input type="date" name="tanggal_input" id="import_tanggal_input" class="form-control form-control-solid" data-control="datepicker" />
                     </div>
 
                     <div class="fv-row mb-7">
@@ -359,6 +364,7 @@ function renderDetailRow($label, $id, $col = 6)
             let fileInput = document.getElementById('file_excel');
             let idpaket = $('#import_idpaket').val();
             let idafiliasi = $('#import_idafiliasi').val();
+            let tanggal_input = $('#import_tanggal_input').val();
 
             if (!fileInput.files.length) {
                 Swal.fire("Error", "Pilih file excel/csv terlebih dahulu", "error");
@@ -418,14 +424,14 @@ function renderDetailRow($label, $id, $col = 6)
                     chunks.push(normalizedRows.slice(i, i + chunkSize));
                 }
 
-                processChunk(chunks, 0, idpaket, idafiliasi, normalizedRows.length);
+                processChunk(chunks, 0, idpaket, idafiliasi, tanggal_input, normalizedRows.length);
             };
 
             reader.readAsArrayBuffer(file);
         });
 
         // FUNGSI REKURSIF UNTUK MENGIRIM DATA PER KELOMPOK 
-        function processChunk(chunks, index, idpaket, idafiliasi, totalRecords) {
+        function processChunk(chunks, index, idpaket, idafiliasi, tanggal_input, totalRecords) {
             if (index >= chunks.length) {
                 finishImport();
                 return;
@@ -444,6 +450,7 @@ function renderDetailRow($label, $id, $col = 6)
                     [csrfName]: csrfHash, // Pastikan variabel csrf global Anda sudah ada
                     idpaket: idpaket,
                     idafiliasi: idafiliasi,
+                    tanggal_input: tanggal_input,
                     data_siswa: JSON.stringify(chunks[index])
                 },
                 dataType: "JSON",
@@ -460,7 +467,7 @@ function renderDetailRow($label, $id, $col = 6)
                     }
 
                     // Lanjut ke antrian berikutnya
-                    processChunk(chunks, index + 1, idpaket, idafiliasi, totalRecords);
+                    processChunk(chunks, index + 1, idpaket, idafiliasi, tanggal_input, totalRecords);
                 },
                 error: function() {
                     // Jika server RTO, anggap chunk ini gagal, lalu lanjut chunk berikutnya
@@ -472,7 +479,7 @@ function renderDetailRow($label, $id, $col = 6)
                             reason: "Server Error / Timeout"
                         });
                     });
-                    processChunk(chunks, index + 1, idpaket, idafiliasi, totalRecords);
+                    processChunk(chunks, index + 1, idpaket, idafiliasi, tanggal_input, totalRecords);
                 }
             });
         }
@@ -512,6 +519,7 @@ function renderDetailRow($label, $id, $col = 6)
             $('#form_import_excel')[0].reset();
             $('#import_idpaket').val(null).trigger('change');
             $('#import_idafiliasi').val(null).trigger('change');
+            $('#import_tanggal_input').val(null);
         }
     });
 </script>
