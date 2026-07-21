@@ -72,6 +72,24 @@ class TransaksiController extends BaseController
             ->where('transaksi.status', 'S')
             ->get()->getRowArray();
 
+        $listTahun = $db->table('transaksi')
+            ->select('YEAR(created_at) AS tahun', false)
+            ->where('status', 'S')
+            ->groupBy('tahun')
+            ->orderBy('tahun', 'DESC') // Urutkan dari tahun terbaru
+            ->get()
+            ->getResultArray();
+
+        // Jika tabel kosong, set default ke tahun sekarang agar tidak error
+        if (empty($listTahun)) {
+            $listTahun = [['tahun' => date('Y')]];
+        }
+
+        //  ke dalam array data yang akan dikirim ke View
+        $data = [
+            'listTahun' => $listTahun
+        ];
+
         $data['breadcrumbs'] = [
             ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
             ['title' => 'List Transaksi', 'url' => '#'],
@@ -98,8 +116,9 @@ class TransaksiController extends BaseController
                 $search = $request->getPost('search')['value'];
 
                 // Tangkap Parameter Filter
-                $filter_bulan = $request->getPost('filter_bulan');
-                $status_afiliasi = $request->getPost('filter_status_afiliasi'); // UPGRADE: Tangkap filter afiliasi
+                $filter_bulan = $request->getPost('filter_bulan_range');
+                $status_afiliasi = $request->getPost('filter_status_afiliasi');
+                $filter_paket = $request->getPost('paket_pelatihan'); // UPGRADE: Tangkap filter paket
 
                 // ==========================================
                 // 1. BUILDER UNTUK MENAMPILKAN DATA TABEL
@@ -114,8 +133,29 @@ class TransaksiController extends BaseController
                         ->groupEnd();
                 }
 
+                // ==========================================
+                // IMPLEMENTASI FILTER RANGE BULAN (QUERY 1)
+                // ==========================================
                 if (!empty($filter_bulan)) {
-                    $query->like('transaksi.created_at', $filter_bulan, 'after');
+                    $dates = explode(' - ', $filter_bulan);
+                    if (count($dates) == 2) {
+                        $start_date = trim($dates[0]) . '-01 00:00:00';
+                        $end_date   = date('Y-m-t 23:59:59', strtotime(trim($dates[1]) . '-01'));
+
+                        $query->where('transaksi.created_at >=', $start_date);
+                        $query->where('transaksi.created_at <=', $end_date);
+                    }
+                }
+                
+                // ==========================================
+                // IMPLEMENTASI FILTER PAKET (QUERY 1)
+                // ==========================================
+                if ($filter_paket == '1') {
+                    $query->where('c.v_ujian', 'all');
+                } elseif ($filter_paket == '2') {
+                    $query->where('c.v_materi', 'all');
+                } elseif ($filter_paket == '3') {
+                    $query->whereIn('c.jenis_paket', ['ikh']);
                 }
 
                 if ($status_afiliasi === '0') {
@@ -152,8 +192,29 @@ class TransaksiController extends BaseController
                         ->groupEnd();
                 }
 
+                // ==========================================
+                // IMPLEMENTASI FILTER RANGE BULAN (QUERY TOTAL)
+                // ==========================================
                 if (!empty($filter_bulan)) {
-                    $queryTotal->like('transaksi.created_at', $filter_bulan, 'after');
+                    $dates = explode(' - ', $filter_bulan);
+                    if (count($dates) == 2) {
+                        $start_date = trim($dates[0]) . '-01 00:00:00';
+                        $end_date   = date('Y-m-t 23:59:59', strtotime(trim($dates[1]) . '-01'));
+
+                        $queryTotal->where('transaksi.created_at >=', $start_date);
+                        $queryTotal->where('transaksi.created_at <=', $end_date);
+                    }
+                }
+                
+                // ==========================================
+                // IMPLEMENTASI FILTER PAKET (QUERY TOTAL)
+                // ==========================================
+                if ($filter_paket == '1') {
+                    $query->where('c.v_ujian', 'all');
+                } elseif ($filter_paket == '2') {
+                    $query->where('c.v_materi', 'all');
+                } elseif ($filter_paket == '3') {
+                    $query->whereIn('c.jenis_paket', ['ikh']);
                 }
 
                 if ($status_afiliasi === '0') {

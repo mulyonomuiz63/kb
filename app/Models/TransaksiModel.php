@@ -14,7 +14,7 @@ class TransaksiModel extends Model
     public function getAll()
     {
         return $this
-            ->select('transaksi.*, b.nama_siswa, b.email, c.nama_paket')
+            ->select('transaksi.*, b.nama_siswa, b.email, c.nama_paket, c.v_ujian, c.v_materi, c.jenis_paket')
             ->join('detail_transaksi d', 'd.idtransaksi=transaksi.idtransaksi')
             ->join('siswa b', 'b.id_siswa = transaksi.idsiswa')
             ->join('paket c', 'c.idpaket = d.idpaket')

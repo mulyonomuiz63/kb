@@ -1,4 +1,32 @@
 <?= $this->extend('template/app'); ?>
+
+<?= $this->section('styles'); ?>
+<style>
+    /* Styling sederhana untuk kotak bulan agar mirip kalender */
+    .month-btn {
+        padding: 8px;
+        text-align: center;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: 0.2s;
+        background: #f9f9f9;
+        border: 1px solid #e4e6ef;
+    }
+
+    .month-btn:hover {
+        background-color: #f1faff;
+        color: #009ef7;
+        border-color: #009ef7;
+    }
+
+    .month-active {
+        background-color: #009ef7 !important;
+        color: white !important;
+        border-color: #009ef7 !important;
+        font-weight: bold;
+    }
+</style>
+<?= $this->endSection(); ?>
 <?= $this->section('content'); ?>
 <?php $db = Config\Database::connect(); ?>
 
@@ -66,19 +94,69 @@
                     </div>
 
                     <div class="card-toolbar flex-row-fluid justify-content-end gap-5">
-                        <div class="w-150px">
-                            <select id="filter_bulan" class="form-select form-select-solid" data-control="select2" data-hide-search="true">
-                                <option value="">Semua Bulan</option>
-                                <?php
-                                for ($i = 0; $i < 12; $i++) {
-                                    $val = date('Y-m', strtotime("-$i months"));
-                                    $label = date('F Y', strtotime("-$i months"));
-                                    $bulanEng = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-                                    $bulanInd = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-                                    $label = str_replace($bulanEng, $bulanInd, $label);
-                                    echo "<option value=\"$val\">$label</option>";
-                                }
-                                ?>
+                        <?php
+                        // Siapkan data bulan dan waktu saat ini untuk limitasi
+                        $bulanSingkat = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+                        $currentYear = (int) date('Y');
+                        $currentMonth = (int) date('n'); // 1 - 12
+                        ?>
+
+                        <!-- UI Input Trigger -->
+                        <div class="dropdown w-250px">
+                            <!-- HAPUS data-bs-* agar tidak bentrok dengan core Metronic -->
+                            <input type="text" id="filter_bulan_range" name="filter_bulan_range" class="form-control form-control-solid cursor-pointer" placeholder="Pilih Range Bulan..." readonly>
+
+                            <div class="dropdown-menu p-5 shadow-sm" id="calendar_dropdown" data-cy="<?= $currentYear ?>" data-cm="<?= $currentMonth ?>" style="width: 500px; margin-top: 5px;">
+                                <div class="row">
+
+                                    <!-- Sisi Kiri: Mulai Bulan -->
+                                    <div class="col-6 border-end border-gray-200">
+                                        <div class="text-center fw-bolder text-gray-800 mb-4">Mulai</div>
+                                        <select id="start_year" class="form-select form-select-sm form-select-solid mb-4">
+                                            <?php foreach ($listTahun as $row): ?>
+                                                <option value="<?= $row['tahun'] ?>"><?= $row['tahun'] ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                        <div class="row g-3" id="start_months">
+                                            <?php foreach ($bulanSingkat as $index => $namaBulan): ?>
+                                                <div class="col-4">
+                                                    <div class="btn btn-sm btn-light w-100 start-month-btn" data-month="<?= $index + 1 ?>"><?= $namaBulan ?></div>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    </div>
+
+                                    <!-- Sisi Kanan: Sampai Bulan -->
+                                    <div class="col-6">
+                                        <div class="text-center fw-bolder text-gray-800 mb-4">Sampai</div>
+                                        <select id="end_year" class="form-select form-select-sm form-select-solid mb-4">
+                                            <?php foreach ($listTahun as $row): ?>
+                                                <option value="<?= $row['tahun'] ?>"><?= $row['tahun'] ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                        <div class="row g-3" id="end_months">
+                                            <?php foreach ($bulanSingkat as $index => $namaBulan): ?>
+                                                <div class="col-4">
+                                                    <div class="btn btn-sm btn-light w-100 end-month-btn" data-month="<?= $index + 1 ?>"><?= $namaBulan ?></div>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="d-flex justify-content-end mt-5 pt-4 border-top border-gray-200">
+                                    <button type="button" class="btn btn-light btn-sm me-3" id="btn_clear_range">Reset</button>
+                                    <button type="button" class="btn btn-primary btn-sm" id="btn_apply_range">Terapkan</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="w-100 mw-150px">
+                            <select id="paket-pelatihan" class="form-select form-select-solid" data-control="select2" data-hide-search="true" data-placeholder="Paket Pelaltihan">
+                                <option value="0">Semua Paket</option>
+                                <option value="1">Ujian</option>
+                                <option value="2">Pelatihan</option>
+                                <option value="3">IKH</option>
                             </select>
                         </div>
                         <div class="w-100 mw-150px">
@@ -163,7 +241,8 @@
                 "type": "POST",
                 "data": function(d) {
                     d["<?= csrf_token() ?>"] = $('.csrf-token').val();
-                    d.filter_bulan = $('#filter_bulan').val();
+                    d.filter_bulan_range = $('#filter_bulan_range').val();
+                    d.paket_pelatihan = $('#paket-pelatihan').val();
                     d.filter_status_afiliasi = $('#filter-status-afiliasi').val();
                 },
                 "dataSrc": function(json) {
@@ -210,12 +289,10 @@
             }
         });
 
-        // Trigger reload saat filter bulan diubah
-        $('#filter_bulan').on('change', function() {
+        // Trigger reload saat filter status afiliasi diubah
+        $('#paket-pelatihan').on('change', function() {
             table.ajax.reload();
         });
-
-        // Trigger reload saat filter status afiliasi diubah
         $('#filter-status-afiliasi').on('change', function() {
             table.ajax.reload();
         });
@@ -403,55 +480,110 @@
 
     // --- 1. Chart Paket Terlaris (Horizontal Bar) ---
     function initChartPaket() {
-        if(dataTopPaket.length === 0) return;
+        if (dataTopPaket.length === 0) return;
         let categories = dataTopPaket.map(item => item.label);
         let seriesData = dataTopPaket.map(item => parseInt(item.total));
 
         var options = {
-            series: [{ name: 'Transaksi', data: seriesData }],
-            chart: { fontFamily: 'inherit', type: 'bar', height: 250, toolbar: { show: false } },
-            plotOptions: { bar: { borderRadius: 4, horizontal: true, distributed: true } },
+            series: [{
+                name: 'Transaksi',
+                data: seriesData
+            }],
+            chart: {
+                fontFamily: 'inherit',
+                type: 'bar',
+                height: 250,
+                toolbar: {
+                    show: false
+                }
+            },
+            plotOptions: {
+                bar: {
+                    borderRadius: 4,
+                    horizontal: true,
+                    distributed: true
+                }
+            },
             colors: ['#009EF7', '#50CD89', '#F1416C', '#FFC700', '#7239EA'],
-            dataLabels: { enabled: true, style: { fontSize: '11px' } },
-            xaxis: { categories: categories, labels: { style: { colors: '#A1A5B7' } } },
-            yaxis: { labels: { style: { colors: '#3F4254', fontWeight: 500 } } },
-            legend: { show: false }
+            dataLabels: {
+                enabled: true,
+                style: {
+                    fontSize: '11px'
+                }
+            },
+            xaxis: {
+                categories: categories,
+                labels: {
+                    style: {
+                        colors: '#A1A5B7'
+                    }
+                }
+            },
+            yaxis: {
+                labels: {
+                    style: {
+                        colors: '#3F4254',
+                        fontWeight: 500
+                    }
+                }
+            },
+            legend: {
+                show: false
+            }
         };
         new ApexCharts(document.querySelector("#chart_paket_terlaris"), options).render();
     }
 
     // --- 2. Chart Metode Bayar (Donut) ---
     function initChartMetodeBayar() {
-        if(dataMetodeBayar.length === 0) return;
+        if (dataMetodeBayar.length === 0) return;
         let labels = dataMetodeBayar.map(item => item.label.toUpperCase());
         let series = dataMetodeBayar.map(item => parseInt(item.total));
 
         var options = {
             series: series,
             labels: labels,
-            chart: { fontFamily: 'inherit', type: 'donut', height: 250 },
-            colors: ['#009EF7', '#50CD89'], 
-            plotOptions: { pie: { donut: { size: '65%' } } },
-            dataLabels: { enabled: false },
-            legend: { position: 'bottom' }
+            chart: {
+                fontFamily: 'inherit',
+                type: 'donut',
+                height: 250
+            },
+            colors: ['#009EF7', '#50CD89'],
+            plotOptions: {
+                pie: {
+                    donut: {
+                        size: '65%'
+                    }
+                }
+            },
+            dataLabels: {
+                enabled: false
+            },
+            legend: {
+                position: 'bottom'
+            }
         };
         new ApexCharts(document.querySelector("#chart_metode_bayar"), options).render();
     }
 
     // --- 3. Chart Performa Voucher (Donut - BARU) ---
     function initChartVoucher() {
-        if(dataVoucher.length === 0) return;
+        if (dataVoucher.length === 0) return;
         let labels = dataVoucher.map(item => item.label);
         let series = dataVoucher.map(item => parseInt(item.total));
 
         var options = {
             series: series,
             labels: labels,
-            chart: { fontFamily: 'inherit', type: 'donut', height: 250 },
+            chart: {
+                fontFamily: 'inherit',
+                type: 'donut',
+                height: 250
+            },
             colors: ['#7239EA', '#50CD89', '#E4E6EF'], // Purple untuk Mitra, Green untuk Affiliate, Light Gray untuk tanpa voucher
-            plotOptions: { 
-                pie: { 
-                    donut: { 
+            plotOptions: {
+                pie: {
+                    donut: {
                         size: '65%',
                         labels: {
                             show: true,
@@ -461,26 +593,198 @@
                                 fontSize: '12px',
                                 fontWeight: 'bold',
                                 color: '#A1A5B7',
-                                formatter: function (w) {
+                                formatter: function(w) {
                                     return w.globals.seriesTotals.reduce((a, b) => a + b, 0)
                                 }
                             }
                         }
-                    } 
-                } 
+                    }
+                }
             },
-            dataLabels: { enabled: false },
-            legend: { position: 'bottom' },
-            stroke: { show: true, width: 2, colors: ['#ffffff'] }
+            dataLabels: {
+                enabled: false
+            },
+            legend: {
+                position: 'bottom'
+            },
+            stroke: {
+                show: true,
+                width: 2,
+                colors: ['#ffffff']
+            }
         };
         new ApexCharts(document.querySelector("#chart_performa_voucher"), options).render();
     }
 
     // Render semua chart setelah DOM siap
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
         initChartPaket();
         initChartMetodeBayar();
         initChartVoucher();
     });
+</script>
+<script>
+    // Fungsi utama kalender dibungkus agar aman dari loading halaman
+    function initCustomMonthPicker() {
+        const calendarDropdown = document.getElementById('calendar_dropdown');
+        const inputTrigger = document.getElementById('filter_bulan_range');
+
+        if (!calendarDropdown || !inputTrigger) return;
+
+        // --- LOGIKA BUKA/TUTUP POPUP (BYPASS METRONIC) ---
+        inputTrigger.addEventListener('click', function(e) {
+            e.stopPropagation(); // Mencegah event bocor ke document
+            calendarDropdown.classList.toggle('show');
+        });
+
+        calendarDropdown.addEventListener('click', function(e) {
+            e.stopPropagation(); // Jika klik di dalam popup, jangan ditutup
+        });
+
+        document.addEventListener('click', function() {
+            calendarDropdown.classList.remove('show'); // Tutup jika klik di luar
+        });
+        // --------------------------------------------------
+
+        const currentYear = parseInt(calendarDropdown.getAttribute('data-cy')) || new Date().getFullYear();
+        const currentMonth = parseInt(calendarDropdown.getAttribute('data-cm')) || (new Date().getMonth() + 1);
+        const getMonthVal = (year, month) => parseInt(year) * 12 + parseInt(month);
+        const currentAbs = getMonthVal(currentYear, currentMonth);
+
+        let startYM = null;
+        let endYM = null;
+
+        function renderCalendar() {
+            let sYear = parseInt(document.getElementById('start_year').value);
+            let eYear = parseInt(document.getElementById('end_year').value);
+
+            let sAbs = startYM ? getMonthVal(startYM.year, startYM.month) : null;
+            let eAbs = endYM ? getMonthVal(endYM.year, endYM.month) : null;
+
+            // Render Sisi Kiri
+            document.querySelectorAll('.start-month-btn').forEach(btn => {
+                let m = parseInt(btn.getAttribute('data-month'));
+                let btnAbs = getMonthVal(sYear, m);
+                resetBtnClasses(btn);
+
+                if (btnAbs > currentAbs) {
+                    setDisabled(btn);
+                } else {
+                    if (sAbs && btnAbs === sAbs) {
+                        btn.classList.add('btn-primary', 'active', 'text-white'); // Biru
+                    } else if (sAbs && eAbs && btnAbs > sAbs && btnAbs <= eAbs) {
+                        btn.classList.add('bg-light-primary', 'text-primary'); // Biru Pudar
+                    }
+                }
+            });
+
+            // Render Sisi Kanan
+            document.querySelectorAll('.end-month-btn').forEach(btn => {
+                let m = parseInt(btn.getAttribute('data-month'));
+                let btnAbs = getMonthVal(eYear, m);
+                resetBtnClasses(btn);
+
+                if (btnAbs > currentAbs || (sAbs && btnAbs < sAbs)) {
+                    setDisabled(btn);
+                } else {
+                    if (eAbs && btnAbs === eAbs) {
+                        btn.classList.add('btn-primary', 'active', 'text-white');
+                    } else if (sAbs && eAbs && btnAbs >= sAbs && btnAbs < eAbs) {
+                        btn.classList.add('bg-light-primary', 'text-primary');
+                    }
+                }
+            });
+        }
+
+        function resetBtnClasses(btn) {
+            btn.classList.remove('btn-primary', 'active', 'bg-light-primary', 'text-primary', 'text-white', 'disabled');
+            btn.removeAttribute('disabled');
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+        }
+
+        function setDisabled(btn) {
+            btn.classList.add('disabled');
+            btn.setAttribute('disabled', 'disabled');
+            btn.style.opacity = '0.4';
+            btn.style.cursor = 'not-allowed';
+        }
+
+        function padMonth(m) {
+            return m.toString().padStart(2, '0');
+        }
+
+        // --- EVENT DELEGATION UNTUK TOMBOL ---
+        calendarDropdown.addEventListener('click', function(e) {
+            // Klik Bulan Kiri
+            if (e.target.closest('.start-month-btn')) {
+                let btn = e.target.closest('.start-month-btn');
+                if (btn.hasAttribute('disabled')) return;
+
+                startYM = {
+                    year: parseInt(document.getElementById('start_year').value),
+                    month: parseInt(btn.getAttribute('data-month'))
+                };
+                if (endYM && getMonthVal(startYM.year, startYM.month) > getMonthVal(endYM.year, endYM.month)) endYM = null;
+                renderCalendar();
+            }
+
+            // Klik Bulan Kanan
+            if (e.target.closest('.end-month-btn')) {
+                let btn = e.target.closest('.end-month-btn');
+                if (btn.hasAttribute('disabled')) return;
+
+                endYM = {
+                    year: parseInt(document.getElementById('end_year').value),
+                    month: parseInt(btn.getAttribute('data-month'))
+                };
+                renderCalendar();
+            }
+
+            // Klik Apply
+            if (e.target.id === 'btn_apply_range') {
+                if (startYM && endYM) {
+                    let startStr = startYM.year + '-' + padMonth(startYM.month);
+                    let endStr = endYM.year + '-' + padMonth(endYM.month);
+                    inputTrigger.value = startStr + ' - ' + endStr;
+                    calendarDropdown.classList.remove('show');
+                    $('#datatables-list').DataTable().ajax.reload();
+                } else {
+                    alert('Mohon pilih bulan pada bagian Mulai dan Sampai.');
+                }
+            }
+
+            // Klik Reset
+            if (e.target.id === 'btn_clear_range') {
+                startYM = null;
+                endYM = null;
+                inputTrigger.value = '';
+                renderCalendar();
+            }
+        });
+
+        // --- EVENT CHANGE SELECT TAHUN ---
+        document.getElementById('start_year').addEventListener('change', function() {
+            if (startYM) startYM.year = parseInt(this.value);
+            if (endYM && getMonthVal(startYM.year, startYM.month) > getMonthVal(endYM.year, endYM.month)) endYM = null;
+            renderCalendar();
+        });
+
+        document.getElementById('end_year').addEventListener('change', function() {
+            if (endYM) endYM.year = parseInt(this.value);
+            if (startYM && endYM && getMonthVal(startYM.year, startYM.month) > getMonthVal(endYM.year, endYM.month)) endYM = null;
+            renderCalendar();
+        });
+
+        // Render warna pertama kali
+        renderCalendar();
+    }
+
+    // Eksekusi script hanya setelah halaman (DOM) 100% siap
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCustomMonthPicker);
+    } else {
+        initCustomMonthPicker();
+    }
 </script>
 <?= $this->endSection(); ?>
