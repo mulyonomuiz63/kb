@@ -1206,7 +1206,8 @@ class SiswaController extends BaseController
                     'tgl_pembayaran' => $tgl_mulai,
                     'jenis_bayar'    => 'manual',
                     'kode_voucher'   => '',
-                    'jenis_paket'    => $dataPaket->jenis_paket
+                    'jenis_paket'    => $dataPaket->jenis_paket,
+                    'created_at'     => $tgl_mulai,
                 ];
                 $this->transaksiModel->insert($dataInsertTrans);
                 $idtransaksi = $this->transaksiModel->insertID();
