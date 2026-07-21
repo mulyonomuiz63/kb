@@ -821,7 +821,7 @@ class TransaksiController extends BaseController
         // Tambahkan BOM agar karakter UTF-8 terbaca sempurna di Microsoft Excel
         fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
-        fputcsv($output, ['No', 'Nama Peserta', 'Tanggal Pelatihan', 'Profesi'], ',');
+        fputcsv($output, ['No', 'Nama Peserta', 'Nama Paket', 'Tanggal Pelatihan', 'Profesi'], ',');
 
         // Masukkan Data Baris ke CSV: Ubah pemisah akhir menjadi ','
         $no = 1;
@@ -831,6 +831,7 @@ class TransaksiController extends BaseController
             fputcsv($output, [
                 $no++,
                 $row->nama_siswa ?? '-',
+                $row->nama_paket ?? '-',
                 $tglPelatihan,
                 $row->profesi ?? '-'
             ], ',');
