@@ -210,9 +210,9 @@ class TransaksiController extends BaseController
                 // IMPLEMENTASI FILTER PAKET (QUERY TOTAL)
                 // ==========================================
                 if ($filter_paket == '1') {
-                    $query->where('c.v_ujian', 'all');
+                    $query->whereIn('c.v_ujian', ['all', '1']);
                 } elseif ($filter_paket == '2') {
-                    $query->where('c.v_materi', 'all');
+                    $query->whereIn('c.v_materi', ['all','1']);
                 } elseif ($filter_paket == '3') {
                     $query->whereIn('c.jenis_paket', ['ikh']);
                 }
