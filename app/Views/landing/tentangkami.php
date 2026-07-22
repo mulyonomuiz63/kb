@@ -12,69 +12,27 @@
                     <div>
                         <span>Kelas Brevet merupakan platform pelatihan Brevet Pajak AB yang Terdaftar Resmi. Diselenggarakan oleh Akuntanmu Learning Center By Legalyn Konsultan Indonesia (Lembaga Pelatihan, Kursus/Bimbel, yang didirikan sejak tahun 2021). Sebagai upaya merespon kebutuhan peningkatan kompetensi profesi perpajakan di Indonesia, Akuntanmu Learning Center menghadirkan pembelajaran dan ujian Brevet Pajak AB secara online melalui KelasBrevet.com</span>
                     </div>
-                    <div class="mt-2 mb-2">
-                        <div class="row">
-                            <div class="col-4 col-md-4">
-                                <a href="javascript:void(0)" class="badge text-bg-light p-2 rounded-pill text-primary btn-hover-dark text-izin text-wrap" data-bs-toggle="modal" data-bs-target="#lihatIzinLkp">Izin Operasional LKP</a>
+                    <div class="mt-4 mb-2">
+                        <div class="row g-3">
+                            <div class="col-12 col-md-4">
+                                <a href="<?= base_url('legalitas#lkp') ?>" class="badge text-bg-light p-2 rounded-pill text-primary btn-hover-dark text-izin text-wrap w-100 text-center d-block">Izin Operasional LKP</a>
                             </div>
-                            <div class="col-4 col-md-4">
-                                <a href="javascript:void(0)" class="badge text-bg-light p-2 rounded-pill text-primary btn-hover-dark text-izin text-wrap" data-bs-toggle="modal" data-bs-target="#lihatIzinLpk">Sertifikat Standar LPK</a>
+                            <div class="col-12 col-md-4">
+                                <a href="<?= base_url('legalitas#lpk') ?>" class="badge text-bg-light p-2 rounded-pill text-primary btn-hover-dark text-izin text-wrap w-100 text-center d-block">Sertifikat Standar LPK</a>
                             </div>
-                            <div class="col-4 col-md-4">
-                                <a href="javascript:void(0)" class="badge text-bg-light p-2  rounded-pill text-primary btn-hover-dark text-izin text-wrap" data-bs-toggle="modal" data-bs-target="#lihatKemnaker">Publikasi Kemnaker</a>
+                            <div class="col-12 col-md-4">
+                                <a href="<?= base_url('legalitas#kemnaker') ?>" class="badge text-bg-light p-2 rounded-pill text-primary btn-hover-dark text-izin text-wrap w-100 text-center d-block">Publikasi Kemnaker</a>
                             </div>
                         </div>
                     </div>
                 </div>
                 <!-- Section Title End -->
-
             </div>
-            <div class="col-md-6">
+            <div class="col-md-6 mt-4 mt-md-0">
                 <div class="card p-4 border-0">
                     <?= img_lazy('assets-landing/images/slider/slider-2.png', "loading", ['class' => 'card-img-top']) ?>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
-<!-- untuk tampilan surat izin LKP-->
-<div class="modal fade" id="lihatIzinLkp" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Surat Izin LKP</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-0">
-                <iframe src="<?= base_url('assets-landing/images/surat-izin/izin-LKP-akuntanmu-01.pdf') ?>" width="100%" height="600px" style="border: none;"></iframe>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!--surat izin LPK-->
-<div class="modal fade" id="lihatIzinLpk" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Sertifikat Standar LPK</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-0">
-                <iframe src="<?= base_url('assets-landing/images/surat-izin/izin-LPK-akuntanmu-01.pdf') ?>" width="100%" height="600px" style="border: none;"></iframe>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!--kemnaker-->
-<div class="modal fade" id="lihatKemnaker" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <iframe src="https://skillhub.kemnaker.go.id/mitra/temukan-mitra/lpk-akuntanmu-by-legalyn-konsultan-indonesia-d8c65b1d-90e6-43a3-b1de-96cb4af8c662" width="100%" height="500vh"></iframe>
         </div>
     </div>
 </div>

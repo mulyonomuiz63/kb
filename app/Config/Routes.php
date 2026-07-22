@@ -47,6 +47,7 @@ $routes->get('paket-allinone', 'Transaksi::allinone');
 $routes->get('pelatihan', 'Landing::pelatihan');
 $routes->get('testimoni', 'Landing::testimoni');
 $routes->get('tentangkami', 'Landing::tentangkami');
+$routes->get('legalitas', 'Landing::legalitas');
 $routes->get('siap-kerja', 'Landing::siap_kerja');
 $routes->get('penilaian', 'Landing::penilaian');
 $routes->get('terms', 'Landing::term');

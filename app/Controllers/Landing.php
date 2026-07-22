@@ -525,4 +525,18 @@ class Landing extends BaseController
             return redirect()->to('jadwal');
         }
     }
+
+    public function legalitas()
+    {
+		//untuk breadcrumb
+		$breadcrumbItems = [
+            "Home" => base_url(),
+            "Legalitas" => current_url()
+        ];
+        $schemaBreadcrumb = $this->seo->breadcrumbSchema($breadcrumbItems);
+        $schema = $schemaBreadcrumb;
+        $data['schema'] = $schema;
+        $data['db'] =  Database::connect();
+        return view('landing/legalitas', $data);
+    }
 }
