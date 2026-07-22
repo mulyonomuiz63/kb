@@ -83,9 +83,6 @@
                 
                 <h2 class="main-title fw-bolder mb-3 mb-md-4">Legalitas <span class="text-primary">Kelas Brevet</span></h2>
                 
-                <p class="text-muted fs-6 lh-lg px-2 px-md-0">
-                    Kelas Brevet merupakan platform pelatihan Brevet Pajak AB yang Terdaftar Resmi. Diselenggarakan oleh <strong>Akuntanmu Learning Center By Legalyn Konsultan Indonesia</strong> (Lembaga Pelatihan, Kursus/Bimbel, yang didirikan sejak tahun 2021). Kami hadir merespon kebutuhan peningkatan kompetensi profesi perpajakan di Indonesia.
-                </p>
             </div>
         </div>
 
