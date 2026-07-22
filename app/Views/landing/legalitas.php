@@ -10,14 +10,17 @@
         overflow-y: hidden;
         white-space: nowrap;
         -webkit-overflow-scrolling: touch;
-        scrollbar-width: none; 
+        scrollbar-width: none;
     }
+
     .legalitas-nav::-webkit-scrollbar {
         display: none;
     }
+
     .legalitas-nav .nav-item {
         flex: 0 0 auto;
     }
+
     .legalitas-nav .nav-link {
         color: #6c757d;
         font-weight: 600;
@@ -26,26 +29,29 @@
         font-size: 0.9rem;
         padding: 0.5rem 1rem;
     }
+
     .legalitas-nav .nav-link:hover {
         color: #0d6efd;
         background-color: #f8f9fa;
     }
+
     .legalitas-nav .nav-link.active {
         background-color: #0d6efd;
         color: #fff;
         box-shadow: 0 4px 10px rgba(13, 110, 253, 0.3);
     }
+
     .doc-container {
         background: #fff;
         border: 1px solid #eaedf1;
     }
-    
+
     /* Responsivitas Area Dokumen/Iframe */
     .doc-viewer {
         height: 65vh;
         min-height: 400px;
         max-height: 700px;
-        overflow-y: auto; 
+        overflow-y: auto;
         scroll-behavior: smooth;
         position: relative;
     }
@@ -55,7 +61,7 @@
         max-width: 100%;
         height: auto;
         display: block;
-        margin: 0 auto 15px auto; 
+        margin: 0 auto 15px auto;
     }
 
     /* Styling indikator loading agar di tengah */
@@ -71,11 +77,13 @@
         .main-title {
             font-size: 1.75rem;
         }
+
         .legalitas-nav .nav-link {
             font-size: 0.85rem;
         }
+
         .doc-viewer {
-            height: 60vh; 
+            height: 60vh;
             min-height: 400px;
         }
     }
@@ -83,16 +91,16 @@
 
 <div class="section section-padding-02 py-5 bg-light" id="legalitas-section">
     <div class="container">
-        
+
         <!-- Header Section -->
         <div class="row mb-4 mb-md-5 justify-content-center">
-            <div class="col-12 col-lg-8 text-center">
+            <div class="d-none d-md-block text-center">
                 <div class="d-inline-flex align-items-center bg-primary text-white rounded-pill px-3 py-1 mb-3 fw-bold" style="font-size: 0.85rem;">
                     <i class="fas fa-shield-alt me-2"></i>Terdaftar & Terverifikasi
                 </div>
-                
+
                 <h2 class="main-title fw-bolder mb-3 mb-md-4">Legalitas <span class="text-primary">Kelas Brevet</span></h2>
-                
+
                 <p class="text-muted fs-6 lh-lg px-2 px-md-0">
                     Kelas Brevet merupakan platform pelatihan Brevet Pajak AB yang Terdaftar Resmi. Diselenggarakan oleh <strong>Akuntanmu Learning Center By Legalyn Konsultan Indonesia</strong> (Lembaga Pelatihan, Kursus/Bimbel, yang didirikan sejak tahun 2021). Kami hadir merespon kebutuhan peningkatan kompetensi profesi perpajakan di Indonesia.
                 </p>
@@ -101,8 +109,8 @@
 
         <!-- Document View Section (Tabs) -->
         <div class="row justify-content-center">
-            <div class="col-12 col-xl-10">
-                
+            <div class="col-12 col-xl-12">
+
                 <!-- Nav Pills -->
                 <div class="bg-white p-1 rounded-pill shadow-sm border mb-4">
                     <ul class="nav nav-pills legalitas-nav gap-1" id="legalitas-tab" role="tablist">
@@ -126,9 +134,9 @@
 
                 <!-- Tab Content -->
                 <div class="tab-content doc-container p-3 p-md-4 rounded-4 shadow-sm" id="legalitas-tabContent">
-                    
+
                     <!-- Tab: LKP -->
-                    <div class="tab-pane fade show active" id="lkp" role="tabpanel" aria-labelledby="lkp-tab" tabindex="0">                        
+                    <div class="tab-pane fade show active" id="lkp" role="tabpanel" aria-labelledby="lkp-tab" tabindex="0">
                         <div class="doc-viewer bg-secondary bg-opacity-10 rounded-3 p-2 p-md-3">
                             <!-- Indikator Loading LKP -->
                             <div class="loading-indicator text-center" id="loading-lkp">
@@ -137,7 +145,7 @@
                                 </div>
                                 <p class="mt-3 text-muted fw-bold">Sedang memuat dokumen...</p>
                             </div>
-                            
+
                             <!-- Container tempat halaman PDF LKP akan dirender -->
                             <div id="pdf-container-lkp" class="d-flex flex-column align-items-center w-100"></div>
                         </div>
@@ -186,7 +194,7 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        
+
         // Logika untuk mempertahankan Tab aktif setelah refresh
         let hash = window.location.hash;
         if (hash) {
@@ -194,9 +202,12 @@
             if (targetTab) {
                 let tab = new bootstrap.Tab(targetTab);
                 tab.show();
-                
+
                 setTimeout(() => {
-                    document.getElementById('legalitas-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    document.getElementById('legalitas-section').scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
                 }, 300);
             }
         }
@@ -208,28 +219,30 @@
         function renderFullPDF(url, containerId, loadingId) {
             const container = document.getElementById(containerId);
             const loadingElement = document.getElementById(loadingId);
-            
+
             // Mulai memuat dokumen
             const loadingTask = pdfjsLib.getDocument(url);
-            
+
             loadingTask.promise.then(function(pdf) {
                 const totalPages = pdf.numPages;
-                
+
                 // Menghapus elemen loading begitu file PDF berhasil ditarik dan siap dirender
                 if (loadingElement) {
                     loadingElement.style.display = 'none';
                 }
-                
+
                 // Looping untuk merender dari halaman 1 sampai halaman terakhir
                 for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
                     pdf.getPage(pageNum).then(function(page) {
-                        const scale = 1.5; 
-                        const viewport = page.getViewport({scale: scale});
+                        const scale = 1.5;
+                        const viewport = page.getViewport({
+                            scale: scale
+                        });
 
                         const canvas = document.createElement('canvas');
                         canvas.className = 'pdf-canvas shadow-sm border bg-white';
                         const context = canvas.getContext('2d');
-                        
+
                         canvas.height = viewport.height;
                         canvas.width = viewport.width;
 
@@ -255,7 +268,7 @@
         // Parameter: (URL_PDF, ID_Container, ID_Loading)
         const urlLKP = '<?= base_url('assets-landing/images/surat-izin/izin-LKP-akuntanmu-01.pdf') ?>';
         const urlLPK = '<?= base_url('assets-landing/images/surat-izin/izin-LPK-akuntanmu-01.pdf') ?>';
-        
+
         renderFullPDF(urlLKP, 'pdf-container-lkp', 'loading-lkp');
         renderFullPDF(urlLPK, 'pdf-container-lpk', 'loading-lpk');
     });
