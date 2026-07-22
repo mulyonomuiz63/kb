@@ -80,9 +80,6 @@
                 <div class="d-inline-flex align-items-center bg-primary text-white rounded-pill px-3 py-1 mb-3 fw-bold" style="font-size: 0.85rem;">
                     <i class="fas fa-shield-alt me-2"></i>Terdaftar & Terverifikasi
                 </div>
-                
-                <h2 class="main-title fw-bolder mb-3 mb-md-4">Legalitas <span class="text-primary">Kelas Brevet</span></h2>
-                
             </div>
         </div>
 
