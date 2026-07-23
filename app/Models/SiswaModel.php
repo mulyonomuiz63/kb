@@ -84,7 +84,7 @@ class SiswaModel extends Model
         } else {
             // Sorting diproses langsung oleh database
             $builder->orderBy('sedang_ujian', 'DESC');
-            $builder->orderBy('total_sertifikat', 'DESC');
+            // $builder->orderBy('total_sertifikat', 'DESC');
             $builder->orderBy("{$this->table}.date_created", 'DESC');
         }
 
