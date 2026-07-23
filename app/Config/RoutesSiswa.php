@@ -9,10 +9,11 @@ $routes->group('sw-siswa', ['filter' => 'roleCheck:2'], function ($routes) {
     $routes->group('affiliate', function ($routes) {
         $routes->get('/', 'Siswa\AffiliateController::index');
         $routes->get('create', 'Siswa\AffiliateController::create');
-        $routes->get('edit/(:num)', 'Siswa\AffiliateController::edit/$1');
+        $routes->get('edit/(:segment)', 'Siswa\AffiliateController::edit/$1');
         $routes->post('save', 'Siswa\AffiliateController::save');
         $routes->post('delete', 'Siswa\AffiliateController::delete');
         $routes->post('copy', 'Siswa\AffiliateController::copy');
+        $routes->get('getDetailPencairan/(:segment)', 'Siswa\AffiliateController::getDetailPencairan/$1');
     });
 
     // transaksi

@@ -68,8 +68,9 @@ class AffiliateController extends BaseController
         return view('siswa/affiliate/form', $data);
     }
 
-    public function edit($id)
+    public function edit($idenc)
     {
+        $id = decrypt_url($idenc);
         $data['breadcrumbs'] = [
             ['title' => 'Affiliate', 'url' => base_url('sw-siswa/affiliate')],
             ['title' => 'Edit Affiliate', 'url' => '#'],
@@ -313,6 +314,64 @@ class AffiliateController extends BaseController
     
     }
 
+    public function getDetailPencairan($id_komisi)
+    {
+        // Pastikan request melalui AJAX
+        if (!$this->request->isAJAX()) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Akses tidak sah.'
+            ]);
+        }
+
+        try {
+            $db = \Config\Database::connect();
+
+            // ==============================================================
+            // PERBAIKAN DI SINI
+            // Karena di database tersimpan sebagai string ("35"), 
+            // kita harus menambahkan kutip ganda di dalam pencariannya.
+            // ==============================================================
+            $searchId = '"' . (int)$id_komisi . '"';
+
+            $pencairan = $db->table('affiliate_pencairan')
+                ->where("JSON_CONTAINS(list_id_komisi, '$searchId')", null, false)
+                ->get()
+                ->getRowArray();
+
+            if (empty($pencairan)) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Data detail pencairan tidak ditemukan.'
+                ]);
+            }
+
+            // Ambil list ID komisi dari kolom JSON dan ubah kembali menjadi array PHP
+            $listIdKomisi = json_decode($pencairan['list_id_komisi'], true);
+
+            // Ambil rincian data komisi terkait dari tabel affiliate_commissions
+            $detailKomisi = [];
+            if (!empty($listIdKomisi) && is_array($listIdKomisi)) {
+                $detailKomisi = $db->table('affiliate_commissions')
+                    ->whereIn('id', $listIdKomisi)
+                    ->get()
+                    ->getResultArray();
+            }
+
+            // Masukkan data rincian komisi ke dalam array hasil response
+            $pencairan['detail_komisi'] = $detailKomisi;
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'data' => $pencairan
+            ]);
+        } catch (\Exception $e) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()
+            ]);
+        }
+    }
 
 
 }

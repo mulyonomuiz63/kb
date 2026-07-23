@@ -44,7 +44,7 @@
                                             <i class="ki-outline ki-bank fs-4 me-1"></i> Detail Rekening
                                         </button>
                                         <?php if($affiliates->total_edit <= 0): ?>
-                                            <a href="<?= base_url('sw-siswa/affiliate/edit/'.$affiliates->id_affiliate) ?>" class="btn btn-sm btn-light-warning fw-bold">
+                                            <a href="<?= base_url('sw-siswa/affiliate/edit/'.encrypt_url($affiliates->id_affiliate)) ?>" class="btn btn-sm btn-light-warning fw-bold">
                                                 Edit
                                             </a>
                                         <?php endif ?>
@@ -129,15 +129,13 @@
                             <table class="table align-middle table-row-dashed fs-6 gy-5" id="kt_table_komisi">
                                 <thead>
                                     <tr class="text-start text-gray-400 fw-bold fs-7 text-uppercase gs-0">
-                                        <th class="w-50px">No</th>
-                                        <th class="min-w-125px">Pemesan</th>
-                                        <th class="min-w-125px">Paket</th>
-                                        <th class="text-end">Harga</th>
-                                        <th class="text-center">Komisi</th>
-                                        <th class="text-end">Total</th>
-                                        <th class="text-center">Status</th>
-                                        <th class="text-center">Pencairan</th>
-                                        <th class="text-end">Tanggal</th>
+                                        <th class="w-50px text-center">No</th>
+                                        <th class="min-w-150px">Pemesan</th>
+                                        <th class="min-w-150px">Paket</th>
+                                        <th class="min-w-150px">Rincian Komisi</th>
+                                        <th class="min-w-120px text-center">Status & Pencairan</th>
+                                        <th class="min-w-120px text-center">Tanggal Pembayaran</th>
+                                        <th class="text-end min-w-100px">Aksi / Detail</th>
                                     </tr>
                                 </thead>
                                 <tbody class="fw-semibold text-gray-600">
@@ -145,58 +143,70 @@
                                         <?php $no = 1 + ($pager->getCurrentPage('komisi') - 1) * $pager->getPerPage('komisi'); ?>
                                         <?php foreach ($komisi as $k): ?>
                                             <tr>
-                                                <td><?= $no++ ?></td>
+                                                <td class="text-center text-gray-800 fw-bold"><?= $no++ ?></td>
                                                 <td>
-                                                    <div class="d-flex flex-column">
-                                                        <span class="text-gray-800 fw-bold text-hover-primary mb-1 fs-6">
-                                                            <?= ucwords(strtolower($k['nama_siswa'])) ?>
-                                                        </span>
-                                                    </div>
+                                                    <span class="text-gray-800 fw-bold text-hover-primary fs-6">
+                                                        <?= ucwords(strtolower($k['nama_siswa'])) ?>
+                                                    </span>
                                                 </td>
                                                 <td>
+                                                    <span class="text-gray-800 fw-bold text-hover-primary fs-6">
+                                                        <?= ucwords(strtolower($k['nama_paket'])) ?>
+                                                    </span>
+                                                </td>
+                                                <td>
                                                     <div class="d-flex flex-column">
-                                                        <span class="text-gray-800 fw-bold text-hover-primary mb-1 fs-6">
-                                                            <?= ucwords(strtolower($k['nama_paket'])) ?>
-                                                        </span>
+                                                        <span class="text-gray-800 fw-bold">Rp <?= number_format($k['harga'], 0, ',', '.') ?></span>
+                                                        <span class="fs-7 text-muted">Komisi (<?= $k['komisi'] ?>%): <strong class="text-success">Rp <?= number_format($k['harga'] * $k['komisi']/100, 0, ',', '.') ?></strong></span>
                                                     </div>
                                                 </td>
-                                                <td class="text-end">Rp <?= number_format($k['harga'], 0, ',', '.') ?></td>
                                                 <td class="text-center">
-                                                    <span class="badge badge-light-success fw-bold"><?= $k['komisi'] ?>%</span>
-                                                </td>
-                                                <td class="text-end text-gray-800 fw-bolder">
-                                                    Rp <?= number_format($k['harga'] * $k['komisi']/100, 0, ',', '.') ?>
+                                                    <div class="d-flex flex-column align-items-center gap-1">
+                                                        <div>
+                                                            <span class="text-muted fs-8">Status:</span> 
+                                                            <?php 
+                                                                $statusClass = [
+                                                                    'approved' => 'badge-light-success',
+                                                                    'pending'  => 'badge-light-warning',
+                                                                    'paid'     => 'badge-light-primary',
+                                                                    'rejected' => 'badge-light-danger'
+                                                                ][$k['status']] ?? 'badge-light-secondary';
+                                                            ?>
+                                                            <span class="badge <?= $statusClass ?> fs-8 fw-bold px-2 py-1"><?= ucfirst($k['status']) ?></span>
+                                                        </div>
+                                                        <div>
+                                                            <span class="text-muted fs-8">Pencairan:</span> 
+                                                            <?php
+                                                                $penarikanMap = [
+                                                                    'pending'    => ['c' => 'badge-light-warning', 't' => 'Pending'],
+                                                                    'approved'   => ['c' => 'badge-light-primary', 't' => 'Approved'],
+                                                                    'processing' => ['c' => 'badge-light-info', 't' => 'Processing'],
+                                                                    'paid'       => ['c' => 'badge-light-success', 't' => 'Paid'],
+                                                                ][$k['status_penarikan']] ?? ['c' => 'badge-light-secondary', 't' => '-'];
+                                                            ?>
+                                                            <span class="badge <?= $penarikanMap['c'] ?> fs-8 fw-bold px-2 py-1"><?= $penarikanMap['t'] ?></span>
+                                                        </div>
+                                                    </div>
                                                 </td>
                                                 <td class="text-center">
-                                                    <?php 
-                                                        $statusClass = [
-                                                            'approved' => 'badge-light-success',
-                                                            'pending'  => 'badge-light-warning',
-                                                            'paid'     => 'badge-light-primary',
-                                                            'rejected' => 'badge-light-danger'
-                                                        ][$k['status']] ?? 'badge-light-secondary';
-                                                    ?>
-                                                    <span class="badge <?= $statusClass ?> fs-8 fw-bold"><?= ucfirst($k['status']) ?></span>
-                                                </td>
-                                                <td class="text-center">
-                                                    <?php
-                                                        $penarikanMap = [
-                                                            'pending'    => ['c' => 'badge-light-warning', 't' => 'Pending'],
-                                                            'approved'   => ['c' => 'badge-light-primary', 't' => 'Approved'],
-                                                            'processing' => ['c' => 'badge-light-info', 't' => 'Processing'],
-                                                            'paid'       => ['c' => 'badge-light-success', 't' => 'Paid'],
-                                                        ][$k['status_penarikan']] ?? ['c' => 'badge-light-secondary', 't' => '-'];
-                                                    ?>
-                                                    <span class="badge <?= $penarikanMap['c'] ?> fs-8 fw-bold"><?= $penarikanMap['t'] ?></span>
+                                                    <span class="text-gray-700 fs-7 fw-bold"><?= $k['tgl_pembayaran'] ? date('d M Y', strtotime($k['tgl_pembayaran'])) : '-' ?></span>
                                                 </td>
                                                 <td class="text-end">
-                                                    <span class="text-gray-500 fs-7"><?= $k['tgl_pembayaran'] ? date('d M Y', strtotime($k['tgl_pembayaran'])) : '-' ?></span>
+                                                    <?php if ($k['status_penarikan'] == 'paid'): ?>
+                                                        <button type="button" class="btn btn-icon btn-light-primary btn-sm btn-view-pencairan" 
+                                                            data-id-komisi="<?= $k['id'] ?>"
+                                                                title="Lihat Detail Pencairan">
+                                                            <i class="ki-outline ki-eye fs-4"></i>
+                                                        </button>
+                                                    <?php else: ?>
+                                                        <span class="text-muted fs-7 italic">-</span>
+                                                    <?php endif; ?>
                                                 </td>
                                             </tr>
                                         <?php endforeach ?>
                                     <?php else: ?>
                                         <tr>
-                                            <td colspan="8" class="text-center text-muted py-10">Belum ada data komisi</td>
+                                            <td colspan="7" class="text-center text-muted py-10">Belum ada data komisi</td>
                                         </tr>
                                     <?php endif ?>
                                 </tbody>
@@ -219,42 +229,210 @@
     </div>
 </div>
 
+<!-- ==============================================
+     MODAL DETAIL PENCAIRAN UNTUK SISWA
+     ============================================== -->
+<div class="modal fade" id="modalDetailPencairan" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Detail Riwayat Pencairan Komisi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="row g-5">
+                    <div class="col-md-6">
+                        <table class="table table-row-bordered fs-6 gy-2">
+                            <tr>
+                                <td class="fw-bold text-muted">Kode Penarikan</td>
+                                <td id="det_kode_penarikan" class="fw-bold text-gray-800">-</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold text-muted">Bank Tujuan</td>
+                                <td id="det_bank">-</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold text-muted">No. Rekening</td>
+                                <td id="det_norek">-</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold text-muted">Atas Nama</td>
+                                <td id="det_atas_nama">-</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold text-muted">Status</td>
+                                <td id="det_status">-</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="col-md-6">
+                        <table class="table table-row-bordered fs-6 gy-2">
+                            <tr>
+                                <td class="fw-bold text-muted">Nominal Kotor</td>
+                                <td id="det_kotor" class="text-end">-</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold text-muted">Potongan PPh21</td>
+                                <td id="det_pph21" class="text-end text-danger">-</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold text-muted">Biaya Admin</td>
+                                <td id="det_admin" class="text-end text-danger">-</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold text-muted">Total Bersih</td>
+                                <td id="det_bersih" class="text-end fw-bold text-success">-</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="separator my-5"></div>
+
+                <div class="text-center">
+                    <label class="form-label fw-bold d-block mb-3">Bukti Transfer:</label>
+                    <div id="wrapper_bukti" class="border rounded p-3 bg-light">
+                        <span class="text-muted">Memuat bukti transfer...</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Custom style untuk meratakan tampilan */
+    .table.table-row-dashed tr {
+        border-bottom-width: 1px;
+        border-bottom-style: dashed;
+        border-bottom-color: var(--bs-gray-200);
+    }
+    .badge-light-success {
+        background-color: #E8FFF3;
+        color: #50CD89;
+    }
+    .badge-light-warning {
+        background-color: #FFF8DD;
+        color: #FFC700;
+    }
+    .badge-light-primary {
+        background-color: #F1FAFF;
+        color: #009EF7;
+    }
+    .badge-light-info {
+        background-color: #F8F5FF;
+        color: #7239EA;
+    }
+    .fw-boldest {
+        font-weight: 800;
+    }
+</style>
+
 <?= $this->endSection(); ?>
 
 <?= $this->section('scripts'); ?>
 <script>
-$(document).on('click', '.btn-delete', function () {
-    const id = $(this).data('id');
+$(document).ready(function () {
+    // Fungsi pembatalan pengajuan affiliate (fungsi asli tetap dipertahankan)
+    $(document).on('click', '.btn-delete', function () {
+        const id = $(this).data('id');
 
-    Swal.fire({
-        title: 'Yakin ingin membatalkan?',
-        text: "Pengajuan affiliate ini akan dihapus permanen.",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Ya, Batalkan!',
-        cancelButtonText: 'Tutup',
-        customClass: {
-            confirmButton: "btn btn-danger",
-            cancelButton: "btn btn-active-light"
-        }
-    }).then(function (result) {
-        if (result.isConfirmed) {
-            $.post("<?= base_url('sw-siswa/affiliate/delete') ?>", {
-                id: id,
-                <?= csrf_token() ?>: "<?= csrf_hash() ?>"
-            }, function (response) {
-                if (response.status === 'success') {
-                    Swal.fire({
-                        title: 'Berhasil!',
-                        text: response.message,
-                        icon: 'success',
-                        confirmButtonText: 'Ok'
-                    }).then(() => location.reload());
+        Swal.fire({
+            title: 'Yakin ingin membatalkan?',
+            text: "Pengajuan affiliate ini akan dihapus permanen.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Batalkan!',
+            cancelButtonText: 'Tutup',
+            customClass: {
+                confirmButton: "btn btn-danger",
+                cancelButton: "btn btn-active-light"
+            }
+        }).then(function (result) {
+            if (result.isConfirmed) {
+                $.post("<?= base_url('sw-siswa/affiliate/delete') ?>", {
+                    id: id,
+                    <?= csrf_token() ?>: "<?= csrf_hash() ?>"
+                }, function (response) {
+                    if (response.status === 'success') {
+                        Swal.fire({
+                            title: 'Berhasil!',
+                            text: response.message,
+                            icon: 'success',
+                            confirmButtonText: 'Ok'
+                        }).then(() => location.reload());
+                    } else {
+                        Swal.fire('Gagal!', response.message, 'error');
+                    }
+                }, 'json');
+            }
+        });
+    });
+
+    // Tombol Lihat Detail Pencairan untuk Siswa
+    $(document).on('click', '.btn-view-pencairan', function () {
+        let idKomisi = $(this).data('id-komisi');
+
+        // Tampilkan state loading pada modal
+        $('#det_kode_penarikan').text('Memuat...');
+        $('#det_bank').text('...');
+        $('#det_norek').text('...');
+        $('#det_atas_nama').text('...');
+        $('#det_status').text('...');
+        $('#det_kotor').text('...');
+        $('#det_pph21').text('...');
+        $('#det_admin').text('...');
+        $('#det_bersih').text('...');
+        $('#wrapper_bukti').html('<span class="text-muted">Memuat bukti transfer...</span>');
+        
+        $('#modalDetailPencairan').modal('show');
+
+        // Mengambil data detail pencairan via AJAX
+        $.ajax({
+            url: "<?= base_url('sw-siswa/affiliate/getDetailPencairan') ?>/" + idKomisi,
+            type: "GET",
+            dataType: "json",
+            success: function (res) {
+                if (res.status === 'success') {
+                    let d = res.data;
+                    $('#det_kode_penarikan').text(d.kode_penarikan);
+                    $('#det_bank').text(d.bank_tujuan);
+                    $('#det_norek').text(d.no_rekening);
+                    $('#det_atas_nama').text(d.atas_nama);
+                    $('#det_status').html('<span class="badge badge-light-success fw-bold">' + d.status.toUpperCase() + '</span>');
+                    
+                    $('#det_kotor').text('Rp ' + parseFloat(d.nominal_kotor).toLocaleString('id-ID'));
+                    $('#det_pph21').text('- Rp ' + parseFloat(d.potongan_pph21).toLocaleString('id-ID'));
+                    $('#det_admin').text('- Rp ' + parseFloat(d.biaya_admin).toLocaleString('id-ID'));
+                    $('#det_bersih').text('Rp ' + parseFloat(d.nominal_bersih).toLocaleString('id-ID'));
+
+                    if (d.bukti_transfer) {
+                        let imageUrl = "<?= base_url('uploads/bukti_pencairan/') ?>" + d.bukti_transfer;
+                        $('#wrapper_bukti').html(`
+                            <a href="${imageUrl}" target="_blank" title="Klik untuk memperbesar gambar">
+                                <img src="${imageUrl}" alt="Bukti Transfer" class="img-fluid rounded shadow-sm" style="max-height: 300px; object-fit: contain;">
+                            </a>
+                            <div class="mt-2">
+                                <a href="${imageUrl}" target="_blank" class="btn btn-sm btn-light-primary">Buka Gambar Penuh</a>
+                            </div>
+                        `);
+                    } else {
+                        $('#wrapper_bukti').html('<span class="text-danger">Bukti transfer tidak ditemukan.</span>');
+                    }
                 } else {
-                    Swal.fire('Gagal!', response.message, 'error');
+                    Swal.fire('Gagal', res.message, 'error');
                 }
-            }, 'json');
-        }
+            },
+            error: function () {
+                Swal.fire('Gagal', 'Tidak dapat mengambil data detail pencairan.', 'error');
+            }
+        });
     });
 });
 </script>

@@ -48,9 +48,8 @@
 
     /* Responsivitas Area Dokumen/Iframe */
     .doc-viewer {
-        height: 65vh;
         min-height: 400px;
-        max-height: 700px;
+        max-height: 900px;
         overflow-y: auto;
         scroll-behavior: smooth;
         position: relative;
@@ -133,7 +132,7 @@
                 </div>
 
                 <!-- Tab Content -->
-                <div class="tab-content doc-container p-3 p-md-4 rounded-4 shadow-sm" id="legalitas-tabContent">
+                <div class="tab-content doc-container p-3 p-md-4 rounded-4 shadow-sm" id="">
 
                     <!-- Tab: LKP -->
                     <div class="tab-pane fade show active" id="lkp" role="tabpanel" aria-labelledby="lkp-tab" tabindex="0">

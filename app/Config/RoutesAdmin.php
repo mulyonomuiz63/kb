@@ -240,6 +240,7 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
         $routes->post('store', 'Admin\AffiliateController::store');
         $routes->get('komisi/(:segment)', 'Admin\AffiliateController::listKomisi/$1');
         $routes->post('processKomisi', 'Admin\AffiliateController::processKomisi');
+        $routes->get('getDetailPencairan/(:segment)', 'Admin\AffiliateController::getDetailPencairan/$1');
     });
 
     $routes->group('profile', function ($routes) {

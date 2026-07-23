@@ -3,6 +3,7 @@
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
+use App\Libraries\Emailer;
 use App\Models\AffiliateModel;
 use App\Models\AffiliateLinkModel;
 use App\Models\AffiliateCommissionModel;
@@ -14,6 +15,7 @@ class AffiliateController extends BaseController
     protected $affiliateLinkModel;
     protected $komisi;
     protected $affiliateKlikHarianModel;
+    protected $emailer;
 
     public function __construct()
     {
@@ -21,6 +23,7 @@ class AffiliateController extends BaseController
         $this->affiliateLinkModel = new AffiliateLinkModel();
         $this->komisi    = new AffiliateCommissionModel();
         $this->affiliateKlikHarianModel = new AffiliateKlikHarianModel();
+        $this->emailer = new Emailer();
     }
 
     public function index()
@@ -421,7 +424,9 @@ class AffiliateController extends BaseController
 
             // Ambil data affiliate
             $affiliate = $this->affiliate
-                ->where('kode_affiliate', $id)
+                ->select('affiliates.*, siswa.nama_siswa, siswa.email')
+                ->join('siswa', 'siswa.id_siswa=affiliates.user_id')
+                ->where('affiliates.kode_affiliate', $id)
                 ->first();
 
             if (!$affiliate) {
@@ -430,7 +435,7 @@ class AffiliateController extends BaseController
 
             // Ambil data komisi dengan pagination
             $komisi = $this->komisi
-                ->select('affiliate_commissions.*, siswa.nama_siswa, paket.nama_paket') // Tambahkan kolom paket di sini
+                ->select('affiliate_commissions.*, siswa.email, siswa.nama_siswa, paket.nama_paket') // Tambahkan kolom paket di sini
                 ->join('transaksi', 'transaksi.idtransaksi = affiliate_commissions.id_transaksi')
                 ->join('detail_transaksi', 'detail_transaksi.idtransaksi = transaksi.idtransaksi')
                 ->join('paket', 'paket.idpaket = detail_transaksi.idpaket')
@@ -458,20 +463,285 @@ class AffiliateController extends BaseController
 
     public function processKomisi()
     {
+        // 1. Tangkap Data dari Request
         $ids = $this->request->getPost('ids');
+        $email = $this->request->getPost('email');
+        $nama = $this->request->getPost('nama') ?? 'Affiliate'; // Fallback jika nama tidak ter-passing
 
-        if (empty($ids)) {
-            return $this->response->setJSON(['status' => 'error']);
+        // Data tambahan untuk tabel pencairan
+        $bank_tujuan = $this->request->getPost('bank_tujuan');
+        $no_rekening = $this->request->getPost('no_rekening');
+        $atas_nama   = $this->request->getPost('atas_nama');
+        $persentase_pph21 = (float) $this->request->getPost('potongan_pph21');
+        $biaya_admin = (float) $this->request->getPost('biaya_admin');
+        $fileBukti   = $this->request->getFile('bukti_transfer');
+
+        // 2. Validasi Input Dasar
+        if (empty($ids) || empty($email) || !is_array($ids)) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Data ID atau Email tidak boleh kosong/tidak valid.'
+            ]);
         }
 
-        $this->komisi
-            ->whereIn('id', $ids)
-            ->set([
-                'status_penarikan' => 'paid',
-                'tgl_pembayaran'   => date('Y-m-d H:i:s')
-            ])
-            ->update();
+        // 3. Validasi Keamanan File (Anti-Hacker)
+        if (!$fileBukti || !$fileBukti->isValid()) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'File bukti transfer tidak valid atau belum diunggah.'
+            ]);
+        }
 
-        return $this->response->setJSON(['status' => 'success']);
+        // Pengecekan tipe MIME asli file untuk mencegah hacker mengubah ekstensi file berbahaya menjadi .jpg
+        $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+        if (!in_array($fileBukti->getMimeType(), $allowedMimeTypes)) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Keamanan: Format file ditolak! Hanya boleh JPG, JPEG, atau PNG.'
+            ]);
+        }
+
+        $db = \Config\Database::connect();
+
+        // 4. Hitung nominal kotor langsung dari Database agar aman dari manipulasi inspect element (Hacker)
+        $komisiTerpilih = $db->table('affiliate_commissions')
+            ->whereIn('id', $ids)
+            ->get()->getResultArray();
+
+        if (empty($komisiTerpilih)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Data komisi tidak ditemukan di database.']);
+        }
+
+        $nominal_kotor = 0;
+        $kode_affiliate = $komisiTerpilih[0]['kode_affiliate']; // Ambil kode affiliate dari data komisi
+
+        foreach ($komisiTerpilih as $k) {
+            $nominal_kotor += ($k['harga'] * $k['komisi'] / 100);
+        }
+
+
+        $pph21 = $nominal_kotor * ($persentase_pph21 / 100);
+        $biaya_admin = (float) $biaya_admin; // Pastikan biaya admin adalah float
+
+        $nominal_bersih = $nominal_kotor - $pph21 - $biaya_admin;
+        // 5. Proses Manajemen Folder & Upload File
+        $uploadPath = FCPATH . 'uploads/bukti_pencairan/';
+
+        // Jika folder belum ada, buat foldernya secara otomatis beserta permission-nya (0755)
+        if (!is_dir($uploadPath)) {
+            mkdir($uploadPath, 0755, true);
+        }
+
+        // Gunakan fungsi getRandomName() agar nama file terenkripsi (mencegah overwrite & serangan path traversal)
+        $fileName = $fileBukti->getRandomName();
+
+        // Pindahkan file ke folder tujuan
+        if (!$fileBukti->move($uploadPath, $fileName)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Gagal mengunggah bukti transfer ke server.']);
+        }
+
+        // ================= MULAI TRANSAKSI DATABASE =================
+        $db->transStart();
+
+        try {
+            // A. Insert data ke tabel affiliate_pencairan (Yang baru)
+            $dataPencairan = [
+                'kode_affiliate' => $kode_affiliate,
+                'kode_penarikan' => 'WDW-' . date('YmdHis') . rand(10, 99), // Generate Resi
+                'list_id_komisi' => json_encode($ids), // Tampung id komisi dalam format JSON
+                'nominal_kotor'  => $nominal_kotor,
+                'potongan_pph21' => $persentase_pph21, // Simpan persentase PPh21, bukan nominal
+                'biaya_admin'    => $biaya_admin,
+                'nominal_bersih' => $nominal_bersih,
+                'bank_tujuan'    => esc($bank_tujuan),
+                'no_rekening'    => esc($no_rekening),
+                'atas_nama'      => esc($atas_nama),
+                'bukti_transfer' => $fileName, // Nama file random yang tersimpan
+                'status'         => 'selesai' // Langsung selesai karena bukti transfer sudah dilampirkan admin
+            ];
+            $db->table('affiliate_pencairan')->insert($dataPencairan);
+
+            // B. Proses Update Database (Kode Lama Anda Dipertahankan 100%)
+            $this->komisi
+                ->whereIn('id', $ids)
+                ->set([
+                    'status_penarikan' => 'paid',
+                    'tgl_pembayaran'   => date('Y-m-d H:i:s')
+                ])
+                ->update();
+
+            // C. Proses Kirim Email (Kode Lama Anda Dipertahankan 100%)
+            // C. Proses Kirim Email
+            $subject = 'Pencairan Komisi Affiliate Berhasil Diproses';
+            $message = '
+                <div style="color: #333; padding: 20px; font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 1px solid #eaedf1; border-radius: 10px; background-color: #ffffff;">
+                    
+                    <!-- Header -->
+                    <div style="text-align: center; border-bottom: 2px solid #f8f9fa; padding-bottom: 15px; margin-bottom: 20px;">
+                        <div style="font-size: 22px; color: #1C3FAA; font-weight: bold;">
+                            PENCAIRAN KOMISI BERHASIL
+                        </div>
+                        <p style="font-size: 14px; color: #6c757d; margin-top: 5px;">Bukti pembayaran telah dilampirkan ke akun Anda</p>
+                    </div>
+                    
+                    <!-- Body / Sambutan -->
+                    <p style="font-size: 15px; color: #333; line-height: 1.6;">Hallo <strong>' . esc($nama) . '</strong>,</p>
+                    <p style="font-size: 15px; color: #555; line-height: 1.6;">
+                        Kabar gembira! Permintaan pencairan komisi affiliate Anda telah berhasil kami proses dan dana telah ditransfer ke rekening Anda. Berikut adalah rincian pencairannya:
+                    </p>
+                    
+                    <!-- Rincian Pencairan (Tabel) -->
+                    <div style="background-color: #f8f9fa; padding: 15px 20px; border-radius: 8px; margin: 25px 0;">
+                        <table style="width: 100%; font-size: 14px; color: #333; border-collapse: collapse;">
+                            <tr>
+                                <td style="padding: 10px 0; border-bottom: 1px dashed #ccc;"><strong>Jumlah Komisi Dicairkan</strong></td>
+                                <td style="padding: 10px 0; border-bottom: 1px dashed #ccc; text-align: right;"><strong>' . count($komisiTerpilih) . ' Item</strong></td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px 0; border-bottom: 1px dashed #ccc;"><strong>Total Komisi Kotor</strong></td>
+                                <td style="padding: 10px 0; border-bottom: 1px dashed #ccc; text-align: right;">Rp ' . number_format($nominal_kotor, 0, ',', '.') . '</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px 0; border-bottom: 1px dashed #ccc;"><strong>Potongan PPh21 (' . $persentase_pph21 . '%)</strong></td>
+                                <td style="padding: 10px 0; border-bottom: 1px dashed #ccc; text-align: right; color: #dc3545;">- Rp ' . number_format($pph21, 0, ',', '.') . '</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 15px 0 5px 0; font-size: 14px; color: #1C3FAA;"><strong>Biaya Admin / Transfer</strong></td>
+                                <td style="padding: 15px 0 5px 0; font-size: 14px; color: #1C3FAA; text-align: right;"><strong>- Rp ' . number_format($biaya_admin, 0, ',', '.') . '</strong></td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 15px 0 5px 0; font-size: 16px; color: #1C3FAA;"><strong>TOTAL DITERIMA</strong></td>
+                                <td style="padding: 15px 0 5px 0; font-size: 16px; color: #1C3FAA; text-align: right;"><strong>Rp ' . number_format($nominal_bersih, 0, ',', '.') . '</strong></td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Detail Rekening Tujuan -->
+                    <div style="margin-bottom: 25px; font-size: 14px; color: #555; line-height: 1.6; border-left: 4px solid #1C3FAA; padding-left: 15px; background-color: #f0f4f8; padding: 10px 15px; border-radius: 0 5px 5px 0;">
+                        <strong style="color: #333;">Informasi Rekening Tujuan:</strong><br>
+                        Bank Tujuan : <strong>' . esc($bank_tujuan) . '</strong><br>
+                        No. Rekening : <strong>' . esc($no_rekening) . '</strong><br>
+                        Atas Nama : <strong>' . esc($atas_nama) . '</strong>
+                    </div>
+                    
+                    <p style="font-size: 15px; color: #555; line-height: 1.6;">
+                        Silakan cek mutasi rekening Anda. Untuk melihat riwayat pencairan dan mengunduh bukti transfer resmi, silakan klik tombol di bawah ini:
+                    </p>
+                    
+                    <!-- Tombol Call to Action -->
+                    <div style="text-align: center; margin-top: 30px; margin-bottom: 20px;">
+                        <a href="' . base_url('sw-siswa/affiliate') . '" style="display: inline-block; padding: 12px 25px; background-color: #1C3FAA; color: #fff; text-decoration: none; border-radius: 50px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 6px rgba(28, 63, 170, 0.2);">
+                            Lihat Dashboard Komisi
+                        </a>
+                    </div>
+                    
+                    <!-- Footer -->
+                    <p style="font-size: 12px; color: #999; text-align: center; margin-top: 35px; border-top: 1px solid #eaedf1; padding-top: 15px;">
+                        Email ini dibuat otomatis oleh sistem. Mohon tidak membalas email ini.
+                    </p>
+                </div>
+            ';
+            $emailSent = $this->emailer->send($email, $subject, $message);
+
+            // Selesaikan transaksi database
+            $db->transComplete();
+
+            // Jika transaksi database gagal
+            if ($db->transStatus() === false) {
+                // ROLLBACK MANUAL: Hapus file gambar yang sudah terlanjur terupload jika DB error
+                if (file_exists($uploadPath . $fileName)) {
+                    unlink($uploadPath . $fileName);
+                }
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Gagal memproses data.'
+                ]);
+            }
+
+            if (!$emailSent) {
+                // Opsional: Database sukses di-update tapi email gagal terkirim
+                return $this->response->setJSON([
+                    'status' => 'warning',
+                    'message' => 'Komisi berhasil dibayar, tetapi email pemberitahuan gagal dikirim.'
+                ]);
+            }
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Komisi berhasil diproses dan email terkirim.'
+            ]);
+        } catch (\Exception $e) {
+            // Tangkap error tak terduga (exception)
+            $db->transRollback();
+
+            // ROLLBACK MANUAL: Hapus file gambar jika ada sistem error/syntax error
+            if (isset($fileName) && file_exists($uploadPath . $fileName)) {
+                unlink($uploadPath . $fileName);
+            }
+
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    public function getDetailPencairan($id_komisi)
+    {
+        // Pastikan request melalui AJAX
+        if (!$this->request->isAJAX()) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Akses tidak sah.'
+            ]);
+        }
+
+        try {
+            $db = \Config\Database::connect();
+
+            // ==============================================================
+            // PERBAIKAN DI SINI
+            // Karena di database tersimpan sebagai string ("35"), 
+            // kita harus menambahkan kutip ganda di dalam pencariannya.
+            // ==============================================================
+            $searchId = '"' . (int)$id_komisi . '"';
+
+            $pencairan = $db->table('affiliate_pencairan')
+                ->where("JSON_CONTAINS(list_id_komisi, '$searchId')", null, false)
+                ->get()
+                ->getRowArray();
+
+            if (empty($pencairan)) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Data detail pencairan tidak ditemukan.'
+                ]);
+            }
+
+            // Ambil list ID komisi dari kolom JSON dan ubah kembali menjadi array PHP
+            $listIdKomisi = json_decode($pencairan['list_id_komisi'], true);
+
+            // Ambil rincian data komisi terkait dari tabel affiliate_commissions
+            $detailKomisi = [];
+            if (!empty($listIdKomisi) && is_array($listIdKomisi)) {
+                $detailKomisi = $db->table('affiliate_commissions')
+                    ->whereIn('id', $listIdKomisi)
+                    ->get()
+                    ->getResultArray();
+            }
+
+            // Masukkan data rincian komisi ke dalam array hasil response
+            $pencairan['detail_komisi'] = $detailKomisi;
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'data' => $pencairan
+            ]);
+        } catch (\Exception $e) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()
+            ]);
+        }
     }
 }
