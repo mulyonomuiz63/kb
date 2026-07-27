@@ -20,8 +20,8 @@
         <meta property="article:section" content="<?= !empty($detail)? $detail->judul :'Kelas Brevet AB' ?>"/>
         <meta property="og:image" content="<?= !empty($detail) ? base_url('uploads/artikel/thumbnails/'.$detail->image_default) : base_url(favicon()); ?>"/>
         <meta property="og:image:secure_url" content="<?= !empty($detail) ? base_url('uploads/artikel/thumbnails/'.$detail->image_default) : base_url(favicon()) ?>"/>
-        <!--<meta property="og:image:width" content="1446"/>-->
-        <!--<meta property="og:image:height" content="754"/>-->
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
         <meta property="og:image:alt" content="<?= !empty($detail)? $detail->judul :'Kelas Brevet AB' ?>"/>
         <meta property="og:image:type" content="image/jpeg"/>
     <?php elseif($uris->getSegment(1) == 'twibbon'): ?>
@@ -34,8 +34,8 @@
         <meta property="article:section" content="<?= title(); ?>"/>
         <meta property="og:image" content="<?=  base_url("uploads/twibbon.png"); ; ?>"/>
         <meta property="og:image:secure_url" content="<?= base_url("uploads/twibbon.png"); ?>"/>
-        <!--<meta property="og:image:width" content="1446"/>-->
-        <!--<meta property="og:image:height" content="754"/>-->
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
         <meta property="og:image:alt" content="<?= title(); ?>"/>
         <meta property="og:image:type" content="image/jpeg"/>
     <?php elseif($uris->getSegment(1) == 'presensi'): ?>
@@ -51,8 +51,8 @@
         <meta property="article:section" content="<?= title(); ?>"/>
         <meta property="og:image" content="<?= !empty($dataIklan->getRowObject()) ? base_url('uploads/iklan/thumbnails/' . $dataIklan->getRowObject()->file) : base_url(favicon()); ?>"/>
         <meta property="og:image:secure_url" content="<?= !empty($dataIklan->getRowObject()) ? base_url('uploads/iklan/thumbnails/' . $dataIklan->getRowObject()->file) : base_url(favicon()); ?>"/>
-        <!--<meta property="og:image:width" content="1446"/>-->
-        <!--<meta property="og:image:height" content="754"/>-->
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
         <meta property="og:image:alt" content="<?= title(); ?>"/>
         <meta property="og:image:type" content="image/jpeg"/>
     <?php elseif($uris->getSegment(1) == 'bimbel'): ?>
@@ -63,6 +63,8 @@
         <meta property="og:image" content="<?= base_url('assets-landing/images/paket/thumbnails/'.$paket->file) ?>" />
         <meta property="og:url" content="<?= !base_url('assets-landing/images/paket/thumbnails/'.$paket->file) ?>" />
         <meta property="og:type" content="website" />
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
         <meta property="og:site_name" content="KelasBrevet" />
         
         <!-- Opsional: Twitter card -->
@@ -83,8 +85,8 @@
         <meta property="article:section" content="<?= title(); ?>"/>
         <meta property="og:image" content="<?= !empty($dataIklan->getRowObject()) ? base_url('uploads/iklan/thumbnails/' . $dataIklan->getRowObject()->file) : base_url(favicon()); ; ?>"/>
         <meta property="og:image:secure_url" content="<?= !empty($dataIklan->getRowObject()) ? base_url('uploads/iklan/thumbnails/' . $dataIklan->getRowObject()->file) : base_url(favicon()); ; ?>"/>
-        <!--<meta property="og:image:width" content="1446"/>-->
-        <!--<meta property="og:image:height" content="754"/>-->
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
         <meta property="og:image:alt" content="<?= title(); ?>"/>
         <meta property="og:image:type" content="image/jpeg"/>
     <?php endif; ?>

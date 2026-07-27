@@ -14,17 +14,30 @@
     <meta name="robots" content="index, follow">
 
     <!-- Open Graph -->
+    <meta property="og:site_name" content="kelasbrevet">
     <meta property="og:title" content="<?= title(); ?>" />
     <meta property="og:description" content="<?= !empty($dataMeta) ? $dataMeta->nama : "Kelas Brevet Pajak Online Terpercaya Di Indonesia"; ?>" />
     <meta property="og:url" content="<?= !empty($dataMeta) ? $dataMeta->url : base_url('/'); ?>" />
     <meta property="og:article:section" content="<?= title(); ?>" />
     <meta property="og:image" content="<?= !empty($dataMeta) ? base_url('uploads/iklan/thumbnails/' . $dataMeta->file) : base_url(favicon()); ?>" />
     <meta property="og:image:alt" content="<?= title(); ?>" />
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
     <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="id_ID">
+    
+    
+    <!-- ========================================== -->
+    <!-- TWITTER / X CARD OPTIMIZATION              -->
+    <!-- ========================================== -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@kelasbrevet">
+    <meta name="twitter:title" content="<?= title(); ?>">
+    <meta name="twitter:description" content="<?= !empty($dataMeta) ? $dataMeta->nama : "Kelas Brevet Pajak Online Terpercaya Di Indonesia"; ?>">
+    <meta name="twitter:image" content="<?= !empty($dataMeta) ? base_url('uploads/iklan/thumbnails/' . $dataMeta->file) : base_url(favicon()); ?>">
 
     <link rel="canonical" href="<?= current_url() ?>" />
-
-
     <!-- Google tag (gtag.js) -->
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-LVJ4K7XNX9"></script>
@@ -60,6 +73,7 @@
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="<?= base_url(favicon()); ?>" />
+    <link href="<?= base_url(favicon()); ?>" rel="apple-touch-icon">
 
     <!-- CSS
 	============================================ -->
