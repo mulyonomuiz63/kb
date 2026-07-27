@@ -122,7 +122,10 @@
                                             </td>
                                             <td class="text-center text-gray-800 fw-bold"><?= $no++ ?></td>
                                             <td>
-                                                <span class="text-gray-800 fw-bold"><?= esc($k['nama_siswa']) ?></span>
+                                                <div class="d-flex flex-column">
+                                                    <span class="text-gray-800 fw-bold"><span class="text-gray-800 fw-bold"><?= esc($k['nama_siswa']) ?></span></span>
+                                                    <span class="fs-7 text-muted">Tgl Transaksi <strong class="text-success"><?= date('d-m-Y', strtotime($k['tgl_approved'])) ?></strong></span>
+                                                </div>
                                             </td>
                                             <td>
                                                 <span class="text-gray-800 fw-bold"><?= esc($k['nama_paket']) ?></span>
@@ -420,7 +423,7 @@
         // Tombol Bulk -> Buka Modal
         $('#btnUpdateKomisi').on('click', function() {
             let email = $('#dataUser').data('email');
-            let nama  = $('#dataUser').data('nama');
+            let nama = $('#dataUser').data('nama');
             $('#input_email').val(email);
             $('#input_nama').val(nama);
 
