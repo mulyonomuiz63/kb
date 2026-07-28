@@ -3,6 +3,10 @@
 namespace App\Controllers\Guru;
 
 use App\Controllers\BaseController;
+use App\Models\BankSoalModel;
+use App\Models\GuruModel;
+use App\Models\KategoriModel;
+use App\Models\TagModel;
 
 class BankSoalController extends BaseController
 {
@@ -13,10 +17,10 @@ class BankSoalController extends BaseController
 
     public function __construct()
     {
-        $this->bankSoalModel = new \App\models\BankSoalModel();
-        $this->kategoriModel = new \App\models\KategoriModel();
-        $this->guruModel = new \App\models\GuruModel();
-        $this->tagModel = new \App\models\TagModel();
+        $this->bankSoalModel = new BankSoalModel();
+        $this->kategoriModel = new KategoriModel();
+        $this->guruModel = new GuruModel();
+        $this->tagModel = new TagModel();
 
     }
     public function index()
