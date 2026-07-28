@@ -283,4 +283,15 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
     $routes->group('review', function ($routes) {
         $routes->get('', 'Admin\ReviewController::index');
     });
+
+    $routes->group('bank-soal', function ($routes) {
+        $routes->get('', 'Admin\BankSoalController::index');
+        $routes->get('create', 'Admin\BankSoalController::create');
+        $routes->post('store', 'Admin\BankSoalController::store');
+        $routes->get('edit/(:segment)', 'Admin\BankSoalController::edit/$1');
+        $routes->post('update', 'Admin\BankSoalController::update');
+        $routes->get('delete/(:segment)', 'Admin\BankSoalController::delete/$1');
+        $routes->post('upload-summernote', 'Admin\BankSoalController::uploadSummernote');
+        $routes->post('delete-image', 'Admin\BankSoalController::deleteImage');
+    });
 });
