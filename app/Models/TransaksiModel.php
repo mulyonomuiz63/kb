@@ -26,7 +26,7 @@ class TransaksiModel extends Model
     public function getBaseQuery()
     {
         // UPGRADE: Menambahkan b.idafiliasi pada select untuk mempermudah eksekusi filter di controller
-        return $this->select('transaksi.*, b.nama_siswa, b.email, b.id_siswa, b.kantor, b.idafiliasi, c.nama_paket, a.nama_afiliasi')
+        return $this->select('transaksi.*, b.nama_siswa, b.email, b.hp, b.id_siswa, b.kantor, b.idafiliasi, c.nama_paket, a.nama_afiliasi')
             ->join('detail_transaksi d', 'd.idtransaksi=transaksi.idtransaksi')
             ->join('siswa b', 'b.id_siswa = transaksi.idsiswa')
             ->join('paket c', 'c.idpaket = d.idpaket')

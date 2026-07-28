@@ -248,8 +248,26 @@ class TransaksiController extends BaseController
                     $row = [];
 
                     // Kolom Peserta
-                    $row['peserta'] = '<div class="text-gray-800 fw-bold fs-6">' . esc($s->nama_siswa) . '</div>
-                       <div class="text-muted fw-semibold fs-7">' . esc($s->email) . '</div>';
+                    $htmlPeserta = '<div class="text-gray-800 fw-bold fs-6">' . esc($s->nama_siswa) . '</div>';
+                    $htmlPeserta .= '<div class="text-muted fw-semibold fs-7 mb-1">' . esc($s->email) . '</div>';
+
+                    // Pengecekan jika nomor HP ada dan tidak kosong
+                    if (!empty($s->hp)) {
+                        // Bersihkan karakter selain angka (misal ada spasi atau strip)
+                        $no_wa = preg_replace('/[^0-9]/', '', $s->hp);
+
+                        // Ubah awalan '0' menjadi '62' agar formatnya sesuai dengan standar API WhatsApp
+                        if (substr($no_wa, 0, 1) === '0') {
+                            $no_wa = '62' . substr($no_wa, 1);
+                        }
+
+                        // Tambahkan tombol WhatsApp
+                        $htmlPeserta .= '<a href="https://wa.me/' . esc($no_wa) . '" target="_blank" class="badge badge-light-success text-decoration-none mt-1">
+                        <i class="ki-outline ki-whatsapp text-success me-1"></i> ' . esc($s->hp) . '
+                     </a>';
+                    }
+
+                    $row['peserta'] = $htmlPeserta;
 
                     // Kolom Paket
                     $row['paket'] = '<div class="text-gray-800 fw-bold fs-6">' . esc($s->nama_paket) . '</div>
