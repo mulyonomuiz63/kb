@@ -13,14 +13,24 @@
 
 
                 <div id="email-field" class="field-wrapper input">
-                    <input type="email" id="email" name="email" value="<?= old('email'); ?>" placeholder="Email Aktif" type="text" class="form-control" required autocomplete="off">
+                    <input type="email" id="email" name="email" value="<?= old('email'); ?>" placeholder="Email Aktif" class="form-control" required autocomplete="off">
+                </div>
+                <div id="hp-field" class="field-wrapper input mb-3">
+                    <input type="number" 
+                        id="hp" 
+                        name="hp" 
+                        value="<?= old('hp'); ?>" 
+                        placeholder="Nomor/WA Aktif" 
+                        class="form-control <?= session('errors.hp') ? 'is-invalid' : '' ?>" 
+                        required 
+                        autocomplete="off">
                 </div>
 
                 <div id="jenis_kelamin-field" class="field-wrapper input">
                     <select name="jenis_kelamin" required class="form-control" style=" display:block;
-  color: #999;
-  border: none;
-  border-bottom: 1px solid #e0e6ed">
+                        color: #999;
+                        border: none;
+                        border-bottom: 1px solid #e0e6ed">
                         <option value="">Pilih Jenis Kelamin </option>
                         <option value="Laki - Laki" <?= old('jenis_kelamin') == 'Laki - Laki' ? 'selected' : ''; ?>>Laki - Laki</option>
                         <option value="Perempuan" <?= old('jenis_kelamin') == 'Perempuan' ? 'selected' : ''; ?>>Perempuan</option>

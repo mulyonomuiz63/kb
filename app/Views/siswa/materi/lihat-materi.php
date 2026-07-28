@@ -316,7 +316,8 @@
 </div>
 
 <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" tabindex="-1">
-  <div class="modal-dialog">
+  <!-- Rekomendasi: tambahkan class 'modal-lg' di samping 'modal-dialog' agar popup lebih lebar dan iframe terlihat lebih jelas -->
+  <div class="modal-dialog modal-lg">
     <div class="modal-content border-0 shadow-lg">
       <div class="modal-header border-0">
         <h3 class="modal-title fw-bold">Download Materi Softcopy</h3>
@@ -325,12 +326,72 @@
         </div>
       </div>
       <div class="modal-body">
+
+        <!-- FUNGSI LAMA (JANGAN DIUBAH) -->
         <div id="file-list-container">
           <div class="text-center py-5">
             <span class="spinner-border text-primary"></span>
           </div>
         </div>
+        <!-- END FUNGSI LAMA -->
+
+        <!-- TAMBAHAN BARU: Info, Tombol, & Embed Google Drive -->
+        <div class="mt-7 pt-5 border-top">
+          <div class="d-flex flex-column align-items-center bg-light rounded p-5">
+            <div class="text-center mb-4">
+              <h5 class="fw-bold text-dark mb-2">Akses Keseluruhan Materi</h5>
+              <span class="text-muted fs-6">Untuk melihat atau mengunduh keseluruhan materi secara lengkap, Anda bisa melihatnya pada tampilan folder di bawah atau klik tombol berikut.</span>
+            </div>
+
+            <!-- Tombol Buka di Tab Baru -->
+            <a href="https://drive.google.com/drive/folders/1Rqr_3mgwLJx-8Zx2NLUPNuLT0xrqvUe9?usp=sharing" target="_blank" class="btn btn-primary mb-5">
+              <i class="ki-outline ki-cloud-download fs-2 me-2"></i> Buka Folder Google Drive
+            </a>
+          </div>
+        </div>
+        <!-- END TAMBAHAN BARU -->
+
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Preview PDF Fullscreen -->
+<div class="modal fade" id="pdfPreviewModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-fullscreen">
+    <div class="modal-content shadow-none">
+
+      <!-- Header Modal Profesional -->
+      <div class="modal-header bg-light border-bottom-0 shadow-sm z-index-1">
+        <div class="d-flex align-items-center">
+          <i class="ki-outline ki-file fs-1 text-primary me-3"></i>
+          <h5 class="modal-title fw-bold text-dark mb-0" id="pdfModalTitle">Preview Dokumen</h5>
+        </div>
+
+        <div class="d-flex align-items-center">
+          <!-- Tombol Download Tetap Disediakan -->
+          <a href="#" id="pdfDownloadBtn" download class="btn btn-sm btn-primary me-4">
+            <i class="ki-outline ki-save-2 fs-4 me-2"></i> Download
+          </a>
+
+          <!-- Tombol Tutup -->
+          <div class="btn btn-icon btn-sm btn-active-light-danger" data-bs-dismiss="modal">
+            <i class="ki-outline ki-cross fs-1"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-body p-0 bg-secondary">
+        <!-- Animasi Loading -->
+        <div id="pdfLoadingContainer" class="d-flex flex-column justify-content-center align-items-center h-100">
+          <span class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;"></span>
+          <span class="text-muted fw-bold">Memuat dokumen...</span>
+        </div>
+
+        <!-- Frame Penampil PDF (Tambahkan d-none di sini, hapus inline display:none) -->
+        <iframe id="pdfViewer" class="d-none" src="" style="width: 100%; height: 100%; border: none;"></iframe>
+      </div>
+
     </div>
   </div>
 </div>
@@ -425,7 +486,7 @@
      ========================================================================== */
   function resetIdleTimer() {
     const videoContainer = $('#videoContainer');
-    
+
     // Tampilkan kembali kontrol & kursor dengan menghapus class video-idle
     videoContainer.removeClass('video-idle');
     clearTimeout(idleTimer);
@@ -451,8 +512,8 @@
         if (duration > 0) {
           const percentage = (current / duration) * 100;
           const pb = document.getElementById('progressBar');
-          pb.value = percentage; 
-          updateRangeFill(pb); 
+          pb.value = percentage;
+          updateRangeFill(pb);
           document.getElementById('timeDisplay').innerText = `${formatTime(current)} / ${formatTime(duration)}`;
         }
         requestAnimationFrame(trackProgress);
@@ -487,7 +548,7 @@
 
   function onPlayerStateChange(event) {
     const containerCenter = $('#centerIconContainer');
-    
+
     if (event.data === YT.PlayerState.UNSTARTED || event.data === YT.PlayerState.CUED) {
       containerCenter.removeClass('show-icon');
     } else {
@@ -497,14 +558,13 @@
     if (event.data === YT.PlayerState.PLAYING) {
       $('#iconPlay, #centerIconPlay').addClass('d-none');
       $('#iconPause, #centerIconPause').removeClass('d-none');
-      
+
       resetIdleTimer(); // Mulai timer sembunyi kontrol
       requestAnimationFrame(trackProgress);
-    } 
-    else if (event.data === YT.PlayerState.PAUSED) {
+    } else if (event.data === YT.PlayerState.PAUSED) {
       $('#iconPause, #centerIconPause').addClass('d-none');
       $('#iconPlay, #centerIconPlay').removeClass('d-none');
-      
+
       // Saat Pause, kontrol harus tetap muncul
       clearTimeout(idleTimer);
       $('#videoContainer').removeClass('video-idle');
@@ -515,17 +575,25 @@
       const next = current.next('.video-thumb');
       if (next.length > 0) {
         next.click();
-        next[0].scrollIntoView({ behavior: 'smooth', inline: 'center' });
+        next[0].scrollIntoView({
+          behavior: 'smooth',
+          inline: 'center'
+        });
       } else {
         const firstThumb = $('.video-thumb').first();
         $('.video-thumb').removeClass('border border-primary border-3');
         firstThumb.addClass('border border-primary border-3');
         $('#judul_materi_chat').text(firstThumb.data('title'));
         $('#kode_materi').val(firstThumb.data('kode_materi'));
-        track.scrollTo({ left: 0, behavior: 'smooth' });
-        
+        track.scrollTo({
+          left: 0,
+          behavior: 'smooth'
+        });
+
         if (player && player.cueVideoById) {
-          player.cueVideoById({ videoId: firstThumb.data('videoid') });
+          player.cueVideoById({
+            videoId: firstThumb.data('videoid')
+          });
         }
         get_chat_materi(true);
         loadFileMateri(firstThumb.data('kode_materi'));
@@ -538,7 +606,7 @@
      5. EVENT LISTENERS UTAMA
      ========================================================================== */
   $(document).ready(function() {
-    
+
     // -- Deteksi Pergerakan Mouse untuk Fitur Auto-Hide --
     $('#videoContainer').on('mousemove mousedown touchstart keydown', function() {
       resetIdleTimer();
@@ -564,7 +632,7 @@
 
     // -- Progress Bar (Timeline) --
     $('#progressBar').on('input', function() {
-      updateRangeFill(this); 
+      updateRangeFill(this);
       if (player && player.getDuration) {
         const duration = player.getDuration();
         const seekToTime = (this.value / 100) * duration;
@@ -575,10 +643,10 @@
 
     // -- Volume Control --
     $('#volumeBar').on('input', function() {
-      updateRangeFill(this); 
+      updateRangeFill(this);
       const volVal = this.value;
 
-      if(volVal == 0) {
+      if (volVal == 0) {
         $('#iconVolumeUp').addClass('d-none');
         $('#iconVolumeMute').removeClass('d-none');
       } else {
@@ -621,12 +689,20 @@
       loadFileMateri(kode_materi);
 
       if (player && player.loadVideoById) {
-        player.loadVideoById({ videoId: videoId });
+        player.loadVideoById({
+          videoId: videoId
+        });
       }
     });
 
-    $('#nextBtn').on('click', () => track.scrollBy({ left: 250, behavior: 'smooth' }));
-    $('#prevBtn').on('click', () => track.scrollBy({ left: -250, behavior: 'smooth' }));
+    $('#nextBtn').on('click', () => track.scrollBy({
+      left: 250,
+      behavior: 'smooth'
+    }));
+    $('#prevBtn').on('click', () => track.scrollBy({
+      left: -250,
+      behavior: 'smooth'
+    }));
 
     // -- Fitur Chat (Send & Reload) --
     $('#chat_materi').off('click').on('click', function() {
@@ -673,7 +749,9 @@
   function loadFileMateri(kode) {
     const container = $('#file-list-container');
     container.html('<div class="text-center py-10"><span class="spinner-border text-primary"></span></div>');
-    $.post("<?= base_url('sw-siswa/materi/get-file-materi') ?>", { kode_materi: kode }, function(res) {
+    $.post("<?= base_url('sw-siswa/materi/get-file-materi') ?>", {
+      kode_materi: kode
+    }, function(res) {
       container.html(res);
     }).fail(function() {
       container.html('<div class="text-center text-danger">Gagal memuat file.</div>');
@@ -687,7 +765,9 @@
       url: "<?= base_url('sw-siswa/materi/get-chat-materi') ?>",
       method: "POST",
       dataType: "json",
-      data: { kode_materi: kode_materi },
+      data: {
+        kode_materi: kode_materi
+      },
       success: function(res) {
         if (res.html) {
           $('.inner-chat-materi').html(res.html);
@@ -700,5 +780,52 @@
       }
     });
   }
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var pdfPreviewModal = document.getElementById('pdfPreviewModal');
+    var pdfViewer = document.getElementById('pdfViewer');
+    var pdfLoading = document.getElementById('pdfLoadingContainer');
+    var pdfTitle = document.getElementById('pdfModalTitle');
+    var pdfDownloadBtn = document.getElementById('pdfDownloadBtn');
+
+    // Ketika modal akan ditampilkan
+    pdfPreviewModal.addEventListener('show.bs.modal', function(event) {
+      var button = event.relatedTarget;
+      var fileUrl = button.getAttribute('data-file-url');
+      var fileName = button.getAttribute('data-file-name');
+
+      // Update Judul dan Link Download di Header
+      pdfTitle.textContent = fileName;
+      pdfDownloadBtn.href = fileUrl;
+
+      // RESET TAMPILAN AWAL: Sembunyikan iframe, munculkan loading
+      pdfViewer.classList.remove('d-block');
+      pdfViewer.classList.add('d-none');
+
+      pdfLoading.classList.remove('d-none');
+      pdfLoading.classList.add('d-flex');
+
+      // Masukkan URL ke dalam iframe untuk mulai memuat
+      pdfViewer.src = fileUrl;
+
+      // Ketika iframe selesai memuat file
+      pdfViewer.onload = function() {
+        // Hapus class d-flex dan tambahkan d-none untuk menghilangkan loading sepenuhnya
+        pdfLoading.classList.remove('d-flex');
+        pdfLoading.classList.add('d-none');
+
+        // Hapus class d-none dan tambahkan d-block untuk menampilkan iframe PDF
+        pdfViewer.classList.remove('d-none');
+        pdfViewer.classList.add('d-block');
+      };
+    });
+
+    // Bersihkan iframe ketika modal ditutup
+    pdfPreviewModal.addEventListener('hidden.bs.modal', function() {
+      pdfViewer.src = '';
+      pdfTitle.textContent = 'Preview Dokumen';
+    });
+  });
 </script>
 <?= $this->endSection(); ?>

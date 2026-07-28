@@ -134,12 +134,16 @@ class MateriController extends BaseController
                         $urlFile = base_url('assets/app-assets/file/' . $m->nama_file);
 
                         $html .= '
-                    <a href="' . $urlFile . '" download
-                        class="btn btn-outline btn-outline-dashed btn-outline-primary btn-active-light-primary d-flex align-items-center p-4 mb-3">
-                        <i class="ki-outline ki-save-2 fs-2x me-4"></i>
+                    <a href="javascript:void(0)" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#pdfPreviewModal" 
+                    data-file-url="' . $urlFile . '" 
+                    data-file-name="' . $namaTampil . '"
+                    class="btn btn-outline btn-outline-dashed btn-outline-primary btn-active-light-primary d-flex align-items-center p-4 mb-3 btn-view-pdf">
+                        <i class="ki-outline ki-document fs-2x me-4"></i> <!-- Icon diubah jadi dokumen -->
                         <div class="text-start">
                             <span class="fw-bold d-block fs-6">' . $namaTampil . '</span>
-                            <span class="text-muted fs-8">Klik untuk mengunduh berkas PDF/Doc</span>
+                            <span class="text-muted fs-8">Klik untuk melihat / preview berkas PDF</span>
                         </div>
                     </a>';
                     }

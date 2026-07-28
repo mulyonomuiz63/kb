@@ -204,12 +204,11 @@
               <input type="hidden" name="kodevoucher" value="<?= $kodevoucher ?>">
               <input type="hidden" name="recaptcha_token" id="recaptcha_token">
 
-              <div class="fv-row mb-7">
-                <label class="fw-bold fs-6 mb-2">Nama Lengkap</label>
-                <input type="text" name="nama_siswa" class="form-control form-control-solid mb-3 mb-lg-0" placeholder="Contoh: Budi Santoso" required />
-              </div>
-
               <div class="row g-9 mb-7">
+                <div class="col-md-6 fv-row">
+                  <label class="fw-bold fs-6 mb-2">Nama Lengkap</label>
+                  <input type="text" name="nama_siswa" class="form-control form-control-solid mb-3 mb-lg-0" placeholder="Contoh: Budi Santoso" required />
+                </div>
                 <div class="col-md-6 fv-row">
                   <label class="fw-bold fs-6 mb-2">Jenis Kelamin</label>
                   <select name="jenis_kelamin" class="form-select form-select-solid" required>
@@ -217,6 +216,20 @@
                     <option value="Laki - Laki">Laki - Laki</option>
                     <option value="Perempuan">Perempuan</option>
                   </select>
+                </div>
+              </div>
+
+              <div class="row g-9 mb-7">
+                <div class="col-md-6 fv-row">
+                  <label class="fw-bold fs-6 mb-2">Nomor HP aktfi Atau WA Aktif</label>
+                  <input type="number" 
+                        id="hp" 
+                        name="hp" 
+                        value="<?= old('hp'); ?>" 
+                        placeholder="Nomor/WA Aktif" 
+                        class="form-control form-control-solid" 
+                        required 
+                        autocomplete="off">
                 </div>
                 <div class="col-md-6 fv-row">
                   <label class="fw-bold fs-6 mb-2">Email Aktif</label>

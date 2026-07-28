@@ -67,6 +67,16 @@ class RegisterController extends BaseController
                     'is_unique'   => 'Email sudah terdaftar.'
                 ]
             ],
+            'hp' => [
+                'rules'  => 'required|numeric|min_length[10]|max_length[15]|is_unique[siswa.hp]',
+                'errors' => [
+                    'required'   => 'Nomor HP harus diisi.',
+                    'numeric'    => 'Nomor HP hanya boleh berisi angka.',
+                    'min_length' => 'Nomor HP minimal terdiri dari 10 digit.',
+                    'max_length' => 'Nomor HP maksimal terdiri dari 15 digit.',
+                    'is_unique'  => 'Nomor HP ini sudah terdaftar, silakan gunakan nomor lain.'
+                ]
+            ],
             'nama_siswa' => [
                 'rules'  => 'required|alpha_numeric_space|min_length[3]|max_length[60]',
                 'errors' => [
@@ -76,7 +86,13 @@ class RegisterController extends BaseController
                     'max_length'          => 'Nama maksimal 60 karakter.'
                 ]
             ],
-            'password'   => 'required|min_length[6]',
+            'password'   => [
+                'rules'  => 'required|min_length[6]',
+                'errors' => [
+                    'required'            => 'Password Harus Diisi.',
+                     'min_length'         => 'Password minimal harus {param} karakter.'
+                ]
+            ]
         ];
     
         // 2. Jalankan Validasi
@@ -133,6 +149,7 @@ class RegisterController extends BaseController
             'is_active'      => 0,
             'date_created'   => time(),
             'avatar'         => 'default.jpg',
+            'hp'             => $this->request->getPost('hp'),
         );
     
         $this->siswaModel->insert($data_siswa);
@@ -197,6 +214,16 @@ class RegisterController extends BaseController
                     'is_unique'   => 'Email ini sudah terdaftar di sistem.'
                 ]
             ],
+            'hp' => [
+                'rules'  => 'required|numeric|min_length[10]|max_length[15]|is_unique[siswa.hp]',
+                'errors' => [
+                    'required'   => 'Nomor HP harus diisi.',
+                    'numeric'    => 'Nomor HP hanya boleh berisi angka.',
+                    'min_length' => 'Nomor HP minimal terdiri dari 10 digit.',
+                    'max_length' => 'Nomor HP maksimal terdiri dari 15 digit.',
+                    'is_unique'  => 'Nomor HP ini sudah terdaftar, silakan gunakan nomor lain.'
+                ]
+            ],
             'nama_siswa' => [
                 'rules'  => 'required|alpha_numeric_space|min_length[3]|max_length[60]',
                 'errors' => [
@@ -250,6 +277,7 @@ class RegisterController extends BaseController
             'is_active'      => 1, // Langsung aktif karena alur pesan/transaksi
             'date_created'   => time(),
             'avatar'         => 'default.jpg',
+            'hp'             => $this->request->getPost('hp'),
         );
     
         $this->siswaModel->insert($data_siswa);
