@@ -343,15 +343,7 @@ class MidtransController extends BaseController
                     }
 
                     // 3. Jalankan perintah insert
-                    $insertResult = $this->ikhModel->insert($dataInsertLengkap);
-
-                    // 4. Debugging (Bisa kamu hapus/komentari kalau sudah berhasil masuk DB)
-                    if ($insertResult === false) {
-                        dd([
-                            'Pesan Gagal Model' => $this->ikhModel->errors(),
-                            'Pesan Gagal DB Server' => $this->ikhModel->db->error()
-                        ]);
-                    }
+                    $this->ikhModel->insert($dataInsertLengkap);
                 }
             }
         }

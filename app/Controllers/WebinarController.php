@@ -179,7 +179,7 @@ class WebinarController extends BaseController
                     'idtransaksi' => $idtransaksi,
                     'idpaket'     => '0',
                     'idmapel'     => '0',
-                    'id_sesi'     => $rows->id_sesi,
+                    'idsesi'     => $rows->id_sesi,
                     'prince'      => $rows->harga_sesi,
                     'quantity'    => 1,
                     'name'        => $rows->nama_sesi
