@@ -9,12 +9,12 @@ class WebinarSesiModel extends Model
     protected $allowedFields    = ['idpaket', 'nama_sesi', 'deskripsi_sesi', 'waktu_mulai', 'waktu_selesai', 'harga_sesi', 'link_zoom'];
 
     // Fungsi untuk Landing Page: Mengambil data paket berserta sesi-sesinya
-    public function getPaketWebinarLengkap($idpaket = null)
+    public function getPaketWebinarLengkap($slug = null)
     {
         $builder = $this->db->table('paket'); // Asumsi nama tabel Anda 'paket'
         
-        if ($idpaket) {
-            $builder->where('paket.idpaket', $idpaket);
+        if ($slug) {
+            $builder->where('paket.slug', $slug);
         }
         
         $pakets = $builder->get()->getResult();

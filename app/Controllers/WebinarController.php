@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Libraries\Emailer;
 use App\Models\WebinarSesiModel;
 use App\Models\SiswaModel; // Sesuaikan dengan model siswa Anda
 use App\Libraries\SeoHelper;
@@ -17,6 +18,7 @@ class WebinarController extends BaseController
     protected  $paketModel;
     protected  $transaksiModel;
     protected  $detailTransaksiModel;
+    protected  $emailer;
 
     public function __construct()
     {
@@ -26,30 +28,23 @@ class WebinarController extends BaseController
         $this->paketModel = new PaketModel();
         $this->transaksiModel = new TransaksiModel();
         $this->detailTransaksiModel = new DetailTransaksiModel();
+        $this->emailer = new Emailer();
     }
 
-    public function index()
+    public function index($slug)
     {
         //untuk breadcrumb 
         $breadcrumbItems = [
             "Home" => base_url(),
         ];
 
-        $data['katalog_webinar'] = $this->sesiModel->getPaketWebinarLengkap(72);
+        $data['katalog_webinar'] = $this->sesiModel->getPaketWebinarLengkap($slug);
+        $data['siswa'] = $this->siswaModel->where('id_siswa', session()->get('id'))->first();
         // var_dump($data['katalog_webinar']);
         $schemaBreadcrumb = $this->seo->breadcrumbSchema($breadcrumbItems);
         $schema = $schemaBreadcrumb;
         $data['schema'] = $schema;
         return view('webinar/index', $data);
-    }
-    public function daftartes(){
-        $idpaket       = (int)$this->request->getPost('idpaket');
-        $email         = $this->request->getPost('email', FILTER_SANITIZE_EMAIL);
-        $nama_siswa    = esc($this->request->getPost('nama')); // Diubah jadi 'nama' menyesuaikan form HTML
-        $hp            = esc($this->request->getPost('hp'));
-        $sesi_terpilih = $this->request->getPost('id_sesi'); // Bentuknya Array
-        $dataPaket = $this->paketModel->select('paket.*, diskon.diskon, sum(webinar_sesi.harga_sesi) as harga_sesi')->join('diskon', 'paket.iddiskon = diskon.iddiskon', 'left')->join('webinar_sesi', 'paket.idpaket=webinar_sesi.idpaket')->where('paket.idpaket', $idpaket)->whereIn('webinar_sesi.id_sesi', $sesi_terpilih)->get()->getRow();
-        var_dump($dataPaket);
     }
 
     // Memproses Pendaftaran
@@ -117,10 +112,13 @@ class WebinarController extends BaseController
             $id_siswa = $cekSiswa['id_siswa'];
             
         } else {
+            $randomPassword = random_string('alnum', 8);
+            $hashedPassword = password_hash($randomPassword, PASSWORD_DEFAULT);
             $data_siswa = array(
                 'no_induk_siswa' => rand(1000000, 9000000),
                 'nama_siswa'     => $nama_siswa,
                 'email'          => $email,
+                'password'       => $hashedPassword,
                 'kelas'          => 1,
                 'role'           => 2,
                 'is_active'      => 1,
@@ -131,6 +129,27 @@ class WebinarController extends BaseController
 
             $this->siswaModel->insert($data_siswa);
             $id_siswa = $this->siswaModel->insertID();
+            $subject = 'SELAMAT ANDA BERHASIL TERDAFTAR DI KELASBREVET';
+            $message = '
+            <div style="color: #000; padding: 10px;">
+                <div style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; font-size: 20px; color: #1C3FAA; font-weight: bold;">
+                    INFORMASI PENDAFTARAN</div>
+                <br>
+                <p style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; color: #000;">Hallo ' . substr($nama_siswa, 0, 10) . ' <br>
+                    <span style="color: #000;">Kami menambahkan anda ke dalam kelasBrevet 
+                    <br>Silahkan login ke website kelasbrevet untuk mengerjakan ujian:</span></p>
+                <table style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; color: #000;">
+                    <tr><td>Nama</td><td> : ' . substr($nama_siswa, 0, 10) . '</td></tr>
+                    <tr><td>Email</td><td> : ' . $email . '</td></tr>
+                    <!-- NOTE: Password yang dikirim HARUS randomPassword asli, bukan Hash-nya -->
+                    <tr><td>Password</td><td> : ' . $randomPassword . '</td></tr> 
+                </table>
+                <br>
+                    <a href="' . base_url("auth/") . '"  style="display: inline-block; background: #1C3FAA; color: #fff;margin:10px; text-decoration: none; border-radius: 5px; text-align: center; line-height: 30px; font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; padding: 5px 20px;">Login</a>
+            </div>';
+
+            // Kirim Email
+            $this->emailer->send($email, $subject, $message);
         }
 
 
@@ -145,15 +164,24 @@ class WebinarController extends BaseController
             return redirect()->back()->with('error', 'Data Paket Webinar tidak ditemukan.');
         }
 
+        if ((float) $dataPaket->harga_sesi <= 0) {
+            $status = 'S';
+            $tgl_pembayaran = $tgl_mulai;
+        } else {
+            $status = 'M';
+            $tgl_pembayaran = null;
+        }
+
         $dataInsert = [
             'idsiswa'      => $id_siswa,
             'nominal'      => $dataPaket->harga_sesi,
             'diskon'       => $dataPaket->diskon,
-            'status'       => 'M', // Menunggu
+            'status'       => $status, // Menunggu
             'v_ujian'      => '0', // Menunggu
             'v_materi'     => '0', // Menunggu
             'tgl_exp'      => $tgl_exp,
             'tgl_drop'     => $tgl_exp,
+            'tgl_pembayaran' => $tgl_pembayaran,
             'jenis_bayar'  => 'online',
             'jenis_paket'  => $dataPaket->jenis_paket
         ];
@@ -189,75 +217,78 @@ class WebinarController extends BaseController
 
 
             // 4. Pembayaran Midtrans
-            \Midtrans\Config::$serverKey    = setting('midtrans_server_key');
-            \Midtrans\Config::$isProduction = filter_var(setting('midtrans_is_production'), FILTER_VALIDATE_BOOLEAN);
-            \Midtrans\Config::$isSanitized  = true;
-            \Midtrans\Config::$is3ds        = true;
+            //kondisi jika paket hanya yang di pilih gratis
+            if ((float) $dataPaket->harga_sesi >= 0) {
+                \Midtrans\Config::$serverKey    = setting('midtrans_server_key');
+                \Midtrans\Config::$isProduction = filter_var(setting('midtrans_is_production'), FILTER_VALIDATE_BOOLEAN);
+                \Midtrans\Config::$isSanitized  = true;
+                \Midtrans\Config::$is3ds        = true;
 
-            // PERBAIKAN LOGIKA: Hanya ambil data yang baru saja diinsert (tanpa filter status P karena kita simpan dengan status M)
-            $data = $this->transaksiModel
-                ->join('siswa', 'transaksi.idsiswa=siswa.id_siswa')
-                ->where('transaksi.idtransaksi', $idtransaksi)
-                ->get()->getRowObject();
+                // PERBAIKAN LOGIKA: Hanya ambil data yang baru saja diinsert (tanpa filter status P karena kita simpan dengan status M)
+                $data = $this->transaksiModel
+                    ->join('siswa', 'transaksi.idsiswa=siswa.id_siswa')
+                    ->where('transaksi.idtransaksi', $idtransaksi)
+                    ->get()->getRowObject();
 
-            $diskon         = ($data->nominal * $data->diskon) / 100;
-            $totalDiskon    = $data->nominal - $diskon;
-            // Asumsi kolom voucher ada di tabel, jika tidak ada, ubah $data->voucher menjadi 0
-            $voucher        = isset($data->voucher) ? $data->voucher : 0;
-            $diskon_voucher = ($totalDiskon * $voucher) / 100;
-            $gross_amount   = round($totalDiskon - $diskon_voucher);
+                $diskon         = ($data->nominal * $data->diskon) / 100;
+                $totalDiskon    = $data->nominal - $diskon;
+                // Asumsi kolom voucher ada di tabel, jika tidak ada, ubah $data->voucher menjadi 0
+                $voucher        = isset($data->voucher) ? $data->voucher : 0;
+                $diskon_voucher = ($totalDiskon * $voucher) / 100;
+                $gross_amount   = round($totalDiskon - $diskon_voucher);
 
-            $detailTransaksi = $this->detailTransaksiModel->where('idtransaksi', $idtransaksi)->get()->getResultObject();
-            $dataItem = array();
+                $detailTransaksi = $this->detailTransaksiModel->where('idtransaksi', $idtransaksi)->get()->getResultObject();
+                $dataItem = array();
 
-            foreach ($detailTransaksi as $rows) {
-                $price = (int)$rows->prince;
-                $dataItem[] = array(
-                    'id'       => $rows->iddetailtransaksi,
-                    'price'    => $price,
-                    'quantity' => (int)$rows->quantity,
-                    'name'     => substr($rows->name, 0, 50)
-                );
-                $total_item_price += ($price * (int)$rows->quantity);
-            }
+                foreach ($detailTransaksi as $rows) {
+                    $price = (int)$rows->prince;
+                    $dataItem[] = array(
+                        'id'       => $rows->iddetailtransaksi,
+                        'price'    => $price,
+                        'quantity' => (int)$rows->quantity,
+                        'name'     => substr($rows->name, 0, 50)
+                    );
+                    $total_item_price += ($price * (int)$rows->quantity);
+                }
 
-            // Penyesuaian diskon agar item_details sinkron dengan gross_amount
-            $selisih = $gross_amount - $total_item_price;
-            if ($selisih != 0) {
-                $dataItem[] = array(
-                    'id'       => 'DISC-VOUCHER',
-                    'price'    => $selisih,
-                    'quantity' => 1,
-                    'name'     => 'Potongan Harga / Voucher'
-                );
-            }
+                // Penyesuaian diskon agar item_details sinkron dengan gross_amount
+                $selisih = $gross_amount - $total_item_price;
+                if ($selisih != 0) {
+                    $dataItem[] = array(
+                        'id'       => 'DISC-VOUCHER',
+                        'price'    => $selisih,
+                        'quantity' => 1,
+                        'name'     => 'Potongan Harga / Voucher'
+                    );
+                }
 
-            $params = array(
-                'transaction_details' => array(
-                    // Tambahkan time() agar ID pesanan Unik jika user mencoba transaksi ulang
-                    'order_id'     => $data->idtransaksi . '-' . time(),
-                    'gross_amount' => $gross_amount,
-                ),
-                'item_details'     => $dataItem,
-                'customer_details' => array(
-                    'first_name' => $data->nama_siswa,
-                    'email'      => $data->email,
-                    'phone'      => $data->hp,
-                    'billing_address' => array(
-                        "first_name"   => $data->nama_siswa,
-                        "email"        => $data->email,
-                        "phone"        => $data->hp,
-                        "country_code" => "IDN"
+                $params = array(
+                    'transaction_details' => array(
+                        // Tambahkan time() agar ID pesanan Unik jika user mencoba transaksi ulang
+                        'order_id'     => $data->idtransaksi . '-' . time(),
+                        'gross_amount' => $gross_amount,
                     ),
-                ),
-            );
-            $snapToken = \Midtrans\Snap::getSnapToken($params);
+                    'item_details'     => $dataItem,
+                    'customer_details' => array(
+                        'first_name' => $data->nama_siswa,
+                        'email'      => $data->email,
+                        'phone'      => $data->hp,
+                        'billing_address' => array(
+                            "first_name"   => $data->nama_siswa,
+                            "email"        => $data->email,
+                            "phone"        => $data->hp,
+                            "country_code" => "IDN"
+                        ),
+                    ),
+                );
+                $snapToken = \Midtrans\Snap::getSnapToken($params);
 
-            // Update database dengan Token
-            $this->transaksiModel
-                ->where('idtransaksi', $idtransaksi)
-                ->set('token', $snapToken)
-                ->update();
+                // Update database dengan Token
+                $this->transaksiModel
+                    ->where('idtransaksi', $idtransaksi)
+                    ->set('token', $snapToken)
+                    ->update();
+            }
         }
 
         $db->transComplete(); // Selesai query

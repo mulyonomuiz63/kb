@@ -24,6 +24,7 @@ class HomeController extends BaseController
         $this->data['affiliate'] =  $this->affiliateModel->where('user_id', session()->get('id'))->first();
         
         $this->data['paket'] = $this->paketModel->getAll();
+        $this->data['paketWebinar'] = $this->paketModel->getPaketWebinar();
         // Pastikan DB instance tersedia di view jika Anda melakukan query di dalam loop
         $this->data['db'] = \Config\Database::connect();
 

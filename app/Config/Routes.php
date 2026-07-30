@@ -15,9 +15,9 @@ use CodeIgniter\Router\RouteCollection;
 $routes->set404Override('App\Controllers\Errors::show404');
 
 $routes->group('webinar', function ($routes) {
-    $routes->get('/', 'WebinarController::index');
     $routes->post('daftar', 'WebinarController::daftar');
     $routes->get('invoice', 'WebinarController::invoice');
+    $routes->get('(:segment)', 'WebinarController::index/$1');
 });
 
 $routes->group('auth', ['filter' => 'isGuest'], function ($routes) {

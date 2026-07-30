@@ -64,6 +64,18 @@ class PaketModel extends Model
             ->groupBy('paket.idpaket')
             ->get()->getResultObject();
     }
+    public function getPaketWebinar()
+    {
+        return $this
+            ->select('paket.*, b.diskon, c.*')
+            ->join('diskon b', 'b.iddiskon = paket.iddiskon')
+            ->join('webinar_sesi c', 'c.idpaket=paket.idpaket')
+            ->where('paket.status', 1)
+            ->orderBy('paket.is_pinned', 'DESC')
+            ->orderBy('paket.sort_order', 'asc')
+            ->groupBy('paket.idpaket')
+            ->get()->getResultObject();
+    }
     public function getById($id)
     {
         return $this

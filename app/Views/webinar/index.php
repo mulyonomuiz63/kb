@@ -278,19 +278,19 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar[0] : null;
 
                                 <div class="mb-3">
                                     <label class="form-label fw-semibold">Nama Lengkap <span class="text-danger">*</span></label>
-                                    <input type="text" name="nama" value="<?= esc(old('nama')) ?>" class="form-control form-control-lg" placeholder="Masukkan nama lengkap" required>
+                                    <input type="text" name="nama" value="<?= session()->get('id') && isset($siswa) ? esc($siswa['nama_siswa']) : esc(old('nama')) ?>" class="form-control form-control-lg" placeholder="Masukkan nama lengkap" required <?= session()->get('id') ? 'readonly style="cursor: not-allowed; background-color: #e9ecef;"' : '' ?>>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label fw-semibold">Alamat Email <span class="text-danger">*</span></label>
-                                    <input type="email" name="email" value="<?= esc(old('email')) ?>" class="form-control form-control-lg" placeholder="contoh@email.com" required>
+                                    <input type="email" name="email" value="<?= session()->get('id') && isset($siswa) ? esc($siswa['email']) : esc(old('email')) ?>" class="form-control form-control-lg" placeholder="contoh@email.com" required <?= session()->get('id') ? 'readonly style="cursor: not-allowed; background-color: #e9ecef;"' : '' ?>>
                                     <small class="text-muted">Akses zoom dan materi akan dikirim ke email ini.</small>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label fw-semibold">Nomor WhatsApp <span class="text-danger">*</span></label>
                                     <div class="input-group">
-                                        <input type="tel" name="hp" value="<?= esc(old('hp')) ?>" class="form-control form-control-lg" placeholder="81234567890" pattern="[0-9]+" minlength="9" maxlength="15" required autocomplete="off">
+                                        <input type="tel" name="hp" value="<?= session()->get('id') && isset($siswa) ? esc($siswa['hp']) : esc(old('hp')) ?>" class="form-control form-control-lg" placeholder="81234567890" pattern="[0-9]+" minlength="9" maxlength="15" required autocomplete="off" <?= session()->get('id') ? 'readonly style="cursor: not-allowed; background-color: #e9ecef;"' : '' ?>>
                                     </div>
                                 </div>
                             </div>
@@ -307,18 +307,30 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar[0] : null;
                                 <!-- Daftar Sesi (Di-loop dari database) -->
                                 <div class="d-flex flex-column gap-3 mb-4">
                                     <?php if ($paketWebinar && !empty($paketWebinar->sesi)) : ?>
-                                        <?php foreach ($paketWebinar->sesi as $sesi) : ?>
+                                        <?php
+                                        $currentDateTime = date('Y-m-d H:i:s');
+                                        foreach ($paketWebinar->sesi as $sesi) :
+                                            $isExpired = (strtotime($sesi['waktu_mulai']) <= strtotime($currentDateTime));
+                                            $isFree = ($sesi['harga_sesi'] <= 0); // Pengecekan harga 0
+                                        ?>
                                             <!-- Looping Sesi -->
-                                            <label class="w-100 m-0">
-                                                <input type="checkbox" name="id_sesi[]" value="<?= esc($sesi['id_sesi']) ?>" class="session-checkbox calculate-price" data-price="<?= round($sesi['harga_sesi']) ?>">
-                                                <div class="session-card p-3 d-flex align-items-center justify-content-between">
+                                            <label class="w-100 m-0 <?= $isExpired ? 'opacity-50' : '' ?>" <?= $isExpired ? 'style="cursor: not-allowed;"' : ($isFree ? 'style="cursor: default;"' : '') ?>>
+                                                <input type="checkbox" name="id_sesi[]" value="<?= esc($sesi['id_sesi']) ?>" class="session-checkbox calculate-price" data-price="<?= round($sesi['harga_sesi']) ?>" <?= $isExpired ? 'disabled' : '' ?> <?= $isFree ? 'checked onclick="return false;"' : '' ?>>
+                                                <div class="session-card p-3 d-flex align-items-center justify-content-between <?= $isExpired ? 'bg-light' : '' ?>">
                                                     <div>
                                                         <h6 class="fw-bold mb-1"><?= esc($sesi['nama_sesi']) ?></h6>
                                                         <small class="text-muted"><i class="far fa-calendar-alt me-1"></i> <?= date('d M Y, H:i', strtotime($sesi['waktu_mulai'])) ?> WIB</small>
+                                                        <?php if ($isExpired): ?>
+                                                            <span class="badge bg-danger ms-2" style="font-size: 0.65rem;">Sesi Telah Dimulai/Berakhir</span>
+                                                        <?php elseif ($isFree): ?>
+                                                            <span class="badge bg-success ms-2" style="font-size: 0.65rem;">Gratis (Otomatis Terpilih)</span>
+                                                        <?php endif; ?>
                                                     </div>
                                                     <div class="text-end">
-                                                        <span class="fw-bold text-dark d-block">Rp <?= number_format($sesi['harga_sesi'], 0, ',', '.') ?></span>
-                                                        <i class="fa-solid fa-circle-check fs-4 check-icon text-muted"></i>
+                                                        <span class="fw-bold <?= $isExpired ? 'text-muted text-decoration-line-through' : 'text-dark' ?> d-block">
+                                                            <?= $isFree ? 'Gratis' : 'Rp ' . number_format($sesi['harga_sesi'], 0, ',', '.') ?>
+                                                        </span>
+                                                        <i class="fa-solid fa-circle-check fs-4 check-icon <?= $isExpired ? 'text-secondary' : ($isFree ? 'text-primary' : 'text-muted') ?>"></i>
                                                     </div>
                                                 </div>
                                             </label>
@@ -499,8 +511,13 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar[0] : null;
             function calculateTotal() {
                 let total = 0;
                 let checkedCount = 0;
+                let activeCount = 0; // Tambahan: Menghitung total checkbox yang aktif/bisa dipilih
 
                 checkboxes.forEach(function(cb) {
+                    if (!cb.disabled) {
+                        activeCount++; // Hanya hitung sesi yang belum kadaluarsa
+                    }
+
                     if (cb.checked) {
                         total += parseInt(cb.getAttribute('data-price'));
                         checkedCount++;
@@ -521,8 +538,8 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar[0] : null;
                     btnSubmit.classList.add('btn-secondary');
                 }
 
-                // Update teks tombol Select All
-                if (checkedCount === checkboxes.length && checkboxes.length > 0) {
+                // Update teks tombol Select All (Bandingkan jumlah centang dengan jumlah sesi yang aktif saja)
+                if (checkedCount === activeCount && activeCount > 0) {
                     btnSelectAll.innerText = "Batalkan Pilihan";
                     btnSelectAll.classList.replace('btn-outline-primary', 'btn-danger');
                 } else {
@@ -541,14 +558,18 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar[0] : null;
                 btnSelectAll.addEventListener('click', function() {
                     let allChecked = true;
 
-                    // Cek apakah semua sudah tercentang
+                    // Cek apakah semua sesi YANG AKTIF sudah tercentang
                     checkboxes.forEach(function(cb) {
-                        if (!cb.checked) allChecked = false;
+                        if (!cb.disabled && !cb.checked) {
+                            allChecked = false;
+                        }
                     });
 
-                    // Jika semua sudah tercentang, hilangkan centang semua. Jika belum, centang semua.
+                    // Jika semua sudah tercentang, hilangkan centang semua. Jika belum, centang semua (HANYA SESI AKTIF).
                     checkboxes.forEach(function(cb) {
-                        cb.checked = !allChecked;
+                        if (!cb.disabled) {
+                            cb.checked = !allChecked;
+                        }
                     });
 
                     calculateTotal();

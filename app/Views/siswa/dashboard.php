@@ -147,8 +147,8 @@
         // Cek apakah ada paket webinar/pelatihan aktif yang waktu selesainya belum terlewati
         $currentDateTime = date('Y-m-d H:i:s');
         $activeWebinar = null;
-        if (!empty($paket)) {
-            foreach ($paket as $p) {
+        if (!empty($paketWebinar)) {
+            foreach ($paketWebinar as $p) {
                 // Mengecek sesi webinar berdasarkan idpaket pada tabel webinar_sesi
                 $checkSesi = $db->query("SELECT * FROM webinar_sesi WHERE idpaket = ? AND waktu_selesai >= ? ORDER BY waktu_selesai ASC LIMIT 1", [$p->idpaket, $currentDateTime])->getRow();
                 if ($checkSesi) {
@@ -164,23 +164,65 @@
 
         <?php if ($activeWebinar): ?>
             <!-- TAMPILAN KHUSUS PELATIHAN/WEBINAR AKTIF BERDASARKAN WAKTU SELESAI -->
-            <div class="card bgi-position-y-bottom bgi-position-x-end bgi-no-repeat bgi-size-cover min-h-250px bg-body mb-5 mb-xl-8 border border-primary"
-                style="background-position: 100% 50px; background-size: 500px auto; background-image:url('<?= base_url('') ?>')" dir="ltr">
-                <div class="card-body d-flex flex-column justify-content-center ps-lg-15">
-                    <span class="badge bg-primary px-3 py-2 rounded-pill mb-3 w-max-content">Pelatihan/Webinar Berlangsung</span>
-                    <h3 class="text-dark fs-2qx fw-bold mb-2"><?= $activeWebinar['paket']->nama_paket ?></h3>
-                    <div class="fs-5 fw-semibold text-gray-600 mb-4">
-                        Berakhir pada: <span class="text-danger fw-bold"><?= date('d M Y, H:i', strtotime($activeWebinar['sesi']->waktu_selesai)) ?> WIB</span>
-                    </div>
-                    <div class="m-0 d-flex flex-column flex-sm-row">
-                        <a href="<?= base_url('bimbel/' . $activeWebinar['paket']->slug) ?>"
-                            class="btn btn-primary fw-bold px-8 py-3 mb-2 mb-sm-0 w-100 w-sm-auto">
-                            Ikuti Pelatihan Sekarang
-                        </a>
-                        <a href="<?= base_url('list-bimbel') ?>"
-                            class="btn btn-light-primary fw-bold px-8 py-3 ms-0 ms-sm-2 w-100 w-sm-auto">
-                            Lihat Paket Lain
-                        </a>
+            <div class="card border-0 shadow-sm rounded-4 mb-5 mb-xl-8 overflow-hidden">
+                <div class="card-body p-0 d-flex flex-column justify-content-center bgi-no-repeat bgi-size-cover bgi-position-x-end"
+                    style="background-position: right bottom; background-size: auto 100%; background-image:url('<?= base_url('assets-landing/images/bg-banner.png') /* Ganti dengan URL gambar Anda jika perlu */ ?>');" dir="ltr">
+
+                    <!-- Container konten dengan background gradient putih agar teks tetap tajam terbaca -->
+                    <div class="p-10 p-lg-15 w-100 h-100" style="background: linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0.95) 50%, rgba(255,255,255,0) 100%);">
+
+                        <!-- Status Badges -->
+                        <div class="d-flex align-items-center flex-wrap gap-3 mb-4">
+                            <span class="badge badge-light-primary fw-bolder px-4 py-2 rounded-pill">
+                                <i class="ki-outline ki-screen fs-4 text-primary me-2"></i> Webinar Sedang Aktif
+                            </span>
+                            <span class="badge badge-light-danger fw-bolder px-4 py-2 rounded-pill">
+                                <i class="ki-outline ki-timer fs-4 text-danger me-2"></i> Berakhir: <?= date('d M Y, H:i', strtotime($activeWebinar['sesi']->waktu_selesai)) ?> WIB
+                            </span>
+                        </div>
+
+                        <!-- Judul Paket -->
+                        <h2 class="text-dark fw-bolder fs-2qx mb-5 w-lg-75 w-100" style="line-height: 1.3;">
+                            <?= esc($activeWebinar['paket']->nama_paket) ?>
+                        </h2>
+
+                        <!-- Info Detail Sesi (Desain Box Highlight) -->
+                        <div class="border border-dashed border-primary border-opacity-50 rounded-4 bg-light-primary p-6 mb-7 w-lg-700px w-100 shadow-sm">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="symbol symbol-45px me-4">
+                                    <span class="symbol-label bg-primary shadow-sm">
+                                        <i class="ki-outline ki-calendar-tick fs-2 text-white"></i>
+                                    </span>
+                                </div>
+                                <div>
+                                    <h4 class="text-primary fw-bolder mb-1"><?= esc($activeWebinar['sesi']->nama_sesi) ?></h4>
+                                    <div class="text-gray-700 fw-semibold fs-6">
+                                        <i class="ki-outline ki-time fs-5 me-1"></i>
+                                        <?= date('d M Y', strtotime($activeWebinar['sesi']->waktu_mulai)) ?> <span class="mx-1">|</span>
+                                        <?= date('H:i', strtotime($activeWebinar['sesi']->waktu_mulai)) ?> - <?= date('H:i', strtotime($activeWebinar['sesi']->waktu_selesai)) ?> WIB
+                                    </div>
+                                </div>
+                            </div>
+
+                            <?php if (!empty($activeWebinar['sesi']->deskripsi_sesi)): ?>
+                                <div class="text-gray-600 fw-medium fs-6 mt-4 border-top border-primary border-opacity-25 pt-4">
+                                    <i class="ki-outline ki-information fs-5 me-1 text-primary"></i> <?= esc($activeWebinar['sesi']->deskripsi_sesi) ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="m-0 d-flex flex-column flex-sm-row gap-3">
+                            <a href="<?= base_url('webinar/' . $activeWebinar['paket']->slug) ?>"
+                                class="btn btn-primary fw-bold px-8 py-3 w-100 w-sm-auto shadow-sm">
+                                <i class="ki-outline ki-entrance-left fs-3 me-2"></i> Ikuti Pelatihan
+                            </a>
+                            <a href="<?= base_url('list-bimbel') ?>"
+                                class="btn btn-light-primary fw-bold px-8 py-3 w-100 w-sm-auto">
+                                Lihat Paket Lain
+                            </a>
+                        </div>
+
                     </div>
                 </div>
             </div>
