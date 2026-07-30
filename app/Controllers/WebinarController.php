@@ -42,9 +42,18 @@ class WebinarController extends BaseController
         $data['schema'] = $schema;
         return view('webinar/index', $data);
     }
+    public function daftar(){
+        $idpaket       = (int)$this->request->getPost('idpaket');
+        $email         = $this->request->getPost('email', FILTER_SANITIZE_EMAIL);
+        $nama_siswa    = esc($this->request->getPost('nama')); // Diubah jadi 'nama' menyesuaikan form HTML
+        $hp            = esc($this->request->getPost('hp'));
+        $sesi_terpilih = $this->request->getPost('id_sesi'); // Bentuknya Array
+        $dataPaket = $this->paketModel->select('paket.*, diskon.diskon, sum(webinar_sesi.harga_sesi) as harga_sesi')->join('diskon', 'paket.iddiskon = diskon.iddiskon', 'left')->join('webinar_sesi', 'paket.idpaket=webinar_sesi.idpaket')->where('paket.idpaket', $idpaket)->whereIn('webinar_sesi.id_sesi', $sesi_terpilih)->get()->getRow();
+        var_dump($dataPaket);
+    }
 
     // Memproses Pendaftaran
-    public function daftar()
+    public function daftara()
     {
         // 1. Sanitasi dan Casting Input untuk mencegah manipulasi data
         $idpaket       = (int)$this->request->getPost('idpaket');
@@ -148,27 +157,13 @@ class WebinarController extends BaseController
         $tgl_exp   = date('Y-m-d H:i:s', strtotime('+ 1 day', strtotime($tgl_mulai)));
 
         // Keamanan: Pastikan paket yang dibeli ada di database
-        $dataPaket = $this->paketModel->where('paket.idpaket', $idpaket)->get()->getRow();
+        $dataPaket = $this->paketModel->select('paket.*, diskon.diskon, sum(webinar_sesi.harga_sesi) as harga_sesi')->join('diskon', 'paket.iddiskon = diskon.iddiskon', 'left')->join('webinar_sesi', 'paket.idpaket=webinar_sesi.idpaket')->where('paket.idpaket', $idpaket)->whereIn('webinar_sesi.id_sesi', $sesi_terpilih)->get()->getRow();
 
         if (empty($dataPaket)) {
             return redirect()->back()->with('error', 'Data Paket Webinar tidak ditemukan.');
         }
 
-        $dataInsert = [
-            'idsiswa'      => $cekSiswa['id_siswa'],
-            'nominal'      => $dataPaket->nominal_paket,
-            'diskon'       => '0',
-            'status'       => 'M', // Menunggu
-            'v_ujian'      => '0', // Menunggu
-            'v_materi'     => '0', // Menunggu
-            'tgl_exp'      => $tgl_exp,
-            'tgl_drop'     => $tgl_exp,
-            'jenis_bayar'  => 'online',
-            'jenis_paket'  => $dataPaket->jenis_paket
-        ];
-
-        $this->transaksiModel->insert($dataInsert);
-        $idtransaksi = $this->transaksiModel->insertID();
+        
 
         // PERBAIKAN KRUSIAL: Filter sesi HANYA mengambil yang dicentang oleh user
         $detailPaket = $this->sesiModel
@@ -179,6 +174,22 @@ class WebinarController extends BaseController
         if (!empty($detailPaket) && is_array($detailPaket)) {
             $detailTransaksi = [];
             $total_item_price = 0;
+
+            $dataInsert = [
+                'idsiswa'      => $cekSiswa['id_siswa'],
+                'nominal'      => $dataPaket->harga_sesi,
+                'diskon'       => $dataPaket->diskon,
+                'status'       => 'M', // Menunggu
+                'v_ujian'      => '0', // Menunggu
+                'v_materi'     => '0', // Menunggu
+                'tgl_exp'      => $tgl_exp,
+                'tgl_drop'     => $tgl_exp,
+                'jenis_bayar'  => 'online',
+                'jenis_paket'  => $dataPaket->jenis_paket
+            ];
+
+            $this->transaksiModel->insert($dataInsert);
+            $idtransaksi = $this->transaksiModel->insertID();
 
             foreach ($detailPaket as $rows) {
                 $detailTransaksi[] = [
@@ -275,5 +286,15 @@ class WebinarController extends BaseController
         // 5. Redirect ke Invoice sambil membawa Token
         // Parameter with() menyimpan variabel secara sementara untuk dipanggil di halaman Invoice
         return redirect()->to('webinar/invoice')->with('success', 'Pendaftaran berhasil, silakan selesaikan pembayaran!')->with('snapToken' , $snapToken);
+    }
+
+    public function invoice()
+    {
+        // Jika tidak ada token (misal user asal buka URL /invoice), kembalikan ke home
+        if (!session()->getFlashdata('snapToken') && !session()->getFlashdata('success')) {
+            return redirect()->to('/webinar');
+        }
+
+        return view('webinar/invoice');
     }
 }
