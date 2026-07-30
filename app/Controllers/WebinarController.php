@@ -177,7 +177,7 @@ class WebinarController extends BaseController
             foreach ($detailPaket as $rows) {
                 $detailTransaksi[] = [
                     'idtransaksi' => $idtransaksi,
-                    'idpaket'     => '0',
+                    'idpaket'     => $idpaket,
                     'idmapel'     => '0',
                     'idsesi'     => $rows->id_sesi,
                     'prince'      => $rows->harga_sesi,
