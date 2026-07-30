@@ -42,7 +42,7 @@ class WebinarController extends BaseController
         $data['schema'] = $schema;
         return view('webinar/index', $data);
     }
-    public function daftar(){
+    public function daftartes(){
         $idpaket       = (int)$this->request->getPost('idpaket');
         $email         = $this->request->getPost('email', FILTER_SANITIZE_EMAIL);
         $nama_siswa    = esc($this->request->getPost('nama')); // Diubah jadi 'nama' menyesuaikan form HTML
@@ -53,7 +53,7 @@ class WebinarController extends BaseController
     }
 
     // Memproses Pendaftaran
-    public function daftara()
+    public function daftar()
     {
         // 1. Sanitasi dan Casting Input untuk mencegah manipulasi data
         $idpaket       = (int)$this->request->getPost('idpaket');
@@ -115,14 +115,7 @@ class WebinarController extends BaseController
         $cekSiswa = $this->siswaModel->where('email', $email)->first();
         if ($cekSiswa) {
             $id_siswa = $cekSiswa['id_siswa'];
-            $datasession = [
-                'id'       => $cekSiswa['id_siswa'],
-                'email'    => $cekSiswa['email'],
-                'nama'     => $cekSiswa['nama_siswa'],
-                'role'     => $cekSiswa['role'],
-                'avatar'   => $cekSiswa['avatar'],
-            ];
-            session()->set($datasession);
+            
         } else {
             $data_siswa = array(
                 'no_induk_siswa' => rand(1000000, 9000000),
@@ -138,17 +131,6 @@ class WebinarController extends BaseController
 
             $this->siswaModel->insert($data_siswa);
             $id_siswa = $this->siswaModel->insertID();
-
-            $userBaru = $this->siswaModel->find($id_siswa);
-
-            $datasession = [
-                'id'       => $userBaru['id_siswa'],
-                'email'    => $userBaru['email'],
-                'nama'     => $userBaru['nama_siswa'],
-                'role'     => $userBaru['role'],
-                'avatar'   => $userBaru['avatar'],
-            ];
-            session()->set($datasession);
         }
 
 
@@ -163,6 +145,22 @@ class WebinarController extends BaseController
             return redirect()->back()->with('error', 'Data Paket Webinar tidak ditemukan.');
         }
 
+        $dataInsert = [
+            'idsiswa'      => $id_siswa,
+            'nominal'      => $dataPaket->harga_sesi,
+            'diskon'       => $dataPaket->diskon,
+            'status'       => 'M', // Menunggu
+            'v_ujian'      => '0', // Menunggu
+            'v_materi'     => '0', // Menunggu
+            'tgl_exp'      => $tgl_exp,
+            'tgl_drop'     => $tgl_exp,
+            'jenis_bayar'  => 'online',
+            'jenis_paket'  => $dataPaket->jenis_paket
+        ];
+
+        $this->transaksiModel->insert($dataInsert);
+        $idtransaksi = $this->transaksiModel->insertID();
+
         
 
         // PERBAIKAN KRUSIAL: Filter sesi HANYA mengambil yang dicentang oleh user
@@ -174,22 +172,7 @@ class WebinarController extends BaseController
         if (!empty($detailPaket) && is_array($detailPaket)) {
             $detailTransaksi = [];
             $total_item_price = 0;
-
-            $dataInsert = [
-                'idsiswa'      => $cekSiswa['id_siswa'],
-                'nominal'      => $dataPaket->harga_sesi,
-                'diskon'       => $dataPaket->diskon,
-                'status'       => 'M', // Menunggu
-                'v_ujian'      => '0', // Menunggu
-                'v_materi'     => '0', // Menunggu
-                'tgl_exp'      => $tgl_exp,
-                'tgl_drop'     => $tgl_exp,
-                'jenis_bayar'  => 'online',
-                'jenis_paket'  => $dataPaket->jenis_paket
-            ];
-
-            $this->transaksiModel->insert($dataInsert);
-            $idtransaksi = $this->transaksiModel->insertID();
+            
 
             foreach ($detailPaket as $rows) {
                 $detailTransaksi[] = [
