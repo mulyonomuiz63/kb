@@ -90,12 +90,12 @@
                     onSuccess: function(result){
                         // Aksi jika pembayaran berhasil
                         alert("Pembayaran berhasil!");
-                        window.location.href = "<?= base_url('member/dashboard') ?>"; // Redirect ke dashboard user
+                        window.location.href = "<?= base_url('/') ?>"; // Redirect ke dashboard user
                     },
                     onPending: function(result){
                         // Aksi jika pembayaran tertunda (menunggu transfer bank/minimarket)
                         alert("Menunggu pembayaran Anda!");
-                        window.location.href = "<?= base_url('member/transaksi') ?>"; // Redirect ke riwayat transaksi
+                        window.location.href = "<?= base_url('/') ?>"; // Redirect ke riwayat transaksi
                     },
                     onError: function(result){
                         // Aksi jika pembayaran gagal
