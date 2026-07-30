@@ -143,23 +143,67 @@
         </div>
     </div>
     <div class="col-xl-8 ps-xl-12">
-        <div class="card bgi-position-y-bottom bgi-position-x-end bgi-no-repeat bgi-size-cover min-h-250px bg-body mb-5 mb-xl-8"
-            style="background-position: 100% 50px; background-size: 500px auto; background-image:url('<?= base_url('') ?>')" dir="ltr">
-            <div class="card-body d-flex flex-column justify-content-center ps-lg-15">
-                <h3 class="text-dark fs-2qx fw-bold mb-4">Siap Menjadi Ahli Pajak <br /><span class="text-primary">Profesional?</span></h3>
-                <div class="fs-5 fw-semibold text-gray-600 mb-7">Tingkatkan kompetensi Anda dengan materi terupdate dan instruktur berpengalaman.</div>
-                <div class="m-0 d-flex flex-column flex-sm-row">
-                    <a href="<?= base_url('sw-siswa/materi') ?>"
-                        class="btn btn-primary fw-bold px-8 py-3 mb-2 mb-sm-0 w-100 w-sm-auto">
-                        Mulai Belajar Sekarang
-                    </a>
-                    <a href="<?= base_url('list-bimbel') ?>"
-                        class="btn btn-light-primary fw-bold px-8 py-3 ms-0 ms-sm-2 w-100 w-sm-auto">
-                        Lihat Paket Lain
-                    </a>
+        <?php
+        // Cek apakah ada paket webinar/pelatihan aktif yang waktu selesainya belum terlewati
+        $currentDateTime = date('Y-m-d H:i:s');
+        $activeWebinar = null;
+        if (!empty($paket)) {
+            foreach ($paket as $p) {
+                // Mengecek sesi webinar berdasarkan idpaket pada tabel webinar_sesi
+                $checkSesi = $db->query("SELECT * FROM webinar_sesi WHERE idpaket = ? AND waktu_selesai >= ? ORDER BY waktu_selesai ASC LIMIT 1", [$p->idpaket, $currentDateTime])->getRow();
+                if ($checkSesi) {
+                    $activeWebinar = [
+                        'paket' => $p,
+                        'sesi' => $checkSesi
+                    ];
+                    break;
+                }
+            }
+        }
+        ?>
+
+        <?php if ($activeWebinar): ?>
+            <!-- TAMPILAN KHUSUS PELATIHAN/WEBINAR AKTIF BERDASARKAN WAKTU SELESAI -->
+            <div class="card bgi-position-y-bottom bgi-position-x-end bgi-no-repeat bgi-size-cover min-h-250px bg-body mb-5 mb-xl-8 border border-primary"
+                style="background-position: 100% 50px; background-size: 500px auto; background-image:url('<?= base_url('') ?>')" dir="ltr">
+                <div class="card-body d-flex flex-column justify-content-center ps-lg-15">
+                    <span class="badge bg-primary px-3 py-2 rounded-pill mb-3 w-max-content">Pelatihan/Webinar Berlangsung</span>
+                    <h3 class="text-dark fs-2qx fw-bold mb-2"><?= $activeWebinar['paket']->nama_paket ?></h3>
+                    <div class="fs-5 fw-semibold text-gray-600 mb-4">
+                        Berakhir pada: <span class="text-danger fw-bold"><?= date('d M Y, H:i', strtotime($activeWebinar['sesi']->waktu_selesai)) ?> WIB</span>
+                    </div>
+                    <div class="m-0 d-flex flex-column flex-sm-row">
+                        <a href="<?= base_url('bimbel/' . $activeWebinar['paket']->slug) ?>"
+                            class="btn btn-primary fw-bold px-8 py-3 mb-2 mb-sm-0 w-100 w-sm-auto">
+                            Ikuti Pelatihan Sekarang
+                        </a>
+                        <a href="<?= base_url('list-bimbel') ?>"
+                            class="btn btn-light-primary fw-bold px-8 py-3 ms-0 ms-sm-2 w-100 w-sm-auto">
+                            Lihat Paket Lain
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
+        <?php else: ?>
+            <!-- TAMPILAN KODE SEBELUMNYA APABILA WAKTU SUDAH HABIS ATAU BUKAN PAKET WEBINAR AKTIF -->
+            <div class="card bgi-position-y-bottom bgi-position-x-end bgi-no-repeat bgi-size-cover min-h-250px bg-body mb-5 mb-xl-8"
+                style="background-position: 100% 50px; background-size: 500px auto; background-image:url('<?= base_url('') ?>')" dir="ltr">
+                <div class="card-body d-flex flex-column justify-content-center ps-lg-15">
+                    <h3 class="text-dark fs-2qx fw-bold mb-4">Siap Menjadi Ahli Pajak <br /><span class="text-primary">Profesional?</span></h3>
+                    <div class="fs-5 fw-semibold text-gray-600 mb-7">Tingkatkan kompetensi Anda dengan materi terupdate dan instruktur berpengalaman.</div>
+                    <div class="m-0 d-flex flex-column flex-sm-row">
+                        <a href="<?= base_url('sw-siswa/materi') ?>"
+                            class="btn btn-primary fw-bold px-8 py-3 mb-2 mb-sm-0 w-100 w-sm-auto">
+                            Mulai Belajar Sekarang
+                        </a>
+                        <a href="<?= base_url('list-bimbel') ?>"
+                            class="btn btn-light-primary fw-bold px-8 py-3 ms-0 ms-sm-2 w-100 w-sm-auto">
+                            Lihat Paket Lain
+                        </a>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
 
         <div class="card shadow-sm rounded-4 mb-10">
             <div class="card-body">
