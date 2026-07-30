@@ -9,7 +9,7 @@ class DetailTransaksiModel extends Model
 {
     protected $table            = 'detail_transaksi';
     protected $primaryKey       = 'iddetailtransaksi';
-    protected $allowedFields    = ['idtransaksi', 'idpaket', 'idmapel', 'prince', 'quantity', 'name'];
+    protected $allowedFields    = ['idtransaksi', 'idpaket', 'idmapel', 'idsesi', 'prince', 'quantity', 'name'];
 
     public function getAll()
     {

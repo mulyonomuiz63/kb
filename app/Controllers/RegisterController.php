@@ -263,7 +263,7 @@ class RegisterController extends BaseController
 
         // 5. Sanitasi Data (Pembersihan Karakter Tersembunyi)
         $emailClean = $this->request->getPost('email', FILTER_SANITIZE_EMAIL);
-        $namaClean  = $this->request->getPost('nama_siswa', FILTER_SANITIZE_STRING);
+        $namaClean  = esc($this->request->getPost('nama_siswa'));
     
         // 6. Proses Simpan Data Siswa Baru
         $data_siswa = array(

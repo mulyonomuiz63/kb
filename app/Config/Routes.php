@@ -14,6 +14,12 @@ use CodeIgniter\Router\RouteCollection;
  */
 $routes->set404Override('App\Controllers\Errors::show404');
 
+$routes->group('webinar', function ($routes) {
+    $routes->get('/', 'WebinarController::index');
+    $routes->post('daftar', 'WebinarController::daftar');
+    $routes->get('invoice', 'WebinarController::invoice');
+});
+
 $routes->group('auth', ['filter' => 'isGuest'], function ($routes) {
     $routes->get('/', 'AuthController::index'); // Penamaan route: login
     $routes->post('login-proses', 'AuthController::loginProses');
