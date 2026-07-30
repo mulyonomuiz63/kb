@@ -48,7 +48,7 @@ class WebinarController extends BaseController
 
         // Asumsi: id pengguna di tabel transaksi adalah 'id_siswa' dan status 'L' berarti Lunas
         $builder->where('t.idsiswa', $id_siswa);
-        $builder->where('t.status', 'L');
+        $builder->where('t.status', 'S');
 
         // Urutkan berdasarkan waktu mulai terdekat
         $builder->orderBy('ws.waktu_mulai', 'ASC');
