@@ -75,13 +75,13 @@ class MidtransController extends BaseController
 
             if ($internalStatus === 'S') {
                 $updateData['tgl_pembayaran'] = date('Y-m-d H:i:s');
+                $this->transaksiModel->update($trx['idtransaksi'], $updateData);
                 $this->approveOtomatis($trx['idtransaksi']);
 
                 // Kirim Notifikasi Email
                 $this->kirimNotifikasiEmail($trx, $payload->gross_amount);
             }
 
-            $this->transaksiModel->update($trx['idtransaksi'], $updateData);
 
 
             if ($this->db->transStatus() === false) {
@@ -156,6 +156,11 @@ class MidtransController extends BaseController
             // ---------------------------------------------------------
             // LOGIKA DIPERBAIKI: Mengakomodasi 'capture' (Credit Card) dan 'settlement' (Transfer/E-Wallet)
             if ($status->transaction_status == 'settlement' || $status->transaction_status == 'capture') {
+                // Update Status Transaksi menjadi Sukses (S)
+                $this->transaksiModel->where('idtransaksi', $idtransaksi)
+                    ->set('status', 'S')
+                    ->set('tgl_pembayaran', date("Y-m-d H:i:s"))
+                    ->update();
                 $this->approveOtomatis($idtransaksi);
 
                 // Kirim Email Konfirmasi
@@ -175,12 +180,6 @@ class MidtransController extends BaseController
                 if (session('email')) {
                     $this->emailer->send(session('email'), $subject, $message);
                 }
-
-                // Update Status Transaksi menjadi Sukses (S)
-                $this->transaksiModel->where('idtransaksi', $idtransaksi)
-                    ->set('status', 'S')
-                    ->set('tgl_pembayaran', date("Y-m-d H:i:s"))
-                    ->update();
             }
 
             // ---------------------------------------------------------
@@ -214,7 +213,7 @@ class MidtransController extends BaseController
 
         foreach ($datatransaksi as $rowst) {
             // Logika pengecekan status sebelum diproses
-            if ($rowst->status != 'S') {
+            if ($rowst->status == 'S') {
                 $idsiswa = $rowst->idsiswa;
 
                 // Tambah Mapel Siswa
