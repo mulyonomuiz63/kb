@@ -26,8 +26,8 @@
     <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:type" content="website">
     <meta property="og:locale" content="id_ID">
-    
-    
+
+
     <!-- ========================================== -->
     <!-- TWITTER / X CARD OPTIMIZATION              -->
     <!-- ========================================== -->
@@ -306,6 +306,27 @@
             width: auto !important;
             display: block;
         }
+
+        @keyframes professionalPulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.6);
+            }
+
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 0 0 5px rgba(220, 53, 69, 0);
+            }
+
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+            }
+        }
+
+        .badge-pro-pulse {
+            animation: professionalPulse 2s infinite ease-in-out;
+        }
     </style>
     <!-- ✅ SEO AUTO -->
     <?= $schema ?>
@@ -383,6 +404,12 @@
                                 </li>
                                 <li>
                                     <a href="<?= base_url("testimoni") ?>" class="text-white">Testimoni</a>
+                                </li>
+                                <li>
+                                    <a href="<?= base_url("marathon-perpajakan") ?>" class="text-white d-inline-flex align-items-center gap-1">
+                                        Webinar
+                                        <span class="badge bg-danger badge-pro-pulse fw-bold" style="font-size: 8px; margin-bottom: 16px; padding: 2px 5px; letter-spacing: 0.5px;">NEW</span>
+                                    </a>
                                 </li>
                                 <li>
                                     <a href="#" class="text-white">Informasi <i class="bi bi-chevron-down"></i></a>

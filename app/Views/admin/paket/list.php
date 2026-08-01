@@ -147,7 +147,7 @@
                             <label class="required fs-6 fw-semibold mb-2">Tagline Paket</label>
                             <input type="text" name="tagline" class="form-control form-control-solid" required>
                         </div>
-                        
+
                         <!-- Input Nominal Tambah Paket -->
                         <div class="col-md-6 fv-row">
                             <label class="required fs-6 fw-semibold mb-2">Nominal Paket (Rp)</label>
@@ -280,7 +280,7 @@
                             <label class="required fs-6 fw-semibold mb-2">Tagline Paket</label>
                             <input type="text" name="tagline" id="tagline" class="form-control form-control-solid" required>
                         </div>
-                        
+
                         <!-- Input Nominal Edit Paket -->
                         <div class="col-md-6 fv-row">
                             <label class="required fs-6 fw-semibold mb-2">Nominal (Rp)</label>
@@ -339,7 +339,7 @@
                                     <option></option>
                                 </select>
                             </div>
-                            
+
                             <div class="col-md-12 fv-row" id="wrapper_mapel_edit">
                                 <label class="fs-6 fw-semibold mb-2">Mapel <span class="text-danger fs-8 fw-normal">(Bisa pilih banyak)</span></label>
                                 <select name="id_mapel[]" id="edit_id_mapel" class="form-select form-select-solid" data-control="select2" data-dropdown-parent="#wrapper_mapel_edit" multiple="multiple" data-placeholder="Pilih Mapel...">
@@ -417,7 +417,7 @@
         if (selectedTypes.includes('webinar')) {
             $(modalElement).find('.webinar-fields').slideDown();
             $(modalElement).find('.dynamic-req-webinar').prop('required', true);
-            
+
             // Jadikan field Nominal READONLY (Hanya bisa dihitung otomatis) & Ganti Background
             $(nominalInputId).prop('readonly', true).addClass('bg-secondary');
 
@@ -428,7 +428,7 @@
         } else {
             $(modalElement).find('.webinar-fields').slideUp();
             $(modalElement).find('.dynamic-req-webinar').prop('required', false).val('').trigger('change');
-            
+
             // Lepas kunci READONLY jika bukan webinar & Hapus efek background
             $(nominalInputId).prop('readonly', false).removeClass('bg-secondary');
         }
@@ -473,7 +473,10 @@
             $.ajax({
                 url: "<?php echo site_url('sw-admin/paket/ujian-master'); ?>",
                 method: "POST",
-                data: { id: id, [csrfName]: csrfHash },
+                data: {
+                    id: id,
+                    [csrfName]: csrfHash
+                },
                 dataType: 'json',
                 success: function(res) {
                     updateCSRF(res[csrfName]);
@@ -481,14 +484,19 @@
                     $.each(res.data, function(i, item) {
                         html += '<option value="' + item.id_ujian + '">' + item.nama_ujian + '</option>';
                     });
-                    $('#id_ujian').html(html).select2({ dropdownParent: $('#wrapper_id_ujian') });
+                    $('#id_ujian').html(html).select2({
+                        dropdownParent: $('#wrapper_id_ujian')
+                    });
                 }
             });
 
             $.ajax({
                 url: "<?php echo site_url('sw-admin/paket/get-mapel'); ?>",
                 method: "POST",
-                data: { id: id, [csrfName]: $('input[name="<?= csrf_token() ?>"]').val() },
+                data: {
+                    id: id,
+                    [csrfName]: $('input[name="<?= csrf_token() ?>"]').val()
+                },
                 dataType: 'json',
                 success: function(res) {
                     updateCSRF(res[csrfName]);
@@ -496,7 +504,9 @@
                     $.each(res.data, function(i, item) {
                         html += '<option value="' + item.id_mapel + '">' + item.nama_mapel + '</option>';
                     });
-                    $('#id_mapel').html(html).select2({ dropdownParent: $('#wrapper_id_mapel') });
+                    $('#id_mapel').html(html).select2({
+                        dropdownParent: $('#wrapper_id_mapel')
+                    });
                 }
             });
         });
@@ -506,12 +516,14 @@
             let selectedTypes = $(this).val() || [];
             if (selectedTypes.includes('webinar')) {
                 let sesiSelect = $('#id_sesi');
-                if (sesiSelect.children('option').length <= 1) { 
+                if (sesiSelect.children('option').length <= 1) {
                     var csrfName = '<?= csrf_token() ?>';
                     $.ajax({
                         url: "<?= base_url('sw-admin/paket/get-webinar-sesi') ?>",
                         method: "POST",
-                        data: { [csrfName]: $('input[name="<?= csrf_token() ?>"]').val() },
+                        data: {
+                            [csrfName]: $('input[name="<?= csrf_token() ?>"]').val()
+                        },
                         dataType: 'json',
                         success: function(res) {
                             updateCSRF(res[csrfName]);
@@ -559,26 +571,42 @@
             $.ajax({
                 url: "<?php echo site_url('sw-admin/paket/ujian-master'); ?>",
                 method: "POST",
-                data: { id: id, [csrfName]: csrfHash },
+                data: {
+                    id: id,
+                    [csrfName]: csrfHash
+                },
                 dataType: 'json',
                 success: function(res) {
                     updateCSRF(res[csrfName]);
                     var html = '<option></option><option value="all">-- PILIH SEMUA UJIAN --</option>';
-                    $.each(res.data, function(i, item) { html += '<option value="' + item.id_ujian + '">' + item.nama_ujian + '</option>'; });
-                    $('#edit_ujian_master').select2('destroy').html(html).select2({ theme: 'bootstrap5', dropdownParent: $('#wrapper_ujian_edit') });
+                    $.each(res.data, function(i, item) {
+                        html += '<option value="' + item.id_ujian + '">' + item.nama_ujian + '</option>';
+                    });
+                    $('#edit_ujian_master').select2('destroy').html(html).select2({
+                        theme: 'bootstrap5',
+                        dropdownParent: $('#wrapper_ujian_edit')
+                    });
                 }
             });
 
             $.ajax({
                 url: "<?php echo site_url('sw-admin/paket/get-mapel'); ?>",
                 method: "POST",
-                data: { id: id, [csrfName]: $('input[name="<?= csrf_token() ?>"]').val() },
+                data: {
+                    id: id,
+                    [csrfName]: $('input[name="<?= csrf_token() ?>"]').val()
+                },
                 dataType: 'json',
                 success: function(res) {
                     updateCSRF(res[csrfName]);
                     var html = '<option></option><option value="all">-- PILIH SEMUA MAPEL --</option>';
-                    $.each(res.data, function(i, item) { html += '<option value="' + item.id_mapel + '">' + item.nama_mapel + '</option>'; });
-                    $('#edit_id_mapel').select2('destroy').html(html).select2({ theme: 'bootstrap5', dropdownParent: $('#wrapper_mapel_edit') });
+                    $.each(res.data, function(i, item) {
+                        html += '<option value="' + item.id_mapel + '">' + item.nama_mapel + '</option>';
+                    });
+                    $('#edit_id_mapel').select2('destroy').html(html).select2({
+                        theme: 'bootstrap5',
+                        dropdownParent: $('#wrapper_mapel_edit')
+                    });
                 }
             });
         });
@@ -617,50 +645,81 @@
                     $("#komisi").val(data.komisi);
                     $("#deskripsi_wrapper").html(`<textarea name="deskripsi" class="summernote_edit">${data.deskripsi}</textarea>`);
 
-                    if (data.file) { $("#view_gambar").html("<img class='img-fluid rounded shadow-sm w-150px' src='<?= base_url('assets-landing/images/paket/thumbnails'); ?>/" + data.file + "'>"); } 
-                    else { $("#view_gambar").html(""); }
+                    if (data.file) {
+                        $("#view_gambar").html("<img class='img-fluid rounded shadow-sm w-150px' src='<?= base_url('assets-landing/images/paket/thumbnails'); ?>/" + data.file + "'>");
+                    } else {
+                        $("#view_gambar").html("");
+                    }
 
-                    $('.summernote_edit').summernote({ height: 300, fontSizes: ['8', '9', '10', '11', '12', '14', '18', '24', '36', '48', '64', '82'] });
+                    $('.summernote_edit').summernote({
+                        height: 300,
+                        fontSizes: ['8', '9', '10', '11', '12', '14', '18', '24', '36', '48', '64', '82']
+                    });
 
                     let arrPaket = [];
                     if (data.jenis_paket) {
                         let parsedData = (typeof data.jenis_paket === 'string') ? JSON.parse(data.jenis_paket) : data.jenis_paket;
-                        if (Array.isArray(parsedData)) { arrPaket = parsedData.map(item => item.trim().toLowerCase()); }
+                        if (Array.isArray(parsedData)) {
+                            arrPaket = parsedData.map(item => item.trim().toLowerCase());
+                        }
                     }
-                    
+
                     // Ini akan mentrigger toggleDynamicFields
                     $("#edit_paket .jenis_paket").val(arrPaket).trigger('change');
 
                     // AUTO-FILL BREVET
                     if (data.id_kelas) {
-                        $("#edit_id_kelas").val(data.id_kelas).trigger({ type: 'change', preventAjax: true });
+                        $("#edit_id_kelas").val(data.id_kelas).trigger({
+                            type: 'change',
+                            preventAjax: true
+                        });
                         var tokenUpdate = $('input[name="<?= csrf_token() ?>"]').val();
 
                         $.ajax({
                             url: "<?php echo site_url('sw-admin/paket/ujian-master'); ?>",
                             method: "POST",
-                            data: { id: data.id_kelas, [csrfName]: tokenUpdate },
+                            data: {
+                                id: data.id_kelas,
+                                [csrfName]: tokenUpdate
+                            },
                             dataType: 'json',
                             success: function(res) {
                                 updateCSRF(res[csrfName]);
                                 var html = '<option></option><option value="all">-- PILIH SEMUA UJIAN --</option>';
-                                $.each(res.data, function(i, item) { html += '<option value="' + item.id_ujian + '">' + item.nama_ujian + '</option>'; });
-                                $('#edit_ujian_master').select2('destroy').html(html).select2({ theme: 'bootstrap5', dropdownParent: $('#wrapper_ujian_edit') });
-                                if(data.arr_ujian && data.arr_ujian.length > 0) { $('#edit_ujian_master').val(data.arr_ujian).trigger('change'); }
+                                $.each(res.data, function(i, item) {
+                                    html += '<option value="' + item.id_ujian + '">' + item.nama_ujian + '</option>';
+                                });
+                                $('#edit_ujian_master').select2('destroy').html(html).select2({
+                                    theme: 'bootstrap5',
+                                    dropdownParent: $('#wrapper_ujian_edit')
+                                });
+                                if (data.arr_ujian && data.arr_ujian.length > 0) {
+                                    $('#edit_ujian_master').val(data.arr_ujian).trigger('change');
+                                }
                             }
                         });
 
                         $.ajax({
                             url: "<?php echo site_url('sw-admin/paket/get-mapel'); ?>",
                             method: "POST",
-                            data: { id: data.id_kelas, [csrfName]: $('input[name="<?= csrf_token() ?>"]').val() },
+                            data: {
+                                id: data.id_kelas,
+                                [csrfName]: $('input[name="<?= csrf_token() ?>"]').val()
+                            },
                             dataType: 'json',
                             success: function(res) {
                                 updateCSRF(res[csrfName]);
                                 var html = '<option></option><option value="all">-- PILIH SEMUA MAPEL --</option>';
-                                $.each(res.data, function(i, item) { html += '<option value="' + item.id_mapel + '">' + item.nama_mapel + '</option>'; });
-                                $('#edit_id_mapel').select2('destroy').html(html).select2({ theme: 'bootstrap5', dropdownParent: $('#wrapper_mapel_edit') });
-                                if(data.arr_mapel && data.arr_mapel.length > 0) { $('#edit_id_mapel').val(data.arr_mapel).trigger('change'); }
+                                $.each(res.data, function(i, item) {
+                                    html += '<option value="' + item.id_mapel + '">' + item.nama_mapel + '</option>';
+                                });
+                                $('#edit_id_mapel').select2('destroy').html(html).select2({
+                                    theme: 'bootstrap5',
+                                    dropdownParent: $('#wrapper_mapel_edit')
+                                });
+                                if (data.arr_mapel && data.arr_mapel.length > 0) {
+                                    $('#edit_id_mapel').val(data.arr_mapel).trigger('change');
+                                }
                             }
                         });
                     }
@@ -670,7 +729,9 @@
                         $.ajax({
                             url: "<?= base_url('sw-admin/paket/get-webinar-sesi') ?>",
                             method: "POST",
-                            data: { [csrfName]: $('input[name="<?= csrf_token() ?>"]').val() },
+                            data: {
+                                [csrfName]: $('input[name="<?= csrf_token() ?>"]').val()
+                            },
                             dataType: 'json',
                             success: function(res) {
                                 updateCSRF(res[csrfName]);
@@ -712,10 +773,21 @@
                 showCancelButton: true,
                 confirmButtonText: "Ya, Hapus!",
                 cancelButtonText: "Batal",
-                customClass: { confirmButton: "btn btn-danger", cancelButton: "btn btn-light-primary" }
+                customClass: {
+                    confirmButton: "btn btn-danger",
+                    cancelButton: "btn btn-light-primary"
+                }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    Swal.fire({ text: "Menghapus data...", icon: "info", allowOutsideClick: false, showConfirmButton: false, didOpen: () => { Swal.showLoading(); }});
+                    Swal.fire({
+                        text: "Menghapus data...",
+                        icon: "info",
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
                     window.location.href = targetUrl;
                 }
             });
@@ -726,11 +798,18 @@
             $.ajax({
                 url: "<?= base_url('sw-admin/paket/pin') ?>",
                 type: "POST",
-                data: { id: id, "<?= csrf_token() ?>": $('input[name="<?= csrf_token() ?>"]').val() },
+                data: {
+                    id: id,
+                    "<?= csrf_token() ?>": $('input[name="<?= csrf_token() ?>"]').val()
+                },
                 dataType: "json",
                 success: function(res) {
-                    if (res.status === 'success') { location.reload(); } 
-                    else { updateCSRF(res.<?= csrf_token() ?>); Swal.fire("Gagal!", res.message, "error"); }
+                    if (res.status === 'success') {
+                        location.reload();
+                    } else {
+                        updateCSRF(res.<?= csrf_token() ?>);
+                        Swal.fire("Gagal!", res.message, "error");
+                    }
                 }
             });
         });
@@ -747,21 +826,26 @@
                 ghostClass: 'bg-light-primary',
                 onEnd: function() {
                     let order = [];
-                    tbody.querySelectorAll('tr').forEach((row, index) => { order.push({ id: row.dataset.id, position: index + 1 }); });
-                    fetch("<?= base_url('sw-admin/paket/reorder') ?>", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "X-Requested-With": "XMLHttpRequest",
-                            "X-CSRF-TOKEN": $('input[name="<?= csrf_token() ?>"]').val()
-                        },
-                        body: JSON.stringify(order)
-                    })
-                    .then(res => res.json())
-                    .then(res => {
-                        updateCSRF(res.<?= csrf_token() ?>);
-                        if (res.status !== 'success') Swal.fire("Gagal!", "Urutan gagal disimpan", "error");
+                    tbody.querySelectorAll('tr').forEach((row, index) => {
+                        order.push({
+                            id: row.dataset.id,
+                            position: index + 1
+                        });
                     });
+                    fetch("<?= base_url('sw-admin/paket/reorder') ?>", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-Requested-With": "XMLHttpRequest",
+                                "X-CSRF-TOKEN": $('input[name="<?= csrf_token() ?>"]').val()
+                            },
+                            body: JSON.stringify(order)
+                        })
+                        .then(res => res.json())
+                        .then(res => {
+                            updateCSRF(res.<?= csrf_token() ?>);
+                            if (res.status !== 'success') Swal.fire("Gagal!", "Urutan gagal disimpan", "error");
+                        });
                 }
             });
         }

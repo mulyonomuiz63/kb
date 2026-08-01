@@ -292,12 +292,6 @@
                                                 <i class="ki-outline ki-screen fs-6 text-white me-1"></i> Webinar Aktif
                                             </span>
                                         </div>
-                                        <!-- Badge Jumlah Sesi (Kanan Atas) -->
-                                        <div class="position-absolute top-0 end-0 m-3">
-                                            <span class="badge px-3 py-1.5 rounded-pill fw-bold text-primary bg-white shadow border border-primary border-dashed" style="font-size: 0.75rem;">
-                                                <i class="ki-outline ki-calendar-add fs-6 text-primary me-1"></i> <?= $paidSessionsCount ?> Sesi Pembelajaran
-                                            </span>
-                                        </div>
                                     </div>
 
                                     <!-- KONTEN DI BAWAH BINGKAI GAMBAR -->
@@ -320,11 +314,6 @@
 
                                         <!-- Box Informasi Daftar Semua Sesi -->
                                         <div class="mb-6">
-                                            <div class="d-flex align-items-center mb-3">
-                                                <i class="ki-outline ki-element-11 fs-4 me-2 text-gray-500"></i>
-                                                <label class="fw-bolder text-gray-500 fs-8 text-uppercase letter-spacing-1 m-0">Detail Sesi Pembelajaran</label>
-                                            </div>
-
                                             <div class="d-flex flex-column gap-3 session-scroll" style="max-height: 220px; overflow-y: auto; padding-right: 8px;">
                                                 <?php foreach ($listSesi as $s): ?>
                                                     <?php
@@ -343,17 +332,6 @@
                                                                     <h5 class="fw-bolder mb-1 fs-6 <?= $isExpired && !$isFree ? 'text-gray-400 text-decoration-line-through' : 'text-gray-800' ?>">
                                                                         <?= esc($s->nama_sesi) ?>
                                                                     </h5>
-
-                                                                    <!-- Tampilkan waktu HANYA jika bukan sesi gratis -->
-                                                                    <?php if (!$isFree): ?>
-                                                                        <div class="text-gray-500 fs-7 fw-semibold d-flex align-items-center">
-                                                                            <i class="ki-outline ki-time fs-6 me-1 <?= $isExpired ? 'text-gray-400' : 'text-primary' ?>"></i>
-                                                                            <?= date('d M Y', strtotime($s->waktu_mulai)) ?> <span class="mx-2 text-gray-300">|</span>
-                                                                            <?= date('H:i', strtotime($s->waktu_mulai)) ?> - <?= date('H:i', strtotime($s->waktu_selesai)) ?> WIB
-                                                                        </div>
-                                                                    <?php else: ?>
-                                                                        <span class="badge bg-success mt-1" style="font-size: 0.65rem;">Gratis (Otomatis Terpilih)</span>
-                                                                    <?php endif; ?>
                                                                 </div>
                                                             </div>
                                                             <div>
@@ -362,11 +340,13 @@
                                                                         <span class="badge bg-secondary text-gray-500 fs-8 fw-bold px-3 py-1.5 rounded-pill">Selesai</span>
                                                                     <?php else: ?>
                                                                         <span class="badge fs-8 fw-bolder px-3 py-1.5 rounded-pill d-flex align-items-center" style="background-color: #e8fff3; color: #15cc74;">
-                                                                            <span class="bullet bullet-dot me-1.5" style="background-color: #15cc74;"></span> Tersedia
+                                                                            <span class="bullet bullet-dot me-1.5" style="background-color: #15cc74;"></span> Berbayar
                                                                         </span>
                                                                     <?php endif; ?>
                                                                 <?php else: ?>
-                                                                    <span class="fw-bold text-dark fs-7">Gratis</span>
+                                                                    <span class="badge fs-8 fw-bolder px-3 py-1.5 rounded-pill d-flex align-items-center" style="background-color: #e8f4fd; color: #0d6efd;">
+                                                                        <span class="bullet bullet-dot me-1.5" style="background-color: #0d6efd;"></span> Gratis
+                                                                    </span>
                                                                 <?php endif; ?>
                                                             </div>
                                                         </div>
@@ -388,28 +368,6 @@
                                                                 }
                                                             }
                                                             ?>
-
-                                                            <div class="mt-3 pt-3 border-top">
-                                                                <p class="text-muted fw-bold fs-8 mb-2"><i class="ki-outline ki-layer fs-7 me-1"></i> Sesi yang didapatkan:</p>
-
-                                                                <?php if (!empty($childNames)): ?>
-                                                                    <ul class="text-muted fs-8 mb-3 ps-3" style="margin-bottom: 0;">
-                                                                        <?php foreach ($childNames as $name): ?>
-                                                                            <li><?= esc($name) ?></li>
-                                                                        <?php endforeach; ?>
-                                                                    </ul>
-                                                                <?php else: ?>
-                                                                    <p class="text-muted fs-8 mb-3 fst-italic">Belum ada sesi tertaut.</p>
-                                                                <?php endif; ?>
-
-                                                                <div class="alert alert-info py-2 px-3 border-0 mb-0 d-flex align-items-start gap-2 shadow-sm rounded-3" style="font-size: 0.75rem; line-height: 1.4; background-color: #e8f4fd;">
-                                                                    <i class="ki-outline ki-information-5 fs-5 text-info mt-1"></i>
-                                                                    <div>
-                                                                        <strong>Informasi Paket:</strong><br>
-                                                                        Paket sesi gratis menampung seluruh paket berbayar namun akses <strong>hanya disediakan pelatihan Zoom saja</strong>. Untuk materi dan link rekaman (YouTube) materi <strong>tidak didapatkan</strong>.
-                                                                    </div>
-                                                                </div>
-                                                            </div>
                                                         <?php endif; ?>
 
                                                     </div>
