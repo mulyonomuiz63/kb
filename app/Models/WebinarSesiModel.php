@@ -24,8 +24,10 @@ class WebinarSesiModel extends Model
         foreach ($pakets as $p) {
             // Ambil sesi sebagai ARRAY menggunakan getResultArray()
             $p->sesi = $this->db->table('webinar_sesi ws') // Sesuaikan nama tabel
-                ->select('ws.*')
+                ->select('ws.*, d.diskon')
                 ->join('detail_paket dp', 'dp.id_sesi = ws.id_sesi')
+                ->join('paket p', 'p.idpaket = dp.idpaket')
+                ->join('diskon d', 'd.iddiskon = p.iddiskon', 'left')
                 ->where('dp.idpaket', $p->idpaket)
                 ->orderBy('harga_sesi', 'asc')
                 ->orderBy('waktu_mulai', 'asc')

@@ -31,19 +31,55 @@ class WebinarController extends BaseController
         $this->emailer = new Emailer();
     }
 
-    public function index($slug)
+    public function index($slug = '')
     {
-        //untuk breadcrumb 
+        // untuk breadcrumb 
         $breadcrumbItems = [
             "Home" => base_url(),
         ];
 
-        $data['katalog_webinar'] = $this->sesiModel->getPaketWebinarLengkap($slug);
+        // 1. Ambil data dari model
+        $katalog_webinar = $this->sesiModel->getPaketWebinarLengkap($slug);
+
+        // Ambil nilai diskon keseluruhan dari database (Asumsi nama fieldnya 'diskon' di tabel paket)
+        // Sesuaikan '$katalog_webinar->diskon' dengan nama kolom diskon di database Anda
+        $diskonKeseluruhan = isset($katalog_webinar->diskon) ? $katalog_webinar->diskon : 10; 
+
+        // 2. Manipulasi data untuk menambahkan harga_coret dan menghitung diskon pada setiap sesi
+        if ($katalog_webinar && !empty($katalog_webinar->sesi)) {
+            foreach ($katalog_webinar->sesi as &$sesi) {
+                
+                if (isset($sesi['harga_sesi']) && $sesi['harga_sesi'] > 0) {
+                    
+                    // Cek jika ada diskon khusus per sesi, jika tidak gunakan diskon keseluruhan
+                    $diskonAktif = isset($sesi['diskon']) ? $sesi['diskon'] : $diskonKeseluruhan;
+
+                    if ($diskonAktif > 0 && $diskonAktif <= 100) {
+                        // 1. Simpan harga asli ke harga_coret (Misal: 200.000)
+                        $sesi['harga_coret'] = $sesi['harga_sesi'];
+                        
+                        // 2. Hitung harga bayar setelah diskon (Misal: 200.000 - 10% = 180.000)
+                        $potonganDiskon = $sesi['harga_sesi'] * ($diskonAktif / 100);
+                        $sesi['harga_sesi'] = $sesi['harga_sesi'] - $potonganDiskon;
+                    } else {
+                        // Jika tidak ada diskon
+                        $sesi['harga_coret'] = $sesi['harga_sesi'];
+                    }
+
+                } else {
+                    $sesi['harga_coret'] = 0; // Jika sesi gratis
+                }
+            }
+        }
+
+        // 3. Masukkan ke array $data
+        $data['katalog_webinar'] = $katalog_webinar;
         $data['siswa'] = $this->siswaModel->where('id_siswa', session()->get('id'))->first();
-        // var_dump($data['katalog_webinar']);
+        
         $schemaBreadcrumb = $this->seo->breadcrumbSchema($breadcrumbItems);
         $schema = $schemaBreadcrumb;
         $data['schema'] = $schema;
+        
         return view('webinar/index', $data);
     }
 
@@ -137,7 +173,7 @@ class WebinarController extends BaseController
                 <br>
                 <p style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; color: #000;">Hallo ' . substr($nama_siswa, 0, 10) . ' <br>
                     <span style="color: #000;">Kami menambahkan anda ke dalam kelasBrevet 
-                    <br>Silahkan login ke website kelasbrevet untuk mengerjakan ujian:</span></p>
+                    <br>Silahkan login ke website kelasbrevet untuk mengikuti webinar:</span></p>
                 <table style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; color: #000;">
                     <tr><td>Nama</td><td> : ' . substr($nama_siswa, 0, 10) . '</td></tr>
                     <tr><td>Email</td><td> : ' . $email . '</td></tr>

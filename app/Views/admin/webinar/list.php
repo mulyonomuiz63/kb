@@ -162,9 +162,9 @@
                     </div>
 
                     <!-- Input Sesi Gratis / Bonus Terkait Edit -->
-                    <div class="fv-row mb-7">
+                    <div class="fv-row mb-7" id="sesi_gratis_edit">
                         <label class="fs-6 fw-semibold mb-2">Pilih Sesi Bonus / Gratis Terkait</label>
-                        <select name="sesi_gratis[]" id="e_sesi_gratis" class="form-select form-select-solid" data-control="select2" data-dropdown-parent="#edit_webinar" data-placeholder="Pilih sesi bonus..." multiple="multiple">
+                        <select name="sesi_gratis[]" id="e_sesi_gratis" class="form-select form-select-solid" data-control="select2" data-dropdown-parent="#sesi_gratis_edit" data-placeholder="Pilih sesi bonus..." multiple="multiple">
                             <?php foreach ($allSesi as $s): ?>
                                 <option value="<?= $s['id_sesi'] ?>"><?= esc($s['nama_sesi']) ?></option>
                             <?php endforeach; ?>

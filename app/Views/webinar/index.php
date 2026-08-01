@@ -233,7 +233,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
 
                         <!-- Area Countdown -->
                         <div class="mb-5">
-                            <h5 class="fw-bold mb-3 text-dark">Webinar Dimulai Dalam:</h5>
+                            <h5 class="fw-bold mb-3 text-dark">Sesi Selanjutnya Dimulai Dalam:</h5>
                             <div class="d-flex gap-3">
                                 <div class="countdown-box">
                                     <span class="countdown-number" id="days">00</span>
@@ -288,8 +288,8 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
 
                 <div class="text-center mb-5">
                     <span class="badge bg-primary px-3 py-2 rounded-pill mb-2">Formulir Pendaftaran</span>
-                    <h2 class="fw-bold text-dark">Pilih Sesi & Amankan Tiket</h2>
-                    <p class="text-secondary">Anda dapat memilih paket gratis atau berbayar sesuai kebutuhan.</p>
+                    <h2 class="fw-bold text-dark">Pilih Paket & Amankan Tiket</h2>
+                    <p class="text-secondary">Pilih salah satu paket di bawah ini yang sesuai dengan kebutuhan Anda.</p>
                 </div>
 
                 <!-- Form mengarah ke Controller CI4 yang akan memproses Midtrans -->
@@ -310,9 +310,8 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                 </div>
 
                                 <div class="mb-3">
-                                    <label class="form-label fw-semibold">Alamat Email <span class="text-danger">*</span></label>
+                                    <label class="form-label fw-semibold">Email Aktif<span class="text-danger">*</span></label>
                                     <input type="email" name="email" value="<?= session()->get('id') && isset($siswa) ? esc($siswa['email']) : esc(old('email')) ?>" class="form-control form-control-lg" placeholder="contoh@email.com" required <?= session()->get('id') ? 'readonly style="cursor: not-allowed; background-color: #e9ecef;"' : '' ?>>
-                                    <small class="text-muted">Akses zoom dan materi akan dikirim ke email ini.</small>
                                 </div>
 
                                 <div class="mb-3">
@@ -328,8 +327,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                         <div class="col-lg-6">
                             <div class="card border-0 shadow-sm rounded-4 p-4">
                                 <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
-                                    <h4 class="fw-bold mb-0">Pilih Sesi</h4>
-                                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill" id="btnSelectAll">Pilih Semua Sesi</button>
+                                    <h4 class="fw-bold mb-0">Pilih Paket</h4>
                                 </div>
 
                                 <!-- Daftar Sesi (Di-loop dari database) -->
@@ -337,12 +335,43 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                     <?php if ($paketWebinar && !empty($paketWebinar->sesi)) : ?>
                                         <?php
                                         $currentDateTime = date('Y-m-d H:i:s');
+                                        $db = \Config\Database::connect(); // Load instance DB
+                                        
                                         foreach ($paketWebinar->sesi as $sesi) :
-                                            $isExpired = (strtotime($sesi['waktu_mulai']) <= strtotime($currentDateTime));
                                             $isFree = ($sesi['harga_sesi'] <= 0);
+
+                                            // Logika mendapatkan list anak sesi dan status kedaluwarsa 
+                                            $childSessionsData = [];
+                                            $childIds = json_decode($sesi['sesi_gratis'], true) ?? [];
+                                            $hasChildren = false;
+                                            $isAllChildExpired = true;
+
+                                            if (!empty($childIds)) {
+                                                $hasChildren = true;
+                                                $childSessionsData = $db->table('webinar_sesi')
+                                                    ->whereIn('id_sesi', $childIds)
+                                                    ->orderBy('waktu_mulai', 'ASC')
+                                                    ->get()
+                                                    ->getResultArray();
+                                                    
+                                                foreach ($childSessionsData as $cs) {
+                                                    // Paket masih terbuka bila ADA minimal 1 sesi yang belum berjalan
+                                                    if (strtotime($cs['waktu_mulai']) > strtotime($currentDateTime)) {
+                                                        $isAllChildExpired = false;
+                                                    }
+                                                }
+                                            }
+
+                                            // Penentuan Paket expired
+                                            if ($hasChildren) {
+                                                $isExpired = $isAllChildExpired;
+                                            } else {
+                                                $isExpired = (strtotime($sesi['waktu_mulai']) <= strtotime($currentDateTime));
+                                            }
                                         ?>
-                                            <label class="w-100 m-0 <?= $isExpired && !$isFree ? 'opacity-50' : '' ?>" <?= $isExpired && !$isFree ? 'style="cursor: not-allowed;"' : ($isFree ? 'style="cursor: default;"' : '') ?>>
-                                                <input type="checkbox" name="id_sesi[]" value="<?= esc($sesi['id_sesi']) ?>" class="session-checkbox calculate-price" data-price="<?= round($sesi['harga_sesi']) ?>" <?= $isExpired && !$isFree ? 'disabled' : '' ?> <?= $isFree ? 'checked onclick="return false;"' : '' ?>>
+                                            <label class="w-100 m-0 <?= $isExpired && !$isFree ? 'opacity-50' : '' ?>" <?= $isExpired && !$isFree ? 'style="cursor: not-allowed;"' : 'style="cursor: pointer;"' ?>>
+                                                <!-- TYPE INPUT RADIO (HANYA BISA PILIH SATU) -->
+                                                <input type="radio" name="id_sesi[]" value="<?= esc($sesi['id_sesi']) ?>" class="session-checkbox calculate-price" data-price="<?= round($sesi['harga_sesi']) ?>" <?= $isExpired && !$isFree ? 'disabled' : '' ?> <?= $isFree && !$isExpired ? 'checked' : '' ?>>
                                                 <div class="session-card p-3 d-flex flex-column <?= $isExpired && !$isFree ? 'bg-light' : '' ?>">
 
                                                     <!-- Header Card Sesi -->
@@ -350,66 +379,60 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                                         <div class="pe-3">
                                                             <h6 class="fw-bold mb-1"><?= esc($sesi['nama_sesi']) ?></h6>
 
-                                                            <!-- Tampilkan waktu & deskripsi HANYA jika bukan sesi gratis -->
-                                                            <?php if (!$isFree): ?>
+                                                            <!-- Indikator Paket Selesai / Gratis (WAKTU TIDAK DITAMPILKAN LAGI DI HEADER) -->
+                                                            <?php if ($isExpired && !$isFree): ?>
                                                                 <div class="mb-1">
-                                                                    <small class="text-muted"><i class="far fa-calendar-alt me-1"></i> <?= date('d M Y, H:i', strtotime($sesi['waktu_mulai'])) ?> WIB</small>
-                                                                    <?php if ($isExpired): ?>
-                                                                        <span class="badge bg-danger ms-1" style="font-size: 0.65rem;">Sesi Telah Dimulai/Berakhir</span>
-                                                                    <?php endif; ?>
+                                                                    <span class="badge bg-danger mt-1" style="font-size: 0.65rem;">Semua Sesi Telah Berakhir</span>
                                                                 </div>
+                                                            <?php elseif ($isFree): ?>
+                                                                <div class="mb-1">
+                                                                    <span class="badge bg-success mt-1" style="font-size: 0.65rem;">Gratis</span>
+                                                                </div>
+                                                            <?php endif; ?>
 
-                                                                <!-- Tampilan Deskripsi Sesi Berbayar -->
-                                                                <?php if (!empty($sesi['deskripsi_sesi'])): ?>
-                                                                    <p class="text-secondary mb-0 mt-2" style="font-size: 0.75rem; line-height: 1.4;">
-                                                                        <?= esc($sesi['deskripsi_sesi']) ?>
-                                                                    </p>
-                                                                <?php endif; ?>
-
-                                                            <?php else: ?>
-                                                                <span class="badge bg-success mt-1" style="font-size: 0.65rem;">Gratis (Otomatis Terpilih)</span>
+                                                            <!-- Tampilan Deskripsi Sesi Berbayar -->
+                                                            <?php if (!$isFree && !empty($sesi['deskripsi_sesi'])): ?>
+                                                                <p class="text-secondary mb-0 mt-2" style="font-size: 0.75rem; line-height: 1.4;">
+                                                                    <?= esc($sesi['deskripsi_sesi']) ?>
+                                                                </p>
                                                             <?php endif; ?>
                                                         </div>
+
                                                         <div class="text-end flex-shrink-0">
+                                                            <!-- Menampilkan Diskon Sesi (Harga Coret) -->
+                                                            <?php if (!$isFree && isset($sesi['harga_coret']) && $sesi['harga_coret'] > $sesi['harga_sesi']): ?>
+                                                                <span class="text-muted text-decoration-line-through d-block" style="font-size: 0.8rem;">Rp <?= number_format($sesi['harga_coret'], 0, ',', '.') ?></span>
+                                                            <?php endif; ?>
+
                                                             <span class="fw-bold <?= $isExpired && !$isFree ? 'text-muted text-decoration-line-through' : 'text-dark' ?> d-block">
-                                                                <?= $isFree ? 'Gratis' : 'Rp ' . number_format($sesi['harga_sesi'], 0, ',', '.') ?>
+                                                                <?= $isFree ? '' : 'Rp ' . number_format($sesi['harga_sesi'], 0, ',', '.') ?>
                                                             </span>
                                                             <i class="fa-solid fa-circle-check fs-4 check-icon <?= $isExpired && !$isFree ? 'text-secondary' : ($isFree ? 'text-primary' : 'text-muted') ?> mt-1"></i>
                                                         </div>
                                                     </div>
 
-                                                    <!-- List Sesi Khusus untuk Paket Gratis -->
-                                                    <?php if ($isFree): ?>
-                                                        <?php
-                                                        // Mengambil daftar nama sesi berdasarkan ID yang ada di kolom sesi_gratis
-                                                        $childNames = [];
-                                                        $childIds = json_decode($sesi['sesi_gratis'], true) ?? [];
-
-                                                        if (!empty($childIds)) {
-                                                            $db = \Config\Database::connect();
-                                                            $childSessions = $db->table('webinar_sesi')
-                                                                ->whereIn('id_sesi', $childIds)
-                                                                ->get()
-                                                                ->getResultArray();
-                                                            foreach ($childSessions as $cs) {
-                                                                $childNames[] = $cs['nama_sesi'];
-                                                            }
-                                                        }
-                                                        ?>
-
-                                                        <div class="mt-3 pt-3 border-top">
+                                                    <!-- List Sesi Khusus untuk Paket (Gratis & Berbayar Bundle) (WAKTU TAMPIL DISINI) -->
+                                                    <div class="mt-3 pt-3 border-top">
+                                                        <?php if (!empty($childSessionsData)): ?>
                                                             <p class="text-muted fw-bold fs-8 mb-2"><i class="fa-solid fa-layer-group me-1"></i> Sesi yang didapatkan:</p>
+                                                            <ul class="text-muted fs-8 mb-3 ps-3" style="margin-bottom: 0;">
+                                                                <?php foreach ($childSessionsData as $cs): ?>
+                                                                    <?php $isCsExpired = (strtotime($cs['waktu_mulai']) <= strtotime($currentDateTime)); ?>
+                                                                    <li class="<?= $isCsExpired ? 'opacity-75' : '' ?> mb-2">
+                                                                        <span class="<?= $isCsExpired ? 'text-decoration-line-through' : '' ?>"><?= esc($cs['nama_sesi']) ?></span>
+                                                                        <br>
+                                                                        <small class="text-primary fw-semibold" style="font-size: 0.7rem;"><i class="far fa-calendar-alt me-1"></i> <?= date('d M Y, H:i', strtotime($cs['waktu_mulai'])) ?> WIB</small>
+                                                                        <?php if ($isCsExpired): ?>
+                                                                            <span class="badge bg-danger ms-1" style="font-size: 0.6rem;">Selesai</span>
+                                                                        <?php endif; ?>
+                                                                    </li>
+                                                                <?php endforeach; ?>
+                                                            </ul>
+                                                        <?php elseif ($isFree && empty($childSessionsData)): ?>
+                                                            <p class="text-muted fs-8 mb-3 fst-italic">Belum ada sesi tertaut.</p>
+                                                        <?php endif; ?>
 
-                                                            <?php if (!empty($childNames)): ?>
-                                                                <ul class="text-muted fs-8 mb-3 ps-3" style="margin-bottom: 0;">
-                                                                    <?php foreach ($childNames as $name): ?>
-                                                                        <li><?= esc($name) ?></li>
-                                                                    <?php endforeach; ?>
-                                                                </ul>
-                                                            <?php else: ?>
-                                                                <p class="text-muted fs-8 mb-3 fst-italic">Belum ada sesi tertaut.</p>
-                                                            <?php endif; ?>
-
+                                                        <?php if ($isFree): ?>
                                                             <div class="alert py-2 px-3 border-0 mb-0 d-flex align-items-start gap-2 shadow-sm rounded-3" style="font-size: 0.75rem; line-height: 1.4; background-color: #fce4ec; color: #c2185b;">
                                                                 <i class="fa-solid fa-circle-info mt-1"></i>
                                                                 <div>
@@ -417,9 +440,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                                                     Untuk pilihan paket gratis, anda tidak mendapatkan fasilitas webinar seperti: rekaman, materi, sertifikat, fasilitas lain-nya.
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                    <?php else: ?>
-                                                        <div class="mt-3 pt-3 border-top">
+                                                        <?php else: ?>
                                                             <div class="alert alert-info py-2 px-3 border-0 mb-0 d-flex align-items-start gap-2 shadow-sm rounded-3" style="font-size: 0.75rem; line-height: 1.4; background-color: #fce4ec; color: #c2185b;">
                                                                 <i class="fa-solid fa-circle-info text-info mt-1"></i>
                                                                 <div>
@@ -427,9 +448,8 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                                                     Untuk pilihan paket berbayar, anda akan mendapatkan fasilitas webinar seperti: rekaman, materi, sertifikat, fasilitas lain-nya.
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                    <?php endif; ?>
-
+                                                        <?php endif; ?>
+                                                    </div>
                                                 </div>
                                             </label>
                                         <?php endforeach; ?>
@@ -448,7 +468,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                     </button>
                                     <div class="mt-3">
                                         <small class="text-muted d-block mb-2">Pembayaran aman didukung oleh:</small>
-                                        <img src="https://midtrans.com/assets/img/midtrans-logo.svg" height="25" alt="Midtrans Logo" style="opacity: 0.7;">
+                                        <img src="https://opd-static.midtrans.com/assethera/logo/midtrans-dark-3a5ac77cd3110b28b32cb590fc968f296d2123e686591d636bd51b276f6ed034.svg" height="25" alt="Midtrans Logo" style="opacity: 0.7;">
                                     </div>
                                 </div>
 
@@ -557,30 +577,45 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
     <!-- Bootstrap JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Countdown Script (Dinamis Berdasarkan Sesi Terdekat & Berbayar) -->
+    <!-- Countdown Script (Dinamis Berdasarkan Sesi Di Dalam List) -->
     <script>
         <?php
         $validTimestamps = [];
-        // Filter sesi yang berbayar (tidak free/harga > 0)
+        // Kumpulkan SEMUA jadwal sesi anak/list
         if ($paketWebinar && !empty($paketWebinar->sesi)) {
+            $db = \Config\Database::connect();
             foreach ($paketWebinar->sesi as $sesi) {
-                if (isset($sesi['harga_sesi']) && $sesi['harga_sesi'] > 0) {
-                    $validTimestamps[] = strtotime($sesi['waktu_mulai']) * 1000;
+                $childIds = json_decode($sesi['sesi_gratis'], true) ?? [];
+                if (!empty($childIds)) {
+                    $childSessions = $db->table('webinar_sesi')
+                                        ->whereIn('id_sesi', $childIds)
+                                        ->get()
+                                        ->getResultArray();
+                    foreach ($childSessions as $cs) {
+                        $validTimestamps[] = strtotime($cs['waktu_mulai']) * 1000;
+                    }
+                } else {
+                    // Fallback jika tidak ada list sesi (sesi tunggal)
+                    if (isset($sesi['waktu_mulai'])) {
+                        $validTimestamps[] = strtotime($sesi['waktu_mulai']) * 1000;
+                    }
                 }
             }
-            // Urutkan dari sesi yang paling dekat waktunya
+            // Hapus duplikat barangkali list child kembar dan urutkan waktu dari yang terdekat
+            $validTimestamps = array_unique($validTimestamps);
             sort($validTimestamps);
         }
         ?>
 
         // Parsing array PHP ke array JS
-        const sessionTimes = <?= json_encode($validTimestamps) ?>;
+        const sessionTimes = <?= json_encode(array_values($validTimestamps)) ?>;
 
         const timer = setInterval(function() {
             const now = new Date().getTime();
             let targetDate = null;
 
-            // Cari sesi terdekat yang belum dimulai/terlewati
+            // Cari sesi terdekat di list yang belum dimulai
+            // Jika list ke-1 habis, dia akan otomatis beralih mencari waktu ke-2, dst.
             for (let i = 0; i < sessionTimes.length; i++) {
                 if (sessionTimes[i] > now) {
                     targetDate = sessionTimes[i];
@@ -588,7 +623,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                 }
             }
 
-            // Jika masih ada sesi (selain free) yang akan datang
+            // Jika masih ada list sesi yang akan datang
             if (targetDate) {
                 const distance = targetDate - now;
 
@@ -604,7 +639,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                 document.getElementById("minutes").innerHTML = minutes < 10 ? "0" + minutes : minutes;
                 document.getElementById("seconds").innerHTML = seconds < 10 ? "0" + seconds : seconds;
             } else {
-                // Jika semua sesi telah terlewati atau tidak ada sesi berbayar
+                // Jika seluruh jadwal di list sesi telah terlewati
                 clearInterval(timer);
                 document.getElementById("days").innerHTML = "00";
                 document.getElementById("hours").innerHTML = "00";
@@ -620,7 +655,6 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
             const checkboxes = document.querySelectorAll('.calculate-price');
             const displayTotal = document.getElementById('displayTotal');
             const btnSubmit = document.getElementById('btnSubmit');
-            const btnSelectAll = document.getElementById('btnSelectAll');
 
             // Fungsi Format Rupiah
             function formatRupiah(angka) {
@@ -631,20 +665,15 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                 }).format(angka);
             }
 
-            // Fungsi Hitung Total
+            // Fungsi Hitung Total (Diubah Karena Input Type Sekarang Adalah Radio)
             function calculateTotal() {
                 let total = 0;
-                let checkedCount = 0;
-                let activeCount = 0;
+                let isChecked = false;
 
                 checkboxes.forEach(function(cb) {
-                    if (!cb.disabled) {
-                        activeCount++;
-                    }
-
-                    if (cb.checked) {
+                    if (cb.checked && !cb.disabled) {
                         total += parseInt(cb.getAttribute('data-price'));
-                        checkedCount++;
+                        isChecked = true;
                     }
                 });
 
@@ -652,7 +681,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                 displayTotal.innerText = formatRupiah(total);
 
                 // Disable tombol bayar jika tidak ada sesi yang dipilih
-                if (checkedCount > 0) {
+                if (isChecked) {
                     btnSubmit.removeAttribute('disabled');
                     btnSubmit.classList.remove('btn-secondary');
                     btnSubmit.classList.add('btn-primary');
@@ -661,44 +690,14 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                     btnSubmit.classList.remove('btn-primary');
                     btnSubmit.classList.add('btn-secondary');
                 }
-
-                // Update teks tombol Select All
-                if (checkedCount === activeCount && activeCount > 0) {
-                    btnSelectAll.innerText = "Batalkan Pilihan";
-                    btnSelectAll.classList.replace('btn-outline-primary', 'btn-danger');
-                } else {
-                    btnSelectAll.innerText = "Pilih Semua Sesi";
-                    btnSelectAll.classList.replace('btn-danger', 'btn-outline-primary');
-                }
             }
 
-            // Event Listener tiap checkbox
+            // Event Listener tiap radio (otomatis uncheck yang lain saat diklik)
             checkboxes.forEach(function(cb) {
                 cb.addEventListener('change', calculateTotal);
             });
 
-            // Event Listener tombol Pilih Semua Sesi
-            if (btnSelectAll) {
-                btnSelectAll.addEventListener('click', function() {
-                    let allChecked = true;
-
-                    checkboxes.forEach(function(cb) {
-                        if (!cb.disabled && !cb.checked) {
-                            allChecked = false;
-                        }
-                    });
-
-                    checkboxes.forEach(function(cb) {
-                        if (!cb.disabled) {
-                            cb.checked = !allChecked;
-                        }
-                    });
-
-                    calculateTotal();
-                });
-            }
-
-            // Jalankan kalkulasi pertama kali halaman dimuat (untuk sesi gratis yang tercentang otomatis)
+            // Jalankan kalkulasi pertama kali halaman dimuat
             calculateTotal();
         });
     </script>

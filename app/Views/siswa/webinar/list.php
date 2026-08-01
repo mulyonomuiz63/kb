@@ -257,124 +257,32 @@
                     ?>
                     <?php foreach ($webinar as $w) : ?>
                         <?php
-                        $delay += 0.1;
-                        $isPaketGratis = ($w->harga_sesi == 0); // Menandakan ini adalah paket penampung sesi
+                        // Cek apakah paket ini Gratis atau Berbayar
+                        $isPaketGratis = ($w->harga_sesi == 0);
+
+                        // Kumpulkan list sesi detail yang akan dijadikan card terpisah
+                        $childSessions = [];
+                        $childIds = json_decode($w->sesi_gratis, true) ?? [];
+
+                        if (!empty($childIds)) {
+                            $db = \Config\Database::connect();
+                            $childSessions = $db->table('webinar_sesi')
+                                ->whereIn('id_sesi', $childIds)
+                                ->orderBy('waktu_mulai', 'ASC')
+                                ->get()
+                                ->getResult();
+                        } else {
+                            // Fallback jika tidak ada anak (hanya 1 sesi utama)
+                            $childSessions = [$w];
+                        }
                         ?>
 
-                        <?php if ($isPaketGratis): ?>
-                            <!-- ============================================================== -->
-                            <!-- TAMPILAN PAKET SESI GRATIS / BUNDLE (Membaca data dari sesi_gratis) -->
-                            <!-- ============================================================== -->
+                        <!-- Render setiap anak sesi menjadi Card Terpisah -->
+                        <?php foreach ($childSessions as $child): ?>
                             <?php
-                            // Mengambil data sesi anak (child sessions) dari database berdasarkan array id_sesi
-                            $childSessions = [];
-                            $childIds = json_decode($w->sesi_gratis, true) ?? [];
-
-                            if (!empty($childIds)) {
-                                $db = \Config\Database::connect();
-                                $childSessions = $db->table('webinar_sesi')
-                                    ->whereIn('id_sesi', $childIds)
-                                    ->orderBy('waktu_mulai', 'ASC')
-                                    ->get()
-                                    ->getResult();
-                            }
-                            ?>
-
-                            <div class="col-md-6 col-xl-4 animate-card" style="animation-delay: <?= $delay ?>s">
-                                <div class="card border-2 border-primary shadow-sm h-100 hover-elevate-up d-flex flex-column">
-
-                                    <!-- Card Header / Image Thumbnail -->
-                                    <div class="position-relative img-zoom-container bg-light rounded-top" style="aspect-ratio: 16/9; flex-shrink: 0; overflow: hidden;">
-                                        <?= img_lazy('assets-landing/images/paket/thumbnails/' . $w->file, esc($w->nama_sesi), ['class' => 'w-100 h-100 object-fit-cover opacity-75']) ?>
-                                        <div class="position-absolute top-0 start-0 w-100 h-100 bg-gradient-to-t from-dark opacity-50"></div>
-
-                                        <div class="position-absolute top-0 start-0 p-4 w-100">
-                                            <span class="badge bg-primary text-white fs-7 fw-bolder px-4 py-2 shadow-sm d-inline-block">
-                                                <i class="ki-outline ki-abstract-26 fs-5 text-white me-2"></i> Akses Gratis
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <!-- Card Body -->
-                                    <div class="card-body p-6 d-flex flex-column flex-grow-1">
-                                        <h3 class="text-dark fw-boldest fs-4 mb-2 lh-base">
-                                            <?= esc($w->nama_sesi) ?>
-                                        </h3>
-                                        <p class="text-muted fs-8 mb-4">Paket ini mencakup <?= count($childSessions) ?> sesi webinar khusus untuk Anda.</p>
-
-                                        <!-- Daftar Sesi Anak (Scrollable jika lebih dari 2 sesi) -->
-                                        <div class="d-flex flex-column gap-3 flex-grow-1" style="max-height: 280px; overflow-y: auto; padding-right: 5px;">
-                                            <?php if (empty($childSessions)): ?>
-                                                <div class="alert alert-light-primary border-dashed p-4 text-center">
-                                                    <span class="fs-8 text-primary">Belum ada sesi yang ditambahkan ke paket ini.</span>
-                                                </div>
-                                            <?php else: ?>
-                                                <?php foreach ($childSessions as $child): ?>
-                                                    <?php
-                                                    $cWaktuMulai = strtotime($child->waktu_mulai);
-                                                    $cWaktuSelesai = strtotime($child->waktu_selesai);
-
-                                                    // Penentuan Status Child Session
-                                                    if ($currentDateTime < $cWaktuMulai) {
-                                                        $cStatus = 'upcoming';
-                                                        $cBadge = 'badge-light-warning';
-                                                        $cText = 'Akan Datang';
-                                                    } elseif ($currentDateTime >= $cWaktuMulai && $currentDateTime <= $cWaktuSelesai) {
-                                                        $cStatus = 'live';
-                                                        $cBadge = 'bg-danger text-white pulse-animation';
-                                                        $cText = 'Sedang Live';
-                                                    } else {
-                                                        $cStatus = 'finished';
-                                                        $cBadge = 'badge-light-success';
-                                                        $cText = 'Selesai';
-                                                    }
-
-                                                    // Parsing Zoom Child
-                                                    $cZoomLinks = json_decode($child->link_zoom, true) ?? [];
-                                                    $cLinkZoom = $cZoomLinks[0] ?? $child->link_zoom;
-                                                    ?>
-
-                                                    <!-- Item Child Session -->
-                                                    <div class="border border-gray-300 rounded-3 p-4 bg-light">
-                                                        <div class="d-flex justify-content-between align-items-start mb-2">
-                                                            <h5 class="fs-6 fw-bold text-gray-800 mb-0 pe-2" style="line-height: 1.4;"><?= esc($child->nama_sesi) ?></h5>
-                                                            <span class="badge <?= $cBadge ?> fs-9 px-2 py-1 text-nowrap"><?= $cText ?></span>
-                                                        </div>
-
-                                                        <div class="d-flex align-items-center text-muted fs-8 mb-3">
-                                                            <i class="ki-outline ki-time fs-7 me-1"></i>
-                                                            <?= date('d M Y, H:i', $cWaktuMulai) ?> - <?= date('H:i', $cWaktuSelesai) ?>
-                                                        </div>
-
-                                                        <!-- Tombol Zoom Child Session -->
-                                                        <?php if ($cStatus == 'upcoming'): ?>
-                                                            <button class="btn btn-sm btn-light w-100 fs-8 fw-bold disabled" disabled>
-                                                                <i class="ki-outline ki-lock fs-6 me-1"></i> Dibuka <?= date('d M', $cWaktuMulai) ?>
-                                                            </button>
-                                                        <?php elseif ($cStatus == 'live'): ?>
-                                                            <a href="<?= esc($cLinkZoom) ?>" target="_blank" class="btn btn-sm btn-primary w-100 fs-8 fw-bold shadow-sm">
-                                                                Gabung Zoom <i class="ki-outline ki-entrance-left fs-6 ms-1"></i>
-                                                            </a>
-                                                        <?php else: ?>
-                                                            <button class="btn btn-sm btn-light-success w-100 fs-8 fw-bold disabled" disabled>
-                                                                <i class="ki-outline ki-check-circle fs-6 me-1"></i> Sesi Selesai
-                                                            </button>
-                                                        <?php endif; ?>
-                                                    </div>
-                                                <?php endforeach; ?>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                        <?php else: ?>
-                            <!-- ============================================================== -->
-                            <!-- TAMPILAN SESI BERBAYAR / UTAMA / REGULER -->
-                            <!-- ============================================================== -->
-                            <?php
-                            $waktuMulai = strtotime($w->waktu_mulai);
-                            $waktuSelesai = strtotime($w->waktu_selesai);
+                            $delay += 0.1;
+                            $waktuMulai = strtotime($child->waktu_mulai);
+                            $waktuSelesai = strtotime($child->waktu_selesai);
 
                             // 1. Menentukan Status Sesi Zoom
                             if ($currentDateTime < $waktuMulai) {
@@ -396,8 +304,8 @@
 
                             // 2. Mengolah Data JSON YouTube
                             $youtubeLinks = [];
-                            if (!empty($w->link_youtube)) {
-                                $decoded = json_decode($w->link_youtube, true);
+                            if (!empty($child->link_youtube)) {
+                                $decoded = json_decode($child->link_youtube, true);
                                 if (is_array($decoded)) {
                                     $youtubeLinks = $decoded;
                                 }
@@ -411,8 +319,8 @@
                             }
 
                             // 4. Zoom Link Utama
-                            $zoomLinks = json_decode($w->link_zoom, true) ?? [];
-                            $mainZoomLink = $zoomLinks[0] ?? $w->link_zoom;
+                            $zoomLinks = json_decode($child->link_zoom, true) ?? [];
+                            $mainZoomLink = $zoomLinks[0] ?? $child->link_zoom;
                             ?>
 
                             <div class="col-md-6 col-xl-4 animate-card" style="animation-delay: <?= $delay ?>s">
@@ -420,25 +328,28 @@
 
                                     <!-- Card Header / Image Thumbnail -->
                                     <div class="position-relative img-zoom-container bg-light" style="aspect-ratio: 16/9; flex-shrink: 0;">
-                                        <?php if ($firstVideoId): ?>
-                                            <img src="https://img.youtube.com/vi/<?= $firstVideoId ?>/maxresdefault.jpg" onerror="this.onerror=null; this.src='https://img.youtube.com/vi/<?= $firstVideoId ?>/hqdefault.jpg';" loading="lazy" class="w-100 h-100 object-fit-cover" alt="<?= esc($w->nama_sesi) ?>">
+                                        <?php if ($firstVideoId && !$isPaketGratis): ?>
+                                            <img src="https://img.youtube.com/vi/<?= $firstVideoId ?>/maxresdefault.jpg" onerror="this.onerror=null; this.src='https://img.youtube.com/vi/<?= $firstVideoId ?>/hqdefault.jpg';" loading="lazy" class="w-100 h-100 object-fit-cover" alt="<?= esc($child->nama_sesi) ?>">
                                             <div class="position-absolute top-50 start-50 translate-middle">
                                                 <i class="ki-solid ki-youtube fs-3x text-danger bg-white rounded-circle shadow-sm"></i>
                                             </div>
                                         <?php else: ?>
-                                            <?= img_lazy('assets-landing/images/paket/thumbnails/' . $w->file, esc($w->nama_sesi), ['class' => 'w-100 h-100 object-fit-cover']) ?>
+                                            <?= img_lazy('assets-landing/images/paket/thumbnails/' . ($child->file ?? $w->file), esc($child->nama_sesi), ['class' => 'w-100 h-100 object-fit-cover']) ?>
                                         <?php endif; ?>
 
                                         <div class="position-absolute top-0 start-0 w-100 h-100 bg-gradient-to-t from-dark opacity-25"></div>
 
-                                        <!-- Label Paket dengan Tooltip Metronic -->
+                                        <!-- Label Paket (Gratis / Premium) -->
                                         <div class="position-absolute top-0 start-0 p-4 w-100">
-                                            <span class="badge bg-dark bg-opacity-75 text-white fs-8 fw-bold px-3 py-2 shadow-sm d-inline-block badge-title-clamp"
-                                                data-bs-toggle="tooltip"
-                                                data-bs-placement="top"
-                                                title="<?= esc($w->nama_paket) ?>">
-                                                <?= esc($w->nama_paket ?? 'Webinar Sesi') ?>
-                                            </span>
+                                            <?php if ($isPaketGratis): ?>
+                                                <span class="badge bg-success text-white fs-8 fw-bold px-3 py-2 shadow-sm d-inline-block badge-title-clamp" data-bs-toggle="tooltip" data-bs-placement="top" title="Paket Gratis">
+                                                    <i class="ki-outline ki-abstract-26 fs-6 text-white me-1"></i> Gratis
+                                                </span>
+                                            <?php else: ?>
+                                                <span class="badge bg-warning text-dark fs-8 fw-bold px-3 py-2 shadow-sm d-inline-block badge-title-clamp" data-bs-toggle="tooltip" data-bs-placement="top" title="Paket Berbayar">
+                                                    <i class="ki-outline ki-star fs-6 text-dark me-1"></i> Premium
+                                                </span>
+                                            <?php endif; ?>
                                         </div>
 
                                         <!-- Status Live/Upcoming -->
@@ -456,14 +367,14 @@
                                                 <img src="<?= base_url('assets-landing/images/logo-blue.png') ?>" alt="Akuntanmu">
                                             </div>
                                             <div class="d-flex flex-column align-items-start">
-                                                <span class="text-dark fw-bolder fs-6">Akuntanmu Center</span>
+                                                <span class="text-dark fw-bolder fs-6">Akuntanmu Learning Center</span>
                                                 <span class="badge badge-light-primary fw-bold fs-9 mt-1">Verified Mentor</span>
                                             </div>
                                         </div>
 
-                                        <!-- Judul Sesi -->
+                                        <!-- Judul Sesi Detail -->
                                         <h3 class="text-dark fw-boldest fs-4 mb-3 lh-base min-h-50px">
-                                            <?= esc($w->nama_sesi) ?>
+                                            <?= esc($child->nama_sesi) ?>
                                         </h3>
 
                                         <div class="separator separator-dashed my-4"></div>
@@ -490,7 +401,7 @@
                                             </div>
                                         </div>
 
-                                        <!-- List YouTube Video (Trigger Modal Popup) -->
+                                        <!-- List YouTube Video (Dibedakan berdasarkan Gratis/Berbayar) -->
                                         <?php if (!empty($youtubeLinks)): ?>
                                             <div class="youtube-recording-box mb-6">
                                                 <div class="d-flex align-items-center justify-content-between mb-3">
@@ -499,19 +410,33 @@
                                                     </span>
                                                 </div>
                                                 <div class="d-flex flex-column gap-2" style="max-height: 140px; overflow-y: auto;">
-                                                    <?php foreach ($youtubeLinks as $idx => $ytLink): ?>
-                                                        <button type="button"
-                                                            class="btn btn-sm btn-white youtube-item-btn fw-bold d-flex align-items-center justify-content-between py-2.5 px-3 rounded-2 shadow-xs w-100 text-start"
-                                                            data-bs-toggle="modal"
-                                                            data-bs-target="#youtubeModal"
-                                                            data-youtubelink="<?= esc($ytLink) ?>">
-                                                            <div class="d-flex align-items-center">
-                                                                <span class="badge badge-light-danger fw-bolder fs-9 me-3 px-2 py-1">Part <?= $idx + 1 ?></span>
-                                                                <span class="text-gray-700 fs-7 text-truncate" style="max-width: 170px;">Tonton Rekaman Sesi <?= $idx + 1 ?></span>
+                                                    
+                                                    <?php if ($isPaketGratis): ?>
+                                                        <!-- Jika Gratis: Box Info Akses Terkunci -->
+                                                        <div class="alert alert-light-danger border border-danger border-dashed p-3 m-0 d-flex align-items-center">
+                                                            <i class="ki-outline ki-lock-3 fs-1 text-danger me-3"></i>
+                                                            <div class="d-flex flex-column">
+                                                                <span class="fw-bold text-danger fs-8">Akses Terkunci</span>
+                                                                <span class="text-muted fs-9">Rekaman hanya untuk peserta Premium.</span>
                                                             </div>
-                                                            <i class="ki-outline ki-play fs-5 text-danger"></i>
-                                                        </button>
-                                                    <?php endforeach; ?>
+                                                        </div>
+                                                    <?php else: ?>
+                                                        <!-- Jika Berbayar: Tombol Player Muncul -->
+                                                        <?php foreach ($youtubeLinks as $idx => $ytLink): ?>
+                                                            <button type="button"
+                                                                class="btn btn-sm btn-white youtube-item-btn fw-bold d-flex align-items-center justify-content-between py-2.5 px-3 rounded-2 shadow-xs w-100 text-start"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#youtubeModal"
+                                                                data-youtubelink="<?= esc($ytLink) ?>">
+                                                                <div class="d-flex align-items-center">
+                                                                    <span class="badge badge-light-danger fw-bolder fs-9 me-3 px-2 py-1">Part <?= $idx + 1 ?></span>
+                                                                    <span class="text-gray-700 fs-7 text-truncate" style="max-width: 170px;">Tonton Rekaman Sesi <?= $idx + 1 ?></span>
+                                                                </div>
+                                                                <i class="ki-outline ki-play fs-5 text-danger"></i>
+                                                            </button>
+                                                        <?php endforeach; ?>
+                                                    <?php endif; ?>
+                                                    
                                                 </div>
                                             </div>
                                         <?php endif; ?>
@@ -535,8 +460,8 @@
                                     </div>
                                 </div>
                             </div>
-
-                        <?php endif; ?>
+                        <?php endforeach; ?>
+                        <!-- End of Child Cards Loop -->
 
                     <?php endforeach; ?>
                 <?php else: ?>

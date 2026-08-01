@@ -51,8 +51,11 @@ class WebinarController extends BaseController
         // var_dump($data['webinar']);
 
         $data = [
-            'title'   => 'Webinar Saya',
             'webinar' => $dataWebinar
+        ];
+        $data['breadcrumbs'] = [
+            ['title' => 'Webinar', 'url' => base_url('sw-siswa')],
+            ['title' => 'List Webinar', 'url' => '#'],
         ];
 
         return view('siswa/webinar/list', $data);

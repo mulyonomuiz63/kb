@@ -129,7 +129,7 @@
                                             <img src="<?= base_url('assets-landing/images/logo-blue.png') ?>" alt="Akuntanmu">
                                         </div>
                                         <div class="d-flex flex-column align-items-start">
-                                            <span class="text-dark fw-bolder fs-6">Akuntanmu Center</span>
+                                            <span class="text-dark fw-bolder fs-6">Akuntanmu Learning Center</span>
                                             <span class="badge badge-light-primary fw-bold fs-9 mt-1">Verified Mentor</span>
                                         </div>
                                     </div>

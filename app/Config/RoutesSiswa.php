@@ -85,7 +85,7 @@ $routes->group('sw-siswa', ['filter' => 'roleCheck:2'], function ($routes) {
         $routes->get('perpanjang/(:segment)', 'Siswa\IKHController::perpanjang/$1');
     });
 
-    $routes->group('webinar',['filter' => 'cekData'] , function($routes){
+    $routes->group('webinar', function($routes){
         $routes->get('/', 'Siswa\WebinarController::index');
         $routes->get('lihat-materi', 'Siswa\WebinarController::lihatMateri');
     });
