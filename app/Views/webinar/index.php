@@ -414,7 +414,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                                                 <i class="fa-solid fa-circle-info text-info mt-1"></i>
                                                                 <div>
                                                                     <strong>Informasi Paket:</strong><br>
-                                                                    Paket sesi gratis menampung seluruh paket berbayar namun akses <strong>hanya disediakan pelatihan Zoom saja</strong>. Untuk materi dan link rekaman (YouTube) materi <strong>tidak didapatkan</strong>.
+                                                                    Untuk pilihan paket gratis, anda tidak mendapatkan fasilitas webinar seperti: rekaman, materi, sertifikat, fasilitas lain-nya.
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -424,7 +424,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                                                 <i class="fa-solid fa-circle-info text-info mt-1"></i>
                                                                 <div>
                                                                     <strong>Informasi Paket:</strong><br>
-                                                                    Paket perbayar ini full akses <strong>mendapatkan materi softcopy</strong>. Mendapatkan Record ulang materi yang sudah disampaikan dan bergabung di group diskusi.
+                                                                    Untuk pilihan paket berbayar, anda akan mendapatkan fasilitas webinar seperti: rekaman, materi, sertifikat, fasilitas lain-nya.
                                                                 </div>
                                                             </div>
                                                         </div>
