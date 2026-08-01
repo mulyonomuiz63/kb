@@ -72,25 +72,29 @@
     .session-scroll::-webkit-scrollbar {
         width: 6px;
     }
+
     .session-scroll::-webkit-scrollbar-track {
-        background: #f1f5f9; 
+        background: #f1f5f9;
         border-radius: 8px;
     }
+
     .session-scroll::-webkit-scrollbar-thumb {
-        background: #e2e8f0; 
+        background: #e2e8f0;
         border-radius: 8px;
     }
+
     .session-scroll::-webkit-scrollbar-thumb:hover {
-        background: #cbd4e1; 
+        background: #cbd4e1;
     }
 
     /* Hover Card Item Sesi */
     .session-item {
         transition: all 0.2s ease;
     }
+
     .session-item:hover {
         border-color: #e2e8f0 !important;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.03) !important;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.03) !important;
         transform: translateY(-2px);
     }
 
@@ -99,13 +103,15 @@
         transition: all 0.3s ease;
         border-color: #eff2f5 !important;
     }
+
     .paket-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
     }
 
     /* FIX: Mencegah tampilan melompat (CLS) Tiny Slider saat loading */
-    #kt_brevet_slider, #kt_webinar_slider {
+    #kt_brevet_slider,
+    #kt_webinar_slider {
         display: flex;
         gap: 10px;
         overflow: hidden;
@@ -121,12 +127,14 @@
         min-width: 100%;
     }
 
-    .tns-slider#kt_brevet_slider, .tns-slider#kt_webinar_slider {
+    .tns-slider#kt_brevet_slider,
+    .tns-slider#kt_webinar_slider {
         display: block !important;
         gap: 0;
     }
 
-    .tns-slider#kt_brevet_slider>div, .tns-slider#kt_webinar_slider>div {
+    .tns-slider#kt_brevet_slider>div,
+    .tns-slider#kt_webinar_slider>div {
         flex: none !important;
         min-width: auto !important;
     }
@@ -138,10 +146,7 @@
         }
     }
 
-    .tns-ovh {
-        padding-right: 10px;
-        padding-top: 10px;
-    }
+
 
     /* Penyesuaian Tombol Affiliate */
     .btn-affiliate-action {
@@ -154,21 +159,26 @@
         transition: all 0.2s ease;
         border: none;
     }
+
     .btn-affiliate-action:hover {
         transform: translateY(-2px);
     }
+
     .btn-copy-link {
         background-color: #f1f1f2;
         color: #3f4254;
     }
+
     .btn-copy-link:hover {
         background-color: #dbdfe9;
         color: #181c32;
     }
+
     .share-link {
         background-color: #e8fff3;
         color: #50cd89;
     }
+
     .share-link:hover {
         background-color: #50cd89;
         color: #ffffff;
@@ -215,7 +225,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="col-xl-8 ps-xl-12">
         <?php
         // Mengumpulkan semua paket webinar aktif yang waktu selesainya belum terlewati
@@ -229,7 +239,7 @@
                 if (!empty($allSesis)) {
                     $activeWebinars[] = [
                         'paket' => $p,
-                        'sesi'  => $allSesis 
+                        'sesi'  => $allSesis
                     ];
                 }
             }
@@ -260,33 +270,41 @@
                             $paketWebinar = $item['paket'];
                             $listSesi = $item['sesi'];
                             $gambarPaket = !empty($paketWebinar->file) ? base_url('assets-landing/images/paket/thumbnails/' . $paketWebinar->file) : base_url('assets-landing/images/blank.png');
+
+                            // Hitung hanya sesi yang berbayar (harga_sesi > 0)
+                            $paidSessionsCount = 0;
+                            foreach ($listSesi as $s) {
+                                if (isset($s->harga_sesi) && $s->harga_sesi > 0) {
+                                    $paidSessionsCount++;
+                                }
+                            }
                             ?>
                             <div>
                                 <div class="card-body p-0 position-relative" dir="ltr">
-                                    
+
                                     <!-- BINGKAI / BANNER GAMBAR UTAMA DI ATAS -->
-                                    <div class="position-relative w-100 overflow-hidden" style="aspect-ratio: 21/9; background-color: #f1f5f9;">
+                                    <div class="position-relative w-100 overflow-hidden rounded-top-4" style="aspect-ratio: 16/9; background-color: #f1f5f9;">
                                         <img src="<?= $gambarPaket ?>" class="w-100 h-100 object-fit-cover" alt="<?= esc($paketWebinar->nama_paket) ?>">
-                                        
+
                                         <!-- Badge Webinar Aktif (Kiri Atas) -->
-                                        <div class="position-absolute top-0 start-0 m-4">
-                                            <span class="badge px-4 py-2 rounded-pill fw-bold text-white shadow" style="background-color: #1d4695; font-size: 0.85rem;">
-                                                <i class="ki-outline ki-screen fs-5 text-white me-2"></i> Webinar Aktif
+                                        <div class="position-absolute top-0 start-0 m-3">
+                                            <span class="badge px-3 py-1.5 rounded-pill fw-bold text-white shadow" style="background-color: #1d4695; font-size: 0.75rem;">
+                                                <i class="ki-outline ki-screen fs-6 text-white me-1"></i> Webinar Aktif
                                             </span>
                                         </div>
                                         <!-- Badge Jumlah Sesi (Kanan Atas) -->
-                                        <div class="position-absolute top-0 end-0 m-4">
-                                            <span class="badge px-4 py-2 rounded-pill fw-bold text-primary bg-white shadow border border-primary border-dashed" style="font-size: 0.85rem;">
-                                                <i class="ki-outline ki-calendar-add fs-5 text-primary me-2"></i> <?= count($listSesi) ?> Sesi Pembelajaran
+                                        <div class="position-absolute top-0 end-0 m-3">
+                                            <span class="badge px-3 py-1.5 rounded-pill fw-bold text-primary bg-white shadow border border-primary border-dashed" style="font-size: 0.75rem;">
+                                                <i class="ki-outline ki-calendar-add fs-6 text-primary me-1"></i> <?= $paidSessionsCount ?> Sesi Pembelajaran
                                             </span>
                                         </div>
                                     </div>
 
                                     <!-- KONTEN DI BAWAH BINGKAI GAMBAR -->
-                                    <div class="p-8 p-lg-10">
+                                    <div class="p-6 p-lg-8">
                                         <!-- Judul Paket -->
-                                        <h2 class="text-dark fw-bolder mb-6"
-                                            style="font-size: 2rem; letter-spacing: -0.5px; line-height: 1.2;"
+                                        <h3 class="text-dark fw-bolder mb-4"
+                                            style="font-size: 1.5rem; letter-spacing: -0.5px; line-height: 1.3;"
                                             data-bs-toggle="tooltip"
                                             data-bs-placement="top"
                                             title="<?= esc($paketWebinar->nama_paket) ?>">
@@ -298,45 +316,102 @@
                                                 echo esc($fullText);
                                             }
                                             ?>
-                                        </h2>
+                                        </h3>
 
                                         <!-- Box Informasi Daftar Semua Sesi -->
-                                        <div class="mb-8">
+                                        <div class="mb-6">
                                             <div class="d-flex align-items-center mb-3">
                                                 <i class="ki-outline ki-element-11 fs-4 me-2 text-gray-500"></i>
                                                 <label class="fw-bolder text-gray-500 fs-8 text-uppercase letter-spacing-1 m-0">Detail Sesi Pembelajaran</label>
                                             </div>
-                                            
-                                            <div class="d-flex flex-column gap-3 session-scroll" style="max-height: 240px; overflow-y: auto; padding-right: 8px;">
+
+                                            <div class="d-flex flex-column gap-3 session-scroll" style="max-height: 220px; overflow-y: auto; padding-right: 8px;">
                                                 <?php foreach ($listSesi as $s): ?>
-                                                    <?php $isEnded = (strtotime($s->waktu_selesai) < strtotime($currentDateTime)); ?>
-                                                    <div class="session-item d-flex align-items-center justify-content-between p-4 rounded-4 border <?= $isEnded ? 'border-gray-200 bg-light' : 'border-gray-200 bg-white shadow-sm' ?>">
-                                                        <div class="d-flex align-items-center me-3">
-                                                            <div class="symbol symbol-45px me-4">
-                                                                <span class="symbol-label rounded-circle <?= $isEnded ? 'bg-secondary text-gray-400' : 'bg-light-primary text-primary' ?>">
-                                                                    <i class="ki-outline ki-calendar-tick fs-2"></i>
-                                                                </span>
-                                                            </div>
-                                                            <div>
-                                                                <h5 class="fw-bolder mb-1 fs-5 <?= $isEnded ? 'text-gray-400 text-decoration-line-through' : 'text-gray-800' ?>">
-                                                                    <?= esc($s->nama_sesi) ?>
-                                                                </h5>
-                                                                <div class="text-gray-500 fs-7 fw-semibold d-flex align-items-center">
-                                                                    <i class="ki-outline ki-time fs-6 me-1 <?= $isEnded ? 'text-gray-400' : 'text-primary' ?>"></i>
-                                                                    <?= date('d M Y', strtotime($s->waktu_mulai)) ?> <span class="mx-2 text-gray-300">|</span>
-                                                                    <?= date('H:i', strtotime($s->waktu_mulai)) ?> - <?= date('H:i', strtotime($s->waktu_selesai)) ?> WIB
+                                                    <?php
+                                                    $isExpired = (strtotime($s->waktu_selesai) < strtotime($currentDateTime));
+                                                    $isFree = (isset($s->harga_sesi) && $s->harga_sesi <= 0);
+                                                    ?>
+                                                    <div class="session-item d-flex flex-column p-3 rounded-4 border <?= $isExpired && !$isFree ? 'border-gray-200 bg-light' : 'border-gray-200 bg-white shadow-sm' ?>">
+                                                        <div class="d-flex align-items-center justify-content-between w-100">
+                                                            <div class="d-flex align-items-center me-3">
+                                                                <div class="symbol symbol-40px me-3">
+                                                                    <span class="symbol-label rounded-circle <?= $isExpired && !$isFree ? 'bg-secondary text-gray-400' : 'bg-light-primary text-primary' ?>">
+                                                                        <i class="ki-outline ki-calendar-tick fs-3"></i>
+                                                                    </span>
+                                                                </div>
+                                                                <div>
+                                                                    <h5 class="fw-bolder mb-1 fs-6 <?= $isExpired && !$isFree ? 'text-gray-400 text-decoration-line-through' : 'text-gray-800' ?>">
+                                                                        <?= esc($s->nama_sesi) ?>
+                                                                    </h5>
+
+                                                                    <!-- Tampilkan waktu HANYA jika bukan sesi gratis -->
+                                                                    <?php if (!$isFree): ?>
+                                                                        <div class="text-gray-500 fs-7 fw-semibold d-flex align-items-center">
+                                                                            <i class="ki-outline ki-time fs-6 me-1 <?= $isExpired ? 'text-gray-400' : 'text-primary' ?>"></i>
+                                                                            <?= date('d M Y', strtotime($s->waktu_mulai)) ?> <span class="mx-2 text-gray-300">|</span>
+                                                                            <?= date('H:i', strtotime($s->waktu_mulai)) ?> - <?= date('H:i', strtotime($s->waktu_selesai)) ?> WIB
+                                                                        </div>
+                                                                    <?php else: ?>
+                                                                        <span class="badge bg-success mt-1" style="font-size: 0.65rem;">Gratis (Otomatis Terpilih)</span>
+                                                                    <?php endif; ?>
                                                                 </div>
                                                             </div>
+                                                            <div>
+                                                                <?php if (!$isFree): ?>
+                                                                    <?php if ($isExpired): ?>
+                                                                        <span class="badge bg-secondary text-gray-500 fs-8 fw-bold px-3 py-1.5 rounded-pill">Selesai</span>
+                                                                    <?php else: ?>
+                                                                        <span class="badge fs-8 fw-bolder px-3 py-1.5 rounded-pill d-flex align-items-center" style="background-color: #e8fff3; color: #15cc74;">
+                                                                            <span class="bullet bullet-dot me-1.5" style="background-color: #15cc74;"></span> Tersedia
+                                                                        </span>
+                                                                    <?php endif; ?>
+                                                                <?php else: ?>
+                                                                    <span class="fw-bold text-dark fs-7">Gratis</span>
+                                                                <?php endif; ?>
+                                                            </div>
                                                         </div>
-                                                        <div>
-                                                            <?php if ($isEnded): ?>
-                                                                <span class="badge bg-secondary text-gray-500 fs-8 fw-bold px-4 py-2 rounded-pill">Selesai</span>
-                                                            <?php else: ?>
-                                                                <span class="badge fs-8 fw-bolder px-4 py-2 rounded-pill d-flex align-items-center" style="background-color: #e8fff3; color: #15cc74;">
-                                                                    <span class="bullet bullet-dot me-2" style="background-color: #15cc74;"></span> Tersedia
-                                                                </span>
-                                                            <?php endif; ?>
-                                                        </div>
+
+                                                        <!-- List Sesi Khusus untuk Paket Gratis -->
+                                                        <?php if ($isFree): ?>
+                                                            <?php
+                                                            $childNames = [];
+                                                            $childIds = json_decode($s->sesi_gratis, true) ?? [];
+
+                                                            if (!empty($childIds)) {
+                                                                $db = \Config\Database::connect();
+                                                                $childSessions = $db->table('webinar_sesi')
+                                                                    ->whereIn('id_sesi', $childIds)
+                                                                    ->get()
+                                                                    ->getResultArray();
+                                                                foreach ($childSessions as $cs) {
+                                                                    $childNames[] = $cs['nama_sesi'];
+                                                                }
+                                                            }
+                                                            ?>
+
+                                                            <div class="mt-3 pt-3 border-top">
+                                                                <p class="text-muted fw-bold fs-8 mb-2"><i class="ki-outline ki-layer fs-7 me-1"></i> Sesi yang didapatkan:</p>
+
+                                                                <?php if (!empty($childNames)): ?>
+                                                                    <ul class="text-muted fs-8 mb-3 ps-3" style="margin-bottom: 0;">
+                                                                        <?php foreach ($childNames as $name): ?>
+                                                                            <li><?= esc($name) ?></li>
+                                                                        <?php endforeach; ?>
+                                                                    </ul>
+                                                                <?php else: ?>
+                                                                    <p class="text-muted fs-8 mb-3 fst-italic">Belum ada sesi tertaut.</p>
+                                                                <?php endif; ?>
+
+                                                                <div class="alert alert-info py-2 px-3 border-0 mb-0 d-flex align-items-start gap-2 shadow-sm rounded-3" style="font-size: 0.75rem; line-height: 1.4; background-color: #e8f4fd;">
+                                                                    <i class="ki-outline ki-information-5 fs-5 text-info mt-1"></i>
+                                                                    <div>
+                                                                        <strong>Informasi Paket:</strong><br>
+                                                                        Paket sesi gratis menampung seluruh paket berbayar namun akses <strong>hanya disediakan pelatihan Zoom saja</strong>. Untuk materi dan link rekaman (YouTube) materi <strong>tidak didapatkan</strong>.
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        <?php endif; ?>
+
                                                     </div>
                                                 <?php endforeach; ?>
                                             </div>
@@ -507,7 +582,7 @@
 <?= $this->section('scripts'); ?>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        
+
         // 1. Inisialisasi Tiny Slider (Slider Brevet)
         if (document.querySelector('#kt_brevet_slider')) {
             var sliderBrevet = tns({
@@ -522,9 +597,15 @@
                 touch: true,
                 preventScrollOnTouch: 'auto',
                 responsive: {
-                    0: { items: 1 },
-                    768: { items: 2 },
-                    1200: { items: 2 }
+                    0: {
+                        items: 1
+                    },
+                    768: {
+                        items: 2
+                    },
+                    1200: {
+                        items: 2
+                    }
                 }
             });
 
@@ -547,8 +628,8 @@
                 autoplay: true,
                 autoplayTimeout: 6000,
                 autoplayButtonOutput: false,
-                controls: false, 
-                nav: true, 
+                controls: false,
+                nav: true,
                 navPosition: 'bottom',
                 mouseDrag: true,
                 touch: true,
@@ -658,7 +739,7 @@
             text: message,
             icon: type,
             timer: 2200,
-            showConfirmButton: false 
+            showConfirmButton: false
         });
     }
 </script>
