@@ -410,8 +410,8 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                                                 <p class="text-muted fs-8 mb-3 fst-italic">Belum ada sesi tertaut.</p>
                                                             <?php endif; ?>
 
-                                                            <div class="alert alert-info py-2 px-3 border-0 mb-0 d-flex align-items-start gap-2 shadow-sm rounded-3" style="font-size: 0.75rem; line-height: 1.4; background-color: #e8f4fd;">
-                                                                <i class="fa-solid fa-circle-info text-info mt-1"></i>
+                                                            <div class="alert py-2 px-3 border-0 mb-0 d-flex align-items-start gap-2 shadow-sm rounded-3" style="font-size: 0.75rem; line-height: 1.4; background-color: #fce4ec; color: #c2185b;">
+                                                                <i class="fa-solid fa-circle-info mt-1"></i>
                                                                 <div>
                                                                     <strong>Informasi Paket:</strong><br>
                                                                     Untuk pilihan paket gratis, anda tidak mendapatkan fasilitas webinar seperti: rekaman, materi, sertifikat, fasilitas lain-nya.
@@ -420,7 +420,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                                         </div>
                                                     <?php else: ?>
                                                         <div class="mt-3 pt-3 border-top">
-                                                            <div class="alert alert-info py-2 px-3 border-0 mb-0 d-flex align-items-start gap-2 shadow-sm rounded-3" style="font-size: 0.75rem; line-height: 1.4; background-color: #e8f4fd;">
+                                                            <div class="alert alert-info py-2 px-3 border-0 mb-0 d-flex align-items-start gap-2 shadow-sm rounded-3" style="font-size: 0.75rem; line-height: 1.4; background-color: #fce4ec; color: #c2185b;">
                                                                 <i class="fa-solid fa-circle-info text-info mt-1"></i>
                                                                 <div>
                                                                     <strong>Informasi Paket:</strong><br>
