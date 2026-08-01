@@ -226,7 +226,6 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                 <div class="row align-items-center flex-column-reverse flex-lg-row">
                     <!-- Teks Kiri -->
                     <div class="col-lg-6 mt-5 mt-lg-0">
-                        <span class="badge bg-primary px-3 py-2 rounded-pill mb-3"><?= $paketWebinar ? esc($paketWebinar->tagline) : 'Live Masterclass 2026' ?></span>
                         <h1 class="hero-title mb-4"><?= $paketWebinar ? esc($paketWebinar->nama_paket) : 'Strategi Jitu Transformasi Bisnis di Era Kecerdasan Buatan' ?></h1>
                         <p class="lead text-secondary mb-4">
                             <?= $paketWebinar && !empty($paketWebinar->deskripsi) ? $paketWebinar->deskripsi : 'Pelajari langkah demi langkah bagaimana mengamankan posisi bisnis Anda di masa depan. Dibawakan langsung oleh praktisi industri terkemuka.' ?>
