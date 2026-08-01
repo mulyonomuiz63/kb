@@ -288,8 +288,8 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
 
                 <div class="text-center mb-5">
                     <span class="badge bg-primary px-3 py-2 rounded-pill mb-2">Formulir Pendaftaran</span>
-                    <h2 class="fw-bold text-dark">Pilih Sesi & Amankan Tiket Anda</h2>
-                    <p class="text-secondary">Anda dapat membeli satuan per sesi atau langsung mengambil full paket untuk pengalaman maksimal.</p>
+                    <h2 class="fw-bold text-dark">Pilih Sesi & Amankan Tiket</h2>
+                    <p class="text-secondary">Anda dapat memilih paket gratis atau berbayar sesuai kebutuhan.</p>
                 </div>
 
                 <!-- Form mengarah ke Controller CI4 yang akan memproses Midtrans -->
