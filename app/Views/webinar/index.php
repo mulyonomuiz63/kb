@@ -188,8 +188,8 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
         <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm py-3 sticky-top">
             <div class="container">
                 <!-- Brand / Logo -->
-                <a class="navbar-brand fw-bold text-primary" href="#">
-                    <i class="fa-solid fa-graduation-cap me-2"></i>Kelas Pajak
+                <a class="navbar-brand fw-bold text-primary" href="<?= base_url('/') ?>">
+                    <img src="<?= base_url('assets-landing/images/logo.png') ?>" alt="Logo" height="35" width="auto">
                 </a>
 
                 <!-- Toggler Button untuk Mobile View -->
