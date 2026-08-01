@@ -189,7 +189,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
             <div class="container">
                 <!-- Brand / Logo -->
                 <a class="navbar-brand fw-bold text-primary" href="#">
-                    <i class="fa-solid fa-graduation-cap me-2"></i>Exclusive Class
+                    <i class="fa-solid fa-graduation-cap me-2"></i>Kelas Pajak
                 </a>
 
                 <!-- Toggler Button untuk Mobile View -->
