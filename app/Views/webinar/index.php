@@ -474,8 +474,8 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                             <div class="icon-box">
                                 <i class="fa-solid fa-book-open"></i>
                             </div>
-                            <h4 class="fw-bold fs-5">Materi Terstruktur</h4>
-                            <p class="text-secondary mb-0">Modul pembelajaran yang dirancang step-by-step agar mudah dipahami bahkan untuk pemula.</p>
+                            <h4 class="fw-bold fs-5">Pakar Perpajakan</h4>
+                            <p class="text-secondary mb-0">Webinar akan diisi oleh pakar perpajakan yang berpengalaman dan ahli di bidangnya.</p>
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -506,11 +506,11 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                 <div class="col-md-7 p-4 p-md-5 bg-white">
                                     <h3 class="fw-bold text-primary mb-3"><?= $paketWebinar ? esc($paketWebinar->nama_paket) : 'Paket VIP Access' ?></h3>
                                     <ul class="list-unstyled mb-4">
-                                        <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i> Akses Live Zoom Session</li>
+                                        <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i> Akses Live Gmeet Session</li>
                                         <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i> E-Sertifikat Kehadiran</li>
                                         <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i> PDF Modul Materi (Downloadable)</li>
                                         <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i> Rekaman Ulang Webinar Seumur Hidup</li>
-                                        <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i> Grup Telegram Eksklusif Alumni</li>
+                                        <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i> Grup Whatsapp Eksklusif Alumni</li>
                                     </ul>
                                 </div>
                                 <div class="col-md-5 p-4 p-md-5 d-flex flex-column justify-content-center align-items-center" style="background-color: var(--light-blue);">
@@ -535,7 +535,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                 <div class="row justify-content-center">
                     <div class="col-lg-8">
                         <h2 class="fw-bold mb-4 display-6">Siap Untuk Meningkatkan Karir dan Bisnis Anda?</h2>
-                        <p class="lead mb-5 opacity-75">Kapasitas Zoom sangat terbatas. Jangan sampai Anda kehilangan kesempatan belajar langsung dari ahlinya. Amankan kursi Anda sekarang juga!</p>
+                        <p class="lead mb-5 opacity-75">Kapasitas sangat terbatas. Jangan sampai Anda kehilangan kesempatan belajar langsung dari ahlinya. Amankan kursi Anda sekarang juga!</p>
 
                         <a href="https://wa.me/6281234567890?text=Halo%20saya%20ingin%20mendaftar%20Webinar" target="_blank" class="btn btn-light btn-custom btn-lg fs-5 text-primary">
                             Daftar Sekarang <i class="fa-solid fa-arrow-right ms-2"></i>
@@ -550,7 +550,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
     <!-- Footer -->
     <footer class="bg-dark text-white py-4 text-center">
         <div class="container">
-            <p class="mb-0 opacity-75">&copy; 2026 WebinarPro. Hak Cipta Dilindungi.</p>
+            <p class="mb-0 opacity-75">&copy; 2026 Kelas Pajak. Hak Cipta Dilindungi.</p>
         </div>
     </footer>
 
