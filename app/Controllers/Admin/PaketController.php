@@ -277,6 +277,31 @@ class PaketController extends BaseController
                 }
             }
 
+            // Pastikan Anda sudah menangkap input id_sesi dari form sebelumnya
+            $raw_id_sesi = $this->request->getPost('id_sesi'); // Berupa Array dari multi-select
+
+            // Mengecek jika paket adalah webinar dan id_sesi ada isinya
+            if (in_array('webinar', $jenis_paket_bersih) && !empty($raw_id_sesi)) {
+
+                // Inisialisasi/kosongkan array penampung agar tidak bentrok dengan data lain
+                $detail_batch = [];
+
+                // Looping semua id_sesi yang dipilih oleh admin
+                foreach ($raw_id_sesi as $sesi) {
+                    $detail_batch[] = [
+                        'idpaket'  => $id_paket, // Variabel ID Paket yang baru saja disimpan
+                        'id_ujian' => 0,
+                        'id_mapel' => 0,
+                        'id_sesi'  => $sesi      // Masukkan id_sesi dari hasil looping
+                    ];
+                }
+
+                // Jika array penampung sudah terisi, eksekusi insertBatch
+                if (!empty($detail_batch)) {
+                    $this->detailPaketModel->insertBatch($detail_batch);
+                }
+            }
+
             // Selesai Transaksi
             $db->transComplete();
 
@@ -709,6 +734,27 @@ class PaketController extends BaseController
                 'status' => 'success',
                 'data'   => $data,
                 csrf_token() => csrf_hash() // Wajib ada agar token form ter-update
+            ]);
+        }
+    }
+    public function getWebinarSesi()
+    {
+        // Pastikan request melalui AJAX demi keamanan
+        if ($this->request->isAJAX()) {
+            $db = \Config\Database::connect();
+
+            // Mengambil semua sesi webinar yang aktif, diurutkan dari yang terbaru (waktu mulai)
+            // Sesuaikan nama tabel 'webinar_sesi' jika di database Anda berbeda
+            $sesi = $db->table('webinar_sesi')
+                ->select('id_sesi, nama_sesi, harga_sesi')
+                ->orderBy('waktu_mulai', 'DESC')
+                ->get()
+                ->getResultArray();
+
+            return $this->response->setJSON([
+                'status'       => 'success',
+                'data'         => $sesi,
+                csrf_token()   => csrf_hash()
             ]);
         }
     }

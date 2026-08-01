@@ -9,7 +9,7 @@ class DetailPaketModel extends Model
 {
     protected $table            = 'detail_paket';
     protected $primaryKey       = 'iddetailpaket';
-    protected $allowedFields    = ['iddetailpaket', 'idpaket', 'id_ujian', 'id_mapel'];
+    protected $allowedFields    = ['iddetailpaket', 'idpaket', 'id_ujian', 'id_mapel', 'id_sesi'];
 
     public function getAll()
     {

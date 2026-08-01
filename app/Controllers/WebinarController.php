@@ -158,7 +158,13 @@ class WebinarController extends BaseController
         $tgl_exp   = date('Y-m-d H:i:s', strtotime('+ 1 day', strtotime($tgl_mulai)));
 
         // Keamanan: Pastikan paket yang dibeli ada di database
-        $dataPaket = $this->paketModel->select('paket.*, diskon.diskon, sum(webinar_sesi.harga_sesi) as harga_sesi')->join('diskon', 'paket.iddiskon = diskon.iddiskon', 'left')->join('webinar_sesi', 'paket.idpaket=webinar_sesi.idpaket')->where('paket.idpaket', $idpaket)->whereIn('webinar_sesi.id_sesi', $sesi_terpilih)->get()->getRow();
+        $dataPaket = $this->paketModel->select('paket.*, diskon.diskon, sum(webinar_sesi.harga_sesi) as harga_sesi')
+                    ->join('diskon', 'paket.iddiskon = diskon.iddiskon', 'left')
+                    ->join('detail_paket', 'paket.idpaket=detail_paket.idpaket', 'left')
+                    ->join('webinar_sesi', 'detail_paket.id_sesi=webinar_sesi.id_sesi', 'left')
+                    ->where('paket.idpaket', $idpaket)
+                    ->whereIn('webinar_sesi.id_sesi', $sesi_terpilih)
+                    ->get()->getRow();
 
         if (empty($dataPaket)) {
             return redirect()->back()->with('error', 'Data Paket Webinar tidak ditemukan.');
@@ -193,8 +199,9 @@ class WebinarController extends BaseController
 
         // PERBAIKAN KRUSIAL: Filter sesi HANYA mengambil yang dicentang oleh user
         $detailPaket = $this->sesiModel
-            ->where('idpaket', $idpaket)
-            ->whereIn('id_sesi', $sesi_terpilih)
+            ->join('detail_paket', 'webinar_sesi.id_sesi=detail_paket.id_sesi', 'left')
+            ->where('detail_paket.idpaket', $idpaket)
+            ->whereIn('webinar_sesi.id_sesi', $sesi_terpilih)
             ->get()->getResultObject();
 
         if (!empty($detailPaket) && is_array($detailPaket)) {

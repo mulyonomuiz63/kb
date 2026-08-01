@@ -1,7 +1,7 @@
 <?= $this->extend('siswa/template/app'); ?>
 <?= $this->section('styles'); ?>
 <style>
-    /* Tombol Navigasi Lingkaran Biru */
+    /* Tombol Navigasi Lingkaran Biru (Brevet) */
     .nav-circle {
         width: 40px !important;
         height: 40px !important;
@@ -9,30 +9,103 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background-color: #29459A !important;
+        background-color: #1d4695 !important;
         border: none;
         cursor: pointer;
         transition: all 0.2s ease;
+        box-shadow: 0 4px 10px rgba(29, 70, 149, 0.3);
     }
 
     .nav-circle:hover {
-        background-color: #0086d1 !important;
+        background-color: #15377a !important;
         transform: scale(1.1);
     }
 
-    /* Hover Card */
+    /* Tombol Navigasi Webinar (Premium Solid Blue) */
+    .nav-circle-webinar {
+        width: 45px !important;
+        height: 45px !important;
+        border-radius: 50% !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #1d4695 !important;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(29, 70, 149, 0.3);
+    }
+
+    .nav-circle-webinar:hover {
+        background-color: #15377a !important;
+        transform: scale(1.05);
+    }
+
+    /* Kustomisasi Titik Navigasi (Dots) Tiny Slider Webinar */
+    .tns-nav {
+        position: absolute;
+        bottom: 25px;
+        right: 35px;
+        z-index: 10;
+        display: flex;
+        gap: 8px;
+    }
+
+    .tns-nav button {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: #cbd4e1;
+        border: none;
+        padding: 0;
+        transition: all 0.3s ease;
+    }
+
+    .tns-nav button.tns-nav-active {
+        background-color: #0d6efd;
+        width: 12px;
+        height: 12px;
+        transform: translateY(-1px);
+    }
+
+    /* Custom Scrollbar untuk Daftar Sesi Webinar */
+    .session-scroll::-webkit-scrollbar {
+        width: 6px;
+    }
+    .session-scroll::-webkit-scrollbar-track {
+        background: #f1f5f9; 
+        border-radius: 8px;
+    }
+    .session-scroll::-webkit-scrollbar-thumb {
+        background: #e2e8f0; 
+        border-radius: 8px;
+    }
+    .session-scroll::-webkit-scrollbar-thumb:hover {
+        background: #cbd4e1; 
+    }
+
+    /* Hover Card Item Sesi */
+    .session-item {
+        transition: all 0.2s ease;
+    }
+    .session-item:hover {
+        border-color: #e2e8f0 !important;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.03) !important;
+        transform: translateY(-2px);
+    }
+
+    /* Hover Card Paket */
     .paket-card {
         transition: all 0.3s ease;
         border-color: #eff2f5 !important;
     }
-
     .paket-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
     }
 
-    /* FIX: Mencegah tampilan melompat (CLS) dari 1 ke 2 card saat loading */
-    #kt_brevet_slider {
+    /* FIX: Mencegah tampilan melompat (CLS) Tiny Slider saat loading */
+    #kt_brevet_slider, #kt_webinar_slider {
         display: flex;
         gap: 10px;
         overflow: hidden;
@@ -43,11 +116,17 @@
         min-width: calc(50% - 10px);
     }
 
-    .tns-slider#kt_brevet_slider {
-        display: block !important;
+    #kt_webinar_slider>div {
+        flex: 0 0 100%;
+        min-width: 100%;
     }
 
-    .tns-slider#kt_brevet_slider>div {
+    .tns-slider#kt_brevet_slider, .tns-slider#kt_webinar_slider {
+        display: block !important;
+        gap: 0;
+    }
+
+    .tns-slider#kt_brevet_slider>div, .tns-slider#kt_webinar_slider>div {
         flex: none !important;
         min-width: auto !important;
     }
@@ -75,26 +154,21 @@
         transition: all 0.2s ease;
         border: none;
     }
-
     .btn-affiliate-action:hover {
         transform: translateY(-2px);
     }
-
     .btn-copy-link {
         background-color: #f1f1f2;
         color: #3f4254;
     }
-
     .btn-copy-link:hover {
         background-color: #dbdfe9;
         color: #181c32;
     }
-
     .share-link {
         background-color: #e8fff3;
         color: #50cd89;
     }
-
     .share-link:hover {
         background-color: #50cd89;
         color: #ffffff;
@@ -105,7 +179,6 @@
             position: -webkit-sticky;
             position: sticky;
             top: 80px;
-            /* Jarak dari atas layar, sesuaikan dengan tinggi header/navbar kamu */
             z-index: 1;
         }
     }
@@ -122,11 +195,11 @@
                     ['url' => 'sw-siswa/materi', 'icon' => 'ki-book-open', 'color' => 'primary', 'title' => 'Materi Belajar', 'desc' => 'Akses semua modul'],
                     ['url' => 'sw-siswa/ujian', 'icon' => 'ki-notepad-edit', 'color' => 'danger', 'title' => 'Ujian & Quiz', 'desc' => 'Evaluasi pemahaman'],
                     ['url' => 'sw-siswa/sertifikat', 'icon' => 'ki-medal-star', 'color' => 'success', 'title' => 'Sertifikat', 'desc' => 'Download bukti lulus'],
+                    ['url' => 'sw-siswa/webinar', 'icon' => 'ki-award', 'color' => 'warning', 'title' => 'Webinar/Pelatihan', 'desc' => 'Pelatihan'],
                     ['url' => 'sw-siswa/affiliate', 'icon' => 'ki-people', 'color' => 'warning', 'title' => 'Affiliate', 'desc' => 'Bonus referensi'],
                     ['url' => 'sw-siswa/transaksi', 'icon' => 'ki-time', 'color' => 'info', 'title' => 'Histori', 'desc' => 'Status pembayaran'],
                     ['url' => 'sw-siswa/profile', 'icon' => 'ki-user', 'color' => 'dark', 'title' => 'Akun Saya', 'desc' => 'Pengaturan data diri'],
                     ['url' => 'sw-siswa/diskusi', 'icon' => 'ki-messages', 'color' => 'warning', 'title' => 'Diskusi', 'desc' => 'Komunitas belajar'],
-                    ['url' => 'sw-siswa/ikh', 'icon' => 'ki-award', 'color' => 'warning', 'title' => 'Izin Kuasa Hukum', 'desc' => 'Pengurusan IKH.']
                 ];
                 foreach ($menus as $m): ?>
                     <div class="col-6 d-flex">
@@ -142,104 +215,167 @@
             </div>
         </div>
     </div>
+    
     <div class="col-xl-8 ps-xl-12">
         <?php
-        // Cek apakah ada paket webinar/pelatihan aktif yang waktu selesainya belum terlewati
+        // Mengumpulkan semua paket webinar aktif yang waktu selesainya belum terlewati
         $currentDateTime = date('Y-m-d H:i:s');
-        $activeWebinar = null;
-        if (!empty($paketWebinar)) {
-            foreach ($paketWebinar as $p) {
-                // Mengecek sesi webinar berdasarkan idpaket pada tabel webinar_sesi
-                $checkSesi = $db->query("SELECT * FROM webinar_sesi WHERE idpaket = ? AND waktu_selesai >= ? ORDER BY waktu_selesai ASC LIMIT 1", [$p->idpaket, $currentDateTime])->getRow();
-                if ($checkSesi) {
-                    $activeWebinar = [
+        $activeWebinars = [];
+
+        if (!empty($paketWebinars)) {
+            foreach ($paketWebinars as $p) {
+                $allSesis = $db->query("SELECT ws.* FROM detail_paket dp JOIN webinar_sesi ws ON dp.id_sesi = ws.id_sesi WHERE dp.idpaket = ? ORDER BY ws.waktu_mulai ASC", [$p->idpaket])->getResult();
+
+                if (!empty($allSesis)) {
+                    $activeWebinars[] = [
                         'paket' => $p,
-                        'sesi' => $checkSesi
+                        'sesi'  => $allSesis 
                     ];
-                    break;
                 }
             }
         }
         ?>
 
-        <?php if ($activeWebinar): ?>
-            <!-- TAMPILAN KHUSUS PELATIHAN/WEBINAR AKTIF BERDASARKAN WAKTU SELESAI -->
-            <div class="card border-0 shadow-sm rounded-4 mb-5 mb-xl-8 overflow-hidden">
-                <div class="card-body p-0 d-flex flex-column justify-content-center bgi-no-repeat bgi-size-cover bgi-position-x-end"
-                    style="background-position: right bottom; background-size: auto 100%; background-image:url('<?= base_url('assets-landing/images/bg-banner.png') /* Ganti dengan URL gambar Anda jika perlu */ ?>');" dir="ltr">
+        <?php if (!empty($activeWebinars)): ?>
+            <!-- SLIDER WEBINAR PREMIUM -->
+            <div class="position-relative mb-5 mb-xl-8">
 
-                    <!-- Container konten dengan background gradient putih agar teks tetap tajam terbaca -->
-                    <div class="p-10 p-lg-15 w-100 h-100" style="background: linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0.95) 50%, rgba(255,255,255,0) 100%);">
+                <!-- Tombol Navigasi Kustom Webinar -->
+                <div class="position-absolute top-50 start-0 translate-middle-y z-index-3 ms-n3 d-none d-md-block">
+                    <button class="nav-circle-webinar" id="kt_webinar_prev">
+                        <i class="ki-outline ki-left fs-2 text-white"></i>
+                    </button>
+                </div>
+                <div class="position-absolute top-50 end-0 translate-middle-y z-index-3 me-n3 d-none d-md-block">
+                    <button class="nav-circle-webinar" id="kt_webinar_next">
+                        <i class="ki-outline ki-right fs-2 text-white"></i>
+                    </button>
+                </div>
 
-                        <!-- Status Badges -->
-                        <div class="d-flex align-items-center flex-wrap gap-3 mb-4">
-                            <span class="badge badge-light-primary fw-bolder px-4 py-2 rounded-pill">
-                                <i class="ki-outline ki-screen fs-4 text-primary me-2"></i> Webinar Sedang Aktif
-                            </span>
-                            <span class="badge badge-light-danger fw-bolder px-4 py-2 rounded-pill">
-                                <i class="ki-outline ki-timer fs-4 text-danger me-2"></i> Berakhir: <?= date('d M Y, H:i', strtotime($activeWebinar['sesi']->waktu_selesai)) ?> WIB
-                            </span>
-                        </div>
+                <!-- Kontainer Tiny Slider Webinar -->
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden" style="background-color: #ffffff;">
+                    <div id="kt_webinar_slider">
+                        <?php foreach ($activeWebinars as $item): ?>
+                            <?php
+                            $paketWebinar = $item['paket'];
+                            $listSesi = $item['sesi'];
+                            $gambarPaket = !empty($paketWebinar->file) ? base_url('assets-landing/images/paket/thumbnails/' . $paketWebinar->file) : base_url('assets-landing/images/blank.png');
+                            ?>
+                            <div>
+                                <div class="card-body p-0 position-relative" dir="ltr">
+                                    
+                                    <!-- BINGKAI / BANNER GAMBAR UTAMA DI ATAS -->
+                                    <div class="position-relative w-100 overflow-hidden" style="aspect-ratio: 21/9; background-color: #f1f5f9;">
+                                        <img src="<?= $gambarPaket ?>" class="w-100 h-100 object-fit-cover" alt="<?= esc($paketWebinar->nama_paket) ?>">
+                                        
+                                        <!-- Badge Webinar Aktif (Kiri Atas) -->
+                                        <div class="position-absolute top-0 start-0 m-4">
+                                            <span class="badge px-4 py-2 rounded-pill fw-bold text-white shadow" style="background-color: #1d4695; font-size: 0.85rem;">
+                                                <i class="ki-outline ki-screen fs-5 text-white me-2"></i> Webinar Aktif
+                                            </span>
+                                        </div>
+                                        <!-- Badge Jumlah Sesi (Kanan Atas) -->
+                                        <div class="position-absolute top-0 end-0 m-4">
+                                            <span class="badge px-4 py-2 rounded-pill fw-bold text-primary bg-white shadow border border-primary border-dashed" style="font-size: 0.85rem;">
+                                                <i class="ki-outline ki-calendar-add fs-5 text-primary me-2"></i> <?= count($listSesi) ?> Sesi Pembelajaran
+                                            </span>
+                                        </div>
+                                    </div>
 
-                        <!-- Judul Paket -->
-                        <h2 class="text-dark fw-bolder fs-2qx mb-5 w-lg-75 w-100" style="line-height: 1.3;">
-                            <?= esc($activeWebinar['paket']->nama_paket) ?>
-                        </h2>
+                                    <!-- KONTEN DI BAWAH BINGKAI GAMBAR -->
+                                    <div class="p-8 p-lg-10">
+                                        <!-- Judul Paket -->
+                                        <h2 class="text-dark fw-bolder mb-6"
+                                            style="font-size: 2rem; letter-spacing: -0.5px; line-height: 1.2;"
+                                            data-bs-toggle="tooltip"
+                                            data-bs-placement="top"
+                                            title="<?= esc($paketWebinar->nama_paket) ?>">
+                                            <?php
+                                            $fullText = $paketWebinar->nama_paket;
+                                            if (mb_strlen($fullText) > 65) {
+                                                echo esc(mb_substr($fullText, 0, 65)) . '...';
+                                            } else {
+                                                echo esc($fullText);
+                                            }
+                                            ?>
+                                        </h2>
 
-                        <!-- Info Detail Sesi (Desain Box Highlight) -->
-                        <div class="border border-dashed border-primary border-opacity-50 rounded-4 bg-light-primary p-6 mb-7 w-lg-700px w-100 shadow-sm">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="symbol symbol-45px me-4">
-                                    <span class="symbol-label bg-primary shadow-sm">
-                                        <i class="ki-outline ki-calendar-tick fs-2 text-white"></i>
-                                    </span>
-                                </div>
-                                <div>
-                                    <h4 class="text-primary fw-bolder mb-1"><?= esc($activeWebinar['sesi']->nama_sesi) ?></h4>
-                                    <div class="text-gray-700 fw-semibold fs-6">
-                                        <i class="ki-outline ki-time fs-5 me-1"></i>
-                                        <?= date('d M Y', strtotime($activeWebinar['sesi']->waktu_mulai)) ?> <span class="mx-1">|</span>
-                                        <?= date('H:i', strtotime($activeWebinar['sesi']->waktu_mulai)) ?> - <?= date('H:i', strtotime($activeWebinar['sesi']->waktu_selesai)) ?> WIB
+                                        <!-- Box Informasi Daftar Semua Sesi -->
+                                        <div class="mb-8">
+                                            <div class="d-flex align-items-center mb-3">
+                                                <i class="ki-outline ki-element-11 fs-4 me-2 text-gray-500"></i>
+                                                <label class="fw-bolder text-gray-500 fs-8 text-uppercase letter-spacing-1 m-0">Detail Sesi Pembelajaran</label>
+                                            </div>
+                                            
+                                            <div class="d-flex flex-column gap-3 session-scroll" style="max-height: 240px; overflow-y: auto; padding-right: 8px;">
+                                                <?php foreach ($listSesi as $s): ?>
+                                                    <?php $isEnded = (strtotime($s->waktu_selesai) < strtotime($currentDateTime)); ?>
+                                                    <div class="session-item d-flex align-items-center justify-content-between p-4 rounded-4 border <?= $isEnded ? 'border-gray-200 bg-light' : 'border-gray-200 bg-white shadow-sm' ?>">
+                                                        <div class="d-flex align-items-center me-3">
+                                                            <div class="symbol symbol-45px me-4">
+                                                                <span class="symbol-label rounded-circle <?= $isEnded ? 'bg-secondary text-gray-400' : 'bg-light-primary text-primary' ?>">
+                                                                    <i class="ki-outline ki-calendar-tick fs-2"></i>
+                                                                </span>
+                                                            </div>
+                                                            <div>
+                                                                <h5 class="fw-bolder mb-1 fs-5 <?= $isEnded ? 'text-gray-400 text-decoration-line-through' : 'text-gray-800' ?>">
+                                                                    <?= esc($s->nama_sesi) ?>
+                                                                </h5>
+                                                                <div class="text-gray-500 fs-7 fw-semibold d-flex align-items-center">
+                                                                    <i class="ki-outline ki-time fs-6 me-1 <?= $isEnded ? 'text-gray-400' : 'text-primary' ?>"></i>
+                                                                    <?= date('d M Y', strtotime($s->waktu_mulai)) ?> <span class="mx-2 text-gray-300">|</span>
+                                                                    <?= date('H:i', strtotime($s->waktu_mulai)) ?> - <?= date('H:i', strtotime($s->waktu_selesai)) ?> WIB
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <?php if ($isEnded): ?>
+                                                                <span class="badge bg-secondary text-gray-500 fs-8 fw-bold px-4 py-2 rounded-pill">Selesai</span>
+                                                            <?php else: ?>
+                                                                <span class="badge fs-8 fw-bolder px-4 py-2 rounded-pill d-flex align-items-center" style="background-color: #e8fff3; color: #15cc74;">
+                                                                    <span class="bullet bullet-dot me-2" style="background-color: #15cc74;"></span> Tersedia
+                                                                </span>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    </div>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        </div>
+
+                                        <!-- Action Buttons -->
+                                        <div class="m-0 d-flex flex-column flex-sm-row gap-3">
+                                            <a href="<?= base_url('webinar/' . $paketWebinar->slug) ?>"
+                                                class="btn fw-bolder px-8 py-3 w-100 w-sm-auto rounded-pill text-white shadow-sm d-flex align-items-center justify-content-center" style="background-color: #1d4695;">
+                                                <i class="ki-outline ki-entrance-left fs-3 me-2 text-white"></i> Daftar Sekarang
+                                            </a>
+                                            <a href="<?= base_url('list-bimbel') ?>"
+                                                class="btn btn-light-primary fw-bolder px-8 py-3 w-100 w-sm-auto rounded-pill d-flex align-items-center justify-content-center" style="background-color: #f4f8ff; color: #1d4695;">
+                                                Lihat Paket Lain
+                                            </a>
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>
-
-                            <?php if (!empty($activeWebinar['sesi']->deskripsi_sesi)): ?>
-                                <div class="text-gray-600 fw-medium fs-6 mt-4 border-top border-primary border-opacity-25 pt-4">
-                                    <i class="ki-outline ki-information fs-5 me-1 text-primary"></i> <?= esc($activeWebinar['sesi']->deskripsi_sesi) ?>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <div class="m-0 d-flex flex-column flex-sm-row gap-3">
-                            <a href="<?= base_url('webinar/' . $activeWebinar['paket']->slug) ?>"
-                                class="btn btn-primary fw-bold px-8 py-3 w-100 w-sm-auto shadow-sm">
-                                <i class="ki-outline ki-entrance-left fs-3 me-2"></i> Ikuti Pelatihan
-                            </a>
-                            <a href="<?= base_url('list-bimbel') ?>"
-                                class="btn btn-light-primary fw-bold px-8 py-3 w-100 w-sm-auto">
-                                Lihat Paket Lain
-                            </a>
-                        </div>
-
+                        <?php endforeach; ?>
                     </div>
                 </div>
             </div>
+
         <?php else: ?>
-            <!-- TAMPILAN KODE SEBELUMNYA APABILA WAKTU SUDAH HABIS ATAU BUKAN PAKET WEBINAR AKTIF -->
-            <div class="card bgi-position-y-bottom bgi-position-x-end bgi-no-repeat bgi-size-cover min-h-250px bg-body mb-5 mb-xl-8"
+            <!-- TAMPILAN JIKA TIDAK ADA PAKET WEBINAR AKTIF -->
+            <div class="card bgi-position-y-bottom bgi-position-x-end bgi-no-repeat bgi-size-cover min-h-250px bg-body mb-5 mb-xl-8 shadow-sm rounded-4"
                 style="background-position: 100% 50px; background-size: 500px auto; background-image:url('<?= base_url('') ?>')" dir="ltr">
-                <div class="card-body d-flex flex-column justify-content-center ps-lg-15">
+                <div class="card-body d-flex flex-column justify-content-center ps-lg-15 p-10">
                     <h3 class="text-dark fs-2qx fw-bold mb-4">Siap Menjadi Ahli Pajak <br /><span class="text-primary">Profesional?</span></h3>
                     <div class="fs-5 fw-semibold text-gray-600 mb-7">Tingkatkan kompetensi Anda dengan materi terupdate dan instruktur berpengalaman.</div>
-                    <div class="m-0 d-flex flex-column flex-sm-row">
+                    <div class="m-0 d-flex flex-column flex-sm-row gap-3">
                         <a href="<?= base_url('sw-siswa/materi') ?>"
-                            class="btn btn-primary fw-bold px-8 py-3 mb-2 mb-sm-0 w-100 w-sm-auto">
+                            class="btn btn-primary fw-bold px-8 py-3 w-100 w-sm-auto rounded-pill hover-elevate-up" style="background-color: #1d4695;">
                             Mulai Belajar Sekarang
                         </a>
                         <a href="<?= base_url('list-bimbel') ?>"
-                            class="btn btn-light-primary fw-bold px-8 py-3 ms-0 ms-sm-2 w-100 w-sm-auto">
+                            class="btn btn-light-primary fw-bold px-8 py-3 w-100 w-sm-auto rounded-pill hover-elevate-up">
                             Lihat Paket Lain
                         </a>
                     </div>
@@ -247,7 +383,8 @@
             </div>
         <?php endif; ?>
 
-        <div class="card shadow-sm rounded-4 mb-10">
+        <!-- BAGIAN PAKET KELAS BREVET -->
+        <div class="card shadow-sm rounded-4 mb-10 border-0">
             <div class="card-body">
                 <div class="d-flex flex-stack mb-9">
                     <h3 class="fw-bold text-dark m-0 fs-2">Paket Kelas Brevet</h3>
@@ -370,39 +507,65 @@
 <?= $this->section('scripts'); ?>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Slider Initialization
-        var slider = tns({
-            container: '#kt_brevet_slider',
-            items: 2,
-            gutter: 10,
-            speed: 400,
-            autoplay: false,
-            controls: false,
-            nav: false,
-            mouseDrag: true,
-            touch: true,
-            preventScrollOnTouch: 'auto',
-            responsive: {
-                0: {
-                    items: 1
-                },
-                768: {
-                    items: 2
-                },
-                1200: {
-                    items: 2
+        
+        // 1. Inisialisasi Tiny Slider (Slider Brevet)
+        if (document.querySelector('#kt_brevet_slider')) {
+            var sliderBrevet = tns({
+                container: '#kt_brevet_slider',
+                items: 2,
+                gutter: 10,
+                speed: 400,
+                autoplay: false,
+                controls: false,
+                nav: false,
+                mouseDrag: true,
+                touch: true,
+                preventScrollOnTouch: 'auto',
+                responsive: {
+                    0: { items: 1 },
+                    768: { items: 2 },
+                    1200: { items: 2 }
                 }
-            }
-        });
+            });
 
-        document.querySelector('#kt_slider_prev').addEventListener('click', function() {
-            slider.goTo('prev');
-        });
+            document.querySelector('#kt_slider_prev').addEventListener('click', function() {
+                sliderBrevet.goTo('prev');
+            });
 
-        document.querySelector('#kt_slider_next').addEventListener('click', function() {
-            slider.goTo('next');
-        });
+            document.querySelector('#kt_slider_next').addEventListener('click', function() {
+                sliderBrevet.goTo('next');
+            });
+        }
+
+        // 2. Inisialisasi Tiny Slider (Slider Webinar Premium)
+        if (document.querySelector('#kt_webinar_slider')) {
+            var sliderWebinar = tns({
+                container: '#kt_webinar_slider',
+                items: 1,
+                slideBy: 'page',
+                speed: 600,
+                autoplay: true,
+                autoplayTimeout: 6000,
+                autoplayButtonOutput: false,
+                controls: false, 
+                nav: true, 
+                navPosition: 'bottom',
+                mouseDrag: true,
+                touch: true,
+                preventScrollOnTouch: 'auto'
+            });
+
+            document.querySelector('#kt_webinar_prev').addEventListener('click', function() {
+                sliderWebinar.goTo('prev');
+            });
+
+            document.querySelector('#kt_webinar_next').addEventListener('click', function() {
+                sliderWebinar.goTo('next');
+            });
+        }
     });
+
+    // --- FUNGSI AJAX & SWEETALERT UNTUK AFFILIATE --- //
 
     // AJAX Copy Link Affiliate
     $(document).on('click', '.btn-copy-link', function() {
@@ -474,7 +637,7 @@
             success: function(res) {
                 if (res.status === 'success') {
                     let link = encodeURIComponent(res.link);
-                    waWindow.location.href = "https://wa.me/?text=Cek kelas brevet menarik ini: " + link;
+                    waWindow.location.href = "https://wa.me/?text=Cek kelas menarik ini: " + link;
                 } else {
                     showAlert('error', 'Gagal!', 'Link gagal dibuat.');
                     waWindow.close();
@@ -490,13 +653,12 @@
     });
 
     function showAlert(type, title, message) {
-        // Gunakan Swal.fire untuk SweetAlert2
         Swal.fire({
             title: title,
             text: message,
-            icon: type, // 'success', 'error', 'warning', 'info'
+            icon: type,
             timer: 2200,
-            showConfirmButton: false // Di SweetAlert2, 'buttons: false' diganti ini
+            showConfirmButton: false 
         });
     }
 </script>

@@ -195,6 +195,15 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
         $routes->post('update', 'Admin\DiskonController::update');
         $routes->get('delete/(:segment)', 'Admin\DiskonController::delete/$1');
     });
+    $routes->group('webinar', function ($routes) {
+        $routes->get('', 'Admin\WebinarController::index');
+        $routes->post('datatables', 'Admin\WebinarController::datatables');
+        $routes->post('store', 'Admin\WebinarController::store');
+        $routes->post('edit', 'Admin\WebinarController::edit');
+        $routes->post('update', 'Admin\WebinarController::update');
+        $routes->get('delete/(:segment)', 'Admin\WebinarController::delete/$1');
+    });
+    
 
     $routes->group('paket', function ($routes) {
         $routes->get('', 'Admin\PaketController::index');
@@ -215,6 +224,7 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
 
         $routes->post('ujian-master', 'Admin\PaketController::getUjianMaster'); // Ganti 'Paket' dengan nama Controller Anda
         $routes->post('get-mapel', 'Admin\PaketController::getMapel');
+        $routes->post('get-webinar-sesi', 'Admin\PaketController::getWebinarSesi');
     });
 
     $routes->group('transaksi', function ($routes) {

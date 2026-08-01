@@ -110,6 +110,7 @@
     </div>
 </div>
 
+<!-- ================= MODAL TAMBAH PAKET ================= -->
 <div class="modal fade" id="tambah_paket" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered mw-800px">
         <div class="modal-content rounded border-0">
@@ -129,6 +130,7 @@
                             <select name="jenis_paket[]" class="form-select form-select-solid jenis_paket" data-control="select2" data-dropdown-parent="#tambah_paket" data-placeholder="Pilih layanan..." multiple="multiple" required>
                                 <option value="brevet">Kelas Brevet AB</option>
                                 <option value="ikh">Perijinan IKH</option>
+                                <option value="webinar">Webinar</option>
                             </select>
                             <div class="form-text text-muted">Form akan menyesuaikan berdasarkan pilihan di atas. Anda dapat memilih lebih dari satu.</div>
                         </div>
@@ -145,10 +147,13 @@
                             <label class="required fs-6 fw-semibold mb-2">Tagline Paket</label>
                             <input type="text" name="tagline" class="form-control form-control-solid" required>
                         </div>
+                        
+                        <!-- Input Nominal Tambah Paket -->
                         <div class="col-md-6 fv-row">
                             <label class="required fs-6 fw-semibold mb-2">Nominal Paket (Rp)</label>
-                            <input type="number" name="nominal_paket" class="form-control form-control-solid" required>
+                            <input type="number" name="nominal_paket" id="add_nominal_paket" class="form-control form-control-solid" required>
                         </div>
+
                         <div class="col-md-6 fv-row">
                             <label class="required fs-6 fw-semibold mb-2">Diskon</label>
                             <select name="iddiskon" class="form-select form-select-solid" data-control="select2" data-dropdown-parent="#tambah_paket" required>
@@ -172,6 +177,7 @@
                         </div>
                     </div>
 
+                    <!-- FORM BREVET -->
                     <div class="brevet-fields" style="display: none;">
                         <div class="separator separator-dashed my-8"></div>
                         <h4 class="fw-bold text-dark mb-5"><i class="ki-duotone ki-book-open fs-2 me-2"></i> Pengaturan Kelas Brevet</h4>
@@ -203,6 +209,20 @@
                         </div>
                     </div>
 
+                    <!-- FORM WEBINAR -->
+                    <div class="webinar-fields" style="display: none;">
+                        <div class="separator separator-dashed my-8"></div>
+                        <h4 class="fw-bold text-dark mb-5"><i class="ki-duotone ki-laptop fs-2 me-2"></i> Pengaturan Webinar</h4>
+                        <div class="row g-5 bg-light-info p-5 rounded">
+                            <div class="col-md-12 fv-row" id="wrapper_id_sesi">
+                                <label class="required fs-6 fw-semibold mb-2">Pilih Sesi Webinar <span class="text-danger fs-8 fw-normal">(Bisa pilih banyak)</span></label>
+                                <select name="id_sesi[]" id="id_sesi" class="form-select form-select-solid dynamic-req-webinar" data-control="select2" data-dropdown-parent="#wrapper_id_sesi" data-placeholder="Pilih Sesi Webinar..." multiple="multiple">
+                                    <option></option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="fv-row mt-7">
                         <label class="required fs-6 fw-semibold mb-2">Deskripsi Paket</label>
                         <textarea name="deskripsi" class="summernote form-control" required></textarea>
@@ -219,6 +239,7 @@
     </div>
 </div>
 
+<!-- ================= MODAL EDIT PAKET ================= -->
 <div class="modal fade" id="edit_paket" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered mw-800px">
         <div class="modal-content rounded border-0 shadow-lg">
@@ -242,6 +263,7 @@
                             <select name="jenis_paket[]" class="form-select form-select-solid jenis_paket" data-control="select2" data-dropdown-parent="#edit_paket" data-placeholder="Pilih layanan..." multiple="multiple" required>
                                 <option value="brevet">Kelas Brevet AB</option>
                                 <option value="ikh">Perijinan IKH</option>
+                                <option value="webinar">Webinar</option>
                             </select>
                         </div>
 
@@ -258,10 +280,13 @@
                             <label class="required fs-6 fw-semibold mb-2">Tagline Paket</label>
                             <input type="text" name="tagline" id="tagline" class="form-control form-control-solid" required>
                         </div>
+                        
+                        <!-- Input Nominal Edit Paket -->
                         <div class="col-md-6 fv-row">
                             <label class="required fs-6 fw-semibold mb-2">Nominal (Rp)</label>
-                            <input type="number" name="nominal_paket" id="nominal_paket" class="form-control form-control-solid" required>
+                            <input type="number" name="nominal_paket" id="edit_nominal_paket" class="form-control form-control-solid" required>
                         </div>
+
                         <div class="col-md-6 fv-row">
                             <label class="required fs-6 fw-semibold mb-2">Diskon</label>
                             <select name="iddiskon" id="iddiskon" class="form-select form-select-solid" data-control="select2" data-dropdown-parent="#edit_paket" required>
@@ -284,6 +309,7 @@
                         </div>
                     </div>
 
+                    <!-- FORM BREVET EDIT -->
                     <div class="brevet-fields" style="display: none;">
                         <div class="separator separator-dashed my-8"></div>
                         <h4 class="fw-bold text-dark mb-5"><i class="ki-duotone ki-book-open fs-2 me-2"></i> Update Susunan Kelas Brevet</h4>
@@ -323,6 +349,20 @@
                         </div>
                     </div>
 
+                    <!-- FORM WEBINAR EDIT -->
+                    <div class="webinar-fields" style="display: none;">
+                        <div class="separator separator-dashed my-8"></div>
+                        <h4 class="fw-bold text-dark mb-5"><i class="ki-duotone ki-laptop fs-2 me-2"></i> Update Sesi Webinar</h4>
+                        <div class="row g-5 bg-light-info p-5 rounded" id="wrapper_id_sesi_edit">
+                            <div class="col-md-12 fv-row">
+                                <label class="fs-6 fw-semibold mb-2">Pilih Sesi Webinar <span class="text-danger fs-8 fw-normal">(Bisa pilih banyak)</span></label>
+                                <select name="id_sesi[]" id="edit_id_sesi" class="form-select form-select-solid dynamic-req-webinar" data-control="select2" data-dropdown-parent="#wrapper_id_sesi_edit" multiple="multiple" data-placeholder="Pilih Sesi Webinar...">
+                                    <option></option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="fv-row mt-7">
                         <label class="required fs-6 fw-semibold mb-2">Deskripsi Paket</label>
                         <div id="deskripsi_wrapper"></div>
@@ -346,13 +386,22 @@
     // 1. FUNGSI GLOBAL
     // =========================================================
 
-    // Fungsi Update CSRF Token agar AJAX tidak error 403
     function updateCSRF(token) {
         $('input[name="<?= csrf_token() ?>"]').val(token);
     }
 
-    // Fungsi Menampilkan/Menyembunyikan Form Dinamis (Brevet / IKH)
-    function toggleDynamicFields(modalElement) {
+    // Fungsi Kalkulasi Harga Nominal berdasarkan total "harga_sesi"
+    function calculateWebinarTotal(selectElement, nominalInputId) {
+        let total = 0;
+        $(selectElement).find('option:selected').each(function() {
+            let harga = $(this).data('harga') || 0;
+            total += parseInt(harga);
+        });
+        $(nominalInputId).val(total);
+    }
+
+    // UPDATE: Fungsi Menampilkan/Menyembunyikan Form Dinamis (Brevet, IKH, & Webinar)
+    function toggleDynamicFields(modalElement, nominalInputId) {
         let selectedTypes = $(modalElement).find('.jenis_paket').val() || [];
 
         // Logika Form Brevet
@@ -363,6 +412,26 @@
             $(modalElement).find('.brevet-fields').slideUp();
             $(modalElement).find('.dynamic-req-brevet').prop('required', false).val('').trigger('change');
         }
+
+        // Logika Form Webinar & Kalkulasi Nominal
+        if (selectedTypes.includes('webinar')) {
+            $(modalElement).find('.webinar-fields').slideDown();
+            $(modalElement).find('.dynamic-req-webinar').prop('required', true);
+            
+            // Jadikan field Nominal READONLY (Hanya bisa dihitung otomatis) & Ganti Background
+            $(nominalInputId).prop('readonly', true).addClass('bg-secondary');
+
+            // Hitung harga sesi (berjaga-jaga jika ada yg sudah terpilih)
+            let selectSesi = $(modalElement).find('.dynamic-req-webinar');
+            calculateWebinarTotal(selectSesi, nominalInputId);
+
+        } else {
+            $(modalElement).find('.webinar-fields').slideUp();
+            $(modalElement).find('.dynamic-req-webinar').prop('required', false).val('').trigger('change');
+            
+            // Lepas kunci READONLY jika bukan webinar & Hapus efek background
+            $(nominalInputId).prop('readonly', false).removeClass('bg-secondary');
+        }
     }
 
     // =========================================================
@@ -370,27 +439,27 @@
     // =========================================================
     $(document).ready(function() {
 
-        // --- Init DataTables ---
         var table = $('#datatable-list').DataTable({
             "ordering": false,
         });
 
-        // Custom Search DataTables
         $('[data-kt-paket-table-filter="search"]').on('keyup', function() {
             table.search(this.value).draw();
         });
 
-        // --- Init Summernote (Form Tambah) ---
         $('.summernote').summernote({
             placeholder: 'Tulis deskripsi paket di sini...',
             height: 300,
             fontSizes: ['8', '9', '10', '11', '12', '14', '18', '24', '36', '48', '64', '82'],
         });
 
-        // --- Event Listener: Jenis Paket ---
-        $('.jenis_paket').on('change', function() {
-            let parentModal = $(this).closest('.modal');
-            toggleDynamicFields(parentModal);
+        // Deteksi perubahan jenis_paket pada masing-masing modal
+        $('#tambah_paket .jenis_paket').on('change', function() {
+            toggleDynamicFields($('#tambah_paket'), '#add_nominal_paket');
+        });
+
+        $('#edit_paket .jenis_paket').on('change', function() {
+            toggleDynamicFields($('#edit_paket'), '#edit_nominal_paket');
         });
 
         // =========================================================
@@ -404,10 +473,7 @@
             $.ajax({
                 url: "<?php echo site_url('sw-admin/paket/ujian-master'); ?>",
                 method: "POST",
-                data: {
-                    id: id,
-                    [csrfName]: csrfHash
-                },
+                data: { id: id, [csrfName]: csrfHash },
                 dataType: 'json',
                 success: function(res) {
                     updateCSRF(res[csrfName]);
@@ -415,22 +481,14 @@
                     $.each(res.data, function(i, item) {
                         html += '<option value="' + item.id_ujian + '">' + item.nama_ujian + '</option>';
                     });
-
-                    // PERBAIKAN DI SINI: Paksa render ulang dan ikat ke Modal Tambah
-                    $('#id_ujian').html(html).select2({
-                        dropdownParent: $('#wrapper_id_ujian')
-                    });
+                    $('#id_ujian').html(html).select2({ dropdownParent: $('#wrapper_id_ujian') });
                 }
             });
 
-            // Ambil Mapel
             $.ajax({
                 url: "<?php echo site_url('sw-admin/paket/get-mapel'); ?>",
                 method: "POST",
-                data: {
-                    id: id,
-                    [csrfName]: $('input[name="<?= csrf_token() ?>"]').val()
-                },
+                data: { id: id, [csrfName]: $('input[name="<?= csrf_token() ?>"]').val() },
                 dataType: 'json',
                 success: function(res) {
                     updateCSRF(res[csrfName]);
@@ -438,14 +496,50 @@
                     $.each(res.data, function(i, item) {
                         html += '<option value="' + item.id_mapel + '">' + item.nama_mapel + '</option>';
                     });
-
-                    // PERBAIKAN DI SINI: Paksa render ulang dan ikat ke Modal Tambah
-                    $('#id_mapel').html(html).select2({
-                        dropdownParent: $('#wrapper_id_mapel')
-                    });
+                    $('#id_mapel').html(html).select2({ dropdownParent: $('#wrapper_id_mapel') });
                 }
             });
         });
+
+        // Load Sesi Webinar (Modal Tambah)
+        $('#tambah_paket .jenis_paket').on('change', function() {
+            let selectedTypes = $(this).val() || [];
+            if (selectedTypes.includes('webinar')) {
+                let sesiSelect = $('#id_sesi');
+                if (sesiSelect.children('option').length <= 1) { 
+                    var csrfName = '<?= csrf_token() ?>';
+                    $.ajax({
+                        url: "<?= base_url('sw-admin/paket/get-webinar-sesi') ?>",
+                        method: "POST",
+                        data: { [csrfName]: $('input[name="<?= csrf_token() ?>"]').val() },
+                        dataType: 'json',
+                        success: function(res) {
+                            updateCSRF(res[csrfName]);
+                            var html = '<option></option>';
+                            $.each(res.data, function(i, item) {
+                                // SELIPKAN HARGA SESI di data-harga
+                                html += '<option value="' + item.id_sesi + '" data-harga="' + item.harga_sesi + '">' + item.nama_sesi + '</option>';
+                            });
+                            sesiSelect.select2('destroy').html(html).select2({
+                                theme: 'bootstrap5',
+                                dropdownParent: $('#wrapper_id_sesi')
+                            });
+                        }
+                    });
+                }
+            }
+        });
+
+        // Panggil fungsi Kalkulator otomatis ketika user memilih sesi (Modal Tambah)
+        $('#id_sesi').on('change', function() {
+            calculateWebinarTotal(this, '#add_nominal_paket');
+        });
+
+        // Panggil fungsi Kalkulator otomatis ketika user memilih sesi (Modal Edit)
+        $('#edit_id_sesi').on('change', function() {
+            calculateWebinarTotal(this, '#edit_nominal_paket');
+        });
+
 
         // =========================================================
         // 4. AJAX DYNAMIC SELECT (MODAL EDIT)
@@ -457,74 +551,49 @@
             var csrfHash = $('input[name="<?= csrf_token() ?>"]').val();
 
             if (!id) {
-                // Jika Kelas dikosongkan, reset Ujian dan Mapel ke kosong
                 $('#edit_ujian_master').html('<option></option>').trigger('change');
                 $('#edit_id_mapel').html('<option></option>').trigger('change');
                 return;
             }
 
-            // Ambil Ujian Master untuk Edit
             $.ajax({
                 url: "<?php echo site_url('sw-admin/paket/ujian-master'); ?>",
                 method: "POST",
-                data: {
-                    id: id,
-                    [csrfName]: csrfHash
-                },
+                data: { id: id, [csrfName]: csrfHash },
                 dataType: 'json',
                 success: function(res) {
                     updateCSRF(res[csrfName]);
                     var html = '<option></option><option value="all">-- PILIH SEMUA UJIAN --</option>';
-                    $.each(res.data, function(i, item) {
-                        html += '<option value="' + item.id_ujian + '">' + item.nama_ujian + '</option>';
-                    });
-
-                    // PERBAIKAN: Destroy, isi HTML, lalu init ulang ke wrapper
-                    $('#edit_ujian_master').select2('destroy').html(html).select2({
-                        theme: 'bootstrap5',
-                        dropdownParent: $('#wrapper_ujian_edit')
-                    });
+                    $.each(res.data, function(i, item) { html += '<option value="' + item.id_ujian + '">' + item.nama_ujian + '</option>'; });
+                    $('#edit_ujian_master').select2('destroy').html(html).select2({ theme: 'bootstrap5', dropdownParent: $('#wrapper_ujian_edit') });
                 }
             });
 
-            // Ambil Mapel untuk Edit
             $.ajax({
                 url: "<?php echo site_url('sw-admin/paket/get-mapel'); ?>",
                 method: "POST",
-                data: {
-                    id: id,
-                    [csrfName]: $('input[name="<?= csrf_token() ?>"]').val() // Gunakan value terbaru karena mungkin sudah diubah AJAX sebelumnya
-                },
+                data: { id: id, [csrfName]: $('input[name="<?= csrf_token() ?>"]').val() },
                 dataType: 'json',
                 success: function(res) {
                     updateCSRF(res[csrfName]);
                     var html = '<option></option><option value="all">-- PILIH SEMUA MAPEL --</option>';
-                    $.each(res.data, function(i, item) {
-                        html += '<option value="' + item.id_mapel + '">' + item.nama_mapel + '</option>';
-                    });
-
-                    // PERBAIKAN: Destroy, isi HTML, lalu init ulang ke wrapper
-                    $('#edit_id_mapel').select2('destroy').html(html).select2({
-                        theme: 'bootstrap5',
-                        dropdownParent: $('#wrapper_mapel_edit')
-                    });
+                    $.each(res.data, function(i, item) { html += '<option value="' + item.id_mapel + '">' + item.nama_mapel + '</option>'; });
+                    $('#edit_id_mapel').select2('destroy').html(html).select2({ theme: 'bootstrap5', dropdownParent: $('#wrapper_mapel_edit') });
                 }
             });
         });
 
-        // =========================================================
-        // 5. AJAX BUKA MODAL EDIT PAKET
-        // =========================================================
+
         // =========================================================
         // 5. AJAX BUKA MODAL EDIT PAKET
         // =========================================================
         $(document).on('click', '.edit-paket', function() {
             const idpaket = $(this).data('paket');
 
-            // Reset form di modal edit setiap kali dibuka
             $('#edit_id_kelas').val('');
             $('#edit_ujian_master').html('<option></option>').trigger('change');
             $('#edit_id_mapel').html('<option></option>').trigger('change');
+            $('#edit_id_sesi').html('<option></option>').trigger('change');
 
             $.ajax({
                 type: 'POST',
@@ -538,53 +607,35 @@
                     var csrfName = '<?= csrf_token() ?>';
                     updateCSRF(data[csrfName]);
 
-                    // Isi form dasar
                     $("#idpaket").val(data.idpaket);
                     $("#nama_paket").val(data.nama_paket);
                     $("#tagline").val(data.tagline);
                     $("#iddiskon").val(data.iddiskon).trigger('change');
-                    $("#nominal_paket").val(data.nominal_paket);
+                    $("#edit_nominal_paket").val(data.nominal_paket);
                     $("#gambar_lama").val(data.file);
                     $("#status").val(data.status);
                     $("#komisi").val(data.komisi);
                     $("#deskripsi_wrapper").html(`<textarea name="deskripsi" class="summernote_edit">${data.deskripsi}</textarea>`);
 
-                    if (data.file) {
-                        $("#view_gambar").html("<img class='img-fluid rounded shadow-sm w-150px' src='<?= base_url('assets-landing/images/paket/thumbnails'); ?>/" + data.file + "'>");
-                    } else {
-                        $("#view_gambar").html("");
-                    }
+                    if (data.file) { $("#view_gambar").html("<img class='img-fluid rounded shadow-sm w-150px' src='<?= base_url('assets-landing/images/paket/thumbnails'); ?>/" + data.file + "'>"); } 
+                    else { $("#view_gambar").html(""); }
 
-                    // Init ulang Summernote untuk form edit
-                    $('.summernote_edit').summernote({
-                        height: 300,
-                        fontSizes: ['8', '9', '10', '11', '12', '14', '18', '24', '36', '48', '64', '82'],
-                    });
+                    $('.summernote_edit').summernote({ height: 300, fontSizes: ['8', '9', '10', '11', '12', '14', '18', '24', '36', '48', '64', '82'] });
 
-                    // Set Jenis Paket JSON Array ke Select2
                     let arrPaket = [];
                     if (data.jenis_paket) {
                         let parsedData = (typeof data.jenis_paket === 'string') ? JSON.parse(data.jenis_paket) : data.jenis_paket;
-                        if (Array.isArray(parsedData)) {
-                            arrPaket = parsedData.map(item => item.trim().toLowerCase());
-                        }
+                        if (Array.isArray(parsedData)) { arrPaket = parsedData.map(item => item.trim().toLowerCase()); }
                     }
-                    // Trigger otomatis toggle form
+                    
+                    // Ini akan mentrigger toggleDynamicFields
                     $("#edit_paket .jenis_paket").val(arrPaket).trigger('change');
 
-                    // =======================================================
-                    // AUTO-FILL UNTUK KELAS, UJIAN & MAPEL (KHUSUS BREVET)
-                    // =======================================================
-                   if (data.id_kelas) {
-                        // 1. Set ID Kelas dan update Select2 secara SILENT (tanpa tabrakan AJAX)
-                        $("#edit_id_kelas").val(data.id_kelas).trigger({
-                            type: 'change',
-                            preventAjax: true
-                        });
-                        
+                    // AUTO-FILL BREVET
+                    if (data.id_kelas) {
+                        $("#edit_id_kelas").val(data.id_kelas).trigger({ type: 'change', preventAjax: true });
                         var tokenUpdate = $('input[name="<?= csrf_token() ?>"]').val();
 
-                        // 2. Fetch Option Ujian dan centang nilainya
                         $.ajax({
                             url: "<?php echo site_url('sw-admin/paket/ujian-master'); ?>",
                             method: "POST",
@@ -593,54 +644,62 @@
                             success: function(res) {
                                 updateCSRF(res[csrfName]);
                                 var html = '<option></option><option value="all">-- PILIH SEMUA UJIAN --</option>';
-                                $.each(res.data, function(i, item) {
-                                    html += '<option value="' + item.id_ujian + '">' + item.nama_ujian + '</option>';
-                                });
-
-                                $('#edit_ujian_master').select2('destroy').html(html).select2({
-                                    theme: 'bootstrap5',
-                                    dropdownParent: $('#wrapper_ujian_edit')
-                                });
-
-                                // Centang value lama
-                                if(data.arr_ujian.length > 0) {
-                                    $('#edit_ujian_master').val(data.arr_ujian).trigger('change');
-                                }
+                                $.each(res.data, function(i, item) { html += '<option value="' + item.id_ujian + '">' + item.nama_ujian + '</option>'; });
+                                $('#edit_ujian_master').select2('destroy').html(html).select2({ theme: 'bootstrap5', dropdownParent: $('#wrapper_ujian_edit') });
+                                if(data.arr_ujian && data.arr_ujian.length > 0) { $('#edit_ujian_master').val(data.arr_ujian).trigger('change'); }
                             }
                         });
 
-                        // 3. Fetch Option Mapel dan centang nilainya
                         $.ajax({
                             url: "<?php echo site_url('sw-admin/paket/get-mapel'); ?>",
                             method: "POST",
-                            data: { id: data.id_kelas, [csrfName]: $('input[name="<?= csrf_token() ?>"]').val() }, // pakai token terbaru
+                            data: { id: data.id_kelas, [csrfName]: $('input[name="<?= csrf_token() ?>"]').val() },
                             dataType: 'json',
                             success: function(res) {
                                 updateCSRF(res[csrfName]);
                                 var html = '<option></option><option value="all">-- PILIH SEMUA MAPEL --</option>';
+                                $.each(res.data, function(i, item) { html += '<option value="' + item.id_mapel + '">' + item.nama_mapel + '</option>'; });
+                                $('#edit_id_mapel').select2('destroy').html(html).select2({ theme: 'bootstrap5', dropdownParent: $('#wrapper_mapel_edit') });
+                                if(data.arr_mapel && data.arr_mapel.length > 0) { $('#edit_id_mapel').val(data.arr_mapel).trigger('change'); }
+                            }
+                        });
+                    }
+
+                    // AUTO-FILL WEBINAR
+                    if (arrPaket.includes('webinar')) {
+                        $.ajax({
+                            url: "<?= base_url('sw-admin/paket/get-webinar-sesi') ?>",
+                            method: "POST",
+                            data: { [csrfName]: $('input[name="<?= csrf_token() ?>"]').val() },
+                            dataType: 'json',
+                            success: function(res) {
+                                updateCSRF(res[csrfName]);
+                                var html = '<option></option>';
                                 $.each(res.data, function(i, item) {
-                                    html += '<option value="' + item.id_mapel + '">' + item.nama_mapel + '</option>';
+                                    // SELIPKAN HARGA SESI
+                                    html += '<option value="' + item.id_sesi + '" data-harga="' + item.harga_sesi + '">' + item.nama_sesi + '</option>';
                                 });
 
-                                $('#edit_id_mapel').select2('destroy').html(html).select2({
+                                $('#edit_id_sesi').select2('destroy').html(html).select2({
                                     theme: 'bootstrap5',
-                                    dropdownParent: $('#wrapper_mapel_edit')
+                                    dropdownParent: $('#wrapper_id_sesi_edit')
                                 });
 
-                                // Centang value lama
-                                if(data.arr_mapel.length > 0) {
-                                    $('#edit_id_mapel').val(data.arr_mapel).trigger('change');
+                                if (data.arr_sesi && data.arr_sesi.length > 0) {
+                                    // trigger change akan otomatis memanggil kalkulator total nominal
+                                    $('#edit_id_sesi').val(data.arr_sesi).trigger('change');
+                                } else {
+                                    calculateWebinarTotal('#edit_id_sesi', '#edit_nominal_paket');
                                 }
                             }
                         });
                     }
-                    // =======================================================
                 }
             });
         });
 
         // =========================================================
-        // 6. FITUR HAPUS PAKET (SWEETALERT)
+        // 6. FITUR HAPUS PAKET & 7. FITUR PIN PAKET
         // =========================================================
         $(document).on('click', '.btn-delete', function(e) {
             e.preventDefault();
@@ -653,51 +712,28 @@
                 showCancelButton: true,
                 confirmButtonText: "Ya, Hapus!",
                 cancelButtonText: "Batal",
-                customClass: {
-                    confirmButton: "btn btn-danger",
-                    cancelButton: "btn btn-light-primary"
-                }
+                customClass: { confirmButton: "btn btn-danger", cancelButton: "btn btn-light-primary" }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    Swal.fire({
-                        text: "Menghapus data...",
-                        icon: "info",
-                        allowOutsideClick: false,
-                        showConfirmButton: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        }
-                    });
-                    // Redirect ke fungsi delete
+                    Swal.fire({ text: "Menghapus data...", icon: "info", allowOutsideClick: false, showConfirmButton: false, didOpen: () => { Swal.showLoading(); }});
                     window.location.href = targetUrl;
                 }
             });
         });
 
-        // =========================================================
-        // 7. FITUR PIN PAKET
-        // =========================================================
         $(document).on('click', '.pin-paket', function() {
             let id = $(this).data('id');
             $.ajax({
                 url: "<?= base_url('sw-admin/paket/pin') ?>",
                 type: "POST",
-                data: {
-                    id: id,
-                    "<?= csrf_token() ?>": $('input[name="<?= csrf_token() ?>"]').val()
-                },
+                data: { id: id, "<?= csrf_token() ?>": $('input[name="<?= csrf_token() ?>"]').val() },
                 dataType: "json",
                 success: function(res) {
-                    if (res.status === 'success') {
-                        location.reload();
-                    } else {
-                        updateCSRF(res.<?= csrf_token() ?>);
-                        Swal.fire("Gagal!", res.message, "error");
-                    }
+                    if (res.status === 'success') { location.reload(); } 
+                    else { updateCSRF(res.<?= csrf_token() ?>); Swal.fire("Gagal!", res.message, "error"); }
                 }
             });
         });
-
     });
 
     // =========================================================
@@ -711,27 +747,21 @@
                 ghostClass: 'bg-light-primary',
                 onEnd: function() {
                     let order = [];
-                    tbody.querySelectorAll('tr').forEach((row, index) => {
-                        order.push({
-                            id: row.dataset.id,
-                            position: index + 1
-                        });
-                    });
-
+                    tbody.querySelectorAll('tr').forEach((row, index) => { order.push({ id: row.dataset.id, position: index + 1 }); });
                     fetch("<?= base_url('sw-admin/paket/reorder') ?>", {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json",
-                                "X-Requested-With": "XMLHttpRequest",
-                                "X-CSRF-TOKEN": $('input[name="<?= csrf_token() ?>"]').val()
-                            },
-                            body: JSON.stringify(order)
-                        })
-                        .then(res => res.json())
-                        .then(res => {
-                            updateCSRF(res.<?= csrf_token() ?>);
-                            if (res.status !== 'success') Swal.fire("Gagal!", "Urutan gagal disimpan", "error");
-                        });
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-Requested-With": "XMLHttpRequest",
+                            "X-CSRF-TOKEN": $('input[name="<?= csrf_token() ?>"]').val()
+                        },
+                        body: JSON.stringify(order)
+                    })
+                    .then(res => res.json())
+                    .then(res => {
+                        updateCSRF(res.<?= csrf_token() ?>);
+                        if (res.status !== 'success') Swal.fire("Gagal!", "Urutan gagal disimpan", "error");
+                    });
                 }
             });
         }

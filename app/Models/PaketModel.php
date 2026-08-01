@@ -67,10 +67,12 @@ class PaketModel extends Model
     public function getPaketWebinar()
     {
         return $this
-            ->select('paket.*, b.diskon, c.*')
+            ->select('paket.*, d.id_sesi')
             ->join('diskon b', 'b.iddiskon = paket.iddiskon')
-            ->join('webinar_sesi c', 'c.idpaket=paket.idpaket')
+            ->join('detail_paket c', 'c.idpaket=paket.idpaket')
+            ->join('webinar_sesi d', 'c.id_sesi=d.id_sesi')
             ->where('paket.status', 1)
+            ->like('paket.jenis_paket', '"webinar"')
             ->orderBy('paket.is_pinned', 'DESC')
             ->orderBy('paket.sort_order', 'asc')
             ->groupBy('paket.idpaket')

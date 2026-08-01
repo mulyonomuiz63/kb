@@ -36,28 +36,23 @@ class WebinarController extends BaseController
     {
         // Pastikan user sudah login
         $id_siswa = session()->get('id');
-
-        $db = \Config\Database::connect();
-
         // Query untuk mengambil sesi webinar yang sudah dibeli dan lunas
-        $builder = $db->table('webinar_sesi ws');
-        $builder->select('ws.*, p.nama_paket');
-        $builder->join('detail_transaksi dt', 'dt.idsesi = ws.id_sesi');
-        $builder->join('transaksi t', 't.idtransaksi = dt.idtransaksi');
-        $builder->join('paket p', 'p.idpaket = ws.idpaket', 'left'); // Mengambil info paket terkait
+        $dataWebinar = $this->transaksiModel
+            ->select('webinar_sesi.*, paket.nama_paket, paket.file')
+            ->join('detail_transaksi', 'transaksi.idtransaksi = detail_transaksi.idtransaksi')
+            ->join('paket','detail_transaksi.idpaket=paket.idpaket')
+            ->join('webinar_sesi', 'detail_transaksi.idsesi=webinar_sesi.id_sesi')
+            ->where('transaksi.status', 'S')
+            ->where('idsiswa', $id_siswa)
+            ->groupBy('detail_transaksi.idsesi')
+            ->get()
+            ->getResult();
 
-        // Asumsi: id pengguna di tabel transaksi adalah 'id_siswa' dan status 'L' berarti Lunas
-        $builder->where('t.idsiswa', $id_siswa);
-        $builder->where('t.status', 'S');
-
-        // Urutkan berdasarkan waktu mulai terdekat
-        $builder->orderBy('ws.waktu_mulai', 'ASC');
-
-        $webinar = $builder->get()->getResultObject();
+        // var_dump($data['webinar']);
 
         $data = [
             'title'   => 'Webinar Saya',
-            'webinar' => $webinar
+            'webinar' => $dataWebinar
         ];
 
         return view('siswa/webinar/list', $data);
