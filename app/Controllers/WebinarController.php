@@ -235,7 +235,7 @@ class WebinarController extends BaseController
         $detailPaket = $this->sesiModel
             ->join('detail_paket', 'webinar_sesi.id_sesi=detail_paket.id_sesi', 'left')
             ->where('detail_paket.idpaket', $idpaket)
-            ->whereIn('webinar_sesi.id_sesi', $sesi_terpilih)
+            ->groupBy('detail_paket.idpaket')
             ->get()->getResultObject();
 
         if (!empty($detailPaket) && is_array($detailPaket)) {
