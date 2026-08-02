@@ -87,10 +87,10 @@ class WebinarController extends BaseController
     public function daftar()
     {
         // 1. Sanitasi dan Casting Input untuk mencegah manipulasi data
-        $idpaket       = (int)$this->request->getPost('idpaket');
-        $email         = $this->request->getPost('email', FILTER_SANITIZE_EMAIL);
+        $idpaket      = (int)$this->request->getPost('idpaket');
+        $email        = $this->request->getPost('email', FILTER_SANITIZE_EMAIL);
         $nama_siswa    = esc($this->request->getPost('nama')); // Diubah jadi 'nama' menyesuaikan form HTML
-        $hp            = esc($this->request->getPost('hp'));
+        $hp           = esc($this->request->getPost('hp'));
         $sesi_terpilih = $this->request->getPost('id_sesi'); // Bentuknya Array
 
         // Jika user iseng bypass HTML Required dan tidak memilih sesi satupun
@@ -250,7 +250,7 @@ class WebinarController extends BaseController
                     'idtransaksi' => $idtransaksi,
                     'idpaket'     => $idpaket,
                     'idmapel'     => '0',
-                    'idsesi'     => $rows->id_sesi,
+                    'idsesi'      => $rows->id_sesi,
                     'prince'      => $rows->harga_sesi,
                     'quantity'    => 1,
                     'name'        => $rows->nama_sesi
@@ -259,26 +259,26 @@ class WebinarController extends BaseController
             $this->detailTransaksiModel->insertBatch($detailTransaksi);
 
 
-            // 4. Pembayaran Midtrans
-            //kondisi jika paket hanya yang di pilih gratis
-            if ((float) $dataPaket->harga_sesi >= 0) {
+            // 4. Proses Transaksi (Midtrans jika berbayar / Langsung selesai jika gratis)
+            $data = $this->transaksiModel
+                ->join('siswa', 'transaksi.idsiswa=siswa.id_siswa')
+                ->where('transaksi.idtransaksi', $idtransaksi)
+                ->get()->getRowObject();
+
+            $diskon         = ($data->nominal * $data->diskon) / 100;
+            $totalDiskon    = $data->nominal - $diskon;
+            // Asumsi kolom voucher ada di tabel, jika tidak ada, ubah $data->voucher menjadi 0
+            $voucher        = isset($data->voucher) ? $data->voucher : 0;
+            $diskon_voucher = ($totalDiskon * $voucher) / 100;
+            $gross_amount   = round($totalDiskon - $diskon_voucher);
+
+            $snapToken = null;
+
+            if ($gross_amount > 0) {
                 \Midtrans\Config::$serverKey    = setting('midtrans_server_key');
                 \Midtrans\Config::$isProduction = filter_var(setting('midtrans_is_production'), FILTER_VALIDATE_BOOLEAN);
                 \Midtrans\Config::$isSanitized  = true;
                 \Midtrans\Config::$is3ds        = true;
-
-                // PERBAIKAN LOGIKA: Hanya ambil data yang baru saja diinsert (tanpa filter status P karena kita simpan dengan status M)
-                $data = $this->transaksiModel
-                    ->join('siswa', 'transaksi.idsiswa=siswa.id_siswa')
-                    ->where('transaksi.idtransaksi', $idtransaksi)
-                    ->get()->getRowObject();
-
-                $diskon         = ($data->nominal * $data->diskon) / 100;
-                $totalDiskon    = $data->nominal - $diskon;
-                // Asumsi kolom voucher ada di tabel, jika tidak ada, ubah $data->voucher menjadi 0
-                $voucher        = isset($data->voucher) ? $data->voucher : 0;
-                $diskon_voucher = ($totalDiskon * $voucher) / 100;
-                $gross_amount   = round($totalDiskon - $diskon_voucher);
 
                 $detailTransaksi = $this->detailTransaksiModel->where('idtransaksi', $idtransaksi)->get()->getResultObject();
                 $dataItem = array();
@@ -340,11 +340,13 @@ class WebinarController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Terjadi kesalahan pada server saat mendaftar.');
         }
 
-        // 5. Redirect ke Invoice sambil membawa Token
-        // Parameter with() menyimpan variabel secara sementara untuk dipanggil di halaman Invoice
-        return redirect()->to('webinar/invoice')->with('success', 'Pendaftaran berhasil, silakan selesaikan pembayaran!')->with('snapToken' , $snapToken);
+        // 5. Redirect Berdasarkan Jenis Paket (Berbayar via Midtrans, Gratis kembali ke halaman semula)
+        if ($gross_amount > 0) {
+            return redirect()->to('webinar/invoice')->with('success', 'Pendaftaran berhasil, silakan selesaikan pembayaran!')->with('snapToken' , $snapToken);
+        } else {
+            return redirect()->back()->with('success', 'Pendaftaran berhasil, Anda telah terdaftar!');
+        }
     }
-
     public function invoice()
     {
         // Jika tidak ada token (misal user asal buka URL /invoice), kembalikan ke home
