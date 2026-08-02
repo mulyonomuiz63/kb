@@ -264,7 +264,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                         <?php
                         $gambarPaket = ($paketWebinar && !empty($paketWebinar->file))
                             ? base_url('assets-landing/images/paket/thumbnails/' . $paketWebinar->file)
-                            : 'https://images.unsplash.com/photo-1591115765373-5207764f72e7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
+                            : '';
                         ?>
                         <img src="<?= $gambarPaket ?>"
                             alt="<?= $paketWebinar ? esc($paketWebinar->nama_paket) : 'Suasana Webinar Transformasi Digital' ?>"
@@ -641,7 +641,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                                         <!-- Tampilan Deskripsi Sesi Berbayar -->
                                                         <?php if (!$isFree && !empty($sesi['deskripsi_sesi'])): ?>
                                                             <p class="text-secondary mb-0 mt-2" style="font-size: 0.85rem; line-height: 1.5;">
-                                                                <span class="badge bg-success mt-1" style="font-size: 0.75rem;">Berbayar</span>
+                                                                <span class="badge bg-primary mt-1" style="font-size: 0.75rem;">Berbayar</span>
                                                             </p>
                                                         <?php endif; ?>
                                                     </div>
