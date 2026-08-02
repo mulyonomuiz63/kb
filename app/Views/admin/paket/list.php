@@ -154,9 +154,9 @@
                             <input type="number" name="nominal_paket" id="add_nominal_paket" class="form-control form-control-solid" required>
                         </div>
 
-                        <div class="col-md-6 fv-row">
+                        <div class="col-md-6 fv-row" id="wrapper_tambah_diskon">
                             <label class="required fs-6 fw-semibold mb-2">Diskon</label>
-                            <select name="iddiskon" class="form-select form-select-solid" data-control="select2" data-dropdown-parent="#tambah_paket" required>
+                            <select name="iddiskon" class="form-select form-select-solid" data-control="select2" data-dropdown-parent="#wrapper_tambah_diskon" required>
                                 <option value="">Pilih</option>
                                 <?php $dataDiskon = $db->query("select * from diskon ")->getResultObject(); ?>
                                 <?php foreach ($dataDiskon as $rows) : ?>
@@ -287,9 +287,9 @@
                             <input type="number" name="nominal_paket" id="edit_nominal_paket" class="form-control form-control-solid" required>
                         </div>
 
-                        <div class="col-md-6 fv-row">
+                        <div class="col-md-6 fv-row" id="wrapper_edit_diskon">
                             <label class="required fs-6 fw-semibold mb-2">Diskon</label>
-                            <select name="iddiskon" id="iddiskon" class="form-select form-select-solid" data-control="select2" data-dropdown-parent="#edit_paket" required>
+                            <select name="iddiskon" id="iddiskon" class="form-select form-select-solid" data-control="select2" data-dropdown-parent="#wrapper_edit_diskon" required>
                                 <option value="">Pilih</option>
                                 <?php foreach ($dataDiskon as $rows) : ?>
                                     <option value="<?= $rows->iddiskon; ?>"><?= $rows->diskon; ?>%</option>
