@@ -43,21 +43,21 @@ class WebinarController extends BaseController
 
         // Ambil nilai diskon keseluruhan dari database (Asumsi nama fieldnya 'diskon' di tabel paket)
         // Sesuaikan '$katalog_webinar->diskon' dengan nama kolom diskon di database Anda
-        $diskonKeseluruhan = isset($katalog_webinar->diskon) ? $katalog_webinar->diskon : 10; 
+        $diskonKeseluruhan = isset($katalog_webinar->diskon) ? $katalog_webinar->diskon : 10;
 
         // 2. Manipulasi data untuk menambahkan harga_coret dan menghitung diskon pada setiap sesi
         if ($katalog_webinar && !empty($katalog_webinar->sesi)) {
             foreach ($katalog_webinar->sesi as &$sesi) {
-                
+
                 if (isset($sesi['harga_sesi']) && $sesi['harga_sesi'] > 0) {
-                    
+
                     // Cek jika ada diskon khusus per sesi, jika tidak gunakan diskon keseluruhan
                     $diskonAktif = isset($sesi['diskon']) ? $sesi['diskon'] : $diskonKeseluruhan;
 
                     if ($diskonAktif > 0 && $diskonAktif <= 100) {
                         // 1. Simpan harga asli ke harga_coret (Misal: 200.000)
                         $sesi['harga_coret'] = $sesi['harga_sesi'];
-                        
+
                         // 2. Hitung harga bayar setelah diskon (Misal: 200.000 - 10% = 180.000)
                         $potonganDiskon = $sesi['harga_sesi'] * ($diskonAktif / 100);
                         $sesi['harga_sesi'] = $sesi['harga_sesi'] - $potonganDiskon;
@@ -65,7 +65,6 @@ class WebinarController extends BaseController
                         // Jika tidak ada diskon
                         $sesi['harga_coret'] = $sesi['harga_sesi'];
                     }
-
                 } else {
                     $sesi['harga_coret'] = 0; // Jika sesi gratis
                 }
@@ -75,11 +74,11 @@ class WebinarController extends BaseController
         // 3. Masukkan ke array $data
         $data['katalog_webinar'] = $katalog_webinar;
         $data['siswa'] = $this->siswaModel->where('id_siswa', session()->get('id'))->first();
-        
+
         $schemaBreadcrumb = $this->seo->breadcrumbSchema($breadcrumbItems);
         $schema = $schemaBreadcrumb;
         $data['schema'] = $schema;
-        
+
         return view('webinar/index', $data);
     }
 
@@ -146,7 +145,6 @@ class WebinarController extends BaseController
         $cekSiswa = $this->siswaModel->where('email', $email)->first();
         if ($cekSiswa) {
             $id_siswa = $cekSiswa['id_siswa'];
-            
         } else {
             $randomPassword = random_string('alnum', 8);
             $hashedPassword = password_hash($randomPassword, PASSWORD_DEFAULT);
@@ -195,12 +193,12 @@ class WebinarController extends BaseController
 
         // Keamanan: Pastikan paket yang dibeli ada di database
         $dataPaket = $this->paketModel->select('paket.*, diskon.diskon, sum(webinar_sesi.harga_sesi) as harga_sesi')
-                    ->join('diskon', 'paket.iddiskon = diskon.iddiskon', 'left')
-                    ->join('detail_paket', 'paket.idpaket=detail_paket.idpaket', 'left')
-                    ->join('webinar_sesi', 'detail_paket.id_sesi=webinar_sesi.id_sesi', 'left')
-                    ->where('paket.idpaket', $idpaket)
-                    ->whereIn('webinar_sesi.id_sesi', $sesi_terpilih)
-                    ->get()->getRow();
+            ->join('diskon', 'paket.iddiskon = diskon.iddiskon', 'left')
+            ->join('detail_paket', 'paket.idpaket=detail_paket.idpaket', 'left')
+            ->join('webinar_sesi', 'detail_paket.id_sesi=webinar_sesi.id_sesi', 'left')
+            ->where('paket.idpaket', $idpaket)
+            ->whereIn('webinar_sesi.id_sesi', $sesi_terpilih)
+            ->get()->getRow();
 
         if (empty($dataPaket)) {
             return redirect()->back()->with('error', 'Data Paket Webinar tidak ditemukan.');
@@ -229,31 +227,64 @@ class WebinarController extends BaseController
         $this->transaksiModel->insert($dataInsert);
         $idtransaksi = $this->transaksiModel->insertID();
 
-        
+
 
         // PERBAIKAN KRUSIAL: Filter sesi HANYA mengambil yang dicentang oleh user
         $detailPaket = $db->table('detail_paket')
-                ->join('webinar_sesi', 'detail_paket.id_sesi = webinar_sesi.id_sesi', 'left')
-                ->where('detail_paket.idpaket', $idpaket)
-                ->get()
-                ->getResultObject();
+            ->select('
+                detail_paket.*, 
+                COALESCE(webinar_sesi.harga_sesi, 0) as harga_sesi,
+                webinar_sesi.nama_sesi, 
+                ujian_master.nama_ujian, 
+                mapel.nama_mapel,
+                COALESCE(NULLIF(webinar_sesi.nama_sesi, ""), NULLIF(ujian_master.nama_ujian, ""), NULLIF(mapel.nama_mapel, ""), "Item Paket") as nama_final
+            ')
+            ->join('webinar_sesi', 'detail_paket.id_sesi = webinar_sesi.id_sesi', 'left')
+            ->join('ujian_master', 'detail_paket.id_ujian = ujian_master.id_ujian', 'left')
+            ->join('mapel', 'detail_paket.id_mapel = mapel.id_mapel', 'left')
+            ->where('detail_paket.idpaket', $idpaket)
+            ->get()
+            ->getResultObject();
 
         if (!empty($detailPaket) && is_array($detailPaket)) {
+            // 1. Hitung Total Item dan Total Harga Keseluruhan
+            $jmlDetail = count($detailPaket);
+            $totalHargaKeseluruhan = 0;
+
+            foreach ($detailPaket as $row) {
+                $totalHargaKeseluruhan += (float) $row->harga_sesi;
+            }
+
+            // 2. Hitung Harga Rata-Rata per Item dan Sisa Pembagian
+            // Menggunakan floor agar hasilnya selalu bilangan bulat (integer)
+            $hargaRataRata = floor($totalHargaKeseluruhan / $jmlDetail);
+            $sisaHarga = $totalHargaKeseluruhan - ($hargaRataRata * $jmlDetail);
+
             $detailTransaksi = [];
             $total_item_price = 0;
-            
 
-            foreach ($detailPaket as $rows) {
+            foreach ($detailPaket as $index => $rows) {
+                $itemName = !empty($rows->nama_sesi) ? $rows->nama_sesi : (!empty($rows->nama_ujian) ? $rows->nama_ujian : (!empty($rows->nama_mapel) ? $rows->nama_mapel : 'Item Paket'));
+
+                // 3. Set Harga Item
+                $hargaFinalItem = $hargaRataRata;
+
+                // Tambahkan sisa bagi (selisih) HANYA ke item pertama agar total keseluruhan tetap sama persis (mencegah error Midtrans)
+                if ($index === 0) {
+                    $hargaFinalItem += $sisaHarga;
+                }
+
                 $detailTransaksi[] = [
                     'idtransaksi' => $idtransaksi,
                     'idpaket'     => $idpaket,
-                    'idmapel'     => $rows->id_mapel,
-                    'idsesi'      => $rows->id_sesi,
-                    'prince'      => $rows->harga_sesi,
+                    'idmapel'     => $rows->id_mapel ?? '0',
+                    'idsesi'      => $rows->id_sesi ?? '0',
+                    'prince'      => $hargaFinalItem,
                     'quantity'    => 1,
-                    'name'        => $rows->nama_sesi
+                    'name'        => $itemName
                 ];
             }
+
             $this->detailTransaksiModel->insertBatch($detailTransaksi);
 
 
@@ -340,7 +371,7 @@ class WebinarController extends BaseController
 
         // 5. Redirect Berdasarkan Jenis Paket (Berbayar via Midtrans, Gratis kembali ke halaman semula)
         if ($gross_amount > 0) {
-            return redirect()->to('webinar/invoice')->with('success', 'Pendaftaran berhasil, silakan selesaikan pembayaran!')->with('snapToken' , $snapToken);
+            return redirect()->to('webinar/invoice')->with('success', 'Pendaftaran berhasil, silakan selesaikan pembayaran!')->with('snapToken', $snapToken);
         } else {
             return redirect()->back()->with('success', 'Pendaftaran berhasil, Anda telah terdaftar!');
         }
