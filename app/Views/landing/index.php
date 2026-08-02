@@ -530,9 +530,9 @@
                     <li>
                         <a href="<?= base_url("tentangkami") ?>">Tentang Kami</a>
                     </li>
-                    <li>
+                    <!-- <li>
                         <a href="<?= base_url("siap-kerja") ?>">Siap Kerja</a>
-                    </li>
+                    </li> -->
                     <li>
                         <a href="<?= base_url("pelatihan") ?>">Pelatihan</a>
                     </li>
@@ -543,20 +543,23 @@
                         <a href="<?= base_url("testimoni") ?>">Testimoni</a>
                     </li>
                     <li>
-                        <a href="<?= base_url("marathon-perpajakan") ?>">Webinar</a>
+                        <a href="<?= base_url("marathon-perpajakan") ?>" class="text-dark d-inline-flex align-items-center gap-1">
+                            Webinar
+                            <span class="badge bg-danger badge-pro-pulse fw-bold" style="font-size: 8px; margin-bottom: 16px; padding: 2px 5px; letter-spacing: 0.5px;">NEW</span>
+                        </a>
                     </li>
-                    <!--<li>-->
+                    <!-- <li> -->
                     <!--    <a href="<?= base_url("jadwal") ?>">Jadwal</a>-->
                     <!--</li>-->
                     <!--<li>-->
                     <!--    <a href="<?= base_url("galeri") ?>">Galeri</a>-->
                     <!--</li>-->
-                    <li>
+                    <!-- <li>
                         <a href="<?= base_url("media-kelasbrevet") ?>">Media</a>
                     </li>
                     <li>
                         <a href="<?= base_url("twibbon") ?>">Twibbon</a>
-                    </li>
+                    </li> -->
                 </ul>
 
             </div>

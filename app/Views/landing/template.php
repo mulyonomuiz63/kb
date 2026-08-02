@@ -581,9 +581,9 @@
                                             <li class="text-dark"><a href="<?= base_url("artikel") ?>"><i class="bi bi-file-richtext me-2"></i>Artikel</a></li>
                                             <!--<li class="text-dark"><a href="<?= base_url("jadwal") ?>"><i class="bi bi-calendar me-2"></i>Jadwal</a></li>-->
                                             <!--<li class="text-dark"><a href="<?= base_url("galeri") ?>"><i class="bi bi-image me-2"></i>Galeri</a></li>-->
-                                            <li class="text-dark"><a href="<?= base_url("media-kelasbrevet") ?>"><i class="bi bi-image me-2"></i>Media</a></li>
+                                            <!-- <li class="text-dark"><a href="<?= base_url("media-kelasbrevet") ?>"><i class="bi bi-image me-2"></i>Media</a></li>
                                             <li class="text-dark"><a href="<?= base_url("siap-kerja") ?>"><i class="bi bi-info-square-fill me-2"></i>Siap Kerja</a></li>
-                                            <li class="text-dark"><a href="<?= base_url("twibbon") ?>"><i class="bi bi-person-square me-2"></i>Twibbon</a></li>
+                                            <li class="text-dark"><a href="<?= base_url("twibbon") ?>"><i class="bi bi-person-square me-2"></i>Twibbon</a></li> -->
                                         </ul>
                                     </div>
                                 </li>
@@ -681,9 +681,9 @@
                     <li>
                         <a href="<?= base_url("tentangkami") ?>" class="">Tentang Kami</a>
                     </li>
-                    <li>
+                    <!-- <li>
                         <a href="<?= base_url("siap-kerja") ?>">Siap Kerja</a>
-                    </li>
+                    </li> -->
                     <li>
                         <a href="<?= base_url("pelatihan") ?>">Pelatihan</a>
                     </li>
@@ -694,7 +694,10 @@
                         <a href="<?= base_url("testimoni") ?>">Testimoni</a>
                     </li>
                     <li>
-                        <a href="<?= base_url("marathon-perpajakan") ?>">Webinar</a>
+                        <a href="<?= base_url("marathon-perpajakan") ?>" class="d-inline-flex align-items-center gap-1">
+                            Webinar
+                            <span class="badge bg-danger badge-pro-pulse fw-bold" style="font-size: 8px; margin-bottom: 16px; padding: 2px 5px; letter-spacing: 0.5px;">NEW</span>
+                        </a>
                     </li>
                     <!--<li>-->
                     <!--    <a href="<?= base_url("jadwal") ?>">Jadwal</a>-->
@@ -702,9 +705,9 @@
                     <!--<li>-->
                     <!--    <a href="<?= base_url("galeri") ?>">Galeri</a>-->
                     <!--</li>-->
-                    <li>
+                    <!-- <li>
                         <a href="<?= base_url("twibbon") ?>">Twibbon</a>
-                    </li>
+                    </li> -->
                 </ul>
 
             </div>
