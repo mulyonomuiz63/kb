@@ -304,7 +304,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
             ],
             [
                 'sesi'     => 'PERTEMUAN 2',
-                'pemateri' => 'Raden Agus Suparman SE, SAk, MSi',
+                'pemateri' => 'Raden Agus Suparman',
                 'jabatan'  => 'Founder Botax Consulting<br>Ex-DJP Tahun 1995 - 2022',
                 'image'    => base_url('uploads/webinar/agus.png')
             ],
@@ -316,7 +316,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
             ],
             [
                 'sesi'     => 'PERTEMUAN 4',
-                'pemateri' => 'Moh. Yazid, S.E, S.H., M.A., BKP',
+                'pemateri' => 'Moh. Yazid',
                 'jabatan'  => 'Founder Taxflash<br>Ex-Pemeriksa & Penyidik Pajak',
                 'image'    => base_url('uploads/webinar/yazid.png')
             ]
@@ -443,7 +443,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                 <!-- Judul Section -->
                 <div class="jadwal-divider-container">
                     <div class="bg-yellow text-navy fw-bold px-4 py-1 rounded-pill mx-3 shadow-sm" style="font-size: 1rem;">
-                        <h3>KAMI AKAN MENGHADIRKAN PAKAR</h3>
+                        <h3>KAMI AKAN MENGHADIRKAN:</h3>
                     </div>
                 </div>
 
@@ -503,7 +503,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                             <div class="card bg-white border-0 shadow-sm h-100 card-jadwal text-center">
                                 <div class="badge-pertemuan bg-yellow text-navy"><?= $jadwal['sesi'] ?></div>
                                 <div class="pt-4 px-2 mt-2">
-                                    <img src="<?= $jadwal['image'] ?>" alt="<?= $jadwal['pemateri'] ?>" class="rounded-circle img-card mx-auto mb-2">
+                                    <img src="<?= $jadwal['image'] ?>?v=<?= time() ?>" alt="<?= $jadwal['pemateri'] ?>" class="rounded-circle img-card mx-auto mb-2">
                                 </div>
                                 <!-- Box Biru Bawah -->
                                 <div class="bg-navy text-white mt-auto py-2 px-2">
@@ -641,7 +641,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                                         <!-- Tampilan Deskripsi Sesi Berbayar -->
                                                         <?php if (!$isFree && !empty($sesi['deskripsi_sesi'])): ?>
                                                             <p class="text-secondary mb-0 mt-2" style="font-size: 0.85rem; line-height: 1.5;">
-                                                                
+
                                                             </p>
                                                         <?php endif; ?>
                                                     </div>
@@ -739,7 +739,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                 <div class="mb-3">
                                     <label class="form-label fw-semibold">Nomor WhatsApp <span class="text-danger">*</span></label>
                                     <div class="input-group">
-                                        <input type="tel" name="hp" value="<?= session()->get('id') && isset($siswa) ? esc($siswa['hp']) : esc(old('hp')) ?>" class="form-control form-control-lg" placeholder="81234567890" pattern="[0-9]+" minlength="9" maxlength="15" required autocomplete="off" <?= session()->get('id') ? 'readonly style="cursor: not-allowed; background-color: #e9ecef;"' : '' ?>>
+                                        <input type="number" name="hp" value="<?= session()->get('id') && isset($siswa) ? esc($siswa['hp']) : esc(old('hp')) ?>" class="form-control form-control-lg" placeholder="81234567890" pattern="[0-9]+" minlength="10" maxlength="15" required autocomplete="off" <?= session()->get('id') ? 'readonly style="cursor: not-allowed; background-color: #e9ecef;"' : '' ?>>
                                     </div>
                                 </div>
                             </div>
@@ -1046,6 +1046,38 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
 
             // Jalankan kalkulasi pertama kali halaman dimuat
             calculateTotal();
+        });
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const form = document.getElementById("formWebinar");
+            if (!form) return;
+
+            const btnSubmit = document.getElementById("btnSubmit");
+            const inputs = form.querySelectorAll("input[name='nama'], input[name='email'], input[name='hp']");
+            const radios = form.querySelectorAll(".session-checkbox");
+
+            function validateForm() {
+                // 1. Cek apakah ada paket yang terpilih dan tidak disabled
+                let isPackageSelected = Array.from(radios).some(radio => radio.checked && !radio.disabled);
+
+                // 2. Cek apakah semua field input teks wajib terisi
+                let areInputsFilled = Array.from(inputs).every(input => input.value.trim() !== "");
+
+                // 3. Tombol aktif hanya jika KEDUANYA terpenuhi
+                if (isPackageSelected && areInputsFilled) {
+                    btnSubmit.removeAttribute("disabled");
+                } else {
+                    btnSubmit.setAttribute("disabled", "true");
+                }
+            }
+
+            // Jalankan fungsi validasi setiap ada input atau perubahan pilihan
+            form.addEventListener("input", validateForm);
+            form.addEventListener("change", validateForm);
+
+            // Jalankan sekali saat halaman dimuat (untuk mengecek kondisi awal)
+            validateForm();
         });
     </script>
 </body>
