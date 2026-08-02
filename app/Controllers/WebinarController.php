@@ -243,6 +243,14 @@ class WebinarController extends BaseController
             ->join('ujian_master', 'detail_paket.id_ujian = ujian_master.id_ujian', 'left')
             ->join('mapel', 'detail_paket.id_mapel = mapel.id_mapel', 'left')
             ->where('detail_paket.idpaket', $idpaket)
+
+            // PERBAIKAN: Mengelompokkan kondisi OR
+            ->groupStart()
+            ->whereIn('detail_paket.id_sesi', $sesi_terpilih) // Ambil sesi yang dicentang
+            ->orWhere('detail_paket.id_sesi', 0) // ATAU ambil yang id_sesi-nya 0 (Ujian / Materi)
+            ->orWhere('detail_paket.id_sesi IS NULL') // Jaga-jaga jika di database tersimpan sebagai NULL
+            ->groupEnd()
+
             ->get()
             ->getResultObject();
 
