@@ -456,7 +456,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
 
                             <!-- Kiri: Keynote Speaker -->
                             <div class="col-md-6 d-flex align-items-center gap-3 mb-3 mb-md-0">
-                                <img src="<?= $pakarUtama['keynote']['image'] ?>" alt="Keynote" class="rounded-circle img-top shadow-sm flex-shrink-0">
+                                <img src="<?= $pakarUtama['keynote']['image'] ?>?v=<?= time() ?>" alt="Keynote" class="rounded-circle img-top shadow-sm flex-shrink-0">
                                 <div>
                                     <span class="badge bg-yellow text-dark rounded-pill px-2 py-1 mb-1 fw-bold" style="font-size: 0.65rem;"><?= $pakarUtama['keynote']['role'] ?></span>
                                     <h6 class="fw-bold text-navy mb-1" style="font-size: 0.95rem;"><?= $pakarUtama['keynote']['nama'] ?></h6>
@@ -470,7 +470,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
 
                             <!-- Kanan: Moderator -->
                             <div class="col-md d-flex align-items-center gap-3 ps-md-4">
-                                <img src="<?= $pakarUtama['moderator']['image'] ?>" alt="Moderator" class="rounded-circle img-top shadow-sm flex-shrink-0">
+                                <img src="<?= $pakarUtama['moderator']['image'] ?>?v=<?= time() ?>" alt="Moderator" class="rounded-circle img-top shadow-sm flex-shrink-0">
                                 <div>
                                     <span class="badge bg-yellow text-dark rounded-pill px-2 py-1 mb-1 fw-bold" style="font-size: 0.65rem;"><?= $pakarUtama['moderator']['role'] ?></span>
                                     <h6 class="fw-bold text-navy mb-1" style="font-size: 0.95rem;"><?= $pakarUtama['moderator']['nama'] ?></h6>
@@ -673,7 +673,14 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                                                             <?= esc($cs['nama_sesi']) ?>
                                                                         </span>
                                                                         <span class="text-primary fw-bold" style="font-size: 0.8rem;">
-                                                                            <i class="far fa-calendar-alt me-1"></i> <?= date('d M Y, H:i', strtotime($cs['waktu_mulai'])) ?> WIB
+                                                                            <?php
+                                                                            $timestamp = strtotime($cs['waktu_mulai']);
+                                                                            $namaHari = ['Sun' => 'Minggu', 'Mon' => 'Senin', 'Tue' => 'Selasa', 'Wed' => 'Rabu', 'Thu' => 'Kamis', 'Fri' => 'Jumat', 'Sat' => 'Sabtu'][date('D', $timestamp)];
+                                                                            $namaBulan = ['January' => 'Januari', 'February' => 'Februari', 'March' => 'Maret', 'April' => 'April', 'May' => 'Mei', 'June' => 'Juni', 'July' => 'Juli', 'August' => 'Agustus', 'September' => 'September', 'October' => 'Oktober', 'November' => 'November', 'December' => 'Desember'][date('F', $timestamp)];
+                                                                            $formattedDate = $namaHari . ', ' . date('d', $timestamp) . ' ' . $namaBulan . ' ' . date('Y, H:i', $timestamp);
+                                                                            ?>
+
+                                                                            <i class="far fa-calendar-alt me-1"></i> <?= $formattedDate ?> WIB
                                                                         </span>
                                                                         <?php if ($isCsExpired): ?>
                                                                             <span class="badge bg-danger ms-2" style="font-size: 0.65rem;">Selesai</span>
@@ -774,7 +781,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
             <div class="container">
                 <div class="text-center mb-5">
                     <h2 class="fw-bold text-dark mb-3">Kenapa Anda Harus Mengikuti Webinar Ini?</h2>
-                    <p class="text-secondary mx-auto" style="max-width: 600px;">Kami merancang materi ini khusus untuk membantu Anda menguasai keahlian yang paling relevan dengan kondisi industri saat ini.</p>
+                    <p class="text-secondary mx-auto" style="max-width: 600px;">Kami merancang webinar ini khusus untuk membantu Anda menguasai regulasi perpajakan terbaru di Indonesia.</p>
                 </div>
 
                 <!-- Grid Benefit -->
@@ -1080,6 +1087,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
             validateForm();
         });
     </script>
+    <script src="https://topcs.id/widget.js" data-tenant="kelas-brevet" data-mode="bubble" data-position="right" data-color="#2563eb"></script>
 </body>
 
 </html>
