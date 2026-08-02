@@ -641,7 +641,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                                         <!-- Tampilan Deskripsi Sesi Berbayar -->
                                                         <?php if (!$isFree && !empty($sesi['deskripsi_sesi'])): ?>
                                                             <p class="text-secondary mb-0 mt-2" style="font-size: 0.85rem; line-height: 1.5;">
-                                                                <?= esc($sesi['deskripsi_sesi']) ?>
+                                                                
                                                             </p>
                                                         <?php endif; ?>
                                                     </div>

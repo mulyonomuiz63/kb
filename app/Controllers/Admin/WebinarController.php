@@ -8,10 +8,14 @@ use App\Models\WebinarSesiModel;
 class WebinarController extends BaseController
 {
     protected $webinarSesiModel;
+    protected $detailPaketModel;
+    protected $paketModel;
 
     public function __construct()
     {
         $this->webinarSesiModel = new WebinarSesiModel();
+        $this->detailPaketModel = new \App\Models\DetailPaketModel();
+        $this->paketModel = new \App\Models\PaketModel();
     }
 
     public function index()
@@ -91,7 +95,7 @@ class WebinarController extends BaseController
             if (!empty($bonusIds)) {
                 $bonusSessions = $this->webinarSesiModel->whereIn('id_sesi', $bonusIds)->findAll();
                 foreach ($bonusSessions as $bs) {
-                    $bonusHtml .= '<span class="badge badge-light-info">' . esc($bs['nama_sesi']) . '</span>';
+                    $bonusHtml .= '<span class="badge badge-light-info text-break text-start" style="white-space: normal;">' . esc($bs['nama_sesi']) . '</span>';
                 }
             } else {
                 $bonusHtml .= '<span class="text-muted fs-7">Tidak ada</span>';
@@ -114,14 +118,14 @@ class WebinarController extends BaseController
             </div>';
 
             $data[] = [
-                "nama_sesi"     => '<div class="text-gray-800 fw-bold text-hover-primary mb-1 fs-6">' . esc($record->nama_sesi) . '</div>',
-                "waktu"         => '<div class="fs-7 text-muted"><b>Mulai:</b> ' . esc($record->waktu_mulai) . '<br><b>Selesai:</b> ' . esc($record->waktu_selesai) . '</div>',
-                "harga_sesi"    => '<span class="fw-bold text-success">Rp ' . number_format($record->harga_sesi, 0, ',', '.') . '</span>',
-                "status"        => $statusHtml,
-                "sesi_gratis"   => $bonusHtml,
-                "link_zoom"     => $zoomHtml ?: '<span class="text-muted fs-7">Tidak ada</span>',
-                "link_youtube"  => $ytHtml ?: '<span class="text-muted fs-7">Tidak ada</span>',
-                "opsi"          => $opsi
+                "nama_sesi"    => '<div class="text-gray-800 fw-bold text-hover-primary mb-1 fs-6 text-break" style="white-space: normal; word-break: break-word;">' . esc($record->nama_sesi) . '</div>',
+                "waktu"        => '<div class="fs-7 text-muted text-break" style="white-space: normal;"><b>Mulai:</b> ' . esc($record->waktu_mulai) . '<br><b>Selesai:</b> ' . esc($record->waktu_selesai) . '</div>',
+                "harga_sesi"   => '<span class="fw-bold text-success text-break">Rp ' . number_format($record->harga_sesi, 0, ',', '.') . '</span>',
+                "status"       => $statusHtml,
+                "sesi_gratis"  => $bonusHtml,
+                "link_zoom"    => '<div class="d-flex flex-wrap text-break">' . ($zoomHtml ?: '<span class="text-muted fs-7">Tidak ada</span>') . '</div>',
+                "link_youtube" => '<div class="d-flex flex-wrap text-break">' . ($ytHtml ?: '<span class="text-muted fs-7">Tidak ada</span>') . '</div>',
+                "opsi"         => $opsi
             ];
         }
 
@@ -216,6 +220,42 @@ class WebinarController extends BaseController
                 'link_youtube'   => json_encode(array_values($ytArray)),
                 'sesi_gratis'    => json_encode(array_values($sesiGratisInput)),
             ]);
+            
+
+            // =========================================================================
+            // TAMBAHAN LOGIKA UPDATE OTOMATIS HARGA PAKET
+            // =========================================================================
+            $db = \Config\Database::connect();
+
+            // 1. Cari semua paket yang terkait dengan id_sesi yang baru saja diubah
+            $affectedPackages = $db->table('detail_paket')
+                                   ->select('idpaket')
+                                   ->where('id_sesi', $id)
+                                   ->get()
+                                   ->getResult();
+
+            // 2. Looping semua paket yang terdampak
+            foreach ($affectedPackages as $paket) {
+                
+                // Hitung total harga_sesi untuk idpaket ini (Relasi: detail_paket -> webinar_sesi)
+                $totalHargaRow = $db->table('detail_paket')
+                                    ->selectSum('webinar_sesi.harga_sesi', 'total_harga')
+                                    ->join('webinar_sesi', 'webinar_sesi.id_sesi = detail_paket.id_sesi')
+                                    ->where('detail_paket.idpaket', $paket->idpaket)
+                                    ->get()
+                                    ->getRow();
+
+                $totalHargaBaru = $totalHargaRow->total_harga ?? 0;
+
+                // 3. Update field nominal_paket di tabel paket dengan total harga yang baru
+                $db->table('paket')
+                   ->where('idpaket', $paket->idpaket)
+                   ->update(['nominal_paket' => $totalHargaBaru]);
+            }
+            // =========================================================================
+            // AKHIR TAMBAHAN LOGIKA
+            // =========================================================================
+
 
             return redirect()->to('sw-admin/webinar')->with('success', 'Webinar sesi berhasil diubah');
         } catch (\Exception $e) {
