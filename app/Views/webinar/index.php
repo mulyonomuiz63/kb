@@ -641,7 +641,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                                         <!-- Tampilan Deskripsi Sesi Berbayar -->
                                                         <?php if (!$isFree && !empty($sesi['deskripsi_sesi'])): ?>
                                                             <p class="text-secondary mb-0 mt-2" style="font-size: 0.85rem; line-height: 1.5;">
-
+                                                                <span class="badge bg-success mt-1" style="font-size: 0.75rem;">Berbayar</span>
                                                             </p>
                                                         <?php endif; ?>
                                                     </div>
@@ -825,8 +825,8 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                             <ul class="list-unstyled mb-0" style="font-size: 0.9rem;">
                                                 <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i> Akses Live Gmeet Session</li>
                                                 <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i> E-Sertifikat Kehadiran</li>
-                                                <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i> PDF Modul Materi (Downloadable)</li>
-                                                <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i> Rekaman Ulang Webinar Seumur Hidup</li>
+                                                <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i> PDF Modul Materi</li>
+                                                <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i> Rekaman Ulang Webinar</li>
                                                 <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i> Grup Whatsapp Eksklusif Alumni</li>
                                             </ul>
                                         </div>
@@ -882,8 +882,8 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                             <p class="mb-1 text-light opacity-75" style="font-size: 0.75rem;">Investasi Mulai Dari</p>
                                             <h4 class="text-warning fw-bold mb-3">Rp 50.000</h4>
                                             <!-- Ganti href sesuai link pendaftaran brevet Anda -->
-                                            <a href="<?= base_url('list-bimbel') ?>" class="btn btn-warning w-100 py-2 fw-bold rounded-pill shadow-sm text-dark transition-all" style="font-size: 0.85rem;">
-                                                Ambil Paket <i class="fa-solid fa-arrow-right ms-1"></i>
+                                            <a href="<?= base_url('/') ?>" class="btn btn-warning w-100 py-2 fw-bold rounded-pill shadow-sm text-dark transition-all" style="font-size: 0.85rem;">
+                                                Lihat Penawaran <i class="fa-solid fa-arrow-right ms-1"></i>
                                             </a>
                                         </div>
                                     </div>
