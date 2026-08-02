@@ -219,8 +219,6 @@ class WebinarController extends BaseController
             'nominal'      => $dataPaket->harga_sesi,
             'diskon'       => $dataPaket->diskon,
             'status'       => $status, // Menunggu
-            'v_ujian'      => '0', // Menunggu
-            'v_materi'     => '0', // Menunggu
             'tgl_exp'      => $tgl_exp,
             'tgl_drop'     => $tgl_exp,
             'tgl_pembayaran' => $tgl_pembayaran,
@@ -249,7 +247,7 @@ class WebinarController extends BaseController
                 $detailTransaksi[] = [
                     'idtransaksi' => $idtransaksi,
                     'idpaket'     => $idpaket,
-                    'idmapel'     => '0',
+                    'idmapel'     => $rows->id_mapel,
                     'idsesi'      => $rows->id_sesi,
                     'prince'      => $rows->harga_sesi,
                     'quantity'    => 1,

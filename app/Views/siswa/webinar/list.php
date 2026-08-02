@@ -283,17 +283,18 @@
                             $delay += 0.1;
                             $waktuMulai = strtotime($child->waktu_mulai);
                             $waktuSelesai = strtotime($child->waktu_selesai);
+                            $waktuBukaZoom = $waktuMulai - (2 * 3600); // 2 jam sebelum acara mulai
 
-                            // 1. Menentukan Status Sesi Zoom
-                            if ($currentDateTime < $waktuMulai) {
+                            // 1. Menentukan Status Sesi Zoom (Dibuka 2 jam sebelum mulai)
+                            if ($currentDateTime < $waktuBukaZoom) {
                                 $status = 'upcoming';
                                 $badgeColor = 'badge-light-warning';
                                 $badgeText = 'Akan Datang';
                                 $icon = 'ki-calendar-tick';
-                            } elseif ($currentDateTime >= $waktuMulai && $currentDateTime <= $waktuSelesai) {
+                            } elseif ($currentDateTime >= $waktuBukaZoom && $currentDateTime <= $waktuSelesai) {
                                 $status = 'live';
                                 $badgeColor = 'bg-danger text-white pulse-animation';
-                                $badgeText = 'Sedang Live';
+                                $badgeText = ($currentDateTime < $waktuMulai) ? 'Segera Dimulai' : 'Sedang Live';
                                 $icon = 'ki-bi-camera-video-fill';
                             } else {
                                 $status = 'finished';
@@ -445,7 +446,7 @@
                                         <div class="mt-auto pt-4">
                                             <?php if ($status == 'upcoming'): ?>
                                                 <button class="btn btn-light w-100 fs-7 fw-bold py-3 disabled" disabled>
-                                                    <i class="ki-outline ki-lock fs-5 me-2"></i> Akses Zoom Dibuka <?= date('d M', $waktuMulai) ?>
+                                                    <i class="ki-outline ki-lock fs-5 me-2"></i> Akses Zoom Dibuka <?= date('d M H:i', $waktuBukaZoom) ?>
                                                 </button>
                                             <?php elseif ($status == 'live'): ?>
                                                 <a href="<?= esc($mainZoomLink) ?>" target="_blank" class="btn btn-primary btn-glow-primary w-100 fs-7 fw-bold py-3 shadow-sm">
