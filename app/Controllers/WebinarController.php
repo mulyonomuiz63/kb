@@ -232,11 +232,11 @@ class WebinarController extends BaseController
         
 
         // PERBAIKAN KRUSIAL: Filter sesi HANYA mengambil yang dicentang oleh user
-        $detailPaket = $this->sesiModel
-            ->join('detail_paket', 'webinar_sesi.id_sesi=detail_paket.id_sesi', 'left')
-            ->where('detail_paket.idpaket', $idpaket)
-            ->groupBy('detail_paket.idpaket')
-            ->get()->getResultObject();
+        $detailPaket = $db->table('detail_paket')
+                ->join('webinar_sesi', 'detail_paket.id_sesi = webinar_sesi.id_sesi', 'left')
+                ->where('detail_paket.idpaket', $idpaket)
+                ->get()
+                ->getResultObject();
 
         if (!empty($detailPaket) && is_array($detailPaket)) {
             $detailTransaksi = [];
