@@ -441,7 +441,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
             <div class="container pb-3">
 
                 <!-- Judul Section -->
-                 <div class="jadwal-divider-container">
+                <div class="jadwal-divider-container">
                     <div class="bg-yellow text-navy fw-bold px-4 py-1 rounded-pill mx-3 shadow-sm" style="font-size: 1rem;">
                         <h3>KAMI AKAN MENGHADIRKAN PAKAR</h3>
                     </div>
@@ -811,9 +811,9 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                 <!-- Info Paket & Promosi (Lebar Disesuaikan agar muat di layar) -->
                 <div class="row justify-content-center">
                     <!-- Wrapper pembatas lebar agar tidak full mentok tepi layar -->
-                    <div class="col-lg-12 col-xl-11 col-xxl-10"> 
+                    <div class="col-lg-12 col-xl-11 col-xxl-10">
                         <div class="row g-4 align-items-stretch">
-                            
+
                             <!-- ========================================== -->
                             <!-- KOLOM KIRI: INFO PAKET ASLI -->
                             <!-- ========================================== -->
@@ -832,11 +832,17 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                         </div>
                                         <div class="col-lg-5 p-4 d-flex flex-column justify-content-center align-items-center text-center" style="background-color: var(--light-blue, #e3f2fd);">
                                             <?php
-                                            $nominalAsli = ($paketWebinar && isset($paketWebinar->nominal_paket)) ? $paketWebinar->nominal_paket : 149000;
-                                            $hargaCoret = $nominalAsli * 1.3;
+                                            // 1. Ambil harga asli (yang akan dicoret) dari database
+                                            $hargaCoret = ($paketWebinar && isset($paketWebinar->nominal_paket)) ? $paketWebinar->nominal_paket : 200000;
+
+                                            // 2. Ambil persentase diskon dari database (sesuaikan nama field 'diskon' dengan yang ada di DB Anda)
+                                            $persenDiskon = ($paketWebinar && isset($paketWebinar->diskon)) ? $paketWebinar->diskon : 10;
+
+                                            // 3. Kalkulasi harga akhir setelah dipotong persen diskon
+                                            $hargaAkhir = $hargaCoret - ($hargaCoret * ($persenDiskon / 100));
                                             ?>
                                             <p class="text-decoration-line-through text-muted mb-1 fs-6">Rp <?= number_format($hargaCoret, 0, ',', '.') ?></p>
-                                            <h3 class="fw-bold text-dark mb-2">Rp <?= number_format($nominalAsli, 0, ',', '.') ?></h3>
+                                            <h3 class="fw-bold text-dark mb-2">Rp <?= number_format($hargaAkhir, 0, ',', '.') ?></h3>
                                             <span class="badge bg-primary px-3 py-2 rounded-pill mt-1">Promo Terbatas!</span>
                                         </div>
                                     </div>
@@ -848,26 +854,26 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                             <!-- ========================================== -->
                             <div class="col-md-5">
                                 <div class="card border-0 shadow-lg h-100 rounded-4 overflow-hidden text-white" style="background: linear-gradient(145deg, #0c2b6b, #1a4ab9);">
-                                    
+
                                     <div class="card-body p-4 d-flex flex-column">
                                         <span class="badge bg-warning text-dark align-self-start px-2 py-1 rounded-pill mb-2 fw-bold" style="font-size: 0.7rem;">
                                             <i class="fa-solid fa-star me-1"></i> SPESIAL OFFER
                                         </span>
-                                        
+
                                         <h5 class="fw-bold mb-2 text-white">Sertifikasi Brevet Pajak A/B</h5>
                                         <p class="text-light opacity-75 mb-3" style="font-size: 0.8rem; line-height: 1.4;">Tingkatkan kompetensi dan legalitas Anda di bidang perpajakan bersama praktisi ahli.</p>
-                                        
+
                                         <ul class="list-unstyled mb-3 mt-auto" style="font-size: 0.8rem;">
                                             <li class="mb-2 d-flex align-items-start">
-                                                <i class="fa-solid fa-circle-check text-warning mt-1 me-2"></i> 
+                                                <i class="fa-solid fa-circle-check text-warning mt-1 me-2"></i>
                                                 <span class="text-light">Sebagai salah satu bukti memiliki pengetahuan/kompetensi dibidang perpajakan</span>
                                             </li>
                                             <li class="mb-2 d-flex align-items-start">
-                                                <i class="fa-solid fa-circle-check text-warning mt-1 me-2"></i> 
+                                                <i class="fa-solid fa-circle-check text-warning mt-1 me-2"></i>
                                                 <span class="text-light">Dapat digunakan sebagai syarat administrasi seorang kuasa saat mendampingi WP</span>
                                             </li>
                                             <li class="mb-2 d-flex align-items-start">
-                                                <i class="fa-solid fa-circle-check text-warning mt-1 me-2"></i> 
+                                                <i class="fa-solid fa-circle-check text-warning mt-1 me-2"></i>
                                                 <span class="text-light">Dapat digunakan sebagai syarat permohonan izin kuasa hukum di pengadilan pajak</span>
                                             </li>
                                         </ul>
@@ -911,7 +917,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
     <!-- Footer -->
     <footer class="bg-dark text-white py-4 text-center">
         <div class="container">
-            <p class="mb-0 opacity-75">&copy; 2026 Kelas Pajak. Hak Cipta Dilindungi.</p>
+            <p class="mb-0 opacity-75">&copy; 2026 Kelasbrevet. Hak Cipta Dilindungi.</p>
         </div>
     </footer>
 
