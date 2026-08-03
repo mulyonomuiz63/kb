@@ -63,6 +63,9 @@ class WebinarController extends BaseController
         $currentDateTime = date('Y-m-d H:i:s');
         $data = [];
 
+        // Inisialisasi DB di luar loop untuk menghitung jumlah peserta nanti
+        $db = \Config\Database::connect();
+
         foreach ($records as $record) {
             $id_encrypt = encrypt_url($record->id_sesi);
 
@@ -102,6 +105,19 @@ class WebinarController extends BaseController
             }
             $bonusHtml .= '</div>';
 
+            // =========================================================================================
+            // TAMBAHAN: Menghitung jumlah peserta yang sudah beli / daftar pada sesi ini
+            // (Hanya menghitung yang status transaksinya 'S' (Selesai) atau 'M' (Menunggu Pembayaran))
+            // =========================================================================================
+            $jumlah_peserta = $db->table('detail_transaksi')
+                ->join('transaksi', 'transaksi.idtransaksi = detail_transaksi.idtransaksi')
+                ->where('detail_transaksi.idsesi', $record->id_sesi)
+                ->whereIn('transaksi.status', ['S']) 
+                ->countAllResults();
+
+            $pesertaHtml = '<span class="badge badge-light-success fw-bold px-3 py-2"><i class="ki-duotone ki-profile-user fs-6 me-1"></i> ' . $jumlah_peserta . ' Peserta</span>';
+            // =========================================================================================
+
             $opsi = '
             <div class="d-flex justify-content-end">
                 <a href="javascript:void(0)" 
@@ -122,6 +138,7 @@ class WebinarController extends BaseController
                 "waktu"        => '<div class="fs-7 text-muted text-break" style="white-space: normal;"><b>Mulai:</b> ' . esc($record->waktu_mulai) . '<br><b>Selesai:</b> ' . esc($record->waktu_selesai) . '</div>',
                 "harga_sesi"   => '<span class="fw-bold text-success text-break">Rp ' . number_format($record->harga_sesi, 0, ',', '.') . '</span>',
                 "status"       => $statusHtml,
+                "jumlah_peserta" => $pesertaHtml, // <-- Data kolom baru ditambahkan ke array
                 "sesi_gratis"  => $bonusHtml,
                 "link_zoom"    => '<div class="d-flex flex-wrap text-break">' . ($zoomHtml ?: '<span class="text-muted fs-7">Tidak ada</span>') . '</div>',
                 "link_youtube" => '<div class="d-flex flex-wrap text-break">' . ($ytHtml ?: '<span class="text-muted fs-7">Tidak ada</span>') . '</div>',

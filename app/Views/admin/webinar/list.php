@@ -4,14 +4,14 @@
 <div class="d-flex flex-column flex-column-fluid">
     <div id="kt_app_content" class="app-content flex-column-fluid">
         <div id="kt_app_content_container" class="app-container container-xxl">
-            
+
             <div class="card card-flush shadow-sm border-0">
                 <div class="card-header align-items-center py-5 gap-2 gap-md-5">
                     <div class="card-title flex-column align-items-start">
                         <span class="card-label fw-bold text-gray-800">Daftar Sesi Webinar</span>
                         <span class="text-gray-500 mt-1 fw-semibold fs-7">Kelola data sesi webinar, waktu, harga, dan tautan bonus</span>
                     </div>
-                    
+
                     <div class="card-toolbar flex-row-fluid justify-content-end gap-5">
                         <div class="d-flex align-items-center position-relative my-1">
                             <i class="ki-duotone ki-magnifier fs-3 position-absolute ms-4">
@@ -30,15 +30,16 @@
                     <div class="table-responsive">
                         <table id="datatables-list" class="table align-middle table-row-dashed fs-6 gy-5 text-nowrap w-100">
                             <thead>
-                                <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
+                                <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0 align-middle">
                                     <th class="min-w-200px">Nama Sesi</th>
                                     <th class="min-w-150px">Waktu</th>
                                     <th class="min-w-100px">Harga</th>
                                     <th class="min-w-100px">Status</th>
-                                    <th class="min-w-150px text-wrap">Sesi Bonus / Gratis</th>
-                                    <th class="min-w-150px">Link Zoom</th>
-                                    <th class="min-w-150px">Link YouTube</th>
-                                    <th class="text-end min-w-100px">Opsi</th>
+                                    <th class="min-w-150px">Jumlah Peserta</th>
+                                    <th class="min-w-200px">Sesi Bonus / Gratis</th>
+                                    <th class="min-w-125px">Link Zoom</th>
+                                    <th class="min-w-125px">Link YouTube</th>
+                                    <th class="text-end min-w-75px">Opsi</th>
                                 </tr>
                             </thead>
                             <tbody class="fw-semibold text-gray-600">
@@ -58,14 +59,14 @@
         <div class="modal-content rounded border-0">
             <form action="<?= base_url('sw-admin/webinar/store'); ?>" method="POST" class="needs-validation">
                 <input type="hidden" name="<?= csrf_token() ?>" class="csrf-token" value="<?= csrf_hash() ?>" />
-                
+
                 <div class="modal-header pb-0 border-0 justify-content-between">
                     <h2 class="fw-bold">Tambah Sesi Webinar Baru</h2>
                     <div class="btn btn-sm btn-icon btn-active-color-primary" data-bs-dismiss="modal">
                         <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i>
                     </div>
                 </div>
-                
+
                 <div class="modal-body scroll-y px-10 px-lg-15 pt-5 pb-10">
                     <div class="fv-row mb-7">
                         <label class="required fs-6 fw-semibold mb-2">Nama Sesi</label>
@@ -110,7 +111,7 @@
                         <textarea name="link_youtube" class="form-control form-control-solid" rows="2" placeholder="https://youtube.com/watch?v=...&#10;https://youtube.com/watch?v=..."></textarea>
                     </div>
                 </div>
-                
+
                 <div class="modal-footer border-0 p-5 p-lg-10 pt-0">
                     <button type="button" class="btn btn-light me-3 fw-bold" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-primary fw-bold">
@@ -129,14 +130,14 @@
             <form action="<?= base_url('sw-admin/webinar/update'); ?>" method="POST">
                 <input type="hidden" name="<?= csrf_token() ?>" class="csrf-token" value="<?= csrf_hash() ?>" />
                 <input type="hidden" name="id_sesi" id="e_id_sesi">
-                
+
                 <div class="modal-header pb-0 border-0 justify-content-between">
                     <h2 class="fw-bold">Ubah Data Sesi Webinar</h2>
                     <div class="btn btn-sm btn-icon btn-active-color-primary" data-bs-dismiss="modal">
                         <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i>
                     </div>
                 </div>
-                
+
                 <div class="modal-body scroll-y px-10 px-lg-15 pt-5 pb-10">
                     <div class="fv-row mb-7">
                         <label class="required fs-6 fw-semibold mb-2">Nama Sesi</label>
@@ -180,7 +181,7 @@
                         <textarea name="link_youtube" id="e_link_youtube" class="form-control form-control-solid" rows="2"></textarea>
                     </div>
                 </div>
-                
+
                 <div class="modal-footer border-0 p-5 p-lg-10 pt-0">
                     <button type="button" class="btn btn-light me-3 fw-bold" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-info fw-bold text-white">
@@ -216,15 +217,33 @@
                     return json.data;
                 }
             },
-            "columns": [
-                { "data": "nama_sesi" },
-                { "data": "waktu" },
-                { "data": "harga_sesi" },
-                { "data": "status" },
-                { "data": "sesi_gratis" },
-                { "data": "link_zoom" },
-                { "data": "link_youtube" },
-                { "data": "opsi" }
+            "columns": [{
+                    "data": "nama_sesi"
+                },
+                {
+                    "data": "waktu"
+                },
+                {
+                    "data": "harga_sesi"
+                },
+                {
+                    "data": "status"
+                },
+                {
+                    "data": "jumlah_peserta"
+                },
+                {
+                    "data": "sesi_gratis"
+                },
+                {
+                    "data": "link_zoom"
+                },
+                {
+                    "data": "link_youtube"
+                },
+                {
+                    "data": "opsi"
+                }
             ],
             "columnDefs": [{
                 "targets": [7],
@@ -232,7 +251,9 @@
                 "className": "text-end"
             }],
             "drawCallback": function(settings) {
-                if (typeof KTMenu !== 'undefined') { KTMenu.createInstances(); }
+                if (typeof KTMenu !== 'undefined') {
+                    KTMenu.createInstances();
+                }
                 $('[data-bs-toggle="tooltip"]').tooltip();
             }
         });
@@ -267,10 +288,10 @@
                     $("#e_harga_sesi").val(data.harga_sesi);
                     $("#e_link_zoom").val(data.link_zoom_text);
                     $("#e_link_youtube").val(data.link_youtube_text);
-                    
+
                     // Set value untuk select2 multi-select sesi gratis
                     $("#e_sesi_gratis").val(data.sesi_gratis_array).trigger('change');
-                    
+
                     $('#edit_webinar').modal('show');
                 }
             });
