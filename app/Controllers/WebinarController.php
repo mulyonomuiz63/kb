@@ -257,16 +257,22 @@ class WebinarController extends BaseController
             ->join('webinar_sesi', 'detail_paket.id_sesi = webinar_sesi.id_sesi', 'left')
             ->join('ujian_master', 'detail_paket.id_ujian = ujian_master.id_ujian', 'left')
             ->join('mapel', 'detail_paket.id_mapel = mapel.id_mapel', 'left')
-            ->where('detail_paket.idpaket', $idpaket)
+            ->where('detail_paket.idpaket', $idpaket);
 
-            // PERBAIKAN: Mengelompokkan kondisi OR
-            ->groupStart()
-            ->whereIn('detail_paket.id_sesi', $sesi_terpilih) // Ambil sesi yang dicentang
-            ->orWhere('detail_paket.id_sesi', 0) // ATAU ambil yang id_sesi-nya 0 (Ujian / Materi)
-            ->orWhere('detail_paket.id_sesi IS NULL') // Jaga-jaga jika di database tersimpan sebagai NULL
-            ->groupEnd()
+        // PERBAIKAN: Mengelompokkan kondisi OR
+        $detailPaket->groupStart()
+            ->whereIn('detail_paket.id_sesi', $sesi_terpilih); // Selalu ambil sesi yang dicentang
 
-            ->get()
+        // DIBENAHI: Kondisi diubah menjadi > 0 (Berbayar). 
+        // Jika gratis, if ini di-skip sehingga sistem HANYA menyimpan webinar_sesi.
+        if ((float) $dataPaket->harga_sesi > 0) {
+            $detailPaket->orWhere('detail_paket.id_sesi', 0) // ATAU ambil yang id_sesi-nya 0 (Ujian / Materi)
+                ->orWhere('detail_paket.id_sesi IS NULL'); // Jaga-jaga jika di database tersimpan sebagai NULL
+        }
+
+        $detailPaket->groupEnd();
+
+        $detailPaket->get()
             ->getResultObject();
 
         if (!empty($detailPaket) && is_array($detailPaket)) {
