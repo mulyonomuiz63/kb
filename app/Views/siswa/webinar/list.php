@@ -442,19 +442,19 @@
                                             </div>
                                         <?php endif; ?>
 
-                                        <!-- Action Button Zoom Utama -->
+                                        <!-- Action Button Gmeet Utama -->
                                         <div class="mt-auto pt-4">
                                             <?php if ($status == 'upcoming'): ?>
                                                 <button class="btn btn-light w-100 fs-7 fw-bold py-3 disabled" disabled>
-                                                    <i class="ki-outline ki-lock fs-5 me-2"></i> Akses Zoom Dibuka <?= date('d M H:i', $waktuBukaZoom) ?>
+                                                    <i class="ki-outline ki-lock fs-5 me-2"></i> Akses Gmeet Dibuka <?= date('d M H:i', $waktuBukaZoom) ?>
                                                 </button>
                                             <?php elseif ($status == 'live'): ?>
                                                 <a href="<?= esc($mainZoomLink) ?>" target="_blank" class="btn btn-primary btn-glow-primary w-100 fs-7 fw-bold py-3 shadow-sm">
-                                                    Gabung Zoom <i class="ki-outline ki-entrance-left fs-5 ms-2"></i>
+                                                    Gabung Gmeet <i class="ki-outline ki-entrance-left fs-5 ms-2"></i>
                                                 </a>
                                             <?php else: ?>
                                                 <button class="btn btn-light-success w-100 fs-7 fw-bold py-3 disabled" disabled>
-                                                    <i class="ki-outline ki-check-circle fs-5 me-2"></i> Zoom Selesai
+                                                    <i class="ki-outline ki-check-circle fs-5 me-2"></i> Gmeet Selesai
                                                 </button>
                                             <?php endif; ?>
                                         </div>
