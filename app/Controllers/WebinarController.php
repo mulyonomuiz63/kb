@@ -131,11 +131,11 @@ class WebinarController extends BaseController
         if (!$this->validate($rules)) {
             $errors = $this->validator->getErrors();
             $errorMsg = implode(' ', $errors);
-            return redirect()->back()->withInput()->with('error', "'" . str_replace(["\r", "\n"], '', $errorMsg) . "'");
+            return redirect()->to('marathon-perpajakan')->withInput()->with('error', "'" . str_replace(["\r", "\n"], '', $errorMsg) . "'");
         }
 
         if (!is_valid_domain($email)) {
-            return redirect()->back()->withInput()->with('error', 'Domain email tidak valid.');
+            return redirect()->to('marathon-perpajakan')->withInput()->with('error', 'Domain email tidak valid.');
         }
 
         $db = \Config\Database::connect();
@@ -201,7 +201,7 @@ class WebinarController extends BaseController
             ->get()->getRow();
 
         if (empty($dataPaket)) {
-            return redirect()->back()->with('error', 'Data Paket Webinar tidak ditemukan.');
+            return redirect()->to('marathon-perpajakan')->with('error', 'Data Paket Webinar tidak ditemukan.');
         }
 
         if ((float) $dataPaket->harga_sesi <= 0) {
@@ -381,7 +381,7 @@ class WebinarController extends BaseController
         if ($gross_amount > 0) {
             return redirect()->to('webinar/invoice')->with('success', 'Pendaftaran berhasil, silakan selesaikan pembayaran!')->with('snapToken', $snapToken);
         } else {
-            return redirect()->back()->with('success', 'Pendaftaran berhasil, Anda telah terdaftar!');
+            return redirect()->to('marathon-perpajakan')->with('success', 'Pendaftaran berhasil, Anda telah terdaftar!');
         }
     }
     public function invoice()

@@ -284,7 +284,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
             'keynote' => [
                 'role'  => 'KEYNOTE SPEAKER',
                 'nama'  => 'Nurtiyas, S.E., M.Ak., BKP',
-                'desc'  => 'Ketua Lembaga Pelatihan<br>Registered Tax Consultant',
+                'desc'  => 'Ketua LKP - Kelas Brevet<br>Registered Tax Consultant',
                 'image' => base_url('uploads/webinar/nurtiyas.png')
             ],
             'moderator' => [
@@ -299,13 +299,13 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
             [
                 'sesi'     => 'PERTEMUAN 1',
                 'pemateri' => 'Faris Yustian',
-                'jabatan'  => 'Trainer Perpajakan<br>ASN DJP',
+                'jabatan'  => 'Trainer Perpajakan (Bicara Pajak)<br>ASN DJP',
                 'image'    => base_url('uploads/webinar/faris.png')
             ],
             [
                 'sesi'     => 'PERTEMUAN 2',
                 'pemateri' => 'Raden Agus Suparman',
-                'jabatan'  => 'Founder Botax Consulting<br>Ex-DJP Tahun 1995 - 2022',
+                'jabatan'  => 'Founder Botax Consulting<br>Ex-Pemeriksan (DJP Tahun 1995 - 2022)',
                 'image'    => base_url('uploads/webinar/agus.png')
             ],
             [
@@ -317,7 +317,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
             [
                 'sesi'     => 'PERTEMUAN 4',
                 'pemateri' => 'Moh. Yazid',
-                'jabatan'  => 'Founder Taxflash<br>Ex-Pemeriksa & Penyidik Pajak',
+                'jabatan'  => 'Founder Taxflash & NGOPI<br>Ex-Pemeriksa & Penyidik (DJP Tahun 1999 - 2020)',
                 'image'    => base_url('uploads/webinar/yazid.png')
             ]
         ];
@@ -443,7 +443,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                 <!-- Judul Section -->
                 <div class="jadwal-divider-container">
                     <div class="bg-yellow text-navy fw-bold px-4 py-1 rounded-pill mx-3 shadow-sm" style="font-size: 1rem;">
-                        <h3>KAMI AKAN MENGHADIRKAN:</h3>
+                        <h3>KAMI MENGHADIRKAN:</h3>
                     </div>
                 </div>
 
@@ -547,14 +547,6 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
 
             <div class="container py-3">
 
-                <!-- Pesan Notifikasi Controller -->
-                <?php if (session()->getFlashdata('error')) : ?>
-                    <div class="alert alert-danger mb-4"><b>Gagal:</b> <?= session()->getFlashdata('error') ?></div>
-                <?php endif; ?>
-                <?php if (session()->getFlashdata('success')) : ?>
-                    <div class="alert alert-success mb-4"><b>Sukses:</b> <?= session()->getFlashdata('success') ?></div>
-                <?php endif; ?>
-
                 <div class="text-center mb-5">
                     <span class="badge bg-primary px-3 py-2 rounded-pill mb-2">Formulir Pendaftaran</span>
                     <h2 class="fw-bold text-dark">Pilih Paket & Amankan Tiket</h2>
@@ -634,14 +626,14 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                                             </div>
                                                         <?php elseif ($isFree): ?>
                                                             <div class="mb-1">
-                                                                <span class="badge bg-success mt-1" style="font-size: 0.75rem;">Gratis</span>
+                                                                <span class="badge bg-success mt-1" style="font-size: 0.65rem;">Fasilitas terbatas</span>
                                                             </div>
                                                         <?php endif; ?>
 
                                                         <!-- Tampilan Deskripsi Sesi Berbayar -->
                                                         <?php if (!$isFree && !empty($sesi['deskripsi_sesi'])): ?>
                                                             <p class="text-secondary mb-0 mt-2" style="font-size: 0.85rem; line-height: 1.5;">
-                                                                <span class="badge bg-primary mt-1" style="font-size: 0.75rem;">Berbayar</span>
+                                                                <span class="badge bg-primary mt-1" style="font-size: 0.65rem;">Gratis E-learning + Ujian Brevet AB</span>
                                                             </p>
                                                         <?php endif; ?>
                                                     </div>
@@ -661,7 +653,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                                 <!-- List Sesi Khusus untuk Paket dengan Icon Ceklis Profesional -->
                                                 <div class="mt-4 pt-3 border-top flex-grow-1">
                                                     <?php if (!empty($childSessionsData)): ?>
-                                                        <p class="text-dark fw-bold fs-7 mb-3"><i class="fa-solid fa-layer-group me-2 text-primary"></i>Sesi yang didapatkan:</p>
+                                                        <p class="text-dark fw-bold fs-7 mb-3"><i class="fa-solid fa-layer-group me-2 text-primary"></i>4 Materi Spesial Webinar:</p>
                                                         <ul class="list-unstyled mb-4" style="margin-bottom: 0;">
                                                             <?php foreach ($childSessionsData as $cs): ?>
                                                                 <?php $isCsExpired = (strtotime($cs['waktu_mulai']) <= strtotime($currentDateTime)); ?>
@@ -705,9 +697,9 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                                         </div>
                                                     <?php else: ?>
                                                         <div class="alert alert-info py-2 px-3 border-0 mb-0 d-flex align-items-start gap-2 rounded-3" style="font-size: 0.8rem; line-height: 1.4; background-color: #e3f2fd; color: #0277bd;">
-                                                            <i class="fa-solid fa-circle-check mt-1"></i>
+                                                            <i class="fa-solid fa-circle-info mt-1"></i>
                                                             <div>
-                                                                <strong>Informasi Paket:</strong> <?= $sesi['deskripsi_sesi'] ?>
+                                                                <strong>Informasi Paket:</strong> Anda akan mendapatkan rekaman webinar, materi, dan sertifikat langsung di website kelasbrevet.com
                                                             </div>
                                                         </div>
                                                     <?php endif; ?>
@@ -801,7 +793,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                 <i class="fa-solid fa-certificate"></i>
                             </div>
                             <h4 class="fw-bold fs-5">E-Sertifikat Resmi</h4>
-                            <p class="text-secondary mb-0">Dapatkan sertifikat resmi setelah menyelesaikan webinar yang dapat ditambahkan ke profil LinkedIn Anda.</p>
+                            <p class="text-secondary mb-0">Dapatkan sertifikat resmi setelah menyelesaikan webinar yang dapat ditambahkan ke profil Anda.</p>
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -830,6 +822,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                         <div class="col-lg-7 p-4 bg-white d-flex flex-column justify-content-center">
                                             <h4 class="fw-bold text-primary mb-3"><?= $paketWebinar ? esc($paketWebinar->nama_paket) : 'Paket VIP Access' ?></h4>
                                             <ul class="list-unstyled mb-0" style="font-size: 0.9rem;">
+                                                <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i> E-Learning + Ujian Brevet AB</li>
                                                 <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i> Akses Live Gmeet Session</li>
                                                 <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i> E-Sertifikat Kehadiran</li>
                                                 <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i> PDF Modul Materi</li>
@@ -843,7 +836,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                             $hargaCoret = ($paketWebinar && isset($paketWebinar->nominal_paket)) ? $paketWebinar->nominal_paket : 200000;
 
                                             // 2. Ambil persentase diskon dari database (sesuaikan nama field 'diskon' dengan yang ada di DB Anda)
-                                            $persenDiskon = ($paketWebinar && isset($paketWebinar->diskon)) ? $paketWebinar->diskon : 10;
+                                            $persenDiskon = ($paketWebinar && isset($paketWebinar->diskon)) ? $paketWebinar->diskon : 65;
 
                                             // 3. Kalkulasi harga akhir setelah dipotong persen diskon
                                             $hargaAkhir = $hargaCoret - ($hargaCoret * ($persenDiskon / 100));
@@ -1088,6 +1081,32 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
         });
     </script>
     <script src="https://topcs.id/widget.js" data-tenant="kelas-brevet" data-mode="bubble" data-position="right" data-color="#2563eb"></script>
+
+    <!-- SweetAlert2 CDN & Notifikasi Logic -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            <?php if (session()->getFlashdata('success')) : ?>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: '<?= session()->getFlashdata('success') ?>',
+                    confirmButtonColor: '#0d6efd',
+                    confirmButtonText: 'Tutup'
+                });
+            <?php endif; ?>
+
+            <?php if (session()->getFlashdata('error')) : ?>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: '<?= session()->getFlashdata('error') ?>',
+                    confirmButtonColor: '#dc3545',
+                    confirmButtonText: 'Tutup'
+                });
+            <?php endif; ?>
+        });
+    </script>
 </body>
 
 </html>
