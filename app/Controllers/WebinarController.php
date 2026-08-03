@@ -199,7 +199,7 @@ class WebinarController extends BaseController
 
         if ($cekPaketAktif) {
             $db->transRollback(); // Batalkan seluruh query sebelumnya (termasuk insert siswa jika baru)
-            return redirect()->to('marathon-perpajakan')->withInput()->with('error', 'Anda sudah memiliki paket sesi yang aktif atau sedang menunggu pembayaran.');
+            return redirect()->to('marathon-perpajakan')->withInput()->with('error', 'Anda sudah memiliki paket webinar yang aktif atau sedang menunggu pembayaran.');
         }
         // ==============================================================================
 
@@ -395,7 +395,7 @@ class WebinarController extends BaseController
         if ($gross_amount > 0) {
             return redirect()->to('webinar/invoice')->with('success', 'Pendaftaran berhasil, silakan selesaikan pembayaran!')->with('snapToken', $snapToken);
         } else {
-            return redirect()->to('marathon-perpajakan')->with('success', 'Pendaftaran berhasil, Anda telah terdaftar!');
+            return redirect()->to('marathon-perpajakan')->with('success', 'Pendaftaran berhasil, Anda telah terdaftar sebagai peserta webinar.');
         }
     }
     public function invoice()

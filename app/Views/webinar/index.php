@@ -184,8 +184,9 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
 <body>
 
     <!-- Header / Navbar -->
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm py-3 sticky-top">
+    <!-- Class sticky-top dan shadow-sm dipindahkan ke elemen <header> -->
+    <header class="sticky-top bg-white shadow-sm" style="z-index: 1030;">
+        <nav class="navbar navbar-expand-lg navbar-light py-3">
             <div class="container">
                 <!-- Brand / Logo -->
                 <a class="navbar-brand fw-bold text-primary" href="<?= base_url('/') ?>">
@@ -1062,21 +1063,45 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                 let isPackageSelected = Array.from(radios).some(radio => radio.checked && !radio.disabled);
 
                 // 2. Cek apakah semua field input teks wajib terisi
-                let areInputsFilled = Array.from(inputs).every(input => input.value.trim() !== "");
+                // Logika: Jika input readonly (ada session), otomatis true. Jika tidak, pastikan tidak kosong.
+                let areInputsFilled = Array.from(inputs).every(input => {
+                    if (input.readOnly) return true;
+                    return input.value.trim() !== "";
+                });
 
-                // 3. Tombol aktif hanya jika KEDUANYA terpenuhi
-                if (isPackageSelected && areInputsFilled) {
+                // 3. Validasi khusus nomor WhatsApp: Minimal 10, Maksimal 15 Angka
+                let isHpValid = true;
+                const hpInput = form.querySelector("input[name='hp']");
+                if (hpInput && !hpInput.readOnly) {
+                    let hpLength = hpInput.value.trim().length;
+                    isHpValid = (hpLength >= 10 && hpLength <= 15);
+                }
+
+                // 4. Tombol aktif hanya jika KETIGANYA terpenuhi (Paket, Input Umum, Input HP)
+                if (isPackageSelected && areInputsFilled && isHpValid) {
                     btnSubmit.removeAttribute("disabled");
                 } else {
                     btnSubmit.setAttribute("disabled", "true");
                 }
             }
 
-            // Jalankan fungsi validasi setiap ada input atau perubahan pilihan
+            // Event Listener Khusus untuk Input HP (Membatasi max 15 karakter saat mengetik)
+            const hpInput = form.querySelector("input[name='hp']");
+            if (hpInput && !hpInput.readOnly) {
+                hpInput.addEventListener("input", function() {
+                    // Potong value jika melebihi 15 karakter
+                    if (this.value.length > 15) {
+                        this.value = this.value.slice(0, 15);
+                    }
+                    validateForm();
+                });
+            }
+
+            // Jalankan fungsi validasi setiap ada input atau perubahan pilihan form
             form.addEventListener("input", validateForm);
             form.addEventListener("change", validateForm);
 
-            // Jalankan sekali saat halaman dimuat (untuk mengecek kondisi awal)
+            // Jalankan sekali saat halaman dimuat (untuk mengecek kondisi awal / saat ada session)
             validateForm();
         });
     </script>
