@@ -245,7 +245,7 @@ class WebinarController extends BaseController
         $idtransaksi = $this->transaksiModel->insertID();
 
         // PERBAIKAN KRUSIAL: Filter sesi HANYA mengambil yang dicentang oleh user
-        $detailPaket = $db->table('detail_paket')
+        $builder = $db->table('detail_paket')
             ->select('
                 detail_paket.*, 
                 COALESCE(webinar_sesi.harga_sesi, 0) as harga_sesi,
@@ -260,20 +260,20 @@ class WebinarController extends BaseController
             ->where('detail_paket.idpaket', $idpaket);
 
         // PERBAIKAN: Mengelompokkan kondisi OR
-        $detailPaket->groupStart()
+        $builder->groupStart()
             ->whereIn('detail_paket.id_sesi', $sesi_terpilih); // Selalu ambil sesi yang dicentang
 
         // DIBENAHI: Kondisi diubah menjadi > 0 (Berbayar). 
         // Jika gratis, if ini di-skip sehingga sistem HANYA menyimpan webinar_sesi.
         if ((float) $dataPaket->harga_sesi > 0) {
-            $detailPaket->orWhere('detail_paket.id_sesi', 0) // ATAU ambil yang id_sesi-nya 0 (Ujian / Materi)
+            $builder->orWhere('detail_paket.id_sesi', 0) // ATAU ambil yang id_sesi-nya 0 (Ujian / Materi)
                 ->orWhere('detail_paket.id_sesi IS NULL'); // Jaga-jaga jika di database tersimpan sebagai NULL
         }
 
-        $detailPaket->groupEnd();
+        $builder->groupEnd();
 
-        $detailPaket->get()
-            ->getResultObject();
+        $detailPaket = $builder->get()->getResultObject();
+        $gross_amount = 0; // Inisialisasi gross_amount
 
         if (!empty($detailPaket) && is_array($detailPaket)) {
             // 1. Hitung Total Item dan Total Harga Keseluruhan
