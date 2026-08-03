@@ -186,6 +186,23 @@ class WebinarController extends BaseController
             $this->emailer->send($email, $subject, $message);
         }
 
+        // ==============================================================================
+        // UPGRADE TAMBAHAN: Cek Jika Peserta Sudah Punya Paket/Sesi Ini (Gratis/Berbayar)
+        // ==============================================================================
+        $cekPaketAktif = $db->table('transaksi')
+            ->join('detail_transaksi', 'transaksi.idtransaksi = detail_transaksi.idtransaksi')
+            ->where('transaksi.idsiswa', $id_siswa)
+            ->whereIn('transaksi.status', ['M', 'S']) // 'S' = Lunas/Gratis (Selesai), 'M' = Menunggu Pembayaran
+            ->whereIn('detail_transaksi.idsesi', $sesi_terpilih)
+            ->get()
+            ->getRow();
+
+        if ($cekPaketAktif) {
+            $db->transRollback(); // Batalkan seluruh query sebelumnya (termasuk insert siswa jika baru)
+            return redirect()->to('marathon-perpajakan')->withInput()->with('error', 'Anda sudah memiliki paket sesi yang aktif atau sedang menunggu pembayaran.');
+        }
+        // ==============================================================================
+
 
         // 3. Proses Pembayaran
         $tgl_mulai = date('Y-m-d H:i:s');
@@ -216,7 +233,7 @@ class WebinarController extends BaseController
             'idsiswa'      => $id_siswa,
             'nominal'      => $dataPaket->harga_sesi,
             'diskon'       => $dataPaket->diskon,
-            'status'       => $status, // Menunggu
+            'status'       => $status, // Menunggu atau Selesai
             'tgl_exp'      => $tgl_exp,
             'tgl_drop'     => $tgl_exp,
             'tgl_pembayaran' => $tgl_pembayaran,
@@ -226,8 +243,6 @@ class WebinarController extends BaseController
 
         $this->transaksiModel->insert($dataInsert);
         $idtransaksi = $this->transaksiModel->insertID();
-
-
 
         // PERBAIKAN KRUSIAL: Filter sesi HANYA mengambil yang dicentang oleh user
         $detailPaket = $db->table('detail_paket')
@@ -294,7 +309,6 @@ class WebinarController extends BaseController
             }
 
             $this->detailTransaksiModel->insertBatch($detailTransaksi);
-
 
             // 4. Proses Transaksi (Midtrans jika berbayar / Langsung selesai jika gratis)
             $data = $this->transaksiModel
