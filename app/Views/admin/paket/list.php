@@ -83,6 +83,24 @@
                                                     </a>
                                                 <?php endif; ?>
 
+                                                <!-- ======================================================== -->
+                                                <!-- TAMBAHAN: Tombol Kirim Email (Hanya untuk Paket Webinar) -->
+                                                <!-- ======================================================== -->
+                                                <?php
+                                                // 1. Decode string JSON menjadi Array PHP
+                                                $jenisPaketArr = json_decode($s->jenis_paket, true);
+                                                // 2. Pastikan bentuknya array, lalu ubah semua isinya jadi huruf kecil agar aman
+                                                $jenisPaketArr = is_array($jenisPaketArr) ? array_map('strtolower', $jenisPaketArr) : [];
+
+                                                // 3. Cek apakah ada kata 'webinar' di dalam array tersebut
+                                                if (in_array('webinar', $jenisPaketArr)):
+                                                ?>
+                                                    <button type="button" class="btn btn-icon btn-light-success btn-sm btn-kirim-info-paket" data-id="<?= encrypt_url($s->idpaket); ?>" data-bs-toggle="tooltip" title="Kirim Email Peserta">
+                                                        <i class="ki-duotone ki-send fs-3"><span class="path1"></span><span class="path2"></span></i>
+                                                    </button>
+                                                <?php endif; ?>
+                                                <!-- ======================================================== -->
+
                                                 <button type="button" class="btn btn-icon btn-sm <?= $s->is_pinned ? 'btn-warning' : 'btn-light-dark' ?> pin-paket" data-id="<?= $s->idpaket ?>" data-bs-toggle="tooltip" title="<?= $s->is_pinned ? 'Lepas Pin' : 'Pin ke Atas' ?>">
                                                     <i class="ki-duotone ki-pin fs-3"><span class="path1"></span><span class="path2"></span></i>
                                                 </button>
@@ -849,6 +867,58 @@
                 }
             });
         }
+    });
+</script>
+<script>
+    $(document).ready(function() {
+        $(document).on('click', '.btn-kirim-info-paket', function(e) {
+            e.preventDefault();
+            var idPaket = $(this).data('id');
+
+            Swal.fire({
+                title: 'Kirim Email ke Peserta?',
+                text: "Pesan pengingat akan dikirim ke seluruh peserta yang telah lunas/mendaftar di paket webinar ini.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#0d6efd',
+                cancelButtonColor: '#dc3545',
+                confirmButtonText: 'Ya, Kirim Sekarang!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Mengirim Email...',
+                        text: 'Sistem sedang mengirim pesan massal. Mohon tunggu.',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    $.ajax({
+                        // Sesuaikan URL ini dengan routes controller Anda
+                        url: "<?= base_url('sw-admin/paket/kirim-email-peserta') ?>",
+                        type: "POST",
+                        data: {
+                            id_paket: idPaket,
+                            [csrfName]: csrfHash
+                        },
+                        dataType: "JSON",
+                        success: function(response) {
+                            updateCSRF(response.<?= csrf_token() ?>);
+                            if (response.status) {
+                                Swal.fire('Berhasil!', response.message, 'success');
+                            } else {
+                                Swal.fire('Info', response.message, 'warning');
+                            }
+                        },
+                        error: function() {
+                            Swal.fire('Error!', 'Terjadi kesalahan pada server.', 'error');
+                        }
+                    });
+                }
+            });
+        });
     });
 </script>
 <?= $this->endSection(); ?>

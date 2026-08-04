@@ -40,8 +40,7 @@
                                     <th class="min-w-200px">Penerima</th>
                                     <th class="min-w-200px">Subjek</th>
                                     <th class="min-w-100px text-center">Status</th>
-                                    <th class="min-w-200px">Pesan Error</th>
-                                    <th class="text-end min-w-100px">Opsi</th>
+                                    <th class="min-w-300px">Pesan Error</th>
                                 </tr>
                             </thead>
                             <tbody class="fw-semibold text-gray-600">
@@ -125,7 +124,7 @@
                         }
 
                         // Ambil 20 kata pertama dan gabungkan kembali ditambah titik-titik
-                        var shortText = words.slice(0, 20).join(' ') + '...';
+                        var shortText = words.slice(0, 5).join(' ') + '...';
 
                         // Buat elemen HTML untuk toggle (buka/tutup) dengan penambahan word-break
                         return '<div class="toggle-error" style="cursor: pointer; word-break: break-word;" title="Klik untuk lihat detail">' +
@@ -133,9 +132,6 @@
                             '<span class="text-full" style="display: none;">' + safeData + ' <span class="badge badge-light-danger ms-1 badge-sm" style="white-space: nowrap;">Ringkas</span></span>' +
                             '</div>';
                     }
-                },
-                {
-                    "data": "opsi"
                 }
             ],
             "columnDefs": [{
@@ -145,7 +141,7 @@
                 },
                 {
                     // Aturan tambahan spesifik untuk kolom status dan opsi
-                    "targets": [3, 5],
+                    "targets": [3, 4],
                     "orderable": false,
                     "className": "text-end text-wrap"
                 }

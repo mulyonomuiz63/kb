@@ -89,11 +89,6 @@ class LogEmailController extends BaseController
                 $nestedData['subjek']        = $row->subjek;
                 $nestedData['status']        = $row->status; 
                 $nestedData['error_message'] = $row->error_message;
-                
-                // Tombol Opsi (Bisa untuk Hapus Satuan jika diperlukan)
-                $btn = '<a href="javascript:void(0)" class="btn btn-icon btn-light-danger btn-sm" onclick="hapusSatuan('.$row->id.')" title="Hapus"><i class="ki-duotone ki-trash fs-3"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i></a>';
-                
-                $nestedData['opsi'] = $btn;
                 $data[] = $nestedData;
             }
 

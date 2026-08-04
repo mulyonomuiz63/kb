@@ -226,6 +226,7 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
         $routes->post('ujian-master', 'Admin\PaketController::getUjianMaster'); // Ganti 'Paket' dengan nama Controller Anda
         $routes->post('get-mapel', 'Admin\PaketController::getMapel');
         $routes->post('get-webinar-sesi', 'Admin\PaketController::getWebinarSesi');
+        $routes->post('kirim-email-peserta', 'Admin\PaketController::kirimEmailPeserta');
     });
 
     $routes->group('transaksi', function ($routes) {

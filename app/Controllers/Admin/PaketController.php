@@ -13,6 +13,7 @@ class PaketController extends BaseController
     protected $mapelModel;
     protected $detailPaketModel;
     protected $reviewModel;
+    protected $emailer;
 
     public function __construct()
     {
@@ -22,6 +23,7 @@ class PaketController extends BaseController
         $this->mapelModel = new \App\Models\MapelModel();
         $this->detailPaketModel = new \App\Models\DetailPaketModel();
         $this->reviewModel = new \App\Models\ReviewModel();
+        $this->emailer = new \App\Libraries\Emailer();
     }
 
     public function index()
@@ -786,5 +788,85 @@ class PaketController extends BaseController
                 csrf_token()   => csrf_hash()
             ]);
         }
+    }
+
+    public function kirimEmailPeserta()
+    {
+        if (!$this->request->isAJAX()) {
+            return redirect()->to('auth');
+        }
+
+        $id_encrypt = $this->request->getPost('id_paket');
+        $id_paket = decrypt_url($id_encrypt);
+
+        if (!$id_paket) {
+            return $this->response->setJSON(['status' => false, 'message' => 'Data paket tidak valid.', csrf_token() => csrf_hash()]);
+        }
+
+        $db = \Config\Database::connect();
+
+        // 1. Ambil nama Paket
+        $paket = $db->table('paket')->where('idpaket', $id_paket)->get()->getRow();
+        if (!$paket) {
+            return $this->response->setJSON(['status' => false, 'message' => 'Paket tidak ditemukan.', csrf_token() => csrf_hash()]);
+        }
+
+        // 2. Ambil data peserta berdasarkan ID Paket (melalui detail_transaksi)
+        // GROUP BY digunakan untuk mencegah email duplikat
+        $pesertaList = $db->table('detail_transaksi')
+            ->select('siswa.nama_siswa, siswa.email')
+            ->join('transaksi', 'transaksi.idtransaksi = detail_transaksi.idtransaksi')
+            ->join('siswa', 'siswa.id_siswa = transaksi.idsiswa')
+            ->where('detail_transaksi.idpaket', $id_paket)
+            ->where('transaksi.status', 'S') // Selesai / Lunas / Gratis
+            ->groupBy('siswa.email')
+            ->get()
+            ->getResultObject();
+
+        if (empty($pesertaList)) {
+            return $this->response->setJSON([
+                'status' => false, 
+                'message' => 'Tidak ada peserta aktif yang terdaftar pada paket ini.',
+                csrf_token() => csrf_hash() // <--- Sisipkan ini
+            ]);
+        }
+
+        // 3. Proses Kirim Email
+        $berhasil = 0;
+        foreach ($pesertaList as $p) {
+            $nama_siswa = $p->nama_siswa;
+            $email = $p->email;
+
+            $subject = 'INFORMASI PELAKSANAAN WEBINAR - ' . strtoupper($paket->nama_paket);
+            
+            $message = '
+            <div style="color: #000; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; max-width: 600px;">
+                <div style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; font-size: 20px; color: #1C3FAA; font-weight: bold; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">
+                    INFORMASI PELAKSANAAN WEBINAR
+                </div>
+                <br>
+                <p style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; color: #334155; line-height: 1.6;">
+                    Hallo <b>' . substr(esc($nama_siswa), 0, 10) . '</b>, <br>
+                    Paket Webinar <b>' . esc($paket->nama_paket) . '</b> yang Anda ikuti 2 jam lagi akan segera dimulai. Silakan cek detail jadwal melalui akun Anda.
+                </p>
+                
+                <div style="margin-top: 20px;">
+                    <a href="' . base_url("auth/") . '" style="display: inline-block; background: #1C3FAA; color: #fff; margin: 5px 0 10px 0; text-decoration: none; border-radius: 5px; text-align: center; line-height: 30px; font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; padding: 5px 20px;">
+                        Login
+                    </a>
+                </div> 
+            </div>';
+
+            $kirim = $this->emailer->send($email, $subject, $message);
+            if ($kirim) {
+                $berhasil++;
+            }
+        }
+
+        return $this->response->setJSON([
+            'status' => true, 
+            'message' => "Berhasil mengirim pengingat ke $berhasil email peserta.",
+            csrf_token() => csrf_hash() // <--- Sisipkan ini
+        ]);
     }
 }
