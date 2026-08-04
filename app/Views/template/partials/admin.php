@@ -18,6 +18,7 @@ $master_data_pool = array_merge($siswa, $guru, $mitra, $pic, $kelas, $mapel, $re
 
 // Langganan & Konten
 $iklan = array('sw-admin/iklan');
+$logEmail = array('sw-admin/log-email');
 $twibbon = array('sw-admin/twibbon');
 $galeri = array('sw-admin/galeri');
 $testimoni = array('sw-admin/testimoni');
@@ -319,6 +320,10 @@ $is_pengaturan_active = in_array($current_uri, $pengaturan_pool);
                                         <a href="<?= base_url('sw-admin/iklan') ?>" class="menu-link p-4 mb-2 <?= (in_array($current_uri, $iklan) ? 'active' : '') ?>">
                                             <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-primary"><i class="ki-duotone ki-pointers text-primary fs-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i></span>
                                             <span class="d-flex flex-column"><span class="fs-6 fw-bold text-gray-800">Iklan</span><span class="fs-7 fw-semibold text-muted">Landing Page Ads</span></span>
+                                        </a>
+                                        <a href="<?= base_url('sw-admin/log-email') ?>" class="menu-link p-4 mb-2 <?= (in_array($current_uri, $logEmail) ? 'active' : '') ?>">
+                                            <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-primary"><i class="ki-duotone ki-pointers text-primary fs-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i></span>
+                                            <span class="d-flex flex-column"><span class="fs-6 fw-bold text-gray-800">Log Email</span><span class="fs-7 fw-semibold text-muted">Email Sending Logs</span></span>
                                         </a>
                                     </div>
                                 </div>

@@ -600,6 +600,7 @@ function renderDetailRow($label, $id, $col = 6)
                     <div class="menu-item px-3"><a href="<?= base_url('sw-admin/siswa/sertifikat') ?>/${row.id_siswa_enc}" class="menu-link px-3">Sertifikat</a></div>
                     <div class="menu-item px-3"><a href="<?= base_url('sw-admin/siswa/ujian') ?>/${row.id_siswa_enc}" class="menu-link px-3">List Ujian</a></div>
                     <div class="menu-item px-3"><a href="<?= base_url('sw-admin/siswa/materi') ?>/${row.id_siswa_enc}" class="menu-link px-3">List Materi</a></div>
+                    <div class="menu-item px-3"><a href="<?= base_url('sw-admin/siswa/webinar') ?>/${row.id_siswa_enc}" class="menu-link px-3">List Webinar</a></div>
                     ${row.totalUjian <= 0 ? `
                         <div class="separator mt-3 opacity-75"></div>
                         <div class="menu-item px-3"><a href="<?= base_url('sw-admin/siswa/delete') ?>/${row.id_siswa_enc}" class="menu-link px-3 text-danger btn-hapus">Hapus</a></div>

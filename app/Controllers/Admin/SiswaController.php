@@ -647,7 +647,34 @@ class SiswaController extends BaseController
         ]);
     }
 
+    public function webinar($id)
+    {
+        // Pastikan user sudah login
+        $id_siswa = decrypt_url($id);
+        // Query untuk mengambil sesi webinar yang sudah dibeli dan lunas
+        $dataWebinar = $this->transaksiModel
+            ->select('webinar_sesi.*, paket.nama_paket, paket.file')
+            ->join('detail_transaksi', 'transaksi.idtransaksi = detail_transaksi.idtransaksi')
+            ->join('paket','detail_transaksi.idpaket=paket.idpaket')
+            ->join('webinar_sesi', 'detail_transaksi.idsesi=webinar_sesi.id_sesi')
+            ->where('transaksi.status', 'S')
+            ->where('idsiswa', $id_siswa)
+            ->groupBy('detail_transaksi.idsesi')
+            ->get()
+            ->getResult();
 
+
+        $data = [
+            'webinar' => $dataWebinar
+        ];
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'Data Peserta', 'url' => base_url('sw-admin/siswa')],
+            ['title' => 'List Webinar', 'url' => '#'],
+        ];
+
+        return view('admin/webinar/list-siswa', $data);
+    }
 
 
     public function lihatSertifikat($kode_ujian, $id_ujian, $jenis = "")

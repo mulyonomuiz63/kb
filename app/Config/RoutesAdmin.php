@@ -17,6 +17,7 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
         $routes->post('get-data-sertifikat', 'Admin\SiswaController::getDataSertifikat');
         $routes->get('ujian/(:segment)', 'Admin\SiswaController::ujian/$1');
         $routes->post('get-data-ujian', 'Admin\SiswaController::getDataUjian');
+        $routes->get('webinar/(:segment)', 'Admin\SiswaController::webinar/$1');
         
         $routes->post('processImportBatch', 'Admin\SiswaController::processImportBatch');
 
@@ -303,5 +304,11 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
         $routes->get('delete/(:segment)', 'Admin\BankSoalController::delete/$1');
         $routes->post('upload-summernote', 'Admin\BankSoalController::uploadSummernote');
         $routes->post('delete-image', 'Admin\BankSoalController::deleteImage');
+    });
+
+    $routes->group('log-email', function ($routes) {
+        $routes->get('', 'Admin\LogEmailController::index');
+        $routes->post('datatables', 'Admin\LogEmailController::datatables');
+        $routes->post('delete-old', 'Admin\LogEmailController::deleteOld');
     });
 });
