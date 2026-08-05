@@ -145,6 +145,21 @@ class WebinarController extends BaseController
         $cekSiswa = $this->siswaModel->where('email', $email)->first();
         if ($cekSiswa) {
             $id_siswa = $cekSiswa['id_siswa'];
+            $subject = 'SELAMAT ANDA BERHASIL TERDAFTAR DI DIWEBINAR KELASBREVET';
+            $message = '
+            <div style="color: #000; padding: 10px;">
+                <div style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; font-size: 20px; color: #1C3FAA; font-weight: bold;">
+                    INFORMASI PENDAFTARAN WEBINAR</div> 
+                <br>
+                <p style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; color: #000;">Hallo ' . substr($nama_siswa, 0, 10) . ' <br>
+                    <span style="color: #000;">Kami menambahkan anda ke dalam webinar kelasBrevet. 
+                    <br>Silahkan login ke website kelasbrevet untuk mengikuti webinar:</span></p>
+                <br>
+                    <a href="' . base_url("auth/") . '"  style="display: inline-block; background: #1C3FAA; color: #fff;margin:10px; text-decoration: none; border-radius: 5px; text-align: center; line-height: 30px; font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; padding: 5px 20px;">Login</a>
+            </div>';
+
+            // Kirim Email
+            $this->emailer->send($email, $subject, $message);
         } else {
             $randomPassword = random_string('alnum', 8);
             $hashedPassword = password_hash($randomPassword, PASSWORD_DEFAULT);
@@ -163,12 +178,12 @@ class WebinarController extends BaseController
 
             $this->siswaModel->insert($data_siswa);
             $id_siswa = $this->siswaModel->insertID();
-            $subject = 'SELAMAT ANDA BERHASIL TERDAFTAR DI KELASBREVET';
+            $subject = 'SELAMAT ANDA BERHASIL TERDAFTAR DI DIWEBINAR KELASBREVET';
             $message = '
             <div style="color: #000; padding: 10px;">
                 <div style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; font-size: 20px; color: #1C3FAA; font-weight: bold;">
                     INFORMASI PENDAFTARAN</div>
-                <br>
+                <br> 
                 <p style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; color: #000;">Hallo ' . substr($nama_siswa, 0, 10) . ' <br>
                     <span style="color: #000;">Kami menambahkan anda ke dalam kelasBrevet 
                     <br>Silahkan login ke website kelasbrevet untuk mengikuti webinar:</span></p>
@@ -199,7 +214,7 @@ class WebinarController extends BaseController
 
         if ($cekPaketAktif) {
             $db->transRollback(); // Batalkan seluruh query sebelumnya (termasuk insert siswa jika baru)
-            return redirect()->to('marathon-perpajakan')->withInput()->with('error', 'Anda sudah memiliki paket webinar yang aktif atau sedang menunggu pembayaran.');
+            return redirect()->to('marathon-perpajakan')->withInput()->with('error', 'Anda sudah terdaftar pada paket webinar ini. Silakan cek email Anda untuk informasi lebih lanjut.');
         }
         // ==============================================================================
 
@@ -401,7 +416,7 @@ class WebinarController extends BaseController
         if ($gross_amount > 0) {
             return redirect()->to('webinar/invoice')->with('success', 'Pendaftaran berhasil, silakan selesaikan pembayaran!')->with('snapToken', $snapToken);
         } else {
-            return redirect()->to('marathon-perpajakan')->with('success', 'Pendaftaran berhasil, Anda telah terdaftar sebagai peserta webinar.');
+            return redirect()->to('marathon-perpajakan')->with('success', 'Pendaftaran berhasil, Anda telah terdaftar sebagai peserta webinar, informasi lengkapnya akan dikirim ke email Anda.');
         }
     }
     public function invoice()
