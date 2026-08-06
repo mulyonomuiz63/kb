@@ -614,7 +614,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                                                 <?php if ($isExpired && !$isFree): ?>
                                                                     <div class="mb-1"><span class="badge bg-danger mt-1" style="font-size: 0.75rem;">Semua Sesi Telah Berakhir</span></div>
                                                                 <?php elseif ($isFree): ?>
-                                                                    <div class="mb-1"><span class="badge bg-success mt-1" style="font-size: 0.65rem;">Fasilitas terbatas</span></div>
+                                                                    <div class="mb-1"><span class="badge bg-success mt-1" style="font-size: 0.65rem;">Fasilitas Full Akses Materi</span></div>
                                                                 <?php endif; ?>
 
                                                                 <?php if (!$isFree && !empty($sesi['deskripsi_sesi'])): ?>
