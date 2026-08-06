@@ -210,11 +210,11 @@ class TransaksiController extends BaseController
                 // IMPLEMENTASI FILTER PAKET (QUERY TOTAL)
                 // ==========================================
                 if ($filter_paket == '1') {
-                    $query->whereIn('c.v_ujian', ['all', '1']);
+                    $queryTotal->whereIn('c.v_ujian', ['all', '1']);
                 } elseif ($filter_paket == '2') {
-                    $query->whereIn('c.v_materi', ['all', '1']);
+                    $queryTotal->whereIn('c.v_materi', ['all', '1']);
                 } elseif ($filter_paket == '3') {
-                    $query->like('c.jenis_paket', '"ikh"');
+                    $queryTotal->like('c.jenis_paket', '"ikh"');
                 }
 
                 if ($status_afiliasi === '0') {
@@ -228,8 +228,11 @@ class TransaksiController extends BaseController
                 // Ambil semua data hanya yang berstatus Lunas (S)
                 $dataTotalLunas = $queryTotal->where('transaksi.status', 'S')->get()->getResultObject();
 
-                // Kalkulasi omset murni
+                // Kalkulasi omset murni (Keseluruhan, Manual, dan Midtrans)
                 $totalPendapatan = 0;
+                $totalManual = 0;
+                $totalMidtrans = 0;
+
                 foreach ($dataTotalLunas as $dt) {
                     $diskon         = ($dt->nominal * $dt->diskon) / 100;
                     $totalDiskon    = $dt->nominal - $diskon;
@@ -237,6 +240,13 @@ class TransaksiController extends BaseController
                     $nominal_bersih = $dt->nominal - $diskon - $diskon_voucher;
 
                     $totalPendapatan += $nominal_bersih;
+
+                    // Pisahkan berdasarkan jenis pembayaran
+                    if ($dt->jenis_bayar === 'manual') {
+                        $totalManual += $nominal_bersih;
+                    } elseif ($dt->jenis_bayar === 'online') {
+                        $totalMidtrans += $nominal_bersih;
+                    }
                 }
 
                 // ==========================================
@@ -413,6 +423,8 @@ class TransaksiController extends BaseController
                     'recordsFiltered'  => $totalFiltered,
                     'data'             => $results,
                     'total_pendapatan' => number_format($totalPendapatan, 0, ',', '.'),
+                    'total_manual'     => number_format($totalManual, 0, ',', '.'),
+                    'total_midtrans'   => number_format($totalMidtrans, 0, ',', '.'),
                     'csrf_hash'        => csrf_hash()
                 ]);
             } catch (\Exception $e) {
@@ -422,6 +434,8 @@ class TransaksiController extends BaseController
                     'recordsFiltered'  => 0,
                     'data'             => [],
                     'total_pendapatan' => '0',
+                    'total_manual'     => '0',
+                    'total_midtrans'   => '0',
                     'error'            => $e->getMessage()
                 ]);
             }

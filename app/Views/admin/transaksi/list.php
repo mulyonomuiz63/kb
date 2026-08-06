@@ -86,10 +86,22 @@
                     <!-- Judul & Total Lunas -->
                     <div class="card-title flex-column align-items-start m-0">
                         <span class="card-label fw-bold text-gray-800 fs-4">Daftar Pembayaran</span>
-                        <div class="d-flex align-items-center gap-2 mt-1">
-                            <span class="text-gray-500 fs-7">Kelola dan validasi pembayaran.</span>
-                            <span class="badge badge-light-success fw-bold fs-7 px-2 py-1">
-                                Rp <span id="ui_total_pendapatan">0</span>
+                        <div class="d-flex align-items-center gap-2 mt-2 flex-wrap">
+                            <span class="text-gray-500 fs-7">Kelola dan validasi pembayaran:</span>
+
+                            <!-- Badge 1: Total Keseluruhan -->
+                            <span class="badge badge-light-success fw-bold fs-7 px-3 py-1.5" title="Total Keseluruhan">
+                                Total: Rp <span id="ui_total_pendapatan">0</span>
+                            </span>
+
+                            <!-- Badge 2: Total Manual -->
+                            <span class="badge badge-light-primary fw-bold fs-7 px-3 py-1.5" title="Total Pembayaran Manual">
+                                Manual: Rp <span id="ui_total_manual">0</span>
+                            </span>
+
+                            <!-- Badge 3: Total Midtrans -->
+                            <span class="badge badge-light-info fw-bold fs-7 px-3 py-1.5" title="Total Pembayaran Midtrans">
+                                Midtrans: Rp <span id="ui_total_midtrans">0</span>
                             </span>
                         </div>
                     </div>
@@ -286,7 +298,10 @@
                 },
                 "dataSrc": function(json) {
                     $('.csrf-token').val(json.csrf_hash);
+                    // Update 3 informasi total secara sinkron
                     $('#ui_total_pendapatan').text(json.total_pendapatan);
+                    $('#ui_total_manual').text(json.total_manual ?? '0');
+                    $('#ui_total_midtrans').text(json.total_midtrans ?? '0');
                     return json.data;
                 },
             },
@@ -834,7 +849,7 @@
         let filterBulan = document.getElementById('filter_bulan_range').value;
         let filterPaket = document.getElementById('paket-pelatihan').value;
         let statusAfiliasi = document.getElementById('filter-status-afiliasi').value;
-        
+
         // Ambil teks dari kotak pencarian DataTables jika ada
         let searchValue = document.querySelector('input[data-kt-transaksi-table-filter="search"]').value;
 
