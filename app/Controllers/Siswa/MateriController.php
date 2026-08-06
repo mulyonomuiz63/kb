@@ -53,7 +53,11 @@ class MateriController extends BaseController
             $modul = $this->mapelModel->getAllIdSiswa($r->idmapel);
 
             foreach ($modul as $m) {
-                $data['modul'][] = $m;
+                // PERUBAHAN: Kelompokkan modul berdasarkan nama_kelas
+                // (Menggunakan fallback string jika field nama_kelas tidak di-select di model)
+                $namaKelas = !empty($m->nama_kelas) ? $m->nama_kelas : 'Paket Kelas (ID: ' . $m->id_kelas . ')';
+                
+                $data['modul'][$namaKelas][] = $m;
             }
         }
 

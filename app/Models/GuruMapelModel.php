@@ -8,7 +8,7 @@ class GuruMapelModel extends Model
 {
     protected $table            = 'guru_mapel';
     protected $primaryKey       = 'id_guru_mapel';
-    protected $allowedFields    = ['guru', 'mapel', 'nama_mapel'];
+    protected $allowedFields    = ['guru', 'kelas', 'mapel', 'nama_mapel'];
 
     public function getALLByGuruAndMapel($guru, $mapel)
     {

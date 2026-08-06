@@ -76,20 +76,20 @@ class MateriController extends BaseController
 
 
 
+        $id_kelas_dipilih = $this->request->getVar('kelas');
+
         $siswa = $this->siswaModel
-            ->where('kelas', $this->request->getVar('kelas'))
+            ->select('siswa.*')
+            ->join('siswa_kelas', 'siswa_kelas.id_siswa = siswa.id_siswa', 'left')
+            ->groupStart()
+            ->where('siswa.kelas', $id_kelas_dipilih)          // Menangkap data siswa kelas lama
+            ->orWhere('siswa_kelas.id_kelas', $id_kelas_dipilih) // Menangkap data siswa multi-kelas (pivot)
+            ->groupEnd()
+            ->groupBy('siswa.id_siswa') // Mencegah data siswa muncul dua kali jika terdaftar di kedua tempat
             ->get()->getResultObject();
 
         if (count($siswa) == 0) {
-            session()->setFlashdata('pesan', "
-                swal({
-                    title: 'Oops!',
-                    text: 'Belum ada siswa dikelas ini',
-                    type: 'error',
-                    padding: '2em'
-                    });
-                ");
-            return redirect()->to('guru/materi/' . $idmapel . '/' . $idkelas);
+            return redirect()->to('sw-guru/materi/lihat/' . $idmapel . '/' . $idkelas)->with('pesan', 'Belum ada siswa dikelas ini');
         }
 
         // CEK APAKAH ADA FILE U=YANG DIPILIH

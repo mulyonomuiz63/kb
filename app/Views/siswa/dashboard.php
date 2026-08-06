@@ -193,10 +193,148 @@
         }
     }
 </style>
-<?= $this->endSection(); ?>
+<style>
+    @keyframes pulseGlowDanger {
+        0% {
+            box-shadow: 0 0 0 0 rgba(241, 65, 108, 0.5);
+        }
 
+        70% {
+            box-shadow: 0 0 0 15px rgba(241, 65, 108, 0);
+        }
+
+        100% {
+            box-shadow: 0 0 0 0 rgba(241, 65, 108, 0);
+        }
+    }
+
+    @keyframes pulseGlowPrimary {
+        0% {
+            box-shadow: 0 0 0 0 rgba(0, 158, 247, 0.5);
+        }
+
+        70% {
+            box-shadow: 0 0 0 15px rgba(0, 158, 247, 0);
+        }
+
+        100% {
+            box-shadow: 0 0 0 0 rgba(0, 158, 247, 0);
+        }
+    }
+
+    @keyframes bounceSlow {
+
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-4px);
+        }
+    }
+
+    @keyframes pingSlow {
+        0% {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        50% {
+            transform: scale(1.4);
+            opacity: 0.6;
+        }
+
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    .animate-glow-danger {
+        animation: pulseGlowDanger 2s infinite;
+    }
+
+    .animate-glow-primary {
+        animation: pulseGlowPrimary 2s infinite;
+    }
+
+    .animate-bounce-custom {
+        animation: bounceSlow 2.5s infinite ease-in-out;
+    }
+
+    .animate-ping-slow {
+        animation: pingSlow 2s infinite ease-in-out;
+    }
+
+    .pulse-danger-box {
+        border-left: 6px solid #f1416c !important;
+    }
+
+    .pulse-primary-box {
+        border-left: 6px solid #009ef7 !important;
+    }
+</style>
+<?= $this->endSection(); ?>
 <?= $this->section('content'); ?>
 <div class="row g-5 g-xl-8">
+    <?php if (!empty($activeAlerts)): ?>
+        <div class="mb-8 animate-alert-wrapper">
+            <?php foreach ($activeAlerts as $alert): ?>
+                <?php
+                $alertClass = $alert->is_live ? 'bg-light-danger border-danger pulse-danger-box' : 'bg-light-primary border-primary pulse-primary-box';
+                $iconColor  = $alert->is_live ? 'text-danger' : 'text-primary';
+                $badgeClass = $alert->is_live ? 'bg-danger pulse-animation' : 'bg-primary';
+                $statusText = $alert->is_live ? 'SEDANG BERLANGSUNG' : 'SEGERA DIMULAI';
+                ?>
+
+                <!-- Alert Card Metronic 8 -->
+                <div class="alert <?= $alertClass ?> border border-2 d-flex flex-column flex-sm-row align-items-center p-6 mb-5 shadow-lg rounded-4 position-relative overflow-hidden transition-3d">
+
+                    <!-- Icon Animasi Denyut -->
+                    <div class="symbol symbol-60px me-sm-5 mb-4 mb-sm-0 position-relative">
+                        <span class="symbol-label <?= $alertClass ?> shadow-sm">
+                            <i class="ki-duotone <?= $alert->is_live ? 'ki-time' : 'ki-time' ?> fs-2x <?= $iconColor ?> animate-bounce-custom">
+                                <span class="path1"></span><span class="path2"></span><span class="path3"></span>
+                            </i>
+                        </span>
+                        <span class="position-absolute top-0 start-100 translate-middle p-2 bg-success border border-light rounded-circle animate-ping-slow"></span>
+                    </div>
+
+                    <!-- Info Pelatihan & Countdown Timer -->
+                    <!-- Info Pelatihan & Countdown Timer -->
+                    <div class="d-flex flex-column flex-grow-1 text-center text-sm-start me-sm-5 z-index-2">
+
+                        <!-- Nama Paket Ditambahkan Di Sini -->
+                        <h2 class="text-gray-800 fw-bold mb-2 fs-4 text-uppercase"><?= esc("MARATHON UPDATE PERPAJAKAN 2026") ?></h2>
+
+                        <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-sm-start mb-2 gap-2">
+                            <h3 class="text-gray-900 fw-bold m-0"><?= esc($alert->nama_sesi) ?></h3>
+                            <span class="badge <?= $badgeClass ?> text-white fw-bolder px-3 py-1.5 fs-8 shadow-sm animate-pulse"><?= $statusText ?></span>
+                        </div>
+                        <span class="text-gray-600 fs-7 d-flex align-items-center justify-content-center justify-content-sm-start gap-2">
+                            <span><i class="ki-outline ki-time fs-7 me-1"></i> <?= date('d M Y, H:i', $alert->waktu_mulai_format) ?> - <?= date('H:i WIB', $alert->waktu_selesai_format) ?></span>
+
+                            <?php if (!$alert->is_live): ?>
+                                <span class="badge badge-light-warning fw-bold fs-8 px-2 py-1 countdown-badge" data-mulai="<?= $alert->waktu_mulai_format ?>">
+                                    <i class="ki-outline ki-hourglass fs-8 me-1"></i> Mulai dalam: <span class="fw-bolder timer-text">Menghitung...</span>
+                                </span>
+                            <?php endif; ?>
+                        </span>
+                    </div>
+
+                    <!-- Action Button Gmeet (Diberikan z-index-3 dan position-relative agar pasti bisa diklik) -->
+                    <div class="d-flex align-items-center mt-5 mt-sm-0 position-relative z-index-3">
+                        <a href="<?= esc($alert->mainZoomLink) ?>" target="_blank" class="btn btn-<?= $alert->is_live ? 'danger animate-glow-danger' : 'primary animate-glow-primary' ?> fw-bold px-8 py-4 fs-6 shadow-sm hover-elevate-up w-100 w-sm-auto d-flex align-items-center justify-content-center gap-2 cursor-pointer">
+                            <i class="ki-outline ki-entrance-left fs-3"></i>
+                            <span><?= $alert->is_live ? 'Gabung Gmeet Sekarang' : 'Masuk Ruang Gmeet' ?></span>
+                        </a>
+                    </div>
+                </div>
+
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
     <div class="col-xl-4">
         <div class="sticky-column">
             <div class="row mb-5 mb-xl-8 g-5 g-xl-8">
@@ -700,5 +838,43 @@
             showConfirmButton: false
         });
     }
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const countdownBadges = document.querySelectorAll('.countdown-badge');
+
+        countdownBadges.forEach(badge => {
+            const targetTime = parseInt(badge.getAttribute('data-mulai')) * 1000; // Ubah ke milidetik
+            const timerText = badge.querySelector('.timer-text');
+
+            function updateTimer() {
+                const now = new Date().getTime();
+                const distance = targetTime - now;
+
+                if (distance < 0) {
+                    timerText.innerHTML = "Segera Dimulai!";
+                    // Opsional: Reload otomatis halaman jika waktu mulai tercapai agar status berubah jadi live
+                    setTimeout(() => {
+                        location.reload();
+                    }, 3000);
+                    return;
+                }
+
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                // Format angka agar selalu 2 digit (contoh: 01:05:09)
+                const formatH = String(hours).padStart(2, '0');
+                const formatM = String(minutes).padStart(2, '0');
+                const formatS = String(seconds).padStart(2, '0');
+
+                timerText.innerHTML = `${formatH}j ${formatM}m ${formatS}d`;
+            }
+
+            updateTimer();
+            setInterval(updateTimer, 1000); // Update setiap 1 detik
+        });
+    });
 </script>
 <?= $this->endSection(); ?>

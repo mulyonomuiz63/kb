@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\GuruKelasModel;
-use App\Models\GuruMapelModel;
 
 
 
@@ -18,17 +17,27 @@ function check_kelas($id_guru, $id_kelas)
     }
 }
 
-function check_mapel($id_guru, $id_mapel)
+// Pastikan parameter $id_kelas ditambahkan
+function check_mapel($id_guru, $id_mapel, $id_kelas)
 {
-    $guruMapelmodel = new GuruMapelModel();
+    $db = \Config\Database::connect();
+    
+    // Decrypt ID Guru karena Anda mengenkripsinya di View
+    $id_guru_decrypted = decrypt_url($id_guru); 
 
-    $guru = decrypt_url($id_guru);
+    // Query untuk mengecek apakah Guru + Mapel + Kelas ini sudah ada di database
+    $result = $db->table('guru_mapel')->where([
+        'guru'  => $id_guru_decrypted,
+        'mapel' => $id_mapel,
+        'kelas' => $id_kelas
+    ])->get()->getRowArray();
 
-    $result = $guruMapelmodel->getALLByGuruAndMapel($guru, $id_mapel);
-
-    if (count($result) > 0) {
+    // Jika data ditemukan, kembalikan string 'checked', jika tidak kosongkan
+    if ($result) {
         return "checked='checked'";
     }
+
+    return "";
 }
 
 function ukuran_file($path)

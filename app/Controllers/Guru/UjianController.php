@@ -61,15 +61,28 @@ class UjianController extends BaseController
         $data['kategori'] = $this->kategoriModel->getAll();
         return view('guru/ujian/tambah_pg', $data);
     }
+    public function getMapelByKelas()
+    {
+        if (!$this->request->isAJAX()) return exit('No direct script access allowed');
+
+        $id_guru  = session()->get('id');
+        $id_kelas = $this->request->getPost('id_kelas');
+
+        $mapel = $this->guruMapelModel->where([
+            'guru'  => $id_guru,
+            'kelas' => $id_kelas
+        ])->findAll();
+
+        // Kirim data mapel beserta token CSRF terbaru
+        return $this->response->setJSON([
+            'mapel' => $mapel,
+            'token' => csrf_hash()
+        ]);
+    }
     public function store()
     {
         $nama_soal = $this->request->getVar('nama_soal');
         if ($nama_soal != null) {
-            $siswa = $this->siswaModel->getAllbyKelas($this->request->getVar('kelas'));
-            if (count($siswa) == 0) {
-                return redirect()->to('sw-guru/ujian')->with('pesan', 'Belum ada siswa dikelas ini');
-            }
-
             // DATA UJIAN
             $kode_ujian = random_string('alnum', 10);
             $data_ujian = [
@@ -254,7 +267,7 @@ class UjianController extends BaseController
         $data['breadcrumbs'] = [
             ['title' => 'Dashboard', 'url' => base_url('sw-guru')],
             ['title' => 'Data Ujian', 'url' => base_url('sw-guru/ujian')],
-             ['title' => 'List Peserta Ujian', 'url' => '#'],
+            ['title' => 'List Peserta Ujian', 'url' => '#'],
         ];
         $kode_ujian = decrypt_url($kode_ujian);
         $data['kode_ujian_encrypt'] = $kode_ujian; // Kirim untuk AJAX
@@ -265,7 +278,7 @@ class UjianController extends BaseController
 
     public function ajaxSiswaUjian($kode_ujian_encrypt)
     {
-        $kode_ujian = decrypt_url($kode_ujian_encrypt);
+        $kode_ujian = $kode_ujian_encrypt;
         $request = \Config\Services::request();
 
         // Ambil parameter dari DataTables
@@ -378,7 +391,7 @@ class UjianController extends BaseController
         $data['breadcrumbs'] = [
             ['title' => 'Dashboard', 'url' => base_url('sw-guru')],
             ['title' => 'Data Ujian', 'url' => base_url('sw-guru/ujian')],
-             ['title' => 'List Soal Ujian', 'url' => '#'],
+            ['title' => 'List Soal Ujian', 'url' => '#'],
         ];
         $data['ujian'] = $this->ujianMasterModel->getBykode(decrypt_url($kode_ujian));
         $data['detail_ujian'] = $this->ujianDetailModel->getAllBykodeUjian(decrypt_url($kode_ujian));
@@ -483,7 +496,7 @@ class UjianController extends BaseController
         $data['breadcrumbs'] = [
             ['title' => 'Dashboard', 'url' => base_url('sw-guru')],
             ['title' => 'Data Ujian', 'url' => base_url('sw-guru/ujian')],
-             ['title' => 'List Soal Ujian', 'url' => '#'],
+            ['title' => 'List Soal Ujian', 'url' => '#'],
         ];
         $data['detail_ujian'] = $this->ujianDetailModel->getAllBykodeUjian(decrypt_url($kode_ujian));
         $data['ujian'] = $this->ujianMasterModel->getBykode(decrypt_url($kode_ujian));
@@ -600,7 +613,7 @@ class UjianController extends BaseController
         $data['breadcrumbs'] = [
             ['title' => 'Dashboard', 'url' => base_url('sw-guru')],
             ['title' => 'Data Ujian', 'url' => base_url('sw-guru/ujian')],
-             ['title' => 'Edit Soal Ujian', 'url' => '#'],
+            ['title' => 'Edit Soal Ujian', 'url' => '#'],
         ];
         $data['detail_ujian'] = $this->ujianDetailModel->getAllByiddetailujian(decrypt_url($id_detail_ujian));
         $data['guru'] = $this->guruModel->asObject()->find(session()->get('id'));

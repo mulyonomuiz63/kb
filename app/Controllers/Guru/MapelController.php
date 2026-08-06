@@ -32,7 +32,13 @@ class MapelController extends BaseController
             ['title' => 'Dashboard', 'url' => base_url('sw-guru')],
             ['title' => 'List Mapel', 'url' => '#'],
         ];
-        $data['mapel'] = $this->guruMapelModel->join('guru_kelas','guru_kelas.guru=guru_mapel.guru')->where('guru_mapel.guru', session()->get('id'))->groupBy('guru_mapel.mapel')->get()->getResultObject();
+        $data['mapel'] = $this->guruMapelModel
+            ->select('guru_mapel.*, guru_kelas.nama_kelas') // Secara spesifik memanggil kolom nama_kelas
+            ->join('guru_kelas', 'guru_kelas.guru = guru_mapel.guru AND guru_kelas.kelas = guru_mapel.kelas', 'left') // Join berdasarkan Guru DAN Kelas
+            ->where('guru_mapel.guru', session()->get('id'))
+            // ->groupBy('guru_mapel.mapel') // SEBAIKNYA DIHAPUS agar mapel yang diajarkan di 2 kelas berbeda tidak saling menimpa
+            ->get()
+            ->getResultObject();
 
         $data['guru_kelas'] = $this->guruKelasModel->getALLByGuru(session()->get('id'));
         $data['guru_mapel'] = $this->guruMapelModel->getALLByGuru(session()->get('id'));

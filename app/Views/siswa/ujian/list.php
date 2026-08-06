@@ -176,168 +176,193 @@
         <div class="col-12 mb-5">
             <!-- Menggunakan bg-light-primary dan border dashed agar terlihat elegan di kedua mode -->
             <div class="alert bg-light-primary border border-primary border-dashed d-flex align-items-center p-5 mb-0">
-
                 <!-- Ikon Informasi -->
                 <i class="ki-duotone ki-information-5 fs-2hx text-primary me-4">
                     <span class="path1"></span><span class="path2"></span><span class="path3"></span>
                 </i>
-
                 <!-- Teks Informasi -->
                 <div class="d-flex flex-column">
-                    <!-- text-gray-900 akan menjadi gelap di light mode dan putih/terang di dark mode -->
                     <h4 class="mb-1 text-gray-900">Informasi Sertifikasi</h4>
-
-                    <!-- text-gray-700/600 memberikan kontras yang nyaman dibaca pada kedua mode -->
                     <span class="text-gray-700">
                         Untuk memperoleh <strong class="text-gray-900">Sertifikat Brevet AB</strong>, Anda diwajibkan lulus pada 8 materi ujian yang telah ditentukan.
                     </span>
                 </div>
-
             </div>
         </div>
+
+        <!-- PERUBAHAN TAMPILAN DIMULAI DI SINI -->
         <?php if (!empty($ujian)) : ?>
-            <?php foreach ($ujian as $u) : ?>
-                <?php
-                // Peningkatan Performa: Hitung baris langsung di level database, tidak perlu dilooping di PHP
-                // Peningkatan Keamanan: Menggunakan query binding (?) untuk mencegah SQL Injection
-                $total = $db->query("SELECT COUNT(id_detail_ujian) as jml FROM ujian_detail WHERE kode_ujian = ?", [$u->kode_ujian])->getRow()->jml;
+            <?php foreach ($ujian as $nama_kelas => $daftar_ujian) : ?>
 
-                $totalMenit = $total * 3;
-                $start = (date('Y-m-d H:i'));
-                $end_ = (date('Y-m-d H:i', strtotime("+ $totalMenit minutes")));
-                $durasi = date_diff(date_create($start), date_create($end_));
-
-                // === LOGIKA KUOTA DINAMIS & ROLE ACCESS ===
-                $roleAccess = session()->get('role_access') ?? 0;
-                $sisa_kuota = $u->kuota ?? 0; // Tarik data dari database (bukan manual 2 lagi)
-                $total_kuota = 3;
-
-                // Rumus: mencari berapa kali ujian sudah terpakai
-                $terpakai = $total_kuota - $sisa_kuota;
-                
-                if ($roleAccess == 1) {
-                    // Role = 1 (Akses Tanpa Batas / Unlimited)
-                    $tampil_kuota = 'U';
-                    $kuotaColor = 'success';
-                } else {
-                    // Role = 0 (Terbatas Kuota)
-                    $tampil_kuota = $terpakai . '/' . $total_kuota;
-                    
-                    // Menentukan warna dinamis berdasarkan pemakaian kuota
-                    $kuotaColor = 'success'; // Default hijau
-                    if ($terpakai >= $total_kuota) {
-                        $kuotaColor = 'danger'; // Merah jika habis
-                    } elseif ($terpakai > 0) {
-                        $kuotaColor = 'warning'; // Kuning jika terpakai sebagian
-                    }
-                }
-                ?>
-
-                <div class="col-md-6 col-xl-4">
-                    <div class="card border-0 shadow-sm card-xl-stretch mb-xl-8 hover-elevate-up">
-                        <div class="card-header border-0 p-0 min-h-150px overlay overflow-hidden rounded-top">
-                            <?= img_lazy('uploads/mapel/' . $u->file, "loading", ['class' => 'w-100 h-100 object-fit-cover']) ?>
-                            <div class="overlay-layer bg-dark bg-opacity-10"></div>
-
-                            <div class="position-absolute top-0 end-0 m-4">
-                                <?= $u->nilai == null ? '' : ($u->nilai >= 60
-                                    ? '<span class="badge badge-success fw-bold uppercase px-4 py-3">Lulus</span>'
-                                    : '<span class="badge badge-danger fw-bold uppercase px-4 py-3">Tidak Lulus</span>'); ?>
+                <!-- HEADER / PEMISAH KELAS -->
+                <div class="col-12 mt-8 mb-4">
+                    <div class="card shadow-sm border-0 border-start border-5 border-primary">
+                        <div class="card-body p-5 d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <div class="symbol symbol-50px symbol-circle me-5">
+                                    <div class="symbol-label bg-light-primary text-primary">
+                                        <i class="ki-duotone ki-book-open fs-2x">
+                                            <span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span>
+                                        </i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h2 class="fw-bolder text-gray-900 mb-1"><?= $nama_kelas ?></h2>
+                                    <span class="text-muted fw-semibold fs-6">Daftar paket ujian untuk kelas ini</span>
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="card-body pt-5">
-                            <div class="d-flex flex-stack mb-2">
-                                <span class="text-primary fw-bold fs-7 uppercase"><?= $u->nama_kelas ?></span>
-                                <span class="text-gray-500 fs-8 fw-bold">
-                                    <i class="ki-duotone ki-time fs-6 me-1"><span class="path1"></span><span class="path2"></span></i>
-                                    <?= ($durasi != '0' ? (($durasi->h * 60) + $durasi->i) : '0') ?> Menit
+                            <!-- Menampilkan badge jumlah ujian di sebelah kanan Card -->
+                            <div class="d-none d-sm-block">
+                                <span class="badge badge-light-primary fw-bold px-4 py-3 text-uppercase">
+                                    <i class="ki-outline ki-document text-primary me-2 fs-5"></i>
+                                    <?= count($daftar_ujian) ?> Paket Ujian
                                 </span>
-                            </div>
-
-                            <a href="#" class="fs-4 text-gray-900 fw-bolder text-hover-primary lh-base d-block mb-4 h-50px">
-                                <?= $u->nama_ujian ?>
-                            </a>
-
-                            <div class="d-flex align-items-center flex-wrap d-grid gap-2 mb-6">
-                                <div class="d-flex align-items-center me-5">
-                                    <div class="symbol symbol-35px symbol-circle me-3">
-                                        <span class="symbol-label bg-light-<?= $kuotaColor ?> text-<?= $kuotaColor ?> fw-bold fs-8"><?= $tampil_kuota ?></span>
-                                    </div>
-                                    <div>
-                                        <div class="fs-7 text-gray-800 fw-bold"> Penggunaan Kuota</div>
-                                        <div class="fs-8 text-gray-500 fw-semibold">
-                                            <?php if ($roleAccess == 1): ?>
-                                                Akses Tanpa Batas
-                                            <?php else: ?>
-                                                <?= ($terpakai == 0) ? 'Kuota penuh' : (($terpakai >= $total_kuota) ? 'Kuota habis' : 'Terpakai ' . $terpakai . 'x') ?>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="d-flex align-items-center">
-                                    <div class="symbol symbol-35px symbol-circle me-3">
-                                        <span class="symbol-label bg-light-primary text-primary fw-bold fs-8"><?= $u->nilai == null ? '-' : $u->nilai ?></span>
-                                    </div>
-                                    <div>
-                                        <div class="fs-7 text-gray-800 fw-bold">Nilai</div>
-                                        <div class="fs-8 text-gray-500 fw-semibold">Nilai Terakhir</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="d-flex gap-2">
-                                <div class="flex-grow-1">
-                                    <?php if ($u->status == 'B') : ?>
-                                        <?php $dataStatus = $db->query("SELECT * FROM status_ujian WHERE kode_ujian = ?", [$u->kode_ujian])->getRow(); ?>
-                                        <?php if (!empty($dataStatus) && $dataStatus->status == 'A') : ?>
-                                            <?php
-                                            $dataAttrs = 'data-idujian="' . encrypt_url($u->id_ujian) . '" ' .
-                                                'data-kuota="' . $tampil_kuota . '" ' .
-                                                'data-warna="' . $kuotaColor . '" ' .
-                                                'data-soal="' . $total . ' soal" ' .
-                                                'data-waktu="' . $totalMenit . ' menit"';
-                                            ?>
-                                            <a href="<?= base_url('sw-siswa/ujian/lihat-pg') . '/' . encrypt_url($u->kode_ujian) . '/' . encrypt_url(session()->get('id')) . '/' . encrypt_url($u->id_ujian); ?>"
-                                                <?= $dataAttrs ?>
-                                                class="btn btn-primary w-100 fw-bold btn-informasi-mulai">
-                                                Mulai
-                                            </a>
-                                        <?php else : ?>
-                                            <button class="btn btn-light w-100 fw-bold btn-informasi-disabled" disabled>Belum Dibuka</button>
-                                        <?php endif; ?>
-
-                                    <?php elseif ($u->status == 'U') : ?>
-                                        <a href="<?= base_url('sw-siswa/ujian/lihat-pg') . '/' . encrypt_url($u->kode_ujian) . '/' . encrypt_url(session()->get('id')) . '/' . encrypt_url($u->id_ujian); ?>"
-                                            class="btn btn-warning w-100 fw-bold">Sedang Ujian</a>
-
-                                    <?php else : ?>
-                                        <?php if ($roleAccess == 1 || $u->kuota != '0') : ?>
-                                            <?php
-                                            $dataAttrs = 'data-idujian="' . encrypt_url($u->id_ujian) . '" ' .
-                                                'data-kuota="' . $tampil_kuota . '" ' .
-                                                'data-warna="' . $kuotaColor . '" ' .
-                                                'data-soal="' . $total . ' soal" ' .
-                                                'data-waktu="' . $totalMenit . ' menit"';
-                                            ?>
-                                            <a href="<?= base_url('sw-siswa/ujian/remedial') . '/' . encrypt_url($u->id_ujian) . '/' . encrypt_url($u->kode_ujian) . '/' . $u->status ?>"
-                                                <?= $dataAttrs ?>
-                                                class="btn btn-light-danger w-100 fw-bold btn-informasi btn-ujian-ulang text-uppercase">
-                                                Ujian Ulang
-                                            </a>
-                                        <?php else : ?>
-                                            <?php if ($u->nilai >= 60) : ?>
-                                                <button class="btn btn-light-success w-100 fw-bold cursor-default" disabled>Ujian Selesai</button>
-                                            <?php else : ?>
-                                                <a href="<?= base_url('list-bimbel') ?>" class="btn btn-light-warning w-100 fw-bold text-uppercase">Beli Paket</a>
-                                            <?php endif; ?>
-                                        <?php endif; ?>
-                                    <?php endif; ?>
-                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                <!-- LOOPING UJIAN DI DALAM KELAS TERSEBUT -->
+                <?php foreach ($daftar_ujian as $u) : ?>
+                    <?php
+                    // Peningkatan Performa & Keamanan (Sama seperti kode Anda)
+                    $total = $db->query("SELECT COUNT(id_detail_ujian) as jml FROM ujian_detail WHERE kode_ujian = ?", [$u->kode_ujian])->getRow()->jml;
+
+                    $totalMenit = $total * 3;
+                    $start = (date('Y-m-d H:i'));
+                    $end_ = (date('Y-m-d H:i', strtotime("+ $totalMenit minutes")));
+                    $durasi = date_diff(date_create($start), date_create($end_));
+
+                    // === LOGIKA KUOTA DINAMIS & ROLE ACCESS ===
+                    $roleAccess = session()->get('role_access') ?? 0;
+                    $sisa_kuota = $u->kuota ?? 0;
+                    $total_kuota = 3;
+                    $terpakai = $total_kuota - $sisa_kuota;
+
+                    if ($roleAccess == 1) {
+                        $tampil_kuota = 'U'; // Untuk badge lingkaran
+                        $teks_modal_kuota = 'Tanpa Batas'; // <-- Teks khusus untuk Modal
+                        $kuotaColor = 'success';
+                    } else {
+                        $tampil_kuota = $terpakai . '/' . $total_kuota; // Untuk badge lingkaran
+                        $teks_modal_kuota = $terpakai . ' dari ' . $total_kuota; // <-- Teks khusus untuk Modal
+
+                        $kuotaColor = 'success';
+                        if ($terpakai >= $total_kuota) {
+                            $kuotaColor = 'danger';
+                        } elseif ($terpakai > 0) {
+                            $kuotaColor = 'warning';
+                        }
+                    }
+                    ?>
+
+                    <div class="col-md-6 col-xl-4">
+                        <div class="card border-0 shadow-sm card-xl-stretch mb-xl-8 hover-elevate-up">
+                            <div class="card-header border-0 p-0 min-h-150px overlay overflow-hidden rounded-top">
+                                <?= img_lazy('uploads/mapel/' . $u->file, "loading", ['class' => 'w-100 h-100 object-fit-cover']) ?>
+                                <div class="overlay-layer bg-dark bg-opacity-10"></div>
+
+                                <div class="position-absolute top-0 end-0 m-4">
+                                    <?= $u->nilai == null ? '' : ($u->nilai >= 60
+                                        ? '<span class="badge badge-success fw-bold uppercase px-4 py-3">Lulus</span>'
+                                        : '<span class="badge badge-danger fw-bold uppercase px-4 py-3">Tidak Lulus</span>'); ?>
+                                </div>
+                            </div>
+
+                            <div class="card-body pt-5">
+                                <div class="d-flex flex-stack mb-2">
+                                    <span class="text-primary fw-bold fs-7 uppercase"><?= $u->nama_kelas ?></span>
+                                    <span class="text-gray-500 fs-8 fw-bold">
+                                        <i class="ki-duotone ki-time fs-6 me-1"><span class="path1"></span><span class="path2"></span></i>
+                                        <?= ($durasi != '0' ? (($durasi->h * 60) + $durasi->i) : '0') ?> Menit
+                                    </span>
+                                </div>
+
+                                <a href="#" class="fs-4 text-gray-900 fw-bolder text-hover-primary lh-base d-block mb-4 h-50px">
+                                    <?= $u->nama_ujian ?>
+                                </a>
+
+                                <div class="d-flex align-items-center flex-wrap d-grid gap-2 mb-6">
+                                    <div class="d-flex align-items-center me-5">
+                                        <div class="symbol symbol-35px symbol-circle me-3">
+                                            <span class="symbol-label bg-light-<?= $kuotaColor ?> text-<?= $kuotaColor ?> fw-bold fs-8"><?= $tampil_kuota ?></span>
+                                        </div>
+                                        <div>
+                                            <div class="fs-7 text-gray-800 fw-bold"> Penggunaan Kuota</div>
+                                            <div class="fs-8 text-gray-500 fw-semibold">
+                                                <?php if ($roleAccess == 1): ?>
+                                                    Akses Tanpa Batas
+                                                <?php else: ?>
+                                                    <?= ($terpakai == 0) ? 'Kuota penuh' : (($terpakai >= $total_kuota) ? 'Kuota habis' : 'Terpakai ' . $terpakai . 'x') ?>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <div class="symbol symbol-35px symbol-circle me-3">
+                                            <span class="symbol-label bg-light-primary text-primary fw-bold fs-8"><?= $u->nilai == null ? '-' : $u->nilai ?></span>
+                                        </div>
+                                        <div>
+                                            <div class="fs-7 text-gray-800 fw-bold">Nilai</div>
+                                            <div class="fs-8 text-gray-500 fw-semibold">Nilai Terakhir</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex gap-2">
+                                    <div class="flex-grow-1">
+                                        <?php if ($u->status == 'B') : ?>
+                                            <?php $dataStatus = $db->query("SELECT * FROM status_ujian WHERE kode_ujian = ?", [$u->kode_ujian])->getRow(); ?>
+                                            <?php if (!empty($dataStatus) && $dataStatus->status == 'A') : ?>
+                                                <?php
+                                                $dataAttrs = 'data-idujian="' . encrypt_url($u->id_ujian) . '" ' .
+                                                    'data-kuota="' . $teks_modal_kuota . '" ' .  // <-- Ubah di sini
+                                                    'data-warna="' . $kuotaColor . '" ' .
+                                                    'data-soal="' . $total . ' soal" ' .
+                                                    'data-waktu="' . $totalMenit . ' menit"';
+                                                ?>
+                                                <a href="<?= base_url('sw-siswa/ujian/lihat-pg') . '/' . encrypt_url($u->kode_ujian) . '/' . encrypt_url(session()->get('id')) . '/' . encrypt_url($u->id_ujian); ?>"
+                                                    <?= $dataAttrs ?>
+                                                    class="btn btn-primary w-100 fw-bold btn-informasi-mulai">
+                                                    Mulai
+                                                </a>
+                                            <?php else : ?>
+                                                <button class="btn btn-light w-100 fw-bold btn-informasi-disabled" disabled>Belum Dibuka</button>
+                                            <?php endif; ?>
+
+                                        <?php elseif ($u->status == 'U') : ?>
+                                            <a href="<?= base_url('sw-siswa/ujian/lihat-pg') . '/' . encrypt_url($u->kode_ujian) . '/' . encrypt_url(session()->get('id')) . '/' . encrypt_url($u->id_ujian); ?>"
+                                                class="btn btn-warning w-100 fw-bold">Sedang Ujian</a>
+
+                                        <?php else : ?>
+                                            <?php if ($roleAccess == 1 || $u->kuota != '0') : ?>
+                                                <?php
+                                                $dataAttrs = 'data-idujian="' . encrypt_url($u->id_ujian) . '" ' .
+                                                    'data-kuota="' . $tampil_kuota . '" ' .
+                                                    'data-warna="' . $kuotaColor . '" ' .
+                                                    'data-soal="' . $total . ' soal" ' .
+                                                    'data-waktu="' . $totalMenit . ' menit"';
+                                                ?>
+                                                <a href="<?= base_url('sw-siswa/ujian/remedial') . '/' . encrypt_url($u->id_ujian) . '/' . encrypt_url($u->kode_ujian) . '/' . $u->status ?>"
+                                                    <?= $dataAttrs ?>
+                                                    class="btn btn-light-danger w-100 fw-bold btn-informasi btn-ujian-ulang text-uppercase">
+                                                    Ujian Ulang
+                                                </a>
+                                            <?php else : ?>
+                                                <?php if ($u->nilai >= 60) : ?>
+                                                    <button class="btn btn-light-success w-100 fw-bold cursor-default" disabled>Ujian Selesai</button>
+                                                <?php else : ?>
+                                                    <a href="<?= base_url('list-bimbel') ?>" class="btn btn-light-warning w-100 fw-bold text-uppercase">Beli Paket</a>
+                                                <?php endif; ?>
+                                            <?php endif; ?>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
             <?php endforeach; ?>
         <?php else : ?>
             <div class="col-12">
@@ -548,7 +573,7 @@
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#28a745', // Warna Hijau
-                    cancelButtonColor: '#d33',     // Warna Merah
+                    cancelButtonColor: '#d33', // Warna Merah
                     confirmButtonText: '<i class="fas fa-camera"></i> Ya, Setuju',
                     cancelButtonText: 'Batal'
                 }).then((result) => {

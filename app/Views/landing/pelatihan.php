@@ -188,104 +188,102 @@
 
                             $rataRating = $jumlahReview > 0 ? round($totalRating / $jumlahReview, 1) : 0;
                             ?>
-                            <?php if ($rows->id_mapel == '0' || $rows->id_mapel == '1'): ?>
-                                <div class="col-12 col-md-6 col-lg-4 mt-4">
-                                    <!-- Single Courses Start -->
-                                    <div class="single-courses card position-relative animate-card">
-                                        <div class="courses-images">
-                                            <a href="<?= base_url('bimbel/' . $rows->slug) ?>">
-                                                <?= img_lazy('assets-landing/images/paket/thumbnails/' . $rows->file, $rows->nama_paket, ['class' => 'card-img-top']) ?>
-                                            </a>
-                                        </div>
-                                        <div class="courses-content">
-                                            <h4 class="title"><a href="<?= base_url('bimbel/' . $rows->slug) ?>"><?= $rows->nama_paket ?></a></h4>
-                                            <div class="courses-meta">
-                                                <?php
-                                                $soal = $db->query("SELECT a.id_ujian, b.kode_ujian FROM detail_paket a join ujian_master b on a.id_ujian=b.id_ujian where a.idpaket = '$rows->idpaket' group by a.id_ujian")->getResult();
-                                                $durasi = 0;
-                                                foreach ($soal as $r):
-                                                    $total = 0;
-                                                    $ujianDetail = $db->query("select * from ujian_detail where kode_ujian = '$r->kode_ujian'")->getResult();
-                                                    foreach ($ujianDetail as $dataRows) {
-                                                        $total++;
-                                                    }
-                                                    $jml = $db->query("select count(kode_ujian) as total_soal from ujian_detail where kode_ujian = '$r->kode_ujian'")->getRow();
-
-                                                    $totalMenit = $total * 3;
-                                                    $start =  (date('Y-m-d H:i'));
-                                                    $end_ = (date('Y-m-d H:i', strtotime("+ $totalMenit minutes")));
-
-
-                                                    $start_ujian = date_create($start);
-                                                    $end_ujian = date_create($end_);
-                                                    $durasi = date_diff($start_ujian, $end_ujian);
-                                                endforeach;
-
-                                                ?>
-                                                <span class="fw-bold"> <i class="icofont-read-book"></i> <?= (!empty($jml) ? $jml->total_soal : '0') ?> Soal/<span style="font-size:10px">Materi</span> </span>
-                                                <div class="d-flex flex-column mb-3">
-                                                    <span class="fw-bold"> Rp <?= number_format($rows->nominal_paket - (($rows->nominal_paket * $rows->diskon) / 100)) ?> </span>
-                                                    <span style="font-size:12px" class="mt-1"> <del>Rp <?= number_format($rows->nominal_paket) ?></del> </span>
-                                                </div>
-
-                                                <!--<span> <i class="icofont-clock-time"></i> <?= ($durasi != '0' ? ($durasi->h * 60) + $durasi->i : '0');  ?> Menit</span>-->
-                                            </div>
-                                            <div>
-                                                <div class="mb-2" style="font-size:12px">
-                                                    <?php if ($rataRating > 0): ?>
-                                                        <span class="text-dark"><?= $rataRating ?><span> <?= showStars($rataRating) ?> <span class="text-dark">(<?= $jumlahReview + 325 ?>)</span>
-                                                            <?php else: ?>
-                                                                <span class="text-dark"><?= "4.9" ?><span> <?= showStars('4.9') ?> <span class="text-dark">(<?= '484' ?>)</span>
-                                                                    <?php endif; ?>
-                                                </div>
-                                                <!-- Affiliate -->
-                                                <?php if (session()->get('id') && !empty($affiliate)): ?>
-                                                    <?php
-                                                    $potongan_diskon = ($rows->nominal_paket * $rows->diskon) / 100;
-                                                    $harga_final     = $rows->nominal_paket - $potongan_diskon;
-                                                    $est_komisi      = ($harga_final * $rows->komisi) / 100;
-                                                    ?>
-                                                    <div class="affiliate-box p-2 mb-3">
-                                                        <div class="d-flex flex-wrap align-items-center gap-1" style="font-size: 0.75rem;">
-                                                            <span>💰</span>
-                                                            <span class="text-muted fw-bold">Komisi</span>
-                                                            <strong class="text-danger"><?= $rows->komisi ?>%</strong>
-                                                            <span class="text-muted mx-1">|</span>
-                                                            <span class="text-muted fw-bold">Est.</span>
-                                                            <strong class="text-danger">Rp <?= number_format($est_komisi, 0, ',', '.') ?></strong>
-                                                        </div>
-                                                        <div class="text-muted mt-1" style="font-size: 0.75rem;">
-                                                            Dari setiap pembelian via link kamu
-                                                        </div>
-                                                    </div>
-                                                <?php endif; ?>
-
-                                            </div>
-                                            <div class="d-flex gap-2 mt-3">
-                                                <a href="<?= base_url('sw-siswa/transaksi/pesan/' . encrypt_url($rows->idpaket)) ?>" class="btn-buy btn-sm text-center flex-fill p-2">Pesan Sekarang</a>
-                                                <?php if (session()->get('id')): ?>
-                                                    <?php if (!empty($affiliate)): ?>
-                                                        <button class="btn-buy-copy btn-sm  btn-copy-link" data-paket_id="<?= $rows->idpaket ?>">
-                                                            <i class="fa fa-copy"></i>
-                                                        </button>
-                                                        <button class="btn-buy-wa btn-sm  share-link" data-paket_id="<?= $rows->idpaket ?>">
-                                                            <i class="fab fa-whatsapp"></i>
-                                                        </button>
-                                                        <!-- iOS clipboard helper -->
-                                                        <input type="text" id="clipboard-temp" style="position:fixed;top:-1000px;opacity:0;">
-                                                    <?php endif; ?>
-                                                <?php endif; ?>
-                                            </div>
-
-
-                                        </div>
-                                        <?php if ($rows->iddiskon != null): ?>
-                                            <div class="position-absolute top-0 end-0 diskon p-1 text-white"><?= $rows->diskon ?> %</div>
-                                        <?php endif; ?>
+                            <div class="col-12 col-md-6 col-lg-4 mt-4">
+                                <!-- Single Courses Start -->
+                                <div class="single-courses card position-relative animate-card">
+                                    <div class="courses-images">
+                                        <a href="<?= base_url('bimbel/' . $rows->slug) ?>">
+                                            <?= img_lazy('assets-landing/images/paket/thumbnails/' . $rows->file, $rows->nama_paket, ['class' => 'card-img-top']) ?>
+                                        </a>
                                     </div>
-                                    <!-- Single Courses End -->
+                                    <div class="courses-content">
+                                        <h4 class="title"><a href="<?= base_url('bimbel/' . $rows->slug) ?>"><?= $rows->nama_paket ?></a></h4>
+                                        <div class="courses-meta">
+                                            <?php
+                                            $soal = $db->query("SELECT a.id_ujian, b.kode_ujian FROM detail_paket a join ujian_master b on a.id_ujian=b.id_ujian where a.idpaket = '$rows->idpaket' group by a.id_ujian")->getResult();
+                                            $durasi = 0;
+                                            foreach ($soal as $r):
+                                                $total = 0;
+                                                $ujianDetail = $db->query("select * from ujian_detail where kode_ujian = '$r->kode_ujian'")->getResult();
+                                                foreach ($ujianDetail as $dataRows) {
+                                                    $total++;
+                                                }
+                                                $jml = $db->query("select count(kode_ujian) as total_soal from ujian_detail where kode_ujian = '$r->kode_ujian'")->getRow();
+
+                                                $totalMenit = $total * 3;
+                                                $start =  (date('Y-m-d H:i'));
+                                                $end_ = (date('Y-m-d H:i', strtotime("+ $totalMenit minutes")));
+
+
+                                                $start_ujian = date_create($start);
+                                                $end_ujian = date_create($end_);
+                                                $durasi = date_diff($start_ujian, $end_ujian);
+                                            endforeach;
+
+                                            ?>
+                                            <span class="fw-bold"> <i class="icofont-read-book"></i> <?= (!empty($jml) ? $jml->total_soal : '0') ?> Soal/<span style="font-size:10px">Materi</span> </span>
+                                            <div class="d-flex flex-column mb-3">
+                                                <span class="fw-bold"> Rp <?= number_format($rows->nominal_paket - (($rows->nominal_paket * $rows->diskon) / 100)) ?> </span>
+                                                <span style="font-size:12px" class="mt-1"> <del>Rp <?= number_format($rows->nominal_paket) ?></del> </span>
+                                            </div>
+
+                                            <!--<span> <i class="icofont-clock-time"></i> <?= ($durasi != '0' ? ($durasi->h * 60) + $durasi->i : '0');  ?> Menit</span>-->
+                                        </div>
+                                        <div>
+                                            <div class="mb-2" style="font-size:12px">
+                                                <?php if ($rataRating > 0): ?>
+                                                    <span class="text-dark"><?= $rataRating ?><span> <?= showStars($rataRating) ?> <span class="text-dark">(<?= $jumlahReview + 325 ?>)</span>
+                                                        <?php else: ?>
+                                                            <span class="text-dark"><?= "4.9" ?><span> <?= showStars('4.9') ?> <span class="text-dark">(<?= '484' ?>)</span>
+                                                                <?php endif; ?>
+                                            </div>
+                                            <!-- Affiliate -->
+                                            <?php if (session()->get('id') && !empty($affiliate)): ?>
+                                                <?php
+                                                $potongan_diskon = ($rows->nominal_paket * $rows->diskon) / 100;
+                                                $harga_final     = $rows->nominal_paket - $potongan_diskon;
+                                                $est_komisi      = ($harga_final * $rows->komisi) / 100;
+                                                ?>
+                                                <div class="affiliate-box p-2 mb-3">
+                                                    <div class="d-flex flex-wrap align-items-center gap-1" style="font-size: 0.75rem;">
+                                                        <span>💰</span>
+                                                        <span class="text-muted fw-bold">Komisi</span>
+                                                        <strong class="text-danger"><?= $rows->komisi ?>%</strong>
+                                                        <span class="text-muted mx-1">|</span>
+                                                        <span class="text-muted fw-bold">Est.</span>
+                                                        <strong class="text-danger">Rp <?= number_format($est_komisi, 0, ',', '.') ?></strong>
+                                                    </div>
+                                                    <div class="text-muted mt-1" style="font-size: 0.75rem;">
+                                                        Dari setiap pembelian via link kamu
+                                                    </div>
+                                                </div>
+                                            <?php endif; ?>
+
+                                        </div>
+                                        <div class="d-flex gap-2 mt-3">
+                                            <a href="<?= base_url('sw-siswa/transaksi/pesan/' . encrypt_url($rows->idpaket)) ?>" class="btn-buy btn-sm text-center flex-fill p-2">Pesan Sekarang</a>
+                                            <?php if (session()->get('id')): ?>
+                                                <?php if (!empty($affiliate)): ?>
+                                                    <button class="btn-buy-copy btn-sm  btn-copy-link" data-paket_id="<?= $rows->idpaket ?>">
+                                                        <i class="fa fa-copy"></i>
+                                                    </button>
+                                                    <button class="btn-buy-wa btn-sm  share-link" data-paket_id="<?= $rows->idpaket ?>">
+                                                        <i class="fab fa-whatsapp"></i>
+                                                    </button>
+                                                    <!-- iOS clipboard helper -->
+                                                    <input type="text" id="clipboard-temp" style="position:fixed;top:-1000px;opacity:0;">
+                                                <?php endif; ?>
+                                            <?php endif; ?>
+                                        </div>
+
+
+                                    </div>
+                                    <?php if ($rows->iddiskon != null): ?>
+                                        <div class="position-absolute top-0 end-0 diskon p-1 text-white"><?= $rows->diskon ?> %</div>
+                                    <?php endif; ?>
                                 </div>
-                            <?php endif; ?>
+                                <!-- Single Courses End -->
+                            </div>
                         <?php endforeach; ?>
                     </div>
                     <?php if ($lihat == '0'): ?>

@@ -71,8 +71,13 @@ class RelasiController extends BaseController
             $this->guruKelasModel->save(array_merge($where, ['nama_kelas' => $kelasData->nama_kelas]));
             $msg = "Akses Kelas Berhasil Diberikan";
         } else {
+            // Cabut akses kelas
             $this->guruKelasModel->where($where)->delete();
-            $msg = "Akses Kelas Berhasil Dicabut";
+            
+            // [BARU] Hapus secara masal semua relasi mapel yang terikat dengan guru dan kelas ini
+            $this->guruMapelModel->where(['guru' => $id_guru, 'kelas' => $id_kelas])->delete();
+            
+            $msg = "Akses Kelas & Mapel Berhasil Dicabut";
         }
 
         return $this->response->setJSON(['status' => true, 'message' => $msg, 'token' => csrf_hash()]);
@@ -84,11 +89,15 @@ class RelasiController extends BaseController
 
         $id_guru  = decrypt_url($this->request->getPost('id_guru'));
         $id_mapel = $this->request->getPost('id_mapel');
+        
+        // [BARU] Menangkap id_kelas yang dikirim dari AJAX View
+        $id_kelas = $this->request->getPost('id_kelas');
 
         $mapelData = $this->mapelModel->asObject()->find($id_mapel);
         if (!$mapelData) return $this->response->setJSON(['status' => false]);
 
-        $where = ['guru' => $id_guru, 'mapel' => $id_mapel];
+        // [BARU] Menambahkan 'kelas' ke dalam kondisi pengecekan database
+        $where = ['guru' => $id_guru, 'mapel' => $id_mapel, 'kelas' => $id_kelas];
         $exists = $this->guruMapelModel->where($where)->first();
 
         if (!$exists) {

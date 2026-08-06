@@ -21,31 +21,38 @@ class UjianController extends BaseController
     }
     public function index()
     {
-
         $data['breadcrumbs'] = [
             ['title' => 'Dashboard', 'url' => base_url('sw-siswa')],
             ['title' => 'Ujian', 'url' => '#'],
         ];
         $data['siswa'] = $this->siswaModel->asObject()->find(session()->get('id'));
 
-        $siswa = $this->siswaModel->where('email', session()->get('email'))->get()->getResultObject();
+        $siswa = $this->siswaModel
+            ->select('siswa.*, kelas.id_kelas, kelas.nama_kelas')
+            ->join('siswa_kelas', 'siswa_kelas.id_siswa = siswa.id_siswa', 'left')
+            ->join('kelas', 'kelas.id_kelas = siswa.kelas OR kelas.id_kelas = siswa_kelas.id_kelas', 'left')
+            ->where('siswa.email', session()->get('email'))
+            ->groupBy('kelas.id_kelas')
+            ->asObject()
+            ->get()
+            ->getResultObject();
+
         $data['ujian'] = array();
         foreach ($siswa as  $r) {
-            $tugas = $this->ujianModel->getAllByKelas($r->kelas, $r->id_siswa);
+            $tugas = $this->ujianModel->getAllByKelas($r->id_kelas, $r->id_siswa);
 
             foreach ($tugas as $t) {
-                $data['ujian'][] = $t;
+                // PERUBAHAN DI SINI: Kelompokkan ujian berdasarkan nama kelas
+                $data['ujian'][$r->nama_kelas][] = $t;
             }
 
-
-            $dataUjian = $this->ujianMasterModel->where('kelas', $r->kelas)->groupBy('mapel')->get()->getResultObject();
+            $dataUjian = $this->ujianMasterModel->where('kelas', $r->id_kelas)->groupBy('mapel')->get()->getResultObject();
             $total = 0;
             foreach ($dataUjian as $rr) {
                 $total++;
             }
 
-
-            $totalUjian = $this->ujianModel->where('kelas', $r->kelas)->where('id_siswa', $r->id_siswa)
+            $totalUjian = $this->ujianModel->where('kelas', $r->id_kelas)->where('id_siswa', $r->id_siswa)
                 ->where('ujian.nilai >=', 60)
                 ->groupBy('ujian.mapel')->get()->getResultObject();
             $totalSertifikat = 0;
@@ -461,22 +468,23 @@ class UjianController extends BaseController
         }
     }
 
-    public function otomatisKirimUjian(){
-         $data = $this->ujianModel->where('status', 'U')->where('end_ujian <', date('Y-m-d H:i'))->get()->getResultObject();
-         foreach($data as $rows){
-             $this->ujianSiswaModel
+    public function otomatisKirimUjian()
+    {
+        $data = $this->ujianModel->where('status', 'U')->where('end_ujian <', date('Y-m-d H:i'))->get()->getResultObject();
+        foreach ($data as $rows) {
+            $this->ujianSiswaModel
                 ->set('status', 'selesai')
                 ->set('date_send', time())
                 ->where('ujian', $rows->kode_ujian)
                 ->where('siswa', $rows->id_siswa)
                 ->update();
-                
+
             $siswa = $this->siswaModel->where('id_siswa', $rows->id_siswa)->get()->getResultObject();
 
             $data['ujian'] = array();
             foreach ($siswa as  $r) {
                 $ujian = $this->ujianMasterModel->getAllUntukNilaiUjian($r->kelas, $r->id_siswa, $rows->kode_ujian);
-    
+
                 foreach ($ujian as $u) {
                     $data['ujian'][] = $u;
                 }
@@ -494,6 +502,6 @@ class UjianController extends BaseController
                     ->where('id_ujian', $rows->id_ujian)
                     ->update();
             }
-         }
+        }
     }
 }

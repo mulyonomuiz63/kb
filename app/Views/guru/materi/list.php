@@ -52,7 +52,7 @@
                 </div>
                 <div class="card-toolbar">
                     <div class="d-flex justify-content-end gap-2">
-                        <a href="<?= base_url('guru/mapel') ?>" class="btn btn-light-primary btn-sm">
+                        <a href="<?= base_url('sw-guru/mapel') ?>" class="btn btn-light-primary btn-sm">
                             <i class="ki-duotone ki-arrow-left fs-2"><span class="path1"></span><span class="path2"></span></i> Kembali
                         </a>
                         <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#tambah_materi">

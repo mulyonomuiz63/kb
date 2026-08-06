@@ -100,84 +100,120 @@
             <div class="row g-7">
                 <?php if (!empty($modul)): ?>
                     <?php $delay = 0; ?>
-                    <?php foreach ($modul as $m) : ?>
-                        <?php
-                        $jml_materi = $db->query("select count(*) as total_materi from materi where mapel = '$m->id_mapel'")->getRow();
-                        $delay += 0.1; // Memberikan efek loading berurutan
-                        ?>
 
-                        <div class="col-md-6 col-xl-4 animate-card" style="animation-delay: <?= $delay ?>s">
-                            <div class="card border-0 shadow-sm h-100 hover-elevate-up">
+                    <!-- PERUBAHAN TAMPILAN: Looping per kelas -->
+                    <?php foreach ($modul as $nama_kelas => $daftar_materi) : ?>
 
-                                <div class="position-relative img-zoom-container" style="aspect-ratio: 16/9;">
-                                    <?= img_lazy('uploads/mapel/' . $m->file, "loading", ['class' => 'w-100 h-100 object-fit-cover']) ?>
-
-                                    <div class="position-absolute top-0 start-0 w-100 h-100 bg-gradient-to-t from-dark opacity-25"></div>
-
-                                    <?php if ($m->status == 0): ?>
-                                        <div class="position-absolute top-0 end-0 p-4">
-                                            <span class="badge badge-glass fs-8 fw-bold px-4 py-2">
-                                                <i class="ki-outline ki-calendar-tick fs-8 me-1 text-white"></i> COMING SOON
-                                            </span>
+                        <!-- HEADER / PEMISAH KELAS -->
+                        <div class="col-12 mt-8 mb-4">
+                            <div class="card shadow-sm border-0 border-start border-5 border-primary">
+                                <div class="card-body p-5 d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center">
+                                        <div class="symbol symbol-50px symbol-circle me-5">
+                                            <div class="symbol-label bg-light-primary text-primary">
+                                                <i class="ki-duotone ki-book-open fs-2x">
+                                                    <span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span>
+                                                </i>
+                                            </div>
                                         </div>
-                                    <?php endif; ?>
-                                </div>
-
-                                <div class="card-body p-7">
-                                    <div class="d-flex align-items-center mb-5">
-                                        <div class="symbol symbol-40px symbol-circle me-3 shadow-sm border border-2 border-white">
-                                            <img src="<?= base_url('assets-landing/images/logo-blue.png') ?>" alt="Akuntanmu">
-                                        </div>
-                                        <div class="d-flex flex-column align-items-start">
-                                            <span class="text-dark fw-bolder fs-6">Akuntanmu Learning Center</span>
-                                            <span class="badge badge-light-primary fw-bold fs-9 mt-1">Verified Mentor</span>
+                                        <div>
+                                            <h2 class="fw-bolder text-gray-900 mb-1"><?= $nama_kelas ?></h2>
+                                            <span class="text-muted fw-semibold fs-6">Daftar paket materi untuk kelas ini</span>
                                         </div>
                                     </div>
-
-                                    <h3 class="text-dark fw-boldest fs-4 mb-3 lh-base min-h-50px text-hover-primary transition-3ms">
-                                        <?= $m->nama_mapel ?>
-                                    </h3>
-
-                                    <div class="separator separator-dashed my-4"></div>
-
-                                    <div class="d-flex flex-stack">
-                                        <div class="d-flex align-items-center me-3">
-                                            <div class="bg-light-info rounded p-2 me-2">
-                                                <i class="ki-outline ki-book-open fs-4 text-info"></i>
-                                            </div>
-                                            <div class="d-flex flex-column">
-                                                <span class="text-dark fw-bold fs-7"><?= $jml_materi->total_materi ?> Sesi</span>
-                                                <span class="text-muted fw-semibold fs-9">Video Materi</span>
-                                            </div>
-                                        </div>
-
-                                        <div class="d-flex align-items-center">
-                                            <div class="bg-light-warning rounded p-2 me-2">
-                                                <i class="ki-outline ki-time fs-4 text-warning"></i>
-                                            </div>
-                                            <div class="d-flex flex-column">
-                                                <span class="text-dark fw-bold fs-7">180 Menit</span>
-                                                <span class="text-muted fw-semibold fs-9">Durasi Total</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="mt-8">
-                                        <?php if ($m->status == 0): ?>
-                                            <button class="btn btn-light-danger w-100 fs-7 fw-bold py-3 disabled">
-                                                <i class="ki-outline ki-lock fs-5 me-2"></i> Belum Tersedia
-                                            </button>
-                                        <?php else: ?>
-                                            <a href="<?= base_url('sw-siswa/materi/lihat-materi/' . encrypt_url($m->kode_materi) . '/' . encrypt_url($m->id_mapel) . '/' . encrypt_url($m->id_kelas)) ?>"
-                                                class="btn btn-primary btn-glow-primary w-100 fs-7 fw-bold py-3 shadow-sm">
-                                                Mulai Belajar <i class="ki-outline ki-arrow-right fs-5 ms-2"></i>
-                                            </a>
-                                        <?php endif; ?>
+                                    
+                                    <!-- Menampilkan badge jumlah materi di sebelah kanan Card -->
+                                    <div class="d-none d-sm-block">
+                                        <span class="badge badge-light-primary fw-bold px-4 py-3 text-uppercase">
+                                            <i class="ki-outline ki-folder text-primary me-2 fs-5"></i>
+                                            <?= count($daftar_materi) ?> Paket Materi
+                                        </span>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- LOOPING MATERI DI DALAM KELAS TERSEBUT -->
+                        <?php foreach ($daftar_materi as $m) : ?>
+                            <?php
+                            $jml_materi = $db->query("select count(*) as total_materi from materi where mapel = '$m->id_mapel'")->getRow();
+                            $delay += 0.1; // Memberikan efek loading berurutan
+                            ?>
+
+                            <div class="col-md-6 col-xl-4 animate-card" style="animation-delay: <?= $delay ?>s">
+                                <div class="card border-0 shadow-sm h-100 hover-elevate-up">
+
+                                    <div class="position-relative img-zoom-container" style="aspect-ratio: 16/9;">
+                                        <?= img_lazy('uploads/mapel/' . $m->file, "loading", ['class' => 'w-100 h-100 object-fit-cover']) ?>
+
+                                        <div class="position-absolute top-0 start-0 w-100 h-100 bg-gradient-to-t from-dark opacity-25"></div>
+
+                                        <?php if ($m->status == 0): ?>
+                                            <div class="position-absolute top-0 end-0 p-4">
+                                                <span class="badge badge-glass fs-8 fw-bold px-4 py-2">
+                                                    <i class="ki-outline ki-calendar-tick fs-8 me-1 text-white"></i> COMING SOON
+                                                </span>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+
+                                    <div class="card-body p-7">
+                                        <div class="d-flex align-items-center mb-5">
+                                            <div class="symbol symbol-40px symbol-circle me-3 shadow-sm border border-2 border-white">
+                                                <img src="<?= base_url('assets-landing/images/logo-blue.png') ?>" alt="Akuntanmu">
+                                            </div>
+                                            <div class="d-flex flex-column align-items-start">
+                                                <span class="text-dark fw-bolder fs-6">Akuntanmu Learning Center</span>
+                                                <span class="badge badge-light-primary fw-bold fs-9 mt-1">Verified Mentor</span>
+                                            </div>
+                                        </div>
+
+                                        <h3 class="text-dark fw-boldest fs-4 mb-3 lh-base min-h-50px text-hover-primary transition-3ms">
+                                            <?= $m->nama_mapel ?>
+                                        </h3>
+
+                                        <div class="separator separator-dashed my-4"></div>
+
+                                        <div class="d-flex flex-stack">
+                                            <div class="d-flex align-items-center me-3">
+                                                <div class="bg-light-info rounded p-2 me-2">
+                                                    <i class="ki-outline ki-book-open fs-4 text-info"></i>
+                                                </div>
+                                                <div class="d-flex flex-column">
+                                                    <span class="text-dark fw-bold fs-7"><?= $jml_materi->total_materi ?> Sesi</span>
+                                                    <span class="text-muted fw-semibold fs-9">Video Materi</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="d-flex align-items-center">
+                                                <div class="bg-light-warning rounded p-2 me-2">
+                                                    <i class="ki-outline ki-time fs-4 text-warning"></i>
+                                                </div>
+                                                <div class="d-flex flex-column">
+                                                    <span class="text-dark fw-bold fs-7">180 Menit</span>
+                                                    <span class="text-muted fw-semibold fs-9">Durasi Total</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-8">
+                                            <?php if ($m->status == 0): ?>
+                                                <button class="btn btn-light-danger w-100 fs-7 fw-bold py-3 disabled">
+                                                    <i class="ki-outline ki-lock fs-5 me-2"></i> Belum Tersedia
+                                                </button>
+                                            <?php else: ?>
+                                                <a href="<?= base_url('sw-siswa/materi/lihat-materi/' . encrypt_url($m->kode_materi) . '/' . encrypt_url($m->id_mapel) . '/' . encrypt_url($m->id_kelas)) ?>"
+                                                    class="btn btn-primary btn-glow-primary w-100 fs-7 fw-bold py-3 shadow-sm">
+                                                    Mulai Belajar <i class="ki-outline ki-arrow-right fs-5 ms-2"></i>
+                                                </a>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
                     <?php endforeach; ?>
+
                 <?php else: ?>
                     <div class="col-12 animate-card">
                         <div class="card border-0 shadow-none bg-transparent">

@@ -3,14 +3,14 @@
 
 <div id="kt_app_content" class="app-content flex-column-fluid">
     <div id="kt_app_content_container" class="app-container container-xxl">
-        
+
         <a href="javascript:void(0);" class="btn btn-primary tambah-pg shadow-sm" style="position: fixed; right: 20px; top: 50%; z-index: 9999; border-radius: 50px;">
             <i class="ki-duotone ki-plus fs-2"></i> Tambah Soal
         </a>
 
         <form action="<?= base_url('sw-guru/ujian/store'); ?>" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>" />
-            
+
             <div class="card card-flush shadow-sm mb-5">
                 <div class="card-header border-0 pt-6">
                     <div class="card-title">
@@ -20,9 +20,9 @@
                         <a href="javascript:void(0);" class="btn btn-light-primary btn-sm" data-bs-toggle="modal" data-bs-target="#bank_soal">
                             <i class="ki-duotone ki-folder fs-2"><span class="path1"></span><span class="path2"></span></i> Bank Soal
                         </a>
-                        <a href="javascript:void(0);" class="btn btn-light-success btn-sm" data-bs-toggle="modal" data-bs-target="#excel_ujian">
+                        <!-- <a href="javascript:void(0);" class="btn btn-light-success btn-sm" data-bs-toggle="modal" data-bs-target="#excel_ujian">
                             <i class="ki-duotone ki-file-up fs-2"><span class="path1"></span><span class="path2"></span></i> Import Excel
-                        </a>
+                        </a> -->
                     </div>
                 </div>
                 <div class="card-body">
@@ -33,20 +33,17 @@
                         </div>
                         <div class="col-md-3">
                             <label class="required fs-6 fw-semibold mb-2">Kelas</label>
-                            <select class="form-select form-select-solid" name="kelas" required>
+                            <select class="form-select form-select-solid" name="kelas" id="pilih_kelas" required>
                                 <option value="">Pilih</option>
                                 <?php foreach ($guru_kelas as $gk) : ?>
-                                    <option value="<?= $gk->id_kelas; ?>"><?= $gk->nama_kelas; ?></option>
+                                    <option value="<?= $gk->kelas; ?>"><?= $gk->nama_kelas; ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
                         <div class="col-md-3">
                             <label class="required fs-6 fw-semibold mb-2">Mapel</label>
-                            <select class="form-select form-select-solid" name="mapel" required>
-                                <option value="">Pilih</option>
-                                <?php foreach ($guru_mapel as $gm) : ?>
-                                    <option value="<?= $gm->id_mapel; ?>"><?= $gm->nama_mapel; ?></option>
-                                <?php endforeach; ?>
+                            <select class="form-select form-select-solid" name="mapel" id="pilih_mapel" required>
+                                <option value="">Pilih Kelas Terlebih Dahulu</option>
                             </select>
                         </div>
                         <div class="col-md-3">
@@ -67,10 +64,10 @@
                 </div>
                 <div class="card-body">
                     <div id="soal_pg">
-                        </div>
-                    
+                    </div>
+
                     <div class="separator separator-dashed my-10"></div>
-                    
+
                     <div class="d-flex justify-content-end">
                         <button type="submit" class="btn btn-primary px-10">
                             <i class="ki-duotone ki-save-2 fs-2"><span class="path1"></span><span class="path2"></span></i> Submit Ujian
@@ -178,7 +175,7 @@
                             </tr>
                         </thead>
                         <tbody class="text-gray-600 fw-semibold">
-                            </tbody>
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -224,17 +221,29 @@
                     return json.data;
                 },
                 "error": function(xhr) {
-                    if (xhr.status === 403) { location.reload(); }
+                    if (xhr.status === 403) {
+                        location.reload();
+                    }
                 }
             },
-            "columnDefs": [
-                { "targets": [0], "orderable": false, "className": 'text-center' },
-                { "targets": [1], "orderable": false }
+            "columnDefs": [{
+                    "targets": [0],
+                    "orderable": false,
+                    "className": 'text-center'
+                },
+                {
+                    "targets": [1],
+                    "orderable": false
+                }
             ]
         });
 
-        $('#nama_soal').on('keyup', function() { t.draw(); });
-        $('#id_kategori').on('change', function() { t.draw(); });
+        $('#nama_soal').on('keyup', function() {
+            t.draw();
+        });
+        $('#id_kategori').on('change', function() {
+            t.draw();
+        });
 
         // Summernote Global Initializer
         function initSummernote() {
@@ -252,8 +261,12 @@
                             ['view', ['fullscreen', 'help']]
                         ],
                         callbacks: {
-                            onImageUpload: function(image) { uploadImage(image[0], this); },
-                            onMediaDelete: function(target) { deleteImage(target[0].src); }
+                            onImageUpload: function(image) {
+                                uploadImage(image[0], this);
+                            },
+                            onMediaDelete: function(target) {
+                                deleteImage(target[0].src);
+                            }
                         }
                     });
                 }
@@ -268,8 +281,11 @@
             data.append("image", image);
             $.ajax({
                 url: "<?= base_url('sw-guru/ujian/upload-summernote') ?>",
-                cache: false, contentType: false, processData: false,
-                data: data, type: "POST",
+                cache: false,
+                contentType: false,
+                processData: false,
+                data: data,
+                type: "POST",
                 success: function(response) {
                     var res = JSON.parse(response);
                     if (res.token) updateCsrfToken(res.token);
@@ -282,7 +298,10 @@
             $.ajax({
                 url: "<?= base_url('sw-guru/ujian/delete-image') ?>",
                 type: "POST",
-                data: { [csrfName]: csrfHash, src: src },
+                data: {
+                    [csrfName]: csrfHash,
+                    src: src
+                },
                 dataType: "JSON",
                 success: function(response) {
                     if (response.token) updateCsrfToken(response.token);
@@ -334,10 +353,19 @@
         $('#table').on('click', 'input#tambahSoal', function() {
             if ($(this).is(':checked')) {
                 var id_bank_soal = $(this).data('id_bank_soal');
+                
+                // Ambil token CSRF terbaru langsung dari input form agar tidak kedaluwarsa
+                var currentHash = $('input[name="' + csrfName + '"]').val();
+
+                let postData = {
+                    id_bank_soal: id_bank_soal
+                };
+                postData[csrfName] = currentHash;
+
                 $.ajax({
                     type: 'POST',
                     url: "<?= base_url('sw-guru/ujian/tambah-bank-soal') ?>",
-                    data: { [csrfName]: csrfHash, id_bank_soal: id_bank_soal },
+                    data: postData,
                     dataType: 'JSON',
                     success: function(data) {
                         if (data.token) updateCsrfToken(data.token);
@@ -381,6 +409,62 @@
         $('#soal_pg').on('click', '.hapus-pg', function() {
             $(this).closest('.isi_soal').remove();
             no_soal--;
+        });
+    });
+</script>
+<script>
+    $(document).ready(function() {
+        $('#pilih_kelas').on('change', function() {
+            let idKelas = $(this).val();
+            let mapelSelect = $('#pilih_mapel');
+
+            // Reset dropdown mapel
+            mapelSelect.empty();
+            mapelSelect.append('<option value="">Pilih</option>');
+
+            const csrfName = "<?= csrf_token() ?>";
+
+            // Ambil token terbaru (bisa dari input tersembunyi atau variabel yang terus di-update)
+            let csrfToken = $('input[name="' + csrfName + '"]').val();
+
+            if (idKelas !== '') {
+                let postData = {
+                    id_kelas: idKelas
+                };
+                postData[csrfName] = csrfToken;
+
+                $.ajax({
+                    type: 'POST',
+                    url: '<?= base_url('sw-guru/ujian/getMapelByKelas') ?>',
+                    data: postData,
+                    dataType: 'JSON',
+                    success: function(response) {
+                        // 1. UPDATE TOKEN CSRF TERBARU DARI SERVER
+                        // Pastikan Controller Anda mengirim balik token, contoh: return $this->response->setJSON([... , 'token' => csrf_hash()]);
+                        if (response.token) {
+                            $('input[name="' + csrfName + '"]').val(response.token);
+                        }
+
+                        // 2. Tampilkan data mapel seperti biasa
+                        // Cek apakah response berupa array langsung atau dibungkus objek (tergantung cara return controller)
+                        let listMapel = response.mapel || response;
+
+                        if (listMapel.length > 0) {
+                            $.each(listMapel, function(index, data) {
+                                mapelSelect.append('<option value="' + data.mapel + '">' + data.nama_mapel + '</option>');
+                            });
+                        } else {
+                            mapelSelect.append('<option value="">Tidak ada mapel di kelas ini</option>');
+                        }
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 403) {
+                            alert('Token keamanan kedaluwarsa, halaman akan dimuat ulang.');
+                            location.reload();
+                        }
+                    }
+                });
+            }
         });
     });
 </script>

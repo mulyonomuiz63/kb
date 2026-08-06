@@ -10,16 +10,16 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- SEO Meta Tags Dinamis -->
-    <title><?= $paketWebinar ? esc($paketWebinar->nama_paket) : 'Webinar Eksklusif: Strategi Transformasi Bisnis Digital 2026' ?></title>
-    <meta name="description" content="<?= $paketWebinar ? esc($paketWebinar->tagline) : 'Ikuti webinar eksklusif kami dan pelajari strategi transformasi bisnis digital terbaik. Dapatkan e-sertifikat, materi lengkap, dan sesi mentoring.' ?>">
-    <meta name="keywords" content="webinar bisnis, transformasi digital, belajar bisnis, kelas online, webinar 2026, <?= $paketWebinar ? esc(strtolower($paketWebinar->nama_paket)) : '' ?>">
-    <meta name="author" content="Nama Perusahaan/Penyelenggara Anda">
+    <title><?= $paketWebinar ? esc($paketWebinar->nama_paket) : 'Kelas Brevet Pajak Online Terpercaya Di Indonesia' ?></title>
+    <meta name="description" content="<?= $paketWebinar ? esc($paketWebinar->tagline) : 'Ikuti webinar eksklusif kami dan dapatkan e-sertifikat, materi lengkap, dan sesi mentoring dari pakar perpajakan.' ?>">
+    <meta name="keywords" content="webinar bisnis, transformasi digital, belajar bisnis, kelas online, webinar 2026, kelas brevet, pajak,  <?= $paketWebinar ? esc(strtolower($paketWebinar->nama_paket)) : '' ?>">
+    <meta name="author" content="kelasbrevet.com">
     <meta name="robots" content="index, follow">
 
     <!-- Open Graph (Untuk Social Media/WhatsApp Sharing) Dinamis -->
-    <meta property="og:title" content="<?= $paketWebinar ? esc($paketWebinar->nama_paket) : 'Webinar Eksklusif: Strategi Transformasi Bisnis Digital' ?>">
-    <meta property="og:description" content="<?= $paketWebinar ? esc($paketWebinar->tagline) : 'Ikuti webinar eksklusif kami dan pelajari strategi transformasi digital. Daftar sekarang!' ?>">
-    <meta property="og:image" content="<?= ($paketWebinar && !empty($paketWebinar->file)) ? base_url('assets-landing/images/paket/thumbnails/' . $paketWebinar->file) : 'URL_GAMBAR_THUMBNAIL_ANDA.jpg' ?>">
+    <meta property="og:title" content="<?= $paketWebinar ? esc($paketWebinar->nama_paket) : 'Webinar Eksklusif: Strategi Perpajakan' ?>">
+    <meta property="og:description" content="<?= $paketWebinar ? esc($paketWebinar->tagline) : 'Kelas Brevet akan mengajak anda untuk lebih dekat dengan regulasi bersama para pakar perpajakan di Indonesia. Daftar sekarang!' ?>">
+    <meta property="og:image" content="<?= ($paketWebinar && !empty($paketWebinar->file)) ? base_url('assets-landing/images/paket/thumbnails/' . $paketWebinar->file) : base_url(favicon()) ?>">
     <meta property="og:url" content="<?= current_url() ?>">
 
     <!-- Google Fonts -->

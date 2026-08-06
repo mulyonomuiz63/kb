@@ -25,6 +25,7 @@ $routes->group('sw-guru', ['filter' => 'roleCheck:3'], function ($routes) {
         $routes->get('', 'Guru\UjianController::index');
         $routes->get('create', 'Guru\UjianController::create');
         $routes->post('store', 'Guru\UjianController::store');
+        $routes->post('getMapelByKelas', 'Guru\UjianController::getMapelByKelas');
         $routes->get('edit-ujian/(:segment)', 'Guru\UjianController::editUjian/$1');
         $routes->post('update', 'Guru\UjianController::update');
         $routes->get('edit-soal/(:segment)', 'Guru\UjianController::editSoal/$1');

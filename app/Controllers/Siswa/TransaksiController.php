@@ -20,6 +20,7 @@ class TransaksiController extends BaseController
     protected $ujianSiswaModel;
     protected $siswaModel;
     protected $ikhModel;
+    protected $siswaKelasModel;
 
     public function __construct()
     {
@@ -35,6 +36,7 @@ class TransaksiController extends BaseController
         $this->mapelSiswaModel = new \App\Models\MapelSiswaModel();
         $this->ujianSiswaModel = new \App\Models\UjianSiswaModel();
         $this->siswaModel = new \App\Models\SiswaModel();
+        $this->siswaKelasModel = new \App\Models\SiswaKelasModel();
         $this->ikhModel = new \App\Models\IkhModel();
         $this->emailer = new \App\Libraries\Emailer();
     }
@@ -137,7 +139,7 @@ class TransaksiController extends BaseController
                 ->where('voucher.tgl_aktif <=', $today)
                 ->where('voucher.tgl_exp >=', $today)
                 // Menambahkan group by untuk memastikan hanya 1 hasil unik
-                ->groupBy('voucher.idvoucher') 
+                ->groupBy('voucher.idvoucher')
                 ->first();
         } else {
             $voucher = null;
@@ -172,16 +174,46 @@ class TransaksiController extends BaseController
             $voucherPersen = ($diskon_voucher != '') ? $diskon_voucher : 0;
 
             $diskon        = $totalRaw - ($totalRaw - ($totalRaw * $diskonPersen / 100));
-            $totalDiskon   = $totalRaw - $diskon; 
+            $totalDiskon   = $totalRaw - $diskon;
             $diskon_voucher = $totalDiskon - ($totalDiskon - ($totalDiskon * $voucherPersen / 100));
             $totalVoucher  = $totalDiskon - $diskon_voucher;
 
             $detailPaket = $this->detailPaketModel
-                ->select('detail_paket.*, ujian_master.nama_ujian, mapel.nama_mapel')
+                ->select('detail_paket.*, ujian_master.nama_ujian, ujian_master.kelas, mapel.nama_mapel')
                 ->join('ujian_master', 'detail_paket.id_ujian=ujian_master.id_ujian', 'left')
                 ->join('mapel', 'detail_paket.id_mapel=mapel.id_mapel', 'left')
                 ->where('detail_paket.idpaket', $this->request->getVar('idpaket'))
                 ->get()->getResultObject();
+
+            //untuk menambah kelas di table pivot
+            $id_kelas_target = null;
+            if (!empty($detailPaket)) {
+                // Cari record pertama yang memiliki kolom id_kelas di ujian_master
+                foreach ($detailPaket as $item) {
+                    // Sesuaikan nama properti 'id_kelas' jika di ujian_master namanya berbeda
+                    if (!empty($item->kelas)) {
+                        $id_kelas_target = $item->kelas;
+                        break; // Ambil 1 saja lalu hentikan perulangan
+                    }
+                }
+            }
+
+            if ($id_kelas_target !== null) {
+                // Asumsi variabel $id_siswa didapat dari data siswa yang sedang diproses
+                $id_siswa = session()->get('id');
+
+                // Cek apakah sudah ada di tabel utama siswa (kolom 'kelas') ATAU di tabel pivot 'siswa_kelas'
+                $cekSiswaUtama = $this->siswaModel->where(['id_siswa' => $id_siswa, 'kelas' => $id_kelas_target])->first();
+                $cekSiswaPivot = $this->siswaKelasModel->where(['id_siswa' => $id_siswa, 'id_kelas' => $id_kelas_target])->first();
+
+                // Jika belum ada di kedua tabel, maka tambahkan ke tabel pivot 'siswa_kelas'
+                if (!$cekSiswaUtama || !$cekSiswaPivot) {
+                    $this->siswaKelasModel->save([
+                        'id_siswa' => $id_siswa,
+                        'id_kelas' => $id_kelas_target
+                    ]);
+                }
+            }
 
             $totalDataCount = $this->detailPaketModel->where('idpaket', $this->request->getVar('idpaket'))->countAllResults();
             $hasil          = ($totalRaw - $diskon - $diskon_voucher) / (int)($totalDataCount ?: 1);
