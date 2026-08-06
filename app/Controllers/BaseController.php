@@ -50,6 +50,7 @@ class BaseController extends Controller
         // Do Not Edit This Line
         parent::initController($request, $response, $logger);
         // Inisialisasi library yang MEMANG dipakai di semua halaman
+        date_default_timezone_set('Asia/Jakarta');
         $this->db = \Config\Database::connect();
         $this->image = \Config\Services::image();
 
