@@ -879,8 +879,8 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                         </ul>
 
                                         <div class="mt-2 pt-3 border-top border-light border-opacity-25 text-center">
-                                            <p class="mb-1 text-light opacity-75" style="font-size: 0.75rem;">Investasi Mulai Dari</p>
-                                            <h4 class="text-warning fw-bold mb-3">Rp 50.000</h4>
+                                            <!-- <p class="mb-1 text-light opacity-75" style="font-size: 0.75rem;">Investasi Mulai Dari</p>
+                                            <h4 class="text-warning fw-bold mb-3">Rp 50.000</h4> -->
                                             <!-- Ganti href sesuai link pendaftaran brevet Anda -->
                                             <a href="<?= base_url('/') ?>" class="btn btn-warning w-100 py-2 fw-bold rounded-pill shadow-sm text-dark transition-all" style="font-size: 0.85rem;">
                                                 Lihat Penawaran <i class="fa-solid fa-arrow-right ms-1"></i>
