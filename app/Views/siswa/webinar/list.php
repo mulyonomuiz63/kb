@@ -402,7 +402,7 @@
                                             </div>
                                         </div>
 
-                                        <!-- List YouTube Video (Dibedakan berdasarkan Gratis/Berbayar) -->
+                                        <!-- List YouTube Video -->
                                         <?php if (!empty($youtubeLinks)): ?>
                                             <div class="youtube-recording-box mb-6">
                                                 <div class="d-flex align-items-center justify-content-between mb-3">
@@ -411,9 +411,8 @@
                                                     </span>
                                                 </div>
                                                 <div class="d-flex flex-column gap-2" style="max-height: 140px; overflow-y: auto;">
-                                                    
+
                                                     <?php if ($isPaketGratis): ?>
-                                                        <!-- Jika Gratis: Box Info Akses Terkunci -->
                                                         <div class="alert alert-light-danger border border-danger border-dashed p-3 m-0 d-flex align-items-center">
                                                             <i class="ki-outline ki-lock-3 fs-1 text-danger me-3"></i>
                                                             <div class="d-flex flex-column">
@@ -422,7 +421,6 @@
                                                             </div>
                                                         </div>
                                                     <?php else: ?>
-                                                        <!-- Jika Berbayar: Tombol Player Muncul -->
                                                         <?php foreach ($youtubeLinks as $idx => $ytLink): ?>
                                                             <button type="button"
                                                                 class="btn btn-sm btn-white youtube-item-btn fw-bold d-flex align-items-center justify-content-between py-2.5 px-3 rounded-2 shadow-xs w-100 text-start"
@@ -437,24 +435,25 @@
                                                             </button>
                                                         <?php endforeach; ?>
                                                     <?php endif; ?>
-                                                    
+
                                                 </div>
                                             </div>
                                         <?php endif; ?>
 
-                                        <!-- Action Button Gmeet Utama -->
+                                        <!-- Action Button Gmeet & Sertifikat -->
                                         <div class="mt-auto pt-4">
                                             <?php if ($status == 'upcoming'): ?>
                                                 <button class="btn btn-light w-100 fs-7 fw-bold py-3 disabled" disabled>
                                                     <i class="ki-outline ki-lock fs-5 me-2"></i> Akses Gmeet Dibuka <?= date('d M H:i', $waktuBukaZoom) ?>
                                                 </button>
                                             <?php elseif ($status == 'live'): ?>
-                                                <a href="<?= esc($mainZoomLink) ?>" target="_blank" class="btn btn-primary btn-glow-primary w-100 fs-7 fw-bold py-3 shadow-sm">
+                                                <a href="<?= esc($mainZoomLink) ?>" target="_blank" class="btn btn-primary btn-glow-primary w-100 fs-7 fw-bold py-3 shadow-sm hover-elevate-up">
                                                     Gabung Gmeet <i class="ki-outline ki-entrance-left fs-5 ms-2"></i>
                                                 </a>
                                             <?php else: ?>
-                                                <button class="btn btn-light-success w-100 fs-7 fw-bold py-3 disabled" disabled>
-                                                    <i class="ki-outline ki-check-circle fs-5 me-2"></i> Gmeet Selesai
+                                                <!-- PERUBAHAN DI SINI: Tombol Download Sertifikat -->
+                                                <button type="button" class="btn btn-success w-100 fs-7 fw-bold py-3 shadow-sm hover-elevate-up" data-bs-toggle="modal" data-bs-target="#modalSertifikat" data-nama="<?= esc($child->nama_sesi) ?>" data-idsesi="<?= esc($child->id_sesi) ?>">
+                                                    <i class="ki-outline ki-diploma fs-4 me-2"></i> Lihat Sertifikat
                                                 </button>
                                             <?php endif; ?>
                                         </div>
@@ -566,6 +565,46 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Popup Sertifikat -->
+<div class="modal fade" id="modalSertifikat" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content shadow-lg border-0 rounded-4">
+            
+            <div class="modal-header border-0 py-5 bg-light-success">
+                <h3 class="fw-bolder mb-0 text-success d-flex align-items-center">
+                    <i class="ki-outline ki-diploma fs-1 me-2 text-success"></i> Sertifikat Pelatihan
+                </h3>
+                <div class="btn btn-icon btn-sm btn-active-light-success ms-2" data-bs-dismiss="modal">
+                    <i class="ki-outline ki-cross fs-1"></i>
+                </div>
+            </div>
+            
+            <div class="modal-body py-5 px-lg-10 text-center">
+                <!-- Judul Dinamis -->
+                <h4 class="fw-bold text-gray-800 mb-5" id="sertifikatTitleName">Nama Sesi</h4>
+                
+                <!-- Gambar/Preview Sertifikat -->
+                <div class="border border-2 border-dashed border-success rounded-3 p-2 mb-5 mx-auto bg-light" style="position: relative;">
+                    <!-- Placeholder Ilustrasi Sertifikat -->
+                    <img src="https://ui-avatars.com/api/?name=Sertifikat+Selesai&background=e8fff3&color=50cd89&size=600&font-size=0.1&length=18" class="img-fluid rounded shadow-sm" alt="Preview Sertifikat">
+                </div>
+                
+                <p class="text-muted fs-6 mb-0">Selamat! Anda telah menyelesaikan sesi pelatihan ini. Sertifikat penghargaan Anda sudah diterbitkan dan siap untuk diunduh.</p>
+            </div>
+            
+            <div class="modal-footer border-0 pt-0 pb-8 justify-content-center">
+                <button type="button" class="btn btn-light fw-bold me-3 px-6" data-bs-dismiss="modal">Tutup</button>
+                
+                <!-- Tombol Action Download PDF -->
+                <a href="#" id="btnDownloadSertifikat" class="btn btn-success fw-bold px-8 shadow-sm hover-elevate-up">
+                    <i class="ki-outline ki-file-down fs-3 me-2"></i> Download PDF
+                </a>
+            </div>
+            
         </div>
     </div>
 </div>
@@ -800,6 +839,29 @@
         });
     });
 </script>
-
+<!-- Script Dinamis Sertifikat -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const modalSertifikat = document.getElementById('modalSertifikat');
+    
+    if (modalSertifikat) {
+        modalSertifikat.addEventListener('show.bs.modal', function (event) {
+            // Tangkap tombol yang diklik
+            const button = event.relatedTarget;
+            
+            // Ambil data atribut dari tombol
+            const namaSesi = button.getAttribute('data-nama');
+            const idSesi = button.getAttribute('data-idsesi');
+            
+            // Update Teks Judul di Modal
+            modalSertifikat.querySelector('#sertifikatTitleName').textContent = namaSesi;
+            
+            // Update Link Download (Ganti URL ini sesuai dengan fungsi cetak PDF di Controller Anda)
+            const btnDownload = modalSertifikat.querySelector('#btnDownloadSertifikat');
+            btnDownload.href = "<?= base_url('sw-siswa/webinar/download-sertifikat') ?>/" + idSesi;
+        });
+    }
+});
+</script>
 
 <?= $this->endSection(); ?>

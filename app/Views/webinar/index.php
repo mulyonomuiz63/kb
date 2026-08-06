@@ -525,7 +525,6 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                 /* Efek transisi halus saat card belum dipilih */
                 .session-card {
                     border: 2px solid #dee2e6 !important;
-                    /* Border default */
                     transition: all 0.3s ease-in-out;
                     cursor: pointer;
                 }
@@ -533,14 +532,10 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                 /* Efek card saat radio button di dalamnya terpilih (Checked) */
                 .session-checkbox:checked+.session-card {
                     border: 2px solid #198754 !important;
-                    /* Warna hijau success Bootstrap */
                     background-color: #f2fcf5 !important;
-                    /* Highlight hijau sangat tipis pada background */
                     box-shadow: 0 0.5rem 1.5rem rgba(25, 135, 84, 0.2) !important;
-                    /* Glow hijau pada shadow */
                 }
 
-                /* Opsional: Jika ingin menyembunyikan bulatan radio button asli agar desain lebih bersih */
                 .session-checkbox {
                     display: none;
                 }
@@ -560,210 +555,345 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                     <!-- Hidden input untuk ID Paket Induk -->
                     <input type="hidden" name="idpaket" value="<?= $paketWebinar ? $paketWebinar->idpaket : '' ?>">
 
-                    <!-- ============================== -->
-                    <!-- BARIS ATAS: PILIHAN PAKET FULL -->
-                    <!-- ============================== -->
-                    <div class="mb-5">
-                        <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-4">
-                            <h4 class="fw-bold mb-0">1. Pilih Paket</h4>
+                    <?php
+                    $jumlahPaket = ($paketWebinar && !empty($paketWebinar->sesi)) ? count($paketWebinar->sesi) : 0;
+                    $currentDateTime = date('Y-m-d H:i:s');
+                    $db = \Config\Database::connect(); // Load instance DB
+                    ?>
+
+                    <?php if ($jumlahPaket == 1) : ?>
+                        <!-- ================================================= -->
+                        <!-- KONDISI 1: JIKA HANYA 1 PAKET (Kiri: Paket, Kanan: Data Diri) -->
+                        <!-- ================================================= -->
+                        <div class="row g-4 mb-4">
+                            <!-- KOLOM KIRI: PILIHAN PAKET -->
+                            <div class="col-lg-7">
+                                <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                                    <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-4">
+                                        <h4 class="fw-bold mb-0">1. Pilih Paket</h4>
+                                    </div>
+
+                                    <div class="row g-4">
+                                        <?php foreach ($paketWebinar->sesi as $sesi) : ?>
+                                            <?php
+                                            $isFree = ($sesi['harga_sesi'] <= 0);
+                                            $childSessionsData = [];
+                                            $childIds = json_decode($sesi['sesi_gratis'], true) ?? [];
+                                            $hasChildren = false;
+                                            $isAllChildExpired = true;
+
+                                            if (!empty($childIds)) {
+                                                $hasChildren = true;
+                                                $childSessionsData = $db->table('webinar_sesi')
+                                                    ->whereIn('id_sesi', $childIds)
+                                                    ->orderBy('waktu_mulai', 'ASC')
+                                                    ->get()
+                                                    ->getResultArray();
+
+                                                foreach ($childSessionsData as $cs) {
+                                                    if (strtotime($cs['waktu_mulai']) > strtotime($currentDateTime)) {
+                                                        $isAllChildExpired = false;
+                                                    }
+                                                }
+                                            }
+
+                                            if ($hasChildren) {
+                                                $isExpired = $isAllChildExpired;
+                                            } else {
+                                                $isExpired = (strtotime($sesi['waktu_mulai']) <= strtotime($currentDateTime));
+                                            }
+                                            ?>
+                                            <div class="col-12">
+                                                <label class="w-100 h-100 m-0 <?= $isExpired && !$isFree ? 'opacity-50' : '' ?>" <?= $isExpired && !$isFree ? 'style="cursor: not-allowed;"' : 'style="cursor: pointer;"' ?>>
+                                                    <input type="radio" name="id_sesi[]" value="<?= esc($sesi['id_sesi']) ?>" class="session-checkbox calculate-price" data-price="<?= round($sesi['harga_sesi']) ?>" <?= $isExpired && !$isFree ? 'disabled' : '' ?> <?= $isFree && !$isExpired ? 'checked' : '' ?>>
+
+                                                    <div class="session-card p-4 h-100 d-flex flex-column rounded-4 shadow-sm <?= $isExpired && !$isFree ? 'bg-light' : 'bg-white' ?>">
+                                                        <div class="d-flex align-items-start justify-content-between w-100">
+                                                            <div class="pe-3">
+                                                                <h5 class="fw-bold mb-1"><?= esc($sesi['nama_sesi']) ?></h5>
+                                                                <?php if ($isExpired && !$isFree): ?>
+                                                                    <div class="mb-1"><span class="badge bg-danger mt-1" style="font-size: 0.75rem;">Semua Sesi Telah Berakhir</span></div>
+                                                                <?php elseif ($isFree): ?>
+                                                                    <div class="mb-1"><span class="badge bg-success mt-1" style="font-size: 0.65rem;">Fasilitas terbatas</span></div>
+                                                                <?php endif; ?>
+
+                                                                <?php if (!$isFree && !empty($sesi['deskripsi_sesi'])): ?>
+                                                                    <p class="text-secondary mb-0 mt-2" style="font-size: 0.85rem; line-height: 1.5;">
+                                                                        <span class="badge bg-primary mt-1" style="font-size: 0.65rem;">Gratis E-learning + Ujian Brevet AB</span>
+                                                                    </p>
+                                                                <?php endif; ?>
+                                                            </div>
+                                                            <div class="text-end flex-shrink-0">
+                                                                <?php if (!$isFree && isset($sesi['harga_coret']) && $sesi['harga_coret'] > $sesi['harga_sesi']): ?>
+                                                                    <span class="text-muted text-decoration-line-through d-block" style="font-size: 0.85rem;">Rp <?= number_format($sesi['harga_coret'], 0, ',', '.') ?></span>
+                                                                <?php endif; ?>
+                                                                <h5 class="fw-bold <?= $isExpired && !$isFree ? 'text-muted text-decoration-line-through' : 'text-primary' ?> d-block mb-1">
+                                                                    <?= $isFree ? 'Rp 0' : 'Rp ' . number_format($sesi['harga_sesi'], 0, ',', '.') ?>
+                                                                </h5>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="mt-4 pt-3 border-top flex-grow-1">
+                                                            <?php if (!empty($childSessionsData)): ?>
+                                                                <p class="text-dark fw-bold fs-7 mb-3"><i class="fa-solid fa-layer-group me-2 text-primary"></i>4 Materi Spesial Webinar:</p>
+                                                                <ul class="list-unstyled mb-4" style="margin-bottom: 0;">
+                                                                    <?php foreach ($childSessionsData as $cs): ?>
+                                                                        <?php $isCsExpired = (strtotime($cs['waktu_mulai']) <= strtotime($currentDateTime)); ?>
+                                                                        <li class="<?= $isCsExpired ? 'opacity-75' : '' ?> mb-3 d-flex align-items-start">
+                                                                            <i class="fa-solid fa-circle-check <?= $isCsExpired ? 'text-secondary' : 'text-success' ?> fs-6 mt-1 me-3"></i>
+                                                                            <div>
+                                                                                <span class="fw-semibold <?= $isCsExpired ? 'text-decoration-line-through text-muted' : 'text-dark' ?> d-block mb-1" style="font-size: 0.95rem; line-height: 1.3;"><?= esc($cs['nama_sesi']) ?></span>
+                                                                                <span class="text-primary fw-bold" style="font-size: 0.8rem;">
+                                                                                    <?php
+                                                                                    $timestamp = strtotime($cs['waktu_mulai']);
+                                                                                    $namaHari = ['Sun' => 'Minggu', 'Mon' => 'Senin', 'Tue' => 'Selasa', 'Wed' => 'Rabu', 'Thu' => 'Kamis', 'Fri' => 'Jumat', 'Sat' => 'Sabtu'][date('D', $timestamp)];
+                                                                                    $namaBulan = ['January' => 'Januari', 'February' => 'Februari', 'March' => 'Maret', 'April' => 'April', 'May' => 'Mei', 'June' => 'Juni', 'July' => 'Juli', 'August' => 'Agustus', 'September' => 'September', 'October' => 'Oktober', 'November' => 'November', 'December' => 'Desember'][date('F', $timestamp)];
+                                                                                    $formattedDate = $namaHari . ', ' . date('d', $timestamp) . ' ' . $namaBulan . ' ' . date('Y, H:i', $timestamp);
+                                                                                    ?>
+                                                                                    <i class="far fa-calendar-alt me-1"></i> <?= $formattedDate ?> WIB
+                                                                                </span>
+                                                                                <?php if ($isCsExpired): ?>
+                                                                                    <span class="badge bg-danger ms-2" style="font-size: 0.65rem;">Selesai</span>
+                                                                                <?php endif; ?>
+                                                                            </div>
+                                                                        </li>
+                                                                    <?php endforeach; ?>
+                                                                </ul>
+                                                            <?php elseif ($isFree && empty($childSessionsData)): ?>
+                                                                <p class="text-muted fs-8 mb-4 fst-italic"><i class="fa-solid fa-info-circle me-1"></i> Belum ada sesi tertaut.</p>
+                                                            <?php endif; ?>
+                                                        </div>
+
+                                                        <div class="mt-auto">
+                                                            <div class="alert alert-info py-2 px-3 border-0 mb-0 d-flex align-items-start gap-2 rounded-3" style="font-size: 0.8rem; line-height: 1.4; background-color: #e3f2fd; color: #0277bd;">
+                                                                <i class="fa-solid fa-circle-info mt-1"></i>
+                                                                <div><strong>Informasi Paket:</strong> <?= $sesi['deskripsi_sesi'] ?></div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- KOLOM KANAN: DATA PESERTA -->
+                            <div class="col-lg-5">
+                                <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                                    <h4 class="fw-bold mb-4 border-bottom pb-2">2. Data Peserta</h4>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Nama Lengkap <span class="text-danger">*</span></label>
+                                        <input type="text" name="nama" value="<?= session()->get('id') && isset($siswa) ? esc($siswa['nama_siswa']) : esc(old('nama')) ?>" class="form-control form-control-lg" placeholder="Masukkan nama lengkap" required <?= session()->get('id') ? 'readonly style="cursor: not-allowed; background-color: #e9ecef;"' : '' ?>>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Email Aktif<span class="text-danger">*</span></label>
+                                        <input type="email" name="email" value="<?= session()->get('id') && isset($siswa) ? esc($siswa['email']) : esc(old('email')) ?>" class="form-control form-control-lg" placeholder="contoh@email.com" required <?= session()->get('id') ? 'readonly style="cursor: not-allowed; background-color: #e9ecef;"' : '' ?>>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Nomor WhatsApp <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <input type="number" name="hp" value="<?= session()->get('id') && isset($siswa) ? esc($siswa['hp']) : esc(old('hp')) ?>" class="form-control form-control-lg" placeholder="81234567890" pattern="[0-9]+" minlength="10" maxlength="15" required autocomplete="off" <?= session()->get('id') ? 'readonly style="cursor: not-allowed; background-color: #e9ecef;"' : '' ?>>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="row g-4">
-                            <?php if ($paketWebinar && !empty($paketWebinar->sesi)) : ?>
-                                <?php
-                                $currentDateTime = date('Y-m-d H:i:s');
-                                $db = \Config\Database::connect(); // Load instance DB
+                        <!-- BAGIAN BAWAH (KHUSUS 1 PAKET): TOTAL PEMBAYARAN & TOMBOL -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card border-primary shadow-sm rounded-4 p-4 bg-light" style="border-width: 2px !important;">
+                                    <div class="row align-items-center">
+                                        <div class="col-lg-7 text-center text-lg-start mb-3 mb-lg-0">
+                                            <p class="text-secondary fw-semibold mb-1">Total Pembayaran Anda</p>
+                                            <h1 class="fw-bold text-primary mb-0" id="displayTotal">Rp 0</h1>
+                                        </div>
+                                        <div class="col-lg-5 text-center text-lg-end">
+                                            <button type="submit" id="btnSubmit" class="btn btn-primary btn-lg w-100 fw-bold rounded-pill shadow-sm py-3 px-5" disabled>
+                                                <i class="fa-solid fa-shield-halved me-2"></i> Daftar & Lanjut Bayar
+                                            </button>
+                                            <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-center justify-content-lg-end gap-2">
+                                                <small class="text-muted fw-medium">Pembayaran aman didukung oleh:</small>
+                                                <img src="https://opd-static.midtrans.com/assethera/logo/midtrans-dark-3a5ac77cd3110b28b32cb590fc968f296d2123e686591d636bd51b276f6ed034.svg" height="20" alt="Midtrans Logo" style="opacity: 0.8;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                                foreach ($paketWebinar->sesi as $sesi) :
-                                    $isFree = ($sesi['harga_sesi'] <= 0);
+                    <?php else : ?>
+                        <!-- ================================================= -->
+                        <!-- KONDISI 2: JIKA BANYAK PAKET (> 1) - KODE AWAL    -->
+                        <!-- ================================================= -->
+                        <!-- BARIS ATAS: PILIHAN PAKET FULL -->
+                        <div class="mb-5">
+                            <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-4">
+                                <h4 class="fw-bold mb-0">1. Pilih Paket</h4>
+                            </div>
 
-                                    // Logika mendapatkan list anak sesi dan status kedaluwarsa 
-                                    $childSessionsData = [];
-                                    $childIds = json_decode($sesi['sesi_gratis'], true) ?? [];
-                                    $hasChildren = false;
-                                    $isAllChildExpired = true;
+                            <div class="row g-4">
+                                <?php if ($paketWebinar && !empty($paketWebinar->sesi)) : ?>
+                                    <?php foreach ($paketWebinar->sesi as $sesi) : ?>
+                                        <?php
+                                        $isFree = ($sesi['harga_sesi'] <= 0);
+                                        $childSessionsData = [];
+                                        $childIds = json_decode($sesi['sesi_gratis'], true) ?? [];
+                                        $hasChildren = false;
+                                        $isAllChildExpired = true;
 
-                                    if (!empty($childIds)) {
-                                        $hasChildren = true;
-                                        $childSessionsData = $db->table('webinar_sesi')
-                                            ->whereIn('id_sesi', $childIds)
-                                            ->orderBy('waktu_mulai', 'ASC')
-                                            ->get()
-                                            ->getResultArray();
+                                        if (!empty($childIds)) {
+                                            $hasChildren = true;
+                                            $childSessionsData = $db->table('webinar_sesi')
+                                                ->whereIn('id_sesi', $childIds)
+                                                ->orderBy('waktu_mulai', 'ASC')
+                                                ->get()
+                                                ->getResultArray();
 
-                                        foreach ($childSessionsData as $cs) {
-                                            // Paket masih terbuka bila ADA minimal 1 sesi yang belum berjalan
-                                            if (strtotime($cs['waktu_mulai']) > strtotime($currentDateTime)) {
-                                                $isAllChildExpired = false;
+                                            foreach ($childSessionsData as $cs) {
+                                                if (strtotime($cs['waktu_mulai']) > strtotime($currentDateTime)) {
+                                                    $isAllChildExpired = false;
+                                                }
                                             }
                                         }
-                                    }
 
-                                    // Penentuan Paket expired
-                                    if ($hasChildren) {
-                                        $isExpired = $isAllChildExpired;
-                                    } else {
-                                        $isExpired = (strtotime($sesi['waktu_mulai']) <= strtotime($currentDateTime));
-                                    }
-                                ?>
-                                    <!-- TAMPILAN PAKET (Grid Otomatis Kiri - Kanan) -->
-                                    <div class="col-lg-6">
-                                        <label class="w-100 h-100 m-0 <?= $isExpired && !$isFree ? 'opacity-50' : '' ?>" <?= $isExpired && !$isFree ? 'style="cursor: not-allowed;"' : 'style="cursor: pointer;"' ?>>
+                                        if ($hasChildren) {
+                                            $isExpired = $isAllChildExpired;
+                                        } else {
+                                            $isExpired = (strtotime($sesi['waktu_mulai']) <= strtotime($currentDateTime));
+                                        }
+                                        ?>
+                                        <div class="col-lg-6">
+                                            <label class="w-100 h-100 m-0 <?= $isExpired && !$isFree ? 'opacity-50' : '' ?>" <?= $isExpired && !$isFree ? 'style="cursor: not-allowed;"' : 'style="cursor: pointer;"' ?>>
+                                                <input type="radio" name="id_sesi[]" value="<?= esc($sesi['id_sesi']) ?>" class="session-checkbox calculate-price" data-price="<?= round($sesi['harga_sesi']) ?>" <?= $isExpired && !$isFree ? 'disabled' : '' ?> <?= $isFree && !$isExpired ? 'checked' : '' ?>>
 
-                                            <!-- TYPE INPUT RADIO (HANYA BISA PILIH SATU) -->
-                                            <input type="radio" name="id_sesi[]" value="<?= esc($sesi['id_sesi']) ?>" class="session-checkbox calculate-price" data-price="<?= round($sesi['harga_sesi']) ?>" <?= $isExpired && !$isFree ? 'disabled' : '' ?> <?= $isFree && !$isExpired ? 'checked' : '' ?>>
+                                                <div class="session-card p-4 h-100 d-flex flex-column rounded-4 shadow-sm <?= $isExpired && !$isFree ? 'bg-light' : 'bg-white' ?>">
+                                                    <div class="d-flex align-items-start justify-content-between w-100">
+                                                        <div class="pe-3">
+                                                            <h5 class="fw-bold mb-1"><?= esc($sesi['nama_sesi']) ?></h5>
+                                                            <?php if ($isExpired && !$isFree): ?>
+                                                                <div class="mb-1"><span class="badge bg-danger mt-1" style="font-size: 0.75rem;">Semua Sesi Telah Berakhir</span></div>
+                                                            <?php elseif ($isFree): ?>
+                                                                <div class="mb-1"><span class="badge bg-success mt-1" style="font-size: 0.65rem;">Fasilitas terbatas</span></div>
+                                                            <?php endif; ?>
 
-                                            <!-- CLASS .session-card MENJADI TARGET CSS JIKA TERPILIH -->
-                                            <div class="session-card p-4 h-100 d-flex flex-column rounded-4 shadow-sm <?= $isExpired && !$isFree ? 'bg-light' : 'bg-white' ?>">
-                                                <!-- Header Card Sesi -->
-                                                <div class="d-flex align-items-start justify-content-between w-100">
-                                                    <div class="pe-3">
-                                                        <h5 class="fw-bold mb-1"><?= esc($sesi['nama_sesi']) ?></h5>
+                                                            <?php if (!$isFree && !empty($sesi['deskripsi_sesi'])): ?>
+                                                                <p class="text-secondary mb-0 mt-2" style="font-size: 0.85rem; line-height: 1.5;">
+                                                                    <span class="badge bg-primary mt-1" style="font-size: 0.65rem;">Gratis E-learning + Ujian Brevet AB</span>
+                                                                </p>
+                                                            <?php endif; ?>
+                                                        </div>
 
-                                                        <!-- Indikator Paket Selesai / Gratis -->
-                                                        <?php if ($isExpired && !$isFree): ?>
-                                                            <div class="mb-1">
-                                                                <span class="badge bg-danger mt-1" style="font-size: 0.75rem;">Semua Sesi Telah Berakhir</span>
-                                                            </div>
-                                                        <?php elseif ($isFree): ?>
-                                                            <div class="mb-1">
-                                                                <span class="badge bg-success mt-1" style="font-size: 0.65rem;">Fasilitas terbatas</span>
-                                                            </div>
-                                                        <?php endif; ?>
+                                                        <div class="text-end flex-shrink-0">
+                                                            <?php if (!$isFree && isset($sesi['harga_coret']) && $sesi['harga_coret'] > $sesi['harga_sesi']): ?>
+                                                                <span class="text-muted text-decoration-line-through d-block" style="font-size: 0.85rem;">Rp <?= number_format($sesi['harga_coret'], 0, ',', '.') ?></span>
+                                                            <?php endif; ?>
+                                                            <h5 class="fw-bold <?= $isExpired && !$isFree ? 'text-muted text-decoration-line-through' : 'text-primary' ?> d-block mb-1">
+                                                                <?= $isFree ? 'Rp 0' : 'Rp ' . number_format($sesi['harga_sesi'], 0, ',', '.') ?>
+                                                            </h5>
+                                                        </div>
+                                                    </div>
 
-                                                        <!-- Tampilan Deskripsi Sesi Berbayar -->
-                                                        <?php if (!$isFree && !empty($sesi['deskripsi_sesi'])): ?>
-                                                            <p class="text-secondary mb-0 mt-2" style="font-size: 0.85rem; line-height: 1.5;">
-                                                                <span class="badge bg-primary mt-1" style="font-size: 0.65rem;">Gratis E-learning + Ujian Brevet AB</span>
-                                                            </p>
+                                                    <div class="mt-4 pt-3 border-top flex-grow-1">
+                                                        <?php if (!empty($childSessionsData)): ?>
+                                                            <p class="text-dark fw-bold fs-7 mb-3"><i class="fa-solid fa-layer-group me-2 text-primary"></i>4 Materi Spesial Webinar:</p>
+                                                            <ul class="list-unstyled mb-4" style="margin-bottom: 0;">
+                                                                <?php foreach ($childSessionsData as $cs): ?>
+                                                                    <?php $isCsExpired = (strtotime($cs['waktu_mulai']) <= strtotime($currentDateTime)); ?>
+                                                                    <li class="<?= $isCsExpired ? 'opacity-75' : '' ?> mb-3 d-flex align-items-start">
+                                                                        <i class="fa-solid fa-circle-check <?= $isCsExpired ? 'text-secondary' : 'text-success' ?> fs-6 mt-1 me-3"></i>
+                                                                        <div>
+                                                                            <span class="fw-semibold <?= $isCsExpired ? 'text-decoration-line-through text-muted' : 'text-dark' ?> d-block mb-1" style="font-size: 0.95rem; line-height: 1.3;"><?= esc($cs['nama_sesi']) ?></span>
+                                                                            <span class="text-primary fw-bold" style="font-size: 0.8rem;">
+                                                                                <?php
+                                                                                $timestamp = strtotime($cs['waktu_mulai']);
+                                                                                $namaHari = ['Sun' => 'Minggu', 'Mon' => 'Senin', 'Tue' => 'Selasa', 'Wed' => 'Rabu', 'Thu' => 'Kamis', 'Fri' => 'Jumat', 'Sat' => 'Sabtu'][date('D', $timestamp)];
+                                                                                $namaBulan = ['January' => 'Januari', 'February' => 'Februari', 'March' => 'Maret', 'April' => 'April', 'May' => 'Mei', 'June' => 'Juni', 'July' => 'Juli', 'August' => 'Agustus', 'September' => 'September', 'October' => 'Oktober', 'November' => 'November', 'December' => 'Desember'][date('F', $timestamp)];
+                                                                                $formattedDate = $namaHari . ', ' . date('d', $timestamp) . ' ' . $namaBulan . ' ' . date('Y, H:i', $timestamp);
+                                                                                ?>
+                                                                                <i class="far fa-calendar-alt me-1"></i> <?= $formattedDate ?> WIB
+                                                                            </span>
+                                                                            <?php if ($isCsExpired): ?>
+                                                                                <span class="badge bg-danger ms-2" style="font-size: 0.65rem;">Selesai</span>
+                                                                            <?php endif; ?>
+                                                                        </div>
+                                                                    </li>
+                                                                <?php endforeach; ?>
+                                                            </ul>
+                                                        <?php elseif ($isFree && empty($childSessionsData)): ?>
+                                                            <p class="text-muted fs-8 mb-4 fst-italic"><i class="fa-solid fa-info-circle me-1"></i> Belum ada sesi tertaut.</p>
                                                         <?php endif; ?>
                                                     </div>
 
-                                                    <div class="text-end flex-shrink-0">
-                                                        <!-- Menampilkan Diskon Sesi (Harga Coret) -->
-                                                        <?php if (!$isFree && isset($sesi['harga_coret']) && $sesi['harga_coret'] > $sesi['harga_sesi']): ?>
-                                                            <span class="text-muted text-decoration-line-through d-block" style="font-size: 0.85rem;">Rp <?= number_format($sesi['harga_coret'], 0, ',', '.') ?></span>
+                                                    <div class="mt-auto">
+                                                        <?php if ($isFree): ?>
+                                                            <div class="alert alert-info py-2 px-3 border-0 mb-0 d-flex align-items-start gap-2 rounded-3" style="font-size: 0.8rem; line-height: 1.4; background-color: #e3f2fd; color: #0277bd;">
+                                                                <i class="fa-solid fa-circle-info mt-1"></i>
+                                                                <div><strong>Informasi Paket:</strong> <?= $sesi['deskripsi_sesi'] ?></div>
+                                                            </div>
+                                                        <?php else: ?>
+                                                            <div class="alert alert-info py-2 px-3 border-0 mb-0 d-flex align-items-start gap-2 rounded-3" style="font-size: 0.8rem; line-height: 1.4; background-color: #e3f2fd; color: #0277bd;">
+                                                                <i class="fa-solid fa-circle-info mt-1"></i>
+                                                                <div><strong>Informasi Paket:</strong> <?= $sesi['deskripsi_sesi'] ?></div>
+                                                            </div>
                                                         <?php endif; ?>
-
-                                                        <h5 class="fw-bold <?= $isExpired && !$isFree ? 'text-muted text-decoration-line-through' : 'text-primary' ?> d-block mb-1">
-                                                            <?= $isFree ? 'Rp 0' : 'Rp ' . number_format($sesi['harga_sesi'], 0, ',', '.') ?>
-                                                        </h5>
                                                     </div>
                                                 </div>
-
-                                                <!-- List Sesi Khusus untuk Paket dengan Icon Ceklis Profesional -->
-                                                <div class="mt-4 pt-3 border-top flex-grow-1">
-                                                    <?php if (!empty($childSessionsData)): ?>
-                                                        <p class="text-dark fw-bold fs-7 mb-3"><i class="fa-solid fa-layer-group me-2 text-primary"></i>4 Materi Spesial Webinar:</p>
-                                                        <ul class="list-unstyled mb-4" style="margin-bottom: 0;">
-                                                            <?php foreach ($childSessionsData as $cs): ?>
-                                                                <?php $isCsExpired = (strtotime($cs['waktu_mulai']) <= strtotime($currentDateTime)); ?>
-                                                                <li class="<?= $isCsExpired ? 'opacity-75' : '' ?> mb-3 d-flex align-items-start">
-                                                                    <!-- Icon Ceklis Pengganti Bullet -->
-                                                                    <i class="fa-solid fa-circle-check <?= $isCsExpired ? 'text-secondary' : 'text-success' ?> fs-6 mt-1 me-3"></i>
-                                                                    <div>
-                                                                        <span class="fw-semibold <?= $isCsExpired ? 'text-decoration-line-through text-muted' : 'text-dark' ?> d-block mb-1" style="font-size: 0.95rem; line-height: 1.3;">
-                                                                            <?= esc($cs['nama_sesi']) ?>
-                                                                        </span>
-                                                                        <span class="text-primary fw-bold" style="font-size: 0.8rem;">
-                                                                            <?php
-                                                                            $timestamp = strtotime($cs['waktu_mulai']);
-                                                                            $namaHari = ['Sun' => 'Minggu', 'Mon' => 'Senin', 'Tue' => 'Selasa', 'Wed' => 'Rabu', 'Thu' => 'Kamis', 'Fri' => 'Jumat', 'Sat' => 'Sabtu'][date('D', $timestamp)];
-                                                                            $namaBulan = ['January' => 'Januari', 'February' => 'Februari', 'March' => 'Maret', 'April' => 'April', 'May' => 'Mei', 'June' => 'Juni', 'July' => 'Juli', 'August' => 'Agustus', 'September' => 'September', 'October' => 'Oktober', 'November' => 'November', 'December' => 'Desember'][date('F', $timestamp)];
-                                                                            $formattedDate = $namaHari . ', ' . date('d', $timestamp) . ' ' . $namaBulan . ' ' . date('Y, H:i', $timestamp);
-                                                                            ?>
-
-                                                                            <i class="far fa-calendar-alt me-1"></i> <?= $formattedDate ?> WIB
-                                                                        </span>
-                                                                        <?php if ($isCsExpired): ?>
-                                                                            <span class="badge bg-danger ms-2" style="font-size: 0.65rem;">Selesai</span>
-                                                                        <?php endif; ?>
-                                                                    </div>
-                                                                </li>
-                                                            <?php endforeach; ?>
-                                                        </ul>
-                                                    <?php elseif ($isFree && empty($childSessionsData)): ?>
-                                                        <p class="text-muted fs-8 mb-4 fst-italic"><i class="fa-solid fa-info-circle me-1"></i> Belum ada sesi tertaut.</p>
-                                                    <?php endif; ?>
-                                                </div>
-
-                                                <!-- Alert Info Footer Card -->
-                                                <div class="mt-auto">
-                                                    <?php if ($isFree): ?>
-                                                        <div class="alert alert-info py-2 px-3 border-0 mb-0 d-flex align-items-start gap-2 rounded-3" style="font-size: 0.8rem; line-height: 1.4; background-color: #e3f2fd; color: #0277bd;">
-                                                            <i class="fa-solid fa-circle-info mt-1"></i>
-                                                            <div>
-                                                                <strong>Informasi Paket:</strong> <?= $sesi['deskripsi_sesi'] ?>
-                                                            </div>
-                                                        </div>
-                                                    <?php else: ?>
-                                                        <div class="alert alert-info py-2 px-3 border-0 mb-0 d-flex align-items-start gap-2 rounded-3" style="font-size: 0.8rem; line-height: 1.4; background-color: #e3f2fd; color: #0277bd;">
-                                                            <i class="fa-solid fa-circle-info mt-1"></i>
-                                                            <div>
-                                                                <strong>Informasi Paket:</strong> <?= $sesi['deskripsi_sesi'] ?>
-                                                            </div>
-                                                        </div>
-                                                    <?php endif; ?>
-                                                </div>
-                                            </div>
-                                        </label>
-                                    </div>
-                                <?php endforeach; ?>
-                            <?php else : ?>
-                                <div class="col-12">
-                                    <div class="alert alert-warning border-dashed">Sesi belum tersedia untuk pendaftaran saat ini.</div>
-                                </div>
-                            <?php endif; ?>
+                                            </label>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- ============================== -->
-                    <!-- BARIS BAWAH: DATA PESERTA & BAYAR -->
-                    <!-- ============================== -->
-                    <div class="row g-4">
-                        <!-- KOLOM KIRI BAWAH: Data Diri -->
-                        <div class="col-lg-7">
-                            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
-                                <h4 class="fw-bold mb-4 border-bottom pb-2">2. Data Peserta</h4>
+                        <!-- BARIS BAWAH: DATA PESERTA & BAYAR -->
+                        <div class="row g-4">
+                            <div class="col-lg-7">
+                                <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                                    <h4 class="fw-bold mb-4 border-bottom pb-2">2. Data Peserta</h4>
 
-                                <div class="mb-3">
-                                    <label class="form-label fw-semibold">Nama Lengkap <span class="text-danger">*</span></label>
-                                    <input type="text" name="nama" value="<?= session()->get('id') && isset($siswa) ? esc($siswa['nama_siswa']) : esc(old('nama')) ?>" class="form-control form-control-lg" placeholder="Masukkan nama lengkap" required <?= session()->get('id') ? 'readonly style="cursor: not-allowed; background-color: #e9ecef;"' : '' ?>>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Nama Lengkap <span class="text-danger">*</span></label>
+                                        <input type="text" name="nama" value="<?= session()->get('id') && isset($siswa) ? esc($siswa['nama_siswa']) : esc(old('nama')) ?>" class="form-control form-control-lg" placeholder="Masukkan nama lengkap" required <?= session()->get('id') ? 'readonly style="cursor: not-allowed; background-color: #e9ecef;"' : '' ?>>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Email Aktif<span class="text-danger">*</span></label>
+                                        <input type="email" name="email" value="<?= session()->get('id') && isset($siswa) ? esc($siswa['email']) : esc(old('email')) ?>" class="form-control form-control-lg" placeholder="contoh@email.com" required <?= session()->get('id') ? 'readonly style="cursor: not-allowed; background-color: #e9ecef;"' : '' ?>>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Nomor WhatsApp <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <input type="number" name="hp" value="<?= session()->get('id') && isset($siswa) ? esc($siswa['hp']) : esc(old('hp')) ?>" class="form-control form-control-lg" placeholder="81234567890" pattern="[0-9]+" minlength="10" maxlength="15" required autocomplete="off" <?= session()->get('id') ? 'readonly style="cursor: not-allowed; background-color: #e9ecef;"' : '' ?>>
+                                        </div>
+                                    </div>
                                 </div>
+                            </div>
 
-                                <div class="mb-3">
-                                    <label class="form-label fw-semibold">Email Aktif<span class="text-danger">*</span></label>
-                                    <input type="email" name="email" value="<?= session()->get('id') && isset($siswa) ? esc($siswa['email']) : esc(old('email')) ?>" class="form-control form-control-lg" placeholder="contoh@email.com" required <?= session()->get('id') ? 'readonly style="cursor: not-allowed; background-color: #e9ecef;"' : '' ?>>
-                                </div>
+                            <div class="col-lg-5">
+                                <div class="card border-primary shadow-sm rounded-4 p-4 h-100 d-flex flex-column justify-content-center bg-light" style="border-width: 2px !important;">
+                                    <div class="text-center">
+                                        <p class="text-secondary fw-semibold mb-1">Total Pembayaran Anda</p>
+                                        <h1 class="fw-bold text-primary mb-4" id="displayTotal">Rp 0</h1>
 
-                                <div class="mb-3">
-                                    <label class="form-label fw-semibold">Nomor WhatsApp <span class="text-danger">*</span></label>
-                                    <div class="input-group">
-                                        <input type="number" name="hp" value="<?= session()->get('id') && isset($siswa) ? esc($siswa['hp']) : esc(old('hp')) ?>" class="form-control form-control-lg" placeholder="81234567890" pattern="[0-9]+" minlength="10" maxlength="15" required autocomplete="off" <?= session()->get('id') ? 'readonly style="cursor: not-allowed; background-color: #e9ecef;"' : '' ?>>
+                                        <button type="submit" id="btnSubmit" class="btn btn-primary btn-lg w-100 fw-bold rounded-pill shadow-sm py-3" disabled>
+                                            <i class="fa-solid fa-shield-halved me-2"></i> Daftar & Lanjut Bayar
+                                        </button>
+
+                                        <div class="mt-4 pt-3 border-top">
+                                            <small class="text-muted d-block mb-2 fw-medium">Pembayaran aman didukung oleh:</small>
+                                            <img src="https://opd-static.midtrans.com/assethera/logo/midtrans-dark-3a5ac77cd3110b28b32cb590fc968f296d2123e686591d636bd51b276f6ed034.svg" height="25" alt="Midtrans Logo" style="opacity: 0.8;">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- KOLOM KANAN BAWAH: Total Bayar & Tombol -->
-                        <div class="col-lg-5">
-                            <div class="card border-primary shadow-sm rounded-4 p-4 h-100 d-flex flex-column justify-content-center bg-light" style="border-width: 2px !important;">
-                                <div class="text-center">
-                                    <p class="text-secondary fw-semibold mb-1">Total Pembayaran Anda</p>
-                                    <h1 class="fw-bold text-primary mb-4" id="displayTotal">Rp 0</h1>
-
-                                    <button type="submit" id="btnSubmit" class="btn btn-primary btn-lg w-100 fw-bold rounded-pill shadow-sm py-3" disabled>
-                                        <i class="fa-solid fa-shield-halved me-2"></i> Daftar & Lanjut Bayar
-                                    </button>
-
-                                    <div class="mt-4 pt-3 border-top">
-                                        <small class="text-muted d-block mb-2 fw-medium">Pembayaran aman didukung oleh:</small>
-                                        <img src="https://opd-static.midtrans.com/assethera/logo/midtrans-dark-3a5ac77cd3110b28b32cb590fc968f296d2123e686591d636bd51b276f6ed034.svg" height="25" alt="Midtrans Logo" style="opacity: 0.8;">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <?php endif; ?>
 
                 </form>
             </div>
