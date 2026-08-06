@@ -145,6 +145,13 @@ class WebinarController extends BaseController
         $cekSiswa = $this->siswaModel->where('email', $email)->first();
         if ($cekSiswa) {
             $id_siswa = $cekSiswa['id_siswa'];
+            $data_siswa = array(
+                'hp' => $hp,
+            );
+
+            // Melakukan Update data berdasarkan id_siswa
+            $this->siswaModel->update($id_siswa, $data_siswa);
+
             $subject = 'SELAMAT ANDA BERHASIL TERDAFTAR DI DIWEBINAR KELASBREVET';
             $message = '
             <div style="color: #000; padding: 10px;">
