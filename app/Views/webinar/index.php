@@ -713,7 +713,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                             <h1 class="fw-bold text-primary mb-0" id="displayTotal">Rp 0</h1>
                                         </div>
                                         <div class="col-lg-5 text-center text-lg-end">
-                                            <button type="submit" id="btnSubmit" class="btn btn-primary btn-lg w-100 fw-bold rounded-pill shadow-sm py-3 px-5" disabled>
+                                            <button type="submit" id="btnSubmit" class="btn btn-primary w-100 fw-bold rounded-pill shadow-sm py-3 px-5" disabled>
                                                 <i class="fa-solid fa-shield-halved me-2"></i> Daftar & Lanjut Bayar
                                             </button>
                                             <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-center justify-content-lg-end gap-2">
