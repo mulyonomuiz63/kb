@@ -690,7 +690,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                                 <!-- Alert Info Footer Card -->
                                                 <div class="mt-auto">
                                                     <?php if ($isFree): ?>
-                                                        <div class="alert py-2 px-3 border-0 mb-0 d-flex align-items-start gap-2 rounded-3" style="font-size: 0.8rem; line-height: 1.4; background-color: #fce4ec; color: #c2185b;">
+                                                        <div class="alert alert-info py-2 px-3 border-0 mb-0 d-flex align-items-start gap-2 rounded-3" style="font-size: 0.8rem; line-height: 1.4; background-color: #e3f2fd; color: #0277bd;">
                                                             <i class="fa-solid fa-circle-info mt-1"></i>
                                                             <div>
                                                                 <strong>Informasi Paket:</strong> <?= $sesi['deskripsi_sesi'] ?>
@@ -700,7 +700,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                                         <div class="alert alert-info py-2 px-3 border-0 mb-0 d-flex align-items-start gap-2 rounded-3" style="font-size: 0.8rem; line-height: 1.4; background-color: #e3f2fd; color: #0277bd;">
                                                             <i class="fa-solid fa-circle-info mt-1"></i>
                                                             <div>
-                                                                <strong>Informasi Paket:</strong> Anda akan mendapatkan rekaman webinar, materi, dan sertifikat langsung di website kelasbrevet.com
+                                                                <strong>Informasi Paket:</strong> <?= $sesi['deskripsi_sesi'] ?>
                                                             </div>
                                                         </div>
                                                     <?php endif; ?>
@@ -823,7 +823,6 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                         <div class="col-lg-7 p-4 bg-white d-flex flex-column justify-content-center">
                                             <h4 class="fw-bold text-primary mb-3"><?= $paketWebinar ? esc($paketWebinar->nama_paket) : 'Paket VIP Access' ?></h4>
                                             <ul class="list-unstyled mb-0" style="font-size: 0.9rem;">
-                                                <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i> E-Learning + Ujian Brevet AB</li>
                                                 <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i> Akses Live Gmeet Session</li>
                                                 <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i> E-Sertifikat Kehadiran</li>
                                                 <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i> PDF Modul Materi</li>
