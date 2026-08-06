@@ -690,13 +690,13 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
 
                                     <div class="mb-3">
                                         <label class="form-label fw-semibold">Email Aktif<span class="text-danger">*</span></label>
-                                        <input type="email" name="email" value="<?= session()->get('id') && isset($siswa) ? esc($siswa['email']) : esc(old('email')) ?>" class="form-control form-control-lg" placeholder="contoh@email.com" required <?= session()->get('id') ? 'readonly style="cursor: not-allowed; background-color: #e9ecef;"' : '' ?>>
+                                        <input type="email" name="email" value="<?= session()->get('id') && isset($siswa) ? esc($siswa['email']) : esc(old('email')) ?>" class="form-control form-control-lg" placeholder="" required <?= session()->get('id') ? 'readonly style="cursor: not-allowed; background-color: #e9ecef;"' : '' ?>>
                                     </div>
 
                                     <div class="mb-3">
                                         <label class="form-label fw-semibold">Nomor WhatsApp <span class="text-danger">*</span></label>
                                         <div class="input-group">
-                                            <input type="number" name="hp" value="<?= session()->get('id') && isset($siswa) ? esc($siswa['hp']) : esc(old('hp')) ?>" class="form-control form-control-lg" placeholder="081234567890" pattern="[0-9]+" minlength="10" maxlength="15" required autocomplete="off" <?= session()->get('id') ? 'style="cursor: not-allowed; background-color: #e9ecef;"' : '' ?>>
+                                            <input type="number" name="hp" value="<?= session()->get('id') && isset($siswa) ? esc($siswa['hp']) : esc(old('hp')) ?>" class="form-control form-control-lg" placeholder="" pattern="[0-9]+" minlength="10" maxlength="15" required autocomplete="off">
                                         </div>
                                     </div>
                                 </div>
