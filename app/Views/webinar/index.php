@@ -1263,6 +1263,31 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
             <?php endif; ?>
         });
     </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Cari tombol berdasarkan ID
+            const btnSubmit = document.getElementById('btnSubmit');
+
+            if (btnSubmit) {
+                // Cari form terdekat yang membungkus tombol ini
+                const form = btnSubmit.closest('form');
+
+                if (form) {
+                    form.addEventListener('submit', function() {
+                        // 1. Ubah teks dan ganti icon menjadi spinner (berputar)
+                        btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> Sedang Memproses...';
+
+                        // 2. Matikan tombol agar tidak bisa diklik lagi
+                        btnSubmit.disabled = true;
+                        btnSubmit.classList.add('disabled');
+
+                        // 3. Tambahan keamanan: matikan event pointer (klik)
+                        btnSubmit.style.pointerEvents = 'none';
+                    });
+                }
+            }
+        });
+    </script>
 </body>
 
 </html>

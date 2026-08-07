@@ -285,8 +285,20 @@
                             $waktuSelesai = strtotime($child->waktu_selesai);
                             $waktuBukaZoom = $waktuMulai - (2 * 3600); // 2 jam sebelum acara mulai
 
+                            // LOGIKA BARU: Ambil Waktu Pembelian User (Cek tgl_pembayaran, jika kosong pakai created_at)
+                            $waktuBeli = strtotime($w->tgl_pembayaran ?? $w->created_at);
+
+                            // Cek apakah user mendaftar/membayar SETELAH sesi ini selesai
+                            $isTerlambatBeli = ($waktuBeli > $waktuSelesai);
+
                             // 1. Menentukan Status Sesi Zoom (Dibuka 2 jam sebelum mulai)
-                            if ($currentDateTime < $waktuBukaZoom) {
+                            if ($isTerlambatBeli) {
+                                // STATUS BARU: Jika telat beli
+                                $status = 'missed';
+                                $badgeColor = 'badge-light-danger';
+                                $badgeText = 'Sesi Terlewat';
+                                $icon = 'ki-cross-circle';
+                            } elseif ($currentDateTime < $waktuBukaZoom) {
                                 $status = 'upcoming';
                                 $badgeColor = 'badge-light-warning';
                                 $badgeText = 'Akan Datang';
@@ -329,7 +341,7 @@
 
                                     <!-- Card Header / Image Thumbnail -->
                                     <div class="position-relative img-zoom-container bg-light" style="aspect-ratio: 16/9; flex-shrink: 0;">
-                                        <?php if ($firstVideoId && !$isPaketGratis): ?>
+                                        <?php if ($firstVideoId && !$isPaketGratis && !$isTerlambatBeli): ?>
                                             <img src="https://img.youtube.com/vi/<?= $firstVideoId ?>/maxresdefault.jpg" onerror="this.onerror=null; this.src='https://img.youtube.com/vi/<?= $firstVideoId ?>/hqdefault.jpg';" loading="lazy" class="w-100 h-100 object-fit-cover" alt="<?= esc($child->nama_sesi) ?>">
                                             <div class="position-absolute top-50 start-50 translate-middle">
                                                 <i class="ki-solid ki-youtube fs-3x text-danger bg-white rounded-circle shadow-sm"></i>
@@ -353,9 +365,9 @@
                                             <?php endif; ?>
                                         </div>
 
-                                        <!-- Status Live/Upcoming -->
+                                        <!-- Status Live/Upcoming/Missed -->
                                         <div class="position-absolute top-0 end-0 p-4">
-                                            <span class="badge <?= $badgeColor ?> fs-8 fw-bold px-4 py-2 border-0 shadow-sm">
+                                            <span class="badge <?= $badgeColor ?> fs-8 fw-bold px-4 py-2 border-0 shadow-sm" <?= $status == 'missed' ? 'data-bs-toggle="tooltip" title="Anda mendaftar setelah sesi ini selesai"' : '' ?>>
                                                 <i class="ki-outline <?= $icon ?> fs-8 me-1 <?= $status == 'live' ? 'text-white' : '' ?>"></i> <?= $badgeText ?>
                                             </span>
                                         </div>
@@ -412,12 +424,15 @@
                                                 </div>
                                                 <div class="d-flex flex-column gap-2" style="max-height: 140px; overflow-y: auto;">
 
-                                                    <?php if ($isPaketGratis): ?>
+                                                    <!-- UPDATE: Logika Terkunci (Gratis ATAU Terlewat Beli) -->
+                                                    <?php if ($isPaketGratis || $isTerlambatBeli): ?>
                                                         <div class="alert alert-light-danger border border-danger border-dashed p-3 m-0 d-flex align-items-center">
                                                             <i class="ki-outline ki-lock-3 fs-1 text-danger me-3"></i>
                                                             <div class="d-flex flex-column">
                                                                 <span class="fw-bold text-danger fs-8">Akses Terkunci</span>
-                                                                <span class="text-muted fs-9">Rekaman hanya untuk peserta Premium.</span>
+                                                                <span class="text-muted fs-9">
+                                                                    <?= $isTerlambatBeli ? 'Anda mendaftar setelah sesi ini selesai.' : 'Rekaman hanya untuk peserta Premium.' ?>
+                                                                </span>
                                                             </div>
                                                         </div>
                                                     <?php else: ?>
@@ -442,7 +457,12 @@
 
                                         <!-- Action Button Gmeet & Sertifikat -->
                                         <div class="mt-auto pt-4">
-                                            <?php if ($status == 'upcoming'): ?>
+                                            <?php if ($status == 'missed'): ?>
+                                                <!-- TOMBOL JIKA TERLAMBAT BELI -->
+                                                <button class="btn btn-light-danger w-100 fs-7 fw-bold py-3 disabled" disabled>
+                                                    <i class="ki-outline ki-cross-square fs-5 me-2"></i> Akses Ditutup (Terlewat)
+                                                </button>
+                                            <?php elseif ($status == 'upcoming'): ?>
                                                 <button class="btn btn-light w-100 fs-7 fw-bold py-3 disabled" disabled>
                                                     <i class="ki-outline ki-lock fs-5 me-2"></i> Akses Gmeet Dibuka <?= date('d M H:i', $waktuBukaZoom) ?>
                                                 </button>
@@ -451,7 +471,7 @@
                                                     Gabung Gmeet <i class="ki-outline ki-entrance-left fs-5 ms-2"></i>
                                                 </a>
                                             <?php else: ?>
-                                                <!-- PERUBAHAN DI SINI: Tombol Download Sertifikat -->
+                                                <!-- TOMBOL SERTIFIKAT JIKA NORMAL & SELESAI -->
                                                 <button type="button" class="btn btn-success w-100 fs-7 fw-bold py-3 shadow-sm hover-elevate-up" data-bs-toggle="modal" data-bs-target="#modalSertifikat" data-nama="<?= esc($child->nama_sesi) ?>" data-idsesi="<?= encrypt_url($child->id_sesi) ?>">
                                                     <i class="ki-outline ki-diploma fs-4 me-2"></i> Lihat Sertifikat
                                                 </button>
@@ -461,7 +481,6 @@
                                 </div>
                             </div>
                         <?php endforeach; ?>
-                        <!-- End of Child Cards Loop -->
 
                     <?php endforeach; ?>
                 <?php else: ?>

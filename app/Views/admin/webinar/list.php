@@ -91,6 +91,16 @@
                         <input type="number" step="0.01" name="harga_sesi" class="form-control form-control-solid" placeholder="0" required>
                     </div>
 
+                    <!-- TAMBAHAN: Input Status (Gratis / Berbayar) -->
+                    <div class="fv-row mb-7">
+                        <label class="required fs-6 fw-semibold mb-2">Status Untuk Full Akses</label>
+                        <select name="status" class="form-select form-select-solid" required>
+                            <option value="" selected disabled>-- Pilih Status Sesi --</option>
+                            <option value="F">Gratis</option>
+                            <option value="B">Berbayar</option>
+                        </select>
+                    </div>
+
                     <!-- Input Sesi Gratis / Bonus Terkait -->
                     <div class="fv-row mb-7" id="sesi_gratis">
                         <label class="fs-6 fw-semibold mb-2">Pilih Sesi Bonus / Gratis Terkait</label>
@@ -160,6 +170,14 @@
                     <div class="fv-row mb-7">
                         <label class="required fs-6 fw-semibold mb-2">Harga Sesi (Rp)</label>
                         <input type="number" step="0.01" name="harga_sesi" id="e_harga_sesi" class="form-control form-control-solid" required>
+                    </div>
+
+                    <div class="fv-row mb-7">
+                        <label class="required fs-6 fw-semibold mb-2">Status Untuk Full Akses</label>
+                        <select name="status" id="e_status" class="form-select form-select-solid" required>
+                            <option value="F">Gratis</option>
+                            <option value="B">Berbayar</option>
+                        </select>
                     </div>
 
                     <!-- Input Sesi Gratis / Bonus Terkait Edit -->
@@ -291,6 +309,7 @@
 
                     // Set value untuk select2 multi-select sesi gratis
                     $("#e_sesi_gratis").val(data.sesi_gratis_array).trigger('change');
+                    $("#e_status").val(data.status);
 
                     $('#edit_webinar').modal('show');
                 }

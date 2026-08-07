@@ -176,6 +176,7 @@ class WebinarController extends BaseController
                 'link_zoom'      => json_encode(array_values($zoomArray)),
                 'link_youtube'   => json_encode(array_values($ytArray)),
                 'sesi_gratis'    => json_encode(array_values($sesiGratisInput)),
+                'status'         => $this->request->getVar('status')
             ];
 
             if ($this->webinarSesiModel->insert($data)) {
@@ -236,6 +237,7 @@ class WebinarController extends BaseController
                 'link_zoom'      => json_encode(array_values($zoomArray)),
                 'link_youtube'   => json_encode(array_values($ytArray)),
                 'sesi_gratis'    => json_encode(array_values($sesiGratisInput)),
+                'status'         => $this->request->getVar('status')
             ]);
             
 
