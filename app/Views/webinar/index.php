@@ -1244,7 +1244,8 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                 Swal.fire({
                     icon: 'success',
                     title: 'Berhasil!',
-                    text: '<?= session()->getFlashdata('success') ?>',
+                    // Hapus tanda kutip manual (' ') dan gunakan json_encode
+                    text: <?= json_encode(session()->getFlashdata('success')) ?>,
                     confirmButtonColor: '#0d6efd',
                     confirmButtonText: 'Tutup'
                 });
@@ -1254,7 +1255,8 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                 Swal.fire({
                     icon: 'error',
                     title: 'Gagal!',
-                    text: '<?= session()->getFlashdata('error') ?>',
+                    // Hapus tanda kutip manual (' ') dan gunakan json_encode
+                    text: <?= json_encode(session()->getFlashdata('error')) ?>,
                     confirmButtonColor: '#dc3545',
                     confirmButtonText: 'Tutup'
                 });

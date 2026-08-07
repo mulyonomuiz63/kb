@@ -88,7 +88,7 @@ class WebinarController extends BaseController
         // 1. Sanitasi dan Casting Input untuk mencegah manipulasi data
         $idpaket      = (int)$this->request->getPost('idpaket');
         $email        = $this->request->getPost('email', FILTER_SANITIZE_EMAIL);
-        $nama_siswa    = esc($this->request->getPost('nama')); // Diubah jadi 'nama' menyesuaikan form HTML
+        $nama_siswa    = esc($this->request->getPost('nama'));
         $hp           = esc($this->request->getPost('hp'));
         $sesi_terpilih = $this->request->getPost('id_sesi'); // Bentuknya Array
 
@@ -97,25 +97,12 @@ class WebinarController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Pilih minimal satu sesi webinar.');
         }
 
+        // ==============================================================================
+        // UPGRADE 1: VALIDASI DINAMIS (Berdasarkan Session Login / User Baru)
+        // ==============================================================================
+        $id_session = session()->get('id'); 
+        
         $rules = [
-            'email' => [
-                // is_unique dihapus karena sistem Anda memperbolehkan user lama beli paket baru
-                'rules'  => 'required|valid_email',
-                'errors' => [
-                    'required'    => 'Email tidak boleh kosong.',
-                    'valid_email' => 'Format email menyimpang (Gunakan standar: contoh@mail.com).'
-                ]
-            ],
-            'hp' => [
-                // is_unique dihapus dengan alasan yang sama
-                'rules'  => 'required|numeric|min_length[9]|max_length[15]',
-                'errors' => [
-                    'required'   => 'Nomor HP harus diisi.',
-                    'numeric'    => 'Nomor HP hanya boleh berisi angka.',
-                    'min_length' => 'Nomor HP minimal terdiri dari 9 digit.',
-                    'max_length' => 'Nomor HP maksimal terdiri dari 15 digit.'
-                ]
-            ],
             'nama' => [
                 'rules'  => 'required|alpha_numeric_space|min_length[3]|max_length[60]',
                 'errors' => [
@@ -127,11 +114,52 @@ class WebinarController extends BaseController
             ],
         ];
 
+        if ($id_session) {
+            // JIKA USER SUDAH LOGIN (SESSION ADA)
+            $rules['email'] = [
+                'rules'  => 'required|valid_email', // Tidak perlu is_unique karena memakai emailnya sendiri
+                'errors' => [
+                    'required'    => 'Email tidak boleh kosong.',
+                    'valid_email' => 'Format email menyimpang (Gunakan standar: contoh@mail.com).'
+                ]
+            ];
+            $rules['hp'] = [
+                'rules'  => "required|numeric|min_length[9]|max_length[15]|is_unique[siswa.hp,id_siswa,{$id_session}]",
+                'errors' => [
+                    'required'   => 'Nomor HP harus diisi.',
+                    'numeric'    => 'Nomor HP hanya boleh berisi angka.',
+                    'min_length' => 'Nomor HP minimal 9 digit.',
+                    'max_length' => 'Nomor HP maksimal 15 digit.',
+                    'is_unique'  => 'Nomor HP ini sudah digunakan oleh akun lain.'
+                ]
+            ];
+        } else {
+            // JIKA USER BARU (TIDAK ADA SESSION)
+            $rules['email'] = [
+                'rules'  => 'required|valid_email|is_unique[siswa.email]',
+                'errors' => [
+                    'required'    => 'Email tidak boleh kosong.',
+                    'valid_email' => 'Format email menyimpang.',
+                    'is_unique'   => 'Email ini sudah terdaftar,'
+                ]
+            ];
+            $rules['hp'] = [
+                'rules'  => 'required|numeric|min_length[9]|max_length[15]|is_unique[siswa.hp]',
+                'errors' => [
+                    'required'   => 'Nomor HP harus diisi.',
+                    'numeric'    => 'Nomor HP hanya boleh berisi angka.',
+                    'min_length' => 'Nomor HP minimal 9 digit.',
+                    'max_length' => 'Nomor HP maksimal 15 digit.',
+                    'is_unique'  => 'Nomor HP ini sudah terdaftar'
+                ]
+            ];
+        }
+
         // Jalankan Validasi Sisi Server
         if (!$this->validate($rules)) {
             $errors = $this->validator->getErrors();
             $errorMsg = implode(' ', $errors);
-            return redirect()->to('marathon-perpajakan')->withInput()->with('error', "'" . str_replace(["\r", "\n"], '', $errorMsg) . "'");
+            return redirect()->to('marathon-perpajakan')->withInput()->with('error', str_replace(["\r", "\n"], '', $errorMsg));
         }
 
         if (!is_valid_domain($email)) {
@@ -139,17 +167,68 @@ class WebinarController extends BaseController
         }
 
         $db = \Config\Database::connect();
+
+        // 2. Ambil Data Paket Lebih Awal (Untuk Cek Harga Gratis / Berbayar)
+        $dataPaket = $this->paketModel->select('paket.*, diskon.diskon, sum(webinar_sesi.harga_sesi) as harga_sesi')
+            ->join('diskon', 'paket.iddiskon = diskon.iddiskon', 'left')
+            ->join('detail_paket', 'paket.idpaket=detail_paket.idpaket', 'left')
+            ->join('webinar_sesi', 'detail_paket.id_sesi=webinar_sesi.id_sesi', 'left')
+            ->where('paket.idpaket', $idpaket)
+            ->whereIn('webinar_sesi.id_sesi', $sesi_terpilih)
+            ->get()->getRow();
+
+        if (empty($dataPaket)) {
+            return redirect()->to('marathon-perpajakan')->with('error', 'Data Paket Webinar tidak ditemukan.');
+        }
+
+        $isCurrentGratis = ((float) $dataPaket->harga_sesi <= 0);
+
+        // ==============================================================================
+        // UPGRADE 2 & 3: CEK DOBEL TRANSAKSI & VALIDASI GRATIS VS BERBAYAR
+        // Pengecekan dilakukan SEBELUM Database Transaction / Insert Siswa
+        // ==============================================================================
+        $cekSiswa = $this->siswaModel->where('email', $email)->first();
+        $id_siswa = $cekSiswa ? $cekSiswa['id_siswa'] : null;
+
+        if ($id_siswa) {
+            // [CEK ANTI SPAM / KLIK DOBEL] - Cek apakah user ini membuat transaksi di 10 detik terakhir
+            $recentTx = $db->table('transaksi')
+                ->where('idsiswa', $id_siswa)
+                ->where('created_at >=', date('Y-m-d H:i:s', time() - 10))
+                ->countAllResults();
+
+            if ($recentTx > 0) {
+                return redirect()->to('marathon-perpajakan')->withInput()->with('error', 'Sistem sedang memproses pendaftaran Anda. Mohon jangan klik tombol daftar berulang kali.');
+            }
+
+            // [CEK DUPLIKASI PAKET] - Boleh beli lagi JIKA beda versi (Gratis vs Berbayar)
+            $cekPaketAktif = $db->table('transaksi')
+                ->join('detail_transaksi', 'transaksi.idtransaksi = detail_transaksi.idtransaksi')
+                ->where('transaksi.idsiswa', $id_siswa)
+                ->whereIn('transaksi.status', ['M', 'S']) // M = Menunggu, S = Selesai/Lunas/Gratis
+                ->whereIn('detail_transaksi.idsesi', $sesi_terpilih);
+            
+            // Logika pembeda:
+            if ($isCurrentGratis) {
+                $cekPaketAktif->where('transaksi.nominal <=', 0); // Cari riwayat yang Gratis juga
+            } else {
+                $cekPaketAktif->where('transaksi.nominal >', 0); // Cari riwayat yang Berbayar juga
+            }
+
+            $cekPaketAktif = $cekPaketAktif->get()->getRow();
+
+            if ($cekPaketAktif) {
+                $tipePaket = $isCurrentGratis ? 'Gratis' : 'Premium/Berbayar';
+                return redirect()->to('marathon-perpajakan')->withInput()->with('error', "Anda sudah memiliki paket {$tipePaket} untuk sesi ini. Silahkan login ke akun Anda untuk melihat paket webinar.");
+            }
+        }
+        // ==============================================================================
+
         $db->transStart();
 
-        // 2. Cek apakah siswa sudah ada, jika belum otomatis daftar
-        $cekSiswa = $this->siswaModel->where('email', $email)->first();
+        // 3. Proses Insert/Update Siswa & Kirim Email (Logika Asli Anda)
         if ($cekSiswa) {
-            $id_siswa = $cekSiswa['id_siswa'];
-            $data_siswa = array(
-                'hp' => $hp,
-            );
-
-            // Melakukan Update data berdasarkan id_siswa
+            $data_siswa = array('hp' => $hp);
             $this->siswaModel->update($id_siswa, $data_siswa);
 
             $subject = 'SELAMAT ANDA BERHASIL TERDAFTAR DI DIWEBINAR KELASBREVET';
@@ -165,7 +244,6 @@ class WebinarController extends BaseController
                     <a href="' . base_url("auth/") . '"  style="display: inline-block; background: #1C3FAA; color: #fff;margin:10px; text-decoration: none; border-radius: 5px; text-align: center; line-height: 30px; font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; padding: 5px 20px;">Login</a>
             </div>';
 
-            // Kirim Email
             $this->emailer->send($email, $subject, $message);
         } else {
             $randomPassword = random_string('alnum', 8);
@@ -197,53 +275,20 @@ class WebinarController extends BaseController
                 <table style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; color: #000;">
                     <tr><td>Nama</td><td> : ' . substr($nama_siswa, 0, 10) . '</td></tr>
                     <tr><td>Email</td><td> : ' . $email . '</td></tr>
-                    <!-- NOTE: Password yang dikirim HARUS randomPassword asli, bukan Hash-nya -->
                     <tr><td>Password</td><td> : ' . $randomPassword . '</td></tr> 
                 </table>
                 <br>
                     <a href="' . base_url("auth/") . '"  style="display: inline-block; background: #1C3FAA; color: #fff;margin:10px; text-decoration: none; border-radius: 5px; text-align: center; line-height: 30px; font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; padding: 5px 20px;">Login</a>
             </div>';
 
-            // Kirim Email
             $this->emailer->send($email, $subject, $message);
         }
 
-        // ==============================================================================
-        // UPGRADE TAMBAHAN: Cek Jika Peserta Sudah Punya Paket/Sesi Ini (Gratis/Berbayar)
-        // ==============================================================================
-        $cekPaketAktif = $db->table('transaksi')
-            ->join('detail_transaksi', 'transaksi.idtransaksi = detail_transaksi.idtransaksi')
-            ->where('transaksi.idsiswa', $id_siswa)
-            ->whereIn('transaksi.status', ['M', 'S']) // 'S' = Lunas/Gratis (Selesai), 'M' = Menunggu Pembayaran
-            ->whereIn('detail_transaksi.idsesi', $sesi_terpilih)
-            ->get()
-            ->getRow();
-
-        if ($cekPaketAktif) {
-            $db->transRollback(); // Batalkan seluruh query sebelumnya (termasuk insert siswa jika baru)
-            return redirect()->to('marathon-perpajakan')->withInput()->with('error', 'Anda sudah terdaftar pada paket webinar ini. Silakan cek email Anda untuk informasi lebih lanjut.');
-        }
-        // ==============================================================================
-
-
-        // 3. Proses Pembayaran
+        // 4. Proses Pembayaran
         $tgl_mulai = date('Y-m-d H:i:s');
         $tgl_exp   = date('Y-m-d H:i:s', strtotime('+ 1 day', strtotime($tgl_mulai)));
 
-        // Keamanan: Pastikan paket yang dibeli ada di database
-        $dataPaket = $this->paketModel->select('paket.*, diskon.diskon, sum(webinar_sesi.harga_sesi) as harga_sesi')
-            ->join('diskon', 'paket.iddiskon = diskon.iddiskon', 'left')
-            ->join('detail_paket', 'paket.idpaket=detail_paket.idpaket', 'left')
-            ->join('webinar_sesi', 'detail_paket.id_sesi=webinar_sesi.id_sesi', 'left')
-            ->where('paket.idpaket', $idpaket)
-            ->whereIn('webinar_sesi.id_sesi', $sesi_terpilih)
-            ->get()->getRow();
-
-        if (empty($dataPaket)) {
-            return redirect()->to('marathon-perpajakan')->with('error', 'Data Paket Webinar tidak ditemukan.');
-        }
-
-        if ((float) $dataPaket->harga_sesi <= 0) {
+        if ($isCurrentGratis) {
             $status = 'S';
             $tgl_pembayaran = $tgl_mulai;
         } else {
@@ -266,7 +311,7 @@ class WebinarController extends BaseController
         $this->transaksiModel->insert($dataInsert);
         $idtransaksi = $this->transaksiModel->insertID();
 
-        // PERBAIKAN KRUSIAL: Filter sesi HANYA mengambil yang dicentang oleh user
+        // 5. Query Builder Detail Paket (Sesuai milik Anda)
         $builder = $db->table('detail_paket')
             ->select('
                 detail_paket.*, 
@@ -281,24 +326,20 @@ class WebinarController extends BaseController
             ->join('mapel', 'detail_paket.id_mapel = mapel.id_mapel', 'left')
             ->where('detail_paket.idpaket', $idpaket);
 
-        // PERBAIKAN: Mengelompokkan kondisi OR
         $builder->groupStart()
-            ->whereIn('detail_paket.id_sesi', $sesi_terpilih); // Selalu ambil sesi yang dicentang
+            ->whereIn('detail_paket.id_sesi', $sesi_terpilih);
 
-        // DIBENAHI: Kondisi diubah menjadi > 0 (Berbayar). 
-        // Jika gratis, if ini di-skip sehingga sistem HANYA menyimpan webinar_sesi.
-        if ((float) $dataPaket->harga_sesi > 0) {
-            $builder->orWhere('detail_paket.id_sesi', 0) // ATAU ambil yang id_sesi-nya 0 (Ujian / Materi)
-                ->orWhere('detail_paket.id_sesi IS NULL'); // Jaga-jaga jika di database tersimpan sebagai NULL
+        if (!$isCurrentGratis) {
+            $builder->orWhere('detail_paket.id_sesi', 0)
+                ->orWhere('detail_paket.id_sesi IS NULL');
         }
 
         $builder->groupEnd();
 
         $detailPaket = $builder->get()->getResultObject();
-        $gross_amount = 0; // Inisialisasi gross_amount
+        $gross_amount = 0; 
 
         if (!empty($detailPaket) && is_array($detailPaket)) {
-            // 1. Hitung Total Item dan Total Harga Keseluruhan
             $jmlDetail = count($detailPaket);
             $totalHargaKeseluruhan = 0;
 
@@ -306,8 +347,6 @@ class WebinarController extends BaseController
                 $totalHargaKeseluruhan += (float) $row->harga_sesi;
             }
 
-            // 2. Hitung Harga Rata-Rata per Item dan Sisa Pembagian
-            // Menggunakan floor agar hasilnya selalu bilangan bulat (integer)
             $hargaRataRata = floor($totalHargaKeseluruhan / $jmlDetail);
             $sisaHarga = $totalHargaKeseluruhan - ($hargaRataRata * $jmlDetail);
 
@@ -317,10 +356,7 @@ class WebinarController extends BaseController
             foreach ($detailPaket as $index => $rows) {
                 $itemName = !empty($rows->nama_sesi) ? $rows->nama_sesi : (!empty($rows->nama_ujian) ? $rows->nama_ujian : (!empty($rows->nama_mapel) ? $rows->nama_mapel : 'Item Paket'));
 
-                // 3. Set Harga Item
                 $hargaFinalItem = $hargaRataRata;
-
-                // Tambahkan sisa bagi (selisih) HANYA ke item pertama agar total keseluruhan tetap sama persis (mencegah error Midtrans)
                 if ($index === 0) {
                     $hargaFinalItem += $sisaHarga;
                 }
@@ -338,7 +374,7 @@ class WebinarController extends BaseController
 
             $this->detailTransaksiModel->insertBatch($detailTransaksi);
 
-            // 4. Proses Transaksi (Midtrans jika berbayar / Langsung selesai jika gratis)
+            // 6. Integrasi Midtrans
             $data = $this->transaksiModel
                 ->join('siswa', 'transaksi.idsiswa=siswa.id_siswa')
                 ->where('transaksi.idtransaksi', $idtransaksi)
@@ -346,7 +382,6 @@ class WebinarController extends BaseController
 
             $diskon         = ($data->nominal * $data->diskon) / 100;
             $totalDiskon    = $data->nominal - $diskon;
-            // Asumsi kolom voucher ada di tabel, jika tidak ada, ubah $data->voucher menjadi 0
             $voucher        = isset($data->voucher) ? $data->voucher : 0;
             $diskon_voucher = ($totalDiskon * $voucher) / 100;
             $gross_amount   = round($totalDiskon - $diskon_voucher);
@@ -373,7 +408,6 @@ class WebinarController extends BaseController
                     $total_item_price += ($price * (int)$rows->quantity);
                 }
 
-                // Penyesuaian diskon agar item_details sinkron dengan gross_amount
                 $selisih = $gross_amount - $total_item_price;
                 if ($selisih != 0) {
                     $dataItem[] = array(
@@ -386,7 +420,6 @@ class WebinarController extends BaseController
 
                 $params = array(
                     'transaction_details' => array(
-                        // Tambahkan time() agar ID pesanan Unik jika user mencoba transaksi ulang
                         'order_id'     => $data->idtransaksi . '-' . time(),
                         'gross_amount' => $gross_amount,
                     ),
@@ -405,7 +438,6 @@ class WebinarController extends BaseController
                 );
                 $snapToken = \Midtrans\Snap::getSnapToken($params);
 
-                // Update database dengan Token
                 $this->transaksiModel
                     ->where('idtransaksi', $idtransaksi)
                     ->set('token', $snapToken)
@@ -413,13 +445,13 @@ class WebinarController extends BaseController
             }
         }
 
-        $db->transComplete(); // Selesai query
+        $db->transComplete();
 
         if ($db->transStatus() === FALSE) {
             return redirect()->back()->withInput()->with('error', 'Terjadi kesalahan pada server saat mendaftar.');
         }
 
-        // 5. Redirect Berdasarkan Jenis Paket (Berbayar via Midtrans, Gratis kembali ke halaman semula)
+        // 7. Selesai
         if ($gross_amount > 0) {
             return redirect()->to('webinar/invoice')->with('success', 'Pendaftaran berhasil, silakan selesaikan pembayaran!')->with('snapToken', $snapToken);
         } else {
