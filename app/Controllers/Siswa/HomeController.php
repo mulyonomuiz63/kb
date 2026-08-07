@@ -67,7 +67,7 @@ class HomeController extends BaseController
             foreach ($childSessions as $child) {
                 $waktuMulai = strtotime($child->waktu_mulai);
                 $waktuSelesai = strtotime($child->waktu_selesai);
-                $waktuBukaZoom = $waktuMulai - (2 * 3600); // 2 Jam sebelum
+                $waktuBukaZoom = $waktuMulai - (3 * 3600); // 3 Jam sebelum
 
                 // KONDISI UTAMA: Jika waktu sekarang berada di antara waktu buka zoom dan waktu selesai
                 if ($currentDateTime >= $waktuBukaZoom && $currentDateTime <= $waktuSelesai) {

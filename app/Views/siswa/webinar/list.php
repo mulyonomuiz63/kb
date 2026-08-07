@@ -283,7 +283,7 @@
                             $delay += 0.1;
                             $waktuMulai = strtotime($child->waktu_mulai);
                             $waktuSelesai = strtotime($child->waktu_selesai);
-                            $waktuBukaZoom = $waktuMulai - (2 * 3600); // 2 jam sebelum acara mulai
+                            $waktuBukaZoom = $waktuMulai - (3 * 3600); // 3 jam sebelum acara mulai
 
                             // LOGIKA BARU: Ambil Waktu Pembelian User (Cek tgl_pembayaran, jika kosong pakai created_at)
                             $waktuBeli = strtotime($w->tgl_pembayaran ?? $w->created_at);
@@ -291,7 +291,7 @@
                             // Cek apakah user mendaftar/membayar SETELAH sesi ini selesai
                             $isTerlambatBeli = ($waktuBeli > $waktuSelesai);
 
-                            // 1. Menentukan Status Sesi Zoom (Dibuka 2 jam sebelum mulai)
+                            // 1. Menentukan Status Sesi Zoom (Dibuka 3 jam sebelum mulai)
                             if ($isTerlambatBeli) {
                                 // STATUS BARU: Jika telat beli
                                 $status = 'missed';
