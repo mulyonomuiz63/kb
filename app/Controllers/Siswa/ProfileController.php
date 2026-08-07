@@ -25,6 +25,7 @@ class ProfileController extends BaseController
     public function editProfile()
     {
         // 2. Definisikan Rule Validasi
+        $id_session = session()->get('id');
         $rules = [
             'nama_siswa' => [
                 'rules'  => 'required|alpha_numeric_space|min_length[3]|max_length[60]',
@@ -55,12 +56,14 @@ class ProfileController extends BaseController
             
             // HP: Wajib angka, maksimal 15 digit
             'hp' => [
-                'rules'  => 'required|numeric|min_length[10]|max_length[15]',
+                // PERHATIKAN: Gunakan tanda kutip ganda (" ") di bawah ini, bukan kutip satu (' ')
+                'rules'  => "required|numeric|min_length[10]|max_length[15]|is_unique[siswa.hp,id_siswa,{$id_session}]",
                 'errors' => [
                     'required'   => 'Nomor HP wajib diisi.',
                     'numeric'    => 'Nomor HP harus berupa angka.',
                     'max_length' => 'Nomor HP maksimal 15 digit.',
                     'min_length' => 'Nomor HP minimal 10 digit.',
+                    'is_unique'  => 'Nomor HP ini sudah digunakan oleh akun lain.'
                 ]
             ],
         
