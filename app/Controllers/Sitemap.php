@@ -52,7 +52,7 @@ class Sitemap extends Controller
     {
         $kategori = $this->db->query("select DISTINCT slug_kategori from kategori_artikel")->getResult();
         $artikel = $this->db->query("select DISTINCT slug_judul from artikel")->getResult();
-        $paket = $this->db->query("select DISTINCT slug from paket where status='1'")->getResult();
+        $paket = $this->db->query("select DISTINCT slug from paket where status='1' and jenis_paket NOT LIKE '%\"webinar\"%'")->getResult();
         $twibbon = $this->db->query("select DISTINCT url from twibbon")->getResult();
 
         $baseUrl = rtrim(base_url(), '/') . '/';
@@ -105,6 +105,12 @@ class Sitemap extends Controller
                 <priority>0.7</priority>
             </url>' . PHP_EOL;
         }
+
+        $xml .= '<url>
+            <loc>' . $baseUrl . 'marathon-perpajakan</loc>
+            <lastmod>' . date('Y-m-d') . '</lastmod>
+            <priority>0.7</priority>
+        </url>' . PHP_EOL;
 
         // Halaman tambahan
         $extraPages = ['tentangkami', 'pelatihan', 'penilaian', 'testimoni', 'artikel', 'jadwal', 'galeri', 'media-kelasbrevet', 'siap-kerja', 'twibbon', 'term', 'privasi', 'quiz'];
