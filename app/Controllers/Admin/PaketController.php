@@ -847,9 +847,19 @@ class PaketController extends BaseController
                 <br>
                 <p style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; color: #334155; line-height: 1.6;">
                     Hallo <b>' . substr(esc($nama_siswa), 0, 10) . '</b>, <br>
-                    Paket Webinar <b>' . esc($paket->nama_paket) . '</b> yang Anda ikuti 2 jam lagi akan segera dimulai. Silakan cek detail jadwal melalui akun Anda.
+                    Paket Webinar <b>' . esc($paket->nama_paket) . '</b> yang Anda ikuti 3 jam lagi akan segera dimulai. Silakan cek detail jadwal melalui akun Anda.
                 </p>
                 
+                <!-- Kotak Informasi Grup WhatsApp -->
+                <div style="margin-top: 20px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 15px;">
+                    <p style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; color: #166534; font-size: 14px; margin: 0 0 10px 0; line-height: 1.4;">
+                        <b>Informasi Grup WhatsApp:</b> Silakan bergabung ke grup resmi untuk koordinasi, tanya jawab, dan info penting lainnya.
+                    </p>
+                    <a href="https://chat.whatsapp.com/CHWkmrWMqrSJvJNlu1UoVy?s=cl&p=i&mlu=4" target="_blank" style="display: inline-block; background: #22c55e; color: #fff; text-decoration: none; border-radius: 5px; text-align: center; line-height: 30px; font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; padding: 5px 15px; font-weight: bold; font-size: 14px;">
+                        Gabung Grup WhatsApp
+                    </a>
+                </div>
+
                 <div style="margin-top: 20px;">
                     <a href="' . base_url("auth/") . '" style="display: inline-block; background: #1C3FAA; color: #fff; margin: 5px 0 10px 0; text-decoration: none; border-radius: 5px; text-align: center; line-height: 30px; font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; padding: 5px 20px;">
                         Login

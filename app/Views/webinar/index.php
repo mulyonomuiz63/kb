@@ -1242,12 +1242,26 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
         document.addEventListener("DOMContentLoaded", function() {
             <?php if (session()->getFlashdata('success')) : ?>
                 Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil!',
-                    // Hapus tanda kutip manual (' ') dan gunakan json_encode
-                    text: <?= json_encode(session()->getFlashdata('success')) ?>,
+                            icon: 'success',
+                            title: 'Pendaftaran Berhasil!',
+                            html: `
+                        <p class="text-gray-700 fs-6 mb-4"><?= json_encode(session()->getFlashdata('success')) ?></p>
+                        
+                        <div class="p-4 bg-light-success border border-success border-dashed rounded-4 text-center">
+                            <span class="d-block fw-bold text-dark fs-6 mb-2">🎉 Langkah Terakhir!</span>
+                            <p class="text-muted fs-7 mb-3">Silakan bergabung ke Grup WhatsApp resmi untuk mendapatkan link akses gmeet dan koordinasi selanjutnya.</p>
+                            
+                            <a href="https://chat.whatsapp.com/CHWkmrWMqrSJvJNlu1UoVy?s=cl&p=i&mlu=4" target="_blank" class="btn btn-success fw-bold px-6 py-3 shadow-sm d-inline-flex align-items-center gap-2">
+                                <i class="fa-brands fa-whatsapp fs-3"></i>
+                                <span>Gabung Grup WhatsApp Sekarang</span>
+                            </a>
+                        </div>
+                    `,
                     confirmButtonColor: '#0d6efd',
-                    confirmButtonText: 'Tutup'
+                    confirmButtonText: 'Tutup / Nanti Saja',
+                    customClass: {
+                        popup: 'rounded-4 p-5'
+                    }
                 });
             <?php endif; ?>
 
