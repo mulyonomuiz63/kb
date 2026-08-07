@@ -203,6 +203,7 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
         $routes->post('edit', 'Admin\WebinarController::edit');
         $routes->post('update', 'Admin\WebinarController::update');
         $routes->get('delete/(:segment)', 'Admin\WebinarController::delete/$1');
+        $routes->get('sertifikat/(:segment)/(:segment)', 'Admin\WebinarController::sertifikat/$1/$2');
     });
     
 

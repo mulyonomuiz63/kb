@@ -88,5 +88,6 @@ $routes->group('sw-siswa', ['filter' => 'roleCheck:2'], function ($routes) {
     $routes->group('webinar', function($routes){
         $routes->get('/', 'Siswa\WebinarController::index');
         $routes->get('lihat-materi', 'Siswa\WebinarController::lihatMateri');
+        $routes->get('sertifikat/(:segment)', 'Siswa\WebinarController::sertifikat/$1');
     });
 });

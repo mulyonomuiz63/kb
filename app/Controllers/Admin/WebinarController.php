@@ -279,4 +279,87 @@ class WebinarController extends BaseController
             return redirect()->to('sw-admin/webinar')->with('error', 'Gagal mengubah data');
         }
     }
+
+    public function sertifikat($id_siswaen, $id_sesien)
+    {
+        // 1. Data Retrieval
+        $id_siswa = decrypt_url($id_siswaen);
+        $id_sesi   = decrypt_url($id_sesien);
+        $hasil      = $this->webinarSesiModel->where('id_sesi', $id_sesi)->get()->getRow();
+
+        if (!$hasil) {
+            return "Data tidak ditemukan";
+        }
+
+        // 2. Inisialisasi PDF (Landscape - A4: 297 x 210 mm)
+        $pdf = new \setasign\Fpdi\Fpdi();
+        $pdf->SetAutoPageBreak(false, 5);
+        $pdf->AddPage('L', 'A4');
+
+        // Metadata
+        $pdf->SetCreator("kelasbrevet.com");
+        $pdf->SetAuthor(strtoupper($hasil->nama_siswa));
+        $pdf->SetTitle(strtoupper($hasil->nama_mapel));
+        $pdf->SetSubject('SERTIFIKAT ' . strtoupper($hasil->nama_mapel));
+        $pdf->SetKeywords('KelasBrevet, Pajak, Webinar');
+
+        // 3. Background Image (Sesuai Permintaan)
+        $bgImg = 'uploads/webinar/sertifikat/background.jpg';
+        $pdf->Image($bgImg, 0, 0, $pdf->getPageWidth(), $pdf->getPageHeight());
+
+        // 4. Helper Format Tanggal & Nomor
+        $arrBulan        = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        $arrBulanRomawi  = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+
+        $timeStart   = strtotime($hasil->start_ujian);
+        // Bisa disesuaikan jika ingin statis 8 Agustus 2026 atau dinamis berdasarkan start_ujian
+        $tglSertif   = date('d', $timeStart) . ' ' . $arrBulan[(int)date('m', $timeStart)] . ' ' . date('Y', $timeStart);
+        $nomorSertif = $hasil->id_sesi . '/WEBINAR-BREVET/' . $arrBulanRomawi[(int)date('m', $timeStart)] . '/' . date('Y', $timeStart);
+
+        // =========================================================
+        // 5. PENULISAN KONTEN DINAMIS (Rata Tengah)
+        // =========================================================
+
+        // A. NOMOR SERTIFIKAT (Di atas teks "diberikan kepada:")
+        $pdf->SetTextColor(51, 49, 49); // Warna Abu-abu gelap / Hitam
+        $pdf->SetFont('Arial', '', 12);
+        // Posisi Y: 75 (Silakan naik/turunkan angka 75 jika kurang pas dengan background)
+        $pdf->SetXY(0, 75); 
+        // Lebar 0 agar membentang penuh dari kiri ke kanan, 'C' untuk Center
+        $pdf->Cell(0, 5, "Nomor: " . $nomorSertif, 0, 1, 'C');
+
+        // B. NAMA LENGKAP PESERTA
+        // Warna Biru (Menyesuaikan desain draft: RGB ~ 23, 107, 195)
+        $pdf->SetTextColor(23, 98, 185); 
+        $pdf->SetFont('Arial', 'B', 36);
+        $pdf->SetXY(0, 105); // Posisi Y: 105
+        // Format nama menjadi Title Case (Huruf besar di awal kata)
+        $nama_siswa = ucwords(strtolower($hasil->nama_siswa));
+        $pdf->Cell(0, 10, $nama_siswa, 0, 1, 'C');
+
+        // C. DESKRIPSI KEGIATAN
+        $pdf->SetTextColor(51, 49, 49); // Kembali ke warna Hitam
+        $pdf->SetFont('Arial', '', 12);
+        
+        // Teks Deskripsi (Gunakan \n untuk memaksa enter agar persis seperti gambar)
+        $deskripsi = "Atas partisipasinya sebagai Peserta Webinar Marathon Update\n"
+                   . "Perpajakan 2026 dengan tema Radar Baru Fiskus 2026:\n"
+                   . "Pengawasan Kepatuhan Wajib Pajak. Yang diselenggarakan oleh Kelas Brevet\n"
+                   . "Pada " . $tglSertif;
+
+        // Karena FPDF MultiCell mengukur dari margin kiri, kita harus hitung posisi X 
+        // agar kotaknya persis berada di tengah kertas.
+        $lebar_teks = 200; // Lebar area teks
+        $posisi_x = ($pdf->getPageWidth() - $lebar_teks) / 2;
+        
+        $pdf->SetXY($posisi_x, 135); // Posisi Y: 135
+        $pdf->MultiCell($lebar_teks, 6, $deskripsi, 0, 'C');
+
+        // =========================================================
+
+        // 6. Output
+        $this->response->setContentType('application/pdf');
+        $pdf->Output(strtoupper($hasil->nama_siswa) . '-SERTIFIKAT.pdf', 'I');
+        exit;
+    }
 }
