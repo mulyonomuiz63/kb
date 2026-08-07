@@ -305,7 +305,8 @@ class WebinarController extends BaseController
             'tgl_drop'     => $tgl_exp,
             'tgl_pembayaran' => $tgl_pembayaran,
             'jenis_bayar'  => 'online',
-            'jenis_paket'  => $dataPaket->jenis_paket
+            'jenis_paket'  => $dataPaket->jenis_paket,
+            'created_at'   => $tgl_mulai
         ];
 
         $this->transaksiModel->insert($dataInsert);

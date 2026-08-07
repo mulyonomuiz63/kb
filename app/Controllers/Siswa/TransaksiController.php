@@ -162,7 +162,8 @@ class TransaksiController extends BaseController
                 'tgl_exp'      => $tgl_exp,
                 'tgl_drop'     => $tgl_exp, // Menggunakan tgl_exp sesuai logika awal
                 'kode_voucher' => $kode_voucher,
-                'jenis_paket'  => $dataPaket->jenis_paket
+                'jenis_paket'  => $dataPaket->jenis_paket,
+                'created_at'   => $tgl_mulai
             ];
 
             $this->transaksiModel->insert($dataInsert);
