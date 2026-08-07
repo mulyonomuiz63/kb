@@ -797,7 +797,11 @@ class PaketController extends BaseController
         }
 
         $id_encrypt = $this->request->getPost('id_paket');
-        $id_paket = decrypt_url($id_encrypt);
+        $id_paket   = decrypt_url($id_encrypt);
+        
+        // Ambil data antrean (mulai dari 0, lalu 5, 10, dst)
+        $offset = (int) $this->request->getPost('offset') ?? 0;
+        $limit  = 5; // Batasi pengiriman 5 email per request agar PHP tidak Timeout
 
         if (!$id_paket) {
             return $this->response->setJSON(['status' => false, 'message' => 'Data paket tidak valid.', csrf_token() => csrf_hash()]);
@@ -811,28 +815,41 @@ class PaketController extends BaseController
             return $this->response->setJSON(['status' => false, 'message' => 'Paket tidak ditemukan.', csrf_token() => csrf_hash()]);
         }
 
-        // 2. Ambil data peserta berdasarkan ID Paket (melalui detail_transaksi)
-        // GROUP BY digunakan untuk mencegah email duplikat
+        // 2. Hitung TOTAL SELURUH PESERTA untuk informasi progress di layar
+        $queryTotal = $db->table('detail_transaksi')
+            ->select('siswa.email')
+            ->join('transaksi', 'transaksi.idtransaksi = detail_transaksi.idtransaksi')
+            ->join('siswa', 'siswa.id_siswa = transaksi.idsiswa')
+            ->where('detail_transaksi.idpaket', $id_paket)
+            ->where('transaksi.status', 'S')
+            ->groupBy('siswa.email')
+            ->get();
+            
+        $totalData = $queryTotal->getNumRows();
+
+        if ($totalData == 0) {
+            return $this->response->setJSON([
+                'status' => false, 
+                'message' => 'Tidak ada peserta aktif yang terdaftar pada paket ini.',
+                csrf_token() => csrf_hash()
+            ]);
+        }
+
+        // 3. Ambil data peserta SECARA BERTAHAP (Limit & Offset)
         $pesertaList = $db->table('detail_transaksi')
             ->select('siswa.nama_siswa, siswa.email')
             ->join('transaksi', 'transaksi.idtransaksi = detail_transaksi.idtransaksi')
             ->join('siswa', 'siswa.id_siswa = transaksi.idsiswa')
             ->where('detail_transaksi.idpaket', $id_paket)
-            ->where('transaksi.status', 'S') // Selesai / Lunas / Gratis
+            ->where('transaksi.status', 'S')
             ->groupBy('siswa.email')
+            ->orderBy('siswa.email', 'ASC') // WAJIB ada order agar data tidak acak saat offset
+            ->limit($limit, $offset)
             ->get()
             ->getResultObject();
 
-        if (empty($pesertaList)) {
-            return $this->response->setJSON([
-                'status' => false, 
-                'message' => 'Tidak ada peserta aktif yang terdaftar pada paket ini.',
-                csrf_token() => csrf_hash() // <--- Sisipkan ini
-            ]);
-        }
-
-        // 3. Proses Kirim Email
-        $berhasil = 0;
+        // 4. Proses Kirim Email (Hanya untuk 5 data di batch ini)
+        $berhasilBatch = 0;
         foreach ($pesertaList as $p) {
             $nama_siswa = $p->nama_siswa;
             $email = $p->email;
@@ -850,7 +867,6 @@ class PaketController extends BaseController
                     Paket Webinar <b>' . esc($paket->nama_paket) . '</b> yang Anda ikuti 3 jam lagi akan segera dimulai. Silakan cek detail jadwal melalui akun Anda.
                 </p>
                 
-                <!-- Kotak Informasi Grup WhatsApp -->
                 <div style="margin-top: 20px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 15px;">
                     <p style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; color: #166534; font-size: 14px; margin: 0 0 10px 0; line-height: 1.4;">
                         <b>Informasi Grup WhatsApp:</b> Silakan bergabung ke grup resmi untuk koordinasi, tanya jawab, dan info penting lainnya.
@@ -869,14 +885,25 @@ class PaketController extends BaseController
 
             $kirim = $this->emailer->send($email, $subject, $message);
             if ($kirim) {
-                $berhasil++;
+                $berhasilBatch++;
             }
+            
+            // JEDA 1 DETIK ANTAR EMAIL
+            // Sangat penting untuk mencegah error "Unable to send email" akibat rate-limit (dianggap spam) oleh server
+            sleep(1); 
         }
 
+        // Kalkulasi posisi berikutnya
+        $nextOffset = $offset + count($pesertaList);
+        $isDone = ($nextOffset >= $totalData); // True jika semua email sudah terkirim
+
         return $this->response->setJSON([
-            'status' => true, 
-            'message' => "Berhasil mengirim pengingat ke $berhasil email peserta.",
-            csrf_token() => csrf_hash() // <--- Sisipkan ini
+            'status'         => true, 
+            'is_done'        => $isDone,
+            'total_data'     => $totalData,
+            'next_offset'    => $nextOffset,
+            'berhasil_batch' => $berhasilBatch,
+            csrf_token()     => csrf_hash()
         ]);
     }
 }

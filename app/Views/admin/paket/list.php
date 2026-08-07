@@ -877,7 +877,7 @@
 
             Swal.fire({
                 title: 'Kirim Email ke Peserta?',
-                text: "Pesan pengingat akan dikirim ke seluruh peserta yang telah lunas/mendaftar di paket webinar ini.",
+                text: "Pesan akan dikirim secara bertahap untuk mencegah server down. Jangan tutup halaman ini selama proses berlangsung.",
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#0d6efd',
@@ -886,39 +886,61 @@
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
+                    // Tampilkan Loading awal
                     Swal.fire({
-                        title: 'Mengirim Email...',
-                        text: 'Sistem sedang mengirim pesan massal. Mohon tunggu.',
+                        title: 'Mempersiapkan Data...',
+                        html: 'Menghitung jumlah peserta...',
                         allowOutsideClick: false,
                         didOpen: () => {
                             Swal.showLoading();
-                        }
-                    });
-
-                    $.ajax({
-                        // Sesuaikan URL ini dengan routes controller Anda
-                        url: "<?= base_url('sw-admin/paket/kirim-email-peserta') ?>",
-                        type: "POST",
-                        data: {
-                            id_paket: idPaket,
-                            [csrfName]: csrfHash
-                        },
-                        dataType: "JSON",
-                        success: function(response) {
-                            updateCSRF(response.<?= csrf_token() ?>);
-                            if (response.status) {
-                                Swal.fire('Berhasil!', response.message, 'success');
-                            } else {
-                                Swal.fire('Info', response.message, 'warning');
-                            }
-                        },
-                        error: function() {
-                            Swal.fire('Error!', 'Terjadi kesalahan pada server.', 'error');
+                            // Mulai proses bertahap dari antrean (offset) 0
+                            processEmailBatch(idPaket, 0, 0);
                         }
                     });
                 }
             });
         });
+
+        // Fungsi Rekursif (Memanggil dirinya sendiri hingga selesai)
+        function processEmailBatch(idPaket, offset, totalBerhasil) {
+            $.ajax({
+                url: "<?= base_url('sw-admin/paket/kirim-email-peserta') ?>",
+                type: "POST",
+                data: {
+                    id_paket: idPaket,
+                    offset: offset,
+                    [csrfName]: csrfHash // csrfName & csrfHash harus sudah didefinisikan secara global
+                },
+                dataType: "JSON",
+                success: function(response) {
+                    // Selalu perbarui Token CSRF agar tidak expired di tengah jalan
+                    updateCSRF(response.<?= csrf_token() ?>); 
+
+                    if (response.status) {
+                        var newBerhasil = totalBerhasil + response.berhasil_batch;
+
+                        // Jika antrean sudah habis (selesai)
+                        if (response.is_done) {
+                            Swal.fire('Selesai!', 'Berhasil mengirim pengingat ke ' + newBerhasil + ' email peserta.', 'success');
+                        } else {
+                            // Jika masih ada sisa, update text Swal dan panggil fungsi ini lagi
+                            Swal.update({
+                                title: 'Mengirim Email...',
+                                html: `Proses pengiriman: <b>${response.next_offset}</b> dari <b>${response.total_data}</b> peserta... <br><br> <small class="text-danger">Mohon jangan menutup halaman ini.</small>`
+                            });
+                            
+                            // Panggil lagi untuk batch selanjutnya
+                            processEmailBatch(idPaket, response.next_offset, newBerhasil);
+                        }
+                    } else {
+                        Swal.fire('Info', response.message, 'warning');
+                    }
+                },
+                error: function() {
+                    Swal.fire('Error!', 'Koneksi terputus atau terjadi kesalahan pada server. Proses terhenti.', 'error');
+                }
+            });
+        }
     });
 </script>
 <?= $this->endSection(); ?>
