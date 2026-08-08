@@ -29,6 +29,8 @@
                 <div class="card-body pt-0">
                     <div class="table-responsive">
                         <table id="datatables-list" class="table align-middle table-row-dashed fs-6 gy-5 text-nowrap w-100">
+                            <!-- Cukup ganti struktur table thead dan javascript dataTables -->
+
                             <thead>
                                 <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0 align-middle">
                                     <th class="min-w-200px">Nama Sesi</th>
@@ -39,6 +41,10 @@
                                     <th class="min-w-200px">Sesi Bonus / Gratis</th>
                                     <th class="min-w-125px">Link Zoom</th>
                                     <th class="min-w-125px">Link YouTube</th>
+                                    
+                                    <!-- TAMBAHAN: Kolom Header File Materi -->
+                                    <th class="min-w-150px">File Materi</th>
+                                    
                                     <th class="text-end min-w-75px">Opsi</th>
                                 </tr>
                             </thead>
@@ -57,7 +63,8 @@
 <div class="modal fade" id="tambah_webinar" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered mw-650px">
         <div class="modal-content rounded border-0">
-            <form action="<?= base_url('sw-admin/webinar/store'); ?>" method="POST" class="needs-validation">
+            <!-- TAMBAHAN: enctype="multipart/form-data" diperlukan agar bisa upload file -->
+            <form action="<?= base_url('sw-admin/webinar/store'); ?>" method="POST" class="needs-validation" enctype="multipart/form-data">
                 <input type="hidden" name="<?= csrf_token() ?>" class="csrf-token" value="<?= csrf_hash() ?>" />
 
                 <div class="modal-header pb-0 border-0 justify-content-between">
@@ -91,7 +98,6 @@
                         <input type="number" step="0.01" name="harga_sesi" class="form-control form-control-solid" placeholder="0" required>
                     </div>
 
-                    <!-- TAMBAHAN: Input Status (Gratis / Berbayar) -->
                     <div class="fv-row mb-7">
                         <label class="required fs-6 fw-semibold mb-2">Status Untuk Full Akses</label>
                         <select name="status" class="form-select form-select-solid" required>
@@ -101,7 +107,6 @@
                         </select>
                     </div>
 
-                    <!-- Input Sesi Gratis / Bonus Terkait -->
                     <div class="fv-row mb-7" id="sesi_gratis">
                         <label class="fs-6 fw-semibold mb-2">Pilih Sesi Bonus / Gratis Terkait</label>
                         <select name="sesi_gratis[]" class="form-select form-select-solid" data-control="select2" data-dropdown-parent="#sesi_gratis" data-placeholder="Pilih sesi bonus..." multiple="multiple">
@@ -120,6 +125,14 @@
                         <label class="fs-6 fw-semibold mb-2">Link YouTube (Bisa banyak, pisahkan baris baru / enter)</label>
                         <textarea name="link_youtube" class="form-control form-control-solid" rows="2" placeholder="https://youtube.com/watch?v=...&#10;https://youtube.com/watch?v=..."></textarea>
                     </div>
+
+                    <!-- TAMBAHAN: Input File Materi Multiple -->
+                    <div class="fv-row mb-7">
+                        <label class="fs-6 fw-semibold mb-2">File Materi PDF (Bisa pilih lebih dari satu)</label>
+                        <input type="file" name="file_materi[]" class="form-control form-control-solid" accept=".pdf" multiple>
+                        <div class="text-muted fs-7 mt-1">Gunakan tombol <code>Ctrl</code> (Windows) atau <code>Command</code> (Mac) saat memilih untuk upload lebih dari 1 file sekaligus.</div>
+                    </div>
+
                 </div>
 
                 <div class="modal-footer border-0 p-5 p-lg-10 pt-0">
@@ -137,7 +150,8 @@
 <div class="modal fade" id="edit_webinar" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered mw-650px">
         <div class="modal-content rounded border-0">
-            <form action="<?= base_url('sw-admin/webinar/update'); ?>" method="POST">
+            <!-- TAMBAHAN: enctype="multipart/form-data" -->
+            <form action="<?= base_url('sw-admin/webinar/update'); ?>" method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="<?= csrf_token() ?>" class="csrf-token" value="<?= csrf_hash() ?>" />
                 <input type="hidden" name="id_sesi" id="e_id_sesi">
 
@@ -180,7 +194,6 @@
                         </select>
                     </div>
 
-                    <!-- Input Sesi Gratis / Bonus Terkait Edit -->
                     <div class="fv-row mb-7" id="sesi_gratis_edit">
                         <label class="fs-6 fw-semibold mb-2">Pilih Sesi Bonus / Gratis Terkait</label>
                         <select name="sesi_gratis[]" id="e_sesi_gratis" class="form-select form-select-solid" data-control="select2" data-dropdown-parent="#sesi_gratis_edit" data-placeholder="Pilih sesi bonus..." multiple="multiple">
@@ -198,6 +211,14 @@
                         <label class="fs-6 fw-semibold mb-2">Link YouTube (Pisahkan baris baru jika lebih dari satu)</label>
                         <textarea name="link_youtube" id="e_link_youtube" class="form-control form-control-solid" rows="2"></textarea>
                     </div>
+
+                    <!-- TAMBAHAN: Input File Materi Multiple Untuk Form Edit -->
+                    <div class="fv-row mb-7">
+                        <label class="fs-6 fw-semibold mb-2">Ubah / Tambah File Materi PDF</label>
+                        <input type="file" name="file_materi[]" class="form-control form-control-solid" accept=".pdf" multiple>
+                        <div class="text-muted fs-7 mt-1">Biarkan kosong jika tidak ingin mengubah materi sebelumnya. Mengunggah file baru akan menimpa/mengganti materi lama.</div>
+                    </div>
+
                 </div>
 
                 <div class="modal-footer border-0 p-5 p-lg-10 pt-0">
@@ -219,6 +240,7 @@
         // Inisialisasi Select2 Metronic
         $('[data-control="select2"]').select2();
 
+        // 1. Inisialisasi DataTables Server Side
         // 1. Inisialisasi DataTables Server Side
         var table = $('#datatables-list').DataTable({
             "processing": true,
@@ -259,12 +281,19 @@
                 {
                     "data": "link_youtube"
                 },
+                
+                // TAMBAHAN: Panggil data file materi
+                {
+                    "data": "file_materi"
+                },
+                
                 {
                     "data": "opsi"
                 }
             ],
             "columnDefs": [{
-                "targets": [7],
+                // PERBAIKAN: Gunakan -1 agar selalu menargetkan kolom paling terakhir secara otomatis
+                "targets": [-1],
                 "orderable": false,
                 "className": "text-end"
             }],
@@ -306,7 +335,7 @@
                     $("#e_harga_sesi").val(data.harga_sesi);
                     $("#e_link_zoom").val(data.link_zoom_text);
                     $("#e_link_youtube").val(data.link_youtube_text);
-
+                    $("#e_file_materi").val(data.file_materi);
                     // Set value untuk select2 multi-select sesi gratis
                     $("#e_sesi_gratis").val(data.sesi_gratis_array).trigger('change');
                     $("#e_status").val(data.status);

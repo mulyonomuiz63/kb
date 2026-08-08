@@ -92,6 +92,23 @@ class WebinarController extends BaseController
                 $ytHtml .= '<a href="' . esc($yl) . '" target="_blank" class="badge badge-light-danger mb-1 me-1 text-truncate" style="max-width:150px;"><i class="ki-duotone ki-youtube fs-6 me-1"></i> YT Link</a>';
             }
 
+            // =========================================================================
+            // TAMBAHAN: Parsing JSON File Materi PDF
+            // =========================================================================
+            $materiHtml = '';
+            if (!empty($record->file_materi)) {
+                $materiLinks = json_decode($record->file_materi, true);
+                if (is_array($materiLinks)) {
+                    foreach ($materiLinks as $idx => $ml) {
+                        $materiHtml .= '<a href="' . esc($ml) . '" target="_blank" class="badge badge-light-info mb-1 me-1 text-truncate" style="max-width:150px;" data-bs-toggle="tooltip" title="Lihat File ' . ($idx + 1) . '"><i class="ki-duotone ki-file-down fs-6 me-1"></i> PDF ' . ($idx + 1) . '</a>';
+                    }
+                } else {
+                    // Fallback jika berupa string tunggal
+                    $materiHtml .= '<a href="' . esc($record->file_materi) . '" target="_blank" class="badge badge-light-info mb-1 me-1 text-truncate" style="max-width:150px;"><i class="ki-duotone ki-file-down fs-6 me-1"></i> PDF</a>';
+                }
+            }
+            // =========================================================================
+
             // Parsing Sesi Bonus / Gratis Terkait
             $bonusIds = json_decode($record->sesi_gratis, true) ?? [];
             $bonusHtml = '<div class="d-flex flex-wrap gap-1" style="max-width: 250px; white-space: normal;">';
@@ -105,10 +122,7 @@ class WebinarController extends BaseController
             }
             $bonusHtml .= '</div>';
 
-            // =========================================================================================
-            // TAMBAHAN: Menghitung jumlah peserta yang sudah beli / daftar pada sesi ini
-            // (Hanya menghitung yang status transaksinya 'S' (Selesai) atau 'M' (Menunggu Pembayaran))
-            // =========================================================================================
+            // Menghitung jumlah peserta yang sudah beli / daftar pada sesi ini
             $jumlah_peserta = $db->table('detail_transaksi')
                 ->join('transaksi', 'transaksi.idtransaksi = detail_transaksi.idtransaksi')
                 ->where('detail_transaksi.idsesi', $record->id_sesi)
@@ -116,7 +130,6 @@ class WebinarController extends BaseController
                 ->countAllResults();
 
             $pesertaHtml = '<span class="badge badge-light-success fw-bold px-3 py-2"><i class="ki-duotone ki-profile-user fs-6 me-1"></i> ' . $jumlah_peserta . ' Peserta</span>';
-            // =========================================================================================
 
             $opsi = '
             <div class="d-flex justify-content-end">
@@ -138,10 +151,14 @@ class WebinarController extends BaseController
                 "waktu"        => '<div class="fs-7 text-muted text-break" style="white-space: normal;"><b>Mulai:</b> ' . esc($record->waktu_mulai) . '<br><b>Selesai:</b> ' . esc($record->waktu_selesai) . '</div>',
                 "harga_sesi"   => '<span class="fw-bold text-success text-break">Rp ' . number_format($record->harga_sesi, 0, ',', '.') . '</span>',
                 "status"       => $statusHtml,
-                "jumlah_peserta" => $pesertaHtml, // <-- Data kolom baru ditambahkan ke array
+                "jumlah_peserta" => $pesertaHtml, 
                 "sesi_gratis"  => $bonusHtml,
                 "link_zoom"    => '<div class="d-flex flex-wrap text-break">' . ($zoomHtml ?: '<span class="text-muted fs-7">Tidak ada</span>') . '</div>',
                 "link_youtube" => '<div class="d-flex flex-wrap text-break">' . ($ytHtml ?: '<span class="text-muted fs-7">Tidak ada</span>') . '</div>',
+                
+                // TAMBAHAN: Data File Materi dimasukkan ke array
+                "file_materi"  => '<div class="d-flex flex-wrap text-break">' . ($materiHtml ?: '<span class="text-muted fs-7">Belum ada</span>') . '</div>',
+                
                 "opsi"         => $opsi
             ];
         }
@@ -167,6 +184,31 @@ class WebinarController extends BaseController
             $zoomArray = array_filter(array_map('trim', preg_split('/[\r\n,]+/', $zoomInput)));
             $ytArray = array_filter(array_map('trim', preg_split('/[\r\n,]+/', $ytInput)));
 
+            // =========================================================================
+            // TAMBAHAN: Upload File Materi (PDF) - Mendukung Banyak File
+            // =========================================================================
+            $path = FCPATH . 'uploads/webinar/materi';
+            if (!is_dir($path)) {
+                mkdir($path, 0777, true); // Buat folder otomatis jika belum ada
+            }
+
+            $uploadedFiles = [];
+            if ($files = $this->request->getFiles()) {
+                if (isset($files['file_materi'])) {
+                    // Pastikan format menjadi array meski yang diunggah hanya 1 file
+                    $materiFiles = is_array($files['file_materi']) ? $files['file_materi'] : [$files['file_materi']];
+                    foreach ($materiFiles as $file) {
+                        if ($file->isValid() && !$file->hasMoved()) {
+                            $newName = $file->getRandomName();
+                            $file->move($path, $newName);
+                            // Simpan link URL lengkap ke dalam array
+                            $uploadedFiles[] = base_url('uploads/webinar/materi/' . $newName);
+                        }
+                    }
+                }
+            }
+            // =========================================================================
+
             $data = [
                 'nama_sesi'      => $this->request->getVar('nama_sesi'),
                 'deskripsi_sesi' => $this->request->getVar('deskripsi_sesi'),
@@ -176,7 +218,8 @@ class WebinarController extends BaseController
                 'link_zoom'      => json_encode(array_values($zoomArray)),
                 'link_youtube'   => json_encode(array_values($ytArray)),
                 'sesi_gratis'    => json_encode(array_values($sesiGratisInput)),
-                'status'         => $this->request->getVar('status')
+                'status'         => $this->request->getVar('status'),
+                'file_materi'    => !empty($uploadedFiles) ? json_encode(array_values($uploadedFiles)) : null
             ];
 
             if ($this->webinarSesiModel->insert($data)) {
@@ -228,7 +271,7 @@ class WebinarController extends BaseController
             $zoomArray = array_filter(array_map('trim', preg_split('/[\r\n,]+/', $zoomInput)));
             $ytArray = array_filter(array_map('trim', preg_split('/[\r\n,]+/', $ytInput)));
 
-            $this->webinarSesiModel->update($id, [
+            $updateData = [
                 'nama_sesi'      => $this->request->getVar('nama_sesi'),
                 'deskripsi_sesi' => $this->request->getVar('deskripsi_sesi'),
                 'waktu_mulai'    => $this->request->getVar('waktu_mulai'),
@@ -238,7 +281,41 @@ class WebinarController extends BaseController
                 'link_youtube'   => json_encode(array_values($ytArray)),
                 'sesi_gratis'    => json_encode(array_values($sesiGratisInput)),
                 'status'         => $this->request->getVar('status')
-            ]);
+            ];
+
+            // =========================================================================
+            // TAMBAHAN: Logika Upload File Materi di Proses Update
+            // =========================================================================
+            $path = FCPATH . 'uploads/webinar/materi';
+            if (!is_dir($path)) {
+                mkdir($path, 0777, true);
+            }
+
+            $uploadedFiles = [];
+            $hasNewFiles = false;
+
+            if ($files = $this->request->getFiles()) {
+                if (isset($files['file_materi'])) {
+                    $materiFiles = is_array($files['file_materi']) ? $files['file_materi'] : [$files['file_materi']];
+                    foreach ($materiFiles as $file) {
+                        if ($file->isValid() && !$file->hasMoved()) {
+                            $newName = $file->getRandomName();
+                            $file->move($path, $newName);
+                            $uploadedFiles[] = base_url('uploads/webinar/materi/' . $newName);
+                            $hasNewFiles = true;
+                        }
+                    }
+                }
+            }
+
+            // Jika ada file PDF baru yang diunggah, timpa array file_materi lama
+            // Jika kosong, data lama tetap dipertahankan
+            if ($hasNewFiles) {
+                $updateData['file_materi'] = json_encode(array_values($uploadedFiles));
+            }
+            // =========================================================================
+
+            $this->webinarSesiModel->update($id, $updateData);
             
 
             // =========================================================================
