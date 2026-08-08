@@ -275,6 +275,21 @@
                             // Fallback jika tidak ada anak (hanya 1 sesi utama)
                             $childSessions = [$w];
                         }
+
+                        // URUTKAN SESI: Sesi yang sudah selesai ditaruh di paling belakang
+                        usort($childSessions, function($a, $b) use ($currentDateTime) {
+                            $endA = strtotime($a->waktu_selesai);
+                            $endB = strtotime($b->waktu_selesai);
+                            
+                            $isFinishedA = $endA < $currentDateTime ? 1 : 0;
+                            $isFinishedB = $endB < $currentDateTime ? 1 : 0;
+
+                            if ($isFinishedA !== $isFinishedB) {
+                                return $isFinishedA - $isFinishedB;
+                            }
+                            // Jika sama-sama belum selesai atau sudah selesai, urutkan berdasarkan waktu mulai
+                            return strtotime($a->waktu_mulai) - strtotime($b->waktu_mulai);
+                        });
                         ?>
 
                         <!-- Render setiap anak sesi menjadi Card Terpisah -->
@@ -315,12 +330,24 @@
                                 $icon = 'ki-check-circle';
                             }
 
-                            // 2. Mengolah Data JSON YouTube
+                            // 2. Mengolah Data JSON YouTube & File Materi
                             $youtubeLinks = [];
                             if (!empty($child->link_youtube)) {
-                                $decoded = json_decode($child->link_youtube, true);
-                                if (is_array($decoded)) {
-                                    $youtubeLinks = $decoded;
+                                $decodedYT = json_decode($child->link_youtube, true);
+                                if (is_array($decodedYT)) {
+                                    $youtubeLinks = $decodedYT;
+                                }
+                            }
+
+                            $fileMateri = [];
+                            // Catatan: Asumsi nama kolom di DB adalah 'file_materi'. Silakan ganti jika namanya berbeda (misal: $child->file)
+                            if (!empty($child->file_materi)) {
+                                $decodedMateri = json_decode($child->file_materi, true);
+                                if (is_array($decodedMateri)) {
+                                    $fileMateri = $decodedMateri;
+                                } else {
+                                    // Fallback jika tidak format JSON (hanya 1 link/file)
+                                    $fileMateri = [$child->file_materi];
                                 }
                             }
 
@@ -414,28 +441,42 @@
                                             </div>
                                         </div>
 
-                                        <!-- List YouTube Video -->
-                                        <?php if (!empty($youtubeLinks)): ?>
-                                            <div class="youtube-recording-box mb-6">
-                                                <div class="d-flex align-items-center justify-content-between mb-3">
-                                                    <span class="text-gray-800 fw-bold fs-7 d-flex align-items-center">
-                                                        <i class="ki-solid ki-youtube text-danger fs-3 me-2"></i> Rekaman Materi (<?= count($youtubeLinks) ?> Bagian)
-                                                    </span>
-                                                </div>
-                                                <div class="d-flex flex-column gap-2" style="max-height: 140px; overflow-y: auto;">
-
-                                                    <!-- UPDATE: Logika Terkunci (Gratis ATAU Terlewat Beli) -->
-                                                    <?php if ($isPaketGratis || $isTerlambatBeli): ?>
-                                                        <div class="alert alert-light-danger border border-danger border-dashed p-3 m-0 d-flex align-items-center">
-                                                            <i class="ki-outline ki-lock-3 fs-1 text-danger me-3"></i>
+                                        <!-- List Rekaman YouTube & Materi PDF -->
+                                        <div class="youtube-recording-box mb-6">
+                                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                                <span class="text-gray-800 fw-bold fs-7 d-flex align-items-center">
+                                                    <i class="ki-solid ki-folder-open text-primary fs-3 me-2"></i> Rekaman & Materi
+                                                </span>
+                                            </div>
+                                            
+                                            <div class="d-flex flex-column gap-2" style="max-height: 140px; overflow-y: auto;">
+                                                <!-- Logika Terkunci (Gratis ATAU Terlewat Beli) -->
+                                                <?php if ($isPaketGratis || $isTerlambatBeli): ?>
+                                                    <div class="alert alert-light-danger border border-danger border-dashed p-3 m-0 d-flex align-items-center">
+                                                        <i class="ki-outline ki-lock-3 fs-1 text-danger me-3"></i>
+                                                        <div class="d-flex flex-column">
+                                                            <span class="fw-bold text-danger fs-8">Akses Terkunci</span>
+                                                            <span class="text-muted fs-9">
+                                                                <?= $isTerlambatBeli ? 'Anda mendaftar setelah sesi ini selesai.' : 'Rekaman dan materi hanya untuk peserta Premium.' ?>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                <?php else: ?>
+                                                
+                                                    <!-- JIKA KEDUA DATA (YOUTUBE & MATERI) KOSONG -->
+                                                    <?php if (empty($youtubeLinks) && empty($fileMateri)): ?>
+                                                        <div class="alert alert-light-info border border-info border-dashed p-3 m-0 d-flex align-items-center">
+                                                            <i class="ki-outline ki-information-5 fs-2 text-info me-3"></i>
                                                             <div class="d-flex flex-column">
-                                                                <span class="fw-bold text-danger fs-8">Akses Terkunci</span>
+                                                                <span class="fw-bold text-info fs-8">Sedang Dipersiapkan</span>
                                                                 <span class="text-muted fs-9">
-                                                                    <?= $isTerlambatBeli ? 'Anda mendaftar setelah sesi ini selesai.' : 'Rekaman hanya untuk peserta Premium.' ?>
+                                                                    Mohon bersabar, rekaman dan file materi saat ini sedang dalam proses persiapan dan akan segera diunggah.
                                                                 </span>
                                                             </div>
                                                         </div>
                                                     <?php else: ?>
+
+                                                        <!-- RENDER REKAMAN YOUTUBE -->
                                                         <?php foreach ($youtubeLinks as $idx => $ytLink): ?>
                                                             <button type="button"
                                                                 class="btn btn-sm btn-white youtube-item-btn fw-bold d-flex align-items-center justify-content-between py-2.5 px-3 rounded-2 shadow-xs w-100 text-start"
@@ -443,17 +484,30 @@
                                                                 data-bs-target="#youtubeModal"
                                                                 data-youtubelink="<?= esc($ytLink) ?>">
                                                                 <div class="d-flex align-items-center">
-                                                                    <span class="badge badge-light-danger fw-bolder fs-9 me-3 px-2 py-1">Part <?= $idx + 1 ?></span>
-                                                                    <span class="text-gray-700 fs-7 text-truncate" style="max-width: 170px;">Tonton Rekaman Sesi <?= $idx + 1 ?></span>
+                                                                    <span class="badge badge-light-danger fw-bolder fs-9 me-3 px-2 py-1">Video <?= $idx + 1 ?></span>
+                                                                    <span class="text-gray-700 fs-7 text-truncate" style="max-width: 170px;">Tonton Rekaman Sesi</span>
                                                                 </div>
                                                                 <i class="ki-outline ki-play fs-5 text-danger"></i>
                                                             </button>
                                                         <?php endforeach; ?>
-                                                    <?php endif; ?>
 
-                                                </div>
+                                                        <!-- RENDER FILE MATERI PDF -->
+                                                        <?php foreach ($fileMateri as $idx => $materiUrl): ?>
+                                                            <a href="<?= esc($materiUrl) ?>" target="_blank"
+                                                                class="btn btn-sm btn-white fw-bold d-flex align-items-center justify-content-between py-2.5 px-3 rounded-2 shadow-xs w-100 text-start mt-1">
+                                                                <div class="d-flex align-items-center">
+                                                                    <span class="badge badge-light-primary fw-bolder fs-9 me-3 px-2 py-1">PDF <?= $idx + 1 ?></span>
+                                                                    <span class="text-gray-700 fs-7 text-truncate" style="max-width: 170px;">Unduh Materi Sesi</span>
+                                                                </div>
+                                                                <i class="ki-outline ki-file-down fs-5 text-primary"></i>
+                                                            </a>
+                                                        <?php endforeach; ?>
+                                                        
+                                                    <?php endif; ?>
+                                                    
+                                                <?php endif; ?>
                                             </div>
-                                        <?php endif; ?>
+                                        </div>
 
                                         <!-- Action Button Gmeet & Sertifikat -->
                                         <div class="mt-auto pt-4">

@@ -8,7 +8,7 @@ class WebinarSesiModel extends Model
 {
     protected $table            = 'webinar_sesi';
     protected $primaryKey       = 'id_sesi';
-    protected $allowedFields    = ['nama_sesi', 'deskripsi_sesi', 'waktu_mulai', 'waktu_selesai', 'harga_sesi', 'link_zoom', 'link_youtube','sesi_gratis', 'status'];
+    protected $allowedFields    = ['nama_sesi', 'deskripsi_sesi', 'waktu_mulai', 'waktu_selesai', 'harga_sesi', 'link_zoom', 'link_youtube','sesi_gratis', 'status', 'file_materi'];
 
     // Fungsi untuk Landing Page: Mengambil data paket berserta sesi-sesinya
     public function getPaketWebinarLengkap($slug = null)
