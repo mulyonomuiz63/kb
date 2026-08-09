@@ -302,8 +302,16 @@
                             // Ambil Waktu Pembelian User
                             $waktuBeli = strtotime($w->tgl_pembayaran ?? $w->created_at);
 
-                            // Cek apakah user mendaftar/membayar SETELAH sesi ini selesai
-                            $isTerlambatBeli = ($waktuBeli > $waktuSelesai);
+                            // ================================================================
+                            // UPDATE LOGIKA: Membandingkan hanya berdasarkan TANGGAL (Hari)
+                            // Mengabaikan Jam, sehingga beli di hari yang sama tetap aman.
+                            // ================================================================
+                            $tanggalBeli = strtotime(date('Y-m-d', $waktuBeli));
+                            $tanggalSelesai = strtotime(date('Y-m-d', $waktuSelesai));
+
+                            // Cek apakah user mendaftar/membayar HARI BERIKUTNYA setelah sesi ini selesai
+                            $isTerlambatBeli = ($tanggalBeli > $tanggalSelesai);
+                            // ================================================================
 
                             // Menentukan Status Sesi Zoom (Dibuka 3 jam sebelum mulai)
                             if ($isTerlambatBeli) {
@@ -475,7 +483,7 @@
                                                     <!-- JIKA KEDUA DATA (YOUTUBE & MATERI) KOSONG -->
                                                     <?php if (empty($youtubeLinks) && empty($fileMateri)): ?>
                                                     
-                                                        <!-- UPDATE BARU: Cek apakah kelas sudah selesai atau belum -->
+                                                        <!-- Cek apakah kelas sudah selesai atau belum -->
                                                         <?php if ($status == 'finished'): ?>
                                                             <div class="alert alert-light-info border border-info border-dashed p-3 m-0 d-flex align-items-center">
                                                                 <i class="ki-outline ki-information-5 fs-2 text-info me-3"></i>
