@@ -432,14 +432,14 @@ class WebinarController extends BaseController
         // B. NAMA LENGKAP PESERTA
         // Warna Biru (Menyesuaikan desain draft: RGB ~ 23, 107, 195)
         $pdf->SetTextColor(23, 98, 185);
-        $pdf->SetFont('Arial', 'B', 36);
+        $pdf->SetFont('Arial', 'B', 24);
 
         $nama_siswa = ucwords(strtoupper($dataSiswa->nama_siswa));
 
         // Jika panjang karakter nama lebih dari 20 huruf, otomatis turunkan ukuran font-nya
-        if (strlen($nama_siswa) > 25) {
+        if (strlen($nama_siswa) > 20) {
             $pdf->SetFont('Arial', 'B', 20); // Font diperkecil jadi 28
-        } elseif (strlen($nama_siswa) > 35) {
+        } elseif (strlen($nama_siswa) > 30) {
             $pdf->SetFont('Arial', 'B', 18); // Font diperkecil jadi 20 jika sangat panjang
         }
 
