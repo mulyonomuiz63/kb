@@ -258,7 +258,7 @@
                     <?php foreach ($webinar as $w) : ?>
                         <?php
                         // Cek apakah paket ini Gratis atau Berbayar
-                        $isPaketGratis = ($w->harga_sesi == 0);
+                        $isPaketGratis = ($w->status == 'F');
 
                         // Kumpulkan list sesi detail yang akan dijadikan card terpisah
                         $childSessions = [];
