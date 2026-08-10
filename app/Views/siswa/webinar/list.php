@@ -403,7 +403,7 @@
                                                     <i class="ki-outline ki-abstract-26 fs-6 text-white me-1"></i> Gratis
                                                 </span>
                                             <?php else: ?>
-                                                <span class="badge bg-warning text-dark fs-8 fw-bold px-3 py-2 shadow-sm d-inline-block badge-title-clamp" data-bs-toggle="tooltip" data-bs-placement="top" title="Paket Berbayar">
+                                                <span class="badge bg-warning text-dark fs-8 fw-bold px-3 py-2 shadow-sm d-inline-block badge-title-clamp" data-bs-toggle="tooltip" data-bs-placement="top" title="Paket Full Akses">
                                                     <i class="ki-outline ki-star fs-6 text-dark me-1"></i> Premium
                                                 </span>
                                             <?php endif; ?>
@@ -517,7 +517,7 @@
                                                                 data-youtubelink="<?= esc($ytLink) ?>">
                                                                 <div class="d-flex align-items-center">
                                                                     <span class="badge badge-light-danger fw-bolder fs-9 me-3 px-2 py-1">Video <?= $idx + 1 ?></span>
-                                                                    <span class="text-gray-700 fs-7 text-truncate" style="max-width: 170px;">Tonton Rekaman Sesi</span>
+                                                                    <span class="text-gray-700 fs-7 text-truncate" style="max-width: 170px;">Tonton Rekaman Webinar</span>
                                                                 </div>
                                                                 <i class="ki-outline ki-play fs-5 text-danger"></i>
                                                             </button>
@@ -529,7 +529,7 @@
                                                                 class="btn btn-sm btn-white fw-bold d-flex align-items-center justify-content-between py-2.5 px-3 rounded-2 shadow-xs w-100 text-start mt-1">
                                                                 <div class="d-flex align-items-center">
                                                                     <span class="badge badge-light-primary fw-bolder fs-9 me-3 px-2 py-1">PDF <?= $idx + 1 ?></span>
-                                                                    <span class="text-gray-700 fs-7 text-truncate" style="max-width: 170px;">Unduh Materi Sesi</span>
+                                                                    <span class="text-gray-700 fs-7 text-truncate" style="max-width: 170px;">Unduh Materi Webinar</span>
                                                                 </div>
                                                                 <i class="ki-outline ki-file-down fs-5 text-primary"></i>
                                                             </a>
@@ -605,7 +605,7 @@
         <div class="modal-content rounded-4 shadow border-0 overflow-hidden">
             <div class="modal-header border-0 pb-0 px-6 pt-6">
                 <h5 class="modal-title fw-bold text-dark d-flex align-items-center">
-                    <i class="ki-solid ki-youtube text-danger fs-2x me-2"></i> Pemutar Rekaman Materi
+                    <i class="ki-solid ki-youtube text-danger fs-2x me-2"></i> Anda Sedang Menonton Rekaman
                 </h5>
                 <!-- Modifikasi tombol close agar juga menyetop video -->
                 <button type="button" class="btn-close" id="btnCloseModal" data-bs-dismiss="modal" aria-label="Close"></button>

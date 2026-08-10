@@ -341,8 +341,8 @@
                 <?php
                 $menus = [
                     ['url' => 'sw-siswa/materi', 'icon' => 'ki-book-open', 'color' => 'primary', 'title' => 'Materi Belajar', 'desc' => 'Akses semua modul'],
-                    ['url' => 'sw-siswa/webinar', 'icon' => 'ki-award', 'color' => 'warning', 'title' => 'Webinar', 'desc' => 'News Webinar'],
-                    ['url' => 'sw-siswa/ujian', 'icon' => 'ki-notepad-edit', 'color' => 'danger', 'title' => 'Ujian & Quiz', 'desc' => 'Evaluasi pemahaman'],
+                    ['url' => 'sw-siswa/webinar', 'icon' => 'ki-award', 'color' => 'warning', 'title' => 'Webinar', 'desc' => 'Update Regulasi'],
+                    ['url' => 'sw-siswa/ujian', 'icon' => 'ki-notepad-edit', 'color' => 'danger', 'title' => 'Ujian & Quiz', 'desc' => 'Uji Kompetensi'],
                     ['url' => 'sw-siswa/sertifikat', 'icon' => 'ki-medal-star', 'color' => 'success', 'title' => 'Sertifikat', 'desc' => 'Download bukti lulus'],
                     ['url' => 'sw-siswa/affiliate', 'icon' => 'ki-people', 'color' => 'warning', 'title' => 'Affiliate', 'desc' => 'Bonus referensi'],
                     ['url' => 'sw-siswa/transaksi', 'icon' => 'ki-time', 'color' => 'info', 'title' => 'Histori', 'desc' => 'Status pembayaran'],
@@ -483,7 +483,7 @@
                                                                     <?php endif; ?>
                                                                 <?php else: ?>
                                                                     <span class="badge fs-8 fw-bolder px-3 py-1.5 rounded-pill d-flex align-items-center" style="background-color: #e8f4fd; color: #0d6efd;">
-                                                                        <span class="bullet bullet-dot me-1.5" style="background-color: #0d6efd;"></span> Gratis
+                                                                        <span style="background-color: #0d6efd;"></span> Gratis
                                                                     </span>
                                                                 <?php endif; ?>
                                                             </div>
