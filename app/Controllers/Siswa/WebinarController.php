@@ -66,7 +66,6 @@ class WebinarController extends BaseController
         // 1. Data Retrieval
         $id_siswa = session()->get('id'); // Ambil ID siswa dari session
         $id_sesi   = decrypt_url($id_sesien);
-        $dataSesi =$id_siswa = session()->get('id'); // Ambil ID siswa yang sedang login
         $id_target = (int) $id_sesi;       // ID Sesi yang ingin dilihat sertifikatnya
 
         $dataSesi = $this->transaksiModel

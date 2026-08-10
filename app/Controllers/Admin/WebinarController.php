@@ -3,6 +3,9 @@
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
+use App\Models\DetailTransaksiModel;
+use App\Models\SiswaModel;
+use App\Models\TransaksiModel;
 use App\Models\WebinarSesiModel;
 
 class WebinarController extends BaseController
@@ -10,11 +13,17 @@ class WebinarController extends BaseController
     protected $webinarSesiModel;
     protected $detailPaketModel;
     protected $paketModel;
+    protected $transaksiModel;
+    protected $siswaModel;
+    protected $detailTransaksiModel;
 
     public function __construct()
     {
         $this->webinarSesiModel = new WebinarSesiModel();
         $this->detailPaketModel = new \App\Models\DetailPaketModel();
+        $this->siswaModel = new SiswaModel();
+        $this->transaksiModel = new TransaksiModel();
+        $this->detailTransaksiModel = new DetailTransaksiModel();
         $this->paketModel = new \App\Models\PaketModel();
     }
 
@@ -92,23 +101,6 @@ class WebinarController extends BaseController
                 $ytHtml .= '<a href="' . esc($yl) . '" target="_blank" class="badge badge-light-danger mb-1 me-1 text-truncate" style="max-width:150px;"><i class="ki-duotone ki-youtube fs-6 me-1"></i> YT Link</a>';
             }
 
-            // =========================================================================
-            // TAMBAHAN: Parsing JSON File Materi PDF
-            // =========================================================================
-            $materiHtml = '';
-            if (!empty($record->file_materi)) {
-                $materiLinks = json_decode($record->file_materi, true);
-                if (is_array($materiLinks)) {
-                    foreach ($materiLinks as $idx => $ml) {
-                        $materiHtml .= '<a href="' . esc($ml) . '" target="_blank" class="badge badge-light-info mb-1 me-1 text-truncate" style="max-width:150px;" data-bs-toggle="tooltip" title="Lihat File ' . ($idx + 1) . '"><i class="ki-duotone ki-file-down fs-6 me-1"></i> PDF ' . ($idx + 1) . '</a>';
-                    }
-                } else {
-                    // Fallback jika berupa string tunggal
-                    $materiHtml .= '<a href="' . esc($record->file_materi) . '" target="_blank" class="badge badge-light-info mb-1 me-1 text-truncate" style="max-width:150px;"><i class="ki-duotone ki-file-down fs-6 me-1"></i> PDF</a>';
-                }
-            }
-            // =========================================================================
-
             // Parsing Sesi Bonus / Gratis Terkait
             $bonusIds = json_decode($record->sesi_gratis, true) ?? [];
             $bonusHtml = '<div class="d-flex flex-wrap gap-1" style="max-width: 250px; white-space: normal;">';
@@ -122,7 +114,10 @@ class WebinarController extends BaseController
             }
             $bonusHtml .= '</div>';
 
-            // Menghitung jumlah peserta yang sudah beli / daftar pada sesi ini
+            // =========================================================================================
+            // TAMBAHAN: Menghitung jumlah peserta yang sudah beli / daftar pada sesi ini
+            // (Hanya menghitung yang status transaksinya 'S' (Selesai) atau 'M' (Menunggu Pembayaran))
+            // =========================================================================================
             $jumlah_peserta = $db->table('detail_transaksi')
                 ->join('transaksi', 'transaksi.idtransaksi = detail_transaksi.idtransaksi')
                 ->where('detail_transaksi.idsesi', $record->id_sesi)
@@ -130,6 +125,7 @@ class WebinarController extends BaseController
                 ->countAllResults();
 
             $pesertaHtml = '<span class="badge badge-light-success fw-bold px-3 py-2"><i class="ki-duotone ki-profile-user fs-6 me-1"></i> ' . $jumlah_peserta . ' Peserta</span>';
+            // =========================================================================================
 
             $opsi = '
             <div class="d-flex justify-content-end">
@@ -155,10 +151,6 @@ class WebinarController extends BaseController
                 "sesi_gratis"  => $bonusHtml,
                 "link_zoom"    => '<div class="d-flex flex-wrap text-break">' . ($zoomHtml ?: '<span class="text-muted fs-7">Tidak ada</span>') . '</div>',
                 "link_youtube" => '<div class="d-flex flex-wrap text-break">' . ($ytHtml ?: '<span class="text-muted fs-7">Tidak ada</span>') . '</div>',
-                
-                // TAMBAHAN: Data File Materi dimasukkan ke array
-                "file_materi"  => '<div class="d-flex flex-wrap text-break">' . ($materiHtml ?: '<span class="text-muted fs-7">Belum ada</span>') . '</div>',
-                
                 "opsi"         => $opsi
             ];
         }
@@ -362,11 +354,40 @@ class WebinarController extends BaseController
     public function sertifikat($id_siswaen, $id_sesien)
     {
         // 1. Data Retrieval
-        $id_siswa = decrypt_url($id_siswaen);
+        $id_siswa = decrypt_url($id_siswaen); // Ambil ID siswa dari session
         $id_sesi   = decrypt_url($id_sesien);
-        $hasil      = $this->webinarSesiModel->where('id_sesi', $id_sesi)->get()->getRow();
+        $id_target = (int) $id_sesi;       // ID Sesi yang ingin dilihat sertifikatnya
 
-        if (!$hasil) {
+        $dataSesi = $this->transaksiModel
+            ->select('ws_target.*, paket.nama_paket')
+            ->join('detail_transaksi', 'transaksi.idtransaksi = detail_transaksi.idtransaksi')
+            ->join('paket', 'detail_transaksi.idpaket = paket.idpaket')
+            ->join('siswa', 'transaksi.idsiswa = siswa.id_siswa')
+            // Ambil data detail dari webinar_sesi target yang ingin dicetak sertifikatnya
+            ->join('webinar_sesi ws_target', 'ws_target.id_sesi = ' . $id_target)
+            ->where('transaksi.status', 'S')
+            ->where('transaksi.idsiswa', $id_siswa)
+            ->groupStart()
+                // KONDISI 1: Sesi yang diminta dibeli secara langsung sebagai sesi utama
+                ->where('detail_transaksi.idsesi', $id_target)
+                // KONDISI 2: Sesi yang diminta ada di dalam daftar JSON `sesi_gratis` dari sesi utama yang dibeli
+                ->orWhere("EXISTS (
+                    SELECT 1 FROM webinar_sesi ws_parent 
+                    WHERE ws_parent.id_sesi = detail_transaksi.idsesi 
+                    AND (
+                        ws_parent.sesi_gratis LIKE '%\"{$id_target}\"%' 
+                        OR ws_parent.sesi_gratis LIKE '%[{$id_target},%' 
+                        OR ws_parent.sesi_gratis LIKE '%,{$id_target},%' 
+                        OR ws_parent.sesi_gratis LIKE '%,{$id_target}]%'
+                    )
+                )", null, false)
+            ->groupEnd()
+            ->get()
+            ->getRow();
+        $dataSiswa     = $this->siswaModel->where('id_siswa', $id_siswa)->get()->getRow();
+
+
+        if (!$dataSesi || !$dataSiswa) {
             return "Data tidak ditemukan";
         }
 
@@ -377,23 +398,24 @@ class WebinarController extends BaseController
 
         // Metadata
         $pdf->SetCreator("kelasbrevet.com");
-        $pdf->SetAuthor(strtoupper($hasil->nama_siswa));
-        $pdf->SetTitle(strtoupper($hasil->nama_mapel));
-        $pdf->SetSubject('SERTIFIKAT ' . strtoupper($hasil->nama_mapel));
+        $pdf->SetAuthor(strtoupper($dataSiswa->nama_siswa));
+        $pdf->SetTitle(strtoupper($dataSesi->nama_sesi) . ' - SERTIFIKAT');
+        $pdf->SetSubject('SERTIFIKAT ' . strtoupper($dataSesi->nama_sesi) . ' - SERTIFIKAT');
         $pdf->SetKeywords('KelasBrevet, Pajak, Webinar');
 
         // 3. Background Image (Sesuai Permintaan)
-        $bgImg = 'uploads/webinar/sertifikat/background.jpg';
+        $bgImg = 'uploads/webinar/sertifikat/background.jpeg';
         $pdf->Image($bgImg, 0, 0, $pdf->getPageWidth(), $pdf->getPageHeight());
 
         // 4. Helper Format Tanggal & Nomor
         $arrBulan        = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
         $arrBulanRomawi  = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
 
-        $timeStart   = strtotime($hasil->start_ujian);
+        $timeStart   = strtotime($dataSesi->waktu_mulai);
+        $idSesi   = str_pad($dataSesi->id_sesi, 3, '0', STR_PAD_LEFT);
         // Bisa disesuaikan jika ingin statis 8 Agustus 2026 atau dinamis berdasarkan start_ujian
         $tglSertif   = date('d', $timeStart) . ' ' . $arrBulan[(int)date('m', $timeStart)] . ' ' . date('Y', $timeStart);
-        $nomorSertif = $hasil->id_sesi . '/WEBINAR-BREVET/' . $arrBulanRomawi[(int)date('m', $timeStart)] . '/' . date('Y', $timeStart);
+        $nomorSertif = $idSesi .' - ' . $dataSiswa->id_siswa . '/WEBINAR-BREVET/' . $arrBulanRomawi[(int)date('m', $timeStart)] . '/' . date('Y', $timeStart);
 
         // =========================================================
         // 5. PENULISAN KONTEN DINAMIS (Rata Tengah)
@@ -401,44 +423,57 @@ class WebinarController extends BaseController
 
         // A. NOMOR SERTIFIKAT (Di atas teks "diberikan kepada:")
         $pdf->SetTextColor(51, 49, 49); // Warna Abu-abu gelap / Hitam
-        $pdf->SetFont('Arial', '', 12);
+        $pdf->SetFont('Arial', 'BU', 16);
         // Posisi Y: 75 (Silakan naik/turunkan angka 75 jika kurang pas dengan background)
-        $pdf->SetXY(0, 75); 
+        $pdf->SetXY(10, 55);
         // Lebar 0 agar membentang penuh dari kiri ke kanan, 'C' untuk Center
         $pdf->Cell(0, 5, "Nomor: " . $nomorSertif, 0, 1, 'C');
 
         // B. NAMA LENGKAP PESERTA
         // Warna Biru (Menyesuaikan desain draft: RGB ~ 23, 107, 195)
-        $pdf->SetTextColor(23, 98, 185); 
+        $pdf->SetTextColor(23, 98, 185);
         $pdf->SetFont('Arial', 'B', 36);
-        $pdf->SetXY(0, 105); // Posisi Y: 105
-        // Format nama menjadi Title Case (Huruf besar di awal kata)
-        $nama_siswa = ucwords(strtolower($hasil->nama_siswa));
+
+        $nama_siswa = ucwords(strtoupper($dataSiswa->nama_siswa));
+
+        // Jika panjang karakter nama lebih dari 20 huruf, otomatis turunkan ukuran font-nya
+        if (strlen($nama_siswa) > 25) {
+            $pdf->SetFont('Arial', 'B', 20); // Font diperkecil jadi 28
+        } elseif (strlen($nama_siswa) > 35) {
+            $pdf->SetFont('Arial', 'B', 18); // Font diperkecil jadi 20 jika sangat panjang
+        }
+
+        $pdf->SetXY(8, 88);
         $pdf->Cell(0, 10, $nama_siswa, 0, 1, 'C');
 
         // C. DESKRIPSI KEGIATAN
         $pdf->SetTextColor(51, 49, 49); // Kembali ke warna Hitam
         $pdf->SetFont('Arial', '', 12);
-        
-        // Teks Deskripsi (Gunakan \n untuk memaksa enter agar persis seperti gambar)
-        $deskripsi = "Atas partisipasinya sebagai Peserta Webinar Marathon Update\n"
-                   . "Perpajakan 2026 dengan tema Radar Baru Fiskus 2026:\n"
-                   . "Pengawasan Kepatuhan Wajib Pajak. Yang diselenggarakan oleh Kelas Brevet\n"
+
+        $namaWebinar = $dataSesi->nama_paket ?? 'Webinar Perpajakan';
+        $teksTema = !empty($dataSesi->nama_sesi) ? "dengan tema \"" . $dataSesi->nama_sesi . "\"\n" : "";
+
+        $deskripsi = "Atas partisipasinya sebagai Peserta " . $namaWebinar . "\n"
+                   . "Yang diselenggarakan oleh Kelas Brevet\n"
+                   . $teksTema
                    . "Pada " . $tglSertif;
 
         // Karena FPDF MultiCell mengukur dari margin kiri, kita harus hitung posisi X 
         // agar kotaknya persis berada di tengah kertas.
         $lebar_teks = 200; // Lebar area teks
         $posisi_x = ($pdf->getPageWidth() - $lebar_teks) / 2;
-        
-        $pdf->SetXY($posisi_x, 135); // Posisi Y: 135
+
+        $pdf->SetXY($posisi_x, 110); // Posisi Y: 135
         $pdf->MultiCell($lebar_teks, 6, $deskripsi, 0, 'C');
 
         // =========================================================
 
         // 6. Output
+        $isDownload = $this->request->getGet('download');
+        $outputMode = $isDownload ? 'D' : 'I'; // 'D' = Download File, 'I' = Preview di Iframe
+
         $this->response->setContentType('application/pdf');
-        $pdf->Output(strtoupper($hasil->nama_siswa) . '-SERTIFIKAT.pdf', 'I');
+        $pdf->Output(strtoupper($dataSiswa->nama_siswa) . '-SERTIFIKAT.pdf', $outputMode);
         exit;
     }
 }

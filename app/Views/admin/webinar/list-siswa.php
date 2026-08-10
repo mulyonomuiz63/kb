@@ -532,7 +532,7 @@
                                                     Gabung Gmeet <i class="ki-outline ki-entrance-left fs-5 ms-2"></i>
                                                 </a>
                                             <?php else: ?>
-                                                <button type="button" class="btn btn-success w-100 fs-7 fw-bold py-3 shadow-sm hover-elevate-up" data-bs-toggle="modal" data-bs-target="#modalSertifikat" data-nama="<?= esc($child->nama_sesi) ?>" data-idsesi="<?= encrypt_url($child->id_sesi) ?>">
+                                                <button type="button" class="btn btn-success w-100 fs-7 fw-bold py-3 shadow-sm hover-elevate-up" data-bs-toggle="modal" data-bs-target="#modalSertifikat" data-idsiswa="<?= encrypt_url($w->idsiswa) ?>" data-nama="<?= esc($child->nama_sesi) ?>" data-idsesi="<?= encrypt_url($child->id_sesi) ?>">
                                                     <i class="ki-outline ki-diploma fs-4 me-2"></i> Lihat Sertifikat
                                                 </button>
                                             <?php endif; ?>
@@ -645,6 +645,44 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+<!-- Modal Popup Sertifikat -->
+<div class="modal fade" id="modalSertifikat" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl"> <!-- Diubah jadi modal-xl agar preview PDF lebih luas dan lega -->
+        <div class="modal-content shadow-lg border-0 rounded-4">
+
+            <div class="modal-header border-0 py-5 bg-light-success">
+                <h3 class="fw-bolder mb-0 text-success d-flex align-items-center">
+                    <i class="ki-outline ki-diploma fs-1 me-2 text-success"></i> Sertifikat Pelatihan
+                </h3>
+                <div class="btn btn-icon btn-sm btn-active-light-success ms-2" data-bs-dismiss="modal">
+                    <i class="ki-outline ki-cross fs-1"></i>
+                </div>
+            </div>
+
+            <div class="modal-body py-5 px-lg-10 text-center">
+                <!-- Judul Dinamis -->
+                <h4 class="fw-bold text-gray-800 mb-5" id="sertifikatTitleName">Nama Sesi</h4>
+
+                <!-- PREVIEW SERTIFIKAT MENGGUNAKAN IFRAME -->
+                <div class="border border-2 border-dashed border-success rounded-3 p-2 mb-5 mx-auto bg-light overflow-hidden" style="position: relative;">
+                    <iframe id="iframeSertifikat" src="" width="100%" height="500px" style="border:none; display:block; border-radius: 8px;"></iframe>
+                </div>
+
+                <p class="text-muted fs-6 mb-0">Selamat! Anda telah menyelesaikan sesi pelatihan ini. Sertifikat penghargaan Anda sudah diterbitkan dan siap untuk diunduh.</p>
+            </div>
+
+            <div class="modal-footer border-0 pt-0 pb-8 justify-content-center">
+                <button type="button" class="btn btn-light fw-bold me-3 px-6" data-bs-dismiss="modal">Tutup</button>
+
+                <!-- Tombol Action Download PDF -->
+                <a href="#" id="btnDownloadSertifikat" class="btn btn-success fw-bold px-8 shadow-sm hover-elevate-up" target="_blank">
+                    <i class="ki-outline ki-file-down fs-3 me-2"></i> Download PDF
+                </a>
+            </div>
+
         </div>
     </div>
 </div>
@@ -879,6 +917,40 @@
         });
     });
 </script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const modalSertifikat = document.getElementById('modalSertifikat');
 
+        if (modalSertifikat) {
+            modalSertifikat.addEventListener('show.bs.modal', function(event) {
+                // Tangkap tombol yang diklik
+                const button = event.relatedTarget;
+
+                // Ambil data atribut dari tombol
+                const namaSesi = button.getAttribute('data-nama');
+                const idSesi = button.getAttribute('data-idsesi');
+                const idsiswa = button.getAttribute('data-idsiswa');
+
+                // Update Teks Judul di Modal
+                modalSertifikat.querySelector('#sertifikatTitleName').textContent = namaSesi;
+
+                // Buat URL endpoint sertifikat
+                const urlSertifikat = "<?= base_url('sw-admin/webinar/sertifikat') ?>/" + idsiswa + "/" + idSesi;
+
+                // Masukkan URL ke dalam Iframe agar langsung merender PDF di dalam modal
+                modalSertifikat.querySelector('#iframeSertifikat').src = urlSertifikat;
+
+                // Update Link Tombol Download
+                const btnDownload = modalSertifikat.querySelector('#btnDownloadSertifikat');
+                btnDownload.href = urlSertifikat + "?download=true";
+            });
+
+            // Kosongkan iframe saat modal ditutup agar tidak membebani memori browser
+            modalSertifikat.addEventListener('hidden.bs.modal', function() {
+                modalSertifikat.querySelector('#iframeSertifikat').src = '';
+            });
+        }
+    });
+</script>
 
 <?= $this->endSection(); ?>

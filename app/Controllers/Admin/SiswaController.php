@@ -653,7 +653,7 @@ class SiswaController extends BaseController
         $id_siswa = decrypt_url($id);
         // Query untuk mengambil sesi webinar yang sudah dibeli dan lunas
         $dataWebinar = $this->transaksiModel
-            ->select('webinar_sesi.*, paket.nama_paket, paket.file')
+            ->select('webinar_sesi.*, paket.nama_paket, paket.file, transaksi.idsiswa')
             ->join('detail_transaksi', 'transaksi.idtransaksi = detail_transaksi.idtransaksi')
             ->join('paket','detail_transaksi.idpaket=paket.idpaket')
             ->join('webinar_sesi', 'detail_transaksi.idsesi=webinar_sesi.id_sesi')
