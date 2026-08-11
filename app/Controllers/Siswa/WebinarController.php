@@ -125,7 +125,7 @@ class WebinarController extends BaseController
         $idSesi   = str_pad($dataSesi->id_sesi, 3, '0', STR_PAD_LEFT);
         // Bisa disesuaikan jika ingin statis 8 Agustus 2026 atau dinamis berdasarkan start_ujian
         $tglSertif   = date('d', $timeStart) . ' ' . $arrBulan[(int)date('m', $timeStart)] . ' ' . date('Y', $timeStart);
-        $nomorSertif = $idSesi .' - ' . $dataSiswa->id_siswa . '/WEBINAR-BREVET/' . $arrBulanRomawi[(int)date('m', $timeStart)] . '/' . date('Y', $timeStart);
+        $nomorSertif = $idSesi .'-' . $dataSiswa->id_siswa . '/WEBINAR-BREVET/' . $arrBulanRomawi[(int)date('m', $timeStart)] . '/' . date('Y', $timeStart);
 
         // =========================================================
         // 5. PENULISAN KONTEN DINAMIS (Rata Tengah)

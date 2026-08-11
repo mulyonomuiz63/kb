@@ -333,14 +333,74 @@
   </div>
 </div>
 
-<div class="container">
-  <div class="product-card my-4">
-    <h2 class="text-left fz-6">Deskripsi Layanan</h2>
-    <?= $paket->deskripsi ?>
+<div class="container my-5">
+    <div class="row g-4 g-lg-5 align-items-stretch">
+        
+        <!-- Bagian Kiri: Deskripsi Layanan -->
+        <div class="col-lg-7 col-md-12">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-4 p-md-5 bg-white">
+                <div class="card-body p-0">
+                    <h2 class="fw-bolder text-dark mb-2 fs-3">
+                      Deskripsi Layanan
+                    </h2>
+                    
+                    <!-- Konten Deskripsi -->
+                    <div class="text-gray-700 fs-6 lh-lg" style="text-align: justify;">
+                        <?= $paket->deskripsi ?>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-  </div>
+        <!-- Bagian Kanan: Widget Informasi Umum -->
+        <div class="col-lg-5 col-md-12">
+            <!-- Card Sticky (Akan mengikuti saat discroll jika konten kiri panjang) -->
+            <div class="position-sticky" style="top: 2rem;">
+                <div class="card border-0 shadow-sm p-4 p-md-5 rounded-4" 
+                     style="background-color: #f8f9fa; border: 2px dashed #0d6efd !important; transition: transform 0.3s ease, box-shadow 0.3s ease;" 
+                     onmouseover="this.style.transform='translateY(-5px)'; this.classList.add('shadow');" 
+                     onmouseout="this.style.transform='translateY(0)'; this.classList.remove('shadow');">
+                    
+                    <div class="card-body p-0">
+                        <h3 class="fw-bolder text-primary mb-4 fs-4 d-flex align-items-center">
+                            <i class="fa fa-info-circle fs-3 text-primary me-3"></i> Informasi Umum
+                        </h3>
+                        
+                        <!-- List Fasilitas / Keunggulan -->
+                        <ul class="list-unstyled d-flex flex-column gap-3 m-0">
+                            <li class="d-flex align-items-start p-1 rounded-3 shadow-sm border border-light">
+                                <i class="fa fa-check-circle text-success me-3 mt-1" style="font-size: 20px;"></i>
+                                <span class="text-dark fw-semibold fs-6 lh-base">LKP Terdaftar Resmi</span>
+                            </li>
+                            <li class="d-flex align-items-start p-1 rounded-3 shadow-sm border border-light">
+                                <i class="fa fa-check-circle text-success me-3 mt-1" style="font-size: 20px;"></i>
+                                <span class="text-dark fw-semibold fs-6 lh-base">Sertifikat Brevet Diakui</span>
+                            </li>
+                            <li class="d-flex align-items-start p-1 rounded-3 shadow-sm border border-light">
+                                <i class="fa fa-check-circle text-success me-3 mt-1" style="font-size: 20px;"></i>
+                                <span class="text-dark fw-semibold fs-6 lh-base">Akses Belajar Selamanya</span>
+                            </li>
+                            <li class="d-flex align-items-start p-1 rounded-3 shadow-sm border border-light">
+                                <i class="fa fa-check-circle text-success me-3 mt-1" style="font-size: 20px;"></i>
+                                <span class="text-dark fw-semibold fs-6 lh-base">Materi Terus di Update</span>
+                            </li>
+                            <li class="d-flex align-items-start p-1 rounded-3 shadow-sm border border-light">
+                                <i class="fa fa-check-circle text-success me-3 mt-1" style="font-size: 20px;"></i>
+                                <span class="text-dark fw-semibold fs-6 lh-base">Tanpa Langganan Bulanan/Tahunan</span>
+                            </li>
+                            <li class="d-flex align-items-start p-1 rounded-3 shadow-sm border border-light">
+                                <i class="fa fa-check-circle text-success me-3 mt-1" style="font-size: 20px;"></i>
+                                <span class="text-dark fw-semibold fs-6 lh-base">Dilatih Oleh Konsultan Pajak dan ASN/EX-DJP</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
 </div>
-
 <!-- ======= REVIEW & RATING SECTION ======= -->
 <?php if ($rataRating > 0): ?>
   <div class="container">
