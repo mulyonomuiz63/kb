@@ -101,6 +101,13 @@ class WebinarController extends BaseController
                 $ytHtml .= '<a href="' . esc($yl) . '" target="_blank" class="badge badge-light-danger mb-1 me-1 text-truncate" style="max-width:150px;"><i class="ki-duotone ki-youtube fs-6 me-1"></i> YT Link</a>';
             }
 
+            // Parsing JSON file_materi
+            $fileMateriLinks = json_decode($record->file_materi, true) ?? [];
+            $fileMateriHtml = '';
+            foreach ($fileMateriLinks as $fml) {
+                $fileMateriHtml .= '<a href="' . esc($fml) . '" target="_blank" class="badge badge-light-info mb-1 me-1 text-truncate" style="max-width:150px;"><i class="ki-duotone ki-file fs-6 me-1"></i> File Materi</a>';
+            }
+
             // Parsing Sesi Bonus / Gratis Terkait
             $bonusIds = json_decode($record->sesi_gratis, true) ?? [];
             $bonusHtml = '<div class="d-flex flex-wrap gap-1" style="max-width: 250px; white-space: normal;">';
@@ -151,6 +158,7 @@ class WebinarController extends BaseController
                 "sesi_gratis"  => $bonusHtml,
                 "link_zoom"    => '<div class="d-flex flex-wrap text-break">' . ($zoomHtml ?: '<span class="text-muted fs-7">Tidak ada</span>') . '</div>',
                 "link_youtube" => '<div class="d-flex flex-wrap text-break">' . ($ytHtml ?: '<span class="text-muted fs-7">Tidak ada</span>') . '</div>',
+                "file_materi" => '<div class="d-flex flex-wrap text-break">' . ($fileMateriHtml ?: '<span class="text-muted fs-7">Tidak ada</span>') . '</div>',
                 "opsi"         => $opsi
             ];
         }
