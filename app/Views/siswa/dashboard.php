@@ -277,6 +277,42 @@
 </style>
 <?= $this->endSection(); ?>
 <?= $this->section('content'); ?>
+<!-- Cek kondisi dari backend -->
+<?php if (isset($showWaAlert) && $showWaAlert): ?>
+
+    <!-- Wrapper Alert (Disembunyikan secara default, ditampilkan via JS) -->
+    <div id="wa-group-alert" class="d-none">
+        <!-- Metronic 8 Alert Component -->
+        <div class="alert bg-light-success border border-success border-dashed d-flex flex-column flex-sm-row w-100 p-5 mb-10 shadow-sm rounded-4">
+
+            <!-- Icon -->
+            <div class="d-flex flex-center me-4 mb-5 mb-sm-0">
+                <i class="fa-brands fa-whatsapp fs-3x text-success"></i>
+            </div>
+
+            <!-- Content -->
+            <div class="d-flex flex-column pe-0 pe-sm-10 flex-grow-1 justify-content-center">
+                <h5 class="mb-1 fw-bolder text-dark">Akses Eksklusif Peserta Pelatihan!</h5>
+                <span class="text-gray-700 fs-6">
+                    Terima kasih atas pembelian paket pelatihan Anda. Sebagai peserta resmi, Anda mendapatkan akses khusus ke Grup WhatsApp kami. Silakan bergabung untuk berdiskusi, mendapatkan update informasi.
+                </span>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex align-items-center mt-4 mt-sm-0 gap-3">
+                <button type="button" class="btn btn-sm btn-outline btn-outline-dashed btn-outline-success btn-active-light-success btn-wa-action fw-bold" data-action="sudah">
+                    Sudah Bergabung
+                </button>
+                <a href="https://chat.whatsapp.com/Jrywzo6tt6m9QltNrNSKNp?s=sh&p=i&mlu=4" target="_blank" class="btn btn-sm btn-success btn-wa-action fw-bold shadow-sm" data-action="gabung">
+                   Bergabung Sekarang
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+<?php endif; ?>
+
 <div class="row g-5 g-xl-8">
     <?php if (!empty($activeAlerts)): ?>
         <div class="mb-8 animate-alert-wrapper">
@@ -673,6 +709,7 @@
         </div>
     </div>
 </div>
+
 <?= $this->endSection(); ?>
 
 <?= $this->section('scripts'); ?>
@@ -875,6 +912,43 @@
             updateTimer();
             setInterval(updateTimer, 1000); // Update setiap 1 detik
         });
+    });
+</script>
+<!-- JavaScript Local Storage Logic -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const waAlert = document.getElementById('wa-group-alert');
+
+        if (waAlert) {
+            // Mengecek apakah user sudah pernah menutup alert ini di browser mereka
+            const hasActedOnWaGroup = localStorage.getItem('waGroupActionDone');
+
+            // Jika belum pernah klik tombol apapun, tampilkan alert
+            if (!hasActedOnWaGroup) {
+                waAlert.classList.remove('d-none');
+            }
+
+            // Menambahkan event listener ke kedua tombol
+            const actionBtns = waAlert.querySelectorAll('.btn-wa-action');
+            actionBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+
+                    // Simpan ke Local Storage agar tidak tampil lagi seterusnya
+                    localStorage.setItem('waGroupActionDone', 'true');
+
+                    // Efek animasi menghilang (Fade out)
+                    waAlert.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                    waAlert.style.opacity = '0';
+                    waAlert.style.transform = 'translateY(-10px)';
+
+                    // Hapus elemen dari DOM setelah animasi selesai
+                    setTimeout(() => {
+                        waAlert.remove();
+                    }, 400);
+
+                });
+            });
+        }
     });
 </script>
 <?= $this->endSection(); ?>

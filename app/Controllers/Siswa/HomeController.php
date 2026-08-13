@@ -95,6 +95,18 @@ class HomeController extends BaseController
         // AKHIR LOGIKA ALERT WEBINAR
         // =================================================================================
 
+        $cekTransaksi = $db->table('transaksi')
+            ->where('idsiswa', $id_siswa)
+            ->where('status', 'S')
+            ->groupStart() // Membuka kurung query agar kondisi OR tidak merusak WHERE idsiswa
+                ->like('jenis_paket', '"brevet"') // Mencari string "brevet" di dalam array
+                ->orLike('jenis_paket', '"ikh"')  // ATAU mencari string "ikh" di dalam array
+            ->groupEnd()
+            ->countAllResults();
+
+        // Kirim variabel ini ke View
+        $this->data['showWaAlert'] = ($cekTransaksi > 0);
+
         // untuk top 10
         $sql = "
         SELECT 
