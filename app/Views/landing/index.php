@@ -27,10 +27,7 @@
     <meta property="og:type" content="website">
     <meta property="og:locale" content="id_ID">
 
-
-    <!-- ========================================== -->
-    <!-- TWITTER / X CARD OPTIMIZATION              -->
-    <!-- ========================================== -->
+    <!-- TWITTER / X CARD OPTIMIZATION -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="@kelasbrevet">
     <meta name="twitter:title" content="<?= title(); ?>">
@@ -38,7 +35,7 @@
     <meta name="twitter:image" content="<?= !empty($dataMeta) ? base_url('uploads/iklan/thumbnails/' . $dataMeta->file) : base_url(favicon()); ?>">
 
     <link rel="canonical" href="<?= current_url() ?>" />
-    <!-- Google tag (gtag.js) -->
+
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-LVJ4K7XNX9"></script>
     <script>
@@ -69,37 +66,29 @@
             f.parentNode.insertBefore(j, f);
         })(window, document, 'script', 'dataLayer', 'GTM-MFDZ3PMC');
     </script>
-    <!-- End Google Tag Manager -->
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="<?= base_url(favicon()); ?>" />
     <link href="<?= base_url(favicon()); ?>" rel="apple-touch-icon">
 
-    <!-- CSS
-	============================================ -->
-
-    <!-- Icon Font CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="<?= base_url('assets-landing/css/plugins/icofont.min.css'); ?>">
     <link rel="stylesheet" href="<?= base_url('assets-landing/css/plugins/flaticon.css'); ?>">
     <link rel="stylesheet" href="<?= base_url('assets-landing/css/plugins/font-awesome.min.css'); ?>">
-
-    <!-- Plugins CSS -->
     <link rel="stylesheet" href="<?= base_url('assets-landing/css/plugins/animate.min.css'); ?>">
     <link rel="stylesheet" href="<?= base_url('assets-landing/css/plugins/swiper-bundle.min.css'); ?>">
-
-    <!-- Main Style CSS -->
-
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Main Style CSS -->
     <link rel="stylesheet" href="<?= base_url('assets-landing/css/style.css'); ?>">
     <link rel="stylesheet" href="<?= base_url('assets-landing/css/custome.css'); ?>?v=8">
 
     <link href="<?= base_url('assets/app-assets/template/cbt-malela'); ?>/plugins/sweetalerts/sweetalert2.min.css" rel="stylesheet" type="text/css" />
     <link href="<?= base_url('assets/app-assets/template/cbt-malela'); ?>/plugins/sweetalerts/sweetalert.css" rel="stylesheet" type="text/css" />
     <script src="<?= base_url('assets/app-assets/template/cbt-malela'); ?>/plugins/sweetalerts/sweetalert2.min.js"></script>
+
     <style>
         .nice-select {
             display: none;
@@ -110,12 +99,9 @@
             height: 90px !important;
             border-radius: 50% !important;
             object-fit: cover !important;
-            /* ↓ Atur posisi wajah agar kepala tidak terpotong */
             object-position: center top !important;
         }
-    </style>
-    <style>
-        /* ===== IMAGE ===== */
+
         .courses-images {
             overflow: hidden;
         }
@@ -128,7 +114,6 @@
             transform: scale(1.08);
         }
 
-        /* ===== TITLE ===== */
         .courses-content h4.title {
             font-size: 16px;
             font-weight: 600;
@@ -136,13 +121,11 @@
             margin-bottom: 6px;
         }
 
-        /* ===== PRICE ===== */
         .courses-meta .fw-bold {
             font-size: 17px;
             color: #29459A;
         }
 
-        /* ===== AFFILIATE ===== */
         .affiliate-box {
             background: linear-gradient(135deg, #f8fbff, #eef4ff);
             border: 1px dashed #c9d9ff;
@@ -151,7 +134,6 @@
             animation: fadeUp .5s ease;
         }
 
-        /* ===== BUTTON ===== */
         .btn-buy {
             background: #29459A;
             color: #fff;
@@ -168,7 +150,6 @@
             transform: scale(1.05);
         }
 
-        /* ===== DISCOUNT BADGE ===== */
         .diskon {
             background: linear-gradient(45deg, #ff4d4d, #ff9800);
             font-size: 12px;
@@ -176,8 +157,6 @@
             animation: pulse 1.5s infinite;
         }
 
-
-        /* ===== KEYFRAMES ===== */
         @keyframes pulse {
             0% {
                 opacity: 1
@@ -204,7 +183,6 @@
             }
         }
 
-        /* ===== RESPONSIVE ===== */
         @media(max-width:576px) {
             .courses-content h4.title {
                 font-size: 15px;
@@ -248,22 +226,17 @@
             transform: scale(1.05);
         }
 
-        /* Container pembungkus logo */
-        /* Pastikan slide tidak memaksa isi menjadi tinggi */
         .tickerwrapper .swiper-slide {
             display: flex !important;
             align-items: center;
             justify-content: center;
             height: 80px !important;
-            /* Kunci tinggi slider logo Anda */
             overflow: hidden;
         }
 
         .lazy-img {
-            /* Mencegah gambar memanjang vertikal */
             max-height: 100%;
             max-width: 150px;
-            /* Batas lebar logo agar tidak terlalu besar */
             width: auto !important;
             height: auto !important;
             display: block;
@@ -274,15 +247,12 @@
             overflow: hidden;
             position: relative;
             display: flex;
-            /* Memastikan container fleksibel */
         }
 
         ul.list {
             display: flex !important;
-            /* Memaksa LI berjejer horizontal */
             flex-direction: row;
             white-space: nowrap;
-            /* Mencegah LI pindah baris */
             list-style: none;
             padding: 0;
             margin: 0;
@@ -293,14 +263,10 @@
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            /* Mencegah LI menciut */
             padding: 0 20px;
-            /* Jarak antar logo */
             height: 80px;
-            /* Tinggi slider */
         }
 
-        /* Pastikan logo tidak melebihi tinggi container */
         .lazy-img {
             max-height: 50px;
             width: auto !important;
@@ -328,16 +294,14 @@
             animation: professionalPulse 2s infinite ease-in-out;
         }
     </style>
-    <!-- ✅ SEO AUTO -->
+
+    <!-- SEO AUTO -->
     <?= $schema ?>
 </head>
 
 <body>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MFDZ3PMC" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
-    <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MFDZ3PMC"
-            height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-    <!-- End Google Tag Manager (noscript) -->
     <?php
     $db = Config\Database::connect();
     $statistik_hariini = $db->query("SELECT COUNT(id) as total FROM `statistik_hits` WHERE date(created_at) = date(now())")->getRowObject();
@@ -349,27 +313,19 @@
 
         <!-- Header Section Start -->
         <div class="header-section">
-
-            <!-- Header Top Start -->
             <div class="header-top d-none d-lg-block">
                 <div class="container">
-                    <!-- Header Top Wrapper Start -->
                     <div class="header-top-wrapper">
-                        <!-- Header Top Left Start -->
                         <div class="header-top-left d-flex align-items-center">
                             <p class="typewrite" data-period="2000" data-type='[ "Akuntanmu Learning Center Menjadi Lembaga Pelatihan Brevet Pajak AB Resmi Di Indonesia" ]'></p>
                         </div>
-                        <!-- Header Top Left End -->
-                        <!-- Header Top Right Start -->
                         <div class="header-top-right">
                             <a href="<?= base_url('list-bimbel') ?>" class="badge text-bg-primary">Ambil Promo</a>
                         </div>
-                        <!-- Header Top Right End -->
                     </div>
-                    <!-- Header Top Wrapper End -->
                 </div>
             </div>
-            <!-- Header Top End -->
+
             <div class="header-toggle d-lg-none d-flex justify-content-start p-4">
                 <a class="menu-toggle" href="javascript:void(0)">
                     <span></span>
@@ -377,34 +333,20 @@
                     <span></span>
                 </a>
             </div>
-            <!-- Header Main Start -->
+
             <div class="header-main d-none d-lg-block">
                 <div class="container">
-
-                    <!-- Header Main Start -->
                     <div class="header-main-wrapper">
-
-                        <!-- Header Logo Start -->
                         <div class="header-logo">
                             <a href="<?= base_url('/') ?>"><img src="<?= base_url('assets-landing/images/logo-putih.png') ?>" alt="<?= setting('app_name') ?>" class="img-fluid"></a>
                         </div>
-                        <!-- Header Logo End -->
 
-                        <!-- Header Menu Start -->
                         <div class="horizontal-nav d-none d-lg-block ">
                             <ul class="nav-menu ">
-                                <li>
-                                    <a href="<?= base_url("tentangkami") ?>" class="text-white  btn-hover-dark">Tentang Kami</a>
-                                </li>
-                                <li>
-                                    <a href="<?= base_url("pelatihan") ?>" class="text-white">Pelatihan</a>
-                                </li>
-                                <li>
-                                    <a href="<?= base_url("penilaian") ?>" class="text-white">Penilaian</a>
-                                </li>
-                                <li>
-                                    <a href="<?= base_url("testimoni") ?>" class="text-white">Testimoni</a>
-                                </li>
+                                <li><a href="<?= base_url("tentangkami") ?>" class="text-white  btn-hover-dark">Tentang Kami</a></li>
+                                <li><a href="<?= base_url("pelatihan") ?>" class="text-white">Pelatihan</a></li>
+                                <li><a href="<?= base_url("penilaian") ?>" class="text-white">Penilaian</a></li>
+                                <li><a href="<?= base_url("testimoni") ?>" class="text-white">Testimoni</a></li>
                                 <li>
                                     <a href="<?= base_url("marathon-perpajakan") ?>" class="text-white d-inline-flex align-items-center gap-1">
                                         Webinar
@@ -416,8 +358,6 @@
                                     <div class="submenu">
                                         <ul>
                                             <li class="text-dark"><a href="<?= base_url("artikel") ?>"><i class="bi bi-file-richtext me-2"></i>Artikel</a></li>
-                                            <!--<li class="text-dark"><a href="<?= base_url("jadwal") ?>"><i class="bi bi-calendar me-2"></i>Jadwal</a></li>-->
-                                            <!--<li class="text-dark"><a href="<?= base_url("galeri") ?>"><i class="bi bi-image me-2"></i>Galeri</a></li>-->
                                             <li class="text-dark"><a href="<?= base_url("media-kelasbrevet") ?>"><i class="bi bi-image me-2"></i>Media</a></li>
                                             <li class="text-dark"><a href="<?= base_url("siap-kerja") ?>"><i class="bi bi-info-square-fill me-2"></i>Siap Kerja</a></li>
                                             <li class="text-dark"><a href="<?= base_url("twibbon") ?>"><i class="bi bi-person-square me-2"></i>Twibbon</a></li>
@@ -425,23 +365,8 @@
                                     </div>
                                 </li>
                             </ul>
-
-                            <!--<ul class="nav-menu">-->
-                            <!--  <li><a href="#">Beranda</a></li>-->
-                            <!--  <li>-->
-                            <!--    <a href="#">Produk</a>-->
-
-                            <!--  </li>-->
-                            <!--  <li><a href="#">Tentang Kami</a></li>-->
-                            <!--  <li><a href="#">Kontak</a></li>-->
-                            <!--</ul>-->
-
-
-
                         </div>
-                        <!-- Header Menu End -->
 
-                        <!-- Header Sing In & Up Start -->
                         <div class="header-sign-in-up d-none d-lg-block">
                             <ul>
                                 <?php if (session('nama') == ''): ?>
@@ -458,16 +383,12 @@
                                                                                                                         elseif (session('role') == '5'):
                                                                                                                             $url =  base_url('sw-pic');
                                                                                                                         endif;
-
                                     ?>
                                     <li><a class="sign-in mr-2 text-white" href="<?= $url; ?>"><?= mb_strimwidth(session('nama'), 0, 8, '...')  ?></a></li>
-
                                 <?php endif; ?>
                             </ul>
                         </div>
-                        <!-- Header Sing In & Up End -->
 
-                        <!-- Header Mobile Toggle Start -->
                         <div class="header-toggle d-lg-none">
                             <a class="menu-toggle" href="javascript:void(0)">
                                 <span></span>
@@ -475,29 +396,15 @@
                                 <span></span>
                             </a>
                         </div>
-                        <!-- Header Mobile Toggle End -->
-
                     </div>
-                    <!-- Header Main End -->
-
                 </div>
             </div>
-            <!-- Header Main End -->
-
         </div>
-
-        <!-- Header Section End -->
 
         <!-- Mobile Menu Start -->
         <div class="mobile-menu">
+            <a class="menu-close" href="javascript:void(0)"><i class="icofont-close-line"></i></a>
 
-            <!-- Menu Close Start -->
-            <a class="menu-close" href="javascript:void(0)">
-                <i class="icofont-close-line"></i>
-            </a>
-            <!-- Menu Close End -->
-
-            <!-- Mobile Sing In & Up Start -->
             <div class="mobile-sign-in-up">
                 <ul>
                     <?php if (session('nama') == ''): ?>
@@ -516,60 +423,29 @@
                         elseif (session('role') == '5'):
                             $url =  base_url('sw-pic');
                         endif;
-
                         ?>
                         <li><a href="<?= $url; ?>"><?= mb_strimwidth(session('nama'), 0, 15, '...')  ?></a></li>
                     <?php endif; ?>
                 </ul>
             </div>
-            <!-- Mobile Sing In & Up End -->
 
-            <!-- Mobile Menu Start -->
             <div class="mobile-menu-items">
                 <ul class="nav-menu text-white">
-                    <li>
-                        <a href="<?= base_url("tentangkami") ?>">Tentang Kami</a>
-                    </li>
-                    <!-- <li>
-                        <a href="<?= base_url("siap-kerja") ?>">Siap Kerja</a>
-                    </li> -->
-                    <li>
-                        <a href="<?= base_url("pelatihan") ?>">Pelatihan</a>
-                    </li>
-                    <li>
-                        <a href="<?= base_url("penilaian") ?>">Penilaian</a>
-                    </li>
-                    <li>
-                        <a href="<?= base_url("testimoni") ?>">Testimoni</a>
-                    </li>
+                    <li><a href="<?= base_url("tentangkami") ?>">Tentang Kami</a></li>
+                    <li><a href="<?= base_url("pelatihan") ?>">Pelatihan</a></li>
+                    <li><a href="<?= base_url("penilaian") ?>">Penilaian</a></li>
+                    <li><a href="<?= base_url("testimoni") ?>">Testimoni</a></li>
                     <li>
                         <a href="<?= base_url("marathon-perpajakan") ?>" class="text-dark d-inline-flex align-items-center gap-1">
                             Webinar
                             <span class="badge bg-danger badge-pro-pulse fw-bold" style="font-size: 8px; margin-bottom: 16px; padding: 2px 5px; letter-spacing: 0.5px;">NEW</span>
                         </a>
                     </li>
-                    <!-- <li> -->
-                    <!--    <a href="<?= base_url("jadwal") ?>">Jadwal</a>-->
-                    <!--</li>-->
-                    <!--<li>-->
-                    <!--    <a href="<?= base_url("galeri") ?>">Galeri</a>-->
-                    <!--</li>-->
-                    <!-- <li>
-                        <a href="<?= base_url("media-kelasbrevet") ?>">Media</a>
-                    </li>
-                    <li>
-                        <a href="<?= base_url("twibbon") ?>">Twibbon</a>
-                    </li> -->
                 </ul>
-
             </div>
-            <!-- Mobile Menu End -->
         </div>
-        <!-- Mobile Menu End -->
 
-        <!-- Overlay Start -->
         <div class="overlay"></div>
-        <!-- Overlay End -->
 
         <!-- Slider Start -->
         <div id="carouselExampleCaptions" class="carousel slide" data-bs-ride="carousel" data-bs-interval="6000">
@@ -579,17 +455,18 @@
                     $no = 0;
                     foreach ($dataIklanDepan as $rows) :
                     ?>
-                        <div class="carousel-item <?= $no == '0' ? 'active' : '' ?>">
-                            <div class="d-flex align-items-start  " id="tampilIklanSlide">
-                                <?= img_lazy('uploads/iklan/thumbnails/' . $rows->file, $rows->nama, ['class' => 'z-2 position-absolute d-flex align-items-center']) ?>
-                                <div class="container d-flex align-items-end z-3" id="tampilIklanSlide">
-                                    <!-- Slider Content Start -->
-                                    <?php if (!empty($rows->text)): ?>
-                                        <div class="slider-content d-none d-lg-block">
-                                            <a class="btn btn-primary btn-hover-dark" href="<?= !empty($rows->url) ? $rows->url : base_url(); ?>"><?= $rows->text ?></a>
-                                        </div>
-                                    <?php endif; ?>
-                                    <!-- Slider Content End -->
+                        <div class="carousel-item <?= $no == 0 ? 'active' : '' ?>">
+                            <!-- Menggunakan auto height dan contain agar gambar tampil utuh menyeluruh -->
+                            <div class="position-relative w-100 bg-dark text-center">
+                                
+                                <?= img_lazy('uploads/iklan/thumbnails/' . $rows->file, $rows->nama, ['class' => 'd-block w-100 h-auto mx-auto']) ?>
+                                
+                                <div class="position-absolute bottom-0 start-0 w-100 pb-4 z-3">
+                                    <div class="container text-center">
+                                        <?php if (!empty($rows->text)): ?>
+                                            <a class="btn btn-primary btn-hover-dark shadow-lg px-4 py-2" href="<?= !empty($rows->url) ? $rows->url : base_url(); ?>"><?= $rows->text ?></a>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -597,24 +474,39 @@
                     endforeach;  ?>
                 <?php else: ?>
                     <div class="carousel-item active">
-                        <div class="d-flex align-items-center d-flex align-items-start" id="tampilIklanSlide">
-                            <?= img_lazy('assets-landing/images/slider/team-3.jpg', "kelas brevet AB", ['class' => 'z-2 position-absolute d-flex align-items-center', 'id' => 'tampilIklanSlide']) ?>
-                            <div class="container d-flex align-items-start z-3">
-                                <!-- Slider Content Start -->
-                                <div class="slider-content">
-                                    <h4 class="text-white ">Ujian Brevet Pajak AB Online Kapan Saja dan Dimana Saja Lebih Mudah</h4>
-                                    <h6 class="main-title text-white ">Harga Mulai <span class="text-white fw-bold">Rp50.000</span>/Materi</h6>
-                                    <a class="btn btn-primary btn-hover-dark" href="<?= base_url('auth/registrasi'); ?>">Daftar Sekarang</a>
+                        <div class="position-relative w-100 bg-dark text-center">
+                            
+                            <?= img_lazy('assets-landing/images/slider/team-3.jpg', "kelas brevet AB", ['class' => 'd-block w-100 h-auto mx-auto']) ?>
+                            
+                            <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center z-3">
+                                <div class="container">
+                                    <div class="row justify-content-center justify-content-md-start">
+                                        <div class="col-12 col-md-10 col-lg-8 text-center text-md-start py-4">
+                                            <h2 class="text-white fw-bold mb-3 fs-4 fs-md-2">Ujian Brevet Pajak AB Online Kapan Saja dan Dimana Saja Lebih Mudah</h2>
+                                            <h5 class="text-white mb-4 fs-6">Harga Mulai <span class="text-warning fw-bold fs-4">Rp 50.000</span> / Materi</h5>
+                                            <a class="btn btn-primary btn-hover-dark btn-sm btn-md-lg shadow px-4 py-2" href="<?= base_url('auth/registrasi'); ?>">Daftar Sekarang</a>
+                                        </div>
+                                    </div>
                                 </div>
-                                <!-- Slider Content End -->
                             </div>
                         </div>
                     </div>
                 <?php endif; ?>
             </div>
+            
+            <?php if (!empty($dataIklanDepan) && count($dataIklanDepan) > 1): ?>
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+            <?php endif; ?>
         </div>
-
         <!-- Slider End -->
+
         <div class="section" style="margin-top:-80px">
             <div class="container ">
                 <div class="courses-tabs-menu courses-active z-3 bg-white shadow-sm bg-body-tertiary rounded">
@@ -684,7 +576,6 @@
             <div class="container">
                 <div class="row align-items-center">
                     <div class="col-md-6">
-                        <!-- Section Title Start -->
                         <div class="row">
                             <div class="section-title shape-02">
                                 <h2 class="main-title">Tentang <span>Kelas Brevet</span></h2>
@@ -706,8 +597,6 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- Section Title End -->
-
                     </div>
                     <div class="col-md-6">
                         <div class="card p-4 border-0">
@@ -717,23 +606,18 @@
                 </div>
             </div>
         </div>
+
         <div class="section call-to-action-wrapper pb-4 d-flex align-items-center" id="bimbel">
             <div class="">
-                <!-- All Courses tab content Start -->
                 <div class="tab-content courses-tab-content">
                     <div class="tab-pane fade show active" id="tabs1">
-
-                        <!-- All Courses Wrapper Start -->
                         <div class="courses-wrapper">
                             <h6>Penawaran Paket Brevet Pajak AB</h6>
                             <span>Pilihan ujian yang bisa kamu kuti secara online kapan saja dan dimana saja</span>
                             <div class="row ">
                                 <?php foreach ($paket as $rows) : ?>
                                     <?php
-                                    // untuk rating
                                     $query = $db->table('paket')->join('detail_paket b', 'paket.idpaket=b.idpaket')->join('ujian_master c', 'b.id_ujian=c.id_ujian')->join('review_ujian d', 'c.kode_ujian=d.kode_ujian')->where('paket.slug', $rows->slug)->get()->getResultObject();
-
-                                    // hitung rata-rata rating
                                     $totalRating = 0;
                                     $jumlahReview = count($query);
 
@@ -745,13 +629,11 @@
                                     ?>
                                     <?php if ($rows->id_mapel == '0' || $rows->id_mapel == '1'): ?>
                                         <div class="col-12 col-md-6 col-lg-4  pt-2">
-                                            <!-- Single Courses Start -->
                                             <div class="single-courses card position-relative zoom">
                                                 <div class="courses-images">
                                                     <a href="<?= base_url('bimbel/' . $rows->slug) ?>">
                                                         <?= img_lazy('assets-landing/images/paket/thumbnails/' . $rows->file, $rows->nama_paket, ['class' => 'card-img-top']) ?>
                                                     </a>
-
                                                 </div>
                                                 <div class="courses-content">
                                                     <h4 class="title"><a href="<?= base_url('bimbel/' . $rows->slug) ?>"><?= $rows->nama_paket ?></a></h4>
@@ -770,20 +652,16 @@
                                                             $totalMenit = $total * 3;
                                                             $start =  (date('Y-m-d H:i'));
                                                             $end_ = (date('Y-m-d H:i', strtotime("+ $totalMenit minutes")));
-
-
                                                             $start_ujian = date_create($start);
                                                             $end_ujian = date_create($end_);
                                                             $durasi = date_diff($start_ujian, $end_ujian);
                                                         endforeach;
-
                                                         ?>
                                                         <span class="fw-bold"> <i class="icofont-read-book"></i> <?= (!empty($jml) ? $jml->total_soal : '0') ?> Soal/<span style="font-size:10px">Materi</span> </span>
                                                         <div class="d-flex flex-column mb-3">
                                                             <span class="fw-bold"> Rp <?= number_format($rows->nominal_paket - (($rows->nominal_paket * $rows->diskon) / 100)) ?> </span>
                                                             <span style="font-size:12px" class="mt-1"> <del>Rp <?= number_format($rows->nominal_paket) ?></del> </span>
                                                         </div>
-                                                        <!--<span> <i class="icofont-clock-time"></i> <?= ($durasi != '0' ? ($durasi->h * 60) + $durasi->i : '0');  ?> Menit</span>-->
                                                     </div>
                                                     <div>
                                                         <div class="mb-2" style="font-size:12px">
@@ -793,7 +671,6 @@
                                                                         <span class="text-dark"><?= "4.9" ?><span> <?= showStars('4.9') ?> <span class="text-dark">(<?= '484' ?>)</span>
                                                                             <?php endif; ?>
                                                         </div>
-                                                        <!-- Affiliate -->
                                                         <?php if (session()->get('id') && !empty($affiliate)): ?>
                                                             <?php
                                                             $potongan_diskon = ($rows->nominal_paket * $rows->diskon) / 100;
@@ -814,7 +691,6 @@
                                                                 </div>
                                                             </div>
                                                         <?php endif; ?>
-
                                                     </div>
                                                     <div class="d-flex gap-2 mt-3">
                                                         <a href="<?= base_url('sw-siswa/transaksi/pesan/' . encrypt_url($rows->idpaket)) ?>" class="btn-buy btn-sm text-center flex-fill p-2">Pesan Sekarang</a>
@@ -834,7 +710,6 @@
                                                     <div class="position-absolute top-0 end-0 diskon p-1 text-white"><?= $rows->diskon ?> %</div>
                                                 <?php endif; ?>
                                             </div>
-                                            <!-- Single Courses End -->
                                         </div>
                                     <?php endif; ?>
                                 <?php endforeach; ?>
@@ -849,10 +724,8 @@
                                 </div>
                             <?php endif; ?>
                         </div>
-                        <!-- All Courses Wrapper End -->
                     </div>
                 </div>
-                <!-- All Courses tab content End -->
             </div>
         </div>
 
@@ -881,7 +754,6 @@
             <div class="container">
                 <div class="row align-items-center">
                     <div class="col-md-6">
-                        <!-- Section Title Start -->
                         <div class="row">
                             <div class="section-title shape-02">
                                 <h6>Keuntungan Memiliki </h6>
@@ -895,19 +767,15 @@
                                     </tr>
                                     <tr>
                                         <td width="5%"><i class="bi bi-patch-check text-primary"></i></td>
-                                        <td width="95%">Dapat digunakan sebagai syarat administrasi seorang kuasa saat mendampingi
-                                            WP</td>
+                                        <td width="95%">Dapat digunakan sebagai syarat administrasi seorang kuasa saat mendampingi WP</td>
                                     </tr>
                                     <tr>
                                         <td width="5%"><i class="bi bi-patch-check text-primary"></i></td>
-                                        <td width="95%">Dapat digunakan sebagai syarat permohonan izin kuasa hukum di pengadilan
-                                            pajak</td>
+                                        <td width="95%">Dapat digunakan sebagai syarat permohonan izin kuasa hukum di pengadilan pajak</td>
                                     </tr>
                                 </table>
                             </div>
                         </div>
-                        <!-- Section Title End -->
-
                     </div>
                     <div class="col-md-6">
                         <div class="card p-4 border-0 animation-down">
@@ -924,18 +792,14 @@
                     <div class="tab-pane fade show active" id="tabs1">
                         <div class="courses-wrapper">
                             <span>Berdasarkan Pasal 32 ayat (3) UU KUP Orang pribadi atau badan dapat menunjuk seorang kuasa dengan surat kuasa khusus untuk menjalankan hak dan memenuhi kewajiban sesuai dengan ketentuan peraturan perundang-undangan perpajakan. Seorang kuasa yang ditunjuk harus mempunyai <i><b>kompetensi tertentu dalam aspek perpajakan.</b></i></span>
-                            <br>
-                            <br>Berdasarkan Pasal 5 ayat (2) Peraturan Menteri Keuangan Nomor 229/PMK.03/2014 bahwa karyawan yang bertindak sebagai kuasa harus memiliki <i><b>sertifikat brevet di bidang perpajakan yang diterbitkan oleh lembaga pendidikan kursus brevet pajak</b></i>.
-                            <br>
-                            <br>Berdasarkan Pasal 4 huruf b angka 2 PMK 184/PMK.01/2017 “Pengetahuan yang luas dan keahlian tentang peraturan perundang-undangan perpajakan sebagaimana dimaksud dalam Pasal 3 huruf b dibuktikan dengan: <i><b>brevet perpajakan dari instansi atau lembaga penyelenggara brevet perpajakan”</b></i>.
-                            <br>
-                            <br>Berdasarkan pasal 3 ayat (2) huruf d PER-1/PP/2024 Tentang Tata Cara Permohonan Izin Kuasa Hukum Pada Pengadilan Pajak "bahwa yang bersangkutan mempunyai pengetahuan yang luas dan keahlian tentang peraturan perundang-undangan perpajakan, yaitu (ditunjukan dengan bukti) sebagai berikut: 1) ijazah Sarjana atau Diploma IV di bidang administrasi fiskal, akuntansi, dan/atau perpajakan dari perguruan tinggi yang terakreditasi; 2) ijazah Diploma III perpajakan dari perguruan tinggi yang terakreditasi; 3)<i><b> brevet perpajakan dari instansi atau lembaga penyelenggara brevet perpajakan;</b></i> atau 4) surat atau dokumen yang menunjukkan pengalaman pernah bekerja pada instansi pemerintah di bidang teknis perpajakan."
+                            <br><br>Berdasarkan Pasal 5 ayat (2) Peraturan Menteri Keuangan Nomor 229/PMK.03/2014 bahwa karyawan yang bertindak sebagai kuasa harus memiliki <i><b>sertifikat brevet di bidang perpajakan yang diterbitkan oleh lembaga pendidikan kursus brevet pajak</b></i>.
+                            <br><br>Berdasarkan Pasal 4 huruf b angka 2 PMK 184/PMK.01/2017 “Pengetahuan yang luas dan keahlian tentang peraturan perundang-undangan perpajakan sebagaimana dimaksud dalam Pasal 3 huruf b dibuktikan dengan: <i><b>brevet perpajakan dari instansi atau lembaga penyelenggara brevet perpajakan”</b></i>.
+                            <br><br>Berdasarkan pasal 3 ayat (2) huruf d PER-1/PP/2024 Tentang Tata Cara Permohonan Izin Kuasa Hukum Pada Pengadilan Pajak "bahwa yang bersangkutan mempunyai pengetahuan yang luas dan keahlian tentang peraturan perundang-undangan perpajakan, yaitu (ditunjukan dengan bukti) sebagai berikut: 1) ijazah Sarjana atau Diploma IV di bidang administrasi fiskal, akuntansi, dan/atau perpajakan dari perguruan tinggi yang terakreditasi; 2) ijazah Diploma III perpajakan dari perguruan tinggi yang terakreditasi; 3)<i><b> brevet perpajakan dari instansi atau lembaga penyelenggara brevet perpajakan;</b></i> atau 4) surat atau dokumen yang menunjukkan pengalaman pernah bekerja pada instansi pemerintah di bidang teknis perpajakan."
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
 
         <div class="section section-padding-02 ">
             <div class="container">
@@ -946,7 +810,6 @@
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <!-- Section Title Start -->
                         <div class="row">
                             <div class="section-title shape-02">
                                 <h6>Penggunaan</h6>
@@ -956,118 +819,170 @@
                                 <table>
                                     <tr>
                                         <td width="5%"><i class="bi bi-patch-check text-primary"></i></td>
-                                        <td width="95%">Kepemilikan sertifikat Brevet Pajak AB dapat digunakan sebagai syarat
-                                            administrasi untuk mendampingi WP orang pribadi &
-                                            badan dalam negeri.</td>
+                                        <td width="95%">Kepemilikan sertifikat Brevet Pajak AB dapat digunakan sebagai syarat administrasi untuk mendampingi WP orang pribadi & badan dalam negeri.</td>
                                     </tr>
                                     <tr>
                                         <td width="5%"><i class="bi bi-patch-check text-primary"></i></td>
-                                        <td width="95%">Kepemilikan sertifikat Brevet Pajak C dapat digunakan sebagai syarat
-                                            administrasi untuk mendampingi WP orang pribadi &
-                                            badan dalam negeri maupun asing.</td>
+                                        <td width="95%">Kepemilikan sertifikat Brevet Pajak C dapat digunakan sebagai syarat administrasi untuk mendampingi WP orang pribadi & badan dalam negeri maupun asing.</td>
                                     </tr>
                                 </table>
                             </div>
                         </div>
-                        <!-- Section Title End -->
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="section section-padding-02 mb-4" id="penilaian">
+        <div class="section section-padding-02 mb-5" id="penilaian">
             <div class="container">
-                <div class="row">
+                <!-- Judul Section -->
+                <div class="row mb-4">
                     <div class="col-12 text-center">
-                        <h6>Sistem Penilaian</h6>
-                        <span>Berikut ini adalah tabel sistem penilaian di KelasBrevet</span>
+                        <h6 class="text-primary fw-bold text-uppercase tracking-wide">Sistem Penilaian</h6>
+                        <h3 class="main-title mb-2">Standar Kelulusan <span>Kelas Brevet</span></h3>
+                        <span class="text-muted">Berikut ini adalah tabel acuan sistem penilaian dan kelulusan.</span>
                     </div>
-                    <div class="col-12 mt-4 card call-to-action-wrapper rounded table-responsive-sm">
-                        <table class="table  text-center no-border font-size-table">
-                            <tr style="background-color: #29459A;">
-                                <td class="text-white">NILAI</td>
-                                <td class="text-white">HURUF</td>
-                                <td class="text-white">PREDIKAT</td>
-                                <td class="text-white">KETERANGAN</td>
-                            </tr>
-                            <tr>
-                                <td>0-59</td>
-                                <td>D</td>
-                                <td>KURANG</td>
-                                <td>TIDAK LULUS</td>
-                            </tr>
-                            <tr>
-                                <td>60-69</td>
-                                <td>C</td>
-                                <td>CUKUP</td>
-                                <td>LULUS</td>
-                            </tr>
-                            <tr>
-                                <td>70-79</td>
-                                <td>B</td>
-                                <td>CUKUP BAIK</td>
-                                <td>LULUS</td>
-                            </tr>
-                            <tr>
-                                <td>80-89</td>
-                                <td>A</td>
-                                <td>BAIK</td>
-                                <td>LULUS</td>
-                            </tr>
-                            <tr>
-                                <td>90-100</td>
-                                <td>A+</td>
-                                <td>SANGAT BAIK</td>
-                                <td>LULUS</td>
-                            </tr>
-                        </table>
+                </div>
+
+                <!-- Custom CSS khusus untuk animasi baris tabel -->
+                <style>
+                    .table-penilaian-wrapper {
+                        border-radius: 16px;
+                    }
+
+                    .table-penilaian tbody tr {
+                        transition: all 0.3s ease-in-out;
+                    }
+
+                    /* Efek melayang dan highlight saat baris di-hover */
+                    .table-penilaian tbody tr:hover {
+                        transform: translateY(-3px) scale(1.01);
+                        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+                        background-color: #ffffff;
+                        z-index: 10;
+                        position: relative;
+                    }
+
+                    .table-penilaian th {
+                        letter-spacing: 0.5px;
+                        font-size: 0.85rem;
+                    }
+                </style>
+
+                <div class="row justify-content-center">
+                    <div class="col-12 col-lg-10">
+                        <!-- Wrapper Tabel (Card + Shadow + Responsif) -->
+                        <div class="card border-0 shadow-sm table-penilaian-wrapper overflow-hidden">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-borderless align-middle text-center mb-0 table-penilaian" style="white-space: nowrap;">
+
+                                    <!-- Header Tabel bergradasi -->
+                                    <thead class="text-white" style="background: linear-gradient(135deg, #29459A 0%, #1a2c6b 100%);">
+                                        <tr>
+                                            <th class="py-4 px-3 fw-semibold text-white">RENTANG NILAI</th>
+                                            <th class="py-4 px-3 fw-semibold text-white">HURUF</th>
+                                            <th class="py-4 px-3 fw-semibold text-white">PREDIKAT</th>
+                                            <th class="py-4 px-3 fw-semibold text-white">KETERANGAN</th>
+                                        </tr>
+                                    </thead>
+
+                                    <!-- Body Tabel -->
+                                    <tbody class="text-secondary bg-light bg-opacity-50">
+
+                                        <!-- Baris Tidak Lulus -->
+                                        <tr>
+                                            <td class="py-3 px-3 fw-medium">0 - 59</td>
+                                            <td class="py-3 px-3"><span class="fs-5 fw-bold text-dark">D</span></td>
+                                            <td class="py-3 px-3 fw-medium text-dark">Kurang</td>
+                                            <td class="py-3 px-3">
+                                                <!-- Gaya Badge Soft Bootstrap -->
+                                                <span class="badge bg-danger text-white bg-opacity-10 text-danger border border-danger border-opacity-25 px-4 py-2 rounded-pill fw-bold shadow-sm">
+                                                    <i class="bi bi-x-circle me-1"></i> TIDAK LULUS
+                                                </span>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Baris Lulus (C) -->
+                                        <tr class="border-top border-light">
+                                            <td class="py-3 px-3 fw-medium">60 - 69</td>
+                                            <td class="py-3 px-3"><span class="fs-5 fw-bold text-dark">C</span></td>
+                                            <td class="py-3 px-3 fw-medium text-dark">Cukup</td>
+                                            <td class="py-3 px-3">
+                                                <span class="badge bg-success text-white bg-opacity-10 text-success border border-success border-opacity-25 px-4 py-2 rounded-pill fw-bold shadow-sm">
+                                                    <i class="bi bi-check-circle me-1"></i> LULUS
+                                                </span>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Baris Lulus (B) -->
+                                        <tr class="border-top border-light">
+                                            <td class="py-3 px-3 fw-medium">70 - 79</td>
+                                            <td class="py-3 px-3"><span class="fs-5 fw-bold text-primary">B</span></td>
+                                            <td class="py-3 px-3 fw-medium text-dark">Cukup Baik</td>
+                                            <td class="py-3 px-3">
+                                                <span class="badge bg-success text-white bg-opacity-10 text-success border border-success border-opacity-25 px-4 py-2 rounded-pill fw-bold shadow-sm">
+                                                    <i class="bi bi-check-circle me-1"></i> LULUS
+                                                </span>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Baris Lulus (A) -->
+                                        <tr class="border-top border-light">
+                                            <td class="py-3 px-3 fw-medium">80 - 89</td>
+                                            <td class="py-3 px-3"><span class="fs-5 fw-bold text-primary">A</span></td>
+                                            <td class="py-3 px-3 fw-medium text-dark">Baik</td>
+                                            <td class="py-3 px-3">
+                                                <span class="badge bg-success text-white bg-opacity-10 text-success border border-success border-opacity-25 px-4 py-2 rounded-pill fw-bold shadow-sm">
+                                                    <i class="bi bi-check-circle me-1"></i> LULUS
+                                                </span>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Baris Lulus (A+) -->
+                                        <tr class="border-top border-light">
+                                            <td class="py-3 px-3 fw-medium">90 - 100</td>
+                                            <td class="py-3 px-3"><span class="fs-5 fw-bold text-warning" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.1);">A+</span></td>
+                                            <td class="py-3 px-3 fw-bold text-dark">Sangat Baik</td>
+                                            <td class="py-3 px-3">
+                                                <span class="badge bg-success text-white bg-opacity-10 text-success border border-success border-opacity-25 px-4 py-2 rounded-pill fw-bold shadow-sm">
+                                                    <i class="bi bi-check-circle me-1"></i> LULUS
+                                                </span>
+                                            </td>
+                                        </tr>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-
-        <!-- Download App Start -->
         <div class="section section-padding download-section mt-4">
             <div class="container">
-                <!-- Download App Wrapper Start -->
                 <div class="download-app-wrapper mt-n6">
-                    <!-- Section Title Start -->
                     <div class="section-title section-title-white">
                         <h2 class="main-title mb-4">Ikuti Ujian Brevet Tanpa Mengikuti Kelas</h2>
                         <h6 class="text-white">Kamu bisa mengikuti Ujian Brevet secara langsung tanpa perlu Mengikuti Kelas terlebih dahulu. <br><i>*Syarat dan ketentuan berlaku</i></h6>
                         <a href="<?= base_url('sw-siswa') ?>" class="btn btn-light  rounded-pill text-primary btn-hover-dark">Ikuti Ujian Brevet Pajak AB</a>
                     </div>
-                    <!-- Section Title End -->
                     <?= img_lazy('assets-landing/images/shape/shape-14.png', "brevet pajak", ['class' => 'shape-1 animation-righ']) ?>
-                    <!-- Download App Button End -->
                     <div class="">
                         <?= img_lazy('assets-landing/images/slider/slider-5.png', "brevet ab", ['class' => '']) ?>
                     </div>
-                    <!-- Download App Button End -->
-
                 </div>
-                <!-- Download App Wrapper End -->
-
             </div>
         </div>
-        <!-- Download App End -->
 
-        <!-- Testimonial End -->
         <div class="section section-padding-02 mt-n1" id="testimoni">
             <div class="container">
-
-                <!-- Section Title Start -->
                 <div class="section-title shape-03 text-center">
                     <h5 class="sub-title text-primary">Testimoni Alumni</h5>
                 </div>
-                <!-- Section Title End -->
-
-                <!-- Testimonial Wrapper End -->
                 <div class="testimonial-wrapper testimonial-active">
                     <div class="swiper-container">
                         <div class="swiper-wrapper">
-                            <!-- Single Testimonial Start -->
                             <?php
                             $data_testi = $db->query("SELECT testimoni.*, siswa.nama_siswa, siswa.kantor, siswa.avatar FROM testimoni join siswa on testimoni.idsiswa=siswa.id_siswa order by idtestimoni desc")->getResult();
                             foreach ($data_testi as $rows) {
@@ -1076,56 +991,37 @@
                                     <div class="testimonial-author">
                                         <div class="position-relative user-info mb-4">
                                             <?= img_lazy('assets/app-assets/user/' . $rows->avatar, "loading", ['class' => 'circle-img']) ?>
-
                                             <i class="icofont-quote-left position-absolute top-100 start-50 translate-middle text-primary fs-1"></i>
                                         </div>
                                         <h4 class="name"><?= $rows->nama_siswa; ?></h4>
                                         <span class="designation"><?= $rows->kantor; ?></span>
                                     </div>
                                     <div class="testimonial-content text">
-
                                         <p><?= $rows->keterangan; ?></p>
                                     </div>
                                     <span class="toggle-btn">Add more</span>
                                 </div>
                             <?php } ?>
-                            <!-- Single Testimonial End -->
                         </div>
-                        <!-- Add Pagination -->
                         <div class="swiper-pagination"></div>
                     </div>
                 </div>
-                <!-- Testimonial Wrapper End -->
-
             </div>
         </div>
-        <!-- Testimonial End -->
 
-
-
-
-        <!-- Footer Start  -->
         <div class="section footer-section mt-4">
-
-            <!-- Footer Widget Section Start -->
             <div class="footer-widget-section">
-
                 <?= img_lazy('assets-landing/images/shape/shape-21.png', "loading", ['class' => 'shape-1 animation-down']) ?>
-
                 <div class="container">
                     <div class="row">
                         <div class="col-lg-6 col-md-6 order-md-6 order-lg-6">
-
-                            <!-- Footer Widget Start -->
                             <div class="footer-widget">
                                 <div class="widget-logo">
                                     <a href="#"><?= img_lazy('assets-landing/images/logo.png', "loading", ['class' => '']) ?></a>
                                 </div>
-
                                 <div>
                                     <p>Kelas Brevet merupakan platform pelatihan Brevet Pajak AB yang Terdaftar Resmi. Diselenggarakan oleh Akuntanmu Learning Center By Legalyn Konsultan Indonesia (Lembaga Pelatihan, Kursus/Bimbel, yang didirikan sejak tahun 2021)</p>
                                 </div>
-
                                 <ul class="widget-info">
                                     <li>
                                         <p> <i class="flaticon-email"></i> <a href="mailto:support@kelasbrevet.com">support@kelasbrevet.com</a> </p>
@@ -1140,7 +1036,6 @@
                                         <p><i class="bi bi-building-add"> </i><a href="#">Menara 165 Lantai 4 - Jakarta Selatan</a></p>
                                     </li>
                                 </ul>
-
                                 <ul class="widget-social">
                                     <li><a href="#"><i class="flaticon-facebook"></i></a></li>
                                     <li><a href="#"><i class="flaticon-twitter"></i></a></li>
@@ -1148,12 +1043,10 @@
                                     <li><a href="#"><i class="flaticon-instagram"></i></a></li>
                                 </ul>
                             </div>
-                            <!-- Footer Widget End -->
                         </div>
                         <div class="col-lg-3 col-md-3 order-md-3 order-lg-3">
                             <div class="row">
                                 <div class="col-12">
-                                    <!-- Footer Widget Start -->
                                     <div class="footer-widget">
                                         <h4 class="footer-widget-title">Lembaga Terdaftar</h4>
                                         <div class="widget-subscribe">
@@ -1163,7 +1056,6 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <!-- Footer Widget End -->
                                 </div>
                                 <div class="col-12 mt-4">
                                     <h6 class="footer-widget-title">Menu KelasBrevet</h6>
@@ -1183,12 +1075,6 @@
                                         <li>
                                             <p><i class="bi bi-dot me-1"></i><a href="<?= base_url("testimoni") ?>">Testimoni</a></p>
                                         </li>
-                                        <!--<li>-->
-                                        <!--    <p><i class="bi bi-dot me-1"></i><a href="<?= base_url("jadwal") ?>">Jadwal</a></p>-->
-                                        <!--</li>-->
-                                        <!--<li>-->
-                                        <!--    <p><i class="bi bi-dot me-1"></i><a href="<?= base_url("galeri") ?>">Galeri</a></p>-->
-                                        <!--</li>-->
                                         <li>
                                             <p><i class="bi bi-dot me-1"></i><a href="<?= base_url("media-kelasbrevet") ?>">Media</a></p>
                                         </li>
@@ -1202,7 +1088,6 @@
                         <div class="col-lg-3 col-md-3 order-md-3 order-lg-3">
                             <div class="row">
                                 <div class="col-12">
-                                    <!-- Footer Widget Start -->
                                     <div class="footer-widget">
                                         <h4 class="footer-widget-title">Statistik</h4>
                                         <ul class="widget-info">
@@ -1220,15 +1105,11 @@
                                             </li>
                                         </ul>
                                     </div>
-                                    <!-- Footer Widget End -->
                                 </div>
                             </div>
                         </div>
                     </div>
-
-
                     <hr>
-                    <!-- Footer Copyright Start -->
                     <div class="accordion" id="accordionExample">
                         <div class="d-flex justify-content-between text-dark">
                             <div class="copyright-link">
@@ -1242,12 +1123,9 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Footer Copyright End -->
                 </div>
-
             </div>
-            <!-- Footer Widget Section End -->
-            <!--//iklan-->
+
             <?php if (!empty($dataIklan)) { ?>
                 <div class="modal fade" id="iklanDepan" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                     <div class="modal-dialog modal-sm modal-dialog-centered" id="modalIklan">
@@ -1288,11 +1166,7 @@
                 </div>
             <?php } ?>
 
-            <!-- Footer End -->
-
-            <!-- JS 
-    ============================================ -->
-            <!--//untuk pesan-->
+            <!-- JS -->
             <script>
                 <?= session()->getFlashdata('pesan'); ?>
             </script>
@@ -1304,7 +1178,6 @@
 
             <!-- Bootstrap JS -->
             <script src="https://akuntanmu.com/assets/assetLanding/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-            <!--<script src="<?= base_url('assets-landing/js/plugins/bootstrap.min.js'); ?>"></script>-->
 
             <!-- Plugins JS -->
             <script src="<?= base_url('assets-landing/js/plugins/swiper-bundle.min.js'); ?>"></script>
@@ -1313,10 +1186,6 @@
             <script src="<?= base_url('assets-landing/js/plugins/jquery.nice-select.min.js'); ?>"></script>
             <script src="<?= base_url('assets-landing/js/plugins/ajax-contact.js'); ?>"></script>
             <script src="<?= base_url('assets-landing/js/TweenMax.min.js'); ?>"></script>
-
-            <!--====== Use the minified version files listed below for better performance and remove the files listed above ======-->
-            <!-- <script src="<?= base_url('assets-landing/js/plugins.min.js'); ?>"></script> -->
-
 
             <!-- Main JS -->
             <script src="<?= base_url('assets-landing/js/main.js'); ?>"></script>
@@ -1364,26 +1233,18 @@
                     });
                 });
 
-                /* ===============================
-                   CLIPBOARD HELPER (iOS SAFE)
-                ================================ */
                 function copyToClipboard(text) {
-                    // Modern API (Chrome, Edge, Android, iOS 16+)
                     if (navigator.clipboard && window.isSecureContext) {
                         return navigator.clipboard.writeText(text);
                     }
-
-                    // Fallback iOS lama
                     return new Promise(function(resolve, reject) {
                         let textarea = document.createElement("textarea");
                         textarea.value = text;
                         textarea.style.position = "fixed";
                         textarea.style.opacity = "0";
                         document.body.appendChild(textarea);
-
                         textarea.focus();
                         textarea.select();
-
                         try {
                             let successful = document.execCommand("copy");
                             document.body.removeChild(textarea);
@@ -1398,15 +1259,11 @@
             <script>
                 $(document).on('click', '.share-link', function(e) {
                     e.preventDefault();
-
                     let btn = $(this);
                     let paket_id = btn.data('paket_id');
-
                     btn.prop('disabled', true);
 
-                    // 🔥 buka window dulu (masih user gesture)
                     let waWindow = window.open('about:blank', '_blank');
-
                     $.ajax({
                         url: "<?= base_url('sw-siswa/affiliate/copy') ?>",
                         type: "POST",
@@ -1422,10 +1279,8 @@
                                 btn.prop('disabled', false);
                                 return;
                             }
-
                             let link = encodeURIComponent(res.link);
                             waWindow.location.href = "https://wa.me/?text=" + link;
-
                             btn.prop('disabled', false);
                         },
                         error: function() {
@@ -1436,10 +1291,6 @@
                     });
                 });
 
-
-                // ===============================
-                // SWEETALERT HELPER
-                // ===============================
                 function showAlert(type, title, message) {
                     swal({
                         title: title,
@@ -1453,7 +1304,6 @@
 
             <script>
                 var splide = new Splide('.splide', {
-
                     type: 'loop',
                     perPage: 3,
                     rewind: true,
@@ -1463,17 +1313,13 @@
                             gap: '.7rem',
                             height: '12rem',
                         },
-
                         480: {
                             perPage: 1,
                             gap: '.7rem',
                             height: '12rem',
                         },
-
                     },
-
                 });
-
                 splide.mount();
             </script>
             <script>
@@ -1494,7 +1340,6 @@
 
                 $clonedList.addClass("cloned").appendTo($tickerWrapper);
 
-                //TimelineMax
                 var infinite = new TimelineMax({
                     repeat: -1,
                     paused: true
@@ -1538,7 +1383,6 @@
                     .progress(1).progress(0)
                     .play();
 
-                //Pause/Play		
                 $tickerWrapper.on("mouseenter", function() {
                     infinite.pause();
                 }).on("mouseleave", function() {
@@ -1546,12 +1390,8 @@
                 });
 
                 setTimeout(function() {
-
                     $('#iklanDepan').modal('show');
-
                 }, 2000);
-
-
 
                 var TxtType = function(el, toRotate, period) {
                     this.toRotate = toRotate;
@@ -1625,7 +1465,6 @@
                     let lazyImages = document.querySelectorAll("img.lazy");
 
                     if ("IntersectionObserver" in window) {
-                        // ✅ Browser support IntersectionObserver
                         let observer = new IntersectionObserver((entries, obs) => {
                             entries.forEach(entry => {
                                 if (entry.isIntersecting) {
@@ -1641,7 +1480,6 @@
                         lazyImages.forEach(img => observer.observe(img));
 
                     } else {
-                        // ⚠️ Fallback kalau browser tidak support
                         lazyImages.forEach(img => {
                             img.src = img.dataset.src;
                             img.removeAttribute("data-src");
@@ -1658,11 +1496,10 @@
                     const btn = card.querySelector(".toggle-btn");
 
                     const lineHeight = parseInt(window.getComputedStyle(text).lineHeight, 10);
-                    const maxHeight = lineHeight * 2; // clamp 4 baris
+                    const maxHeight = lineHeight * 2;
 
-                    // Cek apakah teks lebih tinggi dari batas
                     if (text.scrollHeight <= maxHeight) {
-                        btn.style.display = "none"; // sembunyikan tombol kalau teks pendek
+                        btn.style.display = "none";
                     }
 
                     btn.addEventListener("click", () => {
