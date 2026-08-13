@@ -110,7 +110,6 @@
         background-color: #fff1f2 !important;
         border-color: #f64e60 !important;
         color: #f64e60 !important;
-        transform: translateX(4px);
     }
 
     /* --- WRAPPER UTAMA CUSTOM PLAYER --- */
@@ -386,10 +385,39 @@
                                     <!-- Card Header / Image Thumbnail -->
                                     <div class="position-relative img-zoom-container bg-light" style="aspect-ratio: 16/9; flex-shrink: 0;">
                                         <?php if ($firstVideoId && !$isPaketGratis && !$isTerlambatBeli): ?>
-                                            <img src="https://img.youtube.com/vi/<?= $firstVideoId ?>/maxresdefault.jpg" onerror="this.onerror=null; this.src='https://img.youtube.com/vi/<?= $firstVideoId ?>/hqdefault.jpg';" loading="lazy" class="w-100 h-100 object-fit-cover" alt="<?= esc($child->nama_sesi) ?>">
-                                            <div class="position-absolute top-50 start-50 translate-middle">
+                                            <?php
+                                                // Mengolah Data JSON YouTube dengan aman (Mendukung JSON array maupun string biasa)
+                                                $youtubeLinkstop = [];
+                                                if (!empty($child->link_youtube)) {
+                                                    $decodedYT = json_decode($child->link_youtube, true);
+                                                    if (is_array($decodedYT)) {
+                                                        $youtubeLinkstop = $decodedYT;
+                                                    } else {
+                                                        // Fallback jika ternyata tersimpan sebagai string/link tunggal
+                                                        $youtubeLinkstop = [$child->link_youtube];
+                                                    }
+                                                }
+
+                                                // Ambil link video pertama dengan aman untuk tombol gambar thumbnail
+                                                $firstYtLink = $youtubeLinkstop[0] ?? '';
+                                            ?>
+                                            <button type="button" 
+                                                class="btn p-0 border-0 w-100 h-100 position-absolute top-0 start-0 overflow-hidden youtube-item-btn" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#youtubeModal" 
+                                                data-youtubelink="<?= esc($firstYtLink) ?>"
+                                                >
+                                            
+                                            <img src="https://img.youtube.com/vi/<?= $firstVideoId ?>/maxresdefault.jpg" 
+                                                onerror="this.onerror=null; this.src='https://img.youtube.com/vi/<?= $firstVideoId ?>/hqdefault.jpg';" 
+                                                loading="lazy" 
+                                                class="w-100 h-100 object-fit-cover" 
+                                                alt="<?= esc($child->nama_sesi) ?>">
+                                            
+                                            <div class="position-absolute top-50 start-50 translate-middle" style="z-index: 3;">
                                                 <i class="ki-solid ki-youtube fs-3x text-danger bg-white rounded-circle shadow-sm"></i>
                                             </div>
+                                        </button>
                                         <?php else: ?>
                                             <?= img_lazy('assets-landing/images/paket/thumbnails/' . $w->file, esc($child->nama_sesi), ['class' => 'w-100 h-100 object-fit-cover']) ?>
                                         <?php endif; ?>
