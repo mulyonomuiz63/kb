@@ -36,6 +36,20 @@
 
                             <div class="col-lg-6 mb-3">
                                 <div class="menu-item p-0 m-0">
+                                    <a href="<?= base_url('sw-siswa/webinar') ?>" class="menu-link <?= ($current_uri == 'sw-siswa/webinar') ? 'active' : '' ?>">
+                                        <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
+                                            <i class="ki-outline ki-award text-primary fs-1"></i>
+                                        </span>
+                                        <span class="d-flex flex-column">
+                                            <span class="fs-6 fw-bold text-gray-800">Webinar</span>
+                                            <span class="fs-7 fw-semibold text-muted">Update Regulasi</span>
+                                        </span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6 mb-3">
+                                <div class="menu-item p-0 m-0">
                                     <a href="<?= base_url('sw-siswa/ujian') ?>" class="menu-link <?= ($current_uri == 'sw-siswa/ujian') ? 'active' : '' ?>">
                                         <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
                                             <i class="ki-outline ki-notepad-edit text-danger fs-1"></i>
@@ -89,21 +103,6 @@
                                     </a>
                                 </div>
                             </div>
-
-                            <div class="col-lg-6 mb-3">
-                                <div class="menu-item p-0 m-0">
-                                    <a href="<?= base_url('sw-siswa/profile') ?>" class="menu-link <?= ($current_uri == 'sw-siswa/profile') ? 'active' : '' ?>">
-                                        <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
-                                            <i class="ki-outline ki-user text-dark fs-1"></i>
-                                        </span>
-                                        <span class="d-flex flex-column">
-                                            <span class="fs-6 fw-bold text-gray-800">Profile</span>
-                                            <span class="fs-7 fw-semibold text-muted">Pengaturan akun</span>
-                                        </span>
-                                    </a>
-                                </div>
-                            </div>
-
                         </div>
                         <div class="separator separator-dashed my-5"></div>
 
