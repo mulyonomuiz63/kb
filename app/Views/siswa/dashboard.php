@@ -281,30 +281,34 @@
 <?php if (isset($showWaAlert) && $showWaAlert): ?>
 
     <!-- Wrapper Alert (Disembunyikan secara default, ditampilkan via JS) -->
-    <div id="wa-group-alert" class="d-none">
+    <!-- Wrapper Alert: Melayang (Fixed) di bawah agar tidak menggeser konten utama -->
+    <div id="wa-group-alert" class="d-none position-fixed bottom-0 start-50 translate-middle-x w-100 p-3 p-md-5" style="z-index: 1050; max-width: 900px;">
+
         <!-- Metronic 8 Alert Component -->
-        <div class="alert bg-light-success border border-success border-dashed d-flex flex-column flex-sm-row w-100 p-5 mb-10 shadow-sm rounded-4">
+        <div class="alert bg-light-success border border-success border-dashed d-flex flex-column flex-md-row align-items-center justify-content-between w-100 p-4 p-md-5 shadow-lg rounded-4 mb-0">
 
-            <!-- Icon -->
-            <div class="d-flex flex-center me-4 mb-5 mb-sm-0">
-                <i class="fa-brands fa-whatsapp fs-3x text-success"></i>
-            </div>
+            <div class="d-flex flex-column flex-md-row align-items-center flex-grow-1">
+                <!-- Icon -->
+                <div class="d-flex flex-center me-0 me-md-4 mb-3 mb-md-0">
+                    <i class="fa-brands fa-whatsapp fs-1 fs-md-3x text-success"></i>
+                </div>
 
-            <!-- Content -->
-            <div class="d-flex flex-column pe-0 pe-sm-10 flex-grow-1 justify-content-center">
-                <h5 class="mb-1 fw-bolder text-dark">Akses Eksklusif Peserta Pelatihan!</h5>
-                <span class="text-gray-700 fs-6">
-                    Terima kasih atas pembelian paket pelatihan Anda. Sebagai peserta resmi, Anda mendapatkan akses khusus ke Grup WhatsApp kami. Silakan bergabung untuk berdiskusi, mendapatkan update informasi.
-                </span>
+                <!-- Content -->
+                <div class="d-flex flex-column text-center text-md-start pe-0 pe-md-4">
+                    <h5 class="mb-1 fw-bolder text-dark fs-5 fs-md-4">Akses Eksklusif Peserta Pelatihan!</h5>
+                    <span class="text-gray-700 fs-7 fs-md-6">
+                        Terima kasih atas pembelian paket pelatihan Anda. Sebagai peserta resmi, Anda mendapatkan akses khusus ke Grup WhatsApp kami. Silakan bergabung untuk berdiskusi, mendapatkan update informasi.
+                    </span>
+                </div>
             </div>
 
             <!-- Action Buttons -->
-            <div class="d-flex align-items-center mt-4 mt-sm-0 gap-3">
-                <button type="button" class="btn btn-sm btn-outline btn-outline-dashed btn-outline-success btn-active-light-success btn-wa-action fw-bold" data-action="sudah">
+            <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center mt-4 mt-md-0 gap-2 gap-sm-3 w-100 w-md-auto flex-shrink-0">
+                <button type="button" class="btn btn-sm btn-outline btn-outline-dashed btn-outline-success btn-active-light-success btn-wa-action fw-bold w-100 w-sm-auto text-nowrap" data-action="sudah">
                     Sudah Bergabung
                 </button>
-                <a href="https://chat.whatsapp.com/Jrywzo6tt6m9QltNrNSKNp?s=sh&p=i&mlu=4" target="_blank" class="btn btn-sm btn-success btn-wa-action fw-bold shadow-sm" data-action="gabung">
-                   Bergabung Sekarang
+                <a href="https://chat.whatsapp.com/Jrywzo6tt6m9QltNrNSKNp?s=sh&p=i&mlu=4" target="_blank" class="btn btn-sm btn-success btn-wa-action fw-bold shadow-sm w-100 w-sm-auto text-nowrap" data-action="gabung">
+                    Bergabung Sekarang
                 </a>
             </div>
 
@@ -917,38 +921,38 @@
 <!-- JavaScript Local Storage Logic -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const waAlert = document.getElementById('wa-group-alert');
+        const alertElement = document.getElementById('wa-group-alert');
 
-        if (waAlert) {
-            // Mengecek apakah user sudah pernah menutup alert ini di browser mereka
-            const hasActedOnWaGroup = localStorage.getItem('waGroupActionDone');
+        // Cek apakah user belum pernah menutup alert ini
+        if (!localStorage.getItem('wa_alert_hidden')) {
+            // Hapus d-none dan siapkan posisi di bawah layar (tersembunyi)
+            alertElement.classList.remove('d-none');
+            alertElement.style.transform = 'translate(-50%, 150%)';
+            alertElement.style.transition = 'transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)'; // Efek Bounce
 
-            // Jika belum pernah klik tombol apapun, tampilkan alert
-            if (!hasActedOnWaGroup) {
-                waAlert.classList.remove('d-none');
-            }
-
-            // Menambahkan event listener ke kedua tombol
-            const actionBtns = waAlert.querySelectorAll('.btn-wa-action');
-            actionBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-
-                    // Simpan ke Local Storage agar tidak tampil lagi seterusnya
-                    localStorage.setItem('waGroupActionDone', 'true');
-
-                    // Efek animasi menghilang (Fade out)
-                    waAlert.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-                    waAlert.style.opacity = '0';
-                    waAlert.style.transform = 'translateY(-10px)';
-
-                    // Hapus elemen dari DOM setelah animasi selesai
-                    setTimeout(() => {
-                        waAlert.remove();
-                    }, 400);
-
-                });
-            });
+            // Trigger animasi naik ke atas setelah jeda sebentar
+            setTimeout(() => {
+                alertElement.style.transform = 'translate(-50%, 0)';
+            }, 300);
         }
+
+        // Event listener untuk tombol (Klik salah satu tombol = sembunyikan permanen)
+        const buttons = alertElement.querySelectorAll('.btn-wa-action');
+        buttons.forEach(btn => {
+            btn.addEventListener('click', function() {
+
+                // Simpan status ke localStorage browser
+                localStorage.setItem('wa_alert_hidden', 'true');
+
+                // Mainkan animasi turun ke bawah
+                alertElement.style.transform = 'translate(-50%, 150%)';
+
+                // Hapus elemen dari layar setelah animasi selesai
+                setTimeout(() => {
+                    alertElement.style.display = 'none';
+                }, 600);
+            });
+        });
     });
 </script>
 <?= $this->endSection(); ?>

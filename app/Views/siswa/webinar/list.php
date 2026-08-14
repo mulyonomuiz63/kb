@@ -245,6 +245,42 @@
 <?= $this->endSection(); ?>
 
 <?= $this->section('content'); ?>
+<?php if (isset($showWaAlert) && $showWaAlert): ?>
+
+    <!-- Wrapper Alert: Dibuat melayang (Fixed) di bawah agar 100% tidak menggeser konten utama -->
+    <div id="wa-group-alert" class="d-none position-fixed bottom-0 start-50 translate-middle-x w-100 p-3 p-md-5" style="z-index: 1050; max-width: 900px;">
+
+        <!-- Metronic 8 Alert Component (ditambah shadow-lg agar terlihat mengambang di atas konten) -->
+        <div class="alert bg-light-success border border-success border-dashed d-flex flex-column flex-md-row align-items-center justify-content-between w-100 p-4 p-md-5 shadow-lg rounded-4 mb-0">
+
+            <div class="d-flex flex-column flex-md-row align-items-center flex-grow-1">
+                <!-- Icon -->
+                <div class="d-flex flex-center me-0 me-md-4 mb-3 mb-md-0">
+                    <i class="fa-brands fa-whatsapp fs-1 fs-md-3x text-success"></i>
+                </div>
+
+                <!-- Content -->
+                <div class="d-flex flex-column text-center text-md-start pe-0 pe-md-4">
+                    <h5 class="mb-1 fw-bolder text-dark fs-5 fs-md-4">Akses Eksklusif Peserta Webinar!</h5>
+                    <span class="text-gray-700 fs-7 fs-md-6">
+                        Terima kasih atas partisipasi Anda dalam webinar. Silakan bergabung ke Grup WhatsApp kami untuk berdiskusi dan mendapatkan update informasi.
+                    </span>
+                </div>
+            </div>
+
+            <!-- Action Buttons (Otomatis memanjang ke bawah di HP, dan menyamping di Desktop) -->
+            <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center mt-4 mt-md-0 gap-2 gap-sm-3 w-100 w-md-auto shrink-0">
+                <button type="button" class="btn btn-sm btn-outline btn-outline-dashed btn-outline-success btn-active-light-success btn-wa-action fw-bold w-100 w-sm-auto text-nowrap" data-action="sudah">
+                    Sudah Bergabung
+                </button>
+                <a href="https://chat.whatsapp.com/CHWkmrWMqrSJvJNlu1UoVy?s=cl&p=i&mlu=4" target="_blank" class="btn btn-sm btn-success btn-wa-action fw-bold shadow-sm w-100 w-sm-auto text-nowrap" data-action="gabung">
+                    <i class="fa-brands fa-whatsapp fs-5 me-1"></i> Bergabung
+                </a>
+            </div>
+
+        </div>
+    </div>
+<?php endif; ?>
 <div class="d-flex flex-column flex-column-fluid py-4 py-lg-6 mt-8">
     <div id="kt_app_content" class="app-content flex-column-fluid">
         <div id="kt_app_content_container" class="app-container container-xxl">
@@ -276,10 +312,10 @@
                         }
 
                         // URUTKAN SESI: Sesi yang sudah selesai ditaruh di paling belakang
-                        usort($childSessions, function($a, $b) use ($currentDateTime) {
+                        usort($childSessions, function ($a, $b) use ($currentDateTime) {
                             $endA = strtotime($a->waktu_selesai);
                             $endB = strtotime($b->waktu_selesai);
-                            
+
                             $isFinishedA = $endA < $currentDateTime ? 1 : 0;
                             $isFinishedB = $endB < $currentDateTime ? 1 : 0;
 
@@ -345,7 +381,7 @@
                             }
 
                             $fileMateri = [];
-                            $materiData = $child->file_materi ?? null; 
+                            $materiData = $child->file_materi ?? null;
 
                             if (!empty($materiData)) {
                                 $decodedMateri = json_decode($materiData, true);
@@ -386,38 +422,37 @@
                                     <div class="position-relative img-zoom-container bg-light" style="aspect-ratio: 16/9; flex-shrink: 0;">
                                         <?php if ($firstVideoId && !$isPaketGratis && !$isTerlambatBeli): ?>
                                             <?php
-                                                // Mengolah Data JSON YouTube dengan aman (Mendukung JSON array maupun string biasa)
-                                                $youtubeLinkstop = [];
-                                                if (!empty($child->link_youtube)) {
-                                                    $decodedYT = json_decode($child->link_youtube, true);
-                                                    if (is_array($decodedYT)) {
-                                                        $youtubeLinkstop = $decodedYT;
-                                                    } else {
-                                                        // Fallback jika ternyata tersimpan sebagai string/link tunggal
-                                                        $youtubeLinkstop = [$child->link_youtube];
-                                                    }
+                                            // Mengolah Data JSON YouTube dengan aman (Mendukung JSON array maupun string biasa)
+                                            $youtubeLinkstop = [];
+                                            if (!empty($child->link_youtube)) {
+                                                $decodedYT = json_decode($child->link_youtube, true);
+                                                if (is_array($decodedYT)) {
+                                                    $youtubeLinkstop = $decodedYT;
+                                                } else {
+                                                    // Fallback jika ternyata tersimpan sebagai string/link tunggal
+                                                    $youtubeLinkstop = [$child->link_youtube];
                                                 }
+                                            }
 
-                                                // Ambil link video pertama dengan aman untuk tombol gambar thumbnail
-                                                $firstYtLink = $youtubeLinkstop[0] ?? '';
+                                            // Ambil link video pertama dengan aman untuk tombol gambar thumbnail
+                                            $firstYtLink = $youtubeLinkstop[0] ?? '';
                                             ?>
-                                            <button type="button" 
-                                                class="btn p-0 border-0 w-100 h-100 position-absolute top-0 start-0 overflow-hidden youtube-item-btn" 
-                                                data-bs-toggle="modal" 
-                                                data-bs-target="#youtubeModal" 
-                                                data-youtubelink="<?= esc($firstYtLink) ?>"
-                                                >
-                                            
-                                            <img src="https://img.youtube.com/vi/<?= $firstVideoId ?>/maxresdefault.jpg" 
-                                                onerror="this.onerror=null; this.src='https://img.youtube.com/vi/<?= $firstVideoId ?>/hqdefault.jpg';" 
-                                                loading="lazy" 
-                                                class="w-100 h-100 object-fit-cover" 
-                                                alt="<?= esc($child->nama_sesi) ?>">
-                                            
-                                            <div class="position-absolute top-50 start-50 translate-middle" style="z-index: 3;">
-                                                <i class="ki-solid ki-youtube fs-3x text-danger bg-white rounded-circle shadow-sm"></i>
-                                            </div>
-                                        </button>
+                                            <button type="button"
+                                                class="btn p-0 border-0 w-100 h-100 position-absolute top-0 start-0 overflow-hidden youtube-item-btn"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#youtubeModal"
+                                                data-youtubelink="<?= esc($firstYtLink) ?>">
+
+                                                <img src="https://img.youtube.com/vi/<?= $firstVideoId ?>/maxresdefault.jpg"
+                                                    onerror="this.onerror=null; this.src='https://img.youtube.com/vi/<?= $firstVideoId ?>/hqdefault.jpg';"
+                                                    loading="lazy"
+                                                    class="w-100 h-100 object-fit-cover"
+                                                    alt="<?= esc($child->nama_sesi) ?>">
+
+                                                <div class="position-absolute top-50 start-50 translate-middle" style="z-index: 3;">
+                                                    <i class="ki-solid ki-youtube fs-3x text-danger bg-white rounded-circle shadow-sm"></i>
+                                                </div>
+                                            </button>
                                         <?php else: ?>
                                             <?= img_lazy('assets-landing/images/paket/thumbnails/' . $w->file, esc($child->nama_sesi), ['class' => 'w-100 h-100 object-fit-cover']) ?>
                                         <?php endif; ?>
@@ -493,7 +528,7 @@
                                                     <i class="ki-solid ki-folder-open text-primary fs-3 me-2"></i> Rekaman & Materi
                                                 </span>
                                             </div>
-                                            
+
                                             <div class="d-flex flex-column gap-2" style="max-height: 140px; overflow-y: auto;">
                                                 <!-- Logika Terkunci (Gratis ATAU Terlewat Beli) -->
                                                 <?php if ($isPaketGratis || $isTerlambatBeli): ?>
@@ -507,10 +542,10 @@
                                                         </div>
                                                     </div>
                                                 <?php else: ?>
-                                                
+
                                                     <!-- JIKA KEDUA DATA (YOUTUBE & MATERI) KOSONG -->
                                                     <?php if (empty($youtubeLinks) && empty($fileMateri)): ?>
-                                                    
+
                                                         <!-- Cek apakah kelas sudah selesai atau belum -->
                                                         <?php if ($status == 'finished'): ?>
                                                             <div class="alert alert-light-info border border-info border-dashed p-3 m-0 d-flex align-items-center">
@@ -562,9 +597,9 @@
                                                                 <i class="ki-outline ki-file-down fs-5 text-primary"></i>
                                                             </a>
                                                         <?php endforeach; ?>
-                                                        
+
                                                     <?php endif; ?>
-                                                    
+
                                                 <?php endif; ?>
                                             </div>
                                         </div>
@@ -738,6 +773,9 @@
         </div>
     </div>
 </div>
+<?= $this->endSection(); ?>
+
+<?= $this->section('scripts'); ?>
 <script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
@@ -1004,4 +1042,40 @@
     });
 </script>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const alertElement = document.getElementById('wa-group-alert');
+
+        // Cek apakah user belum pernah menutup alert ini
+        if (!localStorage.getItem('wa_alert_hidden')) {
+            // Hapus d-none dan siapkan posisi di bawah layar (tersembunyi)
+            alertElement.classList.remove('d-none');
+            alertElement.style.transform = 'translate(-50%, 150%)';
+            alertElement.style.transition = 'transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)'; // Efek Bounce
+
+            // Trigger animasi naik ke atas setelah jeda sebentar
+            setTimeout(() => {
+                alertElement.style.transform = 'translate(-50%, 0)';
+            }, 300);
+        }
+
+        // Event listener untuk tombol (Klik salah satu tombol = sembunyikan permanen)
+        const buttons = alertElement.querySelectorAll('.btn-wa-action');
+        buttons.forEach(btn => {
+            btn.addEventListener('click', function() {
+
+                // Simpan status ke localStorage browser
+                localStorage.setItem('wa_alert_hidden', 'true');
+
+                // Mainkan animasi turun ke bawah
+                alertElement.style.transform = 'translate(-50%, 150%)';
+
+                // Hapus elemen dari layar setelah animasi selesai
+                setTimeout(() => {
+                    alertElement.style.display = 'none';
+                }, 600);
+            });
+        });
+    });
+</script>
 <?= $this->endSection(); ?>

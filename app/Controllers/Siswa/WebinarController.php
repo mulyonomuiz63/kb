@@ -50,8 +50,17 @@ class WebinarController extends BaseController
 
         // var_dump($data['webinar']);
 
+        $cekTransaksi = $this->transaksiModel
+            ->where('idsiswa', $id_siswa)
+            ->where('status', 'S')
+            ->groupStart() // Membuka kurung query agar kondisi OR tidak merusak WHERE idsiswa
+                ->like('jenis_paket', 'webinar') // Mencari string "webinar" di dalam array
+            ->groupEnd()
+            ->countAllResults();
+
         $data = [
-            'webinar' => $dataWebinar
+            'webinar' => $dataWebinar,
+            'showWaAlert' => ($cekTransaksi > 0)
         ];
         $data['breadcrumbs'] = [
             ['title' => 'Webinar', 'url' => base_url('sw-siswa')],
