@@ -468,6 +468,82 @@
             color: #29459A !important;
         }
     </style>
+    <style>
+        /* CSS Khusus untuk memunculkan bottom nav hanya di layar mobile (di bawah 992px) */
+        .mobile-bottom-nav {
+            display: none;
+        }
+
+        @media (max-width: 991.98px) {
+            .mobile-bottom-nav {
+                display: flex;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 65px;
+                background-color: #ffffff;
+                box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.08);
+                z-index: 99999;
+                justify-content: space-around;
+                align-items: center;
+                padding-bottom: env(safe-area-inset-bottom);
+                /* Support iPhone notch/home bar */
+                border-top: 1px solid rgba(0, 0, 0, 0.05);
+            }
+
+            .mobile-bottom-nav-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-decoration: none;
+                color: #8c98a4;
+                font-size: 11px;
+                font-weight: 500;
+                flex-grow: 1;
+                height: 100%;
+                transition: all 0.25s ease;
+            }
+
+            .mobile-bottom-nav-item i {
+                font-size: 20px;
+                margin-bottom: 4px;
+                transition: transform 0.2s ease;
+            }
+
+            .mobile-bottom-nav-item:active i {
+                transform: scale(0.85);
+                /* Efek membal saat disentuh */
+            }
+
+            .mobile-bottom-nav-item.active,
+            .mobile-bottom-nav-item:hover {
+                color: #0d6efd;
+                /* Sesuaikan warna aktif dengan tema utama */
+            }
+
+            .mobile-bottom-nav-item:hover i {
+                transform: translateY(-2px);
+                /* Efek melompat kecil saat di-hover */
+            }
+
+            /* Tambahan padding bawah pada body/container mobile agar konten tidak tertutup bar menu */
+            body {
+                padding-bottom: 70px;
+            }
+        }
+
+        /* Mengatur posisi tombol chat CS agar berada di atas menu navigasi mobile */
+        @media (max-width: 991.98px) {
+            .topcs-bubble {
+                bottom: 85px !important;
+                /* Menaikkan posisi tombol di atas tinggi menu (65px + ruang aman) */
+                z-index: 100000 !important;
+                /* Memastikan posisi layer berada di atas menu navigasi */
+            }
+        }
+    </style>
     <?= $this->renderSection('css'); ?>
 
     <script>
@@ -717,6 +793,54 @@
 
         </div>
         <!-- Mobile Menu End -->
+
+        <!-- Mobile Menu End -->
+        <div class="mobile-bottom-nav">
+            <!-- Menu Home -->
+            <a href="<?= base_url('/'); ?>" class="mobile-bottom-nav-item">
+                <i class="bi bi-house"></i>
+                <span>Home</span>
+            </a>
+
+            <!-- Menu Tentang Kami -->
+            <a href="<?= base_url('tentangkami'); ?>" class="mobile-bottom-nav-item <?= set_active_nav($tentangkami); ?>">
+                <i class="bi bi-info-circle"></i>
+                <span>Tentang</span>
+            </a>
+
+            <!-- Menu Pelatihan -->
+            <a href="<?= base_url('pelatihan'); ?>" class="mobile-bottom-nav-item <?= set_active_nav($pelatihan); ?>">
+                <i class="bi bi-mortarboard"></i>
+                <span>Pelatihan</span>
+            </a>
+
+            <!-- Menu Penilaian -->
+            <a href="<?= base_url('penilaian'); ?>" class="mobile-bottom-nav-item <?= set_active_nav($penilaian); ?>">
+                <i class="bi bi-clipboard-check"></i>
+                <span>Penilaian</span>
+            </a>
+
+            <!-- Menu Profile / Masuk (Otomatis menyesuaikan status login session) -->
+            <?php if (session('nama') == ''): ?>
+                <a href="<?= base_url('auth'); ?>" class="mobile-bottom-nav-item">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    <span>Masuk</span>
+                </a>
+            <?php else: ?>
+                <?php
+                if (session('role') == '1') $profile_url = base_url('sw-admin');
+                elseif (session('role') == '2') $profile_url = base_url('sw-siswa');
+                elseif (session('role') == '3') $profile_url = base_url('sw-guru');
+                elseif (session('role') == '4') $profile_url = base_url('sw-mitra');
+                elseif (session('role') == '5') $profile_url = base_url('sw-pic');
+                else $profile_url = base_url('/');
+                ?>
+                <a href="<?= $profile_url; ?>" class="mobile-bottom-nav-item">
+                    <i class="bi bi-person-circle"></i>
+                    <span>Profile</span>
+                </a>
+            <?php endif; ?>
+        </div>
 
         <!-- Overlay Start -->
         <div class="overlay"></div>
