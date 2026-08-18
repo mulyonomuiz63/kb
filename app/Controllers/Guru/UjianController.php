@@ -85,19 +85,26 @@ class UjianController extends BaseController
         if ($nama_soal != null) {
             // DATA UJIAN
             $kode_ujian = random_string('alnum', 10);
+            // DATA UJIAN
             $data_ujian = [
-                'kode_ujian' => $kode_ujian,
-                'nama_ujian' => $this->request->getVar('nama_ujian'),
-                'guru' => session()->get('id'),
-                'kelas' => $this->request->getVar('kelas'),
-                'mapel' => $this->request->getVar('mapel'),
-                'date_created' => time(),
+                'kode_ujian'     => $kode_ujian,
+                'nama_ujian'     => $this->request->getVar('nama_ujian'),
+                'guru'           => session()->get('id'),
+                'kelas'          => $this->request->getVar('kelas'),
+                'mapel'          => $this->request->getVar('mapel'),
+
+                // TAMBAHAN BARU
+                'jml_mudah'      => $this->request->getVar('jml_mudah'),
+                'jml_sedang'     => $this->request->getVar('jml_sedang'),
+                'jml_susah'      => $this->request->getVar('jml_susah'),
+                'waktu_per_soal' => $this->request->getVar('waktu_per_soal'),
+
+                'date_created'   => time(),
             ];
             // END DATA UJIAN
             $this->ujianMasterModel->save($data_ujian);
 
             //UJIAN UNTUK SETIAP SISWA
-
 
             $status_ujian = [
                 'kode_ujian' => $kode_ujian,
@@ -105,8 +112,6 @@ class UjianController extends BaseController
             ];
             // END DATA UJIAN
             $this->statusUjianModel->save($status_ujian);
-
-
             // DATA DETAIL UJIAN PG
 
             // $data_detail_ujian = array();
@@ -116,14 +121,17 @@ class UjianController extends BaseController
                 if ($dataSoal == null) {
                     $data_detail_ujian = [
                         'kode_ujian' => $kode_ujian,
-                        'nama_soal' => $nama,
-                        'pg_1' => 'A. ' . $this->request->getVar('pg_1')[$index],
-                        'pg_2' => 'B. ' . $this->request->getVar('pg_2')[$index],
-                        'pg_3' => 'C. ' . $this->request->getVar('pg_3')[$index],
-                        'pg_4' => 'D. ' . $this->request->getVar('pg_4')[$index],
-                        'pg_5' => 'E. ' . $this->request->getVar('pg_5')[$index],
-                        'jawaban' => $this->request->getVar('jawaban')[$index],
+                        'nama_soal'  => $nama,
+                        'pg_1'       => 'A. ' . $this->request->getVar('pg_1')[$index],
+                        'pg_2'       => 'B. ' . $this->request->getVar('pg_2')[$index],
+                        'pg_3'       => 'C. ' . $this->request->getVar('pg_3')[$index],
+                        'pg_4'       => 'D. ' . $this->request->getVar('pg_4')[$index],
+                        'pg_5'       => 'E. ' . $this->request->getVar('pg_5')[$index],
+                        'jawaban'    => $this->request->getVar('jawaban')[$index],
                         'penjelasan' => $this->request->getVar('penjelasan')[$index],
+
+                        // TAMBAHAN BARU MENANGKAP JENIS SOAL E/M/H
+                        'jenis_soal' => $this->request->getVar('jenis_soal')[$index],
                     ];
                     // END DATA UJIAN
                     $this->ujianDetailModel->save($data_detail_ujian);
@@ -183,9 +191,31 @@ class UjianController extends BaseController
 
         if ($RsData->getNumRows() > 0) {
             foreach ($RsData->getResult() as $rowdata) {
+
+                // --- TAMBAHAN BARU: Logika penentuan Label/Badge Kesulitan ---
+                $badgeKesulitan = '<span class="badge badge-light-secondary">Belum diset</span>'; // Default jika kosong
+                if (isset($rowdata->jenis_soal)) {
+                    if ($rowdata->jenis_soal == 'E') {
+                        $badgeKesulitan = '<span class="badge badge-light-success">Mudah</span>';
+                    } elseif ($rowdata->jenis_soal == 'M') {
+                        $badgeKesulitan = '<span class="badge badge-light-warning">Sedang</span>';
+                    } elseif ($rowdata->jenis_soal == 'H') {
+                        $badgeKesulitan = '<span class="badge badge-light-danger">Sulit</span>';
+                    }
+                }
+                // --------------------------------------------------------------
+
                 $row = array();
+
+                // Kolom 1 (Index 0): Checkbox
                 $row[] = '<input type="checkbox" data-id_bank_soal="' . $rowdata->id_bank_soal . '" id="tambahSoal" class="check-item">';
+
+                // Kolom 2 (Index 1): Kesulitan (Ini yang baru ditambahkan agar sejajar dengan thead HTML)
+                $row[] = $badgeKesulitan;
+
+                // Kolom 3 (Index 2): Detail Isi Soal
                 $row[] = $rowdata->nama_soal;
+
                 $data[] = $row;
             }
         }
@@ -195,7 +225,7 @@ class UjianController extends BaseController
             "recordsTotal"    => $this->bankSoalModel->count_all(),
             "recordsFiltered" => $this->bankSoalModel->count_filtered(),
             "data"            => $data,
-            "token"           => csrf_hash(), // TAMBAHKAN INI
+            "token"           => csrf_hash(),
         );
 
         return $this->response->setJSON($output);
@@ -500,11 +530,101 @@ class UjianController extends BaseController
         ];
         $data['detail_ujian'] = $this->ujianDetailModel->getAllBykodeUjian(decrypt_url($kode_ujian));
         $data['ujian'] = $this->ujianMasterModel->getBykode(decrypt_url($kode_ujian));
+        $data['status_ujian'] = $this->statusUjianModel->where('kode_ujian', decrypt_url($kode_ujian))->first();
         $data['siswa'] = $this->siswaModel->getAllbyKelas($data['ujian']->kelas);
         $data['guru'] = $this->guruModel->asObject()->find(session()->get('id'));
         $data['guru_kelas'] = $this->gurukelasModel->getALLByGuru(session()->get('id'));
         $data['guru_mapel'] = $this->guruMapelModel->getALLByGuru(session()->get('id'));
         return view('guru/ujian/edit_pg', $data);
+    }
+
+    public function updateSoal($kode_ujian)
+    {
+        $kode_ujian_asli = decrypt_url($kode_ujian);
+        $ujian = $this->ujianMasterModel->getBykode($kode_ujian_asli);
+
+        if (!$ujian) {
+            return redirect()->to('sw-guru/ujian')->with('error', 'Data ujian tidak ditemukan.');
+        }
+
+        $nama_soal = $this->request->getVar('nama_soal');
+
+        if ($nama_soal != null) {
+            // 1. UPDATE DATA MASTER UJIAN
+            $data_master = [
+                'nama_ujian'     => $this->request->getVar('nama_ujian'),
+                'kelas'          => $this->request->getVar('kelas'),
+                'mapel'          => $this->request->getVar('mapel'),
+                'jml_mudah'      => $this->request->getVar('jml_mudah'),
+                'jml_sedang'     => $this->request->getVar('jml_sedang'),
+                'jml_susah'      => $this->request->getVar('jml_susah'),
+                'waktu_per_soal' => $this->request->getVar('waktu_per_soal'),
+            ];
+            $this->ujianMasterModel->update($ujian->id_ujian, $data_master);
+
+            // 2. UPDATE STATUS UJIAN
+            $status_ujian = [
+                'status' => $this->request->getVar('status_ujian'),
+            ];
+            $this->statusUjianModel->where('kode_ujian', $kode_ujian_asli)
+                ->set($status_ujian)
+                ->update();
+
+            // 3. UPDATE ATAU INSERT DATA DETAIL UJIAN PG
+            $id_detail_ujian = $this->request->getVar('id_detail_ujian');
+            $submitted_ids = [];
+            $index = 0;
+
+            foreach ($nama_soal as $nama) {
+                // Cek apakah soal ini memiliki ID (soal lama) atau tidak (soal baru ditambahkan)
+                $id_detail = isset($id_detail_ujian[$index]) ? $id_detail_ujian[$index] : null;
+
+                $data_detail_ujian = [
+                    'kode_ujian' => $kode_ujian_asli,
+                    'nama_soal'  => $nama,
+                    'pg_1'       => 'A. ' . $this->request->getVar('pg_1')[$index],
+                    'pg_2'       => 'B. ' . $this->request->getVar('pg_2')[$index],
+                    'pg_3'       => 'C. ' . $this->request->getVar('pg_3')[$index],
+                    'pg_4'       => 'D. ' . $this->request->getVar('pg_4')[$index],
+                    'pg_5'       => 'E. ' . $this->request->getVar('pg_5')[$index],
+                    'jawaban'    => $this->request->getVar('jawaban')[$index],
+                    'penjelasan' => $this->request->getVar('penjelasan')[$index],
+                    'jenis_soal' => $this->request->getVar('jenis_soal')[$index],
+                ];
+
+                if (!empty($id_detail)) {
+                    // Jika ada ID-nya, lakukan Update
+                    $this->ujianDetailModel->update($id_detail, $data_detail_ujian);
+                    $submitted_ids[] = $id_detail;
+                } else {
+                    // Jika tidak ada ID-nya (soal tambahan baru manual/bank soal), lakukan Insert
+                    $this->ujianDetailModel->insert($data_detail_ujian);
+                    $submitted_ids[] = $this->ujianDetailModel->getInsertID();
+                }
+
+                $index++;
+            }
+
+            // 4. SOFT DELETE SOAL YANG DIBUANG DARI FORM
+            $waktu_sekarang = date('Y-m-d H:i:s');
+
+            if (!empty($submitted_ids)) {
+                // Beri tanda waktu pada 'deleted_at' untuk soal yang dihapus oleh guru
+                $this->ujianDetailModel->where('kode_ujian', $kode_ujian_asli)
+                    ->whereNotIn('id_detail_ujian', $submitted_ids)
+                    ->set(['deleted_at' => $waktu_sekarang])
+                    ->update();
+            } else {
+                // Jika semua soal dihapus, beri tanda 'deleted_at' ke semua soal dalam ujian ini
+                $this->ujianDetailModel->where('kode_ujian', $kode_ujian_asli)
+                    ->set(['deleted_at' => $waktu_sekarang])
+                    ->update();
+            }
+
+            return redirect()->to('sw-guru/ujian')->with('success', 'Ujian telah berhasil diperbarui');
+        } else {
+            return redirect()->to('sw-guru/ujian')->with('error', 'Ujian tidak dapat diperbarui karena tidak ada soal yang dimasukkan');
+        }
     }
 
     public function update()
@@ -608,38 +728,7 @@ class UjianController extends BaseController
         return redirect()->to('guru/ujian')->with('success', 'Ujian telah dibuat');
     }
 
-    public function editSoal($id_detail_ujian)
-    {
-        $data['breadcrumbs'] = [
-            ['title' => 'Dashboard', 'url' => base_url('sw-guru')],
-            ['title' => 'Data Ujian', 'url' => base_url('sw-guru/ujian')],
-            ['title' => 'Edit Soal Ujian', 'url' => '#'],
-        ];
-        $data['detail_ujian'] = $this->ujianDetailModel->getAllByiddetailujian(decrypt_url($id_detail_ujian));
-        $data['guru'] = $this->guruModel->asObject()->find(session()->get('id'));
-        $data['guru_kelas'] = $this->gurukelasModel->getALLByGuru(session()->get('id'));
-        $data['guru_mapel'] = $this->guruMapelModel->getALLByGuru(session()->get('id'));
-        return view('guru/ujian/edit_soal', $data);
-    }
-    public function updateSoal()
-    {
 
-        $data_detail_ujian = [
-            'kode_ujian' => $this->request->getVar('kode_ujian'),
-            'nama_soal' => $this->request->getVar('nama_soal'),
-            'pg_1' => 'A. ' . $this->request->getVar('pg_1'),
-            'pg_2' => 'B. ' . $this->request->getVar('pg_2'),
-            'pg_3' => 'C. ' . $this->request->getVar('pg_3'),
-            'pg_4' => 'D. ' . $this->request->getVar('pg_4'),
-            'pg_5' => 'E. ' . $this->request->getVar('pg_5'),
-            'jawaban' => $this->request->getVar('jawaban'),
-            'penjelasan' => $this->request->getVar('penjelasan'),
-        ];
-
-
-        $this->ujianDetailModel->set($data_detail_ujian)->where('id_detail_ujian', $this->request->getVar('id_detail_ujian'))->update();
-        return redirect()->to('sw-guru/ujian/edit-ujian/' . encrypt_url($this->request->getVar('kode_ujian')))->with('success', 'Soal telah diubah');
-    }
 
 
     public function downloadTemplate()

@@ -29,7 +29,7 @@ $routes->group('sw-guru', ['filter' => 'roleCheck:3'], function ($routes) {
         $routes->get('edit-ujian/(:segment)', 'Guru\UjianController::editUjian/$1');
         $routes->post('update', 'Guru\UjianController::update');
         $routes->get('edit-soal/(:segment)', 'Guru\UjianController::editSoal/$1');
-        $routes->post('update-soal', 'Guru\UjianController::updateSoal');
+        $routes->post('update-soal/(:segment)', 'Guru\UjianController::updateSoal/$1');
         $routes->post('get-bank-soal', 'Guru\UjianController::getBankSoal');
         $routes->post('tambah-bank-soal', 'Guru\UjianController::tambahBankSoal');
         $routes->post('upload-summernote', 'Guru\UjianController::uploadSummernote');

@@ -173,16 +173,27 @@ class UjianController extends BaseController
 
             $data_ujian_model = $this->ujianSiswaModel->where('ujian', decrypt_url($kode_ujian))->where('siswa', decrypt_url($id_siswa))->get()->getResultObject();
             if (!empty($data_ujian_model)) {
-                $data_ujian_siswa = $this->ujianSiswaModel->where('ujian', decrypt_url($kode_ujian))->where('siswa', decrypt_url($id_siswa))->get()->getResultObject();
-                foreach ($data_ujian_siswa as $rows) {
-                    $data_detail_siswa = [
-                        'jawaban'       => null,
-                        'benar'         => null,
-                        'jam'           => null,
-                        'status'        => null,
-                    ];
-                    $this->ujianSiswaModel->set($data_detail_siswa)->where('id_ujian_siswa', $rows->id_ujian_siswa)->update();
+                // $data_ujian_siswa = $this->ujianSiswaModel->where('ujian', decrypt_url($kode_ujian))->where('siswa', decrypt_url($id_siswa))->get()->getResultObject();
+                // foreach ($data_ujian_siswa as $rows) {
+                //     $data_detail_siswa = [
+                //         'jawaban'       => null,
+                //         'benar'         => null,
+                //         'jam'           => null,
+                //         'status'        => null,
+                //     ];
+                //     $this->ujianSiswaModel->set($data_detail_siswa)->where('id_ujian_siswa', $rows->id_ujian_siswa)->update();
+                // }
+                $this->ujianSiswaModel->where('ujian', decrypt_url($kode_ujian))->where('siswa', decrypt_url($id_siswa))->delete();
+                $ujian_detail = $this->ujianDetailModel->getAllBykodeUjian(decrypt_url($kode_ujian));
+                $data_ujian_siswa = [];
+                foreach ($ujian_detail as $uj) {
+                    array_push($data_ujian_siswa, [
+                        'ujian_id' => $uj->id_detail_ujian,
+                        'ujian' => $uj->kode_ujian,
+                        'siswa' => decrypt_url($id_siswa),
+                    ]);
                 }
+                $this->ujianSiswaModel->insertBatch($data_ujian_siswa);
             } else {
                 $ujian_detail = $this->ujianDetailModel->getAllBykodeUjian(decrypt_url($kode_ujian));
                 $data_ujian_siswa = [];
@@ -411,6 +422,18 @@ class UjianController extends BaseController
             $kode_ujian = decrypt_url($kode);
             $idsiswa = session('id');
 
+            $this->ujianSiswaModel->where('ujian', $kode_ujian)->where('siswa', $idsiswa)->delete();
+            $ujian_detail = $this->ujianDetailModel->getAllBykodeUjian($kode_ujian);
+            $data_ujian_siswa = [];
+            foreach ($ujian_detail as $uj) {
+                array_push($data_ujian_siswa, [
+                    'ujian_id' => $uj->id_detail_ujian,
+                    'ujian' => $uj->kode_ujian,
+                    'siswa' => $idsiswa,
+                ]);
+            }
+            $this->ujianSiswaModel->insertBatch($data_ujian_siswa);
+
             // AMBIL WAKTU DARI PERANGKAT USER (Jika dikirim via POST)
             // Jika tidak ada, fallback ke waktu server (sebagai pengaman)
             $userTimestamp = $this->request->getPost('device_time') ?: time();
@@ -441,17 +464,17 @@ class UjianController extends BaseController
                 ->update();
 
             // Update detail jawaban siswa
-            $data_ujian_siswa = $this->ujianSiswaModel->where('ujian', $kode_ujian)->where('siswa', $idsiswa)->get()->getResultObject();
+            // $data_ujian_siswa = $this->ujianSiswaModel->where('ujian', $kode_ujian)->where('siswa', $idsiswa)->get()->getResultObject();
 
-            foreach ($data_ujian_siswa as $rows) {
-                $data_detail_siswa = [
-                    'jawaban' => null,
-                    'benar'   => null,
-                    'jam'     => null,
-                    'status'  => null,
-                ];
-                $this->ujianSiswaModel->update($rows->id_ujian_siswa, $data_detail_siswa);
-            }
+            // foreach ($data_ujian_siswa as $rows) {
+            //     $data_detail_siswa = [
+            //         'jawaban' => null,
+            //         'benar'   => null,
+            //         'jam'     => null,
+            //         'status'  => null,
+            //     ];
+            //     $this->ujianSiswaModel->update($rows->id_ujian_siswa, $data_detail_siswa);
+            // }
 
             if ($db->transStatus() === false) {
                 $db->transRollback();

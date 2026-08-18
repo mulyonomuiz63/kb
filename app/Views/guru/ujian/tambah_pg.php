@@ -20,9 +20,6 @@
                         <a href="javascript:void(0);" class="btn btn-light-primary btn-sm" data-bs-toggle="modal" data-bs-target="#bank_soal">
                             <i class="ki-duotone ki-folder fs-2"><span class="path1"></span><span class="path2"></span></i> Bank Soal
                         </a>
-                        <!-- <a href="javascript:void(0);" class="btn btn-light-success btn-sm" data-bs-toggle="modal" data-bs-target="#excel_ujian">
-                            <i class="ki-duotone ki-file-up fs-2"><span class="path1"></span><span class="path2"></span></i> Import Excel
-                        </a> -->
                     </div>
                 </div>
                 <div class="card-body">
@@ -53,6 +50,26 @@
                                 <option value="A">Aktif</option>
                                 <option value="T">Tidak Aktif</option>
                             </select>
+                        </div>
+                    </div>
+
+                    <!-- TAMBAHAN BARU: Baris untuk setting jumlah soal dan waktu -->
+                    <div class="row g-9 mt-5">
+                        <div class="col-md-3">
+                            <label class="required fs-6 fw-semibold mb-2">Jml Soal Mudah</label>
+                            <input type="number" name="jml_mudah" class="form-control form-control-solid" required min="0" value="0">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="required fs-6 fw-semibold mb-2">Jml Soal Sedang</label>
+                            <input type="number" name="jml_sedang" class="form-control form-control-solid" required min="0" value="0">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="required fs-6 fw-semibold mb-2">Jml Soal Susah</label>
+                            <input type="number" name="jml_susah" class="form-control form-control-solid" required min="0" value="0">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="required fs-6 fw-semibold mb-2">Waktu / Soal (Menit)</label>
+                            <input type="number" name="waktu_per_soal" class="form-control form-control-solid" required min="1" value="2">
                         </div>
                     </div>
                 </div>
@@ -171,6 +188,10 @@
                         <thead>
                             <tr class="text-start text-muted fw-bold fs-7 text-uppercase gs-0 bg-light">
                                 <th class="w-50px px-3 text-center">Pilih</th>
+
+                                <!-- TAMBAHAN BARU: Kolom Tingkat Kesulitan -->
+                                <th class="min-w-125px text-center">Kesulitan</th>
+
                                 <th class="min-w-200px">Detail Isi Soal</th>
                             </tr>
                         </thead>
@@ -226,13 +247,19 @@
                     }
                 }
             },
-            "columnDefs": [{
-                    "targets": [0],
+            "columnDefs": [
+                {
+                    "targets": [0], // Kolom Checkbox (Pilih)
                     "orderable": false,
                     "className": 'text-center'
                 },
                 {
-                    "targets": [1],
+                    "targets": [1], // TAMBAHAN BARU: Kolom Tingkat Kesulitan
+                    "orderable": false,
+                    "className": 'text-center'
+                },
+                {
+                    "targets": [2], // Kolom Detail Isi Soal (Bergeser ke index 2)
                     "orderable": false
                 }
             ]
@@ -317,9 +344,19 @@
             <div class="isi_soal mb-10 p-5 border rounded bg-light-neutral">
                 <div class="d-flex justify-content-between align-items-center mb-5">
                     <h4 class="fw-bold">Soal No. ${no_soal}</h4>
-                    <button type="button" class="btn btn-sm btn-icon btn-light-danger hapus-pg">
-                        <i class="ki-duotone ki-trash fs-2"><span class="path1"></span><span class="path2"></span></i>
-                    </button>
+                    
+                    <!-- TAMBAHAN BARU: Dropdown Jenis Soal & Hapus Tombol dibuat sebaris -->
+                    <div class="d-flex align-items-center gap-3">
+                        <select name="jenis_soal[]" class="form-select form-select-sm form-select-solid" required>
+                            <option value="">Pilih Kesulitan</option>
+                            <option value="E">Mudah (Easy)</option>
+                            <option value="M">Sedang (Medium)</option>
+                            <option value="H">Sulit (Hard)</option>
+                        </select>
+                        <button type="button" class="btn btn-sm btn-icon btn-light-danger hapus-pg">
+                            <i class="ki-duotone ki-trash fs-2"><span class="path1"></span><span class="path2"></span></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="form-group mb-5">
                     <textarea name="nama_soal[]" class="summernote" required></textarea>
@@ -353,7 +390,7 @@
         $('#table').on('click', 'input#tambahSoal', function() {
             if ($(this).is(':checked')) {
                 var id_bank_soal = $(this).data('id_bank_soal');
-                
+
                 // Ambil token CSRF terbaru langsung dari input form agar tidak kedaluwarsa
                 var currentHash = $('input[name="' + csrfName + '"]').val();
 
@@ -373,9 +410,18 @@
                         <div class="isi_soal mb-10 p-5 border rounded bg-light-primary">
                             <div class="d-flex justify-content-between align-items-center mb-5">
                                 <h4 class="fw-bold text-primary">Soal No. ${no_soal} (Bank Soal)</h4>
-                                <button type="button" class="btn btn-sm btn-icon btn-light-danger hapus-pg">
-                                    <i class="ki-duotone ki-trash fs-2"></i>
-                                </button>
+                                
+                                <!-- TAMBAHAN BARU: Dropdown Jenis Soal & Hapus Tombol dibuat sebaris -->
+                                <div class="d-flex align-items-center gap-3">
+                                    <select name="jenis_soal[]" class="form-select form-select-sm form-select-solid" required>
+                                        <option value="E" ${data.jenis_soal === 'E' ? 'selected' : ''}>Mudah (Easy)</option>
+                                        <option value="M" ${data.jenis_soal === 'M' ? 'selected' : ''}>Sedang (Medium)</option>
+                                        <option value="H" ${data.jenis_soal === 'H' ? 'selected' : ''}>Sulit (Hard)</option>
+                                    </select>
+                                    <button type="button" class="btn btn-sm btn-icon btn-light-danger hapus-pg">
+                                        <i class="ki-duotone ki-trash fs-2"></i>
+                                    </button>
+                                </div>
                             </div>
                             <textarea name="nama_soal[]" class="summernote">${data.nama_soal}</textarea>
                             <div class="row g-5 mt-2">
