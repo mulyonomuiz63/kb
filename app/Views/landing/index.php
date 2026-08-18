@@ -254,9 +254,17 @@
             display: flex !important;
             align-items: center;
             justify-content: center;
-            height: 80px !important;
-            /* Kunci tinggi slider logo Anda */
+            height: 40px !important;
+            /* Tinggi untuk Mobile */
             overflow: hidden;
+        }
+
+        /* Untuk Desktop (Layar 992px ke atas) */
+        @media (min-width: 992px) {
+            .tickerwrapper .swiper-slide {
+                height: 80px !important;
+                /* Tinggi untuk Desktop */
+            }
         }
 
         .lazy-img {
