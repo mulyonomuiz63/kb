@@ -543,6 +543,9 @@
                 /* Memastikan posisi layer berada di atas menu navigasi */
             }
         }
+        .topcs-tooltip {
+            bottom: 90px !important;
+        }
     </style>
     <?= $this->renderSection('css'); ?>
 
