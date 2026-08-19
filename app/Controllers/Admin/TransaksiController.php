@@ -522,18 +522,14 @@ class TransaksiController extends BaseController
                         'guru'       => $rowsp->guru,
                         'kelas'      => $rowsp->kelas,
                         'mapel'      => $rowsp->mapel,
+                        'jml_mudah'    => $rowsp->jml_mudah,
+                        'jml_sedang'   => $rowsp->jml_sedang,
+                        'jml_susah'    => $rowsp->jml_susah,
+                        'waktu_per_soal' => $rowsp->waktu_per_soal,
                         'date_created' => time(),
                     ]);
-
-                    // Reset status ujian siswa jika sebelumnya sudah ada
-                    $this->ujianSiswaModel->where('ujian', $rowsp->kode_ujian)
-                        ->where('siswa', $rowst->idsiswa)
-                        ->set([
-                            'jawaban' => null,
-                            'benar'   => null,
-                            'jam'     => null,
-                            'status'  => null,
-                        ])->update();
+                    //untuk menghapus data ujian siswa yang sudah ada sebelumnya agar tidak terjadi duplikasi
+                    $this->ujianSiswaModel->where('ujian', $rowsp->kode_ujian)->where('siswa', $rowst->idsiswa)->delete();
                 }
             }
 
@@ -688,6 +684,10 @@ class TransaksiController extends BaseController
                             'guru'       => $row->guru,
                             'kelas'      => $row->kelas,
                             'mapel'      => $row->mapel,
+                            'jml_mudah'    => $row->jml_mudah,
+                            'jml_sedang'   => $row->jml_sedang,
+                            'jml_susah'    => $row->jml_susah,
+                            'waktu_per_soal' => $row->waktu_per_soal,
                             'date_created' => time(),
                         ]);
                     }

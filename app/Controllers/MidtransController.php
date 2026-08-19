@@ -241,27 +241,14 @@ class MidtransController extends BaseController
                         'guru'         => $rowsp->guru,
                         'kelas'        => $rowsp->kelas,
                         'mapel'        => $rowsp->mapel,
+                        'jml_mudah'    => $rowsp->jml_mudah,
+                        'jml_sedang'   => $rowsp->jml_sedang,
+                        'jml_susah'    => $rowsp->jml_susah,
+                        'waktu_per_soal' => $rowsp->waktu_per_soal,
                         'date_created' => time(),
                     ];
                     $this->ujianModel->save($data_ujian);
-
-                    // Menambah/Reset status di tabel ujian siswa
-                    $data_ujian_siswa = $this->ujianSiswaModel
-                        ->where('ujian', $rowsp->kode_ujian)
-                        ->where('siswa', $idsiswa)
-                        ->get()->getResultObject();
-
-                    foreach ($data_ujian_siswa as $rows) {
-                        $data_detail_siswa = [
-                            'jawaban' => null,
-                            'benar'   => null,
-                            'jam'     => null,
-                            'status'  => null,
-                        ];
-                        $this->ujianSiswaModel->set($data_detail_siswa)
-                            ->where('id_ujian_siswa', $rows->id_ujian_siswa)
-                            ->update();
-                    }
+                    $this->ujianSiswaModel->where('ujian', $rowsp->kode_ujian)->where('siswa', $idsiswa)->delete();
                 }
             }
         }

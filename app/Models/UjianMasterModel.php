@@ -68,21 +68,23 @@ class UjianMasterModel extends Model
             ->getResultObject();
     }
 
-    public function getAllUntukNilaiUjian($kelas, $id_siswa, $kode_ujian)
+    public function getAllUntukNilaiUjian($id_siswa, $kode_ujian)
     {
 
-        return $this
-            ->select('ujian_master.kode_ujian, ujian_master.nama_ujian, ujian_master.waktu_mulai, kelas.nama_kelas, ujian_siswa.siswa, ujian_siswa.ujian, COUNT(ujian_siswa.benar) AS benar')
-            ->join('ujian_siswa', 'ujian_master.kode_ujian=ujian_siswa.ujian')
-            ->join('kelas', 'ujian_master.kelas=kelas.id_kelas')
+        $query = $this
+            ->select('ujian_master.kode_ujian, ujian_master.nama_ujian, ujian_siswa.siswa, ujian_siswa.ujian, SUM(CASE WHEN ujian_siswa.benar = 1 THEN 1 ELSE 0 END) AS benar')
+            ->join('ujian_siswa', 'ujian_master.kode_ujian = ujian_siswa.ujian')
             ->where('ujian_siswa.siswa', $id_siswa)
-            ->where('kelas.id_kelas', $kelas)
-            ->where('ujian_siswa.benar', 1)
             ->where('ujian_master.kode_ujian', $kode_ujian)
-            ->groupBy('ujian_siswa.ujian')
+            ->groupBy([
+                'ujian_master.kode_ujian',
+                'ujian_master.nama_ujian',
+                'ujian_siswa.siswa',
+                'ujian_siswa.ujian'
+            ])
             ->orderBy('ujian_master.id_ujian', 'desc')
-            ->get()
-            ->getResultObject();
+            ->get();
+        return $query->getResultObject();
     }
 
     public function getHasilUjian($kode_ujian, $id_siswa)

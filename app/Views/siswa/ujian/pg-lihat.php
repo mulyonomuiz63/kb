@@ -139,12 +139,6 @@ $ujianSiswaModel = new UjianSiswaModel(); ?>
                                     $soal_hidden = '';
                                     $no = 1;
                                     foreach ($detail_ujian as $soal) :
-                                        // (Catatan: Sebaiknya query ke ujianSiswaModel ini dipindah ke Controller agar View tidak berat)
-                                        $jawaban_siswa = $ujianSiswaModel
-                                            ->join('siswa', 'ujian_siswa.siswa=siswa.id_siswa')
-                                            ->where('ujian_siswa.ujian_id', $soal->id_detail_ujian)
-                                            ->where('siswa.email', session()->get('email'))
-                                            ->get()->getRowObject();
                                     ?>
 
                                         <div class="question <?= $soal_hidden ?> question-<?= $no ?>" data-question="<?= $no ?>">
@@ -166,7 +160,7 @@ $ujianSiswaModel = new UjianSiswaModel(); ?>
                                                                 data-jawaban="<?= substr($soal->$field, 0, 1); ?>"
                                                                 name="<?= $soal->id_detail_ujian; ?>"
                                                                 value="<?= substr($soal->$field, 0, 1); ?>"
-                                                                <?= substr($soal->$field, 0, 1) == ($jawaban_siswa->jawaban ?? '') ? 'checked' : ''; ?>>
+                                                                <?= substr($soal->$field, 0, 1) == ($soal->jawaban_siswa ?? '') ? 'checked' : ''; ?>>
                                                             <span class="text-gray-700 fw-semibold fs-6">
                                                                 <b class="me-2"><?= substr($soal->$field, 0, 1); ?>.</b> <?= substr($soal->$field, 3); ?>
                                                             </span>
@@ -223,14 +217,8 @@ $ujianSiswaModel = new UjianSiswaModel(); ?>
                             <?php
                             $no = 1;
                             foreach ($detail_ujian as $soal) :
-                                // Cek apakah soal ini sudah dijawab oleh siswa
-                                $cek_jawaban = $ujianSiswaModel
-                                    ->where('ujian_id', $soal->id_detail_ujian)
-                                    ->where('siswa', session()->get('id'))
-                                    ->get()->getRowObject();
-
                                 // Jika ada jawaban, beri class btn-success, jika tidak btn-light-primary
-                                $bg_class = (!empty($cek_jawaban->jawaban)) ? 'btn-success text-white' : 'btn-light-primary';
+                                $bg_class = (!empty($soal->jawaban_siswa)) ? 'btn-success text-white' : 'btn-light-primary';
                             ?>
                                 <div class="col-3">
                                     <button class="btn btn-icon w-100 fw-bold question-response-rows nav-btn-<?= $no ?> <?= $bg_class ?>"

@@ -35,6 +35,17 @@ class UjianSiswaModel extends Model
             ->get()->getRowObject();
     }
 
+    public function getAllBykodeUjianSiswa($kode_ujian, $id_siswa)
+    {
+        return $this
+            ->select('ujian_detail.*, ujian_siswa.jawaban as jawaban_siswa')
+            ->join('ujian_detail', 'ujian_detail.id_detail_ujian=ujian_siswa.ujian_id')
+            ->where('ujian_siswa.ujian', $kode_ujian)
+            ->where('ujian_siswa.siswa', $id_siswa)
+            ->orderBy('ujian_detail.id_detail_ujian', 'RANDOM')
+            ->get()->getResultObject();
+    }
+
     public function date_kirim_ujian($ujian, $siswa)
     {
         return $this
