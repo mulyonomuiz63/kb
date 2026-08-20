@@ -42,28 +42,16 @@ class UjianController extends BaseController
             $tugas = $this->ujianModel->getAllByKelas($r->id_kelas, $r->id_siswa);
 
             foreach ($tugas as $t) {
-                // PERUBAHAN DI SINI: Kelompokkan ujian berdasarkan nama kelas
+                // Ambil detail soal
+                $ujian_detail = $this->ujianDetailModel->getSoalAcakBerdasarkanLevel($t->kode_ujian);
+
+                // Gunakan pengecekan is_array agar super aman
+                $t->total_soal = is_array($ujian_detail) ? count($ujian_detail) : 0;
+
+                // Kelompokkan ujian berdasarkan nama kelas
                 $data['ujian'][$r->nama_kelas][] = $t;
             }
-
-            $dataUjian = $this->ujianMasterModel->where('kelas', $r->id_kelas)->groupBy('mapel')->get()->getResultObject();
-            $total = 0;
-            foreach ($dataUjian as $rr) {
-                $total++;
-            }
-
-            $totalUjian = $this->ujianModel->where('kelas', $r->id_kelas)->where('id_siswa', $r->id_siswa)
-                ->where('ujian.nilai >=', 60)
-                ->groupBy('ujian.mapel')->get()->getResultObject();
-            $totalSertifikat = 0;
-            foreach ($totalUjian as $r) {
-                $totalSertifikat++;
-            }
-
-            $data['totalSertifikat'] = $totalSertifikat;
-            $data['total'] = $total;
         }
-
         return view('siswa/ujian/list', $data);
     }
 
@@ -150,12 +138,7 @@ class UjianController extends BaseController
         if (!empty($dataUjian)) {
             $this->ujianSiswaModel->where('ujian', decrypt_url($kode_ujian))->where('siswa', $idsiswa)->delete();
             // Ambil soal acak berdasarkan level jika ada pengaturan jumlah soal
-            $ujian_detail = $this->ujianDetailModel->getSoalAcakBerdasarkanLevel(
-                decrypt_url($kode_ujian),
-                (int) $dataUjian->jml_mudah,
-                (int) $dataUjian->jml_sedang,
-                (int) $dataUjian->jml_susah
-            );
+            $ujian_detail = $this->ujianDetailModel->getSoalAcakBerdasarkanLevel(decrypt_url($kode_ujian));
             $total = count($ujian_detail);
             $totalMenit = $total * $dataUjian->waktu_per_soal; // Menggunakan waktu per soal dari database
             // Logic End Ujian berdasarkan waktu device/lokal yang sudah ditentukan di atas
@@ -357,12 +340,7 @@ class UjianController extends BaseController
             if (!empty($dataUjian)) {
                 $this->ujianSiswaModel->where('ujian', $kode_ujian)->where('siswa', $idsiswa)->delete();
                 // Ambil soal acak berdasarkan level jika ada pengaturan jumlah soal
-                $ujian_detail = $this->ujianDetailModel->getSoalAcakBerdasarkanLevel(
-                    decrypt_url($kode_ujian),
-                    (int) $dataUjian->jml_mudah,
-                    (int) $dataUjian->jml_sedang,
-                    (int) $dataUjian->jml_susah
-                );
+                $ujian_detail = $this->ujianDetailModel->getSoalAcakBerdasarkanLevel($kode_ujian);
 
                 $data_ujian_siswa = [];
 

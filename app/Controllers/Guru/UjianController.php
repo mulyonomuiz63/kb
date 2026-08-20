@@ -55,6 +55,13 @@ class UjianController extends BaseController
             ['title' => 'Data Ujian', 'url' => base_url('sw-guru/ujian')],
             ['title' => 'List Ujian', 'url' => '#'],
         ];
+        $data['sub_materi_bank'] = $this->bankSoalModel
+            ->select('sub_materi')
+            ->distinct()
+            ->where('sub_materi IS NOT NULL')
+            ->where('sub_materi !=', '')
+            ->get()
+            ->getResultObject();
         $data['guru_kelas'] = $this->guruKelasModel->getALLByGuru(session()->get('id'));
         $data['guru_mapel'] = $this->guruMapelModel->getALLByGuru(session()->get('id'));
         $data['guru'] = $this->guruModel->asObject()->find(session()->get('id'));
@@ -82,42 +89,61 @@ class UjianController extends BaseController
     public function store()
     {
         $nama_soal = $this->request->getVar('nama_soal');
+
+        // Pastikan ada soal yang diinput
         if ($nama_soal != null) {
-            // DATA UJIAN
+
             $kode_ujian = random_string('alnum', 10);
-            // DATA UJIAN
+            $db = \Config\Database::connect();
+
+            // 1. DATA UJIAN (MASTER)
             $data_ujian = [
                 'kode_ujian'     => $kode_ujian,
                 'nama_ujian'     => $this->request->getVar('nama_ujian'),
                 'guru'           => session()->get('id'),
                 'kelas'          => $this->request->getVar('kelas'),
                 'mapel'          => $this->request->getVar('mapel'),
-
-                // TAMBAHAN BARU
-                'jml_mudah'      => $this->request->getVar('jml_mudah'),
-                'jml_sedang'     => $this->request->getVar('jml_sedang'),
-                'jml_susah'      => $this->request->getVar('jml_susah'),
                 'waktu_per_soal' => $this->request->getVar('waktu_per_soal'),
-
                 'date_created'   => time(),
             ];
-            // END DATA UJIAN
             $this->ujianMasterModel->save($data_ujian);
 
-            //UJIAN UNTUK SETIAP SISWA
-
+            // 2. STATUS UJIAN
             $status_ujian = [
                 'kode_ujian' => $kode_ujian,
-                'status' => $this->request->getVar('status_ujian'),
+                'status'     => $this->request->getVar('status_ujian'),
             ];
-            // END DATA UJIAN
             $this->statusUjianModel->save($status_ujian);
-            // DATA DETAIL UJIAN PG
 
-            // $data_detail_ujian = array();
+            // 3. SIMPAN KOMPOSISI MATERI KE TABEL BARU (ujian_komposisi)
+            $nama_sub_materi = $this->request->getVar('nama_sub_materi');
+            $jml_mudah       = $this->request->getVar('jml_mudah');
+            $jml_sedang      = $this->request->getVar('jml_sedang');
+            $jml_susah       = $this->request->getVar('jml_susah');
+
+            if (!empty($nama_sub_materi)) {
+                $data_komposisi = [];
+                for ($i = 0; $i < count($nama_sub_materi); $i++) {
+                    $data_komposisi[] = [
+                        'kode_ujian'      => $kode_ujian,
+                        'nama_sub_materi' => $nama_sub_materi[$i], // Otomatis tersimpan persis sesuai ketikan/pilihan
+                        'jml_mudah'       => (int) $jml_mudah[$i],
+                        'jml_sedang'      => (int) $jml_sedang[$i],
+                        'jml_susah'       => (int) $jml_susah[$i],
+                    ];
+                }
+                $db->table('ujian_komposisi')->insertBatch($data_komposisi);
+            }
+
+            // 4. DATA DETAIL UJIAN PG (BANK SOAL & MANUAL)
+            $sub_materi_soal = $this->request->getVar('sub_materi'); // Menangkap dari dropdown select
+            $jenis_soal      = $this->request->getVar('jenis_soal');
+
             $index = 0;
             foreach ($nama_soal as $nama) {
+                // Cek apakah soal sudah ada (agar tidak dobel jika ambil dari bank)
                 $dataSoal = $this->ujianDetailModel->getBySoalKodeUjian($nama, $kode_ujian);
+
                 if ($dataSoal == null) {
                     $data_detail_ujian = [
                         'kode_ujian' => $kode_ujian,
@@ -129,19 +155,18 @@ class UjianController extends BaseController
                         'pg_5'       => 'E. ' . $this->request->getVar('pg_5')[$index],
                         'jawaban'    => $this->request->getVar('jawaban')[$index],
                         'penjelasan' => $this->request->getVar('penjelasan')[$index],
+                        'jenis_soal' => $jenis_soal[$index],
 
-                        // TAMBAHAN BARU MENANGKAP JENIS SOAL E/M/H
-                        'jenis_soal' => $this->request->getVar('jenis_soal')[$index],
+                        // Menyimpan materi ke detail ujian
+                        'sub_materi' => $sub_materi_soal[$index],
                     ];
-                    // END DATA UJIAN
+
                     $this->ujianDetailModel->save($data_detail_ujian);
                 }
-
                 $index++;
             }
-            // END DATA DETAIL UJIAN PG
 
-            return redirect()->to('sw-guru/ujian')->with('success', 'Ujian telah dibuat');
+            return redirect()->to('sw-guru/ujian')->with('success', 'Ujian USKP beserta Komposisi berhasil dibuat.');
         } else {
             return redirect()->to('sw-guru/ujian')->with('error', 'Ujian Tidak dapat di tambah karna tidak ada soal yang di ditambah');
         }
@@ -186,14 +211,12 @@ class UjianController extends BaseController
     public function getBankSoal()
     {
         $RsData = $this->bankSoalModel->get_datatables();
-        $no = $this->request->getPost('start');
         $data = array();
 
         if ($RsData->getNumRows() > 0) {
             foreach ($RsData->getResult() as $rowdata) {
 
-                // --- TAMBAHAN BARU: Logika penentuan Label/Badge Kesulitan ---
-                $badgeKesulitan = '<span class="badge badge-light-secondary">Belum diset</span>'; // Default jika kosong
+                $badgeKesulitan = '<span class="badge badge-light-secondary">Belum diset</span>';
                 if (isset($rowdata->jenis_soal)) {
                     if ($rowdata->jenis_soal == 'E') {
                         $badgeKesulitan = '<span class="badge badge-light-success">Mudah</span>';
@@ -203,17 +226,19 @@ class UjianController extends BaseController
                         $badgeKesulitan = '<span class="badge badge-light-danger">Sulit</span>';
                     }
                 }
-                // --------------------------------------------------------------
 
                 $row = array();
 
-                // Kolom 1 (Index 0): Checkbox
-                $row[] = '<input type="checkbox" data-id_bank_soal="' . $rowdata->id_bank_soal . '" id="tambahSoal" class="check-item">';
+                // Kolom 1 (Index 0): Kesulitan (Menyimpan ID bank soal via data attribute)
+                $row[] = '<div data-id_bank_soal="' . $rowdata->id_bank_soal . '" class="text-center">' . $badgeKesulitan . '</div>';
 
-                // Kolom 2 (Index 1): Kesulitan (Ini yang baru ditambahkan agar sejajar dengan thead HTML)
-                $row[] = $badgeKesulitan;
+                // Kolom 2 (Index 1): Kategori
+                $row[] = $rowdata->nama_kategori ? '<div class="fw-bold text-gray-800 mb-1">' . $rowdata->nama_kategori . '</div>' : '<div class="fw-bold text-gray-800 mb-1">Tidak ada kategori</div>';
 
-                // Kolom 3 (Index 2): Detail Isi Soal
+                // Kolom 3 (Index 2): Sub-Materi
+                $row[] = $rowdata->sub_materi ? '<div class="fw-bold text-gray-800 mb-1">' . $rowdata->sub_materi . '</div>' : '<div class="fw-bold text-gray-800 mb-1">Tidak ada sub materi</div>';
+
+                // Kolom 4 (Index 3): Nama Soal
                 $row[] = $rowdata->nama_soal;
 
                 $data[] = $row;
@@ -523,18 +548,41 @@ class UjianController extends BaseController
 
     public function editUjian($kode_ujian)
     {
+        $kode_ujian_asli = decrypt_url($kode_ujian);
+
         $data['breadcrumbs'] = [
             ['title' => 'Dashboard', 'url' => base_url('sw-guru')],
             ['title' => 'Data Ujian', 'url' => base_url('sw-guru/ujian')],
             ['title' => 'List Soal Ujian', 'url' => '#'],
         ];
-        $data['detail_ujian'] = $this->ujianDetailModel->getAllBykodeUjian(decrypt_url($kode_ujian));
-        $data['ujian'] = $this->ujianMasterModel->getBykode(decrypt_url($kode_ujian));
-        $data['status_ujian'] = $this->statusUjianModel->where('kode_ujian', decrypt_url($kode_ujian))->first();
+
+        $db = \Config\Database::connect();
+
+        $data['detail_ujian'] = $this->ujianDetailModel->getAllBykodeUjian($kode_ujian_asli);
+        $data['ujian'] = $this->ujianMasterModel->getBykode($kode_ujian_asli);
+        $data['status_ujian'] = $this->statusUjianModel->where('kode_ujian', $kode_ujian_asli)->first();
+
+        // Ambil data komposisi sub-materi yang sudah ada untuk ujian ini
+        $data['komposisi_ujian'] = $db->table('ujian_komposisi')
+            ->where('kode_ujian', $kode_ujian_asli)
+            ->get()
+            ->getResultObject();
+
+        // Ambil referensi sub-materi unik dari bank_soal untuk datalist
+        $data['sub_materi_bank'] = $db->table('bank_soal')
+            ->select('sub_materi')
+            ->distinct()
+            ->where('sub_materi IS NOT NULL')
+            ->where('sub_materi !=', '')
+            ->get()
+            ->getResultObject();
+
         $data['siswa'] = $this->siswaModel->getAllbyKelas($data['ujian']->kelas);
         $data['guru'] = $this->guruModel->asObject()->find(session()->get('id'));
         $data['guru_kelas'] = $this->gurukelasModel->getALLByGuru(session()->get('id'));
         $data['guru_mapel'] = $this->guruMapelModel->getALLByGuru(session()->get('id'));
+        $data['kategori'] = $db->table('kategori')->get()->getResultObject();
+
         return view('guru/ujian/edit_pg', $data);
     }
 
@@ -550,14 +598,13 @@ class UjianController extends BaseController
         $nama_soal = $this->request->getVar('nama_soal');
 
         if ($nama_soal != null) {
-            // 1. UPDATE DATA MASTER UJIAN
+            $db = \Config\Database::connect();
+
+            // 1. UPDATE DATA MASTER UJIAN (Tanpa jml_mudah, jml_sedang, jml_susah global)
             $data_master = [
                 'nama_ujian'     => $this->request->getVar('nama_ujian'),
                 'kelas'          => $this->request->getVar('kelas'),
                 'mapel'          => $this->request->getVar('mapel'),
-                'jml_mudah'      => $this->request->getVar('jml_mudah'),
-                'jml_sedang'     => $this->request->getVar('jml_sedang'),
-                'jml_susah'      => $this->request->getVar('jml_susah'),
                 'waktu_per_soal' => $this->request->getVar('waktu_per_soal'),
             ];
             $this->ujianMasterModel->update($ujian->id_ujian, $data_master);
@@ -570,13 +617,40 @@ class UjianController extends BaseController
                 ->set($status_ujian)
                 ->update();
 
-            // 3. UPDATE ATAU INSERT DATA DETAIL UJIAN PG
+            // 3. UPDATE KOMPOSISI MATERI (Hapus data lama, masukkan ulang data baru)
+            $db->table('ujian_komposisi')->where('kode_ujian', $kode_ujian_asli)->delete();
+
+            $nama_sub_materi = $this->request->getVar('nama_sub_materi');
+            $jml_mudah       = $this->request->getVar('jml_mudah');
+            $jml_sedang      = $this->request->getVar('jml_sedang');
+            $jml_susah       = $this->request->getVar('jml_susah');
+
+            if (!empty($nama_sub_materi)) {
+                $data_komposisi = [];
+                for ($i = 0; $i < count($nama_sub_materi); $i++) {
+                    if (!empty(trim($nama_sub_materi[$i]))) {
+                        $data_komposisi[] = [
+                            'kode_ujian'      => $kode_ujian_asli,
+                            'nama_sub_materi' => $nama_sub_materi[$i],
+                            'jml_mudah'       => (int) $jml_mudah[$i],
+                            'jml_sedang'      => (int) $jml_sedang[$i],
+                            'jml_susah'       => (int) $jml_susah[$i],
+                        ];
+                    }
+                }
+                if (!empty($data_komposisi)) {
+                    $db->table('ujian_komposisi')->insertBatch($data_komposisi);
+                }
+            }
+
+            // 4. UPDATE ATAU INSERT DATA DETAIL UJIAN PG & SUB-MATERI
             $id_detail_ujian = $this->request->getVar('id_detail_ujian');
-            $submitted_ids = [];
+            $sub_materi_soal = $this->request->getVar('sub_materi');
+            $jenis_soal      = $this->request->getVar('jenis_soal');
+            $submitted_ids   = [];
             $index = 0;
 
             foreach ($nama_soal as $nama) {
-                // Cek apakah soal ini memiliki ID (soal lama) atau tidak (soal baru ditambahkan)
                 $id_detail = isset($id_detail_ujian[$index]) ? $id_detail_ujian[$index] : null;
 
                 $data_detail_ujian = [
@@ -589,15 +663,14 @@ class UjianController extends BaseController
                     'pg_5'       => 'E. ' . $this->request->getVar('pg_5')[$index],
                     'jawaban'    => $this->request->getVar('jawaban')[$index],
                     'penjelasan' => $this->request->getVar('penjelasan')[$index],
-                    'jenis_soal' => $this->request->getVar('jenis_soal')[$index],
+                    'jenis_soal' => $jenis_soal[$index],
+                    'sub_materi' => isset($sub_materi_soal[$index]) ? $sub_materi_soal[$index] : null,
                 ];
 
                 if (!empty($id_detail)) {
-                    // Jika ada ID-nya, lakukan Update
                     $this->ujianDetailModel->update($id_detail, $data_detail_ujian);
                     $submitted_ids[] = $id_detail;
                 } else {
-                    // Jika tidak ada ID-nya (soal tambahan baru manual/bank soal), lakukan Insert
                     $this->ujianDetailModel->insert($data_detail_ujian);
                     $submitted_ids[] = $this->ujianDetailModel->getInsertID();
                 }
@@ -605,23 +678,21 @@ class UjianController extends BaseController
                 $index++;
             }
 
-            // 4. SOFT DELETE SOAL YANG DIBUANG DARI FORM
+            // 5. SOFT DELETE SOAL YANG DIBUANG DARI FORM
             $waktu_sekarang = date('Y-m-d H:i:s');
 
             if (!empty($submitted_ids)) {
-                // Beri tanda waktu pada 'deleted_at' untuk soal yang dihapus oleh guru
                 $this->ujianDetailModel->where('kode_ujian', $kode_ujian_asli)
                     ->whereNotIn('id_detail_ujian', $submitted_ids)
                     ->set(['deleted_at' => $waktu_sekarang])
                     ->update();
             } else {
-                // Jika semua soal dihapus, beri tanda 'deleted_at' ke semua soal dalam ujian ini
                 $this->ujianDetailModel->where('kode_ujian', $kode_ujian_asli)
                     ->set(['deleted_at' => $waktu_sekarang])
                     ->update();
             }
 
-            return redirect()->to('sw-guru/ujian')->with('success', 'Ujian telah berhasil diperbarui');
+            return redirect()->to('sw-guru/ujian')->with('success', 'Ujian berhasil diperbarui.');
         } else {
             return redirect()->to('sw-guru/ujian')->with('error', 'Ujian tidak dapat diperbarui karena tidak ada soal yang dimasukkan');
         }

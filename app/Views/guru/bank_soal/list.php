@@ -5,17 +5,41 @@
     <div id="kt_app_content_container" class="app-container container-xxl">
 
         <div class="card card-flush shadow-sm">
-            <div class="card-header border-0 pt-6">
-                <div class="card-title">
-                    <div class="d-flex align-items-center position-relative my-1">
+            <div class="card-header border-0 pt-6 flex-wrap gap-3">
+                <div class="card-title m-0">
+                    <!-- Filter Nama Soal / Pencarian -->
+                    <div class="d-flex align-items-center position-relative my-1 me-3">
                         <i class="ki-duotone ki-magnifier fs-3 position-absolute ms-5">
                             <span class="path1"></span>
                             <span class="path2"></span>
                         </i>
-                        <input type="text" data-kt-bank-soal-table-filter="search" class="form-control form-control-solid w-250px ps-13" placeholder="Cari Bank Soal..." />
+                        <input type="text" data-kt-bank-soal-table-filter="search" class="form-control form-control-solid w-200px ps-13" placeholder="Cari Bank Soal..." />
+                    </div>
+
+                    <!-- Filter Kategori -->
+                    <div class="my-1 me-3 w-200px">
+                        <select id="filter_kategori" class="form-select form-select-solid">
+                            <option value="">Semua Kategori</option>
+                            <?php foreach ($kategori as $kat) : ?>
+                                <option value="<?= $kat->nama_kategori; ?>"><?= $kat->nama_kategori; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <!-- Filter Sub-Materi -->
+                    <div class="my-1 w-200px">
+                        <select id="filter_sub_materi" class="form-select form-select-solid">
+                            <option value="">Semua Sub-Materi</option>
+                            <?php foreach ($sub_materi_list as $sm) : ?>
+                                <?php if(!empty($sm->sub_materi)): ?>
+                                    <option value="<?= $sm->sub_materi; ?>"><?= $sm->sub_materi; ?></option>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
                 </div>
-                <div class="card-toolbar">
+
+                <div class="card-toolbar m-0">
                     <div class="d-flex justify-content-end gap-3" data-kt-bank-soal-table-toolbar="base">
                         <a href="<?= base_url('sw-guru/kategori'); ?>" class="btn btn-light-primary fw-bold">
                             <i class="ki-duotone ki-plus-square fs-2">
@@ -25,14 +49,14 @@
                             </i>
                             Kategori
                         </a>
-                        <button type="button" class="btn btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#tambah_bank_soal">
+                        <a href="<?= base_url('sw-guru/bank-soal/create'); ?>" class="btn btn-primary me-3">
                             <i class="ki-duotone ki-add-item fs-2">
                                 <span class="path1"></span>
                                 <span class="path2"></span>
                                 <span class="path3"></span>
                             </i>
                             Tambah Soal
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -42,18 +66,43 @@
                     <table id="datatables-list" class="table align-middle table-row-dashed fs-6 gy-5">
                         <thead>
                             <tr class="text-start text-muted fw-bold fs-7 text-uppercase gs-0">
-                                <th class="min-w-125px">Nama Soal</th>
+                                <th class="min-w-200px">Nama Soal & Kategori</th>
+                                <th class="min-w-125px text-center">Sub-Materi</th>
+                                <th class="min-w-100px text-center">Level Soal</th>
                                 <th class="text-end min-w-100px">Opsi</th>
                             </tr>
                         </thead>
                         <tbody class="text-gray-600 fw-semibold">
                             <?php foreach ($soal as $u) : ?>
+                                <?php 
+                                    // Pemetaan Badge Level Kesulitan
+                                    $badgeClass = 'bg-secondary';
+                                    $badgeText = '-';
+                                    if(isset($u->jenis_soal)) {
+                                        if($u->jenis_soal == 'E'){ 
+                                            $badgeClass = 'badge-light-success text-success'; 
+                                            $badgeText = 'Mudah';
+                                        } elseif($u->jenis_soal == 'M'){ 
+                                            $badgeClass = 'badge-light-warning text-warning'; 
+                                            $badgeText = 'Sedang';
+                                        } elseif($u->jenis_soal == 'H'){ 
+                                            $badgeClass = 'badge-light-danger text-danger'; 
+                                            $badgeText = 'Sulit';
+                                        }
+                                    }
+                                ?>
                                 <tr>
                                     <td>
                                         <div class="d-flex flex-column">
                                             <span class="text-gray-800 text-hover-primary mb-1 fw-bold"><?= $u->nama_soal; ?></span>
-                                            <span class="text-muted fs-7">Kategori: <?= $u->nama_kategori; ?></span>
+                                            <span class="text-muted fs-7">Kategori: <?= !empty($u->nama_kategori) ? $u->nama_kategori : '-'; ?></span>
                                         </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="text-gray-700 fs-7"><?= !empty($u->sub_materi) ? $u->sub_materi : '-'; ?></span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge <?= $badgeClass ?> fw-bold fs-7"><?= $badgeText; ?></span>
                                     </td>
                                     <td class="text-end">
                                         <a href="#" class="btn btn-light btn-active-light-primary btn-flex btn-center btn-sm" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
@@ -78,81 +127,39 @@
         </div>
     </div>
 </div>
-<div class="modal fade" id="tambah_bank_soal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered mw-400px">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="fw-bold">Tambah Soal</h2>
-                <div class="btn btn-icon btn-sm btn-active-icon-primary" data-bs-dismiss="modal">
-                    <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i>
-                </div>
-            </div>
-            <div class="modal-body scroll-y mx-5 my-7 text-center">
-                <a href="<?= base_url('sw-guru/bank-soal/create'); ?>" class="btn btn-primary me-3">Input Manual</a>
-                <a href="javascript:void(0);" class="btn btn-light-primary" data-bs-toggle="modal" data-bs-target="#excel_ujian">Import Excel</a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="excel_ujian" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered mw-650px">
-        <div class="modal-content">
-            <form action="<?= base_url('guru/excel_bank_soal_pg'); ?>" method="POST" enctype="multipart/form-data">
-                <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>" />
-                <div class="modal-header">
-                    <h2 class="fw-bold">Import Soal via Excel</h2>
-                    <div class="btn btn-icon btn-sm btn-active-icon-primary" data-bs-dismiss="modal">
-                        <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i>
-                    </div>
-                </div>
-                <div class="modal-body scroll-y mx-5 my-7">
-                    <div class="row g-9">
-                        <div class="col-md-6 fv-row">
-                            <label class="required fs-6 fw-semibold mb-2">File Excel</label>
-                            <input type="file" class="form-control form-control-solid" name="excel" accept=".xls, .xlsx" required>
-                        </div>
-                        <div class="col-md-6 fv-row d-flex flex-column justify-content-end">
-                            <label class="fs-6 fw-semibold mb-2">Template</label>
-                            <a href="<?= base_url('download/excel_soal_pg'); ?>" class="btn btn-success w-100">
-                                <i class="ki-duotone ki-file-down fs-2"><span class="path1"></span><span class="path2"></span></i>
-                                Download
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer flex-center">
-                    <button type="reset" class="btn btn-light me-3" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
 <?= $this->endSection(); ?>
 
 <?= $this->section("scripts"); ?>
 <script>
     $(document).ready(function() {
-        // 1. Deklarasikan variabel di dalam scope yang bisa diakses
         var table = $('#datatables-list').DataTable({
             "ordering": false,
             "lengthChange": false,
             "pageLength": 10,
             "info": false,
-            "dom": "rtp", // Menyembunyikan search bawaan agar tidak double
+            "dom": "rtp",
             "drawCallback": function(settings) {
-                // Re-init KTMenu agar dropdown di dalam baris tabel tetap berfungsi
                 if (typeof KTMenu !== 'undefined') {
                     KTMenu.createInstances();
                 }
             }
         });
 
-        // 2. Pindahkan event listener ke dalam ready() agar variabel 'table' terbaca
+        // Search Nama Soal
         $('[data-kt-bank-soal-table-filter="search"]').on('keyup', function() {
             table.search(this.value).draw();
+        });
+
+        // Filter Kategori (Kolom 0)
+        $('#filter_kategori').on('change', function() {
+            var val = $(this).val();
+            table.column(0).search(val).draw();
+        });
+
+        // Filter Sub-Materi (Kolom 1)
+        $('#filter_sub_materi').on('change', function() {
+            var val = $(this).val();
+            table.column(1).search(val ? '^' + val + '$' : '', true, false).draw();
         });
     });
 </script>

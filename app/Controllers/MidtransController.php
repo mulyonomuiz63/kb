@@ -241,9 +241,6 @@ class MidtransController extends BaseController
                         'guru'         => $rowsp->guru,
                         'kelas'        => $rowsp->kelas,
                         'mapel'        => $rowsp->mapel,
-                        'jml_mudah'    => $rowsp->jml_mudah,
-                        'jml_sedang'   => $rowsp->jml_sedang,
-                        'jml_susah'    => $rowsp->jml_susah,
                         'waktu_per_soal' => $rowsp->waktu_per_soal,
                         'date_created' => time(),
                     ];

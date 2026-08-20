@@ -17,14 +17,29 @@
                 <div class="card-body pt-0">
                     <div id="soal_pg">
                         <div class="isi_soal">
-                            <div class="fv-row mb-7">
-                                <label class="required fs-6 fw-semibold mb-2">Pilihan Kategori</label>
-                                <div class="input-group input-group-solid">
-                                    <select name="id_kategori" class="form-select form-select-solid" data-control="select2" required>
-                                        <option value="">Pilih</option>
-                                        <?php foreach ($kategori as $rows) : ?>
-                                            <option value="<?= $rows->id_kategori; ?>" <?= $rows->id_kategori == $soal->id_kategori ? 'selected' : ''; ?>><?= $rows->nama_kategori; ?></option>
-                                        <?php endforeach; ?>
+                            <div class="row g-9 mb-7">
+                                <div class="col-md-6">
+                                    <label class="required fs-6 fw-semibold mb-2">Pilihan Kategori</label>
+                                    <div class="input-group input-group-solid">
+                                        <select name="id_kategori" class="form-select form-select-solid" required>
+                                            <option value="">Pilih</option>
+                                            <?php foreach ($kategori as $rows) : ?>
+                                                <option value="<?= $rows->id_kategori; ?>" <?= $rows->id_kategori == $soal->id_kategori ? 'selected' : ''; ?>><?= $rows->nama_kategori; ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="fs-6 fw-semibold mb-2">Sub-Materi</label>
+                                    <input type="text" name="sub_materi" value="<?= isset($soal->sub_materi) ? $soal->sub_materi : ''; ?>" class="form-control form-control-solid" placeholder="Contoh: PPh 21" autocomplete="off">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="required fs-6 fw-semibold mb-2">Level Soal</label>
+                                    <select name="jenis_soal" class="form-select form-select-solid" required>
+                                        <option value="">Pilih Level</option>
+                                        <option value="E" <?= (isset($soal->jenis_soal) && $soal->jenis_soal == 'E') ? 'selected' : ''; ?>>Mudah (Easy)</option>
+                                        <option value="M" <?= (isset($soal->jenis_soal) && $soal->jenis_soal == 'M') ? 'selected' : ''; ?>>Sedang (Medium)</option>
+                                        <option value="H" <?= (isset($soal->jenis_soal) && $soal->jenis_soal == 'H') ? 'selected' : ''; ?>>Sulit (Hard)</option>
                                     </select>
                                 </div>
                             </div>
@@ -35,23 +50,23 @@
                             </div>
 
                             <div class="row g-9 mb-7">
-                                <?php 
-                                    $options = [
-                                        '1' => ['label' => 'A', 'val' => $soal->pg_1],
-                                        '2' => ['label' => 'B', 'val' => $soal->pg_2],
-                                        '3' => ['label' => 'C', 'val' => $soal->pg_3],
-                                        '4' => ['label' => 'D', 'val' => $soal->pg_4],
-                                        '5' => ['label' => 'E', 'val' => $soal->pg_5],
-                                    ];
-                                    foreach($options as $key => $opt): 
+                                <?php
+                                $options = [
+                                    '1' => ['label' => 'A', 'val' => substr($soal->pg_1, 3)],
+                                    '2' => ['label' => 'B', 'val' => substr($soal->pg_2, 3)],
+                                    '3' => ['label' => 'C', 'val' => substr($soal->pg_3, 3)],
+                                    '4' => ['label' => 'D', 'val' => substr($soal->pg_4, 3)],
+                                    '5' => ['label' => 'E', 'val' => substr($soal->pg_5, 3)],
+                                ];
+                                foreach ($options as $key => $opt):
                                 ?>
-                                <div class="col-md-4">
-                                    <label class="fs-6 fw-semibold mb-2">Pilihan <?= $opt['label'] ?></label>
-                                    <div class="input-group input-group-solid">
-                                        <span class="input-group-text"><?= $opt['label'] ?></span>
-                                        <input type="text" name="pg_<?= $key ?>" value="<?= $opt['val']; ?>" class="form-control form-control-solid" autocomplete="off" <?= ($opt['label'] == 'A') ? 'required' : '' ?>>
+                                    <div class="col-md-4">
+                                        <label class="fs-6 fw-semibold mb-2">Pilihan <?= $opt['label'] ?></label>
+                                        <div class="input-group input-group-solid">
+                                            <span class="input-group-text"><?= $opt['label'] ?></span>
+                                            <input type="text" name="pg_<?= $key ?>" value="<?= $opt['val']; ?>" class="form-control form-control-solid" autocomplete="off" <?= ($opt['label'] == 'A') ? 'required' : '' ?>>
+                                        </div>
                                     </div>
-                                </div>
                                 <?php endforeach; ?>
 
                                 <div class="col-md-4">
@@ -120,7 +135,6 @@
 
         initSummernote();
 
-        // Keep original interval logic for checking summernote instances
         setInterval(() => {
             $('.summernote').each(function() {
                 if ($(this).summernote('isEmpty') && !$(this).next().hasClass('note-editor')) {
@@ -134,8 +148,11 @@
             data.append("image", image);
             $.ajax({
                 url: "<?= base_url('sw-guru/bank-soal/upload-summernote') ?>",
-                cache: false, contentType: false, processData: false,
-                data: data, type: "POST",
+                cache: false,
+                contentType: false,
+                processData: false,
+                data: data,
+                type: "POST",
                 success: function(url) {
                     $(which_sum).summernote("insertImage", url);
                 }
@@ -144,7 +161,9 @@
 
         function deleteImage(src) {
             $.ajax({
-                data: { src: src },
+                data: {
+                    src: src
+                },
                 type: "POST",
                 url: "<?= base_url('sw-guru/bank-soal/delete-image') ?>",
                 cache: false

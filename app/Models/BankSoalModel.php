@@ -8,7 +8,7 @@ class BankSoalModel extends Model
 {
     protected $table            = 'bank_soal';
     protected $primaryKey       = 'id_bank_soal';
-    protected $allowedFields    = ['id_kategori', 'nama_soal', 'pg_1', 'pg_2', 'pg_3', 'pg_4', 'pg_5', 'jawaban', 'penjelasan'];
+    protected $allowedFields    = ['id_kategori', 'sub_materi', 'nama_soal', 'pg_1', 'pg_2', 'pg_3', 'pg_4', 'pg_5', 'jawaban', 'penjelasan','jenis_soal'];
 
 
     var $column_order = array(null); //set nama field yang bisa diurutkan
@@ -19,6 +19,7 @@ class BankSoalModel extends Model
     {
         return $this
             ->join('kategori', 'kategori.id_kategori=bank_soal.id_kategori')
+            ->OrderBy('bank_soal.id_bank_soal', 'DESC')
             ->get()->getResultObject();
     }
     public function getById($id)
@@ -43,14 +44,18 @@ class BankSoalModel extends Model
 
     private function _get_datatables_query()
     {
-        $this->builder = $this->db->table('bank_soal');
+        $this->builder = $this->db->table('bank_soal')
+        ->join('kategori', 'kategori.id_kategori=bank_soal.id_kategori');
         $i = 0;
 
         if ($_POST['nama_soal'] != "") {
-            $this->builder->like('nama_soal', $_POST['nama_soal']);
+            $this->builder->like('bank_soal.nama_soal', $_POST['nama_soal']);
         }
         if ($_POST['id_kategori'] != "") {
-            $this->builder->like('id_kategori', $_POST['id_kategori']);
+            $this->builder->like('bank_soal.id_kategori', $_POST['id_kategori']);
+        }
+        if ($_POST['sub_materi'] != "") {
+            $this->builder->like('bank_soal.sub_materi', $_POST['sub_materi']);
         }
         foreach ($this->column_search as $item) {
             if (!empty($_POST['search']['value'])) {

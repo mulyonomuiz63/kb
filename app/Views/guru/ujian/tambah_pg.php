@@ -1,6 +1,17 @@
 <?= $this->extend('template/app'); ?>
 <?= $this->section('content'); ?>
 
+<!-- DATALIST: Daftar memori materi dari Bank Soal untuk Komposisi -->
+<datalist id="materi_list">
+    <?php if (!empty($sub_materi_bank)): ?>
+        <?php foreach ($sub_materi_bank as $sm) : ?>
+            <?php if (!empty($sm->sub_materi)): ?>
+                <option value="<?= htmlspecialchars($sm->sub_materi); ?>">
+                <?php endif; ?>
+            <?php endforeach; ?>
+        <?php endif; ?>
+</datalist>
+
 <div id="kt_app_content" class="app-content flex-column-fluid">
     <div id="kt_app_content_container" class="app-container container-xxl">
 
@@ -14,7 +25,7 @@
             <div class="card card-flush shadow-sm mb-5">
                 <div class="card-header border-0 pt-6">
                     <div class="card-title">
-                        <h3 class="card-label fw-bold text-dark">Ujian Pilihan Ganda</h3>
+                        <h3 class="card-label fw-bold text-dark">Form Pembuatan Ujian (Brevet / USKP)</h3>
                     </div>
                     <div class="card-toolbar gap-3">
                         <a href="javascript:void(0);" class="btn btn-light-primary btn-sm" data-bs-toggle="modal" data-bs-target="#bank_soal">
@@ -23,6 +34,7 @@
                     </div>
                 </div>
                 <div class="card-body">
+                    <!-- SETTING UTAMA UJIAN -->
                     <div class="row g-9">
                         <div class="col-md-3">
                             <label class="required fs-6 fw-semibold mb-2">Nama Ujian</label>
@@ -53,23 +65,52 @@
                         </div>
                     </div>
 
-                    <!-- TAMBAHAN BARU: Baris untuk setting jumlah soal dan waktu -->
                     <div class="row g-9 mt-5">
-                        <div class="col-md-3">
-                            <label class="required fs-6 fw-semibold mb-2">Jml Soal Mudah</label>
-                            <input type="number" name="jml_mudah" class="form-control form-control-solid" required min="0" value="0">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="required fs-6 fw-semibold mb-2">Jml Soal Sedang</label>
-                            <input type="number" name="jml_sedang" class="form-control form-control-solid" required min="0" value="0">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="required fs-6 fw-semibold mb-2">Jml Soal Susah</label>
-                            <input type="number" name="jml_susah" class="form-control form-control-solid" required min="0" value="0">
-                        </div>
                         <div class="col-md-3">
                             <label class="required fs-6 fw-semibold mb-2">Waktu / Soal (Menit)</label>
                             <input type="number" name="waktu_per_soal" class="form-control form-control-solid" required min="1" value="2">
+                        </div>
+                    </div>
+
+                    <div class="separator separator-dashed my-8"></div>
+
+                    <!-- KOMPOSISI MATERI USKP (Dilewati jika ujian tipe brevet biasa dengan mengosongkan komposisi) -->
+                    <div class="d-flex justify-content-between align-items-center mb-5">
+                        <div>
+                            <h4 class="fw-bold text-dark m-0">Komposisi Sub-Materi (Khusus USKP)</h4>
+                            <small class="text-muted">Kosongkan/abaikan bagian ini jika ini adalah Ujian Brevet biasa.</small>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-success" id="tambah-komposisi">
+                            <i class="ki-duotone ki-plus fs-2"></i> Tambah Materi
+                        </button>
+                    </div>
+
+                    <div class="bg-light p-5 rounded">
+                        <div class="row g-3 mb-2 fw-bold text-muted">
+                            <div class="col-md-4">Nama Sub-Materi</div>
+                            <div class="col-md-2">Jml Mudah</div>
+                            <div class="col-md-2">Jml Sedang</div>
+                            <div class="col-md-2">Jml Susah</div>
+                            <div class="col-md-2">Aksi</div>
+                        </div>
+                        <div id="container-komposisi">
+                            <div class="row g-3 mb-3 row-komposisi align-items-center">
+                                <div class="col-md-4">
+                                    <input type="text" name="nama_sub_materi[]" list="materi_list" class="form-control form-control-solid border-primary" placeholder="Pilih/Ketik Materi..." autocomplete="off">
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="number" name="jml_mudah[]" class="form-control form-control-solid" min="0" value="0">
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="number" name="jml_sedang[]" class="form-control form-control-solid" min="0" value="0">
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="number" name="jml_susah[]" class="form-control form-control-solid" min="0" value="0">
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="button" class="btn btn-icon btn-light-danger hapus-komposisi" disabled><i class="ki-duotone ki-trash fs-2"></i></button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -87,7 +128,7 @@
 
                     <div class="d-flex justify-content-end">
                         <button type="submit" class="btn btn-primary px-10">
-                            <i class="ki-duotone ki-save-2 fs-2"><span class="path1"></span><span class="path2"></span></i> Submit Ujian
+                            <i class="ki-duotone ki-save-2 fs-2"><span class="path1"></span><span class="path2"></span></i> Simpan Ujian
                         </button>
                     </div>
                 </div>
@@ -96,6 +137,7 @@
     </div>
 </div>
 
+<!-- MODAL IMPORT EXCEL -->
 <div class="modal fade" id="excel_ujian" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <form action="<?= base_url('sw-guru/ujian/import-soal-excel'); ?>" method="POST" enctype="multipart/form-data" class="w-100">
@@ -154,6 +196,7 @@
     </div>
 </div>
 
+<!-- MODAL BANK SOAL (DENGAN FILTER SUB-MATERI) -->
 <div class="modal fade" id="bank_soal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content">
@@ -165,6 +208,7 @@
             </div>
             <div class="modal-body">
                 <div class="row g-9 mb-8">
+                    <!-- Filter Kategori -->
                     <div class="col-md-4">
                         <label class="fs-6 fw-semibold mb-2">Filter Kategori</label>
                         <select class="form-select form-select-solid" id="id_kategori">
@@ -174,24 +218,37 @@
                             <?php endforeach; ?>
                         </select>
                     </div>
-                    <div class="col-md-8">
-                        <label class="fs-6 fw-semibold mb-2">Cari Nama Soal</label>
+
+                    <!-- Filter Sub-Materi Baru -->
+                    <div class="col-md-4">
+                        <label class="fs-6 fw-semibold mb-2">Filter Sub-Materi</label>
+                        <select class="form-select form-select-solid" id="filter_sub_materi">
+                            <option value="">Semua Sub-Materi</option>
+                            <?php foreach ($sub_materi_bank as $sm) : ?>
+                                <?php if (!empty($sm->sub_materi)) : ?>
+                                    <option value="<?= $sm->sub_materi; ?>"><?= $sm->sub_materi; ?></option>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <!-- Pencarian Kata Kunci -->
+                    <div class="col-md-4">
+                        <label class="fs-6 fw-semibold mb-2">Cari Soal</label>
                         <div class="position-relative d-flex align-items-center">
                             <i class="ki-duotone ki-magnifier fs-3 position-absolute ms-4"></i>
-                            <input type="text" id="nama_soal" class="form-control form-control-solid ps-12" placeholder="Ketik kata kunci soal...">
+                            <input type="text" id="nama_soal" class="form-control form-control-solid ps-12" placeholder="Kata kunci...">
                         </div>
                     </div>
                 </div>
 
                 <div class="table-responsive">
-                    <table class="table align-middle table-row-dashed fs-6 gy-5 shadow-sm" id="table">
+                    <table class="table align-middle table-row-dashed fs-6 gy-5 shadow-sm cursor-pointer" id="table">
                         <thead>
                             <tr class="text-start text-muted fw-bold fs-7 text-uppercase gs-0 bg-light">
-                                <th class="w-50px px-3 text-center">Pilih</th>
-
-                                <!-- TAMBAHAN BARU: Kolom Tingkat Kesulitan -->
-                                <th class="min-w-125px text-center">Kesulitan</th>
-
+                                <th class="min-w-100px text-center">Kesulitan</th>
+                                <th class="min-w-150px">Kategori</th>
+                                <th class="min-w-150px">Sub-Materi</th>
                                 <th class="min-w-200px">Detail Isi Soal</th>
                             </tr>
                         </thead>
@@ -219,7 +276,6 @@
     }
 
     $(document).ready(function() {
-        // DataTable Bank Soal
         var t = $('#table').DataTable({
             "select": true,
             "processing": true,
@@ -233,33 +289,36 @@
                 "url": "<?php echo site_url('sw-guru/ujian/get-bank-soal') ?>",
                 "type": "POST",
                 "data": function(d) {
-                    d[csrfName] = csrfHash;
+                    d[csrfName] = $('input[name="' + csrfName + '"]').val();
                     d.nama_soal = $('#nama_soal').val();
                     d.id_kategori = $('#id_kategori').val();
+                    d.sub_materi = $('#filter_sub_materi').val(); // Mengirim filter sub-materi ke server
                 },
                 "dataSrc": function(json) {
                     if (json.token) updateCsrfToken(json.token);
                     return json.data;
                 },
-                "error": function(xhr) {
-                    if (xhr.status === 403) {
-                        location.reload();
-                    }
-                }
             },
-            "columnDefs": [
-                {
-                    "targets": [0], // Kolom Checkbox (Pilih)
+            "columnDefs": [{
+                    "targets": [0],
                     "orderable": false,
                     "className": 'text-center'
                 },
                 {
-                    "targets": [1], // TAMBAHAN BARU: Kolom Tingkat Kesulitan
+                    "targets": [1],
                     "orderable": false,
                     "className": 'text-center'
                 },
                 {
-                    "targets": [2], // Kolom Detail Isi Soal (Bergeser ke index 2)
+                    "targets": [2],
+                    "orderable": false
+                },
+                {
+                    "targets": [3],
+                    "orderable": false
+                },
+                {
+                    "targets": [4],
                     "orderable": false
                 }
             ]
@@ -271,8 +330,10 @@
         $('#id_kategori').on('change', function() {
             t.draw();
         });
+        $('#filter_sub_materi').on('change', function() {
+            t.draw();
+        }); // Trigger filter baru
 
-        // Summernote Global Initializer
         function initSummernote() {
             $('.summernote').each(function() {
                 if (!$(this).next().hasClass('note-editor')) {
@@ -299,7 +360,6 @@
                 }
             });
         }
-
         setInterval(initSummernote, 2000);
 
         function uploadImage(image, which_sum) {
@@ -338,23 +398,76 @@
 
         var no_soal = 1;
 
-        // TAMBAH SOAL MANUAL
+        // --- TAMBAH KOMPOSISI MATERI ---
+        $('#tambah-komposisi').click(function() {
+            var row = `
+            <div class="row g-3 mb-3 row-komposisi align-items-center">
+                <div class="col-md-4">
+                    <input type="text" name="nama_sub_materi[]" list="materi_list" class="form-control form-control-solid border-primary" placeholder="Pilih/Ketik Materi..." autocomplete="off">
+                </div>
+                <div class="col-md-2">
+                    <input type="number" name="jml_mudah[]" class="form-control form-control-solid" min="0" value="0">
+                </div>
+                <div class="col-md-2">
+                    <input type="number" name="jml_sedang[]" class="form-control form-control-solid" min="0" value="0">
+                </div>
+                <div class="col-md-2">
+                    <input type="number" name="jml_susah[]" class="form-control form-control-solid" min="0" value="0">
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-icon btn-light-danger hapus-komposisi"><i class="ki-duotone ki-trash fs-2"></i></button>
+                </div>
+            </div>`;
+            $('#container-komposisi').append(row);
+        });
+
+        $('#container-komposisi').on('click', '.hapus-komposisi', function() {
+            $(this).closest('.row-komposisi').remove();
+        });
+
+        function buildSubMateriOptions(selectedMateri = '') {
+            let options = '<option value="">Pilih Sub-Materi</option>';
+            let hasMateri = false;
+
+            $('input[name="nama_sub_materi[]"]').each(function() {
+                let val = $(this).val().trim();
+                if (val !== '') {
+                    let isSelected = (selectedMateri && val.toLowerCase() === selectedMateri.toLowerCase()) ? 'selected' : '';
+                    options += `<option value="${val}" ${isSelected}>${val}</option>`;
+                    hasMateri = true;
+                }
+            });
+            return {
+                options: options,
+                isValid: hasMateri
+            };
+        }
+
+        // --- TAMBAH SOAL MANUAL ---
         $('.tambah-pg').click(function() {
+            let materiData = buildSubMateriOptions();
+            let selectHtml = '';
+
+            if (materiData.isValid) {
+                selectHtml = `<select name="sub_materi[]" class="form-select form-select-sm form-select-solid w-200px">${materiData.options}</select>`;
+            } else {
+                selectHtml = `<input type="text" name="sub_materi[]" class="form-control form-control-sm form-control-solid w-200px" placeholder="Materi Umum">`;
+            }
+
             const pg = `
             <div class="isi_soal mb-10 p-5 border rounded bg-light-neutral">
                 <div class="d-flex justify-content-between align-items-center mb-5">
-                    <h4 class="fw-bold">Soal No. ${no_soal}</h4>
-                    
-                    <!-- TAMBAHAN BARU: Dropdown Jenis Soal & Hapus Tombol dibuat sebaris -->
+                    <h4 class="fw-bold">Soal No. <span class="nomor-soal">${no_soal}</span></h4>
                     <div class="d-flex align-items-center gap-3">
-                        <select name="jenis_soal[]" class="form-select form-select-sm form-select-solid" required>
+                        ${selectHtml}
+                        <select name="jenis_soal[]" class="form-select form-select-sm form-select-solid w-150px" required>
                             <option value="">Pilih Kesulitan</option>
                             <option value="E">Mudah (Easy)</option>
                             <option value="M">Sedang (Medium)</option>
                             <option value="H">Sulit (Hard)</option>
                         </select>
                         <button type="button" class="btn btn-sm btn-icon btn-light-danger hapus-pg">
-                            <i class="ki-duotone ki-trash fs-2"><span class="path1"></span><span class="path2"></span></i>
+                            <i class="ki-duotone ki-trash fs-2"></i>
                         </button>
                     </div>
                 </div>
@@ -384,77 +497,118 @@
             </div>`;
             $('#soal_pg').append(pg);
             no_soal++;
+            initSummernote();
         });
 
-        // TAMBAH DARI BANK SOAL
-        $('#table').on('click', 'input#tambahSoal', function() {
-            if ($(this).is(':checked')) {
-                var id_bank_soal = $(this).data('id_bank_soal');
+        // --- TAMBAH DARI BANK SOAL (KLIK BARIS TABEL) ---
+        $('#table tbody').on('click', 'tr', function() {
+            var row = $(this);
+            // Asumsi ID bank soal disimpan di data-attribute baris atau pada elemen di dalam baris
+            // Pastikan di Controller getBankSoal, anda memasukkan data-id_bank_soal ke elemen tr atau div di kolom
+            var id_bank_soal = row.find('[data-id_bank_soal]').data('id_bank_soal');
 
-                // Ambil token CSRF terbaru langsung dari input form agar tidak kedaluwarsa
-                var currentHash = $('input[name="' + csrfName + '"]').val();
+            if (!id_bank_soal) return;
 
-                let postData = {
-                    id_bank_soal: id_bank_soal
-                };
-                postData[csrfName] = currentHash;
+            // Berikan efek visual baris terpilih
+            row.addClass('bg-light-primary');
 
-                $.ajax({
-                    type: 'POST',
-                    url: "<?= base_url('sw-guru/ujian/tambah-bank-soal') ?>",
-                    data: postData,
-                    dataType: 'JSON',
-                    success: function(data) {
-                        if (data.token) updateCsrfToken(data.token);
-                        var pg = `
-                        <div class="isi_soal mb-10 p-5 border rounded bg-light-primary">
-                            <div class="d-flex justify-content-between align-items-center mb-5">
-                                <h4 class="fw-bold text-primary">Soal No. ${no_soal} (Bank Soal)</h4>
-                                
-                                <!-- TAMBAHAN BARU: Dropdown Jenis Soal & Hapus Tombol dibuat sebaris -->
-                                <div class="d-flex align-items-center gap-3">
-                                    <select name="jenis_soal[]" class="form-select form-select-sm form-select-solid" required>
-                                        <option value="E" ${data.jenis_soal === 'E' ? 'selected' : ''}>Mudah (Easy)</option>
-                                        <option value="M" ${data.jenis_soal === 'M' ? 'selected' : ''}>Sedang (Medium)</option>
-                                        <option value="H" ${data.jenis_soal === 'H' ? 'selected' : ''}>Sulit (Hard)</option>
-                                    </select>
-                                    <button type="button" class="btn btn-sm btn-icon btn-light-danger hapus-pg">
-                                        <i class="ki-duotone ki-trash fs-2"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <textarea name="nama_soal[]" class="summernote">${data.nama_soal}</textarea>
-                            <div class="row g-5 mt-2">
-                                ${[1,2,3,4,5].map(i => `
-                                    <div class="col-md-4">
-                                        <div class="input-group input-group-solid">
-                                            <span class="input-group-text">${String.fromCharCode(64+i)}</span>
-                                            <input type="text" name="pg_${i}[]" value="${data['pg_'+i]}" class="form-control">
-                                        </div>
-                                    </div>
-                                `).join('')}
-                                <div class="col-md-4">
-                                    <div class="input-group input-group-solid border border-primary">
-                                        <span class="input-group-text bg-primary text-white">Jawaban</span>
-                                        <input type="text" name="jawaban[]" value="${data.jawaban}" class="form-control" required>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="mt-5">
-                                <label class="fw-bold mb-2">Penjelasan</label>
-                                <textarea name="penjelasan[]" class="summernote">${data.penjelasan}</textarea>
-                            </div>
-                        </div>`;
-                        $('#soal_pg').append(pg);
-                        no_soal++;
+            var currentHash = $('input[name="' + csrfName + '"]').val();
+
+            $.ajax({
+                type: 'POST',
+                url: "<?= base_url('sw-guru/ujian/tambah-bank-soal') ?>",
+                data: {
+                    id_bank_soal: id_bank_soal,
+                    [csrfName]: currentHash
+                },
+                dataType: 'JSON',
+                success: function(data) {
+                    if (data.token) updateCsrfToken(data.token);
+
+                    // Toast Notifikasi
+                    Swal.fire({
+                        text: "Soal berhasil ditambahkan ke ujian!",
+                        icon: "success",
+                        toast: true,
+                        position: "top-end",
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true
+                    });
+
+                    // Logika badge kesulitan
+                    let bClass = 'bg-secondary';
+                    let bText = 'Belum Diset';
+                    if (data.jenis_soal === 'E') {
+                        bClass = 'badge-light-success text-success';
+                        bText = 'Mudah';
+                    } else if (data.jenis_soal === 'M') {
+                        bClass = 'badge-light-warning text-warning';
+                        bText = 'Sedang';
+                    } else if (data.jenis_soal === 'H') {
+                        bClass = 'badge-light-danger text-danger';
+                        bText = 'Sulit';
                     }
-                });
-            }
+
+                    let materiData = buildSubMateriOptions(data.sub_materi);
+                    let selectHtml = materiData.isValid ?
+                        `<select name="sub_materi[]" class="form-select form-select-sm form-select-solid w-200px">${materiData.options}</select>` :
+                        `<input type="text" name="sub_materi[]" value="${data.sub_materi || ''}" class="form-control form-control-sm form-control-solid w-200px" placeholder="Materi Umum">`;
+
+                    var pg = `
+            <div class="isi_soal mb-10 p-5 border rounded bg-light-primary">
+                <input type="hidden" name="id_detail_ujian[]" value="${data.id_bank_soal}">
+                <div class="d-flex justify-content-between align-items-center mb-5">
+                    <h4 class="fw-bold text-primary">Soal No. <span class="nomor-soal">${no_soal}</span> (Bank Soal)</h4>
+                    <div class="d-flex align-items-center gap-3">
+                        ${selectHtml}
+                        <select name="jenis_soal[]" class="form-select form-select-sm form-select-solid w-150px" required>
+                            <option value="E" ${data.jenis_soal === 'E' ? 'selected' : ''}>Mudah</option>
+                            <option value="M" ${data.jenis_soal === 'M' ? 'selected' : ''}>Sedang</option>
+                            <option value="H" ${data.jenis_soal === 'H' ? 'selected' : ''}>Sulit</option>
+                        </select>
+                        <button type="button" class="btn btn-sm btn-icon btn-light-danger hapus-pg">
+                            <i class="ki-duotone ki-trash fs-2"></i>
+                        </button>
+                    </div>
+                </div>
+                <textarea name="nama_soal[]" class="summernote" required>${data.nama_soal}</textarea>
+                <div class="row g-5 mt-2">
+                    ${[1,2,3,4,5].map(i => `
+                        <div class="col-md-4">
+                            <div class="input-group input-group-solid">
+                                <span class="input-group-text">${String.fromCharCode(64+i)}</span>
+                                <input type="text" name="pg_${i}[]" value="${data['pg_'+i] ? data['pg_'+i].substring(3) : ''}" class="form-control">
+                            </div>
+                        </div>
+                    `).join('')}
+                    <div class="col-md-4">
+                        <div class="input-group input-group-solid border border-primary">
+                            <span class="input-group-text bg-primary text-white">Jawaban</span>
+                            <input type="text" name="jawaban[]" value="${data.jawaban}" class="form-control" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-5">
+                    <label class="fw-bold mb-2">Penjelasan</label>
+                    <textarea name="penjelasan[]" class="summernote">${data.penjelasan}</textarea>
+                </div>
+            </div>`;
+
+                    $('#soal_pg').append(pg);
+                    no_soal++;
+                    initSummernote();
+                }
+            });
         });
 
         $('#soal_pg').on('click', '.hapus-pg', function() {
             $(this).closest('.isi_soal').remove();
-            no_soal--;
+            no_soal = 1;
+            $('#soal_pg .nomor-soal').each(function() {
+                $(this).text(no_soal);
+                no_soal++;
+            });
         });
     });
 </script>
@@ -464,37 +618,27 @@
             let idKelas = $(this).val();
             let mapelSelect = $('#pilih_mapel');
 
-            // Reset dropdown mapel
             mapelSelect.empty();
             mapelSelect.append('<option value="">Pilih</option>');
 
             const csrfName = "<?= csrf_token() ?>";
-
-            // Ambil token terbaru (bisa dari input tersembunyi atau variabel yang terus di-update)
             let csrfToken = $('input[name="' + csrfName + '"]').val();
 
             if (idKelas !== '') {
-                let postData = {
-                    id_kelas: idKelas
-                };
-                postData[csrfName] = csrfToken;
-
                 $.ajax({
                     type: 'POST',
                     url: '<?= base_url('sw-guru/ujian/getMapelByKelas') ?>',
-                    data: postData,
+                    data: {
+                        id_kelas: idKelas,
+                        [csrfName]: csrfToken
+                    },
                     dataType: 'JSON',
                     success: function(response) {
-                        // 1. UPDATE TOKEN CSRF TERBARU DARI SERVER
-                        // Pastikan Controller Anda mengirim balik token, contoh: return $this->response->setJSON([... , 'token' => csrf_hash()]);
                         if (response.token) {
                             $('input[name="' + csrfName + '"]').val(response.token);
                         }
 
-                        // 2. Tampilkan data mapel seperti biasa
-                        // Cek apakah response berupa array langsung atau dibungkus objek (tergantung cara return controller)
                         let listMapel = response.mapel || response;
-
                         if (listMapel.length > 0) {
                             $.each(listMapel, function(index, data) {
                                 mapelSelect.append('<option value="' + data.mapel + '">' + data.nama_mapel + '</option>');

@@ -227,9 +227,8 @@
                 <?php foreach ($daftar_ujian as $u) : ?>
                     <?php
                     // Peningkatan Performa & Keamanan (Sama seperti kode Anda)
-                    $total = $db->query("SELECT COUNT(id_detail_ujian) as jml FROM ujian_detail WHERE kode_ujian = ?", [$u->kode_ujian])->getRow()->jml;
-
-                    $totalMenit = $total * 3;
+                    $total =  $u->total_soal;
+                    $totalMenit = $total * $u->waktu_per_soal; // Menggunakan waktu per soal dari database
                     $start = (date('Y-m-d H:i'));
                     $end_ = (date('Y-m-d H:i', strtotime("+ $totalMenit minutes")));
                     $durasi = date_diff(date_create($start), date_create($end_));
@@ -319,7 +318,7 @@
                                                 $dataAttrs = 'data-idujian="' . encrypt_url($u->id_ujian) . '" ' .
                                                     'data-kuota="' . $teks_modal_kuota . '" ' .  // <-- Ubah di sini
                                                     'data-warna="' . $kuotaColor . '" ' .
-                                                    'data-soal="' . $total . ' soal" ' .
+                                                    'data-soal="' . $u->total_soal . ' soal" ' .
                                                     'data-waktu="' . $totalMenit . ' menit"';
                                                 ?>
                                                 <a href="<?= base_url('sw-siswa/ujian/lihat-pg') . '/' . encrypt_url($u->kode_ujian) . '/' . encrypt_url(session()->get('id')) . '/' . encrypt_url($u->id_ujian); ?>"
@@ -341,7 +340,7 @@
                                                 $dataAttrs = 'data-idujian="' . encrypt_url($u->id_ujian) . '" ' .
                                                     'data-kuota="' . $tampil_kuota . '" ' .
                                                     'data-warna="' . $kuotaColor . '" ' .
-                                                    'data-soal="' . $total . ' soal" ' .
+                                                    'data-soal="' . $u->total_soal . ' soal" ' .
                                                     'data-waktu="' . $totalMenit . ' menit"';
                                                 ?>
                                                 <a href="<?= base_url('sw-siswa/ujian/remedial') . '/' . encrypt_url($u->id_ujian) . '/' . encrypt_url($u->kode_ujian) . '/' . $u->status ?>"

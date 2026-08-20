@@ -20,14 +20,29 @@
                 <div class="card-body pt-0">
                     <div id="soal_pg">
                         <div class="isi_soal mb-10">
-                            <div class="fv-row mb-7">
-                                <label class="required fs-6 fw-semibold mb-2">Pilihan Kategori</label>
-                                <div class="input-group input-group-solid">
-                                    <select name="id_kategori[]" class="form-select form-select-solid" data-control="select2" data-placeholder="Pilih Kategori" required>
-                                        <option value="">Pilih</option>
-                                        <?php foreach ($kategori as $rows) : ?>
-                                            <option value="<?= $rows->id_kategori; ?>"><?= $rows->nama_kategori; ?></option>
-                                        <?php endforeach; ?>
+                            <div class="row g-9 mb-7">
+                                <div class="col-md-6">
+                                    <label class="required fs-6 fw-semibold mb-2">Pilihan Kategori</label>
+                                    <div class="input-group input-group-solid">
+                                        <select name="id_kategori[]" class="form-select form-select-solid" required>
+                                            <option value="">Pilih</option>
+                                            <?php foreach ($kategori as $rows) : ?>
+                                                <option value="<?= $rows->id_kategori; ?>"><?= $rows->nama_kategori; ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="fs-6 fw-semibold mb-2">Sub-Materi</label>
+                                    <input type="text" name="sub_materi[]" class="form-control form-control-solid" placeholder="Contoh: PPh 21" autocomplete="off">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="required fs-6 fw-semibold mb-2">Level Soal</label>
+                                    <select name="jenis_soal[]" class="form-select form-select-solid" required>
+                                        <option value="">Pilih Level</option>
+                                        <option value="E">Mudah (Easy)</option>
+                                        <option value="M">Sedang (Medium)</option>
+                                        <option value="H">Sulit (Hard)</option>
                                     </select>
                                 </div>
                             </div>
@@ -90,7 +105,6 @@
 <?= $this->section('scripts'); ?>
 <script>
     $(document).ready(function() {
-        // Initialize Summernote with Metronic Style
         function initSummernote() {
             $('.summernote').summernote({
                 tabsize: 2,
@@ -117,8 +131,6 @@
 
         initSummernote();
 
-        // Re-init summernote because of the 1s interval from original code
-        // Note: In Metronic/Modern JS, we usually init only once, but keeping your logic:
         setInterval(() => {
             $('.summernote').each(function() {
                 if ($(this).summernote('isEmpty') && !$(this).next().hasClass('note-editor')) {
@@ -158,15 +170,29 @@
                     <span class="w-250px fw-bold text-primary fs-4">Soal No. ${no_soal}</span>
                 </div>
                 
-                <div class="fv-row mb-7">
-                    <label class="required fs-6 fw-semibold mb-2">Pilihan Kategori</label>
-                    <div class="input-group input-group-solid">
-                        <span class="input-group-text"><i class="ki-duotone ki-category fs-2"></i></span>
-                        <select name="id_kategori[]" class="form-select form-select-solid" required>
-                            <option value="">Pilih</option>
-                            <?php foreach ($kategori as $rows) : ?>
-                                <option value="<?= $rows->id_kategori; ?>"><?= $rows->nama_kategori; ?></option>
-                            <?php endforeach; ?>
+                <div class="row g-9 mb-7">
+                    <div class="col-md-6">
+                        <label class="required fs-6 fw-semibold mb-2">Pilihan Kategori</label>
+                        <div class="input-group input-group-solid">
+                            <select name="id_kategori[]" class="form-select form-select-solid" required>
+                                <option value="">Pilih</option>
+                                <?php foreach ($kategori as $rows) : ?>
+                                    <option value="<?= $rows->id_kategori; ?>"><?= $rows->nama_kategori; ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="required fs-6 fw-semibold mb-2">Sub-Materi</label>
+                        <input type="text" name="sub_materi[]" class="form-control form-control-solid" placeholder="Contoh: PPh 21" autocomplete="off" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="required fs-6 fw-semibold mb-2">Level Soal</label>
+                        <select name="jenis_soal[]" class="form-select form-select-solid" required>
+                            <option value="">Pilih Level</option>
+                            <option value="E">Mudah (Easy)</option>
+                            <option value="M">Sedang (Medium)</option>
+                            <option value="H">Sulit (Hard)</option>
                         </select>
                     </div>
                 </div>
@@ -216,7 +242,7 @@
             </div>`;
 
             $('#soal_pg').append(pg);
-            initSummernote(); // Initialize summernote for the new element
+            initSummernote();
             no_soal++;
         });
 

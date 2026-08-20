@@ -21,7 +21,6 @@ class BankSoalController extends BaseController
         $this->kategoriModel = new KategoriModel();
         $this->guruModel = new GuruModel();
         $this->tagModel = new TagModel();
-
     }
     public function index()
     {
@@ -29,7 +28,21 @@ class BankSoalController extends BaseController
             ['title' => 'Dashboard', 'url' => base_url('sw-guru')],
             ['title' => 'List Soal', 'url' => '#'],
         ];
+
+        $db = \Config\Database::connect();
+
         $data['soal'] = $this->bankSoalModel->getAll();
+
+        // Tambahan data untuk dropdown filter
+        $data['kategori'] = $db->table('kategori')->get()->getResultObject();
+        $data['sub_materi_list'] = $db->table('bank_soal')
+            ->select('sub_materi')
+            ->distinct()
+            ->where('sub_materi IS NOT NULL')
+            ->where('sub_materi !=', '')
+            ->get()
+            ->getResultObject();
+
         return view('guru/bank_soal/list', $data);
     }
     public function create()
@@ -42,7 +55,7 @@ class BankSoalController extends BaseController
         $data['kategori'] = $this->kategoriModel->getAll();
         return view('guru/bank_soal/tambah_pg', $data);
     }
-    
+
     public function store()
     {
         // DATA DETAIL UJIAN PG
@@ -50,16 +63,24 @@ class BankSoalController extends BaseController
         $data_detail_ujian = array();
         $index = 0;
         foreach ($nama_soal as $nama) {
+            $val_pg1 = $this->request->getVar('pg_1')[$index];
+            $val_pg2 = $this->request->getVar('pg_2')[$index];
+            $val_pg3 = $this->request->getVar('pg_3')[$index];
+            $val_pg4 = $this->request->getVar('pg_4')[$index];
+            $val_pg5 = $this->request->getVar('pg_5')[$index];
+
             array_push($data_detail_ujian, array(
                 'id_kategori' => $this->request->getVar('id_kategori')[$index],
-                'nama_soal' => $nama,
-                'pg_1' => 'A. ' . $this->request->getVar('pg_1')[$index],
-                'pg_2' => 'B. ' . $this->request->getVar('pg_2')[$index],
-                'pg_3' => 'C. ' . $this->request->getVar('pg_3')[$index],
-                'pg_4' => 'D. ' . $this->request->getVar('pg_4')[$index],
-                'pg_5' => 'E. ' . $this->request->getVar('pg_5')[$index],
-                'jawaban' => $this->request->getVar('jawaban')[$index],
-                'penjelasan' => $this->request->getVar('penjelasan')[$index],
+                'sub_materi'  => $this->request->getVar('sub_materi')[$index],
+                'nama_soal'   => $nama,
+                'pg_1'        => !empty(trim($val_pg1)) ? 'A. ' . $val_pg1 : '',
+                'pg_2'        => !empty(trim($val_pg2)) ? 'B. ' . $val_pg2 : '',
+                'pg_3'        => !empty(trim($val_pg3)) ? 'C. ' . $val_pg3 : '',
+                'pg_4'        => !empty(trim($val_pg4)) ? 'D. ' . $val_pg4 : '',
+                'pg_5'        => !empty(trim($val_pg5)) ? 'E. ' . $val_pg5 : '',
+                'jawaban'     => $this->request->getVar('jawaban')[$index],
+                'penjelasan'  => $this->request->getVar('penjelasan')[$index],
+                'jenis_soal'  => $this->request->getVar('jenis_soal')[$index],
             ));
 
             $index++;
@@ -86,16 +107,23 @@ class BankSoalController extends BaseController
 
     public function update()
     {
+        $val_pg1 = $this->request->getVar('pg_1');
+        $val_pg2 = $this->request->getVar('pg_2');
+        $val_pg3 = $this->request->getVar('pg_3');
+        $val_pg4 = $this->request->getVar('pg_4');
+        $val_pg5 = $this->request->getVar('pg_5');
         $data_detail_ujian = [
             'id_kategori' => $this->request->getVar('id_kategori'),
+            'sub_materi' => $this->request->getVar('sub_materi'),
             'nama_soal' => $this->request->getVar('nama_soal'),
-            'pg_1' => $this->request->getVar('pg_1'),
-            'pg_2' => $this->request->getVar('pg_2'),
-            'pg_3' => $this->request->getVar('pg_3'),
-            'pg_4' => $this->request->getVar('pg_4'),
-            'pg_5' => $this->request->getVar('pg_5'),
+            'pg_1'        => !empty(trim($val_pg1)) ? 'A. ' . $val_pg1 : '',
+            'pg_2'        => !empty(trim($val_pg2)) ? 'B. ' . $val_pg2 : '',
+            'pg_3'        => !empty(trim($val_pg3)) ? 'C. ' . $val_pg3 : '',
+            'pg_4'        => !empty(trim($val_pg4)) ? 'D. ' . $val_pg4 : '',
+            'pg_5'        => !empty(trim($val_pg5)) ? 'E. ' . $val_pg5 : '',
             'jawaban' => $this->request->getVar('jawaban'),
             'penjelasan' => $this->request->getVar('penjelasan'),
+            'jenis_soal' => $this->request->getVar('jenis_soal'),
         ];
 
 
