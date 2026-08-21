@@ -9,8 +9,8 @@ class PaketModel extends Model
 {
     protected $table            = 'paket';
     protected $primaryKey       = 'idpaket';
-    protected $allowedFields    = ['iddiskon', 'slug', 'nama_paket', 'tagline', 'jenis_paket','jumlah_bulan', 'nominal_paket','file', 'status', 'v_ujian', 'v_materi', 'deskripsi', 'is_pinned', 'sort_order', 'komisi', 'deleted_at'];
-    
+    protected $allowedFields    = ['iddiskon', 'slug', 'nama_paket', 'tagline', 'jenis_paket', 'jumlah_bulan', 'nominal_paket', 'file', 'status', 'v_ujian', 'v_materi', 'deskripsi', 'is_pinned', 'sort_order', 'komisi', 'deleted_at'];
+
     protected $beforeInsert = ['generateSlug'];
     // protected $beforeUpdate = ['generateSlug'];
 
@@ -41,8 +41,8 @@ class PaketModel extends Model
 
         while (
             $this->where('slug', $slug)
-                 ->where($this->primaryKey . ' !=', $id)
-                 ->first()
+            ->where($this->primaryKey . ' !=', $id)
+            ->first()
         ) {
             $slug = $originalSlug . '-' . $counter;
             $counter++;
@@ -51,7 +51,7 @@ class PaketModel extends Model
         return $slug;
     }
 
-    
+
     public function getAll()
     {
         return $this
@@ -91,7 +91,7 @@ class PaketModel extends Model
             ->where('paket.status', '1')
             ->get()->getRowObject();
     }
-    
+
     public function getAllLimit()
     {
         return $this
@@ -110,13 +110,13 @@ class PaketModel extends Model
     {
         return $this
             ->select('paket.*, b.diskon, c.id_mapel, c.id_ujian')
-            ->join('diskon b', 'b.iddiskon = paket.iddiskon')
-            ->join('detail_paket c', 'c.idpaket=paket.idpaket')
+            ->join('diskon b', 'b.iddiskon = paket.iddiskon', 'left') // Ubah jadi LEFT JOIN agar paket tanpa diskon tetap tampil
+            ->join('detail_paket c', 'c.idpaket = paket.idpaket', 'left') // Ubah jadi LEFT JOIN
             ->where('paket.status', 1)
             ->like('paket.jenis_paket', 'uskp')
             ->orderBy('paket.is_pinned', 'DESC')
             ->orderBy('paket.sort_order', 'asc')
-            ->groupBy('paket.idpaket')
+            ->groupBy('paket.idpaket, b.diskon, c.id_mapel, c.id_ujian') // Masukkan kolom select ke groupBy agar lolos aturan SQL
             ->get()->getResultObject();
     }
 }

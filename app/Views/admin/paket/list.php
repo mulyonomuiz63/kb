@@ -196,10 +196,10 @@
                         </div>
                     </div>
 
-                    <!-- FORM BREVET -->
+                    <!-- FORM BREVET / USKP -->
                     <div class="brevet-fields" style="display: none;">
                         <div class="separator separator-dashed my-8"></div>
-                        <h4 class="fw-bold text-dark mb-5"><i class="ki-duotone ki-book-open fs-2 me-2"></i> Pengaturan Kelas Brevet</h4>
+                        <h4 class="fw-bold text-dark mb-5"><i class="ki-duotone ki-book-open fs-2 me-2"></i> Pengaturan Kelas Brevet / USKP</h4>
                         <div class="row g-5 bg-light-primary p-5 rounded">
                             <div class="col-md-12 fv-row" id="wrapper_id_kelas">
                                 <label class="required fs-6 fw-semibold mb-2">Kelas</label>
@@ -277,9 +277,9 @@
                     <div class="fv-row mb-7 text-center" id="view_gambar"></div>
 
                     <div class="row g-5">
-                        <div class="col-md-12 fv-row mb-5">
+                        <div class="col-md-12 fv-row mb-5" id="edit_jenis_paket">
                             <label class="required fs-6 fw-semibold mb-2 text-primary">Jenis Paket Terkait</label>
-                            <select name="jenis_paket[]" class="form-select form-select-solid jenis_paket" data-control="select2" data-dropdown-parent="#edit_paket" data-placeholder="Pilih layanan..." multiple="multiple" required>
+                            <select name="jenis_paket[]" class="form-select form-select-solid jenis_paket" data-control="select2" data-dropdown-parent="#edit_jenis_paket" data-placeholder="Pilih layanan..." multiple="multiple" required>
                                 <option value="brevet">Kelas Brevet AB</option>
                                 <option value="ikh">Perijinan IKH</option>
                                 <option value="webinar">Webinar</option>
@@ -329,7 +329,7 @@
                         </div>
                     </div>
 
-                    <!-- FORM BREVET EDIT -->
+                    <!-- FORM BREVET / USKP EDIT -->
                     <div class="brevet-fields" style="display: none;">
                         <div class="separator separator-dashed my-8"></div>
                         <h4 class="fw-bold text-dark mb-5"><i class="ki-duotone ki-book-open fs-2 me-2"></i> Update Susunan Kelas Brevet / USKP</h4>
@@ -420,19 +420,12 @@
         $(nominalInputId).val(total);
     }
 
-    // UPDATE: Fungsi Menampilkan/Menyembunyikan Form Dinamis (Brevet, IKH, & Webinar)
+    // UPDATE: Fungsi Menampilkan/Menyembunyikan Form Dinamis (Brevet, USKP, & Webinar)
     function toggleDynamicFields(modalElement, nominalInputId) {
         let selectedTypes = $(modalElement).find('.jenis_paket').val() || [];
 
-        // Logika Form Brevet
-        if (selectedTypes.includes('brevet')) {
-            $(modalElement).find('.brevet-fields').slideDown();
-            $(modalElement).find('.dynamic-req-brevet').prop('required', true);
-        } else {
-            $(modalElement).find('.brevet-fields').slideUp();
-            $(modalElement).find('.dynamic-req-brevet').prop('required', false).val('').trigger('change');
-        }
-        if (selectedTypes.includes('uskp')) {
+        // Logika Form Brevet atau USKP
+        if (selectedTypes.includes('brevet') || selectedTypes.includes('uskp')) {
             $(modalElement).find('.brevet-fields').slideDown();
             $(modalElement).find('.dynamic-req-brevet').prop('required', true);
         } else {
@@ -694,7 +687,7 @@
                     // Ini akan mentrigger toggleDynamicFields
                     $("#edit_paket .jenis_paket").val(arrPaket).trigger('change');
 
-                    // AUTO-FILL BREVET
+                    // AUTO-FILL BREVET / USKP
                     if (data.id_kelas) {
                         $("#edit_id_kelas").val(data.id_kelas).trigger({
                             type: 'change',
