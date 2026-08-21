@@ -569,7 +569,10 @@
 
         // Panggil fungsi Kalkulator otomatis ketika user memilih sesi (Modal Edit)
         $('#edit_id_sesi').on('change', function() {
-            calculateWebinarTotal(this, '#edit_nominal_paket');
+            let selectedTypes = $('#edit_paket .jenis_paket').val() || [];
+            if (selectedTypes.includes('webinar')) {
+                calculateWebinarTotal(this, '#edit_nominal_paket');
+            }
         });
 
 
