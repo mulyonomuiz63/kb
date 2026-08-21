@@ -76,7 +76,7 @@ class PaketController extends BaseController
                 $data_paket['arr_sesi']  = []; // <-- INISIALISASI ARRAY SESI WEBINAR
 
                 // Cek jika paket ini mengandung layanan brevet
-                if (in_array('brevet', $jenis_paket)) {
+                if (!empty(array_intersect(['brevet', 'uskp'], $jenis_paket))) {
                     $db = \Config\Database::connect();
 
                     // 1. Cari id_kelas dari relasi ujian_master (Lebih Akurat)
@@ -172,7 +172,7 @@ class PaketController extends BaseController
             $v_materi = "0";
 
             // 3. Validasi Khusus Jika Memilih Layanan Brevet
-            if (in_array('brevet', $jenis_paket_bersih)) {
+            if (!empty(array_intersect(['brevet', 'uskp'], $jenis_paket_bersih))) {
                 // Cek apakah array kosong (hanya berisi nilai kosong/string kosong)
                 $is_ujian_empty = empty(array_filter($raw_id_ujian));
                 $is_mapel_empty = empty(array_filter($raw_id_mapel));
@@ -233,7 +233,7 @@ class PaketController extends BaseController
             $id_paket = $this->paketModel->insertID();
 
             // 6. Insert Tabel Detail (HANYA JIKA LAYANAN BREVET DIPILIH)
-            if (in_array('brevet', $jenis_paket_bersih) && !empty($raw_id_kelas)) {
+            if (!empty(array_intersect(['brevet', 'uskp'], $jenis_paket_bersih)) && !empty($raw_id_kelas)) {
 
                 // Ambil semua data ujian dan mapel berdasarkan kelas yang dipilih
                 $data_master = $this->ujianMasterModel
@@ -401,7 +401,7 @@ class PaketController extends BaseController
             $v_m = '0';
 
             // 1. Proses Brevet jika dipilih
-            if (in_array('brevet', $jenis_paket_bersih)) {
+            if (!empty(array_intersect(['brevet', 'uskp'], $jenis_paket_bersih))) {
                 $raw_id_kelas = $this->request->getVar('id_kelas');
                 $raw_id_ujian = $this->request->getVar('id_ujian') ?? [];
                 if (!is_array($raw_id_ujian)) $raw_id_ujian = [$raw_id_ujian];
