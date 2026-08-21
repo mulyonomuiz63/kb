@@ -51,21 +51,9 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
         $routes->get('delete/(:segment)', 'Admin\GuruController::delete/$1');
 
 
-        $routes->get('ujian-guru/(:segment)', 'Admin\GuruController::ujianGuru/$1');
-        $routes->post('ajaxUjianGuru', 'Admin\GuruController::ajaxUjianGuru');
-        $routes->get('edit-ujian/(:segment)', 'Admin\GuruController::editUjian/$1');
-        $routes->get('edit-soal/(:segment)', 'Admin\GuruController::editSoal/$1');
-        $routes->post('update-soal', 'Admin\GuruController::updateSoal');
-        $routes->get('lihat-ujian/(:segment)', 'Admin\GuruController::lihatUjian/$1');
-        $routes->post('ajaxSiswaUjian/(:segment)', 'Admin\GuruController::ajaxSiswaUjian/$1');
-        $routes->get('lihat-ujian-siswa/(:segment)/(:segment)', 'Admin\GuruController::lihatUjianSiswa/$1/$2');
-        $routes->get('cetak-soal-peserta/(:segment)/(:segment)', 'Admin\GuruController::cetakSoalPeserta/$1/$2');
-        $routes->get('cetak-soal/(:segment)', 'Admin\GuruController::cetakSoal/$1');
-        $routes->post('upload-summernote', 'Admin\GuruController::uploadSummernote');
-        $routes->post('delete-image', 'Admin\GuruController::deleteImage');
+        $routes->get('ujian/(:segment)', 'Admin\GuruController::ujianGuru/$1');
 
-
-        $routes->get('mapel-guru/(:segment)', 'Admin\MapelController::mapelGuru/$1');
+        $routes->get('mapel/(:segment)', 'Admin\MapelController::mapelGuru/$1');
         $routes->get('lihat-materi/(:segment)/(:segment)/(:segment)', 'Admin\MapelController::lihatMateri/$1/$2/$3');
         $routes->post('get-file-materi', 'Admin\MapelController::getFileMateri');
         $routes->post('get-chat-materi', 'Admin\MapelController::getChatMateri');
@@ -295,17 +283,6 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
     
     $routes->group('review', function ($routes) {
         $routes->get('', 'Admin\ReviewController::index');
-    });
-
-    $routes->group('bank-soal', function ($routes) {
-        $routes->get('', 'Admin\BankSoalController::index');
-        $routes->get('create', 'Admin\BankSoalController::create');
-        $routes->post('store', 'Admin\BankSoalController::store');
-        $routes->get('edit/(:segment)', 'Admin\BankSoalController::edit/$1');
-        $routes->post('update', 'Admin\BankSoalController::update');
-        $routes->get('delete/(:segment)', 'Admin\BankSoalController::delete/$1');
-        $routes->post('upload-summernote', 'Admin\BankSoalController::uploadSummernote');
-        $routes->post('delete-image', 'Admin\BankSoalController::deleteImage');
     });
 
     $routes->group('log-email', function ($routes) {

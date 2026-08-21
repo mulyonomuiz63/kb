@@ -35,25 +35,32 @@ class MateriController extends BaseController
     // START::MATERI
     public function lihat($id, $kelas)
     {
+        $idguru = session()->get('idguru_diadmin') ?? session()->get('id');
+        // Cek apakah session idguru_diadmin ada (berarti diakses oleh admin)
+        $isAdmin = !empty(session()->get('idguru_diadmin'));
         $data['breadcrumbs'] = [
-            ['title' => 'Dashboard', 'url' => base_url('sw-guru')],
-            ['title' => 'List Materi', 'url' => '#'],
+            [
+                'title' => $isAdmin ? 'Instruktur': 'Dashboard',
+                'url'   => $isAdmin ? base_url('sw-admin/guru') : base_url('sw-guru') // Sesuaikan 'sw-admin' dengan route dashboard admin Anda
+            ],
+            ['title' => 'List Ujian', 'url' => '#'],
         ];
 
         $data['idmapel'] = $id;
         $data['idkelas'] = $kelas;
         $data['id_mapel'] = decrypt_url($id);
         $data['id_kelas'] = decrypt_url($kelas);
-        $data['materi'] = $this->materiModel->getAllByGuru(session()->get('id'), decrypt_url($id));
+        $data['materi'] = $this->materiModel->getAllByGuru($idguru, decrypt_url($id));
 
-        $data['guru_kelas'] = $this->guruKelasModel->getALLByGuru(session()->get('id'));
-        $data['guru_mapel'] = $this->guruMapelModel->getALLByGuru(session()->get('id'));
+        $data['guru_kelas'] = $this->guruKelasModel->getALLByGuru($idguru);
+        $data['guru_mapel'] = $this->guruMapelModel->getALLByGuru($idguru);
 
         return view('guru/materi/list', $data);
     }
 
     public function store()
     {
+        $idguru = session()->get('idguru_diadmin') ?? session()->get('id');
         $idmapel = encrypt_url($this->request->getVar('mapel'));
         $idkelas = encrypt_url($this->request->getVar('kelas'));
         $thumbs = $this->request->getPost();
@@ -66,7 +73,7 @@ class MateriController extends BaseController
         $data_materi = [
             'kode_materi' => $this->request->getVar('kode_materi'),
             'nama_materi' => $this->request->getVar('nama_materi'),
-            'guru' => session()->get('id'),
+            'guru' => $idguru,
             'mapel' => $this->request->getVar('mapel'),
             'kelas' => $this->request->getVar('kelas'),
             'text_materi' => json_encode($link_video),
@@ -197,10 +204,11 @@ class MateriController extends BaseController
 
     public function lihatMateri($id, $idmapel, $idkelas)
     {
+        $idguru = session()->get('idguru_diadmin') ?? session()->get('id');
         $id_materi = decrypt_url($id);
         $data['materiAll'] = $this->materiModel->getAllByMapelKelas(decrypt_url($idmapel), decrypt_url($idkelas));
         $data['materi'] = $this->materiModel->getById($id_materi);
-        $data['guru'] = $this->guruModel->asObject()->find(session()->get('id'));
+        $data['guru'] = $this->guruModel->asObject()->find($idguru);
         $data['file'] = $this->fileModel->getMateriWithFile(decrypt_url($idmapel), decrypt_url($idkelas));
 
         $data['breadcrumbs'] = [

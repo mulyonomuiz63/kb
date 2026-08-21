@@ -28,20 +28,26 @@ class MapelController extends BaseController
 
     public function index()
     {
+        $idguru = session()->get('idguru_diadmin') ?? session()->get('id');
+        // Cek apakah session idguru_diadmin ada (berarti diakses oleh admin)
+        $isAdmin = !empty(session()->get('idguru_diadmin'));
         $data['breadcrumbs'] = [
-            ['title' => 'Dashboard', 'url' => base_url('sw-guru')],
-            ['title' => 'List Mapel', 'url' => '#'],
+            [
+                'title' => $isAdmin ? 'Instruktur': 'Dashboard',
+                'url'   => $isAdmin ? base_url('sw-admin/guru') : base_url('sw-guru') // Sesuaikan 'sw-admin' dengan route dashboard admin Anda
+            ],
+            ['title' => 'List Ujian', 'url' => '#'],
         ];
         $data['mapel'] = $this->guruMapelModel
             ->select('guru_mapel.*, guru_kelas.nama_kelas') // Secara spesifik memanggil kolom nama_kelas
             ->join('guru_kelas', 'guru_kelas.guru = guru_mapel.guru AND guru_kelas.kelas = guru_mapel.kelas', 'left') // Join berdasarkan Guru DAN Kelas
-            ->where('guru_mapel.guru', session()->get('id'))
+            ->where('guru_mapel.guru', $idguru)
             // ->groupBy('guru_mapel.mapel') // SEBAIKNYA DIHAPUS agar mapel yang diajarkan di 2 kelas berbeda tidak saling menimpa
             ->get()
             ->getResultObject();
 
-        $data['guru_kelas'] = $this->guruKelasModel->getALLByGuru(session()->get('id'));
-        $data['guru_mapel'] = $this->guruMapelModel->getALLByGuru(session()->get('id'));
+        $data['guru_kelas'] = $this->guruKelasModel->getALLByGuru($idguru);
+        $data['guru_mapel'] = $this->guruMapelModel->getALLByGuru($idguru);
 
         return view('guru/materi/index', $data);
     }

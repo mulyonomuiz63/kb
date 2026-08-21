@@ -201,33 +201,21 @@
                                         <div class="courses-meta">
                                             <?php
                                             $soal = $db->query("SELECT a.id_ujian, b.kode_ujian FROM detail_paket a join ujian_master b on a.id_ujian=b.id_ujian where a.idpaket = '$rows->idpaket' group by a.id_ujian")->getResult();
-                                            $durasi = 0;
+                                            $total = null;
                                             foreach ($soal as $r):
-                                                $total = 0;
                                                 $ujianDetail = $db->query("select * from ujian_detail where kode_ujian = '$r->kode_ujian'")->getResult();
                                                 foreach ($ujianDetail as $dataRows) {
-                                                    $total++;
+                                                    $hasilUjian = soal_ujian(encrypt_url($r->kode_ujian));
+                                                    $total = count($hasilUjian);
                                                 }
-                                                $jml = $db->query("select count(kode_ujian) as total_soal from ujian_detail where kode_ujian = '$r->kode_ujian'")->getRow();
-
-                                                $totalMenit = $total * 3;
-                                                $start =  (date('Y-m-d H:i'));
-                                                $end_ = (date('Y-m-d H:i', strtotime("+ $totalMenit minutes")));
-
-
-                                                $start_ujian = date_create($start);
-                                                $end_ujian = date_create($end_);
-                                                $durasi = date_diff($start_ujian, $end_ujian);
                                             endforeach;
 
                                             ?>
-                                            <span class="fw-bold"> <i class="icofont-read-book"></i> <?= (!empty($jml) ? $jml->total_soal : '0') ?> Soal/<span style="font-size:10px">Materi</span> </span>
+                                            <span class="fw-bold"> <i class="icofont-read-book"></i> <?= (!empty($total) ? $total : '0') ?> Soal/<span style="font-size:10px">Materi</span> </span>
                                             <div class="d-flex flex-column mb-3">
                                                 <span class="fw-bold"> Rp <?= number_format($rows->nominal_paket - (($rows->nominal_paket * $rows->diskon) / 100)) ?> </span>
                                                 <span style="font-size:12px" class="mt-1"> <del>Rp <?= number_format($rows->nominal_paket) ?></del> </span>
                                             </div>
-
-                                            <!--<span> <i class="icofont-clock-time"></i> <?= ($durasi != '0' ? ($durasi->h * 60) + $durasi->i : '0');  ?> Menit</span>-->
                                         </div>
                                         <div>
                                             <div class="mb-2" style="font-size:12px">

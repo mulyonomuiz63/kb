@@ -117,6 +117,7 @@ class UjianDetailModel extends Model
             // Fallback: Jika ujian_komposisi kosong (Ujian Brevet Biasa)
             $semua_soal = $this->where('kode_ujian', $kode_ujian)
                 ->where('deleted_at', null)
+                ->limit(30)
                 ->get()->getResultObject();
 
             if (empty($semua_soal)) {

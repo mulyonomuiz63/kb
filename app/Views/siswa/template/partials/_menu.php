@@ -8,7 +8,7 @@
         </a>
     </div>
 
-    <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" class="menu-item menu-lg-down-accordion me-0 me-lg-2">
+    <div id="menu_mobile_siswa" data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" class="menu-item menu-lg-down-accordion me-0 me-lg-2">
         <span class="menu-link <?= (strpos($current_uri, 'sw-siswa/') !== false && $current_uri != 'sw-siswa' && strpos($current_uri, 'sw-siswa/affiliate') === false && strpos($current_uri, 'sw-siswa/ikh') === false) ? 'active' : '' ?>">
             <span class="menu-title">Menu</span>
             <span class="menu-arrow d-lg-none"></span>
@@ -27,7 +27,7 @@
                                             <i class="ki-outline ki-book-open text-primary fs-1"></i>
                                         </span>
                                         <span class="d-flex flex-column">
-                                            <span class="fs-6 fw-bold text-gray-800">Materi</span>
+                                            <span class="fs-6 fw-bold text-gray-800">Materi Brevet</span>
                                             <span class="fs-7 fw-semibold text-muted">Akses modul pembelajaran</span>
                                         </span>
                                     </a>
@@ -104,16 +104,6 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="separator separator-dashed my-5"></div>
-
-                        <div class="d-flex flex-stack flex-wrap gap-2 px-5">
-                            <div class="d-flex flex-column">
-                                <div class="fs-6 fw-bold text-gray-800">Paket Belajar</div>
-                                <div class="fs-7 fw-semibold text-muted">Tingkatkan skill Anda hari ini</div>
-                            </div>
-                            <a href="<?= base_url('list-bimbel') ?>" class="btn btn-sm btn-light-primary fw-bold">Lihat Paket</a>
-                        </div>
-
                     </div>
                 </div>
             </div>
@@ -124,7 +114,8 @@
 
     // Mengambil data pendaftaran
     $ikh = $db->table('pendaftaran_ikh')->where([
-        'id_siswa' => session('id'), 'status_validasi_admin' => 'draft'
+        'id_siswa' => session('id'),
+        'status_validasi_admin' => 'draft'
     ])->get()->getRow();
 
     // 1. Cek apakah ada data pendaftaran IKH

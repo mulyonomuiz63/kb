@@ -1,5 +1,5 @@
 <?php
-$routes->group('sw-guru', ['filter' => 'roleCheck:3'], function ($routes) {
+$routes->group('sw-guru', ['filter' => 'roleCheck:3,1'], function ($routes) {
     $routes->get('/', 'Guru\HomeController::index');
 
     $routes->group('mapel', function ($routes) {

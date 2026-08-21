@@ -329,7 +329,7 @@ $is_pengaturan_active = in_array($current_uri, $pengaturan_pool);
                                 </div>
                             </div>
                             <div class="menu-item me-0 me-lg-2">
-                                <a href="<?= base_url('sw-admin/bank-soal') ?>" class="menu-link <?= (in_array($current_uri, $bankSoal) ? 'active' : '') ?> py-3 px-4">
+                                <a href="<?= base_url('sw-guru/bank-soal') ?>" class="menu-link <?= (in_array($current_uri, $bankSoal) ? 'active' : '') ?> py-3 px-4">
                                     <span class="menu-title">Bank Soal</span>
                                 </a>
                             </div>

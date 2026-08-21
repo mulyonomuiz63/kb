@@ -10,4 +10,5 @@ helper([
     'encryptdecrypt',
     'tgldate',
     'domain',
+    'acaksoal'
 ]);

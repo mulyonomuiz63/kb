@@ -59,7 +59,8 @@ class PaketModel extends Model
             ->join('diskon b', 'b.iddiskon = paket.iddiskon')
             ->join('detail_paket c', 'c.idpaket=paket.idpaket')
             ->where('paket.status', 1)
-            ->notLike('paket.jenis_paket', '"webinar"')
+            ->notLike('paket.jenis_paket', 'webinar')
+            ->notLike('paket.jenis_paket', 'uskp')
             ->orderBy('paket.is_pinned', 'DESC')
             ->orderBy('paket.sort_order', 'asc')
             ->groupBy('paket.idpaket')
@@ -73,7 +74,8 @@ class PaketModel extends Model
             ->join('detail_paket c', 'c.idpaket=paket.idpaket')
             ->join('webinar_sesi d', 'c.id_sesi=d.id_sesi')
             ->where('paket.status', 1)
-            ->like('paket.jenis_paket', '"webinar"')
+            ->notLike('paket.jenis_paket', 'webinar')
+            ->notLike('paket.jenis_paket', 'uskp')
             ->orderBy('paket.is_pinned', 'DESC')
             ->orderBy('paket.sort_order', 'asc')
             ->groupBy('paket.idpaket')
@@ -101,6 +103,20 @@ class PaketModel extends Model
             ->orderBy('paket.sort_order', 'asc')
             ->groupBy('paket.idpaket')
             ->limit(3)
+            ->get()->getResultObject();
+    }
+
+    public function getPaketUskp()
+    {
+        return $this
+            ->select('paket.*, b.diskon, c.id_mapel, c.id_ujian')
+            ->join('diskon b', 'b.iddiskon = paket.iddiskon')
+            ->join('detail_paket c', 'c.idpaket=paket.idpaket')
+            ->where('paket.status', 1)
+            ->where('paket.jenis_paket', 'uskp')
+            ->orderBy('paket.is_pinned', 'DESC')
+            ->orderBy('paket.sort_order', 'asc')
+            ->groupBy('paket.idpaket')
             ->get()->getResultObject();
     }
 }

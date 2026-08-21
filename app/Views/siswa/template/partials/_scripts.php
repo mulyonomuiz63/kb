@@ -91,3 +91,18 @@
         }
     });
 </script>
+<script>
+    $(document).ready(function() {
+        // Deteksi jika layar yang membuka adalah ukuran Mobile / Tablet (< 992px)
+        if (window.matchMedia("(max-width: 991.98px)").matches) {
+            // Berikan jeda waktu super singkat agar sistem menu Metronic termuat sempurna dulu
+            setTimeout(function() {
+                // Mensimulasikan sentuhan/klik otomatis di awal khusus di HP
+                // Sehingga menu terbuka (slide down) dan panah putar berfungsi normal
+                if (!$('#menu_mobile_siswa').hasClass('show')) {
+                    $('#menu_mobile_siswa > .menu-link').trigger('click');
+                }
+            }, 100);
+        }
+    });
+</script>

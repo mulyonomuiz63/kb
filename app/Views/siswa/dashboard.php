@@ -380,7 +380,7 @@
             <div class="row mb-5 mb-xl-8 g-5 g-xl-8">
                 <?php
                 $menus = [
-                    ['url' => 'sw-siswa/materi', 'icon' => 'ki-book-open', 'color' => 'primary', 'title' => 'Materi Belajar', 'desc' => 'Akses semua modul'],
+                    ['url' => 'sw-siswa/materi', 'icon' => 'ki-book-open', 'color' => 'primary', 'title' => 'Materi Brevet', 'desc' => 'Akses semua modul'],
                     ['url' => 'sw-siswa/webinar', 'icon' => 'ki-award', 'color' => 'warning', 'title' => 'Webinar', 'desc' => 'Update Regulasi'],
                     ['url' => 'sw-siswa/ujian', 'icon' => 'ki-notepad-edit', 'color' => 'danger', 'title' => 'Ujian & Quiz', 'desc' => 'Uji Kompetensi'],
                     ['url' => 'sw-siswa/sertifikat', 'icon' => 'ki-medal-star', 'color' => 'success', 'title' => 'Sertifikat', 'desc' => 'Download bukti lulus'],
@@ -620,7 +620,8 @@
                             $soal = $db->query("SELECT a.id_ujian, b.kode_ujian FROM detail_paket a join ujian_master b on a.id_ujian=b.id_ujian where a.idpaket = '$rows->idpaket' group by a.id_ujian")->getResult();
                             $jml = null;
                             foreach ($soal as $r):
-                                $jml = $db->query("select count(kode_ujian) as total_soal from ujian_detail where kode_ujian = '$r->kode_ujian'")->getRow();
+                                $hasilUjian = soal_ujian(encrypt_url($r->kode_ujian));
+                                $jml = count($hasilUjian);
                             endforeach;
                             ?>
 
@@ -643,7 +644,7 @@
                                         </h6>
 
                                         <div class="d-flex justify-content-between align-items-center mb-5">
-                                            <span class="fs-7 fw-bold text-gray-600"><i class="ki-outline ki-book-open fs-2 text-primary me-1"></i> <?= (!empty($jml) ? $jml->total_soal : '0') ?> Soal/Materi</span>
+                                            <span class="fs-7 fw-bold text-gray-600"><i class="ki-outline ki-book-open fs-2 text-primary me-1"></i> <?= (!empty($jml) ? $jml : '0') ?> Soal/Materi</span>
                                             <div class="text-end">
                                                 <div class="fw-bolder fs-4 text-dark">Rp <?= number_format($rows->nominal_paket - (($rows->nominal_paket * $rows->diskon) / 100)) ?></div>
                                                 <div class="text-muted text-decoration-line-through fs-8 small">Rp <?= number_format($rows->nominal_paket) ?></div>

@@ -149,6 +149,7 @@
                                 <option value="brevet">Kelas Brevet AB</option>
                                 <option value="ikh">Perijinan IKH</option>
                                 <option value="webinar">Webinar</option>
+                                <option value="uskp">USKP</option>
                             </select>
                             <div class="form-text text-muted">Form akan menyesuaikan berdasarkan pilihan di atas. Anda dapat memilih lebih dari satu.</div>
                         </div>
@@ -282,6 +283,7 @@
                                 <option value="brevet">Kelas Brevet AB</option>
                                 <option value="ikh">Perijinan IKH</option>
                                 <option value="webinar">Webinar</option>
+                                <option value="uskp">USKP</option>
                             </select>
                         </div>
 
@@ -330,7 +332,7 @@
                     <!-- FORM BREVET EDIT -->
                     <div class="brevet-fields" style="display: none;">
                         <div class="separator separator-dashed my-8"></div>
-                        <h4 class="fw-bold text-dark mb-5"><i class="ki-duotone ki-book-open fs-2 me-2"></i> Update Susunan Kelas Brevet</h4>
+                        <h4 class="fw-bold text-dark mb-5"><i class="ki-duotone ki-book-open fs-2 me-2"></i> Update Susunan Kelas Brevet / USKP</h4>
 
                         <div class="alert alert-dismissible bg-light-warning border border-warning d-flex flex-column flex-sm-row p-5 mb-5">
                             <i class="ki-duotone ki-information fs-2hx text-warning me-4 mb-5 mb-sm-0"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
@@ -424,6 +426,13 @@
 
         // Logika Form Brevet
         if (selectedTypes.includes('brevet')) {
+            $(modalElement).find('.brevet-fields').slideDown();
+            $(modalElement).find('.dynamic-req-brevet').prop('required', true);
+        } else {
+            $(modalElement).find('.brevet-fields').slideUp();
+            $(modalElement).find('.dynamic-req-brevet').prop('required', false).val('').trigger('change');
+        }
+        if (selectedTypes.includes('uskp')) {
             $(modalElement).find('.brevet-fields').slideDown();
             $(modalElement).find('.dynamic-req-brevet').prop('required', true);
         } else {

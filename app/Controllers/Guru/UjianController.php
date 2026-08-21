@@ -40,16 +40,25 @@ class UjianController extends BaseController
     // START = UJIAN PG
     public function index()
     {
+
+        $idguru = session()->get('idguru_diadmin') ?? session()->get('id');
+        // Cek apakah session idguru_diadmin ada (berarti diakses oleh admin)
+        $isAdmin = !empty(session()->get('idguru_diadmin'));
+
         $data['breadcrumbs'] = [
-            ['title' => 'Dashboard', 'url' => base_url('sw-guru')],
+            [
+                'title' => $isAdmin ? 'Instruktur': 'Dashboard',
+                'url'   => $isAdmin ? base_url('sw-admin/guru') : base_url('sw-guru') // Sesuaikan 'sw-admin' dengan route dashboard admin Anda
+            ],
             ['title' => 'List Ujian', 'url' => '#'],
         ];
-        $data['ujian'] = $this->ujianMasterModel->getAllBykodeGuru(session()->get('id'))->get()->getResultObject();
+        $data['ujian'] = $this->ujianMasterModel->getAllBykodeGuru($idguru)->get()->getResultObject();
         return view('guru/ujian/list', $data);
     }
 
     public function create()
     {
+        $idguru = session()->get('idguru_diadmin') ?? session()->get('id');
         $data['breadcrumbs'] = [
             ['title' => 'Dashboard', 'url' => base_url('sw-guru')],
             ['title' => 'Data Ujian', 'url' => base_url('sw-guru/ujian')],
@@ -62,21 +71,21 @@ class UjianController extends BaseController
             ->where('sub_materi !=', '')
             ->get()
             ->getResultObject();
-        $data['guru_kelas'] = $this->guruKelasModel->getALLByGuru(session()->get('id'));
-        $data['guru_mapel'] = $this->guruMapelModel->getALLByGuru(session()->get('id'));
-        $data['guru'] = $this->guruModel->asObject()->find(session()->get('id'));
+        $data['guru_kelas'] = $this->guruKelasModel->getALLByGuru($idguru);
+        $data['guru_mapel'] = $this->guruMapelModel->getALLByGuru($idguru);
+        $data['guru'] = $this->guruModel->asObject()->find($idguru);
         $data['kategori'] = $this->kategoriModel->getAll();
         return view('guru/ujian/tambah_pg', $data);
     }
     public function getMapelByKelas()
     {
+        $idguru = session()->get('idguru_diadmin') ?? session()->get('id');
         if (!$this->request->isAJAX()) return exit('No direct script access allowed');
 
-        $id_guru  = session()->get('id');
         $id_kelas = $this->request->getPost('id_kelas');
 
         $mapel = $this->guruMapelModel->where([
-            'guru'  => $id_guru,
+            'guru'  => $idguru,
             'kelas' => $id_kelas
         ])->findAll();
 
@@ -88,6 +97,7 @@ class UjianController extends BaseController
     }
     public function store()
     {
+        $idguru = session()->get('idguru_diadmin') ?? session()->get('id');
         $nama_soal = $this->request->getVar('nama_soal');
 
         // Pastikan ada soal yang diinput
@@ -100,7 +110,7 @@ class UjianController extends BaseController
             $data_ujian = [
                 'kode_ujian'     => $kode_ujian,
                 'nama_ujian'     => $this->request->getVar('nama_ujian'),
-                'guru'           => session()->get('id'),
+                'guru'           => $idguru,
                 'kelas'          => $this->request->getVar('kelas'),
                 'mapel'          => $this->request->getVar('mapel'),
                 'waktu_per_soal' => $this->request->getVar('waktu_per_soal'),
@@ -548,6 +558,7 @@ class UjianController extends BaseController
 
     public function editUjian($kode_ujian)
     {
+        $idguru = session()->get('idguru_diadmin') ?? session()->get('id');
         $kode_ujian_asli = decrypt_url($kode_ujian);
 
         $data['breadcrumbs'] = [
@@ -578,9 +589,9 @@ class UjianController extends BaseController
             ->getResultObject();
 
         $data['siswa'] = $this->siswaModel->getAllbyKelas($data['ujian']->kelas);
-        $data['guru'] = $this->guruModel->asObject()->find(session()->get('id'));
-        $data['guru_kelas'] = $this->gurukelasModel->getALLByGuru(session()->get('id'));
-        $data['guru_mapel'] = $this->guruMapelModel->getALLByGuru(session()->get('id'));
+        $data['guru'] = $this->guruModel->asObject()->find($idguru);
+        $data['guru_kelas'] = $this->gurukelasModel->getALLByGuru($idguru);
+        $data['guru_mapel'] = $this->guruMapelModel->getALLByGuru($idguru);
         $data['kategori'] = $db->table('kategori')->get()->getResultObject();
 
         return view('guru/ujian/edit_pg', $data);
@@ -700,11 +711,12 @@ class UjianController extends BaseController
 
     public function update()
     {
+        $idguru = session()->get('idguru_diadmin') ?? session()->get('id');
         // DATA UJIAN
         $data_ujian = [
             'kode_ujian' => $this->request->getVar('kode_ujian'),
             'nama_ujian' => $this->request->getVar('nama_ujian'),
-            'guru' => session()->get('id'),
+            'guru' => $idguru,
             'kelas' => $this->request->getVar('kelas'),
             'mapel' => $this->request->getVar('mapel'),
             'date_created' => time(),
@@ -719,7 +731,7 @@ class UjianController extends BaseController
             $update_ujian = [
                 'kode_ujian' => $this->request->getVar('kode_ujian'),
                 'nama_ujian' => $this->request->getVar('nama_ujian'),
-                'guru' => session()->get('id'),
+                'guru' => $idguru,
                 'kelas' => $this->request->getVar('kelas'),
                 'mapel' => $this->request->getVar('mapel'),
                 'date_created' => time(),
@@ -736,7 +748,7 @@ class UjianController extends BaseController
                     'id_siswa' => $rows,
                     'kode_ujian' => $this->request->getVar('kode_ujian'),
                     'nama_ujian' => $this->request->getVar('nama_ujian'),
-                    'guru' => session()->get('id'),
+                    'guru' => $idguru,
                     'kelas' => $this->request->getVar('kelas'),
                     'mapel' => $this->request->getVar('mapel'),
                     'date_created' => time(),
@@ -786,7 +798,7 @@ class UjianController extends BaseController
                     'id_siswa' => $row,
                     'kode_ujian' => $this->request->getVar('kode_ujian'),
                     'nama_ujian' => $this->request->getVar('nama_ujian'),
-                    'guru' => session()->get('id'),
+                    'guru' => $idguru,
                     'kelas' => $this->request->getVar('kelas'),
                     'mapel' => $this->request->getVar('mapel'),
                     'date_created' => time(),
@@ -797,82 +809,5 @@ class UjianController extends BaseController
             }
         }
         return redirect()->to('guru/ujian')->with('success', 'Ujian telah dibuat');
-    }
-
-
-
-
-    public function downloadTemplate()
-    {
-        return $this->response->download('assets/app-assets/file-excel/template.xlsx', NULL);
-    }
-    public function importSoalExcel()
-    {
-        $siswa = $this->siswaModel->getAllbyKelas($this->request->getVar('e_kelas'));
-        $guru = $this->guruModel->asObject()->find(session()->get('id'));
-        if (count($siswa) == 0) {
-            return redirect()->to('sw-guru/ujian')->with('pesan', 'Belum ada siswa dikelas ini');
-        }
-
-        // DATA UJIAN
-        $kode_ujian = random_string('alnum', 10);
-        $data_ujian = [
-            'kode_ujian' => $kode_ujian,
-            'nama_ujian' => $this->request->getVar('e_nama_ujian'),
-            'guru' => session()->get('id'),
-            'kelas' => $this->request->getVar('e_kelas'),
-            'mapel' => $this->request->getVar('e_mapel'),
-            'date_created' => time(),
-        ];
-        // END DATA UJIAN
-
-
-        // TANGKAP FILE EXCEL YANG DI UPLLOAD
-        $file = $this->request->getFile('excel');
-        // AMBIL EXTENSI EXCEL YANG DI UPLOAD
-        $ekstensi = $file->getClientExtension();
-
-        // JIKA EKSTENSINYA XLS BERARTI FORMAT EXCEL VERSI LAMA
-        if ($ekstensi == 'xls') {
-            $reader = new Xls();
-        }
-        // JIKA EKSTENSINYA XLSX BERARTI FORMAT EXCEL VERSI BARU
-        if ($ekstensi == 'xlsx') {
-            $reader = new Xlsx();
-        }
-        /** Load $inputFileName to a Spreadsheet Object  **/
-        $spreadsheet = $reader->load($file);
-        // SIMPAN DATA EXCEL KEDALAM VARIABLE $data DAN UBAH MENJADI ARRAY
-        $data = $spreadsheet->getActiveSheet()->toArray();
-        // LOOPING DATA EXCEL
-
-        // DATA DETAIL UJIAN PG
-        $data_detail_ujian = array();
-
-        foreach ($data as $baris => $kolom) {
-            // KARENA DI DALAM EXCELNYA MEMILIKI HEADER / JUDUL (contoh : nama | kelas | email)
-            // MAKA SKIP BAGIAN JUDUL / BARIS PERTAMA
-            if ($baris != 0) {
-                // AMBDIL DATA DARI BARIS KEDUA DAN MENYIMPANNYA KEDALAM VARIABEL $data_detail_ujian
-                if ($kolom[0] != null) {
-                    array_push($data_detail_ujian, array(
-                        'kode_ujian' => $kode_ujian,
-                        'nama_soal' => $kolom[0],
-                        'pg_1' => 'A. ' . $kolom[1],
-                        'pg_2' => 'B. ' . $kolom[2],
-                        'pg_3' => 'C. ' . $kolom[3],
-                        'pg_4' => 'D. ' . $kolom[4],
-                        'pg_5' => 'E. ' . $kolom[5],
-                        'jawaban' => $kolom[6],
-                        'penjelasan' => $kolom[7],
-                    ));
-                }
-            }
-        }
-
-
-        $this->ujianMasterModel->save($data_ujian);
-        $this->ujianDetailModel->insertBatch($data_detail_ujian);
-        return redirect()->to('sw-guru/ujian')->with('success', 'Ujian telah dibuat');
     }
 }

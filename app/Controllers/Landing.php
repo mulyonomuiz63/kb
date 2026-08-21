@@ -115,6 +115,7 @@ class Landing extends BaseController
         
         $data['schema'] = $schema;
         $data['paket'] = $this->PaketModel->getAllLimit();
+        $data['paketUskp'] = $this->PaketModel->getPaketUskp();
         $data['lihat'] = '0';
         $data['dataIklan'] =  $this->db->table('iklan')->where('status', 'I')->where('status_iklan', 'modal')->orderBy("id", 'desc')->get()->getResultObject();
         $data['dataMeta'] =  $this->db->table('iklan')->where('status', 'I')->where('status_iklan', 'modal')->orderBy("id", 'desc')->get()->getRowObject();
