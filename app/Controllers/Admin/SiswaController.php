@@ -575,8 +575,8 @@ class SiswaController extends BaseController
 
             foreach ($tugas as $u) {
                 // --- LOGIKA HITUNG DURASI (3 Menit per Soal) ---
-                $jmlSoal = $db->query("SELECT COUNT(ujian) as total_soal FROM ujian_siswa WHERE ujian = '$u->kode_ujian' and siswa = '$u->id_siswa'")->getRow();
-                $totalSoal = $jmlSoal ? $jmlSoal->total_soal : 30;
+                $jmlSoal = soal_ujian(encrypt_url($u->kode_ujian));
+                $totalSoal = count($jmlSoal);
                 $durasiMenit = $totalSoal * $u->waktu_per_soal;
 
                 // --- LOGIKA TOMBOL AKSI ---

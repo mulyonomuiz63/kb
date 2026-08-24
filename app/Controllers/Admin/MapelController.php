@@ -27,8 +27,9 @@ class MapelController extends BaseController
     public function index()
     {
 
-        $data = [
-            'title'        => 'Data Mapel',
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
+            ['title' => 'List Mapel', 'url' => '#'],
         ];
         return view('admin/mapel/list', $data);
     }
