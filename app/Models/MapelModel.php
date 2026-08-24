@@ -20,6 +20,8 @@ class MapelModel extends Model
 
     protected $allowedFields    = ['nama_mapel', 'file'];
 
+    protected $useSoftDeletes = true;
+    protected $deletedField   = 'deleted_at';
 
 
     public function getAll($kelas)

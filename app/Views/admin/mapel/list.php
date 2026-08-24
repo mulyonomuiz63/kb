@@ -166,11 +166,9 @@
                 "url": "<?= base_url('sw-admin/mapel/datatables') ?>",
                 "type": "POST",
                 "data": function(d) {
-                    // Ambil hash terbaru dari input setiap kali datatables melakukan request
                     d.<?= csrf_token() ?> = $('input[name="<?= csrf_token() ?>"]').val();
                 },
                 "dataSrc": function(json) {
-                    // Update token di seluruh halaman dengan token baru yang dikirim server
                     if (json.token) {
                         $('input[name="<?= csrf_token() ?>"]').val(json.token);
                     }
@@ -178,16 +176,9 @@
                 }
             },
             "columnDefs": [
-                {
-                    "targets": [0, 2, 3],
-                    "orderable": false
-                },
-                {
-                    "targets": [0, 3],
-                    "className": "text-center"
-                }
+                { "targets": [0, 2, 3], "orderable": false },
+                { "targets": [0, 3], "className": "text-center" }
             ],
-            // Initialize Tooltips/Menus dynamically added by datatables
             "drawCallback": function(settings) {
                 if (typeof KTMenu !== 'undefined') {
                     KTMenu.createInstances();
@@ -200,17 +191,17 @@
             table.search(this.value).draw();
         });
 
-        // Tambah Baris (Dengan penyesuaian kelas form-control-solid)
+        // Tambah Baris
         $('.tambah-baris-mapel').click(function() {
             let baris = `<tr>
-            <td><input type="text" name="nama_mapel[]" required class="form-control form-control-solid" placeholder="Nama Mapel"></td>
-            <td><input type="file" name="gambar_mapel[]" required class="form-control form-control-solid" accept="image/*"></td>
-            <td class="text-end">
-                <button type="button" class="btn btn-icon btn-light-danger btn-sm btn-remove-row">
-                    <i class="ki-duotone ki-trash fs-3"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i>
-                </button>
-            </td>
-        </tr>`;
+                <td><input type="text" name="nama_mapel[]" required class="form-control form-control-solid" placeholder="Nama Mapel"></td>
+                <td><input type="file" name="gambar_mapel[]" required class="form-control form-control-solid" accept="image/*"></td>
+                <td class="text-end">
+                    <button type="button" class="btn btn-icon btn-light-danger btn-sm btn-remove-row">
+                        <i class="ki-duotone ki-trash fs-3"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i>
+                    </button>
+                </td>
+            </tr>`;
             $('#tbody-mapel').append(baris);
         });
 
@@ -219,39 +210,57 @@
             $(this).closest('tr').remove();
         });
 
-        // Edit AJAX
-        $(document).on('click', '.edit-mapel', function() {
-            const id = $(this).data('id');
+        // Edit AJAX (Perbaikan Utama)
+        $(document).on('click', '.edit-mapel', function(e) {
+            e.preventDefault(); // Mencegah reload / submit event default
 
-            // 1. Ambil Nama & Hash CSRF terbaru dari input hidden yang ada di halaman
+            const id = $(this).data('id');
             const csrfName = '<?= csrf_token() ?>';
-            const csrfHash = $('input[name="<?= csrf_token() ?>"]').val();
+            const csrfHash = $('input[name="' + csrfName + '"]').val();
+
+            if (!id) {
+                console.error('ID Mapel tidak ditemukan pada tombol edit!');
+                return;
+            }
 
             $.ajax({
                 type: "POST",
                 url: "<?= base_url('sw-admin/mapel/edit') ?>",
                 data: {
                     id_mapel: id,
-                    [csrfName]: csrfHash // Mengirim hash terbaru (Kunci A)
+                    [csrfName]: csrfHash
                 },
                 dataType: "JSON",
                 success: function(res) {
-                    // 2. Isi data ke dalam field modal
-                    $('#id_mapel').val(res.mapel.id_mapel);
-                    $('#nama_mapel').val(res.mapel.nama_mapel);
-                    $('#gambar_mapel_lama').val(res.mapel.file);
-
-                    let url_preview = "<?= base_url('uploads/mapel') ?>/" + res.mapel.file;
-                    // Styling preview gambar agar terlihat estetik
-                    $('#preview_gambar_lama').html(`<img src="${url_preview}" class="img-fluid rounded shadow-sm" style="max-height: 150px; object-fit: contain;">`);
-
-                    // 3. UPDATE TOKEN CSRF DI HALAMAN (Paling Penting!)
+                    // 1. Update Token CSRF di seluruh input form
                     if (res.token) {
-                        $('input[name="<?= csrf_token() ?>"]').val(res.token);
+                        $('input[name="' + csrfName + '"]').val(res.token);
                     }
 
-                    // Gunakan data-bs-target native BS5 (Metronic 8)
-                    $('#edit_mapel_modal').modal('show');
+                    // 2. Tampilkan data ke input modal jika respon valid
+                    if (res.mapel) {
+                        $('#id_mapel').val(res.mapel.id_mapel);
+                        $('#nama_mapel').val(res.mapel.nama_mapel);
+                        $('#gambar_mapel_lama').val(res.mapel.file);
+
+                        if (res.mapel.file) {
+                            let url_preview = "<?= base_url('uploads/mapel') ?>/" + res.mapel.file;
+                            $('#preview_gambar_lama').html(`<img src="${url_preview}" class="img-fluid rounded shadow-sm" style="max-height: 150px; object-fit: contain;">`);
+                        } else {
+                            $('#preview_gambar_lama').html('<span class="text-muted fs-7">Tidak ada gambar</span>');
+                        }
+
+                        // 3. Trigger Modal menggunakan Bootstrap 5 Instance (Standar Metronic 8)
+                        const modalElement = document.getElementById('edit_mapel_modal');
+                        const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
+                        modalInstance.show();
+                    } else {
+                        alert('Data mapel tidak ditemukan!');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error AJAX:", xhr.responseText);
+                    alert("Gagal mengambil data. Pastikan controller mengembalikan JSON dan token CSRF sesuai.");
                 }
             });
         });
