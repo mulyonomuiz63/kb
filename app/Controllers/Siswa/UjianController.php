@@ -373,7 +373,6 @@ class UjianController extends BaseController
                     ->set('start_ujian', $startTime)
                     ->set('end_ujian', $endTime)
                     ->set('status', 'U')
-                    ->set('nilai', null)
                     ->set('kuota', $kuota)
                     ->where('id_ujian', $id_ujian)
                     ->update();
