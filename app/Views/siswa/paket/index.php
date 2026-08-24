@@ -416,6 +416,11 @@
 </script>
 
 <script src="https://www.google.com/recaptcha/api.js?render=<?= setting('recaptcha_site_key') ?>"></script>
+
+<script>
+  fbq('track', 'InitiateCheckout');
+</script>
+
 <script>
   function submitForm(actionName) {
     if (!form.checkValidity()) {

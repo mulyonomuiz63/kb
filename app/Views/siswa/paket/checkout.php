@@ -311,6 +311,11 @@
 <?= $this->endSection(); ?>
 
 <?= $this->section('scripts'); ?>
+
+<script>
+  fbq('track', 'AddPaymentInfo');
+</script>
+
 <script>
   document.getElementById('bukti_bayar').addEventListener('change', function(e) {
     const file = e.target.files[0];
