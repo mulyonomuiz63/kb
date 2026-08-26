@@ -241,15 +241,6 @@
     .custom-range::-webkit-slider-thumb:hover {
         transform: scale(1.3);
     }
-
-    /* Kustomisasi tambahan Accordion */
-    .accordion-button::after {
-        background-size: 1.25rem;
-    }
-    .accordion-button:not(.collapsed) {
-        background-color: #f1faff !important;
-        color: #009ef7 !important;
-    }
 </style>
 <?= $this->endSection(); ?>
 
@@ -298,35 +289,52 @@
                 <?php
                 $delay = 0;
                 $currentDateTime = strtotime(date('Y-m-d H:i:s'));
-                $currentMonthKey = date('Y-m'); // Mengambil Tahun-Bulan saat ini (Contoh: 2026-08)
-
-                // Array Kamus Bulan Indonesia
+                
+                // ==========================================
+                // PROSES 1: PENGUMPULAN DATA & PENGELOMPOKAN
+                // ==========================================
+                $groupedSessions = [];
                 $bulanIndo = [
                     '01' => 'Januari', '02' => 'Februari', '03' => 'Maret',
                     '04' => 'April', '05' => 'Mei', '06' => 'Juni',
                     '07' => 'Juli', '08' => 'Agustus', '09' => 'September',
                     '10' => 'Oktober', '11' => 'November', '12' => 'Desember'
                 ];
+                $currentMonthKey = date('Y-m');
 
-                $groupedSessions = [];
-
+                // Looping utama persis seperti kode asli Anda untuk query database
                 foreach ($webinar as $w) {
-                    $childIds = json_decode($w->sesi_gratis, true) ?? [];
-
-                    // ==========================================
-                    // Jika sesi_gratis ada isinya, maka JANGAN DITAMPILKAN
-                    // ==========================================
-                    if (!empty($childIds)) {
-                        continue;
-                    }
-
-                    // Cek apakah paket ini Gratis atau Berbayar
                     $isPaketGratis = ($w->status == 'F');
 
-                    // Karena sesi_gratis kosong, langsung pakai $w sebagai sesi utama
-                    $childSessions = [$w];
+                    $childSessions = [];
+                    $childIds = json_decode($w->sesi_gratis, true) ?? [];
 
-                    // PENGELOMPOKAN BERDASARKAN TAHUN DAN BULAN (waktu_mulai)
+                    if (!empty($childIds)) {
+                        $db = \Config\Database::connect();
+                        $childSessions = $db->table('webinar_sesi')
+                            ->whereIn('id_sesi', $childIds)
+                            ->orderBy('waktu_mulai', 'ASC')
+                            ->get()
+                            ->getResult();
+                    } else {
+                        $childSessions = [$w];
+                    }
+
+                    // Urutkan Sesi (Sesi selesai di paling belakang)
+                    usort($childSessions, function ($a, $b) use ($currentDateTime) {
+                        $endA = strtotime($a->waktu_selesai);
+                        $endB = strtotime($b->waktu_selesai);
+
+                        $isFinishedA = $endA < $currentDateTime ? 1 : 0;
+                        $isFinishedB = $endB < $currentDateTime ? 1 : 0;
+
+                        if ($isFinishedA !== $isFinishedB) {
+                            return $isFinishedA - $isFinishedB;
+                        }
+                        return strtotime($a->waktu_mulai) - strtotime($b->waktu_mulai);
+                    });
+
+                    // Masukkan data yang sudah siap ke dalam array kelompok berdasarkan Bulan & Tahun
                     foreach ($childSessions as $child) {
                         $monthKey = date('Y-m', strtotime($child->waktu_mulai));
                         $groupedSessions[$monthKey][] = [
@@ -337,13 +345,14 @@
                     }
                 }
 
-                // Urutkan Array Grup agar bulan yang terbaru (Teratas/Terbaru) berada di urutan atas
+                // Urutkan grup agar bulan terbaru berada paling atas
                 krsort($groupedSessions);
                 ?>
 
-                <!-- JIKA SETELAH DI FILTER TERNYATA MASIH ADA DATA -->
+                <!-- ========================================== -->
+                <!-- PROSES 2: RENDER HTML ACCORDION & CARD     -->
+                <!-- ========================================== -->
                 <?php if (!empty($groupedSessions)): ?>
-                    <!-- ACCORDION KELOMPOK PELATIHAN -->
                     <div class="accordion accordion-icon-toggle" id="webinarAccordion">
                         <?php
                         $accIndex = 0;
@@ -352,10 +361,9 @@
                             list($year, $month) = explode('-', $monthKey);
                             $monthName = $bulanIndo[$month] . ' ' . $year;
 
-                            // Cek apakah group ini adalah Bulan Saat Ini
+                            // Cek apakah group ini adalah Bulan Saat Ini agar otomatis terbuka
                             $isActiveMonth = ($monthKey === $currentMonthKey);
                             
-                            // Konfigurasi CSS berdasarkan status aktif/tidaknya bulan
                             $collapseClass = $isActiveMonth ? 'show' : '';
                             $ariaExpanded = $isActiveMonth ? 'true' : 'false';
                             $buttonClass = $isActiveMonth ? '' : 'collapsed';
@@ -372,15 +380,17 @@
                                 </h2>
                                 <div id="collapse_<?= $accIndex ?>" class="accordion-collapse collapse <?= $collapseClass ?>" aria-labelledby="heading_<?= $accIndex ?>" data-bs-parent="#webinarAccordion">
                                     <div class="accordion-body bg-light rounded-bottom p-5 p-lg-8 border-top">
+                                        
+                                        <!-- Row Card Asli Anda -->
                                         <div class="row g-7">
-
-                                            <!-- Render setiap anak sesi menjadi Card Terpisah -->
                                             <?php foreach ($sessions as $item): ?>
                                                 <?php
+                                                // Memulihkan variabel dari dalam array grouping
                                                 $w = $item['w'];
                                                 $child = $item['child'];
                                                 $isPaketGratis = $item['isPaketGratis'];
-
+                                                
+                                                // --- LOGIKA CARD ASLI ANDA ---
                                                 $delay += 0.1;
                                                 $waktuMulai = strtotime($child->waktu_mulai);
                                                 $waktuSelesai = strtotime($child->waktu_selesai);
@@ -389,11 +399,16 @@
                                                 // Ambil Waktu Pembelian User
                                                 $waktuBeli = strtotime($w->tgl_pembayaran ?? $w->created_at);
 
+                                                // ================================================================
+                                                // UPDATE LOGIKA: Membandingkan hanya berdasarkan TANGGAL (Hari)
+                                                // Mengabaikan Jam, sehingga beli di hari yang sama tetap aman.
+                                                // ================================================================
                                                 $tanggalBeli = strtotime(date('Y-m-d', $waktuBeli));
                                                 $tanggalSelesai = strtotime(date('Y-m-d', $waktuSelesai));
 
                                                 // Cek apakah user mendaftar/membayar HARI BERIKUTNYA setelah sesi ini selesai
                                                 $isTerlambatBeli = ($tanggalBeli > $tanggalSelesai);
+                                                // ================================================================
 
                                                 // Menentukan Status Sesi Zoom (Dibuka 3 jam sebelum mulai)
                                                 if ($isTerlambatBeli) {
@@ -434,6 +449,7 @@
                                                     $decodedMateri = json_decode($materiData, true);
                                                     if (is_array($decodedMateri)) {
                                                         foreach ($decodedMateri as $file) {
+                                                            // Jika database hanya menyimpan nama file, lengkapi path foldernya
                                                             if (!filter_var($file, FILTER_VALIDATE_URL)) {
                                                                 $fileMateri[] = base_url('uploads/webinar/materi/' . $file);
                                                             } else {
@@ -468,15 +484,19 @@
                                                         <div class="position-relative img-zoom-container bg-light" style="aspect-ratio: 16/9; flex-shrink: 0;">
                                                             <?php if ($firstVideoId && !$isPaketGratis && !$isTerlambatBeli): ?>
                                                                 <?php
+                                                                // Mengolah Data JSON YouTube dengan aman (Mendukung JSON array maupun string biasa)
                                                                 $youtubeLinkstop = [];
                                                                 if (!empty($child->link_youtube)) {
                                                                     $decodedYT = json_decode($child->link_youtube, true);
                                                                     if (is_array($decodedYT)) {
                                                                         $youtubeLinkstop = $decodedYT;
                                                                     } else {
+                                                                        // Fallback jika ternyata tersimpan sebagai string/link tunggal
                                                                         $youtubeLinkstop = [$child->link_youtube];
                                                                     }
                                                                 }
+
+                                                                // Ambil link video pertama dengan aman untuk tombol gambar thumbnail
                                                                 $firstYtLink = $youtubeLinkstop[0] ?? '';
                                                                 ?>
                                                                 <button type="button"
@@ -572,6 +592,7 @@
                                                                 </div>
 
                                                                 <div class="d-flex flex-column gap-2" style="max-height: 140px; overflow-y: auto;">
+                                                                    <!-- Logika Terkunci (Gratis ATAU Terlewat Beli) -->
                                                                     <?php if ($isPaketGratis || $isTerlambatBeli): ?>
                                                                         <div class="alert alert-light-danger border border-danger border-dashed p-3 m-0 d-flex align-items-center">
                                                                             <i class="ki-outline ki-lock-3 fs-1 text-danger me-3"></i>
@@ -583,7 +604,11 @@
                                                                             </div>
                                                                         </div>
                                                                     <?php else: ?>
+
+                                                                        <!-- JIKA KEDUA DATA (YOUTUBE & MATERI) KOSONG -->
                                                                         <?php if (empty($youtubeLinks) && empty($fileMateri)): ?>
+
+                                                                            <!-- Cek apakah kelas sudah selesai atau belum -->
                                                                             <?php if ($status == 'finished'): ?>
                                                                                 <div class="alert alert-light-info border border-info border-dashed p-3 m-0 d-flex align-items-center">
                                                                                     <i class="ki-outline ki-information-5 fs-2 text-info me-3"></i>
@@ -605,7 +630,10 @@
                                                                                     </div>
                                                                                 </div>
                                                                             <?php endif; ?>
+
                                                                         <?php else: ?>
+
+                                                                            <!-- RENDER REKAMAN YOUTUBE -->
                                                                             <?php foreach ($youtubeLinks as $idx => $ytLink): ?>
                                                                                 <button type="button"
                                                                                     class="btn btn-sm btn-white youtube-item-btn fw-bold d-flex align-items-center justify-content-between py-2.5 px-3 rounded-2 shadow-xs w-100 text-start"
@@ -619,6 +647,8 @@
                                                                                     <i class="ki-outline ki-play fs-5 text-danger"></i>
                                                                                 </button>
                                                                             <?php endforeach; ?>
+
+                                                                            <!-- RENDER FILE MATERI PDF -->
                                                                             <?php foreach ($fileMateri as $idx => $materiUrl): ?>
                                                                                 <a href="<?= esc($materiUrl) ?>" target="_blank"
                                                                                     class="btn btn-sm btn-white fw-bold d-flex align-items-center justify-content-between py-2.5 px-3 rounded-2 shadow-xs w-100 text-start mt-1">
@@ -629,7 +659,9 @@
                                                                                     <i class="ki-outline ki-file-down fs-5 text-primary"></i>
                                                                                 </a>
                                                                             <?php endforeach; ?>
+
                                                                         <?php endif; ?>
+
                                                                     <?php endif; ?>
                                                                 </div>
                                                             </div>
@@ -639,11 +671,11 @@
                                                                 <?php if ($status == 'missed'): ?>
                                                                     <button class="btn btn-light-danger w-100 fs-7 fw-bold py-3 disabled" disabled>
                                                                         <i class="ki-outline ki-cross-square fs-5 me-2"></i> Akses Ditutup (Terlewat)
-                                                                </button>
+                                                                    </button>
                                                                 <?php elseif ($status == 'upcoming'): ?>
                                                                     <button class="btn btn-light w-100 fs-7 fw-bold py-3 disabled" disabled>
                                                                         <i class="ki-outline ki-lock fs-5 me-2"></i> Akses Gmeet Dibuka <?= date('d M H:i', $waktuBukaZoom) ?>
-                                                                </button>
+                                                                    </button>
                                                                 <?php elseif ($status == 'live'): ?>
                                                                     <a href="<?= esc($mainZoomLink) ?>" target="_blank" class="btn btn-primary btn-glow-primary w-100 fs-7 fw-bold py-3 shadow-sm hover-elevate-up">
                                                                         Gabung Gmeet <i class="ki-outline ki-entrance-left fs-5 ms-2"></i>
@@ -658,16 +690,14 @@
                                                     </div>
                                                 </div>
                                             <?php endforeach; ?>
-
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         <?php endforeach; ?>
                     </div>
-                
-                <!-- JIKA SEMUA DATA TERSKIP (KOSONG) -->
                 <?php else: ?>
+                    <!-- Empty State -->
                     <div class="row g-7">
                         <div class="col-12 animate-card">
                             <div class="card border-0 shadow-none bg-transparent">
@@ -695,7 +725,7 @@
                         </div>
                     </div>
                 <?php endif; ?>
-
+            
             <?php else: ?>
                 <!-- Empty State -->
                 <div class="row g-7">
@@ -804,7 +834,7 @@
 
 <!-- Modal Popup Sertifikat -->
 <div class="modal fade" id="modalSertifikat" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-dialog modal-dialog-centered modal-xl"> <!-- Diubah jadi modal-xl agar preview PDF lebih luas dan lega -->
         <div class="modal-content shadow-lg border-0 rounded-4">
 
             <div class="modal-header border-0 py-5 bg-light-success">
