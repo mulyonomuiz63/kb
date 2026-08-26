@@ -1,4 +1,22 @@
 <?= $this->extend('template/app'); ?>
+
+<!-- TAMBAHAN CSS UNTUK TAMPILAN ACCORDION -->
+<?= $this->section('styles'); ?>
+<style>
+    .group-header:hover td {
+        background-color: #e5f5ff !important;
+    }
+
+    .transition-icon {
+        transition: transform 0.3s ease;
+    }
+
+    .icon-closed {
+        transform: rotate(-90deg);
+    }
+</style>
+<?= $this->endSection(); ?>
+
 <?= $this->section('content'); ?>
 
 <div class="d-flex flex-column flex-column-fluid">
@@ -29,8 +47,6 @@
                 <div class="card-body pt-0">
                     <div class="table-responsive">
                         <table id="datatables-list" class="table align-middle table-row-dashed fs-6 gy-5 text-nowrap w-100">
-                            <!-- Cukup ganti struktur table thead dan javascript dataTables -->
-
                             <thead>
                                 <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0 align-middle">
                                     <th class="min-w-200px">Nama Sesi</th>
@@ -41,10 +57,10 @@
                                     <th class="min-w-200px">Sesi Bonus / Gratis</th>
                                     <th class="min-w-125px">Link Zoom</th>
                                     <th class="min-w-125px">Link YouTube</th>
-                                    
+
                                     <!-- TAMBAHAN: Kolom Header File Materi -->
                                     <th class="min-w-150px">File Materi</th>
-                                    
+
                                     <th class="text-end min-w-75px">Opsi</th>
                                 </tr>
                             </thead>
@@ -241,7 +257,6 @@
         $('[data-control="select2"]').select2();
 
         // 1. Inisialisasi DataTables Server Side
-        // 1. Inisialisasi DataTables Server Side
         var table = $('#datatables-list').DataTable({
             "processing": true,
             "serverSide": true,
@@ -281,18 +296,14 @@
                 {
                     "data": "link_youtube"
                 },
-                
-                // TAMBAHAN: Panggil data file materi
                 {
                     "data": "file_materi"
                 },
-                
                 {
                     "data": "opsi"
                 }
             ],
             "columnDefs": [{
-                // PERBAIKAN: Gunakan -1 agar selalu menargetkan kolom paling terakhir secara otomatis
                 "targets": [-1],
                 "orderable": false,
                 "className": "text-end"
@@ -302,6 +313,91 @@
                     KTMenu.createInstances();
                 }
                 $('[data-bs-toggle="tooltip"]').tooltip();
+
+                // ==========================================================
+                // LOGIKA ACCORDION BERDASARKAN FORMAT CONTROLLER
+                // ==========================================================
+                var api = this.api();
+                var rows = api.rows({ page: 'current' }).nodes();
+                var last = null;
+                var groupIndex = 0;
+
+                // Mendapatkan Bulan & Tahun saat ini (Format Angka: YYYY-MM)
+                var dateObj = new Date();
+                var currYear = dateObj.getFullYear();
+                var currMonth = String(dateObj.getMonth() + 1).padStart(2, '0');
+                var currentMonthKey = currYear + '-' + currMonth;
+
+                var monthNames = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+
+                // Bersihkan event click sebelumnya agar tidak bertumpuk
+                $('#datatables-list tbody').off('click', 'tr.group-header');
+
+                // Loop setiap baris berdasarkan kolom "waktu" (Index ke-1)
+                api.column(1, { page: 'current' }).data().each(function(waktuHtml, i) {
+                    
+                    // Ambil teks murni dari HTML yang dikirim controller: "Mulai: YYYY-MM-DD ... Selesai: ..."
+                    var tempDiv = document.createElement("div");
+                    tempDiv.innerHTML = waktuHtml;
+                    var text = (tempDiv.textContent || tempDiv.innerText || "").trim();
+
+                    var groupName = "Periode Lainnya";
+                    var monthKey = "";
+
+                    // Cari pola tanggal YYYY-MM-DD di dalam teks
+                    var match = text.match(/(\d{4})-(\d{2})-(\d{2})/);
+                    if (match) {
+                        var tahun = match[1];
+                        var bulanAngka = match[2];
+                        monthKey = tahun + '-' + bulanAngka;
+                        
+                        var bIndex = parseInt(bulanAngka, 10);
+                        if (monthNames[bIndex]) {
+                            groupName = monthNames[bIndex] + ' ' + tahun;
+                        }
+                    }
+
+                    // Cek apakah grup ini adalah bulan saat ini
+                    var isOpen = (monthKey === currentMonthKey);
+
+                    // Jika grup berubah, tambahkan baris Header Accordion
+                    if (last !== groupName) {
+                        groupIndex++;
+                        var iconRotationClass = isOpen ? '' : 'icon-closed';
+
+                        $(rows).eq(i).before(
+                            '<tr class="group-header cursor-pointer accordion-toggle" data-group="'+groupIndex+'">' +
+                                '<td colspan="10" class="fw-bolder fs-5 text-primary p-4 bg-light-primary border-bottom border-primary border-opacity-25">' +
+                                    '<div class="d-flex align-items-center justify-content-between">' +
+                                        '<div>' +
+                                            '<i class="ki-outline ki-calendar-8 fs-3 me-2 text-primary"></i> Pelatihan Bulan ' + groupName + 
+                                        '</div>' +
+                                        '<i class="ki-outline ki-down fs-4 text-primary transition-icon ' + iconRotationClass + '" id="icon_group_'+groupIndex+'"></i>' +
+                                    '</div>' +
+                                '</td>' +
+                            '</tr>'
+                        );
+                        last = groupName;
+                    }
+
+                    // Beri penanda class ke baris data
+                    $(rows).eq(i).addClass('group-row-' + groupIndex);
+
+                    // Sembunyikan baris data jika bukan bulan aktif
+                    if (!isOpen) {
+                        $(rows).eq(i).hide();
+                    }
+                });
+
+                // Trigger Event Click untuk buka/tutup Accordion
+                $('#datatables-list tbody').on('click', 'tr.group-header', function() {
+                    var groupId = $(this).data('group');
+                    var icon = $(this).find('.transition-icon');
+                    
+                    $('.group-row-' + groupId).fadeToggle(200);
+                    icon.toggleClass('icon-closed');
+                });
+                // ==========================================================
             }
         });
 
@@ -336,7 +432,6 @@
                     $("#e_link_zoom").val(data.link_zoom_text);
                     $("#e_link_youtube").val(data.link_youtube_text);
                     $("#e_file_materi").val(data.file_materi);
-                    // Set value untuk select2 multi-select sesi gratis
                     $("#e_sesi_gratis").val(data.sesi_gratis_array).trigger('change');
                     $("#e_status").val(data.status);
 

@@ -241,6 +241,15 @@
     .custom-range::-webkit-slider-thumb:hover {
         transform: scale(1.3);
     }
+
+    /* Kustomisasi tambahan Accordion */
+    .accordion-button::after {
+        background-size: 1.25rem;
+    }
+    .accordion-button:not(.collapsed) {
+        background-color: #f1faff !important;
+        color: #009ef7 !important;
+    }
 </style>
 <?= $this->endSection(); ?>
 
@@ -284,354 +293,412 @@
 <div class="d-flex flex-column flex-column-fluid py-4 py-lg-6 mt-8">
     <div id="kt_app_content" class="app-content flex-column-fluid">
         <div id="kt_app_content_container" class="app-container container-xxl">
-            <div class="row g-7">
-                <?php if (!empty($webinar)): ?>
-                    <?php
-                    $delay = 0;
-                    $currentDateTime = strtotime(date('Y-m-d H:i:s'));
-                    ?>
-                    <?php foreach ($webinar as $w) : ?>
+            
+            <?php if (!empty($webinar)): ?>
+                <?php
+                $delay = 0;
+                $currentDateTime = strtotime(date('Y-m-d H:i:s'));
+                $currentMonthKey = date('Y-m'); // Mengambil Tahun-Bulan saat ini (Contoh: 2026-08)
+
+                // Array Kamus Bulan Indonesia
+                $bulanIndo = [
+                    '01' => 'Januari', '02' => 'Februari', '03' => 'Maret',
+                    '04' => 'April', '05' => 'Mei', '06' => 'Juni',
+                    '07' => 'Juli', '08' => 'Agustus', '09' => 'September',
+                    '10' => 'Oktober', '11' => 'November', '12' => 'Desember'
+                ];
+
+                $groupedSessions = [];
+
+                foreach ($webinar as $w) {
+                    $childIds = json_decode($w->sesi_gratis, true) ?? [];
+
+                    // ==========================================
+                    // Jika sesi_gratis ada isinya, maka JANGAN DITAMPILKAN
+                    // ==========================================
+                    if (!empty($childIds)) {
+                        continue;
+                    }
+
+                    // Cek apakah paket ini Gratis atau Berbayar
+                    $isPaketGratis = ($w->status == 'F');
+
+                    // Karena sesi_gratis kosong, langsung pakai $w sebagai sesi utama
+                    $childSessions = [$w];
+
+                    // PENGELOMPOKAN BERDASARKAN TAHUN DAN BULAN (waktu_mulai)
+                    foreach ($childSessions as $child) {
+                        $monthKey = date('Y-m', strtotime($child->waktu_mulai));
+                        $groupedSessions[$monthKey][] = [
+                            'w' => $w,
+                            'child' => $child,
+                            'isPaketGratis' => $isPaketGratis
+                        ];
+                    }
+                }
+
+                // Urutkan Array Grup agar bulan yang terbaru (Teratas/Terbaru) berada di urutan atas
+                krsort($groupedSessions);
+                ?>
+
+                <!-- JIKA SETELAH DI FILTER TERNYATA MASIH ADA DATA -->
+                <?php if (!empty($groupedSessions)): ?>
+                    <!-- ACCORDION KELOMPOK PELATIHAN -->
+                    <div class="accordion accordion-icon-toggle" id="webinarAccordion">
                         <?php
-                        // Cek apakah paket ini Gratis atau Berbayar
-                        $isPaketGratis = ($w->status == 'F');
+                        $accIndex = 0;
+                        foreach ($groupedSessions as $monthKey => $sessions):
+                            $accIndex++;
+                            list($year, $month) = explode('-', $monthKey);
+                            $monthName = $bulanIndo[$month] . ' ' . $year;
 
-                        // Kumpulkan list sesi detail yang akan dijadikan card terpisah
-                        $childSessions = [];
-                        $childIds = json_decode($w->sesi_gratis, true) ?? [];
-
-                        if (!empty($childIds)) {
-                            $db = \Config\Database::connect();
-                            $childSessions = $db->table('webinar_sesi')
-                                ->whereIn('id_sesi', $childIds)
-                                ->orderBy('waktu_mulai', 'ASC')
-                                ->get()
-                                ->getResult();
-                        } else {
-                            // Fallback jika tidak ada anak (hanya 1 sesi utama)
-                            $childSessions = [$w];
-                        }
-
-                        // URUTKAN SESI: Sesi yang sudah selesai ditaruh di paling belakang
-                        usort($childSessions, function ($a, $b) use ($currentDateTime) {
-                            $endA = strtotime($a->waktu_selesai);
-                            $endB = strtotime($b->waktu_selesai);
-
-                            $isFinishedA = $endA < $currentDateTime ? 1 : 0;
-                            $isFinishedB = $endB < $currentDateTime ? 1 : 0;
-
-                            if ($isFinishedA !== $isFinishedB) {
-                                return $isFinishedA - $isFinishedB;
-                            }
-                            return strtotime($a->waktu_mulai) - strtotime($b->waktu_mulai);
-                        });
+                            // Cek apakah group ini adalah Bulan Saat Ini
+                            $isActiveMonth = ($monthKey === $currentMonthKey);
+                            
+                            // Konfigurasi CSS berdasarkan status aktif/tidaknya bulan
+                            $collapseClass = $isActiveMonth ? 'show' : '';
+                            $ariaExpanded = $isActiveMonth ? 'true' : 'false';
+                            $buttonClass = $isActiveMonth ? '' : 'collapsed';
                         ?>
+                            <div class="accordion-item mb-6 border-0 shadow-sm rounded-4 overflow-hidden">
+                                <h2 class="accordion-header" id="heading_<?= $accIndex ?>">
+                                    <button class="accordion-button fs-3 fw-bolder text-dark bg-white <?= $buttonClass ?>" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_<?= $accIndex ?>" aria-expanded="<?= $ariaExpanded ?>" aria-controls="collapse_<?= $accIndex ?>">
+                                        <div class="d-flex align-items-center">
+                                            <i class="ki-outline ki-calendar-8 text-primary fs-2x me-3"></i> 
+                                            Webinar Bulan <?= $monthName ?>
+                                            <span class="badge badge-light-primary ms-3 fs-8 px-3 py-1 rounded-pill"><?= count($sessions) ?> Sesi</span>
+                                        </div>
+                                    </button>
+                                </h2>
+                                <div id="collapse_<?= $accIndex ?>" class="accordion-collapse collapse <?= $collapseClass ?>" aria-labelledby="heading_<?= $accIndex ?>" data-bs-parent="#webinarAccordion">
+                                    <div class="accordion-body bg-light rounded-bottom p-5 p-lg-8 border-top">
+                                        <div class="row g-7">
 
-                        <!-- Render setiap anak sesi menjadi Card Terpisah -->
-                        <?php foreach ($childSessions as $child): ?>
-                            <?php
-                            $delay += 0.1;
-                            $waktuMulai = strtotime($child->waktu_mulai);
-                            $waktuSelesai = strtotime($child->waktu_selesai);
-                            $waktuBukaZoom = $waktuMulai - (3 * 3600); // 3 jam sebelum acara mulai
+                                            <!-- Render setiap anak sesi menjadi Card Terpisah -->
+                                            <?php foreach ($sessions as $item): ?>
+                                                <?php
+                                                $w = $item['w'];
+                                                $child = $item['child'];
+                                                $isPaketGratis = $item['isPaketGratis'];
 
-                            // Ambil Waktu Pembelian User
-                            $waktuBeli = strtotime($w->tgl_pembayaran ?? $w->created_at);
+                                                $delay += 0.1;
+                                                $waktuMulai = strtotime($child->waktu_mulai);
+                                                $waktuSelesai = strtotime($child->waktu_selesai);
+                                                $waktuBukaZoom = $waktuMulai - (3 * 3600); // 3 jam sebelum acara mulai
 
-                            // ================================================================
-                            // UPDATE LOGIKA: Membandingkan hanya berdasarkan TANGGAL (Hari)
-                            // Mengabaikan Jam, sehingga beli di hari yang sama tetap aman.
-                            // ================================================================
-                            $tanggalBeli = strtotime(date('Y-m-d', $waktuBeli));
-                            $tanggalSelesai = strtotime(date('Y-m-d', $waktuSelesai));
+                                                // Ambil Waktu Pembelian User
+                                                $waktuBeli = strtotime($w->tgl_pembayaran ?? $w->created_at);
 
-                            // Cek apakah user mendaftar/membayar HARI BERIKUTNYA setelah sesi ini selesai
-                            $isTerlambatBeli = ($tanggalBeli > $tanggalSelesai);
-                            // ================================================================
+                                                $tanggalBeli = strtotime(date('Y-m-d', $waktuBeli));
+                                                $tanggalSelesai = strtotime(date('Y-m-d', $waktuSelesai));
 
-                            // Menentukan Status Sesi Zoom (Dibuka 3 jam sebelum mulai)
-                            if ($isTerlambatBeli) {
-                                $status = 'missed';
-                                $badgeColor = 'badge-light-danger';
-                                $badgeText = 'Sesi Terlewat';
-                                $icon = 'ki-cross-circle';
-                            } elseif ($currentDateTime < $waktuBukaZoom) {
-                                $status = 'upcoming';
-                                $badgeColor = 'badge-light-warning';
-                                $badgeText = 'Akan Datang';
-                                $icon = 'ki-calendar-tick';
-                            } elseif ($currentDateTime >= $waktuBukaZoom && $currentDateTime <= $waktuSelesai) {
-                                $status = 'live';
-                                $badgeColor = 'bg-danger text-white pulse-animation';
-                                $badgeText = ($currentDateTime < $waktuMulai) ? 'Segera Dimulai' : 'Sedang Live';
-                                $icon = 'ki-bi-camera-video-fill';
-                            } else {
-                                $status = 'finished';
-                                $badgeColor = 'badge-light-success';
-                                $badgeText = 'Selesai';
-                                $icon = 'ki-check-circle';
-                            }
+                                                // Cek apakah user mendaftar/membayar HARI BERIKUTNYA setelah sesi ini selesai
+                                                $isTerlambatBeli = ($tanggalBeli > $tanggalSelesai);
 
-                            // Mengolah Data JSON YouTube
-                            $youtubeLinks = [];
-                            if (!empty($child->link_youtube)) {
-                                $decodedYT = json_decode($child->link_youtube, true);
-                                if (is_array($decodedYT)) {
-                                    $youtubeLinks = $decodedYT;
-                                }
-                            }
-
-                            $fileMateri = [];
-                            $materiData = $child->file_materi ?? null;
-
-                            if (!empty($materiData)) {
-                                $decodedMateri = json_decode($materiData, true);
-                                if (is_array($decodedMateri)) {
-                                    foreach ($decodedMateri as $file) {
-                                        // Jika database hanya menyimpan nama file, lengkapi path foldernya
-                                        if (!filter_var($file, FILTER_VALIDATE_URL)) {
-                                            $fileMateri[] = base_url('uploads/webinar/materi/' . $file);
-                                        } else {
-                                            $fileMateri[] = $file;
-                                        }
-                                    }
-                                } else {
-                                    if (!filter_var($materiData, FILTER_VALIDATE_URL)) {
-                                        $fileMateri[] = base_url('uploads/webinar/materi/' . $materiData);
-                                    } else {
-                                        $fileMateri[] = $materiData;
-                                    }
-                                }
-                            }
-
-                            // Thumbnail Cover YouTube
-                            $firstVideoId = null;
-                            if (!empty($youtubeLinks[0])) {
-                                preg_match('%(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&?/\s]{11})%i', $youtubeLinks[0], $match);
-                                $firstVideoId = $match[1] ?? null;
-                            }
-
-                            // Zoom Link Utama
-                            $zoomLinks = json_decode($child->link_zoom, true) ?? [];
-                            $mainZoomLink = $zoomLinks[0] ?? $child->link_zoom;
-                            ?>
-
-                            <div class="col-md-6 col-xl-4 animate-card" style="animation-delay: <?= $delay ?>s">
-                                <div class="card border-0 shadow-sm h-100 hover-elevate-up d-flex flex-column">
-
-                                    <!-- Card Header / Image Thumbnail -->
-                                    <div class="position-relative img-zoom-container bg-light" style="aspect-ratio: 16/9; flex-shrink: 0;">
-                                        <?php if ($firstVideoId && !$isPaketGratis && !$isTerlambatBeli): ?>
-                                            <?php
-                                            // Mengolah Data JSON YouTube dengan aman (Mendukung JSON array maupun string biasa)
-                                            $youtubeLinkstop = [];
-                                            if (!empty($child->link_youtube)) {
-                                                $decodedYT = json_decode($child->link_youtube, true);
-                                                if (is_array($decodedYT)) {
-                                                    $youtubeLinkstop = $decodedYT;
+                                                // Menentukan Status Sesi Zoom (Dibuka 3 jam sebelum mulai)
+                                                if ($isTerlambatBeli) {
+                                                    $status = 'missed';
+                                                    $badgeColor = 'badge-light-danger';
+                                                    $badgeText = 'Sesi Terlewat';
+                                                    $icon = 'ki-cross-circle';
+                                                } elseif ($currentDateTime < $waktuBukaZoom) {
+                                                    $status = 'upcoming';
+                                                    $badgeColor = 'badge-light-warning';
+                                                    $badgeText = 'Akan Datang';
+                                                    $icon = 'ki-calendar-tick';
+                                                } elseif ($currentDateTime >= $waktuBukaZoom && $currentDateTime <= $waktuSelesai) {
+                                                    $status = 'live';
+                                                    $badgeColor = 'bg-danger text-white pulse-animation';
+                                                    $badgeText = ($currentDateTime < $waktuMulai) ? 'Segera Dimulai' : 'Sedang Live';
+                                                    $icon = 'ki-bi-camera-video-fill';
                                                 } else {
-                                                    // Fallback jika ternyata tersimpan sebagai string/link tunggal
-                                                    $youtubeLinkstop = [$child->link_youtube];
+                                                    $status = 'finished';
+                                                    $badgeColor = 'badge-light-success';
+                                                    $badgeText = 'Selesai';
+                                                    $icon = 'ki-check-circle';
                                                 }
-                                            }
 
-                                            // Ambil link video pertama dengan aman untuk tombol gambar thumbnail
-                                            $firstYtLink = $youtubeLinkstop[0] ?? '';
-                                            ?>
-                                            <button type="button"
-                                                class="btn p-0 border-0 w-100 h-100 position-absolute top-0 start-0 overflow-hidden youtube-item-btn"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#youtubeModal"
-                                                data-youtubelink="<?= esc($firstYtLink) ?>">
+                                                // Mengolah Data JSON YouTube
+                                                $youtubeLinks = [];
+                                                if (!empty($child->link_youtube)) {
+                                                    $decodedYT = json_decode($child->link_youtube, true);
+                                                    if (is_array($decodedYT)) {
+                                                        $youtubeLinks = $decodedYT;
+                                                    }
+                                                }
 
-                                                <img src="https://img.youtube.com/vi/<?= $firstVideoId ?>/maxresdefault.jpg"
-                                                    onerror="this.onerror=null; this.src='https://img.youtube.com/vi/<?= $firstVideoId ?>/hqdefault.jpg';"
-                                                    loading="lazy"
-                                                    class="w-100 h-100 object-fit-cover"
-                                                    alt="<?= esc($child->nama_sesi) ?>">
+                                                $fileMateri = [];
+                                                $materiData = $child->file_materi ?? null;
 
-                                                <div class="position-absolute top-50 start-50 translate-middle" style="z-index: 3;">
-                                                    <i class="ki-solid ki-youtube fs-3x text-danger bg-white rounded-circle shadow-sm"></i>
-                                                </div>
-                                            </button>
-                                        <?php else: ?>
-                                            <?= img_lazy('assets-landing/images/paket/thumbnails/' . $w->file, esc($child->nama_sesi), ['class' => 'w-100 h-100 object-fit-cover']) ?>
-                                        <?php endif; ?>
+                                                if (!empty($materiData)) {
+                                                    $decodedMateri = json_decode($materiData, true);
+                                                    if (is_array($decodedMateri)) {
+                                                        foreach ($decodedMateri as $file) {
+                                                            if (!filter_var($file, FILTER_VALIDATE_URL)) {
+                                                                $fileMateri[] = base_url('uploads/webinar/materi/' . $file);
+                                                            } else {
+                                                                $fileMateri[] = $file;
+                                                            }
+                                                        }
+                                                    } else {
+                                                        if (!filter_var($materiData, FILTER_VALIDATE_URL)) {
+                                                            $fileMateri[] = base_url('uploads/webinar/materi/' . $materiData);
+                                                        } else {
+                                                            $fileMateri[] = $materiData;
+                                                        }
+                                                    }
+                                                }
 
-                                        <div class="position-absolute top-0 start-0 w-100 h-100 bg-gradient-to-t from-dark opacity-25"></div>
+                                                // Thumbnail Cover YouTube
+                                                $firstVideoId = null;
+                                                if (!empty($youtubeLinks[0])) {
+                                                    preg_match('%(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&?/\s]{11})%i', $youtubeLinks[0], $match);
+                                                    $firstVideoId = $match[1] ?? null;
+                                                }
 
-                                        <!-- Label Paket (Gratis / Premium) -->
-                                        <div class="position-absolute top-0 start-0 p-4 w-100">
-                                            <?php if ($isPaketGratis): ?>
-                                                <span class="badge bg-success text-white fs-8 fw-bold px-3 py-2 shadow-sm d-inline-block badge-title-clamp" data-bs-toggle="tooltip" data-bs-placement="top" title="Paket Gratis">
-                                                    <i class="ki-outline ki-abstract-26 fs-6 text-white me-1"></i> Gratis
-                                                </span>
-                                            <?php else: ?>
-                                                <span class="badge bg-warning text-dark fs-8 fw-bold px-3 py-2 shadow-sm d-inline-block badge-title-clamp" data-bs-toggle="tooltip" data-bs-placement="top" title="Paket Full Akses">
-                                                    <i class="ki-outline ki-star fs-6 text-dark me-1"></i> Premium
-                                                </span>
-                                            <?php endif; ?>
-                                        </div>
+                                                // Zoom Link Utama
+                                                $zoomLinks = json_decode($child->link_zoom, true) ?? [];
+                                                $mainZoomLink = $zoomLinks[0] ?? $child->link_zoom;
+                                                ?>
 
-                                        <!-- Status Live/Upcoming/Missed -->
-                                        <div class="position-absolute top-0 end-0 p-4">
-                                            <span class="badge <?= $badgeColor ?> fs-8 fw-bold px-4 py-2 border-0 shadow-sm" <?= $status == 'missed' ? 'data-bs-toggle="tooltip" title="Anda mendaftar setelah sesi ini selesai"' : '' ?>>
-                                                <i class="ki-outline <?= $icon ?> fs-8 me-1 <?= $status == 'live' ? 'text-white' : '' ?>"></i> <?= $badgeText ?>
-                                            </span>
-                                        </div>
-                                    </div>
+                                                <div class="col-md-6 col-xl-4 animate-card" style="animation-delay: <?= $delay ?>s">
+                                                    <div class="card border-0 shadow-sm h-100 hover-elevate-up d-flex flex-column">
 
-                                    <!-- Card Body -->
-                                    <div class="card-body p-7 d-flex flex-column flex-grow-1">
-                                        <div class="d-flex align-items-center mb-5">
-                                            <div class="symbol symbol-40px symbol-circle me-3 shadow-sm border border-2 border-white">
-                                                <img src="<?= base_url('assets-landing/images/logo-blue.png') ?>" alt="Akuntanmu">
-                                            </div>
-                                            <div class="d-flex flex-column align-items-start">
-                                                <span class="text-dark fw-bolder fs-6">Akuntanmu Learning Center</span>
-                                                <span class="badge badge-light-primary fw-bold fs-9 mt-1">Verified Mentor</span>
-                                            </div>
-                                        </div>
+                                                        <!-- Card Header / Image Thumbnail -->
+                                                        <div class="position-relative img-zoom-container bg-light" style="aspect-ratio: 16/9; flex-shrink: 0;">
+                                                            <?php if ($firstVideoId && !$isPaketGratis && !$isTerlambatBeli): ?>
+                                                                <?php
+                                                                $youtubeLinkstop = [];
+                                                                if (!empty($child->link_youtube)) {
+                                                                    $decodedYT = json_decode($child->link_youtube, true);
+                                                                    if (is_array($decodedYT)) {
+                                                                        $youtubeLinkstop = $decodedYT;
+                                                                    } else {
+                                                                        $youtubeLinkstop = [$child->link_youtube];
+                                                                    }
+                                                                }
+                                                                $firstYtLink = $youtubeLinkstop[0] ?? '';
+                                                                ?>
+                                                                <button type="button"
+                                                                    class="btn p-0 border-0 w-100 h-100 position-absolute top-0 start-0 overflow-hidden youtube-item-btn"
+                                                                    data-bs-toggle="modal"
+                                                                    data-bs-target="#youtubeModal"
+                                                                    data-youtubelink="<?= esc($firstYtLink) ?>">
 
-                                        <!-- Judul Sesi Detail -->
-                                        <h3 class="text-dark fw-boldest fs-4 mb-3 lh-base min-h-50px">
-                                            <?= esc($child->nama_sesi) ?>
-                                        </h3>
+                                                                    <img src="https://img.youtube.com/vi/<?= $firstVideoId ?>/maxresdefault.jpg"
+                                                                        onerror="this.onerror=null; this.src='https://img.youtube.com/vi/<?= $firstVideoId ?>/hqdefault.jpg';"
+                                                                        loading="lazy"
+                                                                        class="w-100 h-100 object-fit-cover"
+                                                                        alt="<?= esc($child->nama_sesi) ?>">
 
-                                        <div class="separator separator-dashed my-4"></div>
+                                                                    <div class="position-absolute top-50 start-50 translate-middle" style="z-index: 3;">
+                                                                        <i class="ki-solid ki-youtube fs-3x text-danger bg-white rounded-circle shadow-sm"></i>
+                                                                    </div>
+                                                                </button>
+                                                            <?php else: ?>
+                                                                <?= img_lazy('assets-landing/images/paket/thumbnails/' . $w->file, esc($child->nama_sesi), ['class' => 'w-100 h-100 object-fit-cover']) ?>
+                                                            <?php endif; ?>
 
-                                        <!-- Info Waktu Zoom -->
-                                        <div class="d-flex flex-column gap-3 mb-6">
-                                            <div class="d-flex align-items-center">
-                                                <div class="bg-light-info rounded p-2 me-3">
-                                                    <i class="ki-outline ki-calendar fs-4 text-info"></i>
-                                                </div>
-                                                <div class="d-flex flex-column">
-                                                    <span class="text-gray-500 fw-semibold fs-8">Tanggal Pelaksanaan</span>
-                                                    <span class="text-dark fw-bold fs-6"><?= date('d M Y', $waktuMulai) ?></span>
-                                                </div>
-                                            </div>
-                                            <div class="d-flex align-items-center">
-                                                <div class="bg-light-warning rounded p-2 me-3">
-                                                    <i class="ki-outline ki-time fs-4 text-warning"></i>
-                                                </div>
-                                                <div class="d-flex flex-column">
-                                                    <span class="text-gray-500 fw-semibold fs-8">Waktu Sesi (WIB)</span>
-                                                    <span class="text-dark fw-bold fs-6"><?= date('H:i', $waktuMulai) ?> - <?= date('H:i', $waktuSelesai) ?></span>
-                                                </div>
-                                            </div>
-                                        </div>
+                                                            <div class="position-absolute top-0 start-0 w-100 h-100 bg-gradient-to-t from-dark opacity-25"></div>
 
-                                        <!-- List Rekaman YouTube & Materi PDF -->
-                                        <div class="youtube-recording-box mb-6">
-                                            <div class="d-flex align-items-center justify-content-between mb-3">
-                                                <span class="text-gray-800 fw-bold fs-7 d-flex align-items-center">
-                                                    <i class="ki-solid ki-folder-open text-primary fs-3 me-2"></i> Rekaman & Materi
-                                                </span>
-                                            </div>
+                                                            <!-- Label Paket (Gratis / Premium) -->
+                                                            <div class="position-absolute top-0 start-0 p-4 w-100">
+                                                                <?php if ($isPaketGratis): ?>
+                                                                    <span class="badge bg-success text-white fs-8 fw-bold px-3 py-2 shadow-sm d-inline-block badge-title-clamp" data-bs-toggle="tooltip" data-bs-placement="top" title="Paket Gratis">
+                                                                        <i class="ki-outline ki-abstract-26 fs-6 text-white me-1"></i> Gratis
+                                                                    </span>
+                                                                <?php else: ?>
+                                                                    <span class="badge bg-warning text-dark fs-8 fw-bold px-3 py-2 shadow-sm d-inline-block badge-title-clamp" data-bs-toggle="tooltip" data-bs-placement="top" title="Paket Full Akses">
+                                                                        <i class="ki-outline ki-star fs-6 text-dark me-1"></i> Premium
+                                                                    </span>
+                                                                <?php endif; ?>
+                                                            </div>
 
-                                            <div class="d-flex flex-column gap-2" style="max-height: 140px; overflow-y: auto;">
-                                                <!-- Logika Terkunci (Gratis ATAU Terlewat Beli) -->
-                                                <?php if ($isPaketGratis || $isTerlambatBeli): ?>
-                                                    <div class="alert alert-light-danger border border-danger border-dashed p-3 m-0 d-flex align-items-center">
-                                                        <i class="ki-outline ki-lock-3 fs-1 text-danger me-3"></i>
-                                                        <div class="d-flex flex-column">
-                                                            <span class="fw-bold text-danger fs-8">Akses Terkunci</span>
-                                                            <span class="text-muted fs-9">
-                                                                <?= $isTerlambatBeli ? 'Anda mendaftar setelah sesi ini selesai.' : 'Rekaman dan materi hanya untuk peserta Premium.' ?>
-                                                            </span>
+                                                            <!-- Status Live/Upcoming/Missed -->
+                                                            <div class="position-absolute top-0 end-0 p-4">
+                                                                <span class="badge <?= $badgeColor ?> fs-8 fw-bold px-4 py-2 border-0 shadow-sm" <?= $status == 'missed' ? 'data-bs-toggle="tooltip" title="Anda mendaftar setelah sesi ini selesai"' : '' ?>>
+                                                                    <i class="ki-outline <?= $icon ?> fs-8 me-1 <?= $status == 'live' ? 'text-white' : '' ?>"></i> <?= $badgeText ?>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Card Body -->
+                                                        <div class="card-body p-7 d-flex flex-column flex-grow-1">
+                                                            <div class="d-flex align-items-center mb-5">
+                                                                <div class="symbol symbol-40px symbol-circle me-3 shadow-sm border border-2 border-white">
+                                                                    <img src="<?= base_url('assets-landing/images/logo-blue.png') ?>" alt="Akuntanmu">
+                                                                </div>
+                                                                <div class="d-flex flex-column align-items-start">
+                                                                    <span class="text-dark fw-bolder fs-6">Akuntanmu Learning Center</span>
+                                                                    <span class="badge badge-light-primary fw-bold fs-9 mt-1">Verified Mentor</span>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Judul Sesi Detail -->
+                                                            <h3 class="text-dark fw-boldest fs-4 mb-3 lh-base min-h-50px">
+                                                                <?= esc($child->nama_sesi) ?>
+                                                            </h3>
+
+                                                            <div class="separator separator-dashed my-4"></div>
+
+                                                            <!-- Info Waktu Zoom -->
+                                                            <div class="d-flex flex-column gap-3 mb-6">
+                                                                <div class="d-flex align-items-center">
+                                                                    <div class="bg-light-info rounded p-2 me-3">
+                                                                        <i class="ki-outline ki-calendar fs-4 text-info"></i>
+                                                                    </div>
+                                                                    <div class="d-flex flex-column">
+                                                                        <span class="text-gray-500 fw-semibold fs-8">Tanggal Pelaksanaan</span>
+                                                                        <span class="text-dark fw-bold fs-6"><?= date('d M Y', $waktuMulai) ?></span>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="d-flex align-items-center">
+                                                                    <div class="bg-light-warning rounded p-2 me-3">
+                                                                        <i class="ki-outline ki-time fs-4 text-warning"></i>
+                                                                    </div>
+                                                                    <div class="d-flex flex-column">
+                                                                        <span class="text-gray-500 fw-semibold fs-8">Waktu Sesi (WIB)</span>
+                                                                        <span class="text-dark fw-bold fs-6"><?= date('H:i', $waktuMulai) ?> - <?= date('H:i', $waktuSelesai) ?></span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- List Rekaman YouTube & Materi PDF -->
+                                                            <div class="youtube-recording-box mb-6">
+                                                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                                                    <span class="text-gray-800 fw-bold fs-7 d-flex align-items-center">
+                                                                        <i class="ki-solid ki-folder-open text-primary fs-3 me-2"></i> Rekaman & Materi
+                                                                    </span>
+                                                                </div>
+
+                                                                <div class="d-flex flex-column gap-2" style="max-height: 140px; overflow-y: auto;">
+                                                                    <?php if ($isPaketGratis || $isTerlambatBeli): ?>
+                                                                        <div class="alert alert-light-danger border border-danger border-dashed p-3 m-0 d-flex align-items-center">
+                                                                            <i class="ki-outline ki-lock-3 fs-1 text-danger me-3"></i>
+                                                                            <div class="d-flex flex-column">
+                                                                                <span class="fw-bold text-danger fs-8">Akses Terkunci</span>
+                                                                                <span class="text-muted fs-9">
+                                                                                    <?= $isTerlambatBeli ? 'Anda mendaftar setelah sesi ini selesai.' : 'Rekaman dan materi hanya untuk peserta Premium.' ?>
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                    <?php else: ?>
+                                                                        <?php if (empty($youtubeLinks) && empty($fileMateri)): ?>
+                                                                            <?php if ($status == 'finished'): ?>
+                                                                                <div class="alert alert-light-info border border-info border-dashed p-3 m-0 d-flex align-items-center">
+                                                                                    <i class="ki-outline ki-information-5 fs-2 text-info me-3"></i>
+                                                                                    <div class="d-flex flex-column">
+                                                                                        <span class="fw-bold text-info fs-8">Sedang Dipersiapkan</span>
+                                                                                        <span class="text-muted fs-9">
+                                                                                            Mohon bersabar, rekaman dan file materi saat ini sedang dalam proses persiapan dan akan segera diunggah.
+                                                                                        </span>
+                                                                                    </div>
+                                                                                </div>
+                                                                            <?php else: ?>
+                                                                                <div class="alert alert-light-secondary border border-secondary border-dashed p-3 m-0 d-flex align-items-center">
+                                                                                    <i class="ki-outline ki-time fs-2 text-gray-600 me-3"></i>
+                                                                                    <div class="d-flex flex-column">
+                                                                                        <span class="fw-bold text-gray-700 fs-8">Belum Tersedia</span>
+                                                                                        <span class="text-muted fs-9">
+                                                                                            Rekaman dan materi akan dapat diakses di sini setelah sesi pelatihan selesai.
+                                                                                        </span>
+                                                                                    </div>
+                                                                                </div>
+                                                                            <?php endif; ?>
+                                                                        <?php else: ?>
+                                                                            <?php foreach ($youtubeLinks as $idx => $ytLink): ?>
+                                                                                <button type="button"
+                                                                                    class="btn btn-sm btn-white youtube-item-btn fw-bold d-flex align-items-center justify-content-between py-2.5 px-3 rounded-2 shadow-xs w-100 text-start"
+                                                                                    data-bs-toggle="modal"
+                                                                                    data-bs-target="#youtubeModal"
+                                                                                    data-youtubelink="<?= esc($ytLink) ?>">
+                                                                                    <div class="d-flex align-items-center">
+                                                                                        <span class="badge badge-light-danger fw-bolder fs-9 me-3 px-2 py-1">Video <?= $idx + 1 ?></span>
+                                                                                        <span class="text-gray-700 fs-7 text-truncate" style="max-width: 170px;">Tonton Rekaman Webinar</span>
+                                                                                    </div>
+                                                                                    <i class="ki-outline ki-play fs-5 text-danger"></i>
+                                                                                </button>
+                                                                            <?php endforeach; ?>
+                                                                            <?php foreach ($fileMateri as $idx => $materiUrl): ?>
+                                                                                <a href="<?= esc($materiUrl) ?>" target="_blank"
+                                                                                    class="btn btn-sm btn-white fw-bold d-flex align-items-center justify-content-between py-2.5 px-3 rounded-2 shadow-xs w-100 text-start mt-1">
+                                                                                    <div class="d-flex align-items-center">
+                                                                                        <span class="badge badge-light-primary fw-bolder fs-9 me-3 px-2 py-1">PDF <?= $idx + 1 ?></span>
+                                                                                        <span class="text-gray-700 fs-7 text-truncate" style="max-width: 170px;">Unduh Materi Webinar</span>
+                                                                                    </div>
+                                                                                    <i class="ki-outline ki-file-down fs-5 text-primary"></i>
+                                                                                </a>
+                                                                            <?php endforeach; ?>
+                                                                        <?php endif; ?>
+                                                                    <?php endif; ?>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Action Button Gmeet & Sertifikat -->
+                                                            <div class="mt-auto pt-4">
+                                                                <?php if ($status == 'missed'): ?>
+                                                                    <button class="btn btn-light-danger w-100 fs-7 fw-bold py-3 disabled" disabled>
+                                                                        <i class="ki-outline ki-cross-square fs-5 me-2"></i> Akses Ditutup (Terlewat)
+                                                                </button>
+                                                                <?php elseif ($status == 'upcoming'): ?>
+                                                                    <button class="btn btn-light w-100 fs-7 fw-bold py-3 disabled" disabled>
+                                                                        <i class="ki-outline ki-lock fs-5 me-2"></i> Akses Gmeet Dibuka <?= date('d M H:i', $waktuBukaZoom) ?>
+                                                                </button>
+                                                                <?php elseif ($status == 'live'): ?>
+                                                                    <a href="<?= esc($mainZoomLink) ?>" target="_blank" class="btn btn-primary btn-glow-primary w-100 fs-7 fw-bold py-3 shadow-sm hover-elevate-up">
+                                                                        Gabung Gmeet <i class="ki-outline ki-entrance-left fs-5 ms-2"></i>
+                                                                    </a>
+                                                                <?php else: ?>
+                                                                    <button type="button" class="btn btn-success w-100 fs-7 fw-bold py-3 shadow-sm hover-elevate-up" data-bs-toggle="modal" data-bs-target="#modalSertifikat" data-nama="<?= esc($child->nama_sesi) ?>" data-idsesi="<?= encrypt_url($child->id_sesi) ?>">
+                                                                        <i class="ki-outline ki-diploma fs-4 me-2"></i> Lihat Sertifikat
+                                                                    </button>
+                                                                <?php endif; ?>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                <?php else: ?>
+                                                </div>
+                                            <?php endforeach; ?>
 
-                                                    <!-- JIKA KEDUA DATA (YOUTUBE & MATERI) KOSONG -->
-                                                    <?php if (empty($youtubeLinks) && empty($fileMateri)): ?>
-
-                                                        <!-- Cek apakah kelas sudah selesai atau belum -->
-                                                        <?php if ($status == 'finished'): ?>
-                                                            <div class="alert alert-light-info border border-info border-dashed p-3 m-0 d-flex align-items-center">
-                                                                <i class="ki-outline ki-information-5 fs-2 text-info me-3"></i>
-                                                                <div class="d-flex flex-column">
-                                                                    <span class="fw-bold text-info fs-8">Sedang Dipersiapkan</span>
-                                                                    <span class="text-muted fs-9">
-                                                                        Mohon bersabar, rekaman dan file materi saat ini sedang dalam proses persiapan dan akan segera diunggah.
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                        <?php else: ?>
-                                                            <div class="alert alert-light-secondary border border-secondary border-dashed p-3 m-0 d-flex align-items-center">
-                                                                <i class="ki-outline ki-time fs-2 text-gray-600 me-3"></i>
-                                                                <div class="d-flex flex-column">
-                                                                    <span class="fw-bold text-gray-700 fs-8">Belum Tersedia</span>
-                                                                    <span class="text-muted fs-9">
-                                                                        Rekaman dan materi akan dapat diakses di sini setelah sesi pelatihan selesai.
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                        <?php endif; ?>
-
-                                                    <?php else: ?>
-
-                                                        <!-- RENDER REKAMAN YOUTUBE -->
-                                                        <?php foreach ($youtubeLinks as $idx => $ytLink): ?>
-                                                            <button type="button"
-                                                                class="btn btn-sm btn-white youtube-item-btn fw-bold d-flex align-items-center justify-content-between py-2.5 px-3 rounded-2 shadow-xs w-100 text-start"
-                                                                data-bs-toggle="modal"
-                                                                data-bs-target="#youtubeModal"
-                                                                data-youtubelink="<?= esc($ytLink) ?>">
-                                                                <div class="d-flex align-items-center">
-                                                                    <span class="badge badge-light-danger fw-bolder fs-9 me-3 px-2 py-1">Video <?= $idx + 1 ?></span>
-                                                                    <span class="text-gray-700 fs-7 text-truncate" style="max-width: 170px;">Tonton Rekaman Webinar</span>
-                                                                </div>
-                                                                <i class="ki-outline ki-play fs-5 text-danger"></i>
-                                                            </button>
-                                                        <?php endforeach; ?>
-
-                                                        <!-- RENDER FILE MATERI PDF -->
-                                                        <?php foreach ($fileMateri as $idx => $materiUrl): ?>
-                                                            <a href="<?= esc($materiUrl) ?>" target="_blank"
-                                                                class="btn btn-sm btn-white fw-bold d-flex align-items-center justify-content-between py-2.5 px-3 rounded-2 shadow-xs w-100 text-start mt-1">
-                                                                <div class="d-flex align-items-center">
-                                                                    <span class="badge badge-light-primary fw-bolder fs-9 me-3 px-2 py-1">PDF <?= $idx + 1 ?></span>
-                                                                    <span class="text-gray-700 fs-7 text-truncate" style="max-width: 170px;">Unduh Materi Webinar</span>
-                                                                </div>
-                                                                <i class="ki-outline ki-file-down fs-5 text-primary"></i>
-                                                            </a>
-                                                        <?php endforeach; ?>
-
-                                                    <?php endif; ?>
-
-                                                <?php endif; ?>
-                                            </div>
-                                        </div>
-
-                                        <!-- Action Button Gmeet & Sertifikat -->
-                                        <div class="mt-auto pt-4">
-                                            <?php if ($status == 'missed'): ?>
-                                                <button class="btn btn-light-danger w-100 fs-7 fw-bold py-3 disabled" disabled>
-                                                    <i class="ki-outline ki-cross-square fs-5 me-2"></i> Akses Ditutup (Terlewat)
-                                                </button>
-                                            <?php elseif ($status == 'upcoming'): ?>
-                                                <button class="btn btn-light w-100 fs-7 fw-bold py-3 disabled" disabled>
-                                                    <i class="ki-outline ki-lock fs-5 me-2"></i> Akses Gmeet Dibuka <?= date('d M H:i', $waktuBukaZoom) ?>
-                                                </button>
-                                            <?php elseif ($status == 'live'): ?>
-                                                <a href="<?= esc($mainZoomLink) ?>" target="_blank" class="btn btn-primary btn-glow-primary w-100 fs-7 fw-bold py-3 shadow-sm hover-elevate-up">
-                                                    Gabung Gmeet <i class="ki-outline ki-entrance-left fs-5 ms-2"></i>
-                                                </a>
-                                            <?php else: ?>
-                                                <button type="button" class="btn btn-success w-100 fs-7 fw-bold py-3 shadow-sm hover-elevate-up" data-bs-toggle="modal" data-bs-target="#modalSertifikat" data-nama="<?= esc($child->nama_sesi) ?>" data-idsesi="<?= encrypt_url($child->id_sesi) ?>">
-                                                    <i class="ki-outline ki-diploma fs-4 me-2"></i> Lihat Sertifikat
-                                                </button>
-                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         <?php endforeach; ?>
-
-                    <?php endforeach; ?>
+                    </div>
+                
+                <!-- JIKA SEMUA DATA TERSKIP (KOSONG) -->
                 <?php else: ?>
-                    <!-- Empty State -->
+                    <div class="row g-7">
+                        <div class="col-12 animate-card">
+                            <div class="card border-0 shadow-none bg-transparent">
+                                <div class="card-body d-flex flex-column flex-center py-20">
+                                    <div class="mb-10 text-center">
+                                        <img src="<?= base_url('assets/peserta/media/illustrations/sigma-1/5.png') ?>"
+                                            class="mw-350px mw-lg-450px mb-10 pulse-animation"
+                                            alt="Empty State">
+                                    </div>
+
+                                    <div class="text-center">
+                                        <h2 class="fw-boldest text-dark mb-4 fs-1">Belum Ada Sesi Webinar</h2>
+                                        <p class="text-gray-500 fs-5 fw-semibold mb-10 max-w-600px mx-auto">
+                                            Anda belum memiliki sesi webinar atau pelatihan yang aktif saat ini.<br>
+                                            Silakan lihat daftar paket pelatihan kami untuk mulai belajar dan berinteraksi dengan mentor.
+                                        </p>
+                                        <div class="d-flex flex-center gap-4">
+                                            <a href="<?= base_url('list-bimbel') ?>" class="btn btn-primary px-8 fw-bold">
+                                                <i class="ki-outline ki-shop fs-4 me-2"></i> Jelajahi Paket Webinar
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
+            <?php else: ?>
+                <!-- Empty State -->
+                <div class="row g-7">
                     <div class="col-12 animate-card">
                         <div class="card border-0 shadow-none bg-transparent">
                             <div class="card-body d-flex flex-column flex-center py-20">
@@ -656,8 +723,8 @@
                             </div>
                         </div>
                     </div>
-                <?php endif; ?>
-            </div>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -737,7 +804,7 @@
 
 <!-- Modal Popup Sertifikat -->
 <div class="modal fade" id="modalSertifikat" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-xl"> <!-- Diubah jadi modal-xl agar preview PDF lebih luas dan lega -->
+    <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content shadow-lg border-0 rounded-4">
 
             <div class="modal-header border-0 py-5 bg-light-success">
