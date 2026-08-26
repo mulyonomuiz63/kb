@@ -86,8 +86,7 @@
                                             <?php elseif (in_array($s->status, ['M', 'PM']) && !empty($s->token)) : ?>
                                                 <button type="button"
                                                     class="btn btn-sm btn-light-info fw-bold btn-bayar"
-                                                    data-id="<?= encrypt_url($s->idtransaksi) ?>"
-                                                    data-total="<?= $grand_total ?>">
+                                                    data-id="<?= encrypt_url($s->idtransaksi) ?>">
                                                     Lanjut Bayar
                                                 </button>
 
@@ -179,7 +178,7 @@
             'order': [],
             "lengthChange": false,
             'pageLength': 10,
-            "dom": "lrtip"
+            "dom": "lrtip" // 'f' dihilangkan agar search bar bawaan DataTable tersembunyi
         });
 
         // 2. Hubungkan Input Custom ke DataTable
@@ -187,7 +186,7 @@
             table.search($(this).val()).draw();
         });
 
-        // 3. Handle Klik Invoice
+        // 3. Handle Klik Invoice (Kode lama Anda)
         $('.btn_invoice_cetak').on('click', function() {
             const url = $(this).data('invoice');
             const modal = new bootstrap.Modal(document.getElementById('invoice_cetak_modal'));
@@ -207,40 +206,38 @@
 
         let btn = $(this);
         let idt = btn.data('id');
-        let totalTransaksi = parseFloat(btn.data('total')) || 0; // Mengambil total harga secara dinamis
 
+        // Ambil token CSRF dari meta tag (pastikan meta tag sudah ada di header)
         let csrfName = $('meta[name="X-CSRF-TOKEN"]').attr('name') || '<?= csrf_token() ?>';
         let csrfHash = $('meta[name="X-CSRF-TOKEN"]').attr('content') || '<?= csrf_hash() ?>';
 
+        // Beri loading pada tombol agar tidak diklik berkali-kali
         btn.addClass('disabled').html('<span class="spinner-border spinner-border-sm"></span> Loading...');
 
         $.ajax({
-            url: "<?= base_url('sw-siswa/transaksi/midtrans-bayar') ?>/" + idt,
+            url: "<?= base_url('sw-siswa/transaksi/midtrans-bayar') ?>/" + idt, // Sesuaikan route Anda
             type: "GET",
             data: {
                 [csrfName]: csrfHash
             },
             dataType: "JSON",
             success: function(response) {
+                // Update CSRF Hash agar request selanjutnya tidak error 403
                 if (response.csrf_hash) {
                     $('meta[name="X-CSRF-TOKEN"]').attr('content', response.csrf_hash);
                 }
 
                 if (response.status) {
+                    // Eksekusi Modal Snap
                     window.snap.pay(response.snap_token, {
                         onSuccess: function(result) {
-                            // --- PIXEL PURCHASE DINAMIS ---
-                            fbq('track', 'Purchase', {
-                                value: totalTransaksi,
-                                currency: 'IDR'
-                            });
-                            // -----------------------------
-
                             Swal.fire('Berhasil!', 'Pembayaran Anda telah sukses.', 'success').then(() => {
+                                // Arahkan ke halaman riwayat transaksi agar user bisa melihat status terupdate
                                 window.location.href = "<?= base_url('sw-siswa/transaksi') ?>";
                             });
                         },
                         onPending: function(result) {
+                            // Tampilkan nomor VA atau instruksi pembayaran (opsional, Midtrans sudah menampilkannya)
                             Swal.fire('Pending', 'Silahkan selesaikan pembayaran sesuai instruksi.', 'warning').then(() => {
                                 window.location.href = "<?= base_url('sw-siswa/transaksi') ?>";
                             });
@@ -250,6 +247,7 @@
                             btn.removeClass('disabled').text('Lanjut Bayar');
                         },
                         onClose: function() {
+                            // Jika user menutup modal tanpa bayar
                             btn.removeClass('disabled').text('Lanjut Bayar');
                         }
                     });
@@ -266,4 +264,3 @@
     });
 </script>
 <?= $this->endSection(); ?>
-```[cite: 1]
