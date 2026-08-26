@@ -936,14 +936,13 @@
                                     $rataRating = $jumlahReview > 0 ? round($totalRating / $jumlahReview, 1) : 0;
                                     ?>
                                     <?php if ($rows->id_mapel == '0' || $rows->id_mapel == '1'): ?>
-                                        <div class="col-12 col-md-6 col-lg-4  pt-2">
+                                        <div class="col-12 col-md-6 col-lg-4 pt-2">
                                             <!-- Single Courses Start -->
                                             <div class="single-courses card position-relative zoom">
                                                 <div class="courses-images">
                                                     <a href="<?= base_url('bimbel/' . $rows->slug) ?>">
                                                         <?= img_lazy('assets-landing/images/paket/thumbnails/' . $rows->file, $rows->nama_paket, ['class' => 'card-img-top']) ?>
                                                     </a>
-
                                                 </div>
                                                 <div class="courses-content">
                                                     <h4 class="title"><a href="<?= base_url('bimbel/' . $rows->slug) ?>"><?= $rows->nama_paket ?></a></h4>
@@ -955,7 +954,6 @@
                                                             $hasilUjian = soal_ujian(encrypt_url($r->kode_ujian));
                                                             $total = count($hasilUjian);
                                                         endforeach;
-
                                                         ?>
                                                         <span class="fw-bold"> <i class="icofont-read-book"></i> <?= (!empty($total) ? $total : '0') ?> Soal/<span style="font-size:10px">Materi</span> </span>
                                                         <div class="d-flex flex-column mb-3">
@@ -992,16 +990,62 @@
                                                                 </div>
                                                             </div>
                                                         <?php endif; ?>
-
                                                     </div>
+
+                                                    <!-- Accordion Detail Paket Start -->
+                                                    <div class="accordion accordion-flush mb-2" id="accordionDetail<?= $rows->idpaket ?>">
+                                                        <div class="accordion-item border rounded">
+                                                            <h2 class="accordion-header" id="heading<?= $rows->idpaket ?>">
+                                                                <button class="accordion-button collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDetail<?= $rows->idpaket ?>" aria-expanded="false" aria-controls="collapseDetail<?= $rows->idpaket ?>" style="font-size: 0.8rem; background-color: transparent;">
+                                                                    <i class="icofont-info-circle me-1"></i> Detail Paket
+                                                                </button>
+                                                            </h2>
+                                                            <div id="collapseDetail<?= $rows->idpaket ?>" class="accordion-collapse collapse" aria-labelledby="heading<?= $rows->idpaket ?>" data-bs-parent="#accordionDetail<?= $rows->idpaket ?>">
+                                                                <div class="accordion-body p-2 custom-accordion-text">
+                                                                    <?= !empty($rows->deskripsi) ? $rows->deskripsi : (!empty($rows->detail_paket) ? $rows->detail_paket : 'Detail informasi paket pembelajaran.') ?>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <style>
+                                                        /* Styling khusus isi accordion agar rapi & modern */
+                                                        .custom-accordion-text {
+                                                            background-color: #f8f9fa;
+                                                            border-radius: 6px;
+                                                            max-height: 180px;
+                                                            overflow-y: auto;
+                                                        }
+
+                                                        .custom-accordion-text p {
+                                                            margin-bottom: 4px !important;
+                                                            font-size: 11px !important;
+                                                            line-height: 1.4 !important;
+                                                            letter-spacing: normal !important;
+                                                            /* Menghapus letter-spacing 0.4992px yang renggang */
+                                                            color: #4a5568 !important;
+                                                        }
+
+                                                        /* Styling khusus untuk judul header materi (paragraf pertama) */
+                                                        .custom-accordion-text p:first-child {
+                                                            font-size: 11.5px !important;
+                                                            font-weight: 700 !important;
+                                                            color: #1e293b !important;
+                                                            border-bottom: 1px dashed #cbd5e1;
+                                                            padding-bottom: 4px;
+                                                            margin-bottom: 6px !important;
+                                                        }
+                                                    </style>
+                                                    <!-- Accordion Detail Paket End -->
+
                                                     <div class="d-flex gap-2 mt-3">
                                                         <a href="<?= base_url('sw-siswa/transaksi/pesan/' . encrypt_url($rows->idpaket)) ?>" class="btn-buy btn-sm text-center flex-fill p-2">Pesan Sekarang</a>
                                                         <?php if (session()->get('id')): ?>
                                                             <?php if (!empty($affiliate)): ?>
-                                                                <button class="btn-buy-copy btn-sm  btn-copy-link" data-paket_id="<?= $rows->idpaket ?>">
+                                                                <button class="btn-buy-copy btn-sm btn-copy-link" data-paket_id="<?= $rows->idpaket ?>">
                                                                     <i class="fa fa-copy"></i>
                                                                 </button>
-                                                                <button class="btn-buy-wa btn-sm  share-link" data-paket_id="<?= $rows->idpaket ?>">
+                                                                <button class="btn-buy-wa btn-sm share-link" data-paket_id="<?= $rows->idpaket ?>">
                                                                     <i class="fab fa-whatsapp"></i>
                                                                 </button>
                                                             <?php endif; ?>

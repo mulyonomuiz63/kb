@@ -248,6 +248,51 @@
                                             <?php endif; ?>
 
                                         </div>
+                                        <!-- Accordion Detail Paket Start -->
+                                        <div class="accordion accordion-flush mb-2" id="accordionDetail<?= $rows->idpaket ?>">
+                                            <div class="accordion-item border rounded">
+                                                <h2 class="accordion-header" id="heading<?= $rows->idpaket ?>">
+                                                    <button class="accordion-button collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDetail<?= $rows->idpaket ?>" aria-expanded="false" aria-controls="collapseDetail<?= $rows->idpaket ?>" style="font-size: 0.8rem; background-color: transparent;">
+                                                        <i class="icofont-info-circle me-1"></i> Detail Paket
+                                                    </button>
+                                                </h2>
+                                                <div id="collapseDetail<?= $rows->idpaket ?>" class="accordion-collapse collapse" aria-labelledby="heading<?= $rows->idpaket ?>" data-bs-parent="#accordionDetail<?= $rows->idpaket ?>">
+                                                    <div class="accordion-body p-2 custom-accordion-text">
+                                                        <?= !empty($rows->deskripsi) ? $rows->deskripsi : (!empty($rows->detail_paket) ? $rows->detail_paket : 'Detail informasi paket pembelajaran.') ?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <style>
+                                            /* Styling khusus isi accordion agar rapi & modern */
+                                            .custom-accordion-text {
+                                                background-color: #f8f9fa;
+                                                border-radius: 6px;
+                                                max-height: 180px;
+                                                overflow-y: auto;
+                                            }
+
+                                            .custom-accordion-text p {
+                                                margin-bottom: 4px !important;
+                                                font-size: 11px !important;
+                                                line-height: 1.4 !important;
+                                                letter-spacing: normal !important;
+                                                /* Menghapus letter-spacing 0.4992px yang renggang */
+                                                color: #4a5568 !important;
+                                            }
+
+                                            /* Styling khusus untuk judul header materi (paragraf pertama) */
+                                            .custom-accordion-text p:first-child {
+                                                font-size: 11.5px !important;
+                                                font-weight: 700 !important;
+                                                color: #1e293b !important;
+                                                border-bottom: 1px dashed #cbd5e1;
+                                                padding-bottom: 4px;
+                                                margin-bottom: 6px !important;
+                                            }
+                                        </style>
+                                        <!-- Accordion Detail Paket End -->
                                         <div class="d-flex gap-2 mt-3">
                                             <a href="<?= base_url('sw-siswa/transaksi/pesan/' . encrypt_url($rows->idpaket)) ?>" class="btn-buy btn-sm text-center flex-fill p-2">Pesan Sekarang</a>
                                             <?php if (session()->get('id')): ?>
