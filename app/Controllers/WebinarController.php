@@ -31,7 +31,7 @@ class WebinarController extends BaseController
         $this->emailer = new Emailer();
     }
 
-    public function index($slug = 'marathon-update-perpajakan-2026')
+    public function index($slug = 'marathon-update-perpajakan-session-2-2026')
     {
         // untuk breadcrumb 
         $breadcrumbItems = [
