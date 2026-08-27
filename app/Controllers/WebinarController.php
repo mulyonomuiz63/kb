@@ -471,15 +471,15 @@ class WebinarController extends BaseController
 
         // 7. Selesai
         if ($gross_amount > 0) {
-            return redirect()->to('webinar/invoice')->with('success', 'Pendaftaran berhasil, silakan selesaikan pembayaran!')->with('snapToken', $snapToken);
+            return redirect()->to('webinar/invoice')->with('success_webinar', 'Pendaftaran berhasil, silakan selesaikan pembayaran!')->with('snapToken', $snapToken);
         } else {
-            return redirect()->to('marathon-perpajakan')->with('success', 'Pendaftaran berhasil, Anda telah terdaftar sebagai peserta webinar, informasi lengkapnya akan dikirim ke email Anda.');
+            return redirect()->to('marathon-perpajakan')->with('success_webinar', 'Pendaftaran berhasil, Anda telah terdaftar sebagai peserta webinar, informasi lengkapnya akan dikirim ke email Anda.');
         }
     }
     public function invoice()
     {
         // Jika tidak ada token (misal user asal buka URL /invoice), kembalikan ke home
-        if (!session()->getFlashdata('snapToken') && !session()->getFlashdata('success')) {
+        if (!session()->getFlashdata('snapToken') && !session()->getFlashdata('success_webinar')) {
             return redirect()->to('/webinar');
         }
 

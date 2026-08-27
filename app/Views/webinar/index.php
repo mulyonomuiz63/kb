@@ -1333,7 +1333,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            <?php if (session()->getFlashdata('success')) : ?>
+            <?php if (session()->getFlashdata('success_webinar')) : ?>
                 Swal.fire({
                     icon: 'success',
                     title: 'Pendaftaran Berhasil!',

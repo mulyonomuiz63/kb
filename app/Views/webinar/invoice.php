@@ -54,9 +54,9 @@
             </div>
             
             <div class="p-4 p-md-5 text-center">
-                <?php if (session()->getFlashdata('success')) : ?>
+                <?php if (session()->getFlashdata('success_webinar')) : ?>
                     <div class="alert alert-success border-dashed mb-4">
-                        <?= session()->getFlashdata('success') ?>
+                        <?= session()->getFlashdata('success_webinar') ?>
                     </div>
                 <?php endif; ?>
 
