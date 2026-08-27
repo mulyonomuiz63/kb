@@ -678,11 +678,46 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                 </div>
                             </div>
 
-                            <!-- KOLOM KANAN: DATA PESERTA -->
                             <div class="col-lg-5">
                                 <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
                                     <h4 class="fw-bold mb-4 border-bottom pb-2">2. Data Peserta</h4>
 
+                                    <!-- ================= START TAMBAHAN ================= -->
+                                    <?php if (!session()->get('id')): ?>
+                                        <div class="alert alert-light border shadow-sm rounded-3 mb-4 p-3">
+                                            <div class="d-flex align-items-start mb-3">
+                                                <div class="me-2 mt-1">
+                                                    <i class="fa fa-info-circle text-primary fs-5"></i>
+                                                </div>
+                                                <span class="text-dark" style="font-size: 0.85rem; line-height: 1.4;">
+                                                    <strong>Informasi:</strong> Jika Anda sudah pernah terdaftar di kelas brevet, langsung saja login dengan Google atau user Kelasbrevet Anda agar data terintegrasi.
+                                                </span>
+                                            </div>
+
+                                            <div class="d-flex flex-column flex-sm-row gap-2">
+                                                <!-- Tombol Login Google -->
+                                                <?php if (strtolower(setting('client_status')) == 'true'): ?>
+                                                <a href="<?= $link ?>" class="btn btn-outline-dark d-flex align-items-center justify-content-center flex-fill" style="background-color: #ffffff;">
+                                                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="me-2" style="width: 18px; height: 18px;">
+                                                    <span class="fw-bold" style="font-size: 0.85rem;">Login Google</span>
+                                                </a>
+                                                <?php endif; ?>
+                                                <!-- Tombol Login Biasa -->
+                                                <a href="<?= base_url('auth') ?>" class="btn btn-primary d-flex align-items-center justify-content-center flex-fill">
+                                                    <span class="fw-bold" style="font-size: 0.85rem;">Login Akun</span>
+                                                </a>
+                                            </div>
+
+                                            <div class="d-flex align-items-center my-3">
+                                                <div class="border-bottom flex-grow-1"></div>
+                                                <div class="px-3 text-muted fw-bold" style="font-size: 0.75rem;">ATAU ISI DATA BARU</div>
+                                                <div class="border-bottom flex-grow-1"></div>
+                                            </div>
+                                        </div>
+                                    <?php endif; ?>
+                                    <!-- ================= END TAMBAHAN ================= -->
+
+                                    <!-- KODE ASLI YANG DIPERTAHANKAN -->
                                     <div class="mb-3">
                                         <label class="form-label fw-semibold">Nama Lengkap <span class="text-danger">*</span></label>
                                         <input type="text" name="nama" value="<?= session()->get('id') && isset($siswa) ? esc($siswa['nama_siswa']) : esc(old('nama')) ?>" class="form-control form-control-lg" placeholder="Masukkan nama lengkap" required <?= session()->get('id') ? 'readonly style="cursor: not-allowed; background-color: #e9ecef;"' : '' ?>>
@@ -699,6 +734,8 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                             <input type="number" name="hp" value="<?= session()->get('id') && isset($siswa) ? esc($siswa['hp']) : esc(old('hp')) ?>" class="form-control form-control-lg" placeholder="" pattern="[0-9]+" minlength="10" maxlength="15" required autocomplete="off">
                                         </div>
                                     </div>
+                                    <!-- AKHIR KODE ASLI -->
+
                                 </div>
                             </div>
                         </div>
@@ -855,6 +892,41 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                             <div class="col-lg-7">
                                 <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
                                     <h4 class="fw-bold mb-4 border-bottom pb-2">2. Data Peserta</h4>
+
+                                    <!-- ================= START TAMBAHAN ================= -->
+                                    <?php if (!session()->get('id')): ?>
+                                        <div class="alert alert-light border shadow-sm rounded-3 mb-4 p-3">
+                                            <div class="d-flex align-items-start mb-3">
+                                                <div class="me-2 mt-1">
+                                                    <i class="fa fa-info-circle text-primary fs-5"></i>
+                                                </div>
+                                                <span class="text-dark" style="font-size: 0.85rem; line-height: 1.4;">
+                                                    <strong>Informasi:</strong> Jika Anda sudah pernah terdaftar di kelas brevet, langsung saja login dengan Google atau user Kelasbrevet Anda agar data terintegrasi.
+                                                </span>
+                                            </div>
+
+                                            <div class="d-flex flex-column flex-sm-row gap-2">
+                                                <!-- Tombol Login Google -->
+                                                <?php if (strtolower(setting('client_status')) == 'true'): ?>
+                                                <a href="<?= $link ?>" class="btn btn-outline-dark d-flex align-items-center justify-content-center flex-fill" style="background-color: #ffffff;">
+                                                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="me-2" style="width: 18px; height: 18px;">
+                                                    <span class="fw-bold" style="font-size: 0.85rem;">Login Google</span>
+                                                </a>
+                                                <?php endif; ?>
+                                                <!-- Tombol Login Biasa -->
+                                                <a href="<?= base_url('auth') ?>" class="btn btn-primary d-flex align-items-center justify-content-center flex-fill">
+                                                    <span class="fw-bold" style="font-size: 0.85rem;">Login Akun</span>
+                                                </a>
+                                            </div>
+
+                                            <div class="d-flex align-items-center my-3">
+                                                <div class="border-bottom flex-grow-1"></div>
+                                                <div class="px-3 text-muted fw-bold" style="font-size: 0.75rem;">ATAU ISI DATA BARU</div>
+                                                <div class="border-bottom flex-grow-1"></div>
+                                            </div>
+                                        </div>
+                                    <?php endif; ?>
+                                    <!-- ================= END TAMBAHAN ================= -->
 
                                     <div class="mb-3">
                                         <label class="form-label fw-semibold">Nama Lengkap <span class="text-danger">*</span></label>
@@ -1242,9 +1314,9 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
         document.addEventListener("DOMContentLoaded", function() {
             <?php if (session()->getFlashdata('success')) : ?>
                 Swal.fire({
-                            icon: 'success',
-                            title: 'Pendaftaran Berhasil!',
-                            html: `
+                    icon: 'success',
+                    title: 'Pendaftaran Berhasil!',
+                    html: `
                         <p class="text-gray-700 fs-6 mb-4"><?= json_encode(session()->getFlashdata('success')) ?></p>
                         
                         <div class="p-4 bg-light-success border border-success border-dashed rounded-4 text-center">

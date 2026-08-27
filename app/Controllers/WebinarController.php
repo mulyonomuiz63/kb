@@ -9,6 +9,7 @@ use App\Libraries\SeoHelper;
 use App\Models\DetailTransaksiModel;
 use App\Models\PaketModel;
 use App\Models\TransaksiModel;
+use Google_Client;
 
 class WebinarController extends BaseController
 {
@@ -19,9 +20,11 @@ class WebinarController extends BaseController
     protected  $transaksiModel;
     protected  $detailTransaksiModel;
     protected  $emailer;
+    protected $googleClient;
 
     public function __construct()
     {
+        helper('setting');
         $this->seo = new SeoHelper();
         $this->sesiModel = new WebinarSesiModel();
         $this->siswaModel = new SiswaModel();
@@ -29,6 +32,16 @@ class WebinarController extends BaseController
         $this->transaksiModel = new TransaksiModel();
         $this->detailTransaksiModel = new DetailTransaksiModel();
         $this->emailer = new Emailer();
+
+        $this->googleClient = new Google_Client();
+        $clientId     = setting('client_id');
+        $clientSecret = setting('client_secret');
+        $redirectUri  = setting('redirect_uri');
+        $this->googleClient->setClientId($clientId);
+        $this->googleClient->setClientSecret($clientSecret);
+        $this->googleClient->setRedirectUri($redirectUri);
+        $this->googleClient->addScope('email');
+        $this->googleClient->addScope('profile');
     }
 
     public function index($slug = 'marathon-update-perpajakan-session-2-2026')
@@ -37,6 +50,8 @@ class WebinarController extends BaseController
         $breadcrumbItems = [
             "Home" => base_url(),
         ];
+        $uri = new \CodeIgniter\HTTP\URI($this->request->getUri());
+        session()->set(['url' => $uri->getPath()]);
 
         // 1. Ambil data dari model
         $katalog_webinar = $this->sesiModel->getPaketWebinarLengkap($slug);
@@ -78,6 +93,7 @@ class WebinarController extends BaseController
         $schemaBreadcrumb = $this->seo->breadcrumbSchema($breadcrumbItems);
         $schema = $schemaBreadcrumb;
         $data['schema'] = $schema;
+        $data['link'] = $this->googleClient->createAuthUrl();
 
         return view('webinar/index', $data);
     }
