@@ -44,8 +44,9 @@ class WebinarController extends BaseController
         $this->googleClient->addScope('profile');
     }
 
-    public function index($slug = 'marathon-update-perpajakan-session-2-2026')
+    public function index($slug = 'marathon-update-perpajakan-2026')
     {
+        
         // untuk breadcrumb 
         $breadcrumbItems = [
             "Home" => base_url(),
