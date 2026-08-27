@@ -51,7 +51,7 @@ class WebinarController extends BaseController
             "Home" => base_url(),
         ];
         $uri = new \CodeIgniter\HTTP\URI($this->request->getUri());
-        session()->set(['url' => $uri->getPath()]);
+        session()->set(['url' => $uri->getPath().'#pendaftaran']);
 
         // 1. Ambil data dari model
         $katalog_webinar = $this->sesiModel->getPaketWebinarLengkap($slug);

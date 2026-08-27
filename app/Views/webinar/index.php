@@ -697,10 +697,10 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                             <div class="d-flex flex-column flex-sm-row gap-2">
                                                 <!-- Tombol Login Google -->
                                                 <?php if (strtolower(setting('client_status')) == 'true'): ?>
-                                                <a href="<?= $link ?>" class="btn btn-outline-dark d-flex align-items-center justify-content-center flex-fill" style="background-color: #ffffff;">
-                                                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="me-2" style="width: 18px; height: 18px;">
-                                                    <span class="fw-bold" style="font-size: 0.85rem;">Login Google</span>
-                                                </a>
+                                                    <a href="<?= $link ?>" class="btn btn-outline-dark d-flex align-items-center justify-content-center flex-fill" style="background-color: #ffffff;">
+                                                        <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="me-2" style="width: 18px; height: 18px;">
+                                                        <span class="fw-bold" style="font-size: 0.85rem;">Login Google</span>
+                                                    </a>
                                                 <?php endif; ?>
                                                 <!-- Tombol Login Biasa -->
                                                 <a href="<?= base_url('auth') ?>" class="btn btn-primary d-flex align-items-center justify-content-center flex-fill">
@@ -735,6 +735,16 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                         </div>
                                     </div>
                                     <!-- AKHIR KODE ASLI -->
+                                     <?php if (session()->get('id')): ?>
+                                        <div class="alert alert-success border shadow-sm rounded-3 mt-4 p-3 d-flex align-items-center">
+                                            <div class="me-3">
+                                                <i class="fa fa-check-circle text-success fs-3"></i>
+                                            </div>
+                                            <span class="text-dark" style="font-size: 0.85rem; line-height: 1.4;">
+                                                <strong> Anda sudah berhasil login. </strong> Silakan selesaikan pendaftaran dengan menekan tombol <strong>Daftar Sekarang</strong>.
+                                            </span>
+                                        </div>
+                                    <?php endif; ?>
 
                                 </div>
                             </div>
@@ -908,10 +918,10 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                             <div class="d-flex flex-column flex-sm-row gap-2">
                                                 <!-- Tombol Login Google -->
                                                 <?php if (strtolower(setting('client_status')) == 'true'): ?>
-                                                <a href="<?= $link ?>" class="btn btn-outline-dark d-flex align-items-center justify-content-center flex-fill" style="background-color: #ffffff;">
-                                                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="me-2" style="width: 18px; height: 18px;">
-                                                    <span class="fw-bold" style="font-size: 0.85rem;">Login Google</span>
-                                                </a>
+                                                    <a href="<?= $link ?>" class="btn btn-outline-dark d-flex align-items-center justify-content-center flex-fill" style="background-color: #ffffff;">
+                                                        <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="me-2" style="width: 18px; height: 18px;">
+                                                        <span class="fw-bold" style="font-size: 0.85rem;">Login Google</span>
+                                                    </a>
                                                 <?php endif; ?>
                                                 <!-- Tombol Login Biasa -->
                                                 <a href="<?= base_url('auth') ?>" class="btn btn-primary d-flex align-items-center justify-content-center flex-fill">
@@ -944,6 +954,17 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                             <input type="number" name="hp" value="<?= session()->get('id') && isset($siswa) ? esc($siswa['hp']) : esc(old('hp')) ?>" class="form-control form-control-lg" placeholder="81234567890" pattern="[0-9]+" minlength="10" maxlength="15" required autocomplete="off" <?= session()->get('id') ? 'readonly style="cursor: not-allowed; background-color: #e9ecef;"' : '' ?>>
                                         </div>
                                     </div>
+
+                                    <?php if (session()->get('id')): ?>
+                                        <div class="alert alert-success border shadow-sm rounded-3 mt-4 p-3 d-flex align-items-center">
+                                            <div class="me-3">
+                                                <i class="fa fa-check-circle text-success fs-3"></i>
+                                            </div>
+                                            <span class="text-dark" style="font-size: 0.85rem; line-height: 1.4;">
+                                                <strong> Anda sudah berhasil login. </strong> Silakan selesaikan pendaftaran dengan menekan tombol <strong>Daftar Sekarang</strong>.
+                                            </span>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
                             </div>
 
@@ -954,7 +975,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                         <h1 class="fw-bold text-primary mb-4" id="displayTotal">Rp 0</h1>
 
                                         <button type="submit" id="btnSubmit" class="btn btn-primary btn-lg w-100 fw-bold rounded-pill shadow-sm py-3" disabled>
-                                            <i class="fa-solid fa-shield-halved me-2"></i> Daftar & Lanjut Bayar
+                                            <i class="fa-solid fa-shield-halved me-2"></i> Daftar Sekarang
                                         </button>
 
                                         <div class="mt-4 pt-3 border-top">
