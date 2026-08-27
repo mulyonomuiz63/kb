@@ -3,6 +3,7 @@
 namespace App\Controllers\Siswa;
 
 use App\Controllers\BaseController;
+use Google_Client;
 
 class TransaksiController extends BaseController
 {
@@ -22,8 +23,11 @@ class TransaksiController extends BaseController
     protected $ikhModel;
     protected $siswaKelasModel;
 
+    protected $googleClient;
+
     public function __construct()
     {
+        helper('setting');
         $this->transaksiModel = new \App\Models\TransaksiModel();
         $this->detailTransaksiModel = new \App\Models\DetailTransaksiModel();
         $this->detailPaketModel = new \App\Models\DetailPaketModel();
@@ -39,6 +43,16 @@ class TransaksiController extends BaseController
         $this->siswaKelasModel = new \App\Models\SiswaKelasModel();
         $this->ikhModel = new \App\Models\IkhModel();
         $this->emailer = new \App\Libraries\Emailer();
+
+        $this->googleClient = new Google_Client();
+        $clientId     = setting('client_id');
+        $clientSecret = setting('client_secret');
+        $redirectUri  = setting('redirect_uri');
+        $this->googleClient->setClientId($clientId);
+        $this->googleClient->setClientSecret($clientSecret);
+        $this->googleClient->setRedirectUri($redirectUri);
+        $this->googleClient->addScope('email');
+        $this->googleClient->addScope('profile');
     }
     public function index()
     {
@@ -89,6 +103,7 @@ class TransaksiController extends BaseController
                     ['title' => 'Dashboard', 'url' => base_url('sw-siswa')],
                     ['title' => 'Detail Paket', 'url' => '#'], // Status saat ini
                 ];
+                $data['link'] = $this->googleClient->createAuthUrl();
                 $data = [
                     'db'           => \Config\Database::connect(),
                     'paket'        => $cekpaket,

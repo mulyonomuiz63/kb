@@ -77,6 +77,7 @@
   #password {
     border-right: none;
   }
+
   /* Full-Screen Loading Overlay */
   #page-loader {
     position: fixed;
@@ -100,13 +101,13 @@
 </style>
 <?= $this->endSection(); ?>
 <?= $this->section('meta_tags') ?>
-    <meta property="og:title" content="<?= $paket->nama_paket ?>" />
-    <meta property="og:description" content="<?= $paket->tagline ?>" />
-    <meta property="og:url" content="<?= current_url() ?>" />
-    <meta property="og:article:section" content="<?= $paket->tagline ?>" />
-    <meta property="og:image" content="<?= base_url('assets-landing/images/paket/thumbnails/'.$paket->file) ?>" />
-    <meta property="og:image:alt" content="<?= $paket->nama_paket ?>" />
-    <meta property="og:image:type" content="image/jpeg" />
+<meta property="og:title" content="<?= $paket->nama_paket ?>" />
+<meta property="og:description" content="<?= $paket->tagline ?>" />
+<meta property="og:url" content="<?= current_url() ?>" />
+<meta property="og:article:section" content="<?= $paket->tagline ?>" />
+<meta property="og:image" content="<?= base_url('assets-landing/images/paket/thumbnails/' . $paket->file) ?>" />
+<meta property="og:image:alt" content="<?= $paket->nama_paket ?>" />
+<meta property="og:image:type" content="image/jpeg" />
 <?= $this->endSection() ?>
 <?= $this->section('content'); ?>
 <div id="page-loader">
@@ -222,14 +223,14 @@
               <div class="row g-9 mb-7">
                 <div class="col-md-6 fv-row">
                   <label class="fw-bold fs-6 mb-2">Nomor HP aktfi Atau WA Aktif</label>
-                  <input type="number" 
-                        id="hp" 
-                        name="hp" 
-                        value="<?= old('hp'); ?>" 
-                        placeholder="Nomor/WA Aktif" 
-                        class="form-control form-control-solid" 
-                        required 
-                        autocomplete="off">
+                  <input type="number"
+                    id="hp"
+                    name="hp"
+                    value="<?= old('hp'); ?>"
+                    placeholder="Nomor/WA Aktif"
+                    class="form-control form-control-solid"
+                    required
+                    autocomplete="off">
                 </div>
                 <div class="col-md-6 fv-row">
                   <label class="fw-bold fs-6 mb-2">Email Aktif</label>
@@ -251,6 +252,21 @@
                 <button type="button" class="btn btn-primary btn-lg w-100 fw-bolder" onclick="submitForm('registrasi')">
                   <span class="indicator-label">Daftar & Lanjutkan Pembayaran</span>
                 </button>
+                <?php if (strtolower(setting('client_status')) == 'true'): ?>
+                  <!-- Pemisah (Divider) -->
+                  <div class="d-flex align-items-center my-4">
+                    <div class="border-bottom flex-grow-1"></div>
+                    <div class="px-3 text-gray-500 fw-bold fs-7">ATAU</div>
+                    <div class="border-bottom flex-grow-1"></div>
+                  </div>
+
+                  <!-- Tombol Login / Daftar dengan Google -->
+                  <a href="<?= $link ?>" class="btn btn-light btn-lg w-100 fw-bolder d-flex align-items-center justify-content-center border" style="background-color: #ffffff;">
+                    <!-- Icon Google format SVG agar lebih ringan dan tajam -->
+                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="me-3" style="width: 22px; height: 22px;">
+                    <span class="text-dark">Lanjutkan dengan Google</span>
+                  </a>
+                <?php endif; ?>
                 <div class="text-gray-500 text-center fw-bold fs-7 mt-5">
                   Sudah punya akun? <a href="<?= base_url('auth') ?>" class="link-primary fw-bolder">Log in di sini</a>
                 </div>
@@ -340,13 +356,13 @@
   $('form[action="<?= base_url('sw-siswa/transaksi/checkout'); ?>"]').on('submit', function(e) {
     // Tampilkan overlay full-screen
     $('#page-loader').css('display', 'flex');
-    
+
     // Ubah status tombol menjadi loading & disable
     let btn = $('#btn-konfirmasi');
     btn.prop('disabled', true);
     btn.find('.indicator-label').hide();
     btn.find('.indicator-progress').show();
-    
+
     // Form akan otomatis ter-submit seperti biasa
   });
 
@@ -425,7 +441,7 @@
   function submitForm(actionName) {
     if (!form.checkValidity()) {
       // Jika tidak valid, munculkan peringatan bawaan browser
-      form.reportValidity(); 
+      form.reportValidity();
       return; // Berhenti di sini, jangan lanjut ke reCAPTCHA
     }
     // Ambil status aktif reCAPTCHA dari PHP/Env
