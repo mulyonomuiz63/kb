@@ -103,7 +103,6 @@ class TransaksiController extends BaseController
                     ['title' => 'Dashboard', 'url' => base_url('sw-siswa')],
                     ['title' => 'Detail Paket', 'url' => '#'], // Status saat ini
                 ];
-                $data['link'] = $this->googleClient->createAuthUrl();
                 $data = [
                     'db'           => \Config\Database::connect(),
                     'paket'        => $cekpaket,
@@ -112,6 +111,7 @@ class TransaksiController extends BaseController
                     'url'          => $uri->getPath(),
                     'breadcrumbs'  => $breadcrumbs
                 ];
+                $data['link'] = $this->googleClient->createAuthUrl();
                 return view('siswa/paket/index', $data);
             } else {
                 return redirect()->to('bimbel')->with('pesan', 'Paket yang anda pilih sudah tidak ada.');
