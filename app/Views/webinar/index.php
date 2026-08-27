@@ -1338,7 +1338,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                     icon: 'success',
                     title: 'Pendaftaran Berhasil!',
                     html: `
-                        <p class="text-gray-700 fs-6 mb-4"><?= json_encode(session()->getFlashdata('success')) ?></p>
+                        <p class="text-gray-700 fs-6 mb-4"><?= json_encode(session()->getFlashdata('success_webinar')) ?></p>
                         
                         <div class="p-4 bg-light-success border border-success border-dashed rounded-4 text-center">
                             <span class="d-block fw-bold text-dark fs-6 mb-2">🎉 Langkah Terakhir!</span>
