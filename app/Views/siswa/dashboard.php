@@ -304,10 +304,10 @@
 
             <!-- Action Buttons -->
             <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center mt-4 mt-md-0 gap-2 gap-sm-3 w-100 w-md-auto flex-shrink-0">
-                <!-- <button type="button" class="btn btn-sm btn-outline btn-outline-dashed btn-outline-success btn-active-light-success btn-wa-action fw-bold w-100 w-sm-auto text-nowrap" data-action="sudah">
+                <button type="button" class="btn btn-sm btn-outline btn-outline-dashed btn-outline-success btn-active-light-success btn-wa-action fw-bold w-100 w-sm-auto text-nowrap" data-action="sudah">
                     Sudah Bergabung
-                </button> -->
-                <a href="https://chat.whatsapp.com/GakLHM8gxxvJfHDEryZGOi?s=cl&p=a&mlu=4" target="_blank" class="btn btn-sm btn-success btn-wa-action fw-bold shadow-sm w-100 w-sm-auto text-nowrap" data-action="gabung">
+                </button>
+                <a href="https://chat.whatsapp.com/JejzQkQMV0GCo9ANGko11m?s=cl&p=i&mlu=4" target="_blank" class="btn btn-sm btn-success btn-wa-action fw-bold shadow-sm w-100 w-sm-auto text-nowrap" data-action="gabung">
                     Bergabung Sekarang
                 </a>
             </div>
@@ -925,7 +925,7 @@
         const alertElement = document.getElementById('wa-group-alert');
 
         // Cek apakah user belum pernah menutup alert ini
-        if (!localStorage.getItem('wa_alert_hidden_v2')) {
+        if (!localStorage.getItem('wa_alert_hidden')) {
             // Hapus d-none dan siapkan posisi di bawah layar (tersembunyi)
             alertElement.classList.remove('d-none');
             alertElement.style.transform = 'translate(-50%, 150%)';
@@ -943,7 +943,7 @@
             btn.addEventListener('click', function() {
 
                 // Simpan status ke localStorage browser
-                localStorage.setItem('wa_alert_hidden_v2', 'true');
+                localStorage.setItem('wa_alert_hidden', 'true');
 
                 // Mainkan animasi turun ke bawah
                 alertElement.style.transform = 'translate(-50%, 150%)';
