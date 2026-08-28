@@ -577,41 +577,46 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                         <?php foreach ($paketWebinar->sesi as $sesi) : ?>
                                             <?php
                                             $isFree = ($sesi['harga_sesi'] <= 0);
+                                            $sekarang = strtotime($currentDateTime);
+                                            
+                                            // Asumsikan semua sudah lewat/expired
+                                            $isExpired = true; 
+                                            
+                                            // 1. Cek sesi induk/parent (kalau di masa depan ATAU hari ini sedang berjalan)
+                                            $waktuMulaiParent = strtotime($sesi['waktu_mulai']);
+                                            if ($waktuMulaiParent > $sekarang || date('Y-m-d', $waktuMulaiParent) === date('Y-m-d', $sekarang)) {
+                                                $isExpired = false;
+                                            }
+
                                             $childSessionsData = [];
                                             $childIds = json_decode($sesi['sesi_gratis'], true) ?? [];
-                                            $hasChildren = false;
-                                            $isAllChildExpired = true;
 
                                             if (!empty($childIds)) {
-                                                $hasChildren = true;
                                                 $childSessionsData = $db->table('webinar_sesi')
                                                     ->whereIn('id_sesi', $childIds)
                                                     ->orderBy('waktu_mulai', 'ASC')
                                                     ->get()
                                                     ->getResultArray();
 
+                                                // 2. Cek semua sesi list/anak
                                                 foreach ($childSessionsData as $cs) {
-                                                    if (strtotime($cs['waktu_mulai']) > strtotime($currentDateTime)) {
-                                                        $isAllChildExpired = false;
+                                                    $waktuMulaiChild = strtotime($cs['waktu_mulai']);
+                                                    // Jika ADA 1 SAJA yang di masa depan ATAU hari ini sedang berjalan
+                                                    if ($waktuMulaiChild > $sekarang || date('Y-m-d', $waktuMulaiChild) === date('Y-m-d', $sekarang)) {
+                                                        $isExpired = false; // Maka paket secara keseluruhan BISA dibeli
                                                     }
                                                 }
                                             }
-
-                                            if ($hasChildren) {
-                                                $isExpired = $isAllChildExpired;
-                                            } else {
-                                                $isExpired = (strtotime($sesi['waktu_mulai']) <= strtotime($currentDateTime));
-                                            }
                                             ?>
                                             <div class="col-12">
-                                                <label class="w-100 h-100 m-0 <?= $isExpired && !$isFree ? 'opacity-50' : '' ?>" <?= $isExpired && !$isFree ? 'style="cursor: not-allowed;"' : 'style="cursor: pointer;"' ?>>
-                                                    <input type="radio" name="id_sesi[]" value="<?= esc($sesi['id_sesi']) ?>" class="session-checkbox calculate-price" data-price="<?= round($sesi['harga_sesi']) ?>" <?= $isExpired && !$isFree ? 'disabled' : '' ?> <?= $isFree && !$isExpired ? 'checked' : '' ?>>
+                                                <label class="w-100 h-100 m-0 <?= $isExpired ? 'opacity-50' : '' ?>" <?= $isExpired ? 'style="cursor: not-allowed;"' : 'style="cursor: pointer;"' ?>>
+                                                    <input type="radio" name="id_sesi[]" value="<?= esc($sesi['id_sesi']) ?>" class="session-checkbox calculate-price" data-price="<?= round($sesi['harga_sesi']) ?>" <?= $isExpired ? 'disabled' : '' ?> <?= $isFree && !$isExpired ? 'checked' : '' ?>>
 
-                                                    <div class="session-card p-4 h-100 d-flex flex-column rounded-4 shadow-sm <?= $isExpired && !$isFree ? 'bg-light' : 'bg-white' ?>">
+                                                    <div class="session-card p-4 h-100 d-flex flex-column rounded-4 shadow-sm <?= $isExpired ? 'bg-light' : 'bg-white' ?>">
                                                         <div class="d-flex align-items-start justify-content-between w-100">
                                                             <div class="pe-3">
                                                                 <h5 class="fw-bold mb-1"><?= esc($sesi['nama_sesi']) ?></h5>
-                                                                <?php if ($isExpired && !$isFree): ?>
+                                                                <?php if ($isExpired): ?>
                                                                     <div class="mb-1"><span class="badge bg-danger mt-1" style="font-size: 0.75rem;">Semua Sesi Telah Berakhir</span></div>
                                                                 <?php elseif ($isFree): ?>
                                                                     <div class="mb-1"><span class="badge bg-success mt-1" style="font-size: 0.65rem;">Fasilitas Full Akses Materi</span></div>
@@ -627,7 +632,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                                                 <?php if (!$isFree && isset($sesi['harga_coret']) && $sesi['harga_coret'] > $sesi['harga_sesi']): ?>
                                                                     <span class="text-muted text-decoration-line-through d-block" style="font-size: 0.85rem;">Rp <?= number_format($sesi['harga_coret'], 0, ',', '.') ?></span>
                                                                 <?php endif; ?>
-                                                                <h5 class="fw-bold <?= $isExpired && !$isFree ? 'text-muted text-decoration-line-through' : 'text-primary' ?> d-block mb-1">
+                                                                <h5 class="fw-bold <?= $isExpired ? 'text-muted text-decoration-line-through' : 'text-primary' ?> d-block mb-1">
                                                                     <?= $isFree ? 'Rp 0' : 'Rp ' . number_format($sesi['harga_sesi'], 0, ',', '.') ?>
                                                                 </h5>
                                                             </div>
@@ -638,7 +643,11 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                                                 <p class="text-dark fw-bold fs-7 mb-3"><i class="fa-solid fa-layer-group me-2 text-primary"></i>4 Materi Spesial Webinar:</p>
                                                                 <ul class="list-unstyled mb-4" style="margin-bottom: 0;">
                                                                     <?php foreach ($childSessionsData as $cs): ?>
-                                                                        <?php $isCsExpired = (strtotime($cs['waktu_mulai']) <= strtotime($currentDateTime)); ?>
+                                                                        <?php 
+                                                                        $waktuMulaiChild = strtotime($cs['waktu_mulai']);
+                                                                        // Sesi individual (anak) dicoret HANYA jika waktu lewat DAN BUKAN hari ini
+                                                                        $isCsExpired = ($waktuMulaiChild < $sekarang && date('Y-m-d', $waktuMulaiChild) !== date('Y-m-d', $sekarang)); 
+                                                                        ?>
                                                                         <li class="<?= $isCsExpired ? 'opacity-75' : '' ?> mb-3 d-flex align-items-start">
                                                                             <i class="fa-solid fa-circle-check <?= $isCsExpired ? 'text-secondary' : 'text-success' ?> fs-6 mt-1 me-3"></i>
                                                                             <div>
@@ -788,41 +797,46 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                     <?php foreach ($paketWebinar->sesi as $sesi) : ?>
                                         <?php
                                         $isFree = ($sesi['harga_sesi'] <= 0);
+                                        $sekarang = strtotime($currentDateTime);
+                                        
+                                        // Asumsikan semua sudah lewat/expired
+                                        $isExpired = true; 
+                                        
+                                        // 1. Cek sesi induk/parent
+                                        $waktuMulaiParent = strtotime($sesi['waktu_mulai']);
+                                        if ($waktuMulaiParent > $sekarang || date('Y-m-d', $waktuMulaiParent) === date('Y-m-d', $sekarang)) {
+                                            $isExpired = false;
+                                        }
+
                                         $childSessionsData = [];
                                         $childIds = json_decode($sesi['sesi_gratis'], true) ?? [];
-                                        $hasChildren = false;
-                                        $isAllChildExpired = true;
 
                                         if (!empty($childIds)) {
-                                            $hasChildren = true;
                                             $childSessionsData = $db->table('webinar_sesi')
                                                 ->whereIn('id_sesi', $childIds)
                                                 ->orderBy('waktu_mulai', 'ASC')
                                                 ->get()
                                                 ->getResultArray();
 
+                                            // 2. Cek semua sesi list/anak
                                             foreach ($childSessionsData as $cs) {
-                                                if (strtotime($cs['waktu_mulai']) > strtotime($currentDateTime)) {
-                                                    $isAllChildExpired = false;
+                                                $waktuMulaiChild = strtotime($cs['waktu_mulai']);
+                                                // Jika ADA 1 SAJA yang di masa depan ATAU hari ini sedang berjalan
+                                                if ($waktuMulaiChild > $sekarang || date('Y-m-d', $waktuMulaiChild) === date('Y-m-d', $sekarang)) {
+                                                    $isExpired = false; // Maka paket secara keseluruhan BISA dibeli
                                                 }
                                             }
                                         }
-
-                                        if ($hasChildren) {
-                                            $isExpired = $isAllChildExpired;
-                                        } else {
-                                            $isExpired = (strtotime($sesi['waktu_mulai']) <= strtotime($currentDateTime));
-                                        }
                                         ?>
                                         <div class="col-lg-6">
-                                            <label class="w-100 h-100 m-0 <?= $isExpired && !$isFree ? 'opacity-50' : '' ?>" <?= $isExpired && !$isFree ? 'style="cursor: not-allowed;"' : 'style="cursor: pointer;"' ?>>
-                                                <input type="radio" name="id_sesi[]" value="<?= esc($sesi['id_sesi']) ?>" class="session-checkbox calculate-price" data-price="<?= round($sesi['harga_sesi']) ?>" <?= $isExpired && !$isFree ? 'disabled' : '' ?> <?= $isFree && !$isExpired ? 'checked' : '' ?>>
+                                            <label class="w-100 h-100 m-0 <?= $isExpired ? 'opacity-50' : '' ?>" <?= $isExpired ? 'style="cursor: not-allowed;"' : 'style="cursor: pointer;"' ?>>
+                                                <input type="radio" name="id_sesi[]" value="<?= esc($sesi['id_sesi']) ?>" class="session-checkbox calculate-price" data-price="<?= round($sesi['harga_sesi']) ?>" <?= $isExpired ? 'disabled' : '' ?> <?= $isFree && !$isExpired ? 'checked' : '' ?>>
 
-                                                <div class="session-card p-4 h-100 d-flex flex-column rounded-4 shadow-sm <?= $isExpired && !$isFree ? 'bg-light' : 'bg-white' ?>">
+                                                <div class="session-card p-4 h-100 d-flex flex-column rounded-4 shadow-sm <?= $isExpired ? 'bg-light' : 'bg-white' ?>">
                                                     <div class="d-flex align-items-start justify-content-between w-100">
                                                         <div class="pe-3">
                                                             <h5 class="fw-bold mb-1"><?= esc($sesi['nama_sesi']) ?></h5>
-                                                            <?php if ($isExpired && !$isFree): ?>
+                                                            <?php if ($isExpired): ?>
                                                                 <div class="mb-1"><span class="badge bg-danger mt-1" style="font-size: 0.75rem;">Semua Sesi Telah Berakhir</span></div>
                                                             <?php elseif ($isFree): ?>
                                                                 <div class="mb-1"><span class="badge bg-success mt-1" style="font-size: 0.65rem;">Fasilitas terbatas</span></div>
@@ -839,7 +853,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                                             <?php if (!$isFree && isset($sesi['harga_coret']) && $sesi['harga_coret'] > $sesi['harga_sesi']): ?>
                                                                 <span class="text-muted text-decoration-line-through d-block" style="font-size: 0.85rem;">Rp <?= number_format($sesi['harga_coret'], 0, ',', '.') ?></span>
                                                             <?php endif; ?>
-                                                            <h5 class="fw-bold <?= $isExpired && !$isFree ? 'text-muted text-decoration-line-through' : 'text-primary' ?> d-block mb-1">
+                                                            <h5 class="fw-bold <?= $isExpired ? 'text-muted text-decoration-line-through' : 'text-primary' ?> d-block mb-1">
                                                                 <?= $isFree ? 'Rp 0' : 'Rp ' . number_format($sesi['harga_sesi'], 0, ',', '.') ?>
                                                             </h5>
                                                         </div>
@@ -850,7 +864,10 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                                             <p class="text-dark fw-bold fs-7 mb-3"><i class="fa-solid fa-layer-group me-2 text-primary"></i>4 Materi Spesial Webinar:</p>
                                                             <ul class="list-unstyled mb-4" style="margin-bottom: 0;">
                                                                 <?php foreach ($childSessionsData as $cs): ?>
-                                                                    <?php $isCsExpired = (strtotime($cs['waktu_mulai']) <= strtotime($currentDateTime)); ?>
+                                                                    <?php 
+                                                                    $waktuMulaiChild = strtotime($cs['waktu_mulai']);
+                                                                    $isCsExpired = ($waktuMulaiChild < $sekarang && date('Y-m-d', $waktuMulaiChild) !== date('Y-m-d', $sekarang)); 
+                                                                    ?>
                                                                     <li class="<?= $isCsExpired ? 'opacity-75' : '' ?> mb-3 d-flex align-items-start">
                                                                         <i class="fa-solid fa-circle-check <?= $isCsExpired ? 'text-secondary' : 'text-success' ?> fs-6 mt-1 me-3"></i>
                                                                         <div>
