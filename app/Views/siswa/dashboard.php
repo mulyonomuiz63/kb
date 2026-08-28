@@ -295,9 +295,9 @@
 
                 <!-- Content -->
                 <div class="d-flex flex-column text-center text-md-start pe-0 pe-md-4">
-                    <h5 class="mb-1 fw-bolder text-dark fs-5 fs-md-4">Akses Eksklusif Peserta Pelatihan!</h5>
+                    <h5 class="mb-1 fw-bolder text-dark fs-5 fs-md-4">Pemindahan Grup Diskusi Peserta</h5>
                     <span class="text-gray-700 fs-7 fs-md-6">
-                        Terima kasih atas pembelian paket pelatihan Anda. Sebagai peserta resmi, Anda mendapatkan akses khusus ke Grup WhatsApp kami. Silakan bergabung untuk berdiskusi, mendapatkan update informasi.
+                        Dikarenakan grup utama sedang ditangguhkan, kami telah memindahkan wadah diskusi ke grup WhatsApp baru. Pastikan Anda segera bergabung agar tidak tertinggal update informasi dan materi pelatihan selanjutnya.
                     </span>
                 </div>
             </div>
