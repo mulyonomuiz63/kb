@@ -925,7 +925,7 @@
         const alertElement = document.getElementById('wa-group-alert');
 
         // Cek apakah user belum pernah menutup alert ini
-        if (!localStorage.getItem('wa_alert_hidden')) {
+        if (!localStorage.getItem('wa_alert_hidden_v2')) {
             // Hapus d-none dan siapkan posisi di bawah layar (tersembunyi)
             alertElement.classList.remove('d-none');
             alertElement.style.transform = 'translate(-50%, 150%)';
@@ -943,7 +943,7 @@
             btn.addEventListener('click', function() {
 
                 // Simpan status ke localStorage browser
-                localStorage.setItem('wa_alert_hidden', 'true');
+                localStorage.setItem('wa_alert_hidden_v2', 'true');
 
                 // Mainkan animasi turun ke bawah
                 alertElement.style.transform = 'translate(-50%, 150%)';
