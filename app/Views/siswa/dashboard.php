@@ -307,7 +307,7 @@
                 <button type="button" class="btn btn-sm btn-outline btn-outline-dashed btn-outline-success btn-active-light-success btn-wa-action fw-bold w-100 w-sm-auto text-nowrap" data-action="sudah">
                     Sudah Bergabung
                 </button>
-                <a href="https://chat.whatsapp.com/Jrywzo6tt6m9QltNrNSKNp?s=sh&p=i&mlu=4" target="_blank" class="btn btn-sm btn-success btn-wa-action fw-bold shadow-sm w-100 w-sm-auto text-nowrap" data-action="gabung">
+                <a href="https://chat.whatsapp.com/GakLHM8gxxvJfHDEryZGOi?s=cl&p=a&mlu=4" target="_blank" class="btn btn-sm btn-success btn-wa-action fw-bold shadow-sm w-100 w-sm-auto text-nowrap" data-action="gabung">
                     Bergabung Sekarang
                 </a>
             </div>
