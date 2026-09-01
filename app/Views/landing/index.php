@@ -888,12 +888,12 @@
                                 <div class="mt-2 mb-2">
                                     <div class="row g-2 g-md-3">
                                         <div class="col-6">
-                                            <a href="<?= base_url('legalitas#lkp') ?>" class="badge text-bg-light p-3 p-md-3 rounded-pill text-primary btn-hover-dark text-nowrap w-100 text-center d-block">
+                                            <a href="<?= base_url('legalitas#lkp') ?>" class="badge text-bg-light p-3 p-md-3 rounded-pill text-primary btn-hover-dark text-nowrap w-100 text-center d-block" style="font-size: clamp(9px, 2.8vw, 12px);">
                                                 LEGALITAS LEMBAGA
                                             </a>
                                         </div>
                                         <div class="col-6">
-                                            <a href="https://topcs.id/kelas-brevet" class="badge text-bg-success p-3 p-md-3 rounded-pill  btn-hover-dark text-nowrap w-100 text-center d-block">
+                                            <a href="https://topcs.id/kelas-brevet" class="badge text-bg-success p-3 p-md-3 rounded-pill  btn-hover-dark text-nowrap w-100 text-center d-block" style="font-size: clamp(9px, 2.8vw, 12px);">
                                                 KONSULTASI SEKARANG
                                             </a>
                                         </div>
