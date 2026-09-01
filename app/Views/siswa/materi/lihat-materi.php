@@ -130,6 +130,37 @@
     border: none;
     transition: transform 0.1s;
   }
+
+  /* --- TAMBAHAN STYLE UNTUK CHAT MENTION & FORMAT --- */
+  .chat-message-text {
+    word-wrap: break-word;
+  }
+
+  .mention-dropdown {
+    position: absolute;
+    bottom: 100%;
+    left: 15px;
+    width: calc(100% - 30px);
+    max-height: 200px;
+    overflow-y: auto;
+    background: #ffffff;
+    border: 1px solid var(--bs-gray-300);
+    border-radius: 0.475rem;
+    box-shadow: 0px 0px 20px 0px rgba(76, 87, 125, 0.15);
+    display: none;
+    z-index: 1050;
+  }
+
+  .mention-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+  }
+
+  .mention-item:hover {
+    background-color: var(--bs-light-primary);
+    color: var(--bs-primary);
+  }
 </style>
 <?= $this->endSection(); ?>
 
@@ -221,17 +252,20 @@
 
         <div class="col-xl-4">
           <div class="card card-flush shadow-sm h-xl-100 animate__animated animate__fadeInRight">
-            <div class="card-header pt-7 bg-primary">
+            <div class="card-header pt-5 pb-5 bg-primary">
               <div class="card-title d-flex align-items-center justify-content-between w-100 m-0">
-                <div class="d-flex flex-column pe-3" style="max-width: 85%;">
+                <div class="d-flex flex-column pe-3" style="max-width: 60%;">
                   <span class="card-label fw-bold text-white fs-4 lh-1 mb-1">Diskusi Materi</span>
                   <span class="text-white opacity-75 fw-semibold fs-7 text-truncate" id="judul_materi_chat" style="max-width: 100%;">
                     Tanyakan hal yang belum dimengerti
                   </span>
                 </div>
+                <!-- TOMBOL DOWNLOAD YANG DIPERBARUI AGAR JELAS -->
                 <div class="card-toolbar">
-                  <button type="button" class="btn btn-sm btn-icon btn-color-white btn-active-color-primary btn-outline btn-outline-white border-dashed btn-active-white" data-bs-toggle="modal" data-bs-target="#staticBackdrop" title="Download File Materi">
-                    <i class="ki-outline ki-file-up fs-2 text-white"></i>
+                  <button type="button" class="btn btn-sm btn-light fw-bold text-primary d-flex align-items-center px-3 py-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#staticBackdrop" title="Download File Materi">
+                    <i class="ki-outline ki-file-down fs-2 me-1 text-primary"></i>
+                    <span>File Materi</span>
+                    <span id="fileCountBadge" class="badge badge-circle badge-danger ms-2 fs-9" style="display: none;">0</span>
                   </button>
                 </div>
               </div>
@@ -243,14 +277,22 @@
                 </div>
               </div>
             </div>
-            <div class="card-footer pt-4" id="kt_chat_messenger_footer">
+
+            <div class="card-footer pt-4 position-relative" id="kt_chat_messenger_footer">
               <input type="hidden" name="kode_materi" id="kode_materi" value="">
-              <textarea name="text" class="form-control form-control-flush mb-3" rows="1" data-kt-element="input" placeholder="Tulis pesan..."></textarea>
+
+              <!-- Dropdown Menu Tagging Mention -->
+              <div id="mention_dropdown" class="mention-dropdown shadow-lg"></div>
+
+              <textarea id="msg_input" name="text" class="form-control form-control-flush mb-3" rows="1" data-kt-element="input" placeholder="Tulis pesan... (Gunakan @ untuk tag)"></textarea>
               <div class="d-flex flex-stack">
                 <div class="d-flex align-items-center me-2">
                   <small id="informasi" class="text-danger"></small>
                 </div>
-                <button id="chat_materi" class="btn btn-primary" type="button" data-kt-element="send">Kirim</button>
+                <div class="d-flex">
+                  <button id="btn_cancel_edit" class="btn btn-danger btn-sm me-2 d-none" type="button" title="Batal Edit">Batal</button>
+                  <button id="chat_materi" class="btn btn-primary btn-sm" type="button" data-kt-element="send">Kirim</button>
+                </div>
               </div>
             </div>
           </div>
@@ -316,7 +358,6 @@
 </div>
 
 <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" tabindex="-1">
-  <!-- Rekomendasi: tambahkan class 'modal-lg' di samping 'modal-dialog' agar popup lebih lebar dan iframe terlihat lebih jelas -->
   <div class="modal-dialog modal-lg">
     <div class="modal-content border-0 shadow-lg">
       <div class="modal-header border-0">
@@ -326,72 +367,51 @@
         </div>
       </div>
       <div class="modal-body">
-
-        <!-- FUNGSI LAMA (JANGAN DIUBAH) -->
         <div id="file-list-container">
           <div class="text-center py-5">
             <span class="spinner-border text-primary"></span>
           </div>
         </div>
-        <!-- END FUNGSI LAMA -->
-
-        <!-- TAMBAHAN BARU: Info, Tombol, & Embed Google Drive -->
         <div class="mt-7 pt-5 border-top">
           <div class="d-flex flex-column align-items-center bg-light rounded p-5">
             <div class="text-center mb-4">
               <h5 class="fw-bold text-dark mb-2">Akses Keseluruhan Materi</h5>
               <span class="text-muted fs-6">Untuk melihat atau mengunduh keseluruhan materi secara lengkap, Anda bisa melihatnya pada tampilan folder di bawah atau klik tombol berikut.</span>
             </div>
-
-            <!-- Tombol Buka di Tab Baru -->
             <a href="https://drive.google.com/drive/folders/1Rqr_3mgwLJx-8Zx2NLUPNuLT0xrqvUe9?usp=sharing" target="_blank" class="btn btn-primary mb-5">
               <i class="ki-outline ki-cloud-download fs-2 me-2"></i> Buka Folder Google Drive
             </a>
           </div>
         </div>
-        <!-- END TAMBAHAN BARU -->
-
       </div>
     </div>
   </div>
 </div>
 
-<!-- Modal Preview PDF Fullscreen -->
 <div class="modal fade" id="pdfPreviewModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-fullscreen">
     <div class="modal-content shadow-none">
-
-      <!-- Header Modal Profesional -->
       <div class="modal-header bg-light border-bottom-0 shadow-sm z-index-1">
         <div class="d-flex align-items-center">
           <i class="ki-outline ki-file fs-1 text-primary me-3"></i>
           <h5 class="modal-title fw-bold text-dark mb-0" id="pdfModalTitle">Preview Dokumen</h5>
         </div>
-
         <div class="d-flex align-items-center">
-          <!-- Tombol Download Tetap Disediakan -->
           <a href="#" id="pdfDownloadBtn" download class="btn btn-sm btn-primary me-4">
             <i class="ki-outline ki-save-2 fs-4 me-2"></i> Download
           </a>
-
-          <!-- Tombol Tutup -->
           <div class="btn btn-icon btn-sm btn-active-light-danger" data-bs-dismiss="modal">
             <i class="ki-outline ki-cross fs-1"></i>
           </div>
         </div>
       </div>
-
       <div class="modal-body p-0 bg-secondary">
-        <!-- Animasi Loading -->
         <div id="pdfLoadingContainer" class="d-flex flex-column justify-content-center align-items-center h-100">
           <span class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;"></span>
           <span class="text-muted fw-bold">Memuat dokumen...</span>
         </div>
-
-        <!-- Frame Penampil PDF (Tambahkan d-none di sini, hapus inline display:none) -->
         <iframe id="pdfViewer" class="d-none" src="" style="width: 100%; height: 100%; border: none;"></iframe>
       </div>
-
     </div>
   </div>
 </div>
@@ -408,30 +428,24 @@
     e.preventDefault();
   });
 
-  // 2. Blokir Shortcut Keyboard Developer Tools
   document.onkeydown = function(e) {
-    // Blokir F12
-    if (e.keyCode === 123) {
-      return false;
-    }
-    // Blokir Ctrl+Shift+I (Inspect Element) & Ctrl+Shift+J (Console) & Ctrl+Shift+C (Element Selector)
-    if (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) {
-      return false;
-    }
-    // Blokir Ctrl+U (View Page Source)
-    if (e.ctrlKey && e.keyCode === 85) {
-      return false;
-    }
-    // Blokir Ctrl+S (Save Page)
-    if (e.ctrlKey && e.keyCode === 83) {
-      return false;
-    }
+    if (e.keyCode === 123) return false;
+    if (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) return false;
+    if (e.ctrlKey && e.keyCode === 85) return false;
+    if (e.ctrlKey && e.keyCode === 83) return false;
   };
+
   let player;
-  let idleTimer; // Timer untuk auto-hide controls
+  let idleTimer;
   const track = document.getElementById('carouselTrack');
+
   let currentCsrfHash = '<?= csrf_hash() ?>';
   const csrfName = '<?= csrf_token() ?>';
+
+  // Variabel untuk Chat & Tagging
+  let lastDisplayedId = 0;
+  let editingMessageId = null;
+  let activeParticipants = [];
 
   /* ==========================================================================
      2. FUNGSI UTILITIES (AJAX, WAKTU, & TAMPILAN)
@@ -476,29 +490,23 @@
     el.style.background = `linear-gradient(to right, #ffffff 0%, #ffffff ${percentage}%, rgba(255, 255, 255, 0.2) ${percentage}%, rgba(255, 255, 255, 0.2) 100%)`;
   }
 
-  // Set initial colors
   updateRangeFill(document.getElementById('progressBar'));
   updateRangeFill(document.getElementById('volumeBar'));
-
 
   /* ==========================================================================
      3. FUNGSI AUTO-HIDE KONTROL & KURSOR
      ========================================================================== */
   function resetIdleTimer() {
     const videoContainer = $('#videoContainer');
-
-    // Tampilkan kembali kontrol & kursor dengan menghapus class video-idle
     videoContainer.removeClass('video-idle');
     clearTimeout(idleTimer);
 
-    // Set ulang timer hanya jika video sedang PLAYING
     if (player && player.getPlayerState && player.getPlayerState() === YT.PlayerState.PLAYING) {
       idleTimer = setTimeout(() => {
         videoContainer.addClass('video-idle');
-      }, 2500); // Kursor/kontrol hilang setelah 2.5 detik diam
+      }, 2500);
     }
   }
-
 
   /* ==========================================================================
      4. LOGIKA YOUTUBE PLAYER & KONTROL VIDEO
@@ -541,6 +549,10 @@
       $('#judul_materi_chat').text(initialTitle);
       $('#kode_materi').val(initialKode);
 
+      lastDisplayedId = 0;
+      activeParticipants = [];
+      editingMessageId = null;
+
       get_chat_materi(true);
       loadFileMateri(initialKode);
     }
@@ -559,13 +571,12 @@
       $('#iconPlay, #centerIconPlay').addClass('d-none');
       $('#iconPause, #centerIconPause').removeClass('d-none');
 
-      resetIdleTimer(); // Mulai timer sembunyi kontrol
+      resetIdleTimer();
       requestAnimationFrame(trackProgress);
     } else if (event.data === YT.PlayerState.PAUSED) {
       $('#iconPause, #centerIconPause').addClass('d-none');
       $('#iconPlay, #centerIconPlay').removeClass('d-none');
 
-      // Saat Pause, kontrol harus tetap muncul
       clearTimeout(idleTimer);
       $('#videoContainer').removeClass('video-idle');
     }
@@ -595,19 +606,20 @@
             videoId: firstThumb.data('videoid')
           });
         }
+
+        lastDisplayedId = 0;
+        activeParticipants = [];
+        editingMessageId = null;
         get_chat_materi(true);
         loadFileMateri(firstThumb.data('kode_materi'));
       }
     }
   }
 
-
   /* ==========================================================================
      5. EVENT LISTENERS UTAMA
      ========================================================================== */
   $(document).ready(function() {
-
-    // -- Deteksi Pergerakan Mouse untuk Fitur Auto-Hide --
     $('#videoContainer').on('mousemove mousedown touchstart keydown', function() {
       resetIdleTimer();
     });
@@ -615,11 +627,9 @@
     $('#videoContainer').on('mouseleave', function() {
       if (player && player.getPlayerState && player.getPlayerState() === YT.PlayerState.PLAYING) {
         clearTimeout(idleTimer);
-        // Kontrol akan otomatis tersembunyi karena mouse tidak lagi berada di elemen (:hover css native hilang)
       }
     });
 
-    // -- Tombol Play/Pause Overlay --
     $('#playPauseOverlay, #btnPlayPause').on('click', function() {
       if (player && player.getPlayerState) {
         if (player.getPlayerState() === YT.PlayerState.PLAYING) {
@@ -630,7 +640,6 @@
       }
     });
 
-    // -- Progress Bar (Timeline) --
     $('#progressBar').on('input', function() {
       updateRangeFill(this);
       if (player && player.getDuration) {
@@ -641,11 +650,9 @@
       }
     });
 
-    // -- Volume Control --
     $('#volumeBar').on('input', function() {
       updateRangeFill(this);
       const volVal = this.value;
-
       if (volVal == 0) {
         $('#iconVolumeUp').addClass('d-none');
         $('#iconVolumeMute').removeClass('d-none');
@@ -653,13 +660,9 @@
         $('#iconVolumeMute').addClass('d-none');
         $('#iconVolumeUp').removeClass('d-none');
       }
-
-      if (player && player.setVolume) {
-        player.setVolume(volVal);
-      }
+      if (player && player.setVolume) player.setVolume(volVal);
     });
 
-    // -- Fullscreen --
     $('#btnFullscreen').on('click', function() {
       const videoContainer = document.getElementById('videoContainer');
       if (!document.fullscreenElement) {
@@ -673,7 +676,6 @@
       }
     });
 
-    // -- Playlist Carousel / Klik Video Baru --
     $(document).on('click', '.video-thumb', function() {
       const videoId = $(this).data('videoid');
       const kode_materi = $(this).data('kode_materi');
@@ -683,6 +685,13 @@
       $(this).addClass('border border-primary border-3');
       $('#kode_materi').val(kode_materi);
       $('#judul_materi_chat').text(title);
+
+      // Reset Chat Panel saat pindah video
+      lastDisplayedId = 0;
+      activeParticipants = [];
+      editingMessageId = null;
+      $('#btn_cancel_edit').addClass('d-none');
+      $('#msg_input').val('').attr('placeholder', 'Tulis pesan... (Gunakan @ untuk tag)');
       $('.inner-chat-materi').html('<div class="d-flex justify-content-center py-10"><span class="spinner-border text-primary"></span></div>');
 
       get_chat_materi(true);
@@ -704,38 +713,109 @@
       behavior: 'smooth'
     }));
 
-    // -- Fitur Chat (Send & Reload) --
+    // Batal Edit Message
+    $('#btn_cancel_edit').on('click', function() {
+      editingMessageId = null;
+      $('#msg_input').val('').prop('disabled', false).focus();
+      $('#msg_input').attr('placeholder', 'Tulis pesan... (Gunakan @ untuk tag)');
+      $(this).addClass('d-none');
+    });
+
+    // Enter Key untuk Send (Shift+Enter untuk new line)
+    $('#msg_input').on('keydown', function(e) {
+      if (e.which == 13 && !e.shiftKey) {
+        e.preventDefault();
+        if ($('#mention_dropdown').is(':visible')) {
+          const firstItem = $('#mention_dropdown .mention-item').first();
+          if (firstItem.length > 0) {
+            firstItem.click();
+            return false;
+          }
+        }
+        $('#chat_materi').click();
+      }
+    });
+
+    // Event Autocomplete Tag Mention (@)
+    $('#msg_input').on('keyup input', handleMentionInput);
+
+    // Sembunyikan Dropdown jika klik di luar
+    $(document).on('click', function(e) {
+      if (!$(e.target).closest('#kt_chat_messenger_footer').length) {
+        $('#mention_dropdown').hide();
+      }
+    });
+
+    // Fitur Mengirim Pesan / Edit Message
     $('#chat_materi').off('click').on('click', function() {
       const btn = $(this);
-      const textarea = $('textarea[name=text]');
+      const textarea = $('#msg_input');
       const chat_text = textarea.val().trim();
       const kode_materi = $('#kode_materi').val();
       const link = '<?= $link ?? "" ?>';
       const linkadmin = '<?= $linkadmin ?? "" ?>';
 
       if (chat_text !== '') {
+        $('#mention_dropdown').hide();
         btn.prop('disabled', true);
-        $.ajax({
-          url: "<?= base_url('sw-siswa/materi/chat-materi') ?>",
-          method: "POST",
-          dataType: "json",
-          data: {
-            chat_materi: chat_text,
-            kode_materi: kode_materi,
-            link: link,
-            linkadmin: linkadmin,
-          },
-          success: function(res) {
-            if (res.status === 'success') {
-              updateCsrfToken(res.token);
-              textarea.val('');
-              get_chat_materi(true);
+        textarea.prop('disabled', true);
+
+        if (editingMessageId) {
+          // PROSES UPDATE CHAT
+          $.ajax({
+            url: "<?= base_url('sw-siswa/materi/update-chat-materi') ?>",
+            method: "POST",
+            dataType: "json",
+            data: {
+              id_chat: editingMessageId,
+              text: chat_text
+            },
+            success: function(res) {
+              if (res && res.token) updateCsrfToken(res.token);
+
+              $('#msg-text-' + editingMessageId).html(formatMessage(chat_text));
+              $('#btn-edit-' + editingMessageId).attr('onclick', `editMessage('${editingMessageId}', '${encodeURIComponent(chat_text)}')`);
+
+              editingMessageId = null;
+              $('#btn_cancel_edit').addClass('d-none');
+              textarea.attr('placeholder', 'Tulis pesan... (Gunakan @ untuk tag)');
+              textarea.val('').prop('disabled', false).focus();
+            },
+            error: function(xhr) {
+              let errMsg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : "Gagal mengedit pesan.";
+              Swals.alert("Gagal", errMsg, "error");
+              textarea.prop('disabled', false);
+            },
+            complete: function() {
+              btn.prop('disabled', false);
             }
-          },
-          complete: function() {
-            btn.prop('disabled', false);
-          }
-        });
+          });
+        } else {
+          // PROSES INSERT BARU
+          $.ajax({
+            url: "<?= base_url('sw-siswa/materi/chat-materi') ?>",
+            method: "POST",
+            dataType: "json",
+            data: {
+              chat_materi: chat_text,
+              kode_materi: kode_materi,
+              link: link,
+              linkadmin: linkadmin,
+            },
+            success: function(res) {
+              if (res && res.token) updateCsrfToken(res.token);
+              textarea.val('').prop('disabled', false).focus();
+              get_chat_materi(true);
+            },
+            error: function(xhr) {
+              Swals.alert("Gagal", "Gagal mengirim pesan, silakan coba lagi.", "error");
+              textarea.prop('disabled', false);
+            },
+            complete: function() {
+              btn.prop('disabled', false);
+            }
+          });
+        }
       }
     });
 
@@ -743,8 +823,9 @@
 
   }); // Akhir document.ready
 
+
   /* ==========================================================================
-     6. FUNGSI AJAX BANTUAN MATERI
+     6. FUNGSI AJAX BANTUAN MATERI & LOGIKA CHAT BARU
      ========================================================================== */
   function loadFileMateri(kode) {
     const container = $('#file-list-container');
@@ -761,22 +842,268 @@
   function get_chat_materi(shouldScroll = false) {
     const kode_materi = $('#kode_materi').val();
     if (!kode_materi) return;
+
     $.ajax({
       url: "<?= base_url('sw-siswa/materi/get-chat-materi') ?>",
       method: "POST",
       dataType: "json",
       data: {
-        kode_materi: kode_materi
+        kode_materi: kode_materi,
+        last_id: lastDisplayedId
       },
       success: function(res) {
-        if (res.html) {
-          $('.inner-chat-materi').html(res.html);
+        if (res && res.token) updateCsrfToken(res.token);
+
+        if (lastDisplayedId === 0) {
+          $('.inner-chat-materi').html('');
         }
-        updateCsrfToken(res.token);
-        if (shouldScroll) {
-          const chatContainer = $('.inner-chat-materi');
-          chatContainer.scrollTop(chatContainer[0].scrollHeight);
+
+        if (res.participants && Array.isArray(res.participants)) {
+          res.participants.forEach(p => {
+            if (p && !activeParticipants.includes(p)) activeParticipants.push(p);
+          });
         }
+
+        const data = res.messages;
+        if (data && data.length > 0) {
+          let html = '';
+          let hasNewMessage = false;
+          const myEmail = '<?= session()->get('email') ?>';
+          const currentTime = Math.floor(Date.now() / 1000);
+
+          data.forEach(m => {
+            const msgId = parseInt(m.id_chat_materi);
+
+            if (m.nama && !activeParticipants.includes(m.nama)) activeParticipants.push(m.nama);
+
+            if (msgId > lastDisplayedId) {
+              lastDisplayedId = msgId;
+              hasNewMessage = true;
+
+              const isMe = (m.email === myEmail);
+              const date = new Date(m.date_created * 1000);
+              const timeStr = date.toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit'
+              });
+              const avatarUrl = '<?= base_url('assets/app-assets/user/') ?>' + (m.gambar ? m.gambar : 'default.png');
+
+              if (isMe) {
+                const timeDiff = currentTime - m.date_created;
+                let actionButtons = '';
+
+                // Limitasi 5 Menit
+                if (timeDiff <= 300) {
+                  actionButtons = `
+                                <div class="mt-1 me-14">
+                                    <span id="btn-edit-${msgId}" class="badge badge-light-primary badge-sm cursor-pointer text-hover-primary me-2" onclick="editMessage('${msgId}', '${encodeURIComponent(m.text)}')">
+                                        <i class="ki-outline ki-pencil fs-8 me-1"></i>Edit
+                                    </span>
+                                    <span class="badge badge-light-danger badge-sm cursor-pointer text-hover-danger" onclick="deleteMessage('${msgId}', ${m.date_created})">
+                                        <i class="ki-outline ki-trash fs-8 me-1"></i>Hapus
+                                    </span>
+                                </div>
+                            `;
+                }
+
+                html += `
+                        <div class="d-flex justify-content-end mb-10" id="chat-item-${msgId}">
+                            <div class="d-flex flex-column align-items-end">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="me-3">
+                                        <span class="text-muted fs-9 mb-1">${timeStr}</span>
+                                        <span class="fs-7 fw-bold text-gray-900 text-hover-primary ms-1">Anda</span>
+                                    </div>
+                                    <div class="symbol symbol-35px symbol-circle">
+                                        <img alt="Pic" src="${avatarUrl}" />
+                                    </div>
+                                </div>
+                                <div class="p-5 rounded bg-light-primary text-dark fw-semibold mw-lg-400px text-end chat-message-text" id="msg-text-${msgId}">
+                                    ${formatMessage(m.text)}
+                                </div>
+                                ${actionButtons}
+                            </div>
+                        </div>`;
+              } else {
+                html += `
+                        <div class="d-flex justify-content-start mb-10">
+                            <div class="d-flex flex-column align-items-start">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="symbol symbol-35px symbol-circle">
+                                        <img alt="Pic" src="${avatarUrl}" />
+                                    </div>
+                                    <div class="ms-3">
+                                        <span class="fs-7 fw-bold text-gray-900 text-hover-primary me-1">${m.nama}</span>
+                                        <span class="text-muted fs-9 mb-1">${timeStr}</span>
+                                    </div>
+                                </div>
+                                <div class="p-5 rounded bg-light-info text-dark fw-semibold mw-lg-400px text-start chat-message-text">
+                                    ${formatMessage(m.text)}
+                                </div>
+                                <div class="mt-1 ms-14">
+                                    <span class="badge badge-light badge-sm cursor-pointer text-hover-primary" onclick="replyTo('${m.nama}')">
+                                        <i class="ki-outline ki-left fs-8 me-1"></i>Balas
+                                    </span>
+                                </div>
+                            </div>
+                        </div>`;
+              }
+            }
+          });
+
+          if (hasNewMessage) {
+            if ($('.inner-chat-materi').find('.text-muted.py-10').length > 0) {
+              $('.inner-chat-materi').html('');
+            }
+            $('.inner-chat-materi').append(html);
+            if (shouldScroll) {
+              const chatContainer = $('.inner-chat-materi');
+              chatContainer.scrollTop(chatContainer[0].scrollHeight);
+            }
+          }
+        } else if (lastDisplayedId === 0) {
+          $('.inner-chat-materi').html('<div class="text-center text-muted py-10">Belum ada diskusi. Mulai bertanya yuk!</div>');
+        }
+      }
+    });
+  }
+
+  // --- Fungsi Tambahan: Format, Mentions, Balas, Edit, & Delete ---
+
+  function formatMessage(text) {
+    if (!text) return "";
+    text = text.replace(/(?:\r\n|\r|\n)/g, '<br>');
+    var urlRegex = /(https?:\/\/[^\s]+)/g;
+    text = text.replace(urlRegex, url => `<a href="${url}" target="_blank" class="fw-bold text-primary text-hover-dark">${url}</a>`);
+    var mentionRegex = /@\[(.*?)\]/g;
+    text = text.replace(mentionRegex, `<span class="badge badge-light-primary text-primary fw-bold px-2 py-1 me-1"><i class="ki-outline ki-profile-circle text-primary me-1"></i>@$1</span>`);
+    return text;
+  }
+
+  function replyTo(nama) {
+    const input = $('#msg_input');
+    const currentText = input.val();
+    input.val(`${currentText} @[${nama}] `);
+    input.focus();
+  }
+
+  function handleMentionInput(e) {
+    const input = $(this);
+    const val = input.val();
+    const cursorPosition = input[0].selectionStart;
+    const textBeforeCursor = val.substring(0, cursorPosition);
+    const lastAtIndex = textBeforeCursor.lastIndexOf('@');
+
+    if (lastAtIndex !== -1) {
+      const query = textBeforeCursor.substring(lastAtIndex + 1);
+      if (!query.includes(']') && !query.includes('\n')) {
+        const matches = activeParticipants.filter(name =>
+          name.toLowerCase().includes(query.toLowerCase())
+        );
+        if (matches.length > 0) {
+          showMentionDropdown(matches, lastAtIndex, cursorPosition);
+          return;
+        }
+      }
+    }
+    $('#mention_dropdown').hide();
+  }
+
+  function showMentionDropdown(matches, atIndex, cursorPosition) {
+    const dropdown = $('#mention_dropdown');
+    let html = '';
+    matches.forEach(name => {
+      html += `
+          <div class="mention-item d-flex align-items-center" onclick="insertMention('${name.replace(/'/g, "\\'")}', ${atIndex}, ${cursorPosition})">
+              <div class="symbol symbol-25px symbol-circle me-2">
+                  <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0086a7&color=fff" alt="Avatar">
+              </div>
+              <span class="fw-bold fs-7 text-gray-800">${name}</span>
+          </div>`;
+    });
+    dropdown.html(html).show();
+  }
+
+  function insertMention(name, atIndex, cursorPosition) {
+    const input = $('#msg_input');
+    const val = input.val();
+    const beforeAt = val.substring(0, atIndex);
+    const afterCursor = val.substring(cursorPosition);
+    const newVal = `${beforeAt}@[${name}] ${afterCursor}`;
+    input.val(newVal);
+    $('#mention_dropdown').hide();
+    input.focus();
+  }
+
+  function editMessage(id, encodedText) {
+    editingMessageId = id;
+    const decText = decodeURIComponent(encodedText).replace(/<br\s*[\/]?>/gi, '\n');
+    $('#msg_input').val(decText).focus();
+    $('#msg_input').attr('placeholder', 'Mengedit pesan...');
+    $('#btn_cancel_edit').removeClass('d-none');
+  }
+
+  // Fungsi Delete dengan Validasi Waktu & SweetAlert Confirm (Khusus Siswa)
+  function deleteMessage(id, timeStamp) {
+    const currentTime = Math.floor(Date.now() / 1000);
+    const timeDiff = currentTime - timeStamp;
+
+    // Pengecekan batas waktu 5 menit (300 detik)
+    if (timeDiff > 300) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Ditolak!',
+        text: 'Pesan yang dikirim lebih dari 5 menit yang lalu tidak dapat dihapus.',
+        confirmButtonText: 'OK'
+      });
+      return;
+    }
+
+    // Konfirmasi penghapusan menggunakan SweetAlert2
+    Swal.fire({
+      title: 'Hapus Pesan?',
+      text: 'Pesan ini akan dihapus secara permanen dari diskusi.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, Hapus!',
+      cancelButtonText: 'Batal',
+      reverseButtons: true
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Tampilkan loading saat proses hapus berjalan
+        Swal.fire({
+          title: 'Menghapus...',
+          text: 'Memproses penghapusan pesan',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
+        let postData = {
+          id_chat: id
+        };
+        postData[csrfName] = currentCsrfHash;
+
+        $.post(`<?= base_url('sw-siswa/materi/delete-chat-materi') ?>`, postData, function(res) {
+          if (res && res.token) updateCsrfToken(res.token);
+
+          Swal.close();
+
+          // Hapus elemen pesan dari layar secara mulus tanpa reload halaman
+          $('#chat-item-' + id).fadeOut(300, function() {
+            $(this).remove();
+          });
+        }).fail(function(xhr) {
+          Swal.close();
+          let errMsg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : "Gagal menghapus pesan.";
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal',
+            text: errMsg,
+            confirmButtonText: 'OK'
+          });
+        });
       }
     });
   }
@@ -789,39 +1116,28 @@
     var pdfTitle = document.getElementById('pdfModalTitle');
     var pdfDownloadBtn = document.getElementById('pdfDownloadBtn');
 
-    // Ketika modal akan ditampilkan
     pdfPreviewModal.addEventListener('show.bs.modal', function(event) {
       var button = event.relatedTarget;
       var fileUrl = button.getAttribute('data-file-url');
       var fileName = button.getAttribute('data-file-name');
 
-      // Update Judul dan Link Download di Header
       pdfTitle.textContent = fileName;
       pdfDownloadBtn.href = fileUrl;
 
-      // RESET TAMPILAN AWAL: Sembunyikan iframe, munculkan loading
       pdfViewer.classList.remove('d-block');
       pdfViewer.classList.add('d-none');
-
       pdfLoading.classList.remove('d-none');
       pdfLoading.classList.add('d-flex');
-
-      // Masukkan URL ke dalam iframe untuk mulai memuat
       pdfViewer.src = fileUrl;
 
-      // Ketika iframe selesai memuat file
       pdfViewer.onload = function() {
-        // Hapus class d-flex dan tambahkan d-none untuk menghilangkan loading sepenuhnya
         pdfLoading.classList.remove('d-flex');
         pdfLoading.classList.add('d-none');
-
-        // Hapus class d-none dan tambahkan d-block untuk menampilkan iframe PDF
         pdfViewer.classList.remove('d-none');
         pdfViewer.classList.add('d-block');
       };
     });
 
-    // Bersihkan iframe ketika modal ditutup
     pdfPreviewModal.addEventListener('hidden.bs.modal', function() {
       pdfViewer.src = '';
       pdfTitle.textContent = 'Preview Dokumen';

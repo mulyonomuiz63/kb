@@ -37,6 +37,8 @@ $routes->group('sw-siswa', ['filter' => 'roleCheck:2'], function ($routes) {
         $routes->post('chat-materi', 'Siswa\MateriController::chatMateri');
         $routes->post('get-chat-materi', 'Siswa\MateriController::getChatMateri');
         $routes->post('get-file-materi', 'Siswa\MateriController::getFileMateri');
+        $routes->post('update-chat-materi', 'Siswa\MateriController::updateChatMateri');
+        $routes->post('delete-chat-materi', 'Siswa\MateriController::deleteChatMateri');
     });
 
      $routes->group('sertifikat',['filter' => 'cekData'] , function($routes){

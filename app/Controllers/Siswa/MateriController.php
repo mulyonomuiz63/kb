@@ -68,26 +68,21 @@ class MateriController extends BaseController
 
     public function lihatMateri($kode, $idmapel, $idkelas)
     {
-        // 2. Gunakan Try-Catch untuk menangani kegagalan Decrypt atau Database
         try {
-            // Dekripsi ID di awal untuk keamanan
             $dec_kode    = decrypt_url($kode);
             $dec_idmapel = decrypt_url($idmapel);
             $dec_idkelas = decrypt_url($idkelas);
 
-            // 4. Pengambilan Data (Gunakan variabel terdekripsi)
             $data = [
                 'breadcrumbs' => [
                     ['title' => 'Materi', 'url' => base_url('sw-siswa/materi')],
-                    ['title' => 'List Video Materi', 'url' => '#'], // '#' untuk halaman aktif
+                    ['title' => 'List Video Materi', 'url' => '#'],
                 ],
                 'materiAll' => $this->materiModel->getAllByMapelKelas($dec_idmapel, $dec_idkelas),
                 'materi'    => $this->materiModel->getBykodeMateri($dec_kode),
                 'file'      => $this->fileModel->getAllByKode($dec_kode),
             ];
 
-            // 5. Logika Hapus Notifikasi/Materi Siswa (Disederhanakan)
-            // Gunakan join dan where yang lebih efisien
             $materi_siswa = $this->materiSiswaModel
                 ->join('siswa', 'materi_siswa.siswa=siswa.id_siswa')
                 ->where('materi_siswa.materi', decrypt_url($kode))
@@ -98,7 +93,6 @@ class MateriController extends BaseController
                 $this->materiSiswaModel->where('id_materi_siswa', $materi_siswa->id_materi_siswa)->delete();
             }
 
-            // 6. Cek Data Materi & Generate Link
             $cekDataMateri = $this->materiModel->where('kode_materi', $dec_kode)->first();
             $data['link'] = '';
             $data['linkadmin'] = '';
@@ -109,19 +103,15 @@ class MateriController extends BaseController
 
             return view('siswa/materi/lihat-materi', $data);
         } catch (\Exception $e) {
-
-            // Tampilkan halaman error 404 jika ada serangan URL atau data tidak ditemukan
             return redirect()->to('sw-siswa')->with('pesan', 'Materi tidak ditemukan atau akses tidak sah.');
         }
     }
+
     public function getFileMateri()
     {
         if ($this->request->isAJAX()) {
             $kode_materi = $this->request->getPost('kode_materi');
-
-            // Sesuaikan query-nya dengan model Anda (apakah butuh decrypt atau tidak)
             $file = $this->fileModel->getAllByKode($kode_materi);
-
             $html = '';
 
             if (empty($file)) {
@@ -144,7 +134,7 @@ class MateriController extends BaseController
                     data-file-url="' . $urlFile . '" 
                     data-file-name="' . $namaTampil . '"
                     class="btn btn-outline btn-outline-dashed btn-outline-primary btn-active-light-primary d-flex align-items-center p-4 mb-3 btn-view-pdf">
-                        <i class="ki-outline ki-document fs-2x me-4"></i> <!-- Icon diubah jadi dokumen -->
+                        <i class="ki-outline ki-document fs-2x me-4"></i> 
                         <div class="text-start">
                             <span class="fw-bold d-block fs-6">' . $namaTampil . '</span>
                             <span class="text-muted fs-8">Klik untuk melihat / preview berkas PDF</span>
@@ -165,62 +155,28 @@ class MateriController extends BaseController
     {
         if ($this->request->isAJAX()) {
             $kode_materi = $this->request->getVar('kode_materi');
-            $chat_materi = $this->chatMateriModel->getAllByKodeMateri($kode_materi);
-            $myEmail     = session()->get('email');
-
-            $html = '';
-            foreach ($chat_materi as $chat) {
-                $isMe = ($chat->email == $myEmail);
-                $time = date('H:i', $chat->date_created);
-                $avatarUrl = base_url('assets/app-assets/user/' . ($chat->gambar ?: 'default.png'));
-
-                if ($isMe) {
-                    $html .= '
-                <div class="d-flex justify-content-end mb-10">
-                    <div class="d-flex flex-column align-items-end">
-                        <div class="d-flex align-items-center mb-2">
-                            <div class="me-3">
-                                <span class="text-muted fs-9 mb-1">' . $time . '</span>
-                                <span class="fs-7 fw-bold text-gray-900 text-hover-primary ms-1">Anda</span>
-                            </div>
-                            <div class="symbol symbol-35px symbol-circle">
-                                <img alt="Pic" src="' . $avatarUrl . '" />
-                            </div>
-                        </div>
-                        <div class="p-5 rounded bg-light-primary text-dark fw-semibold mw-lg-400px text-end">
-                            ' . nl2br(esc($chat->text)) . '
-                        </div>
-                    </div>
-                </div>';
-                } else {
-                    $html .= '
-                <div class="d-flex justify-content-start mb-10">
-                    <div class="d-flex flex-column align-items-start">
-                        <div class="d-flex align-items-center mb-2">
-                            <div class="symbol symbol-35px symbol-circle">
-                                <img alt="Pic" src="' . $avatarUrl . '" />
-                            </div>
-                            <div class="ms-3">
-                                <span class="fs-7 fw-bold text-gray-900 text-hover-primary me-1">' . $chat->nama . '</span>
-                                <span class="text-muted fs-9 mb-1">' . $time . '</span>
-                            </div>
-                        </div>
-                        <div class="p-5 rounded bg-light-info text-dark fw-semibold mw-lg-400px text-start">
-                            ' . nl2br(esc($chat->text)) . '
-                        </div>
-                    </div>
-                </div>';
-                }
+            $last_id = $this->request->getVar('last_id') ?? 0;
+            
+            // Ambil pesan hanya yang melebihi ID terakhir yang ditampilkan di layar
+            $chat_materi = $this->chatMateriModel->where('materi', $kode_materi)
+                                                 ->where('id_chat_materi >', $last_id)
+                                                 ->orderBy('date_created', 'ASC')
+                                                 ->findAll();
+                                                 
+            // Ambil partisipan untuk fitur Mention (@)
+            $participantsData = $this->chatMateriModel->select('nama')
+                                                      ->where('materi', $kode_materi)
+                                                      ->groupBy('nama')
+                                                      ->findAll();
+            $participants = [];
+            foreach ($participantsData as $p) {
+                $participants[] = is_object($p) ? $p->nama : $p['nama'];
             }
 
-            if (empty($chat_materi)) {
-                $html = '<div class="text-center text-muted py-10">Belum ada diskusi. Mulai bertanya yuk!</div>';
-            }
-
-            // PERBAIKAN: Kirim HTML beserta Token CSRF terbaru
             return $this->response->setJSON([
-                'html' => $html,
-                'token' => csrf_hash() // Kirim hash baru setiap kali load chat
+                'messages' => $chat_materi,
+                'participants' => $participants,
+                'token' => csrf_hash()
             ]);
         }
     }
@@ -248,7 +204,7 @@ class MateriController extends BaseController
                         '1',
                         'Pesan baru: ' . session()->get('nama'),
                         mb_strimwidth($dataMateri['nama_materi'], 0, 40, "..."),
-                        base_url('sw-admin/guru/diskusi')
+                        base_url('sw-admin/diskusi')
                     );
                 }
 
@@ -262,18 +218,88 @@ class MateriController extends BaseController
                 ];
 
                 if ($this->chatMateriModel->save($data)) {
-                    // PERBAIKAN: Kirim status success beserta token CSRF terbaru
                     return $this->response->setJSON([
                         'status' => 'success',
-                        'token'  => csrf_hash() // Hash baru setelah save
+                        'token'  => csrf_hash()
                     ]);
                 }
             } catch (\Exception $e) {
                 return $this->response->setJSON([
                     'status' => 'error',
                     'message' => $e->getMessage(),
-                    'token' => csrf_hash() // Tetap kirim hash baru meski error
-                ], 500);
+                    'token' => csrf_hash()
+                ])->setStatusCode(500);
+            }
+        }
+    }
+
+    // Fungsi Baru Edit Pesan (Untuk Siswa)
+    public function updateChatMateri()
+    {
+        if ($this->request->isAJAX()) {
+            try {
+                $id_chat = $this->request->getPost('id_chat');
+                $text    = (string) $this->request->getPost('text');
+                $email   = session()->get('email');
+
+                $pesan = $this->chatMateriModel->where('id_chat_materi', $id_chat)->first();
+                $pesanEmail = is_object($pesan) ? $pesan->email : $pesan['email'];
+
+                if ($pesan && $pesanEmail === $email) {
+                    $this->chatMateriModel->update($id_chat, [
+                        'text' => htmlspecialchars($text)
+                    ]);
+                    
+                    return $this->response->setJSON([
+                        'status' => 'success', 
+                        'token'  => csrf_hash()
+                    ]);
+                }
+
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Akses ditolak', 'token' => csrf_hash()])->setStatusCode(403);
+            } catch (\Exception $e) {
+                return $this->response->setJSON(['status' => 'error', 'message' => $e->getMessage(), 'token' => csrf_hash()])->setStatusCode(500);
+            }
+        }
+    }
+
+    // Fungsi Baru Hapus Pesan (Untuk Siswa)
+    public function deleteChatMateri()
+    {
+        if ($this->request->isAJAX()) {
+            try {
+                $id_chat = $this->request->getPost('id_chat');
+                $email   = session()->get('email');
+
+                $pesan = $this->chatMateriModel->where('id_chat_materi', $id_chat)->first();
+                $pesanEmail = is_object($pesan) ? $pesan->email : $pesan['email'];
+                $pesanDate = is_object($pesan) ? $pesan->date_created : $pesan['date_created'];
+
+                if ($pesan && $pesanEmail === $email) {
+                    
+                    // Batas waktu edit/hapus maksimal 5 menit (300 detik)
+                    $waktuSekarang = time();
+                    $selisihWaktu = $waktuSekarang - $pesanDate;
+
+                    if ($selisihWaktu > 300) {
+                        return $this->response->setJSON([
+                            'status' => 'error', 
+                            'message' => 'Pesan sudah melewati batas 5 menit dan tidak bisa dihapus.', 
+                            'token' => csrf_hash()
+                        ])->setStatusCode(400);
+                    }
+
+                    $this->chatMateriModel->where('id_chat_materi', $id_chat)->delete();
+                    
+                    return $this->response->setJSON([
+                        'status' => 'success', 
+                        'token'  => csrf_hash()
+                    ]);
+                }
+
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Akses ditolak', 'token' => csrf_hash()])->setStatusCode(403);
+            } catch (\Exception $e) {
+                return $this->response->setJSON(['status' => 'error', 'message' => $e->getMessage(), 'token' => csrf_hash()])->setStatusCode(500);
             }
         }
     }
