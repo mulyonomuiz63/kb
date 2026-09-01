@@ -885,15 +885,18 @@
                                 Kelas Brevet merupakan platform pelatihan Brevet Pajak AB yang Terdaftar Resmi. Diselenggarakan oleh Akuntanmu Learning Center By Legalyn Konsultan Indonesia (Lembaga Pelatihan, Kursus/Bimbel, yang didirikan sejak tahun 2021). Sebagai upaya merespon kebutuhan peningkatan kompetensi profesi perpajakan di Indonesia, Akuntanmu Learning Center menghadirkan pembelajaran dan ujian Brevet Pajak AB secara online melalui KelasBrevet.com
                             </div>
                             <div class="mt-2 mb-2">
-                                <div class="row g-3">
-                                    <div class="col-12 col-md-4">
-                                        <a href="<?= base_url('legalitas#lkp') ?>" class="badge text-bg-light p-2 rounded-pill text-primary btn-hover-dark text-izin text-wrap w-100 text-center d-block">Izin Operasional LKP</a>
-                                    </div>
-                                    <div class="col-12 col-md-4">
-                                        <a href="<?= base_url('legalitas#lpk') ?>" class="badge text-bg-light p-2 rounded-pill text-primary btn-hover-dark text-izin text-wrap w-100 text-center d-block">Sertifikat Standar LPK</a>
-                                    </div>
-                                    <div class="col-12 col-md-4">
-                                        <a href="<?= base_url('legalitas#kemnaker') ?>" class="badge text-bg-light p-2 rounded-pill text-primary btn-hover-dark text-izin text-wrap w-100 text-center d-block">Publikasi Kemnaker</a>
+                                <div class="mt-2 mb-2">
+                                    <div class="row g-2 g-md-3">
+                                        <div class="col-6">
+                                            <a href="<?= base_url('legalitas#lkp') ?>" class="badge text-bg-light p-3 p-md-3 rounded-pill text-primary btn-hover-dark text-nowrap w-100 text-center d-block">
+                                                LEGALITAS LEMBAGA
+                                            </a>
+                                        </div>
+                                        <div class="col-6">
+                                            <a href="https://topcs.id/kelas-brevet" class="badge text-bg-success p-3 p-md-3 rounded-pill  btn-hover-dark text-nowrap w-100 text-center d-block">
+                                                KONSULTASI SEKARANG
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

@@ -30,8 +30,34 @@
     .chat-message-text {
         word-wrap: break-word;
     }
-</style>
-<style>
+
+    /* Styling Popup Dropdown Mention Tag */
+    .mention-dropdown {
+        position: absolute;
+        bottom: 100%;
+        left: 0;
+        z-index: 1050;
+        width: 280px;
+        max-height: 200px;
+        overflow-y: auto;
+        background: #ffffff;
+        border: 1px solid var(--bs-gray-300);
+        border-radius: 0.475rem;
+        box-shadow: 0px 0px 20px 0px rgba(76, 87, 125, 0.15);
+        display: none;
+    }
+
+    .mention-item {
+        padding: 8px 12px;
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+    }
+
+    .mention-item:hover {
+        background-color: var(--bs-light-primary);
+        color: var(--bs-primary);
+    }
+
     /* Mencegah card kiri melompat saat menjadi sticky */
     .sticky-lg-top {
         transition: top 0.3s ease;
@@ -172,9 +198,16 @@
                             </div>
 
                             <div class="card-footer pt-4" id="kt_chat_messenger_footer">
-                                <div class="d-flex align-items-center">
-                                    <input type="text" id="msg_input" class="form-control form-control-flush mb-0 border-0 fs-6" placeholder="Tuliskan pesan Anda..." autocomplete="off" />
+                                <div class="d-flex align-items-center position-relative">
+                                    <!-- Dropdown Menu Tagging Mention -->
+                                    <div id="mention_dropdown" class="mention-dropdown shadow-lg"></div>
+
+                                    <input type="text" id="msg_input" class="form-control form-control-flush mb-0 border-0 fs-6" placeholder="Tuliskan pesan Anda... (Gunakan @ untuk tag)" autocomplete="off" />
                                     <div class="d-flex align-items-center ms-2">
+                                        <!-- Tombol Batal Edit (Disembunyikan secara default) -->
+                                        <button class="btn btn-danger btn-sm btn-icon me-1 d-none" id="btn_cancel_edit" title="Batal Edit">
+                                            <i class="ki-duotone ki-cross fs-2"><span class="path1"></span><span class="path2"></span></i>
+                                        </button>
                                         <button class="btn btn-primary btn-sm btn-icon" id="btn_send">
                                             <i class="ki-duotone ki-send fs-2"><span class="path1"></span><span class="path2"></span></i>
                                         </button>
@@ -189,6 +222,8 @@
         </div>
     </div>
 </div>
+
+<!-- Modal Materi Baru -->
 <div class="modal fade" id="modal_materi" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered mw-650px">
         <div class="modal-content rounded border-0">
@@ -238,6 +273,14 @@
     let currentNamaGuru = '';
     let lastDisplayedId = 0;
     let chatInterval = null;
+    let editingMessageId = null; // Menyimpan ID pesan yang sedang diedit
+
+    // Token CSRF
+    let chatCsrfName = '<?= csrf_token() ?>';
+    let chatCsrfHash = '<?= csrf_hash() ?>';
+
+    // Menyimpan daftar nama anggota di materi ini untuk autocomplete mention
+    let activeParticipants = [];
 
     $(document).ready(function() {
         // Klik Sidebar Materi
@@ -255,7 +298,35 @@
 
         $('#btn_send').on('click', sendMessage);
         $('#msg_input').on('keypress', function(e) {
-            if (e.which == 13) sendMessage();
+            if (e.which == 13) {
+                if ($('#mention_dropdown').is(':visible')) {
+                    // Pilih item pertama jika dropdown sedang terbuka
+                    const firstItem = $('#mention_dropdown .mention-item').first();
+                    if (firstItem.length > 0) {
+                        firstItem.click();
+                        return false;
+                    }
+                }
+                sendMessage();
+            }
+        });
+
+        // Event Input untuk Autocomplete Tag Mention (@)
+        $('#msg_input').on('keyup input', handleMentionInput);
+
+        // Tutup dropdown jika klik di luar
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('#kt_chat_messenger_footer').length) {
+                $('#mention_dropdown').hide();
+            }
+        });
+
+        // Event Batal Edit
+        $('#btn_cancel_edit').on('click', function() {
+            editingMessageId = null;
+            $('#msg_input').val('').prop('disabled', false).focus();
+            $('#msg_input').attr('placeholder', 'Tuliskan pesan Anda... (Gunakan @ untuk tag)');
+            $(this).addClass('d-none');
         });
     });
 
@@ -271,11 +342,17 @@
 
         currentMateri = materi;
         lastDisplayedId = 0;
+        activeParticipants = [];
+        editingMessageId = null;
+        
+        $('#btn_cancel_edit').addClass('d-none');
+        $('#msg_input').val('').attr('placeholder', 'Tuliskan pesan Anda... (Gunakan @ untuk tag)');
 
-        // Sembunyikan Empty State (Hapus d-flex, tambah d-none)
+        if (currentNamaGuru && !activeParticipants.includes(currentNamaGuru)) {
+            activeParticipants.push(currentNamaGuru);
+        }
+
         $('#empty_state').removeClass('d-flex').addClass('d-none');
-
-        // Tampilkan Chat Area (Hapus d-none, tambah d-flex)
         $('#chat_area').removeClass('d-none').addClass('d-flex');
 
         $('#active_title').text(namaMateri);
@@ -297,6 +374,16 @@
                 if (lastDisplayedId === 0) {
                     $('#chat_history').html('');
                 }
+
+                // Update daftar partisipan dari server
+                if (response.participants && Array.isArray(response.participants)) {
+                    response.participants.forEach(p => {
+                        if (p && !activeParticipants.includes(p)) {
+                            activeParticipants.push(p);
+                        }
+                    });
+                }
+
                 const data = response.messages;
                 if (data && data.length > 0) {
                     let html = '';
@@ -304,6 +391,11 @@
 
                     data.forEach(m => {
                         const msgId = parseInt(m.id_chat_materi);
+
+                        // Kumpulkan partisipan dari riwayat obrolan
+                        if (m.nama && !activeParticipants.includes(m.nama)) {
+                            activeParticipants.push(m.nama);
+                        }
 
                         if (msgId > lastDisplayedId) {
                             lastDisplayedId = msgId;
@@ -316,9 +408,29 @@
                             });
 
                             if (isMe) {
-                                // TAMPILAN SAYA (KANAN) - Menggunakan komponen Metronic Native
+                                // Pengecekan Waktu 5 Menit (300 Detik)
+                                const currentTime = Math.floor(Date.now() / 1000);
+                                const timeDiff = currentTime - m.date_created;
+                                let actionButtons = '';
+
+                                // Jika kurang dari atau sama dengan 5 menit, tampilkan tombol Edit & Hapus
+                                if (timeDiff <= 300) {
+                                    actionButtons = `
+                                        <!-- Tombol Aksi -->
+                                        <div class="mt-1 me-14">
+                                            <span id="btn-edit-${msgId}" class="badge badge-light-primary badge-sm cursor-pointer text-hover-primary me-2" onclick="editMessage('${msgId}', '${encodeURIComponent(m.text)}')">
+                                                <i class="ki-duotone ki-pencil fs-8 me-1"><span class="path1"></span><span class="path2"></span></i>Edit
+                                            </span>
+                                            <span class="badge badge-light-danger badge-sm cursor-pointer text-hover-danger" onclick="deleteMessage('${msgId}', ${m.date_created})">
+                                                <i class="ki-duotone ki-trash fs-8 me-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i>Hapus
+                                            </span>
+                                        </div>
+                                    `;
+                                }
+
+                                // TAMPILAN SAYA (KANAN)
                                 html += `
-                                <div class="d-flex justify-content-end mb-10">
+                                <div class="d-flex justify-content-end mb-10" id="chat-item-${msgId}">
                                     <div class="d-flex flex-column align-items-end">
                                         <div class="d-flex align-items-center mb-2">
                                             <div class="me-3">
@@ -329,13 +441,15 @@
                                                 <img alt="Pic" src="https://ui-avatars.com/api/?name=${encodeURIComponent(m.nama)}&background=0086a7&color=fff">
                                             </div>
                                         </div>
-                                        <div class="p-4 rounded bg-light-primary text-gray-900 fw-semibold mw-lg-400px text-end chat-message-text">
-                                            ${urlify(m.text)}
+                                        <!-- TAMBAHAN: id="msg-text-${msgId}" -->
+                                        <div class="p-4 rounded bg-light-primary text-gray-900 fw-semibold mw-lg-400px text-end chat-message-text" id="msg-text-${msgId}">
+                                            ${formatMessage(m.text)}
                                         </div>
+                                        ${actionButtons}
                                     </div>
                                 </div>`;
                             } else {
-                                // TAMPILAN ORANG LAIN (KIRI) - Menggunakan komponen Metronic Native
+                                // TAMPILAN ORANG LAIN (KIRI) DENGAN TOMBOL BALAS / TAG
                                 html += `
                                 <div class="d-flex justify-content-start mb-10">
                                     <div class="d-flex flex-column align-items-start">
@@ -349,7 +463,13 @@
                                             </div>
                                         </div>
                                         <div class="p-4 rounded bg-light-info text-gray-900 fw-semibold mw-lg-400px text-start chat-message-text">
-                                            ${urlify(m.text)}
+                                            ${formatMessage(m.text)}
+                                        </div>
+                                        <!-- Tombol Tag / Balas -->
+                                        <div class="mt-1 ms-14">
+                                            <span class="badge badge-light badge-sm cursor-pointer text-hover-primary" onclick="replyTo('${m.nama}')">
+                                                <i class="ki-duotone ki-left fs-8 me-1"><span class="path1"></span><span class="path2"></span></i>Balas
+                                            </span>
                                         </div>
                                     </div>
                                 </div>`;
@@ -367,27 +487,190 @@
             });
     }
 
+    // Fungsi Trigger Balas / Tag dari tombol di bawah pesan
+    function replyTo(nama) {
+        const input = $('#msg_input');
+        const currentText = input.val();
+        input.val(`${currentText} @[${nama}] `);
+        input.focus();
+    }
+
+    // Penanganan Autocomplete saat mengetik @
+    function handleMentionInput(e) {
+        const input = $(this);
+        const val = input.val();
+        const cursorPosition = input[0].selectionStart;
+        const textBeforeCursor = val.substring(0, cursorPosition);
+        
+        // Cari simbol @ terakhir sebelum kursor
+        const lastAtIndex = textBeforeCursor.lastIndexOf('@');
+
+        if (lastAtIndex !== -1) {
+            const query = textBeforeCursor.substring(lastAtIndex + 1);
+            
+            // Periksa jika query tidak mengandung spasi atau karakter khusus penutup
+            if (!query.includes(']') && !query.includes('\n')) {
+                const matches = activeParticipants.filter(name => 
+                    name.toLowerCase().includes(query.toLowerCase())
+                );
+
+                if (matches.length > 0) {
+                    showMentionDropdown(matches, lastAtIndex, cursorPosition);
+                    return;
+                }
+            }
+        }
+        $('#mention_dropdown').hide();
+    }
+
+    // Tampilkan List Dropdown
+    function showMentionDropdown(matches, atIndex, cursorPosition) {
+        const dropdown = $('#mention_dropdown');
+        let html = '';
+
+        matches.forEach(name => {
+            html += `
+            <div class="mention-item d-flex align-items-center" onclick="insertMention('${name.replace(/'/g, "\\'")}', ${atIndex}, ${cursorPosition})">
+                <div class="symbol symbol-25px symbol-circle me-2">
+                    <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0086a7&color=fff" alt="Avatar">
+                </div>
+                <span class="fw-bold fs-7 text-gray-800">${name}</span>
+            </div>`;
+        });
+
+        dropdown.html(html).show();
+    }
+
+    // Sisipkan hasil Tag ke input teks
+    function insertMention(name, atIndex, cursorPosition) {
+        const input = $('#msg_input');
+        const val = input.val();
+
+        const beforeAt = val.substring(0, atIndex);
+        const afterCursor = val.substring(cursorPosition);
+
+        // Format tag disimpankan sebagai @[Nama Member]
+        const newVal = `${beforeAt}@[${name}] ${afterCursor}`;
+        input.val(newVal);
+        $('#mention_dropdown').hide();
+        input.focus();
+    }
+
+    // Mengubah format URL & Tag Mention (@[Nama]) menjadi Badge Visual
+    function formatMessage(text) {
+        if (!text) return "";
+
+        // 1. Convert URL link
+        var urlRegex = /(https?:\/\/[^\s]+)/g;
+        text = text.replace(urlRegex, url => `<a href="${url}" target="_blank" class="fw-bold text-primary text-hover-dark">${url}</a>`);
+
+        // 2. Convert Mention Tag (@[Nama]) menjadi Badge
+        var mentionRegex = /@\[(.*?)\]/g;
+        text = text.replace(mentionRegex, `<span class="badge badge-light-primary text-primary fw-bold px-2 py-1 me-1"><i class="ki-duotone ki-profile-circle text-primary me-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>@$1</span>`);
+
+        return text;
+    }
+
+    // Modifikasi Fitur Send Message (Insert Baru atau Update Edit secara Real-time)
     function sendMessage() {
         const text = $('#msg_input').val();
         if (!text || !currentMateri) return;
 
-        $('#msg_input').val('').prop('disabled', true);
+        $('#mention_dropdown').hide();
+        $('#msg_input').prop('disabled', true);
+        $('#btn_cancel_edit').prop('disabled', true);
 
-        $.post(`<?= base_url('sw-admin/diskusi/send') ?>`, {
-            materi: currentMateri,
-            text: text,
-            email_guru: currentEmailGuru,
-            nama_guru: currentNamaGuru
-        }, function() {
-            $('#msg_input').prop('disabled', false).focus();
-            fetchMessages(currentMateri);
-        });
+        if (editingMessageId) {
+            let postData = { id_chat: editingMessageId, text: text };
+            postData[chatCsrfName] = chatCsrfHash;
+
+            $.post(`<?= base_url('sw-admin/diskusi/update-message') ?>`, postData, function(res) {
+                if (res && res.token) chatCsrfHash = res.token;
+                
+                // 1. UBAH TEKS DI LAYAR SECARA LANGSUNG (TANPA RELOAD)
+                $('#msg-text-' + editingMessageId).html(formatMessage(text));
+                
+                // 2. PERBARUI PARAMETER TOMBOL EDIT AGAR MENYIMPAN TEKS TERBARU
+                $('#btn-edit-' + editingMessageId).attr('onclick', `editMessage('${editingMessageId}', '${encodeURIComponent(text)}')`);
+                
+                // 3. Kembalikan input ke mode normal
+                editingMessageId = null;
+                $('#btn_cancel_edit').addClass('d-none').prop('disabled', false);
+                $('#msg_input').attr('placeholder', 'Tuliskan pesan Anda... (Gunakan @ untuk tag)');
+                $('#msg_input').prop('disabled', false).val('').focus();
+                
+            }).fail(function(xhr) {
+                $('#msg_input').prop('disabled', false);
+                $('#btn_cancel_edit').prop('disabled', false);
+                let errMsg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : "Gagal mengedit pesan.";
+                Swals.alert("Gagal", errMsg, "error");
+            });
+
+        } else {
+            // PROSES KIRIM BARU
+            let postData = {
+                materi: currentMateri,
+                text: text,
+                email_guru: currentEmailGuru,
+                nama_guru: currentNamaGuru
+            };
+            postData[chatCsrfName] = chatCsrfHash;
+
+            $.post(`<?= base_url('sw-admin/diskusi/send') ?>`, postData, function(res) {
+                if (res && res.token) chatCsrfHash = res.token;
+                $('#msg_input').prop('disabled', false).val('').focus();
+                fetchMessages(currentMateri);
+            }).fail(function() {
+                $('#msg_input').prop('disabled', false);
+                Swals.alert("Gagal", "Gagal mengirim pesan, silakan coba lagi.", "error");
+            });
+        }
     }
 
-    function urlify(text) {
-        if (!text) return "";
-        var urlRegex = /(https?:\/\/[^\s]+)/g;
-        return text.replace(urlRegex, url => `<a href="${url}" target="_blank" class="fw-bold text-primary text-hover-dark">${url}</a>`);
+    // Fungsi Trigger Edit ke Kotak Input
+    function editMessage(id, encodedText) {
+        editingMessageId = id;
+        $('#msg_input').val(decodeURIComponent(encodedText)).focus();
+        $('#msg_input').attr('placeholder', 'Mengedit pesan... (Tekan Enter untuk simpan)');
+        $('#btn_cancel_edit').removeClass('d-none');
+    }
+
+    // Fungsi Delete dengan Validasi Waktu & SweetAlert Confirm (Tanpa Reload)
+    function deleteMessage(id, timeStamp) {
+        // Pengecekan 5 Menit (300 Detik)
+        const currentTime = Math.floor(Date.now() / 1000);
+        const timeDiff = currentTime - timeStamp;
+
+        if (timeDiff > 300) {
+            Swals.alert('Ditolak!', 'Pesan yang dikirim lebih dari 5 menit yang lalu tidak dapat dihapus.', 'warning');
+            return;
+        }
+
+        Swals.confirm(
+            'Hapus Pesan?',
+            'Pesan ini akan dihapus secara permanen dari diskusi.',
+            function() {
+                Swals.loading('Menghapus...', 'Memproses penghapusan pesan');
+                
+                let postData = { id_chat: id };
+                postData[chatCsrfName] = chatCsrfHash;
+
+                $.post(`<?= base_url('sw-admin/diskusi/delete-message') ?>`, postData, function(res) {
+                    if (res && res.token) chatCsrfHash = res.token;
+                    Swals.close();
+                    
+                    // PERBAIKAN: Hapus pesan langsung dari layar dengan animasi fadeOut (tanpa reload)
+                    $('#chat-item-' + id).fadeOut(300, function() {
+                        $(this).remove();
+                    });
+                    
+                }).fail(function(xhr) {
+                    Swals.close();
+                    let errMsg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : "Gagal menghapus pesan.";
+                    Swals.alert("Gagal", errMsg, "error");
+                });
+            }
+        );
     }
 </script>
 <?= $this->endSection(); ?>

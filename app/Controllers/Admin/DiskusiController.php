@@ -35,16 +35,15 @@ class DiskusiController extends BaseController
             $materiByGuru = $this->chatMateriModel
                 ->select('chat_materi.materi, materi.nama_materi, COUNT(CASE WHEN status_notif = "0" AND email != "' . $myEmail . '" THEN 1 END) as unread_count')
                 ->join('materi', 'chat_materi.materi = materi.kode_materi')
-                ->where('materi.guru', $g['id_guru']) // Sesuaikan nama kolom ID Guru di tabel materi
+                ->where('materi.guru', $g['id_guru'])
                 ->groupBy('chat_materi.materi')
                 ->findAll();
 
             $sidebarData[] = [
-                'nama_guru' => $g['nama_guru'],
-                'id_guru'   => $g['id_guru'],
-                'email_guru'   => $g['email'],
-                'nama_guru'   => $g['nama_guru'],
-                'materi'    => $materiByGuru
+                'nama_guru'  => $g['nama_guru'],
+                'id_guru'    => $g['id_guru'],
+                'email_guru' => $g['email'],
+                'materi'     => $materiByGuru
             ];
         }
         $data['diskusi'] = $sidebarData;
@@ -65,46 +64,51 @@ class DiskusiController extends BaseController
             ->orderBy('date_created', 'ASC')
             ->findAll();
 
-        // 2. Cari pesan pertama belum terbaca
+        // 2. Ambil daftar partisipan unik untuk keperluan Autocomplete Tag Mention
+        $participantsData = $this->chatMateriModel->select('nama')
+            ->where('materi', $materiName)
+            ->groupBy('nama')
+            ->findAll();
+
+        $participants = array_column($participantsData, 'nama');
+
+        // 3. Cari pesan pertama belum terbaca
         $firstUnread = $this->chatMateriModel->where('materi', $materiName)
             ->where('status_notif', '0')
             ->orderBy('id_chat_materi', 'ASC')
             ->first();
 
-        // 3. Update status (Gunakan Try-Catch)
+        // 4. Update status terbaca
         try {
             $db = \Config\Database::connect();
             $builder = $db->table('chat_materi');
             $builder->where('materi', $materiName);
             $builder->where('status_notif', '0');
 
-            // Periksa apakah ada baris yang memenuhi kriteria
             if ($builder->countAllResults(false) > 0) {
                 $builder->update(['status_notif' => '1']);
             }
         } catch (\Exception $e) {
-            // Abaikan error "no data to update" agar response tetap kembali ke JS
+            // Abaikan error "no data to update"
         }
 
         return $this->response->setJSON([
             'messages'        => $messages,
+            'participants'    => $participants,
             'first_unread_id' => $firstUnread ? $firstUnread['id_chat_materi'] : null
         ]);
     }
 
     public function sendMessage()
     {
-
         if ($this->request->isAJAX()) {
             try {
                 $kode_materi = $this->request->getPost('materi');
                 $chat_text   = (string) $this->request->getPost('text');
-                $email   = (string) $this->request->getPost('email_guru');
+                $email       = (string) $this->request->getPost('email_guru');
                 $nama_guru   = (string) $this->request->getPost('nama_guru');
 
                 $user = $this->siswaModel->asObject()->find(session('id'));
-
-                
 
                 $data = [
                     'materi'       => $kode_materi,
@@ -116,18 +120,100 @@ class DiskusiController extends BaseController
                 ];
 
                 if ($this->chatMateriModel->save($data)) {
-                    // PERBAIKAN: Kirim status success beserta token CSRF terbaru
                     return $this->response->setJSON([
                         'status' => 'success',
-                        'token'  => csrf_hash() // Hash baru setelah save
+                        'token'  => csrf_hash()
                     ]);
                 }
             } catch (\Exception $e) {
                 return $this->response->setJSON([
-                    'status' => 'error',
+                    'status'  => 'error',
                     'message' => $e->getMessage(),
-                    'token' => csrf_hash() // Tetap kirim hash baru meski error
-                ], 500);
+                    'token'   => csrf_hash()
+                ])->setStatusCode(500);
+            }
+        }
+    }
+
+    public function updateMessage()
+    {
+        if ($this->request->isAJAX()) {
+            try {
+                $id_chat = $this->request->getPost('id_chat');
+                $text    = (string) $this->request->getPost('text');
+
+                // Verifikasi agar hanya pemilik pesan yang bisa mengedit
+                $pesan = $this->chatMateriModel->where('id_chat_materi', $id_chat)->first();
+
+                if ($pesan && $pesan['email']) {
+                    $this->chatMateriModel->update($id_chat, [
+                        'text' => htmlspecialchars($text)
+                    ]);
+                    
+                    return $this->response->setJSON([
+                        'status' => 'success', 
+                        'token'  => csrf_hash()
+                    ]);
+                }
+
+                return $this->response->setJSON([
+                    'status' => 'error', 
+                    'message' => 'Akses ditolak', 
+                    'token' => csrf_hash()
+                ])->setStatusCode(403);
+            } catch (\Exception $e) {
+                return $this->response->setJSON([
+                    'status' => 'error', 
+                    'message' => $e->getMessage(), 
+                    'token' => csrf_hash()
+                ])->setStatusCode(500);
+            }
+        }
+    }
+
+    public function deleteMessage()
+    {
+        if ($this->request->isAJAX()) {
+            try {
+                $id_chat = $this->request->getPost('id_chat');
+                $email   = session()->get('email');
+
+                // Verifikasi kepemilikan pesan
+                $pesan = $this->chatMateriModel->where('id_chat_materi', $id_chat)->first();
+
+                if ($pesan && $pesan['email']) {
+                    
+                    // Validasi 5 Menit (300 Detik) Backend
+                    $waktuSekarang = time();
+                    $selisihWaktu = $waktuSekarang - $pesan['date_created'];
+
+                    if ($selisihWaktu > 300) {
+                        return $this->response->setJSON([
+                            'status' => 'error', 
+                            'message' => 'Pesan sudah melewati batas 5 menit dan tidak bisa dihapus.', 
+                            'token' => csrf_hash()
+                        ])->setStatusCode(400);
+                    }
+
+                    $this->chatMateriModel->where('id_chat_materi', $id_chat)->delete();
+                    
+                    return $this->response->setJSON([
+                        'status' => 'success', 
+                        'token'  => csrf_hash()
+                    ]);
+                }
+
+                return $this->response->setJSON([
+                    'status' => 'error', 
+                    'message' => 'Akses ditolak', 
+                    'token' => csrf_hash()
+                ])->setStatusCode(403);
+            } catch (\Exception $e) {
+                return $this->response->setJSON([
+                    'status' => 'error', 
+                    'message' => $e->getMessage(), 
+                    'token' => csrf_hash()
+                ])->setStatusCode(500);
             }
         }
     }

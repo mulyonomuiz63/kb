@@ -260,6 +260,8 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
         $routes->get('/', 'Admin\DiskusiController::index');
         $routes->get('get-messages/(:any)', 'Admin\DiskusiController::getMessages/$1');
         $routes->post('send', 'Admin\DiskusiController::sendMessage');
+        $routes->post('update-message', 'Admin\DiskusiController::updateMessage');
+        $routes->post('delete-message', 'Admin\DiskusiController::deleteMessage');
     });
 
 
