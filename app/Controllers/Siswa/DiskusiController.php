@@ -149,4 +149,65 @@ class DiskusiController extends BaseController
             }
         }
     }
+
+    public function updateMessage()
+    {
+        if ($this->request->isAJAX()) {
+            try {
+                $id = $this->request->getPost('id_chat');
+                $text = (string) $this->request->getPost('text');
+                $email = session()->get('email');
+
+                $msg = $this->chatMateriModel->find($id);
+
+                // Validasi: Milik user sendiri & belum lewat 5 menit (300 detik)
+                if ($msg && $msg['email'] == $email && (time() - $msg['date_created']) <= 300) {
+                    $this->chatMateriModel->update($id, ['text' => htmlspecialchars($text)]);
+                    return $this->response->setJSON([
+                        'status' => 'success',
+                        'token'  => csrf_hash()
+                    ]);
+                }
+
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Pesan tidak dapat diedit (waktu 5 menit telah habis atau bukan pesan Anda).',
+                    'token'  => csrf_hash()
+                ])->setStatusCode(400);
+
+            } catch (\Exception $e) {
+                return $this->response->setJSON(['status' => 'error', 'message' => $e->getMessage(), 'token' => csrf_hash()], 500);
+            }
+        }
+    }
+
+    public function deleteMessage()
+    {
+        if ($this->request->isAJAX()) {
+            try {
+                $id = $this->request->getPost('id_chat');
+                $email = session()->get('email');
+
+                $msg = $this->chatMateriModel->find($id);
+
+                // Validasi: Milik user sendiri & belum lewat 5 menit (300 detik)
+                if ($msg && $msg['email'] == $email && (time() - $msg['date_created']) <= 300) {
+                    $this->chatMateriModel->delete($id);
+                    return $this->response->setJSON([
+                        'status' => 'success',
+                        'token'  => csrf_hash()
+                    ]);
+                }
+
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Pesan tidak dapat dihapus (waktu 5 menit telah habis).',
+                    'token'  => csrf_hash()
+                ])->setStatusCode(400);
+
+            } catch (\Exception $e) {
+                return $this->response->setJSON(['status' => 'error', 'message' => $e->getMessage(), 'token' => csrf_hash()], 500);
+            }
+        }
+    }
 }

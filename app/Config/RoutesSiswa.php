@@ -31,7 +31,7 @@ $routes->group('sw-siswa', ['filter' => 'roleCheck:2'], function ($routes) {
         $routes->get('midtrans-bayar/(:segment)', 'Siswa\TransaksiController::midtransBayar/$1');
     });
 
-    $routes->group('materi',['filter' => 'cekData'] , function($routes){
+    $routes->group('materi', ['filter' => 'cekData'], function ($routes) {
         $routes->get('/', 'Siswa\MateriController::index');
         $routes->get('lihat-materi/(:segment)/(:segment)/(:segment)', 'Siswa\MateriController::lihatMateri/$1/$2/$3');
         $routes->post('chat-materi', 'Siswa\MateriController::chatMateri');
@@ -41,24 +41,24 @@ $routes->group('sw-siswa', ['filter' => 'roleCheck:2'], function ($routes) {
         $routes->post('delete-chat-materi', 'Siswa\MateriController::deleteChatMateri');
     });
 
-     $routes->group('sertifikat',['filter' => 'cekData'] , function($routes){
+    $routes->group('sertifikat', ['filter' => 'cekData'], function ($routes) {
         $routes->get('/', 'Siswa\SertifikatController::index');
         $routes->get('lihat-sertifikat-brevet/(:segment)', 'Siswa\SertifikatController::lihatSertifikatBrevet/$1');
         $routes->get('lihat-sertifikat/(:segment)/(:segment)', 'Siswa\SertifikatController::lihatSertifikat/$1/$2');
-     });
+    });
 
     //  review
     $routes->post('simpan-review', 'Siswa\ReviewController::simpanReview');
 
 
-    $routes->group('profile', function($routes){
+    $routes->group('profile', function ($routes) {
         $routes->get('/', 'Siswa\ProfileController::index');
         $routes->post('update-data-diri', 'Siswa\ProfileController::editProfile');
         $routes->post('edit-password', 'Siswa\ProfileController::editPassword');
     });
 
 
-    $routes->group('ujian',['filter' => 'cekData'] ,  function($routes){
+    $routes->group('ujian', ['filter' => 'cekData'],  function ($routes) {
         $routes->get('/', 'Siswa\UjianController::index');
         $routes->get('lihat-pg', 'Siswa\UjianController::lihatPg');
         $routes->get('lihat-pg/(:any)/(:any)/(:any)', 'Siswa\UjianController::lihatPg/$1/$2/$3');
@@ -71,14 +71,17 @@ $routes->group('sw-siswa', ['filter' => 'roleCheck:2'], function ($routes) {
     });
 
     // diskusi
-    $routes->group('diskusi',['filter' => 'cekData'] , function ($routes) {
+    $routes->group('diskusi', ['filter' => 'cekData'], function ($routes) {
         $routes->get('/', 'Siswa\DiskusiController::index');
         $routes->get('get-messages/(:any)', 'Siswa\DiskusiController::getMessages/$1');
         $routes->post('send', 'Siswa\DiskusiController::sendMessage');
+        // --- 2 ROUTE BARU UNTUK EDIT & DELETE ---
+        $routes->post('update-chat', 'Siswa\DiskusiController::updateMessage');
+        $routes->post('delete-chat', 'Siswa\DiskusiController::deleteMessage');
     });
 
 
-    $routes->group('ikh',['filter' => 'cekData'] , function ($routes) {
+    $routes->group('ikh', ['filter' => 'cekData'], function ($routes) {
         $routes->get('/', 'Siswa\IKHController::index');
         $routes->post('store', 'Siswa\IKHController::store');
         $routes->post('generate-sertifikat-drive', 'Siswa\IKHController::generateSertifikatDrive');
@@ -87,7 +90,7 @@ $routes->group('sw-siswa', ['filter' => 'roleCheck:2'], function ($routes) {
         $routes->get('perpanjang/(:segment)', 'Siswa\IKHController::perpanjang/$1');
     });
 
-    $routes->group('webinar', function($routes){
+    $routes->group('webinar', function ($routes) {
         $routes->get('/', 'Siswa\WebinarController::index');
         $routes->get('lihat-materi', 'Siswa\WebinarController::lihatMateri');
         $routes->get('sertifikat/(:segment)', 'Siswa\WebinarController::sertifikat/$1');
