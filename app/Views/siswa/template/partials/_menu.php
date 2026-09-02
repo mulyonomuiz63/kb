@@ -55,8 +55,8 @@
                                             <i class="ki-outline ki-notepad-edit text-danger fs-1"></i>
                                         </span>
                                         <span class="d-flex flex-column">
-                                            <span class="fs-6 fw-bold text-gray-800">Ujian</span>
-                                            <span class="fs-7 fw-semibold text-muted">Evaluasi & Quiz</span>
+                                            <span class="fs-6 fw-bold text-gray-800">Ujian & Latihan</span>
+                                            <span class="fs-7 fw-semibold text-muted">Ujian Kompetensi</span>
                                         </span>
                                     </a>
                                 </div>
