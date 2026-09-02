@@ -16,7 +16,7 @@
                             <i class="ki-duotone ki-magnifier fs-3 position-absolute ms-4">
                                 <span class="path1"></span><span class="path2"></span>
                             </i>
-                            <input type="text" id="searchInput" class="form-control form-control-solid w-250px ps-12" placeholder="Cari NIK / Nama..." />
+                            <input type="text" id="searchInput" class="form-control form-control-solid w-250px ps-12" placeholder="Cari No HP / Nama..." />
                         </div>
                     </div>
                 </div>
@@ -26,7 +26,7 @@
                         <table class="table align-middle table-row-dashed fs-6 gy-5" id="kt_table_ikh">
                             <thead>
                                 <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
-                                    <th class="min-w-150px">Nama Lengkap & NIK</th>
+                                    <th class="min-w-150px">Nama Lengkap & No HP</th>
                                     <th class="min-w-125px">Instansi</th>
                                     <th class="min-w-125px">Status Validasi</th>
                                     <th class="min-w-125px">Tahap Akhir</th>
@@ -39,7 +39,20 @@
                                     <td>
                                         <div class="d-flex flex-column">
                                             <a href="<?= base_url('admin/ikh/review/'.$row['id_ikh']) ?>" class="text-gray-800 text-hover-primary mb-1 fw-bold"><?= $row['nama_lengkap'] == ''? $row['nama_siswa']:$row['nama_lengkap'] ?></a>
-                                            <span><?= $row['nik'] ?></span>
+                                            <?php 
+                                                $no_hp = $row['hp'] ?? '';
+                                                $clean_hp = preg_replace('/[^0-9]/', '', $no_hp);
+                                                if(substr($clean_hp, 0, 1) === '0') {
+                                                    $clean_hp = '62' . substr($clean_hp, 1);
+                                                }
+                                            ?>
+                                            <?php if(!empty($no_hp)): ?>
+                                                <a href="https://wa.me/<?= $clean_hp ?>" target="_blank" class="text-success text-hover-primary d-flex align-items-center">
+                                                    <i class="ki-outline ki-whatsapp fs-4 me-1"></i><?= $no_hp ?>
+                                                </a>
+                                            <?php else: ?>
+                                                <span class="text-muted">-</span>
+                                            <?php endif; ?>
                                         </div>
                                     </td>
                                     <td><?= $row['nama_kantor'] ?></td>
