@@ -364,9 +364,9 @@
                             // Cek apakah group ini adalah Bulan Saat Ini agar otomatis terbuka
                             $isActiveMonth = ($monthKey === $currentMonthKey);
                             
-                            $collapseClass = $isActiveMonth ? 'show' : '';
-                            $ariaExpanded = $isActiveMonth ? 'true' : 'false';
-                            $buttonClass = $isActiveMonth ? '' : 'collapsed';
+                            $collapseClass = 'show';
+                            $ariaExpanded = 'true';
+                            $buttonClass = '';
                         ?>
                             <div class="accordion-item mb-6 border-0 shadow-sm rounded-4 overflow-hidden">
                                 <h2 class="accordion-header" id="heading_<?= $accIndex ?>">
