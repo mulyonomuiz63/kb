@@ -777,7 +777,7 @@
                                 <?= img_lazy('uploads/iklan/thumbnails/' . $rows->file, $rows->nama, ['class' => 'd-block w-100 h-auto']) ?>
 
                                 <!-- 2. Posisi teks/tombol diatur ke bawah (align-items-end) dengan padding bawah -->
-                                <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-end pb-5 z-3">
+                                <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-end pb-12 z-3">
                                     <div class="container">
                                         <!-- Slider Content Start -->
                                         <?php if (!empty($rows->text)): ?>
@@ -816,66 +816,81 @@
             </div>
         </div>
         <!-- Slider End -->
-        <div class="section" style="margin-top:-80px">
-            <div class="container ">
-                <div class="courses-tabs-menu courses-active z-3 bg-white shadow-sm bg-body-tertiary rounded">
-                    <div class="swiper-container">
-                        <div class="d-flex justify-content-center">
-                            <h6>Alumni yang pernah bergabung</h6>
-                        </div>
-                        <div class="swiper-container tickerwrapper">
-                            <?php
-                            $logos = [
-                                'vertica.png',
-                                'sultanfatih.png',
-                                'meka.png',
-                                'istiqomah.png',
-                                'husnayain.png',
-                                'gaspro.png',
-                                'afco.png',
-                                'nusapala.png',
-                                'aliahospital.png',
-                                'bcm.png',
-                                'usp.png',
-                                'rshb aceh.png',
-                                'thaiwah.png',
-                                'polinela.png',
-                                'indra.png',
-                                'stieni.png',
-                                'telkom.png',
-                                'sinar.png',
-                                'twj.png',
-                                'dipa.png',
-                                'gadai.png',
-                                'gbs.png',
-                                'farmamedika.png',
-                                'darmajaya.png',
-                                'hisotex.png',
-                                'abeng.png',
-                                'UnMal.png',
-                                'interactive.png',
-                                'banyualam.png',
-                                'bromelain.png',
-                                'ebara.png',
-                                'fiscaro.png',
-                                'gokomodo.png',
-                                'sabaindomedika.png',
-                                'machung.png',
-                                'mowin.png',
-                                'teknokrat.png',
-                                'ums.png',
-                                'ut.png',
-                                'yppembangunanbogor.png',
-                            ];
-                            ?>
-                            <ul class="swiper-wrapper list">
-                                <?php foreach ($logos as $logo) : ?>
-                                    <li class="listitem swiper-slide">
-                                        <?= img_lazy("assets-landing/images/peserta/{$logo}", "Logo {$logo}") ?>
-                                    </li>
-                                <?php endforeach; ?>
-                            </ul>
-                        </div>
+        <style>
+            .section-alumni-margin {
+                margin-top: -60px;
+            }
+
+            @media (min-width: 992px) {
+                .section-alumni-margin {
+                    margin-top: -80px;
+                }
+            }
+        </style>
+
+        <div class="section section-alumni-margin">
+            <div class="container">
+                <!-- Card Wrapper yang lebih hidup, elegan, dan berkelas -->
+                <div class="courses-tabs-menu courses-active z-3 bg-white shadow rounded-4 p-4 p-lg-5 border-0 position-relative overflow-hidden">
+
+                    <!-- Bagian Judul yang Di-upgrade Menjadi Lebih Menarik & Profesional -->
+                    <div class="text-center mb-4">
+                        <h4 class="fw-bold text-dark mb-1 fs-6 fs-lg-4">Alumni yang pernah bergabung</h4>
+                    </div>
+
+                    <!-- Bagian Ticker / Swiper -->
+                    <div class="swiper-container tickerwrapper mt-4">
+                        <?php
+                        $logos = [
+                            'vertica.png',
+                            'sultanfatih.png',
+                            'meka.png',
+                            'istiqomah.png',
+                            'husnayain.png',
+                            'gaspro.png',
+                            'afco.png',
+                            'nusapala.png',
+                            'aliahospital.png',
+                            'bcm.png',
+                            'usp.png',
+                            'rshb aceh.png',
+                            'thaiwah.png',
+                            'polinela.png',
+                            'indra.png',
+                            'stieni.png',
+                            'telkom.png',
+                            'sinar.png',
+                            'twj.png',
+                            'dipa.png',
+                            'gadai.png',
+                            'gbs.png',
+                            'farmamedika.png',
+                            'darmajaya.png',
+                            'hisotex.png',
+                            'abeng.png',
+                            'UnMal.png',
+                            'interactive.png',
+                            'banyualam.png',
+                            'bromelain.png',
+                            'ebara.png',
+                            'fiscaro.png',
+                            'gokomodo.png',
+                            'sabaindomedika.png',
+                            'machung.png',
+                            'mowin.png',
+                            'teknokrat.png',
+                            'ums.png',
+                            'ut.png',
+                            'yppembangunanbogor.png',
+                        ];
+                        ?>
+                        <ul class="swiper-wrapper list align-items-center">
+                            <?php foreach ($logos as $logo) : ?>
+                                <li class="listitem swiper-slide text-center">
+                                    <?= img_lazy("assets-landing/images/peserta/{$logo}", "Logo {$logo}") ?>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
                     </div>
                 </div>
             </div>
