@@ -117,7 +117,7 @@ class SertifikatController extends BaseController
         $pdf->Cell(75, 4, "500.16.7.2/0003/SPNF-LKP/IV.7/I/2025", 0, 1, 'L');
 
         // Nama Siswa
-        $pdf->SetFont('Arial', 'B', 19.5);
+        $pdf->SetFont('Arial', 'B', 14);
         $pdf->SetXY(28, 126);
         $pdf->Cell(75, 4, strtoupper($nama), 0, 1, 'L');
 
@@ -325,7 +325,7 @@ class SertifikatController extends BaseController
         $pdf->Cell(75, 4, strtoupper($hasil->nama_mapel), 0, 1, 'L');
 
         // Nama Siswa
-        $pdf->SetFont('Arial', 'B', 19.5);
+        $pdf->SetFont('Arial', 'B', 14);
         $pdf->SetXY(28, 126);
         $pdf->Cell(75, 4, strtoupper($hasil->nama_siswa), 0, 1, 'L');
 

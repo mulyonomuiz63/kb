@@ -733,7 +733,7 @@ class SiswaController extends BaseController
 
         // --- 4. NAMA PENERIMA (The Star of the Show) ---
         $pdf->SetTextColor(40, 40, 40);
-        $pdf->SetFont('Arial', 'B', 32); // Ukuran lebih besar agar eksklusif
+        $pdf->SetFont('Arial', 'B', 14); // Ukuran lebih besar agar eksklusif
         $pdf->SetXY(28, 115);
         $pdf->Cell(0, 20, strtoupper($hasil->nama_siswa), 0, 1, 'L');
 
@@ -841,7 +841,7 @@ class SiswaController extends BaseController
         $pdf->SetXY(28, 70);
         $pdf->Cell(0, 5, "Nomor : " . $noSertifikat, 0, 1, 'L');
 
-        $pdf->SetFont('Arial', 'B', 24);
+        $pdf->SetFont('Arial', 'B', 14);
         $pdf->SetXY(28, 118);
         $pdf->Cell(0, 15, strtoupper($siswa->nama_siswa), 0, 1, 'L');
 
