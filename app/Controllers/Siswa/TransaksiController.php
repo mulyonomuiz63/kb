@@ -707,6 +707,7 @@ class TransaksiController extends BaseController
                         "country_code" => "IDN"
                     ),
                 ),
+                'enabled_payments' => ['credit_card', 'qris', 'va']
             );
 
             try {
