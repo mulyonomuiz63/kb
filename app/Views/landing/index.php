@@ -772,16 +772,21 @@
                     foreach ($dataIklanDepan as $rows) :
                     ?>
                         <div class="carousel-item <?= $no == '0' ? 'active' : '' ?>">
-                            <div class="d-flex align-items-start  " id="tampilIklanSlide">
-                                <?= img_lazy('uploads/iklan/thumbnails/' . $rows->file, $rows->nama, ['class' => 'z-2 position-absolute d-flex align-items-center']) ?>
-                                <div class="container d-flex align-items-end z-3" id="tampilIklanSlide">
-                                    <!-- Slider Content Start -->
-                                    <?php if (!empty($rows->text)): ?>
-                                        <div class="slider-content d-none d-lg-block">
-                                            <a class="btn btn-primary btn-hover-dark" href="<?= !empty($rows->url) ? $rows->url : base_url(); ?>"><?= $rows->text ?></a>
-                                        </div>
-                                    <?php endif; ?>
-                                    <!-- Slider Content End -->
+                            <div class="position-relative w-100">
+                                <!-- 1. Gambar dibiarkan mengatur tinggi container otomatis -->
+                                <?= img_lazy('uploads/iklan/thumbnails/' . $rows->file, $rows->nama, ['class' => 'd-block w-100 h-auto']) ?>
+                                
+                                <!-- 2. Posisi teks/tombol diatur ke bawah (align-items-end) dengan padding bawah -->
+                                <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-end pb-5 z-3">
+                                    <div class="container">
+                                        <!-- Slider Content Start -->
+                                        <?php if (!empty($rows->text)): ?>
+                                            <div class="slider-content d-none d-lg-block text-start">
+                                                <a class="btn  btn-hover-primary" href="<?= !empty($rows->url) ? $rows->url : base_url(); ?>" style="background-color: #F5B01A; color:#ffffff"><?= $rows->text ?></a>
+                                            </div>
+                                        <?php endif; ?>
+                                        <!-- Slider Content End -->
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -789,23 +794,27 @@
                     endforeach;  ?>
                 <?php else: ?>
                     <div class="carousel-item active">
-                        <div class="d-flex align-items-center d-flex align-items-start" id="tampilIklanSlide">
-                            <?= img_lazy('assets-landing/images/slider/team-3.jpg', "kelas brevet AB", ['class' => 'z-2 position-absolute d-flex align-items-center', 'id' => 'tampilIklanSlide']) ?>
-                            <div class="container d-flex align-items-start z-3">
-                                <!-- Slider Content Start -->
-                                <div class="slider-content">
-                                    <h4 class="text-white ">Ujian Brevet Pajak AB Online Kapan Saja dan Dimana Saja Lebih Mudah</h4>
-                                    <h6 class="main-title text-white ">Harga Mulai <span class="text-white fw-bold">Rp50.000</span>/Materi</h6>
-                                    <a class="btn btn-primary btn-hover-dark" href="<?= base_url('auth/registrasi'); ?>">Daftar Sekarang</a>
+                        <div class="position-relative w-100">
+                            <!-- 1. Gambar dibiarkan mengatur tinggi container otomatis -->
+                            <?= img_lazy('assets-landing/images/slider/team-3.jpg', "kelas brevet AB", ['class' => 'd-block w-100 h-auto']) ?>
+                            
+                            <!-- 2. Posisi teks/tombol diatur ke bawah (align-items-end) dengan padding bawah -->
+                            <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-end pb-5 z-3">
+                                <div class="container">
+                                    <!-- Slider Content Start -->
+                                    <div class="slider-content col-lg-6 col-md-8 col-12 text-start">
+                                        <h4 class="text-white mb-2 fs-5 fs-md-3">Ujian Brevet Pajak AB Online Kapan Saja dan Dimana Saja Lebih Mudah</h4>
+                                        <h6 class="main-title text-white mb-4 fs-6 fs-md-4">Harga Mulai <span class="text-white fw-bold">Rp50.000</span>/Materi</h6>
+                                        <a class="btn btn-primary btn-hover-dark" href="<?= base_url('auth/registrasi'); ?>">Daftar Sekarang</a>
+                                    </div>
+                                    <!-- Slider Content End -->
                                 </div>
-                                <!-- Slider Content End -->
                             </div>
                         </div>
                     </div>
                 <?php endif; ?>
             </div>
         </div>
-
         <!-- Slider End -->
         <div class="section" style="margin-top:-80px">
             <div class="container ">
@@ -888,7 +897,7 @@
                                 <div class="mt-2 mb-2">
                                     <div class="row g-2 g-md-3">
                                         <div class="col-6">
-                                            <a href="<?= base_url('legalitas#lkp') ?>" class="badge p-3 p-md-3 rounded-pill  btn-hover-dark text-nowrap w-100 text-center d-block" style="background-color: #fd7e14; font-size: clamp(9px, 2.8vw, 12px);">
+                                            <a href="<?= base_url('legalitas#lkp') ?>" class="badge p-3 p-md-3 rounded-pill  btn-hover-dark text-nowrap w-100 text-center d-block" style="background-color: #F5B01A; font-size: clamp(9px, 2.8vw, 12px);">
                                                 LEGALITAS LEMBAGA
                                             </a>
                                         </div>
@@ -913,7 +922,7 @@
             </div>
         </div>
         <div class="section call-to-action-wrapper pb-4 d-flex align-items-center" id="bimbel">
-            <div class="">
+            <div class="container">
                 <!-- All Courses tab content Start -->
                 <div class="tab-content courses-tab-content">
                     <div class="tab-pane fade show active" id="tabs1">
