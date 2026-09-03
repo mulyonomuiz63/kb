@@ -112,6 +112,10 @@
                         <label class="fs-6 fw-semibold mb-2">URL Tujuan <span class="text-muted fs-8 fw-normal">(Opsional)</span></label>
                         <input type="url" name="url" class="form-control form-control-solid" placeholder="https://domain.com/promo">
                     </div>
+                    <div class="fv-row mb-7">
+                        <label class="fs-6 fw-semibold mb-2">Nama Tombol <span class="text-muted fs-8 fw-normal">(Opsional)</span></label>
+                        <input type="text" name="text" class="form-control form-control-solid" placeholder="Daftar Sekarang">
+                    </div>
 
                     <div class="fv-row mb-7">
                         <label class="required fs-6 fw-semibold mb-2">Penempatan</label>
@@ -169,6 +173,10 @@
                     <div class="fv-row mb-7">
                         <label class="fs-6 fw-semibold mb-2">URL Tujuan <span class="text-muted fs-8 fw-normal">(Opsional)</span></label>
                         <input type="url" name="url" id="edit_url" class="form-control form-control-solid">
+                    </div>
+                    <div class="fv-row mb-7">
+                        <label class="fs-6 fw-semibold mb-2">Nama Tombol <span class="text-muted fs-8 fw-normal">(Opsional)</span></label>
+                        <input type="text" name="text" id="edit_text" class="form-control form-control-solid" placeholder="Daftar Sekarang">
                     </div>
 
                     <div class="fv-row mb-7">
@@ -267,6 +275,7 @@
                         $('#edit_id').val(id);
                         $('#edit_nama').val(d.nama);
                         $('#edit_url').val(d.url);
+                        $('#edit_text').val(d.text);
 
                         // Select2 auto update UI
                         $('#edit_status').val(d.status_iklan).trigger('change');

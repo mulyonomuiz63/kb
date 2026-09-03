@@ -162,7 +162,7 @@ class IklanController extends BaseController
                 'nama'         => $this->request->getPost('nama'),
                 'file'         => $newName,
                 'url'          => $this->request->getPost('url'),
-                'text'         => '',
+                'text'         => $this->request->getPost('text'),
                 'status'       => 'I',
                 'status_iklan' => $this->request->getPost('status_iklan'),
             ]);
@@ -257,7 +257,7 @@ class IklanController extends BaseController
                 'nama'         => $this->request->getPost('nama'),
                 'file'         => $newName, // Tetap $file_lama jika tidak ada upload baru
                 'url'          => $this->request->getPost('url'),
-                'text'         => '',
+                'text'         => $this->request->getPost('text'),
                 'status_iklan' => $this->request->getPost('status_iklan'),
             ]);
 
