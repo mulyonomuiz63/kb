@@ -782,7 +782,7 @@
                                         <!-- Slider Content Start -->
                                         <?php if (!empty($rows->text)): ?>
                                             <div class="slider-content d-none d-lg-block text-start">
-                                                <a class="btn  btn-hover-primary" href="<?= !empty($rows->url) ? $rows->url : base_url(); ?>" style="background-color: #F5B01A; color:#ffffff"><?= $rows->text ?></a>
+                                                <a class="btn  btn-hover-primary" href="<?= !empty($rows->url) ? $rows->url : base_url(); ?>" style="background-color: #1fd75b; color:#ffffff"><?= $rows->text ?></a>
                                             </div>
                                         <?php endif; ?>
                                         <!-- Slider Content End -->
