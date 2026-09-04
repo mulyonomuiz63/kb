@@ -937,172 +937,170 @@
             </div>
         </div>
         <div class="section call-to-action-wrapper pb-4 d-flex align-items-center" id="bimbel">
-            <div class="container">
-                <!-- All Courses tab content Start -->
-                <div class="tab-content courses-tab-content">
-                    <div class="tab-pane fade show active" id="tabs1">
+            <!-- All Courses tab content Start -->
+            <div class="tab-content courses-tab-content">
+                <div class="tab-pane fade show active" id="tabs1">
 
-                        <!-- All Courses Wrapper Start -->
-                        <div class="courses-wrapper">
-                            <h6>Penawaran Paket Brevet Pajak AB</h6>
-                            <span>Pilihan ujian yang bisa kamu kuti secara online kapan saja dan dimana saja</span>
-                            <div class="row ">
-                                <?php foreach ($paket as $rows) : ?>
-                                    <?php
-                                    // untuk rating
-                                    $query = $db->table('paket')->join('detail_paket b', 'paket.idpaket=b.idpaket')->join('ujian_master c', 'b.id_ujian=c.id_ujian')->join('review_ujian d', 'c.kode_ujian=d.kode_ujian')->where('paket.slug', $rows->slug)->get()->getResultObject();
+                    <!-- All Courses Wrapper Start -->
+                    <div class="courses-wrapper">
+                        <h6>Penawaran Paket Brevet Pajak AB</h6>
+                        <span>Pilihan ujian yang bisa kamu kuti secara online kapan saja dan dimana saja</span>
+                        <div class="row ">
+                            <?php foreach ($paket as $rows) : ?>
+                                <?php
+                                // untuk rating
+                                $query = $db->table('paket')->join('detail_paket b', 'paket.idpaket=b.idpaket')->join('ujian_master c', 'b.id_ujian=c.id_ujian')->join('review_ujian d', 'c.kode_ujian=d.kode_ujian')->where('paket.slug', $rows->slug)->get()->getResultObject();
 
-                                    // hitung rata-rata rating
-                                    $totalRating = 0;
-                                    $jumlahReview = count($query);
+                                // hitung rata-rata rating
+                                $totalRating = 0;
+                                $jumlahReview = count($query);
 
-                                    foreach ($query as $item) {
-                                        $totalRating += $item->rating;
-                                    }
+                                foreach ($query as $item) {
+                                    $totalRating += $item->rating;
+                                }
 
-                                    $rataRating = $jumlahReview > 0 ? round($totalRating / $jumlahReview, 1) : 0;
-                                    ?>
-                                    <?php if ($rows->id_mapel == '0' || $rows->id_mapel == '1'): ?>
-                                        <div class="col-12 col-md-6 col-lg-4 pt-2">
-                                            <!-- Single Courses Start -->
-                                            <div class="single-courses card position-relative zoom">
-                                                <div class="courses-images">
-                                                    <a href="<?= base_url('bimbel/' . $rows->slug) ?>">
-                                                        <?= img_lazy('assets-landing/images/paket/thumbnails/' . $rows->file, $rows->nama_paket, ['class' => 'card-img-top']) ?>
-                                                    </a>
-                                                </div>
-                                                <div class="courses-content">
-                                                    <h4 class="title"><a href="<?= base_url('bimbel/' . $rows->slug) ?>"><?= $rows->nama_paket ?></a></h4>
-                                                    <div class="courses-meta">
-                                                        <?php
-                                                        $soal = $db->query("SELECT a.id_ujian, b.kode_ujian FROM detail_paket a join ujian_master b on a.id_ujian=b.id_ujian where a.idpaket = '$rows->idpaket' group by a.id_ujian")->getResult();
-                                                        $total = null;
-                                                        foreach ($soal as $r):
-                                                            $hasilUjian = soal_ujian(encrypt_url($r->kode_ujian));
-                                                            $total = count($hasilUjian);
-                                                        endforeach;
-                                                        ?>
-                                                        <span class="fw-bold"> <i class="icofont-read-book"></i> <?= (!empty($total) ? $total : '0') ?> Soal/<span style="font-size:10px">Materi</span> </span>
-                                                        <div class="d-flex flex-column mb-3">
-                                                            <span class="fw-bold"> Rp <?= number_format($rows->nominal_paket - (($rows->nominal_paket * $rows->diskon) / 100)) ?> </span>
-                                                            <span style="font-size:12px" class="mt-1"> <del>Rp <?= number_format($rows->nominal_paket) ?></del> </span>
-                                                        </div>
-                                                    </div>
-                                                    <div>
-                                                        <div class="mb-2" style="font-size:12px">
-                                                            <?php if ($rataRating > 0): ?>
-                                                                <span class="text-dark"><?= $rataRating ?><span> <?= showStars($rataRating) ?> <span class="text-dark">(<?= $jumlahReview + 325 ?>)</span>
-                                                                    <?php else: ?>
-                                                                        <span class="text-dark"><?= "4.9" ?><span> <?= showStars('4.9') ?> <span class="text-dark">(<?= '484' ?>)</span>
-                                                                            <?php endif; ?>
-                                                        </div>
-                                                        <!-- Affiliate -->
-                                                        <?php if (session()->get('id') && !empty($affiliate)): ?>
-                                                            <?php
-                                                            $potongan_diskon = ($rows->nominal_paket * $rows->diskon) / 100;
-                                                            $harga_final     = $rows->nominal_paket - $potongan_diskon;
-                                                            $est_komisi      = ($harga_final * $rows->komisi) / 100;
-                                                            ?>
-                                                            <div class="affiliate-box p-2 mb-3">
-                                                                <div class="d-flex flex-wrap align-items-center gap-1" style="font-size: 0.75rem;">
-                                                                    <span>💰</span>
-                                                                    <span class="text-muted fw-bold">Komisi</span>
-                                                                    <strong class="text-danger"><?= $rows->komisi ?>%</strong>
-                                                                    <span class="text-muted mx-1">|</span>
-                                                                    <span class="text-muted fw-bold">Est.</span>
-                                                                    <strong class="text-danger">Rp <?= number_format($est_komisi, 0, ',', '.') ?></strong>
-                                                                </div>
-                                                                <div class="text-muted mt-1" style="font-size: 0.75rem;">
-                                                                    Dari setiap pembelian via link kamu
-                                                                </div>
-                                                            </div>
-                                                        <?php endif; ?>
-                                                    </div>
-
-                                                    <!-- Accordion Detail Paket Start -->
-                                                    <div class="accordion accordion-flush mb-2" id="accordionDetail<?= $rows->idpaket ?>">
-                                                        <div class="accordion-item border rounded">
-                                                            <h2 class="accordion-header" id="heading<?= $rows->idpaket ?>">
-                                                                <button class="accordion-button collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDetail<?= $rows->idpaket ?>" aria-expanded="false" aria-controls="collapseDetail<?= $rows->idpaket ?>" style="font-size: 0.8rem; background-color: transparent;">
-                                                                    <i class="icofont-info-circle me-1"></i> Detail Paket
-                                                                </button>
-                                                            </h2>
-                                                            <div id="collapseDetail<?= $rows->idpaket ?>" class="accordion-collapse collapse" aria-labelledby="heading<?= $rows->idpaket ?>" data-bs-parent="#accordionDetail<?= $rows->idpaket ?>">
-                                                                <div class="accordion-body p-2 custom-accordion-text">
-                                                                    <?= !empty($rows->deskripsi) ? $rows->deskripsi : (!empty($rows->detail_paket) ? $rows->detail_paket : 'Detail informasi paket pembelajaran.') ?>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <style>
-                                                        /* Styling khusus isi accordion agar rapi & modern */
-                                                        .custom-accordion-text {
-                                                            background-color: #f8f9fa;
-                                                            border-radius: 6px;
-                                                            max-height: 180px;
-                                                            overflow-y: auto;
-                                                        }
-
-                                                        .custom-accordion-text p {
-                                                            margin-bottom: 4px !important;
-                                                            font-size: 11px !important;
-                                                            line-height: 1.4 !important;
-                                                            letter-spacing: normal !important;
-                                                            /* Menghapus letter-spacing 0.4992px yang renggang */
-                                                            color: #4a5568 !important;
-                                                        }
-
-                                                        /* Styling khusus untuk judul header materi (paragraf pertama) */
-                                                        .custom-accordion-text p:first-child {
-                                                            font-size: 11.5px !important;
-                                                            font-weight: 700 !important;
-                                                            color: #1e293b !important;
-                                                            border-bottom: 1px dashed #cbd5e1;
-                                                            padding-bottom: 4px;
-                                                            margin-bottom: 6px !important;
-                                                        }
-                                                    </style>
-                                                    <!-- Accordion Detail Paket End -->
-
-                                                    <div class="d-flex gap-2 mt-3">
-                                                        <a href="<?= base_url('sw-siswa/transaksi/pesan/' . encrypt_url($rows->idpaket)) ?>" class="btn-buy btn-sm text-center flex-fill p-2">Pesan Sekarang</a>
-                                                        <?php if (session()->get('id')): ?>
-                                                            <?php if (!empty($affiliate)): ?>
-                                                                <button class="btn-buy-copy btn-sm btn-copy-link" data-paket_id="<?= $rows->idpaket ?>">
-                                                                    <i class="fa fa-copy"></i>
-                                                                </button>
-                                                                <button class="btn-buy-wa btn-sm share-link" data-paket_id="<?= $rows->idpaket ?>">
-                                                                    <i class="fab fa-whatsapp"></i>
-                                                                </button>
-                                                            <?php endif; ?>
-                                                        <?php endif; ?>
-                                                    </div>
-                                                </div>
-                                                <?php if ($rows->iddiskon != null): ?>
-                                                    <div class="position-absolute top-0 end-0 diskon p-1 text-white"><?= $rows->diskon ?> %</div>
-                                                <?php endif; ?>
+                                $rataRating = $jumlahReview > 0 ? round($totalRating / $jumlahReview, 1) : 0;
+                                ?>
+                                <?php if ($rows->id_mapel == '0' || $rows->id_mapel == '1'): ?>
+                                    <div class="col-12 col-md-6 col-lg-4 pt-2">
+                                        <!-- Single Courses Start -->
+                                        <div class="single-courses card position-relative zoom">
+                                            <div class="courses-images">
+                                                <a href="<?= base_url('bimbel/' . $rows->slug) ?>">
+                                                    <?= img_lazy('assets-landing/images/paket/thumbnails/' . $rows->file, $rows->nama_paket, ['class' => 'card-img-top']) ?>
+                                                </a>
                                             </div>
-                                            <!-- Single Courses End -->
+                                            <div class="courses-content">
+                                                <h4 class="title"><a href="<?= base_url('bimbel/' . $rows->slug) ?>"><?= $rows->nama_paket ?></a></h4>
+                                                <div class="courses-meta">
+                                                    <?php
+                                                    $soal = $db->query("SELECT a.id_ujian, b.kode_ujian FROM detail_paket a join ujian_master b on a.id_ujian=b.id_ujian where a.idpaket = '$rows->idpaket' group by a.id_ujian")->getResult();
+                                                    $total = null;
+                                                    foreach ($soal as $r):
+                                                        $hasilUjian = soal_ujian(encrypt_url($r->kode_ujian));
+                                                        $total = count($hasilUjian);
+                                                    endforeach;
+                                                    ?>
+                                                    <span class="fw-bold"> <i class="icofont-read-book"></i> <?= (!empty($total) ? $total : '0') ?> Soal/<span style="font-size:10px">Materi</span> </span>
+                                                    <div class="d-flex flex-column mb-3">
+                                                        <span class="fw-bold"> Rp <?= number_format($rows->nominal_paket - (($rows->nominal_paket * $rows->diskon) / 100)) ?> </span>
+                                                        <span style="font-size:12px" class="mt-1"> <del>Rp <?= number_format($rows->nominal_paket) ?></del> </span>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div class="mb-2" style="font-size:12px">
+                                                        <?php if ($rataRating > 0): ?>
+                                                            <span class="text-dark"><?= $rataRating ?><span> <?= showStars($rataRating) ?> <span class="text-dark">(<?= $jumlahReview + 325 ?>)</span>
+                                                                <?php else: ?>
+                                                                    <span class="text-dark"><?= "4.9" ?><span> <?= showStars('4.9') ?> <span class="text-dark">(<?= '484' ?>)</span>
+                                                                        <?php endif; ?>
+                                                    </div>
+                                                    <!-- Affiliate -->
+                                                    <?php if (session()->get('id') && !empty($affiliate)): ?>
+                                                        <?php
+                                                        $potongan_diskon = ($rows->nominal_paket * $rows->diskon) / 100;
+                                                        $harga_final     = $rows->nominal_paket - $potongan_diskon;
+                                                        $est_komisi      = ($harga_final * $rows->komisi) / 100;
+                                                        ?>
+                                                        <div class="affiliate-box p-2 mb-3">
+                                                            <div class="d-flex flex-wrap align-items-center gap-1" style="font-size: 0.75rem;">
+                                                                <span>💰</span>
+                                                                <span class="text-muted fw-bold">Komisi</span>
+                                                                <strong class="text-danger"><?= $rows->komisi ?>%</strong>
+                                                                <span class="text-muted mx-1">|</span>
+                                                                <span class="text-muted fw-bold">Est.</span>
+                                                                <strong class="text-danger">Rp <?= number_format($est_komisi, 0, ',', '.') ?></strong>
+                                                            </div>
+                                                            <div class="text-muted mt-1" style="font-size: 0.75rem;">
+                                                                Dari setiap pembelian via link kamu
+                                                            </div>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                </div>
+
+                                                <!-- Accordion Detail Paket Start -->
+                                                <div class="accordion accordion-flush mb-2" id="accordionDetail<?= $rows->idpaket ?>">
+                                                    <div class="accordion-item border rounded">
+                                                        <h2 class="accordion-header" id="heading<?= $rows->idpaket ?>">
+                                                            <button class="accordion-button collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDetail<?= $rows->idpaket ?>" aria-expanded="false" aria-controls="collapseDetail<?= $rows->idpaket ?>" style="font-size: 0.8rem; background-color: transparent;">
+                                                                <i class="icofont-info-circle me-1"></i> Detail Paket
+                                                            </button>
+                                                        </h2>
+                                                        <div id="collapseDetail<?= $rows->idpaket ?>" class="accordion-collapse collapse" aria-labelledby="heading<?= $rows->idpaket ?>" data-bs-parent="#accordionDetail<?= $rows->idpaket ?>">
+                                                            <div class="accordion-body p-2 custom-accordion-text">
+                                                                <?= !empty($rows->deskripsi) ? $rows->deskripsi : (!empty($rows->detail_paket) ? $rows->detail_paket : 'Detail informasi paket pembelajaran.') ?>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <style>
+                                                    /* Styling khusus isi accordion agar rapi & modern */
+                                                    .custom-accordion-text {
+                                                        background-color: #f8f9fa;
+                                                        border-radius: 6px;
+                                                        max-height: 180px;
+                                                        overflow-y: auto;
+                                                    }
+
+                                                    .custom-accordion-text p {
+                                                        margin-bottom: 4px !important;
+                                                        font-size: 11px !important;
+                                                        line-height: 1.4 !important;
+                                                        letter-spacing: normal !important;
+                                                        /* Menghapus letter-spacing 0.4992px yang renggang */
+                                                        color: #4a5568 !important;
+                                                    }
+
+                                                    /* Styling khusus untuk judul header materi (paragraf pertama) */
+                                                    .custom-accordion-text p:first-child {
+                                                        font-size: 11.5px !important;
+                                                        font-weight: 700 !important;
+                                                        color: #1e293b !important;
+                                                        border-bottom: 1px dashed #cbd5e1;
+                                                        padding-bottom: 4px;
+                                                        margin-bottom: 6px !important;
+                                                    }
+                                                </style>
+                                                <!-- Accordion Detail Paket End -->
+
+                                                <div class="d-flex gap-2 mt-3">
+                                                    <a href="<?= base_url('sw-siswa/transaksi/pesan/' . encrypt_url($rows->idpaket)) ?>" class="btn-buy btn-sm text-center flex-fill p-2">Pesan Sekarang</a>
+                                                    <?php if (session()->get('id')): ?>
+                                                        <?php if (!empty($affiliate)): ?>
+                                                            <button class="btn-buy-copy btn-sm btn-copy-link" data-paket_id="<?= $rows->idpaket ?>">
+                                                                <i class="fa fa-copy"></i>
+                                                            </button>
+                                                            <button class="btn-buy-wa btn-sm share-link" data-paket_id="<?= $rows->idpaket ?>">
+                                                                <i class="fab fa-whatsapp"></i>
+                                                            </button>
+                                                        <?php endif; ?>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                            <?php if ($rows->iddiskon != null): ?>
+                                                <div class="position-absolute top-0 end-0 diskon p-1 text-white"><?= $rows->diskon ?> %</div>
+                                            <?php endif; ?>
                                         </div>
-                                    <?php endif; ?>
-                                <?php endforeach; ?>
-                            </div>
-                            <?php if ($lihat == '0'): ?>
-                                <div class="d-flex justify-content-center">
-                                    <div class="row">
-                                        <div class="col-12 text-center" style="padding-top: 20px;">
-                                            <a href="<?= base_url('list-bimbel') ?>" class="text-primary mt-2 ">Lihat lebih banyak</a><i class="bi bi-arrow-down-square-fill ms-1 text-primary"></i>
-                                        </div>
+                                        <!-- Single Courses End -->
+                                    </div>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </div>
+                        <?php if ($lihat == '0'): ?>
+                            <div class="d-flex justify-content-center">
+                                <div class="row">
+                                    <div class="col-12 text-center" style="padding-top: 20px;">
+                                        <a href="<?= base_url('list-bimbel') ?>" class="text-primary mt-2 ">Lihat lebih banyak</a><i class="bi bi-arrow-down-square-fill ms-1 text-primary"></i>
                                     </div>
                                 </div>
-                            <?php endif; ?>
-                        </div>
-                        <!-- All Courses Wrapper End -->
+                            </div>
+                        <?php endif; ?>
                     </div>
+                    <!-- All Courses Wrapper End -->
                 </div>
-                <!-- All Courses tab content End -->
             </div>
+            <!-- All Courses tab content End -->
         </div>
 
         <?php if (!empty($paketUskp)): ?>
