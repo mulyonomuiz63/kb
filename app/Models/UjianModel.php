@@ -30,6 +30,7 @@ class UjianModel extends Model
     {
   
         return $this
+            ->select('ujian.*, kelas.*, mapel.nama_mapel, mapel.file, guru.*')
             ->join('kelas', 'kelas.id_kelas=ujian.kelas')
             ->join('mapel', 'mapel.id_mapel=ujian.mapel')
             ->join('guru', 'guru.id_guru=ujian.guru')
