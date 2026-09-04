@@ -487,7 +487,7 @@ class SiswaController extends BaseController
             ['title' => 'List Sertifikat', 'url' => '#'],
         ];
         $data['idsiswa'] = $id;
-        $data['canDownloadAll'] = ($jumlahLulus >= 5); // Logika untuk tombol "Download Semua Sertifikat"
+        $data['canDownloadAll'] = ($jumlahLulus >= 8); // Logika untuk tombol "Download Semua Sertifikat"
         return view('admin/sertifikat/list', $data);
     }
 
