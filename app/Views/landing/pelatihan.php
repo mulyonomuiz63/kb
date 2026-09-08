@@ -16,6 +16,30 @@
         box-shadow: 0 16px 36px rgba(0, 0, 0, .15);
     }
 
+    /* ===== FLASH SALE PILL TOP-LEFT ===== */
+    .flash-sale-pill {
+        background: linear-gradient(45deg, #ff0055, #ff5e00);
+        color: #fff;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 5px 10px;
+        border-radius: 50px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        box-shadow: 0 4px 12px rgba(255, 0, 85, 0.3);
+        z-index: 10;
+    }
+
+    .flash-sale-timer-box {
+        background: rgba(0, 0, 0, 0.25);
+        color: #fff;
+        padding: 2px 8px;
+        border-radius: 20px;
+        font-family: monospace;
+        letter-spacing: 0.5px;
+    }
+
     /* ===== IMAGE ===== */
     .courses-images {
         overflow: hidden;
@@ -107,6 +131,7 @@
         font-size: 12px;
         border-radius: 0 0 0 14px;
         animation: pulse 1.5s infinite;
+        z-index: 10;
     }
 
     /* ===== ENTRY ANIMATION ===== */
@@ -190,6 +215,15 @@
                         <div class="col-12 col-md-6 col-lg-4 mt-4">
                             <!-- Single Courses Start -->
                             <div class="single-courses card position-relative animate-card">
+                                
+                                <!-- Flash Sale Badge di Pojok Kiri Atas -->
+                                <?php if (isset($rows->is_pinned) && $rows->is_pinned == 1): ?>
+                                    <div class="position-absolute top-0 start-0 m-2 flash-sale-pill">
+                                        <i class="fa fa-bolt"></i> FLASH SALE 
+                                        <span class="flash-sale-timer-box flash-sale-countdown">00:00:00</span>
+                                    </div>
+                                <?php endif; ?>
+
                                 <div class="courses-images">
                                     <a href="<?= base_url('bimbel/' . $rows->slug) ?>">
                                         <?= img_lazy('assets-landing/images/paket/thumbnails/' . $rows->file, $rows->nama_paket, ['class' => 'card-img-top']) ?>
@@ -220,9 +254,9 @@
                                         <div class="mb-2" style="font-size:12px">
                                             <?php if ($rataRating > 0): ?>
                                                 <span class="text-dark"><?= $rataRating ?><span> <?= showStars($rataRating) ?> <span class="text-dark">(<?= $jumlahReview + 325 ?>)</span>
-                                                    <?php else: ?>
-                                                        <span class="text-dark"><?= "4.9" ?><span> <?= showStars('4.9') ?> <span class="text-dark">(<?= '484' ?>)</span>
-                                                            <?php endif; ?>
+                                                <?php else: ?>
+                                                    <span class="text-dark"><?= "4.9" ?><span> <?= showStars('4.9') ?> <span class="text-dark">(<?= '484' ?>)</span>
+                                                        <?php endif; ?>
                                         </div>
                                         <!-- Affiliate -->
                                         <?php if (session()->get('id') && !empty($affiliate)): ?>
@@ -292,6 +326,54 @@
                                         }
                                     </style>
                                     <!-- Accordion Detail Paket End -->
+
+                                    <!-- Informasi Umum (Keunggulan Paket) -->
+                                    <div class="info-umum-box p-3 rounded-3 shadow-sm mb-3 position-relative overflow-hidden bg-white border">
+                                        <div class="box-accent" style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background-color: #0d6efd;"></div>
+                                        <h6 class="fw-bolder mb-2" style="font-size: 12px; color: #0d6efd;">
+                                            <i class="fa fa-star text-warning me-1"></i> Keunggulan Paket
+                                        </h6>
+                                        <div class="row g-1">
+                                            <div class="col-12 col-md-6 mb-2">
+                                                <div class="d-flex align-items-start gap-2">
+                                                    <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
+                                                    <span class="info-text text-dark" style="font-size: 11px; line-height: 1.3;">LKP Terdaftar Resmi</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6 mb-2">
+                                                <div class="d-flex align-items-start gap-2">
+                                                    <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
+                                                    <span class="info-text text-dark" style="font-size: 11px; line-height: 1.3;">Sertifikat Brevet Diakui</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6 mb-2">
+                                                <div class="d-flex align-items-start gap-2">
+                                                    <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
+                                                    <span class="info-text text-dark" style="font-size: 11px; line-height: 1.3;">Akses Belajar Selamanya</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6 mb-2">
+                                                <div class="d-flex align-items-start gap-2">
+                                                    <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
+                                                    <span class="info-text text-dark" style="font-size: 11px; line-height: 1.3;">Materi Terus di Update</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6 mb-2">
+                                                <div class="d-flex align-items-start gap-2">
+                                                    <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
+                                                    <span class="info-text text-dark" style="font-size: 11px; line-height: 1.3;">Tanpa Langganan Bulanan/Tahunan</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6 mb-2">
+                                                <div class="d-flex align-items-start gap-2">
+                                                    <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
+                                                    <span class="info-text text-dark" style="font-size: 11px; line-height: 1.3;">Dilatih Oleh Konsultan Pajak dan ASN/EX-DJP</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Informasi Umum End -->
+
                                     <div class="d-flex gap-2 mt-3">
                                         <a href="<?= base_url('sw-siswa/transaksi/pesan/' . encrypt_url($rows->idpaket)) ?>" class="btn-buy btn-sm text-center flex-fill p-2">Pesan Sekarang</a>
                                         <?php if (session()->get('id')): ?>
@@ -362,6 +444,34 @@
         document.querySelectorAll('.animate-card').forEach(card => {
             observer.observe(card);
         });
+
+        // Countdown Timer 24 Jam Berulang (Reset setiap jam 12 malam / 00:00:00)
+        function updateCountdowns() {
+            const now = new Date();
+            
+            // Waktu target akhir siklus hari ini (jam 00:00:00 hari berikutnya / tengah malam)
+            const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
+            
+            // Sisa waktu dalam milidetik menuju jam 12 malam berikutnya
+            const distance = midnight.getTime() - now.getTime();
+
+            if (distance < 0) {
+                $('.flash-sale-countdown').text('00:00:00');
+                return;
+            }
+
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            const formatTime = (num) => String(num).padStart(2, '0');
+            const timeString = formatTime(hours) + ':' + formatTime(minutes) + ':' + formatTime(seconds);
+
+            $('.flash-sale-countdown').text(timeString);
+        }
+
+        setInterval(updateCountdowns, 1000);
+        updateCountdowns();
     });
 </script>
 

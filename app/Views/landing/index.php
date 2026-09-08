@@ -104,32 +104,26 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
 
     <style>
-        /* Styling khusus untuk slider USKP agar rapi */
+        /* ===== SWIPER & UMUM ===== */
         .swiper-uskp {
             width: 100%;
-            padding-bottom: 50px;
-            /* Ruang untuk titik navigasi (pagination) */
-            padding-top: 10px;
+            padding: 10px 0 50px;
         }
 
         .swiper-uskp .swiper-slide {
             height: auto;
-            /* Agar tinggi card seragam */
         }
 
-        /* Warna tombol panah slider */
         .swiper-button-next,
         .swiper-button-prev {
             color: #0d6efd;
-            /* Sesuaikan dengan warna tema web Anda */
             transform: scale(0.6);
         }
 
         .swiper-pagination-bullet-active {
             background-color: #0d6efd;
         }
-    </style>
-    <style>
+
         .nice-select {
             display: none;
         }
@@ -139,12 +133,10 @@
             height: 90px !important;
             border-radius: 50% !important;
             object-fit: cover !important;
-            /* ↓ Atur posisi wajah agar kepala tidak terpotong */
             object-position: center top !important;
         }
-    </style>
-    <style>
-        /* ===== IMAGE ===== */
+
+        /* ===== KURSUS & AFFILIATE ===== */
         .courses-images {
             overflow: hidden;
         }
@@ -157,7 +149,6 @@
             transform: scale(1.08);
         }
 
-        /* ===== TITLE ===== */
         .courses-content h4.title {
             font-size: 16px;
             font-weight: 600;
@@ -165,13 +156,11 @@
             margin-bottom: 6px;
         }
 
-        /* ===== PRICE ===== */
         .courses-meta .fw-bold {
             font-size: 17px;
             color: #29459A;
         }
 
-        /* ===== AFFILIATE ===== */
         .affiliate-box {
             background: linear-gradient(135deg, #f8fbff, #eef4ff);
             border: 1px dashed #c9d9ff;
@@ -180,24 +169,6 @@
             animation: fadeUp .5s ease;
         }
 
-        /* ===== BUTTON ===== */
-        .btn-buy {
-            background: #29459A;
-            color: #fff;
-            border-radius: 10px;
-            border: none;
-            padding: 0px 15px;
-            font-weight: 600;
-            transition: .3s ease;
-        }
-
-        .btn-buy:hover {
-            background: #d0011b;
-            color: #fff;
-            transform: scale(1.05);
-        }
-
-        /* ===== DISCOUNT BADGE ===== */
         .diskon {
             background: linear-gradient(45deg, #ff4d4d, #ff9800);
             font-size: 12px;
@@ -205,121 +176,68 @@
             animation: pulse 1.5s infinite;
         }
 
-
-        /* ===== KEYFRAMES ===== */
-        @keyframes pulse {
-            0% {
-                opacity: 1
-            }
-
-            50% {
-                opacity: .6
-            }
-
-            100% {
-                opacity: 1
-            }
+        /* ===== BUTTONS (Digabungkan karena style dasar sama) ===== */
+        .btn-buy,
+        .btn-buy-copy,
+        .btn-buy-wa {
+            border-radius: 10px;
+            border: none;
+            padding: 0 15px;
+            font-weight: 600;
+            transition: .3s ease;
         }
 
-        @keyframes fadeUp {
-            from {
-                opacity: 0;
-                transform: translateY(8px)
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0)
-            }
-        }
-
-        /* ===== RESPONSIVE ===== */
-        @media(max-width:576px) {
-            .courses-content h4.title {
-                font-size: 15px;
-            }
-
-            .btn-buy {
-                padding: 10px;
-                font-size: 14px;
-            }
+        .btn-buy {
+            background: #29459A;
+            color: #fff;
         }
 
         .btn-buy-copy {
             background: #DCDCDC;
             color: #212121;
-            border-radius: 10px;
-            border: none;
-            padding: 0px 15px;
-            font-weight: 600;
-            transition: .3s ease;
-        }
-
-        .btn-buy-copy:hover {
-            background: #d0011b;
-            color: #fff;
-            transform: scale(1.05);
         }
 
         .btn-buy-wa {
             background: #90EE90;
             color: #fff;
-            border-radius: 10px;
-            border: none;
-            padding: 0px 15px;
-            font-weight: 600;
-            transition: .3s ease;
         }
 
+        .btn-buy:hover,
+        .btn-buy-copy:hover,
         .btn-buy-wa:hover {
             background: #d0011b;
             color: #fff;
             transform: scale(1.05);
         }
 
-        /* Container pembungkus logo */
-        /* Pastikan slide tidak memaksa isi menjadi tinggi */
-        .tickerwrapper .swiper-slide {
-            display: flex !important;
-            align-items: center;
-            justify-content: center;
-            height: 40px !important;
-            /* Tinggi untuk Mobile */
-            overflow: hidden;
-        }
-
-        /* Untuk Desktop (Layar 992px ke atas) */
-        @media (min-width: 992px) {
-            .tickerwrapper .swiper-slide {
-                height: 80px !important;
-                /* Tinggi untuk Desktop */
-            }
-        }
-
-        .lazy-img {
-            /* Mencegah gambar memanjang vertikal */
-            max-height: 100%;
-            max-width: 150px;
-            /* Batas lebar logo agar tidak terlalu besar */
-            width: auto !important;
-            height: auto !important;
-            display: block;
-        }
-
+        /* ===== TICKER & LIST LOGO ===== */
         .tickerwrapper {
             width: 100%;
             overflow: hidden;
             position: relative;
             display: flex;
-            /* Memastikan container fleksibel */
+        }
+
+        .tickerwrapper .swiper-slide {
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            height: 40px !important;
+            overflow: hidden;
+        }
+
+        .lazy-img {
+            max-height: 50px;
+            max-width: 150px;
+            width: auto !important;
+            height: auto !important;
+            display: block;
         }
 
         ul.list {
             display: flex !important;
-            /* Memaksa LI berjejer horizontal */
             flex-direction: row;
             white-space: nowrap;
-            /* Mencegah LI pindah baris */
             list-style: none;
             padding: 0;
             margin: 0;
@@ -330,48 +248,120 @@
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            /* Mencegah LI menciut */
             padding: 0 20px;
-            /* Jarak antar logo */
             height: 80px;
-            /* Tinggi slider */
         }
 
-        /* Pastikan logo tidak melebihi tinggi container */
-        .lazy-img {
-            max-height: 50px;
-            width: auto !important;
-            display: block;
-        }
-
-        @keyframes professionalPulse {
-            0% {
-                transform: scale(1);
-                box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.6);
-            }
-
-            50% {
-                transform: scale(1.1);
-                box-shadow: 0 0 0 5px rgba(220, 53, 69, 0);
-            }
-
-            100% {
-                transform: scale(1);
-                box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
-            }
-        }
-
+        /* ===== BADGES ===== */
         .badge-pro-pulse {
             animation: professionalPulse 2s infinite ease-in-out;
         }
-    </style>
-    <style>
-        /* CSS Khusus untuk memunculkan bottom nav hanya di layar mobile (di bawah 992px) */
+
+        .flash-sale-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            animation: pulse-flash 2s infinite;
+            box-shadow: 0 4px 10px rgba(255, 75, 43, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .flash-sale-badge .timer-countdown {
+            background: rgba(255, 255, 255, 0.25);
+            padding: 2px 6px;
+            border-radius: 12px;
+            font-family: monospace;
+            font-size: 11px;
+            letter-spacing: 1px;
+        }
+
+        .flash-sale-badge i {
+            color: #ffe600;
+        }
+
+        /* ===== ACCORDION & INFO UMUM ===== */
+        .custom-accordion-text {
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            max-height: 180px;
+            overflow-y: auto;
+        }
+
+        .custom-accordion-text p {
+            margin-bottom: 4px !important;
+            font-size: 11px !important;
+            line-height: 1.4 !important;
+            color: #4a5568 !important;
+        }
+
+        .custom-accordion-text p:first-child {
+            font-size: 11.5px !important;
+            font-weight: 700 !important;
+            color: #1e293b !important;
+            border-bottom: 1px dashed #cbd5e1;
+            padding-bottom: 4px;
+            margin-bottom: 6px !important;
+        }
+
+        .info-umum-box {
+            background-color: #fcfcfc;
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .info-umum-box:hover {
+            background-color: #ffffff;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05) !important;
+            transform: translateY(-2px);
+        }
+
+        .box-accent {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #0d6efd, #0dcaf0);
+        }
+
+        .info-text {
+            font-size: 10.5px;
+            color: #4a5568;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+
+        .topcs-tooltip {
+            bottom: 90px !important;
+        }
+
         .mobile-bottom-nav {
             display: none;
         }
 
+        /* ===== MEDIA QUERIES ===== */
+        @media (min-width: 992px) {
+            .tickerwrapper .swiper-slide {
+                height: 80px !important;
+            }
+        }
+
         @media (max-width: 991.98px) {
+            body {
+                padding-bottom: 70px;
+            }
+
             .mobile-bottom-nav {
                 display: flex;
                 position: fixed;
@@ -385,7 +375,6 @@
                 justify-content: space-around;
                 align-items: center;
                 padding-bottom: env(safe-area-inset-bottom);
-                /* Support iPhone notch/home bar */
                 border-top: 1px solid rgba(0, 0, 0, 0.05);
             }
 
@@ -411,38 +400,85 @@
 
             .mobile-bottom-nav-item:active i {
                 transform: scale(0.85);
-                /* Efek membal saat disentuh */
             }
 
             .mobile-bottom-nav-item.active,
             .mobile-bottom-nav-item:hover {
                 color: #0d6efd;
-                /* Sesuaikan warna aktif dengan tema utama */
             }
 
             .mobile-bottom-nav-item:hover i {
                 transform: translateY(-2px);
-                /* Efek melompat kecil saat di-hover */
             }
 
-            /* Tambahan padding bawah pada body/container mobile agar konten tidak tertutup bar menu */
-            body {
-                padding-bottom: 70px;
-            }
-        }
-
-        /* Mengatur posisi tombol chat CS agar berada di atas menu navigasi mobile */
-        @media (max-width: 991.98px) {
             .topcs-bubble {
                 bottom: 85px !important;
-                /* Menaikkan posisi tombol di atas tinggi menu (65px + ruang aman) */
                 z-index: 100000 !important;
-                /* Memastikan posisi layer berada di atas menu navigasi */
             }
         }
 
-        .topcs-tooltip {
-            bottom: 90px !important;
+        @media(max-width:576px) {
+            .courses-content h4.title {
+                font-size: 15px;
+            }
+
+            .btn-buy {
+                padding: 10px;
+                font-size: 14px;
+            }
+        }
+
+        /* ===== KEYFRAMES ===== */
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: .6;
+            }
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes professionalPulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.6);
+            }
+
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 0 0 5px rgba(220, 53, 69, 0);
+            }
+        }
+
+        @keyframes pulse-flash {
+
+            0%,
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(255, 65, 108, 0.7);
+            }
+
+            70% {
+                transform: scale(1.05);
+                box-shadow: 0 0 0 8px rgba(255, 65, 108, 0);
+            }
         }
     </style>
     <!-- ✅ SEO AUTO -->
@@ -945,7 +981,7 @@
                     <div class="courses-wrapper">
                         <h6>Penawaran Paket Brevet Pajak AB</h6>
                         <span>Pilihan ujian yang bisa kamu kuti secara online kapan saja dan dimana saja</span>
-                        <div class="row ">
+                        <div class="row">
                             <?php foreach ($paket as $rows) : ?>
                                 <?php
                                 // untuk rating
@@ -965,13 +1001,30 @@
                                     <div class="col-12 col-md-6 col-lg-4 pt-2">
                                         <!-- Single Courses Start -->
                                         <div class="single-courses card position-relative zoom">
+
+                                            <!-- Flash Sale Badge Animasi Kiri Atas -->
+                                            <div class="flash-sale-badge">
+                                                <span class="fs-icon"><i class="fa fa-bolt"></i> Flash Sale</span>
+                                                <span class="timer-countdown countdown-clock">00:00:00</span>
+                                            </div>
+                                            <!-- End Flash Sale Badge -->
+
+                                            <!-- Diskon Kanan Atas -->
+                                            <?php if ($rows->iddiskon != null): ?>
+                                                <div class="position-absolute top-0 end-0 diskon p-1 text-white" style="z-index: 10; border-bottom-left-radius: 8px; font-weight: bold; font-size: 12px; background: #dc3545; box-shadow: -2px 2px 5px rgba(0,0,0,0.2);">
+                                                    <?= $rows->diskon ?> %
+                                                </div>
+                                            <?php endif; ?>
+
                                             <div class="courses-images">
                                                 <a href="<?= base_url('bimbel/' . $rows->slug) ?>">
                                                     <?= img_lazy('assets-landing/images/paket/thumbnails/' . $rows->file, $rows->nama_paket, ['class' => 'card-img-top']) ?>
                                                 </a>
                                             </div>
-                                            <div class="courses-content">
+
+                                            <div class="courses-content pb-3">
                                                 <h4 class="title"><a href="<?= base_url('bimbel/' . $rows->slug) ?>"><?= $rows->nama_paket ?></a></h4>
+
                                                 <div class="courses-meta">
                                                     <?php
                                                     $soal = $db->query("SELECT a.id_ujian, b.kode_ujian FROM detail_paket a join ujian_master b on a.id_ujian=b.id_ujian where a.idpaket = '$rows->idpaket' group by a.id_ujian")->getResult();
@@ -983,10 +1036,11 @@
                                                     ?>
                                                     <span class="fw-bold"> <i class="icofont-read-book"></i> <?= (!empty($total) ? $total : '0') ?> Soal/<span style="font-size:10px">Materi</span> </span>
                                                     <div class="d-flex flex-column mb-3">
-                                                        <span class="fw-bold"> Rp <?= number_format($rows->nominal_paket - (($rows->nominal_paket * $rows->diskon) / 100)) ?> </span>
-                                                        <span style="font-size:12px" class="mt-1"> <del>Rp <?= number_format($rows->nominal_paket) ?></del> </span>
+                                                        <span class="fw-bold text-danger fs-5"> Rp <?= number_format($rows->nominal_paket - (($rows->nominal_paket * $rows->diskon) / 100)) ?> </span>
+                                                        <span style="font-size:12px" class="mt-1 text-muted"> <del>Rp <?= number_format($rows->nominal_paket) ?></del> </span>
                                                     </div>
                                                 </div>
+
                                                 <div>
                                                     <div class="mb-2" style="font-size:12px">
                                                         <?php if ($rataRating > 0): ?>
@@ -995,6 +1049,7 @@
                                                                     <span class="text-dark"><?= "4.9" ?><span> <?= showStars('4.9') ?> <span class="text-dark">(<?= '484' ?>)</span>
                                                                         <?php endif; ?>
                                                     </div>
+
                                                     <!-- Affiliate -->
                                                     <?php if (session()->get('id') && !empty($affiliate)): ?>
                                                         <?php
@@ -1019,11 +1074,11 @@
                                                 </div>
 
                                                 <!-- Accordion Detail Paket Start -->
-                                                <div class="accordion accordion-flush mb-2" id="accordionDetail<?= $rows->idpaket ?>">
-                                                    <div class="accordion-item border rounded">
+                                                <div class="accordion accordion-flush mb-3" id="accordionDetail<?= $rows->idpaket ?>">
+                                                    <div class="accordion-item border rounded shadow-sm">
                                                         <h2 class="accordion-header" id="heading<?= $rows->idpaket ?>">
-                                                            <button class="accordion-button collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDetail<?= $rows->idpaket ?>" aria-expanded="false" aria-controls="collapseDetail<?= $rows->idpaket ?>" style="font-size: 0.8rem; background-color: transparent;">
-                                                                <i class="icofont-info-circle me-1"></i> Detail Paket
+                                                            <button class="accordion-button collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDetail<?= $rows->idpaket ?>" aria-expanded="false" aria-controls="collapseDetail<?= $rows->idpaket ?>" style="font-size: 0.8rem; background-color: #f8f9fa;">
+                                                                <i class="icofont-info-circle text-primary me-2"></i> <strong>Detail Paket</strong>
                                                             </button>
                                                         </h2>
                                                         <div id="collapseDetail<?= $rows->idpaket ?>" class="accordion-collapse collapse" aria-labelledby="heading<?= $rows->idpaket ?>" data-bs-parent="#accordionDetail<?= $rows->idpaket ?>">
@@ -1033,54 +1088,69 @@
                                                         </div>
                                                     </div>
                                                 </div>
-
-                                                <style>
-                                                    /* Styling khusus isi accordion agar rapi & modern */
-                                                    .custom-accordion-text {
-                                                        background-color: #f8f9fa;
-                                                        border-radius: 6px;
-                                                        max-height: 180px;
-                                                        overflow-y: auto;
-                                                    }
-
-                                                    .custom-accordion-text p {
-                                                        margin-bottom: 4px !important;
-                                                        font-size: 11px !important;
-                                                        line-height: 1.4 !important;
-                                                        letter-spacing: normal !important;
-                                                        /* Menghapus letter-spacing 0.4992px yang renggang */
-                                                        color: #4a5568 !important;
-                                                    }
-
-                                                    /* Styling khusus untuk judul header materi (paragraf pertama) */
-                                                    .custom-accordion-text p:first-child {
-                                                        font-size: 11.5px !important;
-                                                        font-weight: 700 !important;
-                                                        color: #1e293b !important;
-                                                        border-bottom: 1px dashed #cbd5e1;
-                                                        padding-bottom: 4px;
-                                                        margin-bottom: 6px !important;
-                                                    }
-                                                </style>
                                                 <!-- Accordion Detail Paket End -->
 
-                                                <div class="d-flex gap-2 mt-3">
-                                                    <a href="<?= base_url('sw-siswa/transaksi/pesan/' . encrypt_url($rows->idpaket)) ?>" class="btn-buy btn-sm text-center flex-fill p-2">Pesan Sekarang</a>
+                                                <!-- Informasi Umum (Desain Baru, Rapi di bawah Accordion) -->
+                                                <div class="info-umum-box p-3 p-md-4 rounded-3 shadow-sm mb-3 position-relative overflow-hidden bg-white">
+                                                    <div class="box-accent"></div>
+                                                    <h6 class="fw-bolder mb-3" style="font-size: 13px; color: #0d6efd;">
+                                                        <i class="fa fa-star text-warning me-1"></i> Keunggulan Paket
+                                                    </h6>
+                                                    <div class="row g-1">
+                                                        <div class="col-12 mb-1">
+                                                            <div class="d-flex align-items-start gap-2">
+                                                                <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
+                                                                <span class="info-text text-dark" style="font-size: 11px; line-height: 1.3;">LKP Terdaftar Resmi</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12 mb-1">
+                                                            <div class="d-flex align-items-start gap-2">
+                                                                <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
+                                                                <span class="info-text text-dark" style="font-size: 11px; line-height: 1.3;">Sertifikat Brevet Diakui</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12 mb-1">
+                                                            <div class="d-flex align-items-start gap-2">
+                                                                <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
+                                                                <span class="info-text text-dark" style="font-size: 11px; line-height: 1.3;">Akses Belajar Selamanya</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12 mb-1">
+                                                            <div class="d-flex align-items-start gap-2">
+                                                                <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
+                                                                <span class="info-text text-dark" style="font-size: 11px; line-height: 1.3;">Materi Terus di Update</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12 mb-1">
+                                                            <div class="d-flex align-items-start gap-2">
+                                                                <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
+                                                                <span class="info-text text-dark" style="font-size: 11px; line-height: 1.3;">Tanpa Langganan Bulanan/Tahunan</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12 mb-1">
+                                                            <div class="d-flex align-items-start gap-2">
+                                                                <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
+                                                                <span class="info-text text-dark" style="font-size: 11px; line-height: 1.3;">Dilatih Oleh Konsultan Pajak dan ASN/EX-DJP</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!-- Informasi Umum End -->
+
+                                                <div class="d-flex gap-2 mt-auto pt-2 border-top">
+                                                    <a href="<?= base_url('sw-siswa/transaksi/pesan/' . encrypt_url($rows->idpaket)) ?>" class="btn-buy btn-sm text-center flex-fill p-2 rounded-3 shadow-sm fw-bold">Pesan Sekarang</a>
                                                     <?php if (session()->get('id')): ?>
                                                         <?php if (!empty($affiliate)): ?>
-                                                            <button class="btn-buy-copy btn-sm btn-copy-link" data-paket_id="<?= $rows->idpaket ?>">
+                                                            <button class="btn-buy-copy btn-sm btn-copy-link rounded-3 shadow-sm" data-paket_id="<?= $rows->idpaket ?>">
                                                                 <i class="fa fa-copy"></i>
                                                             </button>
-                                                            <button class="btn-buy-wa btn-sm share-link" data-paket_id="<?= $rows->idpaket ?>">
+                                                            <button class="btn-buy-wa btn-sm share-link rounded-3 shadow-sm" data-paket_id="<?= $rows->idpaket ?>">
                                                                 <i class="fab fa-whatsapp"></i>
                                                             </button>
                                                         <?php endif; ?>
                                                     <?php endif; ?>
                                                 </div>
                                             </div>
-                                            <?php if ($rows->iddiskon != null): ?>
-                                                <div class="position-absolute top-0 end-0 diskon p-1 text-white"><?= $rows->diskon ?> %</div>
-                                            <?php endif; ?>
                                         </div>
                                         <!-- Single Courses End -->
                                     </div>
@@ -1669,206 +1739,141 @@
                     </div>
                 </div>
             <?php } ?>
+        </div>
+    </div>
 
-            <!-- Footer End -->
+    <!-- Footer End -->
 
-            <!-- JS 
+    <!-- JS 
     ============================================ -->
-            <!--//untuk pesan-->
-            <script>
-                <?= session()->getFlashdata('pesan'); ?>
-            </script>
-            <script src="https://topcs.id/widget.js" data-tenant="kelas-brevet" data-mode="bubble" data-position="right" data-color="#2563eb"></script>
+    <!--//untuk pesan-->
+    <script>
+        <?= session()->getFlashdata('pesan'); ?>
+    </script>
+    <script src="https://topcs.id/widget.js" data-tenant="kelas-brevet" data-mode="bubble" data-position="right" data-color="#2563eb"></script>
 
-            <!-- Modernizer & jQuery JS -->
-            <script src="<?= base_url('assets-landing/js/vendor/modernizr-3.11.2.min.js'); ?>"></script>
-            <script src="<?= base_url('assets-landing/js/vendor/jquery-3.5.1.min.js'); ?>"></script>
+    <!-- Modernizer & jQuery JS -->
+    <script src="<?= base_url('assets-landing/js/vendor/modernizr-3.11.2.min.js'); ?>"></script>
+    <script src="<?= base_url('assets-landing/js/vendor/jquery-3.5.1.min.js'); ?>"></script>
 
-            <!-- Bootstrap JS -->
-            <script src="https://akuntanmu.com/assets/assetLanding/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-            <!--<script src="<?= base_url('assets-landing/js/plugins/bootstrap.min.js'); ?>"></script>-->
+    <!-- Bootstrap JS -->
+    <script src="https://akuntanmu.com/assets/assetLanding/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!--<script src="<?= base_url('assets-landing/js/plugins/bootstrap.min.js'); ?>"></script>-->
 
-            <!-- Plugins JS -->
-            <script src="<?= base_url('assets-landing/js/plugins/swiper-bundle.min.js'); ?>"></script>
-            <script src="<?= base_url('assets-landing/js/plugins/jquery.magnific-popup.min.js'); ?>"></script>
-            <script src="<?= base_url('assets-landing/js/plugins/video-playlist.js'); ?>"></script>
-            <script src="<?= base_url('assets-landing/js/plugins/jquery.nice-select.min.js'); ?>"></script>
-            <script src="<?= base_url('assets-landing/js/plugins/ajax-contact.js'); ?>"></script>
-            <script src="<?= base_url('assets-landing/js/TweenMax.min.js'); ?>"></script>
+    <!-- Plugins JS -->
+    <script src="<?= base_url('assets-landing/js/plugins/swiper-bundle.min.js'); ?>"></script>
+    <script src="<?= base_url('assets-landing/js/plugins/jquery.magnific-popup.min.js'); ?>"></script>
+    <script src="<?= base_url('assets-landing/js/plugins/video-playlist.js'); ?>"></script>
+    <script src="<?= base_url('assets-landing/js/plugins/jquery.nice-select.min.js'); ?>"></script>
+    <script src="<?= base_url('assets-landing/js/plugins/ajax-contact.js'); ?>"></script>
+    <script src="<?= base_url('assets-landing/js/TweenMax.min.js'); ?>"></script>
 
-            <!--====== Use the minified version files listed below for better performance and remove the files listed above ======-->
-            <!-- <script src="<?= base_url('assets-landing/js/plugins.min.js'); ?>"></script> -->
+    <!--====== Use the minified version files listed below for better performance and remove the files listed above ======-->
+    <!-- <script src="<?= base_url('assets-landing/js/plugins.min.js'); ?>"></script> -->
 
 
-            <!-- Main JS -->
-            <script src="<?= base_url('assets-landing/js/main.js'); ?>"></script>
-            <!-- Tambahkan JS Swiper di bagian paling bawah halaman (sebelum tag penutup body atau di section scripts) -->
-            <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css"></script>
-            <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+    <!-- Main JS -->
+    <script src="<?= base_url('assets-landing/js/main.js'); ?>"></script>
+    <!-- Tambahkan JS Swiper di bagian paling bawah halaman (sebelum tag penutup body atau di section scripts) -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
 
-            <script>
-                document.addEventListener("DOMContentLoaded", function() {
-                    var swiperUskp = new Swiper(".swiper-uskp", {
-                        slidesPerView: 1, // Di HP tampil 1 per halaman
-                        spaceBetween: 20,
-                        loop: false,
-                        pagination: {
-                            el: ".swiper-pagination",
-                            clickable: true,
+    <script>
+        // ===============================
+        // HELPER FUNCTIONS
+        // ===============================
+        const showAlert = (icon, title, text) => swal({
+            title,
+            text,
+            icon,
+            timer: 2200,
+            buttons: false
+        });
+
+        const copyToClipboard = async (text) => {
+            if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(text);
+            const textarea = document.createElement("textarea");
+            textarea.value = text;
+            textarea.style.cssText = "position:fixed;opacity:0;";
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand("copy");
+                return Promise.resolve();
+            } catch (err) {
+                return Promise.reject();
+            } finally {
+                document.body.removeChild(textarea);
+            }
+        };
+
+        // ===============================
+        // TYPEWRITER CLASS (Modern ES6)
+        // ===============================
+        class TxtType {
+            constructor(el, toRotate, period) {
+                this.toRotate = toRotate;
+                this.el = el;
+                this.loopNum = 0;
+                this.period = parseInt(period, 10) || 2000;
+                this.txt = '';
+                this.isDeleting = false;
+                this.tick();
+            }
+            tick() {
+                const fullTxt = this.toRotate[this.loopNum % this.toRotate.length];
+                this.txt = this.isDeleting ? fullTxt.substring(0, this.txt.length - 1) : fullTxt.substring(0, this.txt.length + 1);
+                this.el.innerHTML = `<span class="wrap">${this.txt}</span>`;
+
+                let delta = 200 - Math.random() * 100;
+                if (this.isDeleting) delta /= 2;
+
+                if (!this.isDeleting && this.txt === fullTxt) {
+                    delta = this.period;
+                    this.isDeleting = true;
+                } else if (this.isDeleting && this.txt === '') {
+                    this.isDeleting = false;
+                    this.loopNum++;
+                    delta = 500;
+                }
+                setTimeout(() => this.tick(), delta);
+            }
+        }
+
+        // ===============================
+        // DOM CONTENT LOADED (Vanilla JS)
+        // ===============================
+        document.addEventListener("DOMContentLoaded", () => {
+            // 1. Swiper USKP
+            if (document.querySelector('.swiper-uskp')) {
+                new Swiper(".swiper-uskp", {
+                    slidesPerView: 1,
+                    spaceBetween: 20,
+                    loop: false,
+                    pagination: {
+                        el: ".swiper-pagination",
+                        clickable: true
+                    },
+                    navigation: {
+                        nextEl: ".swiper-button-next",
+                        prevEl: ".swiper-button-prev"
+                    },
+                    breakpoints: {
+                        768: {
+                            slidesPerView: 2,
+                            spaceBetween: 20
                         },
-                        navigation: {
-                            nextEl: ".swiper-button-next",
-                            prevEl: ".swiper-button-prev",
-                        },
-                        breakpoints: {
-                            // Saat layar > 768px (Tablet) tampilkan 2
-                            768: {
-                                slidesPerView: 2,
-                                spaceBetween: 20,
-                            },
-                            // Saat layar > 992px (Desktop/Laptop) tampilkan 3 (sesuai ukuran col-lg-4 sebelumnya)
-                            992: {
-                                slidesPerView: 3,
-                                spaceBetween: 30,
-                            },
-                        },
-                    });
-                });
-            </script>
-            <script>
-                $(document).on('click', '.btn-copy-link', function() {
-                    let btn = $(this);
-                    let paket_id = btn.data('paket_id');
-
-                    $.ajax({
-                        url: "<?= base_url('sw-siswa/affiliate/copy') ?>",
-                        type: "POST",
-                        dataType: "json",
-                        data: {
-                            paket_id: paket_id,
-                            <?= csrf_token() ?>: "<?= csrf_hash() ?>"
-                        },
-                        success: function(res) {
-                            if (res.status === 'success') {
-
-                                copyToClipboard(res.link).then(function() {
-                                    swal({
-                                        title: 'Berhasil!',
-                                        text: 'Link berhasil disalin, silakan dibagikan.',
-                                        type: 'success',
-                                        padding: '2em'
-                                    }).then(() => location.reload());
-                                }).catch(function() {
-                                    swal({
-                                        title: 'Perhatian',
-                                        text: 'Link gagal di copy, Silahkan coba lagi',
-                                        type: 'info',
-                                        padding: '2em'
-                                    });
-                                });
-
-                            } else {
-                                swal({
-                                    title: 'Gagal!',
-                                    text: 'Link gagal dibuat.',
-                                    type: 'error',
-                                    padding: '2em'
-                                });
-                            }
+                        992: {
+                            slidesPerView: 3,
+                            spaceBetween: 30
                         }
-                    });
-                });
-
-                /* ===============================
-                   CLIPBOARD HELPER (iOS SAFE)
-                ================================ */
-                function copyToClipboard(text) {
-                    // Modern API (Chrome, Edge, Android, iOS 16+)
-                    if (navigator.clipboard && window.isSecureContext) {
-                        return navigator.clipboard.writeText(text);
                     }
-
-                    // Fallback iOS lama
-                    return new Promise(function(resolve, reject) {
-                        let textarea = document.createElement("textarea");
-                        textarea.value = text;
-                        textarea.style.position = "fixed";
-                        textarea.style.opacity = "0";
-                        document.body.appendChild(textarea);
-
-                        textarea.focus();
-                        textarea.select();
-
-                        try {
-                            let successful = document.execCommand("copy");
-                            document.body.removeChild(textarea);
-                            successful ? resolve() : reject();
-                        } catch (err) {
-                            document.body.removeChild(textarea);
-                            reject();
-                        }
-                    });
-                }
-            </script>
-            <script>
-                $(document).on('click', '.share-link', function(e) {
-                    e.preventDefault();
-
-                    let btn = $(this);
-                    let paket_id = btn.data('paket_id');
-
-                    btn.prop('disabled', true);
-
-                    // 🔥 buka window dulu (masih user gesture)
-                    let waWindow = window.open('about:blank', '_blank');
-
-                    $.ajax({
-                        url: "<?= base_url('sw-siswa/affiliate/copy') ?>",
-                        type: "POST",
-                        dataType: "json",
-                        data: {
-                            paket_id: paket_id,
-                            <?= csrf_token() ?>: "<?= csrf_hash() ?>"
-                        },
-                        success: function(res) {
-                            if (res.status !== 'success') {
-                                showAlert('error', 'Gagal!', 'Link gagal dibuat.');
-                                waWindow.close();
-                                btn.prop('disabled', false);
-                                return;
-                            }
-
-                            let link = encodeURIComponent(res.link);
-                            waWindow.location.href = "https://wa.me/?text=" + link;
-
-                            btn.prop('disabled', false);
-                        },
-                        error: function() {
-                            showAlert('error', 'Error!', 'Terjadi kesalahan server.');
-                            waWindow.close();
-                            btn.prop('disabled', false);
-                        }
-                    });
                 });
+            }
 
-
-                // ===============================
-                // SWEETALERT HELPER
-                // ===============================
-                function showAlert(type, title, message) {
-                    swal({
-                        title: title,
-                        text: message,
-                        icon: type,
-                        timer: 2200,
-                        buttons: false
-                    });
-                }
-            </script>
-
-            <script>
-                var splide = new Splide('.splide', {
-
+            // 2. Splide
+            if (document.querySelector('.splide')) {
+                new Splide('.splide', {
                     type: 'loop',
                     perPage: 3,
                     rewind: true,
@@ -1876,47 +1881,101 @@
                         640: {
                             perPage: 2,
                             gap: '.7rem',
-                            height: '12rem',
+                            height: '12rem'
                         },
-
                         480: {
                             perPage: 1,
                             gap: '.7rem',
-                            height: '12rem',
-                        },
+                            height: '12rem'
+                        }
+                    }
+                }).mount();
+            }
 
-                    },
-
+            // 3. Lazy Load Images
+            const lazyImages = document.querySelectorAll("img.lazy");
+            if ("IntersectionObserver" in window) {
+                let observer = new IntersectionObserver((entries, obs) => {
+                    entries.forEach(e => {
+                        if (e.isIntersecting) {
+                            let img = e.target;
+                            img.src = img.dataset.src;
+                            img.removeAttribute("data-src");
+                            img.classList.remove("lazy");
+                            obs.unobserve(img);
+                        }
+                    });
                 });
-
-                splide.mount();
-            </script>
-            <script>
-                var $tickerWrapper = $(".tickerwrapper");
-                var $list = $tickerWrapper.find("ul.list");
-                var $clonedList = $list.clone();
-                var listWidth = 10;
-
-                $list.find("li").each(function(i) {
-                    listWidth += $(this, i).outerWidth(true);
+                lazyImages.forEach(img => observer.observe(img));
+            } else {
+                lazyImages.forEach(img => {
+                    img.src = img.dataset.src;
+                    img.removeAttribute("data-src");
+                    img.setAttribute("loading", "lazy");
+                    img.classList.remove("lazy");
                 });
+            }
 
-                var endPos = $tickerWrapper.width() - listWidth;
+            // 4. Testimonial Expand/Collapse
+            document.querySelectorAll(".single-testimonial").forEach(card => {
+                const text = card.querySelector(".text"),
+                    btn = card.querySelector(".toggle-btn");
+                if (!text || !btn) return;
+                const maxHeight = parseInt(window.getComputedStyle(text).lineHeight, 10) * 2;
+                if (text.scrollHeight <= maxHeight) btn.style.display = "none";
+                btn.addEventListener("click", () => {
+                    text.classList.toggle("expanded");
+                    btn.textContent = text.classList.contains("expanded") ? "Show less" : "Add more";
+                });
+            });
 
+            // 5. Countdown Reset Midnight
+            const clocks = document.querySelectorAll('.countdown-clock');
+            if (clocks.length) {
+                const updateTimers = () => {
+                    const diff = new Date(new Date().setHours(24, 0, 0, 0)) - new Date(); // Next Midnight
+                    if (diff <= 0) return;
+                    const pad = n => String(Math.floor(n)).padStart(2, '0');
+                    const time = `${pad((diff / 3600000) % 24)}:${pad((diff / 60000) % 60)}:${pad((diff / 1000) % 60)}`;
+                    clocks.forEach(c => c.innerText = time);
+                };
+                updateTimers();
+                setInterval(updateTimers, 1000);
+            }
+
+            // 6. Typewriter Init
+            document.querySelectorAll('.typewrite').forEach(el => {
+                const toRotate = el.getAttribute('data-type'),
+                    period = el.getAttribute('data-period');
+                if (toRotate) new TxtType(el, JSON.parse(toRotate), period);
+            });
+        });
+
+        // ===============================
+        // JQUERY SCRIPT & AJAX
+        // ===============================
+        $(function() {
+            const ajaxUrl = "<?= base_url('sw-siswa/affiliate/copy') ?>";
+            const csrfData = {
+                "<?= csrf_token() ?>": "<?= csrf_hash() ?>"
+            };
+
+            // 1. Ticker Animation (TimelineMax)
+            const $ticker = $(".tickerwrapper"),
+                $list = $ticker.find("ul.list");
+            if ($ticker.length && $list.length) {
+                let listWidth = 10;
+                $list.find("li").each((i, el) => listWidth += $(el).outerWidth(true));
+                const $clonedList = $list.clone().addClass("cloned").appendTo($ticker);
                 $list.add($clonedList).css({
-                    "width": listWidth + "px"
+                    width: listWidth + "px"
                 });
 
-                $clonedList.addClass("cloned").appendTo($tickerWrapper);
-
-                //TimelineMax
-                var infinite = new TimelineMax({
-                    repeat: -1,
-                    paused: true
-                });
-                var time = 40;
-
-                infinite
+                const time = 40,
+                    infinite = new TimelineMax({
+                        repeat: -1,
+                        paused: true
+                    })
                     .fromTo($list, time, {
                         rotation: 0.01,
                         x: 0
@@ -1950,142 +2009,95 @@
                         x: 0,
                         ease: Linear.easeNone
                     }, time)
-                    .progress(1).progress(0)
-                    .play();
+                    .progress(1).progress(0).play();
 
-                //Pause/Play		
-                $tickerWrapper.on("mouseenter", function() {
-                    infinite.pause();
-                }).on("mouseleave", function() {
-                    infinite.play();
-                });
+                $ticker.hover(() => infinite.pause(), () => infinite.play());
+            }
 
-                setTimeout(function() {
+            // 2. Ads Modal
+            setTimeout(() => $('#iklanDepan').modal('show'), 2000);
 
-                    $('#iklanDepan').modal('show');
+            // 3. View Gallery Modal
+            $(document).on('click', '.view_galeri', function() {
+                $(".isiKonten").html(`
+                <div class="modal-header">
+                    <h5 class="modal-title">Sertifikat</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">x</button>
+                </div>
+                <iframe src="${$(this).data('url_galleri')}" width="100%" height="500vh"></iframe>
+            `);
+            });
 
-                }, 2000);
-
-
-
-                var TxtType = function(el, toRotate, period) {
-                    this.toRotate = toRotate;
-                    this.el = el;
-                    this.loopNum = 0;
-                    this.period = parseInt(period, 10) || 2000;
-                    this.txt = '';
-                    this.tick();
-                    this.isDeleting = false;
-                };
-
-                TxtType.prototype.tick = function() {
-                    var i = this.loopNum % this.toRotate.length;
-                    var fullTxt = this.toRotate[i];
-
-                    if (this.isDeleting) {
-                        this.txt = fullTxt.substring(0, this.txt.length - 1);
-                    } else {
-                        this.txt = fullTxt.substring(0, this.txt.length + 1);
-                    }
-
-                    this.el.innerHTML = '<span class="wrap">' + this.txt + '</span>';
-
-                    var that = this;
-                    var delta = 200 - Math.random() * 100;
-
-                    if (this.isDeleting) {
-                        delta /= 2;
-                    }
-
-                    if (!this.isDeleting && this.txt === fullTxt) {
-                        delta = this.period;
-                        this.isDeleting = true;
-                    } else if (this.isDeleting && this.txt === '') {
-                        this.isDeleting = false;
-                        this.loopNum++;
-                        delta = 500;
-                    }
-
-                    setTimeout(function() {
-                        that.tick();
-                    }, delta);
-                };
-
-                window.onload = function() {
-                    var elements = document.getElementsByClassName('typewrite');
-                    for (var i = 0; i < elements.length; i++) {
-                        var toRotate = elements[i].getAttribute('data-type');
-                        var period = elements[i].getAttribute('data-period');
-                        if (toRotate) {
-                            new TxtType(elements[i], JSON.parse(toRotate), period);
+            // 4. Copy Link Affiliate
+            $(document).on('click', '.btn-copy-link', function() {
+                $.ajax({
+                    url: ajaxUrl,
+                    type: "POST",
+                    dataType: "json",
+                    data: {
+                        paket_id: $(this).data('paket_id'),
+                        ...csrfData
+                    },
+                    success: res => {
+                        if (res.status === 'success') {
+                            copyToClipboard(res.link)
+                                .then(() => swal({
+                                    title: 'Berhasil!',
+                                    text: 'Link disalin, silakan dibagikan.',
+                                    type: 'success',
+                                    padding: '2em'
+                                }).then(() => location.reload()))
+                                .catch(() => swal({
+                                    title: 'Perhatian',
+                                    text: 'Gagal disalin, coba lagi',
+                                    type: 'info',
+                                    padding: '2em'
+                                }));
+                        } else {
+                            swal({
+                                title: 'Gagal!',
+                                text: 'Link gagal dibuat.',
+                                type: 'error',
+                                padding: '2em'
+                            });
                         }
                     }
-                };
-
-                $('.view_galeri').click(function() {
-                    const url = $(this).data('url_galleri');
-                    $(".isiKonten").html(`
-            <div class="modal-header">
-                <h5 class="modal-title">Sertifikat</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    x
-                </button>
-            </div>
-                <iframe src="${url}" width="100%" height="500vh"></iframe>
-            `);
                 });
-            </script>
-            <script>
-                document.addEventListener("DOMContentLoaded", function() {
-                    let lazyImages = document.querySelectorAll("img.lazy");
+            });
 
-                    if ("IntersectionObserver" in window) {
-                        // ✅ Browser support IntersectionObserver
-                        let observer = new IntersectionObserver((entries, obs) => {
-                            entries.forEach(entry => {
-                                if (entry.isIntersecting) {
-                                    let img = entry.target;
-                                    img.src = img.dataset.src;
-                                    img.removeAttribute("data-src");
-                                    img.classList.remove("lazy");
-                                    obs.unobserve(img);
-                                }
-                            });
-                        });
+            // 5. Share Link to WhatsApp
+            $(document).on('click', '.share-link', function(e) {
+                e.preventDefault();
+                let btn = $(this);
+                btn.prop('disabled', true);
+                let waWindow = window.open('about:blank', '_blank'); // Bypass popup blocker
 
-                        lazyImages.forEach(img => observer.observe(img));
-
-                    } else {
-                        // ⚠️ Fallback kalau browser tidak support
-                        lazyImages.forEach(img => {
-                            img.src = img.dataset.src;
-                            img.removeAttribute("data-src");
-                            img.setAttribute("loading", "lazy");
-                            img.classList.remove("lazy");
-                        });
+                $.ajax({
+                    url: ajaxUrl,
+                    type: "POST",
+                    dataType: "json",
+                    data: {
+                        paket_id: btn.data('paket_id'),
+                        ...csrfData
+                    },
+                    success: res => {
+                        if (res.status !== 'success') {
+                            showAlert('error', 'Gagal!', 'Link gagal dibuat.');
+                            waWindow.close();
+                        } else {
+                            waWindow.location.href = "https://wa.me/?text=" + encodeURIComponent(res.link);
+                        }
+                        btn.prop('disabled', false);
+                    },
+                    error: () => {
+                        showAlert('error', 'Error!', 'Terjadi kesalahan server.');
+                        waWindow.close();
+                        btn.prop('disabled', false);
                     }
                 });
-            </script>
-
-            <script>
-                document.querySelectorAll(".single-testimonial").forEach(card => {
-                    const text = card.querySelector(".text");
-                    const btn = card.querySelector(".toggle-btn");
-
-                    const lineHeight = parseInt(window.getComputedStyle(text).lineHeight, 10);
-                    const maxHeight = lineHeight * 2; // clamp 4 baris
-
-                    // Cek apakah teks lebih tinggi dari batas
-                    if (text.scrollHeight <= maxHeight) {
-                        btn.style.display = "none"; // sembunyikan tombol kalau teks pendek
-                    }
-
-                    btn.addEventListener("click", () => {
-                        text.classList.toggle("expanded");
-                        btn.textContent = text.classList.contains("expanded") ? "Show less" : "Add more";
-                    });
-                });
-            </script>
+            });
+        });
+    </script>
 </body>
 
 </html>

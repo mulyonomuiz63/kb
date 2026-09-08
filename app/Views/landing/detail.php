@@ -334,93 +334,99 @@
 </div>
 
 <div class="container my-5">
-    <div class="row g-4 g-lg-5 align-items-stretch">
-        
-        <!-- Bagian Kiri: Deskripsi Layanan -->
-        <div class="col-lg-7 col-md-12">
-            <div class="card border-0 shadow-sm rounded-4 h-100 p-4 p-md-5 bg-white">
-                <div class="card-body p-0">
-                    <h2 class="fw-bolder text-dark mb-2 fs-3">
-                      Deskripsi Layanan
-                    </h2>
-                    
-                    <!-- Konten Deskripsi -->
-                    <div class="text-gray-700 fs-6 lh-lg" style="text-align: justify;">
-                        <?= $paket->deskripsi ?>
-                    </div>
-                </div>
-            </div>
-        </div>
+  <div class="row g-4 g-lg-5 align-items-stretch">
 
-        <!-- Bagian Kanan: Widget Informasi Umum -->
-        <div class="col-lg-5 col-md-12">
-            <!-- Card Sticky (Akan mengikuti saat discroll jika konten kiri panjang) -->
-            <div class="position-sticky" style="top: 2rem;">
-                <div class="card border-0 shadow-sm p-4 p-md-5 rounded-4" 
-                     style="background-color: #f8f9fa; border: 2px dashed #0d6efd !important; transition: transform 0.3s ease, box-shadow 0.3s ease;" 
-                     onmouseover="this.style.transform='translateY(-5px)'; this.classList.add('shadow');" 
-                     onmouseout="this.style.transform='translateY(0)'; this.classList.remove('shadow');">
-                    
-                    <div class="card-body p-0">
-                        <h3 class="fw-bolder text-primary mb-4 fs-4 d-flex align-items-center">
-                            <i class="fa fa-info-circle fs-3 text-primary me-3"></i> Informasi Umum
-                        </h3>
-                        
-                        <!-- List Fasilitas / Keunggulan -->
-                        <ul class="list-unstyled d-flex flex-column gap-3 m-0">
-                            <li class="d-flex align-items-start p-1 rounded-3 shadow-sm border border-light">
-                                <i class="fa fa-check-circle text-success me-3 mt-1" style="font-size: 20px;"></i>
-                                <span class="text-dark fw-semibold fs-6 lh-base">LKP Terdaftar Resmi</span>
-                            </li>
-                            <li class="d-flex align-items-start p-1 rounded-3 shadow-sm border border-light">
-                                <i class="fa fa-check-circle text-success me-3 mt-1" style="font-size: 20px;"></i>
-                                <span class="text-dark fw-semibold fs-6 lh-base">Sertifikat Brevet Diakui</span>
-                            </li>
-                            <li class="d-flex align-items-start p-1 rounded-3 shadow-sm border border-light">
-                                <i class="fa fa-check-circle text-success me-3 mt-1" style="font-size: 20px;"></i>
-                                <span class="text-dark fw-semibold fs-6 lh-base">Akses Belajar Selamanya</span>
-                            </li>
-                            <li class="d-flex align-items-start p-1 rounded-3 shadow-sm border border-light">
-                                <i class="fa fa-check-circle text-success me-3 mt-1" style="font-size: 20px;"></i>
-                                <span class="text-dark fw-semibold fs-6 lh-base">Materi Terus di Update</span>
-                            </li>
-                            <li class="d-flex align-items-start p-1 rounded-3 shadow-sm border border-light">
-                                <i class="fa fa-check-circle text-success me-3 mt-1" style="font-size: 20px;"></i>
-                                <span class="text-dark fw-semibold fs-6 lh-base">Tanpa Langganan Bulanan/Tahunan</span>
-                            </li>
-                            <li class="d-flex align-items-start p-1 rounded-3 shadow-sm border border-light">
-                                <i class="fa fa-check-circle text-success me-3 mt-1" style="font-size: 20px;"></i>
-                                <span class="text-dark fw-semibold fs-6 lh-base">Dilatih Oleh Konsultan Pajak dan ASN/EX-DJP</span>
-                            </li>
-                        </ul>
-                    </div>
+    <!-- Bagian Kiri: Deskripsi Layanan -->
+    <div class="col-lg-7 col-md-12">
+      <div class="card border-0 shadow-sm rounded-4 h-100 p-4 p-md-5 bg-white">
+        <div class="card-body p-0">
+          <h2 class="fw-bolder text-dark mb-2 fs-3">
+            Deskripsi Layanan
+          </h2>
 
-                </div>
-            </div>
+          <!-- Konten Deskripsi -->
+          <div class="text-gray-700 fs-6 lh-lg" style="text-align: justify;">
+            <?= $paket->deskripsi ?>
+          </div>
         </div>
-
-    </div>
-</div>
-<!-- ======= REVIEW & RATING SECTION ======= -->
-<?php if ($rataRating > 0): ?>
-  <div class="container">
-    <div class="product-card my-4 row g-4">
-      <!-- Kolom Rating Ringkasan -->
-      <div class="col-md-4 text-center border-end">
-        <h5 class="fw-bold mb-1">Penilaian Paket Pelatihan</h5>
-        <h1 class="display-4 fw-bold text-warning mb-0"><?= $rataRating ?: 0 ?></h1>
-        <div class="text-warning mb-2">
-          <?= showStars($rataRating) ?>
-        </div>
-        <p class="text-muted"><?= $totalRating + 325 ?> Ulasan</p>
       </div>
+    </div>
 
-      <!-- Kolom Distribusi Bintang -->
-      <div class="col-md-4">
-        <h6 class="fw-semibold mb-3">Distribusi Rating</h6>
-        <?php
-        // Hitung jumlah rating per bintang (5→1)
-        $ratings = $db->query("
+    <!-- Bagian Kanan: Widget Informasi Umum -->
+    <div class="col-lg-5 col-md-12">
+      <!-- Card Sticky (Akan mengikuti saat discroll jika konten kiri panjang) -->
+      <div class="position-sticky" style="top: 2rem;">
+        <div class="card border-0 shadow-sm p-4 p-md-5 rounded-4"
+          style="background-color: #f8f9fa; border: 2px dashed #0d6efd !important; transition: transform 0.3s ease, box-shadow 0.3s ease;"
+          onmouseover="this.style.transform='translateY(-5px)'; this.classList.add('shadow');"
+          onmouseout="this.style.transform='translateY(0)'; this.classList.remove('shadow');">
+
+          <div class="card-body p-0">
+            <h3 class="fw-bolder text-primary mb-4 fs-4 d-flex align-items-center">
+              <i class="fa fa-info-circle fs-3 text-primary me-3"></i> Informasi Umum
+            </h3>
+
+            <!-- List Fasilitas / Keunggulan -->
+            <ul class="list-unstyled d-flex flex-column gap-3 m-0">
+              <li class="d-flex align-items-start p-1 rounded-3 shadow-sm border border-light">
+                <i class="fa fa-check-circle text-success me-3 mt-1" style="font-size: 20px;"></i>
+                <span class="text-dark fw-semibold fs-6 lh-base">LKP Terdaftar Resmi</span>
+              </li>
+              <li class="d-flex align-items-start p-1 rounded-3 shadow-sm border border-light">
+                <i class="fa fa-check-circle text-success me-3 mt-1" style="font-size: 20px;"></i>
+                <span class="text-dark fw-semibold fs-6 lh-base">Sertifikat Brevet Diakui</span>
+              </li>
+              <li class="d-flex align-items-start p-1 rounded-3 shadow-sm border border-light">
+                <i class="fa fa-check-circle text-success me-3 mt-1" style="font-size: 20px;"></i>
+                <span class="text-dark fw-semibold fs-6 lh-base">Akses Belajar Selamanya</span>
+              </li>
+              <li class="d-flex align-items-start p-1 rounded-3 shadow-sm border border-light">
+                <i class="fa fa-check-circle text-success me-3 mt-1" style="font-size: 20px;"></i>
+                <span class="text-dark fw-semibold fs-6 lh-base">Materi Terus di Update</span>
+              </li>
+              <li class="d-flex align-items-start p-1 rounded-3 shadow-sm border border-light">
+                <i class="fa fa-check-circle text-success me-3 mt-1" style="font-size: 20px;"></i>
+                <span class="text-dark fw-semibold fs-6 lh-base">Tanpa Langganan Bulanan/Tahunan</span>
+              </li>
+              <li class="d-flex align-items-start p-1 rounded-3 shadow-sm border border-light">
+                <i class="fa fa-check-circle text-success me-3 mt-1" style="font-size: 20px;"></i>
+                <span class="text-dark fw-semibold fs-6 lh-base">Dilatih Oleh Konsultan Pajak dan ASN/EX-DJP</span>
+              </li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<?php if ($rataRating > 0): ?>
+  <div class="container my-5">
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+      <div class="card-body p-4 p-lg-5">
+        <div class="row align-items-stretch g-4">
+          
+          <!-- Kolom Rating Ringkasan & Distribusi (col-lg-4 / col-md-4) -->
+          <div class="col-12 col-md-4 col-lg-4 text-center text-md-start border-end-md pe-md-4 d-flex flex-column justify-content-between">
+            <div>
+              <h5 class="fw-bold text-dark mb-3">Penilaian Paket Pelatihan</h5>
+              
+              <div class="d-flex align-items-baseline justify-content-center justify-content-md-start gap-2 mb-1">
+                <h1 class="display-3 fw-bolder text-warning mb-0 lh-1"><?= $rataRating ?: '0' ?></h1>
+                <span class="text-muted fw-semibold fs-5">/ 5.0</span>
+              </div>
+              
+              <div class="text-warning mb-2 fs-5">
+                <?= showStars($rataRating) ?>
+              </div>
+              <p class="text-muted small mb-4">Berdasarkan <strong class="text-dark"><?= $totalRating + 325 ?></strong> Ulasan Pelanggan</p>
+            </div>
+
+            <div class="w-100 mt-2">
+              <h6 class="fw-semibold text-dark mb-3 text-start">Distribusi Rating</h6>
+              <?php
+              // Hitung jumlah rating per bintang (5→1)
+              $ratings = $db->query("
                     SELECT rating, COUNT(*) AS total
                     FROM review_ujian d
                     JOIN ujian_master c ON c.kode_ujian=d.kode_ujian
@@ -429,89 +435,179 @@
                     WHERE p.slug = '$paket->slug'
                     GROUP BY rating
                     ORDER BY rating DESC
-                ")->getResult();
+                  ")->getResult();
 
-        // Siapkan array total per rating
-        $ratingCount = [5 => 0, 4 => 0, 3 => 0, 2 => 0, 1 => 0];
-        $totalAll = 0;
-        foreach ($ratings as $r) {
-          $ratingCount[$r->rating] = $r->total;
-          $totalAll += $r->total;
-        }
-        ?>
+              // Siapkan array total per rating
+              $ratingCount = [5 => 0, 4 => 0, 3 => 0, 2 => 0, 1 => 0];
+              $totalAll = 0;
+              foreach ($ratings as $r) {
+                  $ratingCount[$r->rating] = $r->total;
+                  $totalAll += $r->total;
+              }
+              ?>
 
-        <?php foreach (range(5, 1) as $star):
-          $percent = $totalAll > 0 ? round(($ratingCount[$star] / $totalAll) * 100) : 0;
-        ?>
-          <div class="d-flex align-items-center mb-2">
-            <div class="me-2" style="width:30px;"><?= $star ?>★</div>
-            <div class="progress flex-fill" style="height:8px;">
-              <div class="progress-bar bg-warning" style="width: <?= $percent ?>%;"></div>
+              <?php foreach (range(5, 1) as $star):
+                  $percent = $totalAll > 0 ? round(($ratingCount[$star] / $totalAll) * 100) : 0;
+              ?>
+                <div class="d-flex align-items-center mb-2">
+                  <div class="me-2 text-start text-muted fw-medium small" style="width:35px;"><?= $star ?> <i class="fa fa-star text-warning" style="font-size: 10px;"></i></div>
+                  <div class="progress flex-fill rounded-pill bg-light" style="height:7px;">
+                    <div class="progress-bar bg-warning rounded-pill" role="progressbar" style="width: <?= $percent ?>%; transition: width 0.6s ease;" aria-valuenow="<?= $percent ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                  <div class="ms-2 small text-muted text-end" style="width:35px;"><?= $percent ?>%</div>
+                </div>
+              <?php endforeach; ?>
             </div>
-            <div class="ms-2 small text-muted"><?= $percent ?>%</div>
           </div>
-        <?php endforeach; ?>
-      </div>
 
-      <!-- Kolom Review Terbaru -->
-      <div class="col-md-4">
-        <h6 class="fw-semibold mb-3">Ulasan Terbaru</h6>
-        <?php
-        $reviews = $db->query("
+          <!-- Kolom Review Terbaru (col-lg-8 / col-md-8) -->
+          <div class="col-12 col-md-8 col-lg-8 ps-md-4 d-flex flex-column justify-content-between">
+            <div>
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold text-dark m-0">Ulasan Terbaru</h6>
+                <span class="badge bg-light text-primary border px-2 py-1 rounded-pill" style="font-size: 11px;">Terverifikasi</span>
+              </div>
+
+              <?php
+              $reviews = $db->query("
                   SELECT
                     q.nama_siswa,
                     q.avatar,
                     d.komentar,
                     d.rating,
                     d.created_at
-                FROM review_ujian d
-                JOIN ujian_master c ON c.kode_ujian = d.kode_ujian
-                JOIN detail_paket b ON b.id_ujian = c.id_ujian
-                JOIN paket p ON p.idpaket = b.idpaket
-                JOIN siswa q ON q.id_siswa = d.id_siswa
-                WHERE p.slug = '$paket->slug'
-                  AND d.status = 'A'
-                  AND d.created_at = (
-                      SELECT MAX(d2.created_at)
-                      FROM review_ujian d2
-                      JOIN ujian_master c2 ON c2.kode_ujian = d2.kode_ujian
-                      JOIN detail_paket b2 ON b2.id_ujian = c2.id_ujian
-                      JOIN paket p2 ON p2.idpaket = b2.idpaket
-                      WHERE p2.slug = '$paket->slug'
-                        AND d2.status = 'A'
-                        AND d2.id_siswa = d.id_siswa
-                  )
-                ORDER BY d.created_at DESC limit 10;
-                ")->getResult();
-        ?>
+                  FROM review_ujian d
+                  JOIN ujian_master c ON c.kode_ujian = d.kode_ujian
+                  JOIN detail_paket b ON b.id_ujian = c.id_ujian
+                  JOIN paket p ON p.idpaket = b.idpaket
+                  JOIN siswa q ON q.id_siswa = d.id_siswa
+                  WHERE p.slug = '$paket->slug'
+                    AND d.status = 'A'
+                    AND d.created_at = (
+                        SELECT MAX(d2.created_at)
+                        FROM review_ujian d2
+                        JOIN ujian_master c2 ON c2.kode_ujian = d2.kode_ujian
+                        JOIN detail_paket b2 ON b2.id_ujian = c2.id_ujian
+                        JOIN paket p2 ON p2.idpaket = b2.idpaket
+                        WHERE p2.slug = '$paket->slug'
+                          AND d2.status = 'A'
+                          AND d2.id_siswa = d.id_siswa
+                    )
+                  ORDER BY d.created_at DESC limit 10;
+                  ")->getResult();
+              ?>
 
-        <?php if ($reviews): ?>
-          <div class="review-scroll d-flex gap-3 pb-2">
-            <?php foreach ($reviews as $rv): ?>
-              <div class="review-item flex-shrink-0 p-3 shadow-sm rounded-3" style="min-width: 230px; max-width: 230px;">
-                <div class="d-flex align-items-center mb-2">
-                  <?php
-                  $foto = !empty($rv->avatar)
-                    ? base_url('assets/app-assets/user/' . $rv->avatar)
-                    : base_url('assets/app-assets/user/default.png');
-                  ?>
-                  <img src="<?= $foto ?>" alt="foto <?= esc($rv->nama_siswa ?? 'Pengguna') ?>"
-                    class="rounded-circle me-2 review-avatar">
-                  <div>
-                    <div class="fw-semibold small"><?= esc($rv->nama_siswa ?? 'Pengguna') ?></div>
-                    <div class="text-warning small"><?= showStars($rv->rating) ?></div>
+              <?php if ($reviews): ?>
+                <div class="review-scroll-container position-relative mt-2">
+                  <div class="review-scroll d-flex gap-3 pb-2 overflow-auto style-scroll align-items-stretch" style="scroll-behavior: smooth; -webkit-overflow-scrolling: touch;">
+                    <?php 
+                    $no = 0;
+                    foreach ($reviews as $rv): 
+                      $no++;
+                      $komentar = esc($rv->komentar);
+                      $limit = 85;
+                      $is_long = mb_strlen($komentar) > $limit;
+                      $short_komentar = $is_long ? mb_substr($komentar, 0, $limit) . '...' : $komentar;
+                    ?>
+                      <div class="review-item flex-shrink-0 p-3 border rounded-4 bg-light bg-opacity-50 shadow-hover transition-all d-flex flex-column justify-content-between" style="min-width: 260px; max-width: 260px;">
+                        <div>
+                          <div class="d-flex align-items-center mb-2">
+                            <?php
+                            $foto = !empty($rv->avatar)
+                              ? base_url('assets/app-assets/user/' . $rv->avatar)
+                              : base_url('assets/app-assets/user/default.png');
+                            ?>
+                            <img src="<?= $foto ?>" alt="foto <?= esc($rv->nama_siswa ?? 'Pengguna') ?>"
+                              class="rounded-circle me-2 object-fit-cover shadow-sm" style="width: 40px; height: 40px;">
+                            <div class="overflow-hidden">
+                              <div class="fw-bold small text-dark text-truncate text-uppercase"><?= esc($rv->nama_siswa ?? 'Pengguna') ?></div>
+                              <div class="text-warning" style="font-size: 11px;"><?= showStars($rv->rating) ?></div>
+                            </div>
+                          </div>
+                          
+                          <div class="comment-container mb-2">
+                            <p class="small text-secondary mb-1 fst-italic text-dark" style="line-height: 1.4;">
+                              “<span class="short-text"><?= $short_komentar ?></span><?php if ($is_long): ?><span class="full-text d-none"><?= $komentar ?></span><?php endif; ?>”
+                            </p>
+                            <?php if ($is_long): ?>
+                              <a href="javascript:void(0);" onclick="toggleReview(this)" class="text-primary fw-semibold text-decoration-none" style="font-size: 10px;">Baca Selengkapnya</a>
+                            <?php endif; ?>
+                          </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center border-top pt-2 mt-auto">
+                          <small class="text-muted" style="font-size: 10px;"><i class="fa fa-calendar-alt me-1"></i><?= date('d M Y', strtotime($rv->created_at)) ?></small>
+                          <span class="badge bg-success bg-opacity-10 text-white" style="font-size: 9px;">Peserta</span>
+                        </div>
+                      </div>
+                    <?php endforeach; ?>
                   </div>
                 </div>
-                <p class="small text-muted mb-2">“<?= esc($rv->komentar) ?>”</p>
-                <small class="font-weight-bold text-secondary"><?= date('d M Y', strtotime($rv->created_at)) ?></small>
-              </div>
-            <?php endforeach; ?>
+              <?php else: ?>
+                <div class="text-center py-5 border rounded-4 bg-light">
+                  <p class="text-muted mb-0">Belum ada ulasan untuk paket pelatihan ini.</p>
+                </div>
+              <?php endif; ?>
+            </div>
+            
+            <div class="text-end text-muted mt-2" style="font-size: 11px;">
+              <span>Geser untuk melihat ulasan lainnya <i class="fa fa-arrow-right ms-1"></i></span>
+            </div>
           </div>
-        <?php else: ?>
-          <p class="text-muted">Belum ada ulasan untuk paket pelatihan ini.</p>
-        <?php endif; ?>
+
+        </div>
       </div>
     </div>
   </div>
+
+  <script>
+    function toggleReview(element) {
+      const container = element.previousElementSibling;
+      const shortText = container.querySelector('.short-text');
+      const fullText = container.querySelector('.full-text');
+      
+      if (fullText.classList.contains('d-none')) {
+        fullText.classList.remove('d-none');
+        shortText.classList.add('d-none');
+        element.textContent = 'Sembunyikan';
+      } else {
+        fullText.classList.add('d-none');
+        shortText.classList.remove('d-none');
+        element.textContent = 'Baca Selengkapnya';
+      }
+    }
+  </script>
+
+  <style>
+    /* Styling Tambahan Profesional & Responsif */
+    @media (min-width: 768px) {
+      .border-end-md {
+        border-right: 1px solid #dee2e6 !important;
+      }
+    }
+    .shadow-hover {
+      transition: all 0.3s ease;
+    }
+    .shadow-hover:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 .5rem 1rem rgba(0,0,0,.08)!important;
+      background-color: #fff !important;
+    }
+    /* Custom Scrollbar untuk kotak ulasan horizontal */
+    .style-scroll::-webkit-scrollbar {
+      height: 6px;
+    }
+    .style-scroll::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+    .style-scroll::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 10px;
+    }
+    .style-scroll::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
+  </style>
 <?php endif ?>
 <?= $this->endSection(); ?>
