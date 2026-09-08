@@ -607,51 +607,63 @@
 
                 <div id="kt_brevet_slider">
                     <?php foreach ($paket as $rows) : ?>
-                        <?php if ($rows->id_mapel == '0'): ?>
-                            <?php
-                            $query = $db->table('paket')->join('detail_paket b', 'paket.idpaket=b.idpaket')->join('ujian_master c', 'b.id_ujian=c.id_ujian')->join('review_ujian d', 'c.kode_ujian=d.kode_ujian')->where('paket.slug', $rows->slug)->get()->getResultObject();
-                            $totalRating = 0;
-                            $jumlahReview = count($query);
-                            foreach ($query as $item) {
-                                $totalRating += $item->rating;
-                            }
-                            $rataRating = $jumlahReview > 0 ? round($totalRating / $jumlahReview, 1) : 0;
+                        <?php
+                        // Hitung rating
+                        $query = $db->table('paket')->join('detail_paket b', 'paket.idpaket=b.idpaket')->join('ujian_master c', 'b.id_ujian=c.id_ujian')->join('review_ujian d', 'c.kode_ujian=d.kode_ujian')->where('paket.slug', $rows->slug)->get()->getResultObject();
 
-                            $soal = $db->query("SELECT a.id_ujian, b.kode_ujian FROM detail_paket a join ujian_master b on a.id_ujian=b.id_ujian where a.idpaket = '$rows->idpaket' group by a.id_ujian")->getResult();
-                            $jml = null;
-                            foreach ($soal as $r):
-                                $hasilUjian = soal_ujian(encrypt_url($r->kode_ujian));
-                                $jml = count($hasilUjian);
-                            endforeach;
-                            ?>
+                        $totalRating = 0;
+                        $jumlahReview = count($query);
+                        foreach ($query as $item) {
+                            $totalRating += $item->rating;
+                        }
+                        $rataRating = $jumlahReview > 0 ? round($totalRating / $jumlahReview, 1) : 0;
 
-                            <div class="px-1">
-                                <div class="card paket-card h-100 rounded-4 overflow-hidden border shadow-none">
-                                    <div class="position-relative" style="aspect-ratio: 16/9; overflow: hidden; background-color: #f8f9fa;">
+                        // Hitung soal/materi
+                        $soal = $db->query("SELECT a.id_ujian, b.kode_ujian FROM detail_paket a join ujian_master b on a.id_ujian=b.id_ujian where a.idpaket = '$rows->idpaket' group by a.id_ujian")->getResult();
+                        $jml = null;
+                        foreach ($soal as $r):
+                            $hasilUjian = soal_ujian(encrypt_url($r->kode_ujian));
+                            $jml = count($hasilUjian);
+                        endforeach;
+                        ?>
+
+                        <?php if ($rows->id_mapel == '0' || $rows->id_mapel == '1'): ?>
+                            <div class="pt-2">
+                                <div class="single-courses card position-relative zoom h-100 rounded-4 overflow-hidden border shadow-none">
+
+                                    <!-- Flash Sale Badge Animasi Kiri Atas -->
+<div class="flash-sale-badge position-absolute top-0 start-0 m-3 p-2 bg-danger text-white rounded-3 shadow-sm d-flex align-items-center gap-2" style="z-index: 10;">
+    <span class="fs-icon text-white"><i class="fa fa-bolt text-white"></i> Flash Sale</span>
+    <span class="timer-countdown countdown-clock fw-bold text-white">00:00:00</span>
+</div>
+
+                                    <!-- Diskon Kanan Atas -->
+                                    <?php if ($rows->iddiskon != null): ?>
+                                        <div class="position-absolute top-0 end-0 m-3" style="z-index: 10;">
+                                            <span class="badge badge-danger fw-bold fs-8 px-3 py-2 rounded-pill" style="background-color: #ff6b35 !important;"><?= $rows->diskon ?> %</span>
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <div class="courses-images position-relative" style="aspect-ratio: 16/9; overflow: hidden; background-color: #f8f9fa;">
                                         <a href="<?= base_url('bimbel/' . $rows->slug) ?>">
-                                            <?= img_lazy('assets-landing/images/paket/thumbnails/' . $rows->file, "loading", ['class' => 'w-100 h-100 object-fit-cover']) ?>
+                                            <?= img_lazy('assets-landing/images/paket/thumbnails/' . $rows->file, $rows->nama_paket, ['class' => 'w-100 h-100 object-fit-cover']) ?>
                                         </a>
-                                        <?php if ($rows->iddiskon != null): ?>
-                                            <div class="position-absolute top-0 end-0 m-4">
-                                                <span class="badge badge-danger fw-bold fs-8 px-3 py-2 rounded-pill" style="background-color: #ff6b35 !important;"><?= $rows->diskon ?> %</span>
-                                            </div>
-                                        <?php endif; ?>
                                     </div>
 
-                                    <div class="card-body p-7">
-                                        <h6 class="fs-5 fw-bold mb-4" style="min-height: 45px;">
+                                    <div class="courses-content card-body p-4 d-flex flex-column">
+                                        <h4 class="title fs-5 fw-bold mb-3" style="min-height: 45px;">
                                             <a href="<?= base_url('bimbel/' . $rows->slug) ?>" class="text-dark text-hover-primary"><?= $rows->nama_paket ?></a>
-                                        </h6>
+                                        </h4>
 
-                                        <div class="d-flex justify-content-between align-items-center mb-5">
-                                            <span class="fs-7 fw-bold text-gray-600"><i class="ki-outline ki-book-open fs-2 text-primary me-1"></i> <?= (!empty($jml) ? $jml : '0') ?> Soal/Materi</span>
+                                        <div class="d-flex justify-content-between align-items-center mb-4">
+                                            <span class="fs-7 fw-bold text-gray-600"><i class="icofont-read-book fs-2 text-primary me-1"></i> <?= (!empty($jml) ? $jml : '0') ?> Soal/<span style="font-size:10px">Materi</span></span>
                                             <div class="text-end">
                                                 <div class="fw-bolder fs-4 text-dark">Rp <?= number_format($rows->nominal_paket - (($rows->nominal_paket * $rows->diskon) / 100)) ?></div>
                                                 <div class="text-muted text-decoration-line-through fs-8 small">Rp <?= number_format($rows->nominal_paket) ?></div>
                                             </div>
                                         </div>
 
-                                        <div class="d-flex align-items-center mb-5">
+                                        <div class="d-flex align-items-center mb-4">
                                             <img src="<?= base_url('assets-landing/images/logo-blue.png') ?>" class="rounded-circle me-3" width="30px">
                                             <div class="d-flex flex-column">
                                                 <span class="fw-bold text-gray-800" style="font-size: 11px;">Akuntanmu Learning Center</span>
@@ -659,7 +671,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="mb-6 h-20px">
+                                        <div class="mb-1 h-20px" style="font-size:12px">
                                             <?php if ($rataRating > 0): ?>
                                                 <div class="d-flex align-items-center">
                                                     <span class="text-dark fw-bold me-2 fs-7"><?= $rataRating ?></span>
@@ -668,42 +680,115 @@
                                                 </div>
                                             <?php endif; ?>
                                         </div>
-                                        <div class="mb-6" style="min-height: 20px;">
-                                            <?php if (!empty($affiliate)):
+
+                                        <!-- Affiliate Box -->
+                                        <div class="mb-1" style="min-height: 20px;">
+                                            <?php if ((session()->get('id') || session('role') == 2) && !empty($affiliate)):
                                                 $potongan_diskon = ($rows->nominal_paket * $rows->diskon) / 100;
                                                 $harga_final     = $rows->nominal_paket - $potongan_diskon;
                                                 $est_komisi      = ($harga_final * $rows->komisi) / 100;
                                             ?>
-                                                <div class="d-flex align-items-center flex-wrap gap-1" style="font-size: 0.80rem;">
-                                                    <span class="text-muted fw-semibold">Komisi Affiliate:</span>
-                                                    <span class="text-danger fw-bolder"><?= $rows->komisi ?>%</span>
-                                                    <span class="text-muted mx-1">|</span>
-                                                    <span class="text-muted fw-semibold">Est:</span>
-                                                    <span class="text-danger fw-bolder">Rp <?= number_format($est_komisi, 0, ',', '.') ?></span>
+                                                <div class="affiliate-box p-2 mb-3 bg-light rounded-3">
+                                                    <div class="d-flex flex-wrap align-items-center gap-1" style="font-size: 0.75rem;">
+                                                        <span>💰</span>
+                                                        <span class="text-muted fw-bold">Komisi</span>
+                                                        <strong class="text-danger"><?= $rows->komisi ?>%</strong>
+                                                        <span class="text-muted mx-1">|</span>
+                                                        <span class="text-muted fw-bold">Est.</span>
+                                                        <strong class="text-danger">Rp <?= number_format($est_komisi, 0, ',', '.') ?></strong>
+                                                    </div>
+                                                    <div class="text-muted mt-1" style="font-size: 0.75rem;">
+                                                        Dari setiap pembelian via link kamu
+                                                    </div>
                                                 </div>
                                             <?php endif; ?>
                                         </div>
 
-                                        <?php if (session('role') == 2) : ?>
-                                            <div class="d-flex align-items-center gap-2">
-                                                <a href="<?= base_url('sw-siswa/transaksi/pesan/' . encrypt_url($rows->idpaket)) ?>" class="btn btn-primary btn-sm fw-bold flex-grow-1 rounded-3 py-3">Pesan Sekarang</a>
+                                        <!-- Accordion Detail Paket Start -->
+                                        <div class="accordion accordion-flush mb-3" id="accordionDetail<?= $rows->idpaket ?>">
+                                            <div class="accordion-item border rounded shadow-sm">
+                                                <h2 class="accordion-header" id="heading<?= $rows->idpaket ?>">
+                                                    <button class="accordion-button collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDetail<?= $rows->idpaket ?>" aria-expanded="false" aria-controls="collapseDetail<?= $rows->idpaket ?>" style="font-size: 0.8rem; background-color: #f8f9fa;">
+                                                        <i class="icofont-info-circle text-primary me-2"></i> <strong>Detail Paket</strong>
+                                                    </button>
+                                                </h2>
+                                                <div id="collapseDetail<?= $rows->idpaket ?>" class="accordion-collapse collapse" aria-labelledby="heading<?= $rows->idpaket ?>" data-bs-parent="#accordionDetail<?= $rows->idpaket ?>">
+                                                    <div class="accordion-body p-2 custom-accordion-text" style="font-size: 0.8rem;">
+                                                        <?= !empty($rows->deskripsi) ? $rows->deskripsi : (!empty($rows->detail_paket) ? $rows->detail_paket : 'Detail informasi paket pembelajaran.') ?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Accordion Detail Paket End -->
 
+                                        <!-- Keunggulan Paket Start -->
+                                        <div class="info-umum-box p-3 rounded-3 shadow-sm mb-3 position-relative overflow-hidden bg-white border">
+                                            <h6 class="fw-bolder mb-2" style="font-size: 13px; color: #0d6efd;">
+                                                <i class="fa fa-star text-warning me-1"></i> Keunggulan Paket
+                                            </h6>
+                                            <div class="row g-1">
+                                                <div class="col-12 mb-1">
+                                                    <div class="d-flex align-items-start gap-2">
+                                                        <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
+                                                        <span class="info-text text-dark" style="font-size: 0.8rem;">LKP Terdaftar Resmi</span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 mb-1">
+                                                    <div class="d-flex align-items-start gap-2">
+                                                        <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
+                                                        <span class="info-text text-dark" style="font-size: 0.8rem;">Sertifikat Brevet Diakui</span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 mb-1">
+                                                    <div class="d-flex align-items-start gap-2">
+                                                        <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
+                                                        <span class="info-text text-dark" style="font-size: 0.8rem;">Akses Belajar Selamanya</span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 mb-1">
+                                                    <div class="d-flex align-items-start gap-2">
+                                                        <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
+                                                        <span class="info-text text-dark" style="font-size: 0.8rem;">Materi Terus di Update</span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 mb-1">
+                                                    <div class="d-flex align-items-start gap-2">
+                                                        <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
+                                                        <span class="info-text text-dark" style="font-size: 0.8rem;">Tanpa Langganan Bulanan/Tahunan</span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 mb-1">
+                                                    <div class="d-flex align-items-start gap-2">
+                                                        <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
+                                                        <span class="info-text text-dark" style="font-size: 0.8rem;">Dilatih Oleh Konsultan Pajak dan ASN/EX-DJP</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Keunggulan Paket End -->
+
+                                        <!-- Action Buttons -->
+                                        <div class="d-flex align-items-center gap-2 mt-auto pt-2 border-top">
+                                            <a href="<?= base_url('sw-siswa/transaksi/pesan/' . encrypt_url($rows->idpaket)) ?>" class="btn btn-primary btn-sm fw-bold flex-grow-1 rounded-3 py-2 text-center">Pesan Sekarang</a>
+
+                                            <?php if (session()->get('id') || session('role') == 2): ?>
                                                 <?php if (!empty($affiliate)): ?>
-                                                    <button type="button" class="btn-affiliate-action btn-copy-link"
+                                                    <button type="button" class="btn btn-outline-secondary btn-sm btn-copy-link rounded-3 px-3"
                                                         data-paket_id="<?= $rows->idpaket ?>"
                                                         data-bs-toggle="tooltip" title="Salin Link Affiliate">
-                                                        <i class="ki-outline ki-copy fs-3"></i>
+                                                        <i class="ki-outline ki-copy fs-3 fa fa-copy"></i>
                                                     </button>
 
-                                                    <button type="button" class="btn-affiliate-action share-link"
+                                                    <button type="button" class="btn btn-outline-success btn-sm share-link rounded-3 px-3"
                                                         data-paket_id="<?= $rows->idpaket ?>"
                                                         data-bs-toggle="tooltip" title="Bagikan ke WhatsApp">
                                                         <i class="fab fa-whatsapp fs-3"></i>
                                                     </button>
                                                 <?php endif; ?>
-                                            </div>
-                                            <input type="text" id="clipboard-temp" style="position:absolute;left:-9999px;">
-                                        <?php endif; ?>
+                                            <?php endif; ?>
+                                        </div>
+                                        <input type="text" id="clipboard-temp" style="position:absolute;left:-9999px;">
+
                                     </div>
                                 </div>
                             </div>
@@ -953,6 +1038,46 @@
                     alertElement.style.display = 'none';
                 }, 600);
             });
+        });
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const countdownElements = document.querySelectorAll(".flash-sale-badge");
+
+        countdownElements.forEach(function(element) {
+            const clockSpan = element.querySelector(".countdown-clock");
+            if (!clockSpan) return;
+
+            function updateCountdown() {
+                const now = new Date();
+
+                // Set waktu target ke pukul 00:00:00 di hari berikutnya
+                const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
+                const distance = tomorrow - now;
+
+                if (distance < 0) {
+                    clockSpan.innerHTML = "00:00:00";
+                    return;
+                }
+
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                // Format angka menjadi 2 digit (00:00:00)
+                const formatHours = String(hours).padStart(2, '0');
+                const formatMinutes = String(minutes).padStart(2, '0');
+                const formatSeconds = String(seconds).padStart(2, '0');
+
+                clockSpan.innerHTML = `${formatHours}:${formatMinutes}:${formatSeconds}`;
+            }
+
+            // Jalankan fungsi pertama kali agar tidak ada jeda 1 detik saat halaman dimuat
+            updateCountdown();
+
+            // Perbarui setiap 1 detik
+            setInterval(updateCountdown, 1000);
         });
     });
 </script>

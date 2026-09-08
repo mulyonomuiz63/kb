@@ -334,37 +334,37 @@
                                             <i class="fa fa-star text-warning me-1"></i> Keunggulan Paket
                                         </h6>
                                         <div class="row g-1">
-                                            <div class="col-12 col-md-6 mb-2">
+                                            <div class="col-12 mb-1">
                                                 <div class="d-flex align-items-start gap-2">
                                                     <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
                                                     <span class="info-text text-dark" style="font-size: 11px; line-height: 1.3;">LKP Terdaftar Resmi</span>
                                                 </div>
                                             </div>
-                                            <div class="col-12 col-md-6 mb-2">
+                                            <div class="col-12 mb-1">
                                                 <div class="d-flex align-items-start gap-2">
                                                     <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
                                                     <span class="info-text text-dark" style="font-size: 11px; line-height: 1.3;">Sertifikat Brevet Diakui</span>
                                                 </div>
                                             </div>
-                                            <div class="col-12 col-md-6 mb-2">
+                                            <div class="col-12 mb-1">
                                                 <div class="d-flex align-items-start gap-2">
                                                     <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
                                                     <span class="info-text text-dark" style="font-size: 11px; line-height: 1.3;">Akses Belajar Selamanya</span>
                                                 </div>
                                             </div>
-                                            <div class="col-12 col-md-6 mb-2">
+                                            <div class="col-12 mb-1">
                                                 <div class="d-flex align-items-start gap-2">
                                                     <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
                                                     <span class="info-text text-dark" style="font-size: 11px; line-height: 1.3;">Materi Terus di Update</span>
                                                 </div>
                                             </div>
-                                            <div class="col-12 col-md-6 mb-2">
+                                            <div class="col-12 mb-1">
                                                 <div class="d-flex align-items-start gap-2">
                                                     <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
                                                     <span class="info-text text-dark" style="font-size: 11px; line-height: 1.3;">Tanpa Langganan Bulanan/Tahunan</span>
                                                 </div>
                                             </div>
-                                            <div class="col-12 col-md-6 mb-2">
+                                            <div class="col-12 mb-1">
                                                 <div class="d-flex align-items-start gap-2">
                                                     <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
                                                     <span class="info-text text-dark" style="font-size: 11px; line-height: 1.3;">Dilatih Oleh Konsultan Pajak dan ASN/EX-DJP</span>

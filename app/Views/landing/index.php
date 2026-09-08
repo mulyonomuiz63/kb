@@ -338,8 +338,6 @@
         .info-text {
             font-size: 10.5px;
             color: #4a5568;
-            font-weight: 600;
-            line-height: 1.3;
         }
 
         .topcs-tooltip {
@@ -1100,37 +1098,37 @@
                                                         <div class="col-12 mb-1">
                                                             <div class="d-flex align-items-start gap-2">
                                                                 <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
-                                                                <span class="info-text text-dark" style="font-size: 11px; line-height: 1.3;">LKP Terdaftar Resmi</span>
+                                                                <span class="info-text text-dark">LKP Terdaftar Resmi</span>
                                                             </div>
                                                         </div>
                                                         <div class="col-12 mb-1">
                                                             <div class="d-flex align-items-start gap-2">
                                                                 <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
-                                                                <span class="info-text text-dark" style="font-size: 11px; line-height: 1.3;">Sertifikat Brevet Diakui</span>
+                                                                <span class="info-text text-dark">Sertifikat Brevet Diakui</span>
                                                             </div>
                                                         </div>
                                                         <div class="col-12 mb-1">
                                                             <div class="d-flex align-items-start gap-2">
                                                                 <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
-                                                                <span class="info-text text-dark" style="font-size: 11px; line-height: 1.3;">Akses Belajar Selamanya</span>
+                                                                <span class="info-text text-dark">Akses Belajar Selamanya</span>
                                                             </div>
                                                         </div>
                                                         <div class="col-12 mb-1">
                                                             <div class="d-flex align-items-start gap-2">
                                                                 <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
-                                                                <span class="info-text text-dark" style="font-size: 11px; line-height: 1.3;">Materi Terus di Update</span>
+                                                                <span class="info-text text-dark">Materi Terus di Update</span>
                                                             </div>
                                                         </div>
                                                         <div class="col-12 mb-1">
                                                             <div class="d-flex align-items-start gap-2">
                                                                 <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
-                                                                <span class="info-text text-dark" style="font-size: 11px; line-height: 1.3;">Tanpa Langganan Bulanan/Tahunan</span>
+                                                                <span class="info-text text-dark">Tanpa Langganan Bulanan/Tahunan</span>
                                                             </div>
                                                         </div>
                                                         <div class="col-12 mb-1">
                                                             <div class="d-flex align-items-start gap-2">
                                                                 <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
-                                                                <span class="info-text text-dark" style="font-size: 11px; line-height: 1.3;">Dilatih Oleh Konsultan Pajak dan ASN/EX-DJP</span>
+                                                                <span class="info-text text-dark">Dilatih Oleh Konsultan Pajak dan ASN/EX-DJP</span>
                                                             </div>
                                                         </div>
                                                     </div>
