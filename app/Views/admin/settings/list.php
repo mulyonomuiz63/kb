@@ -45,6 +45,9 @@
                             <li class="nav-item mt-2">
                                 <a class="nav-link text-active-primary ms-0 me-10 py-5" data-bs-toggle="tab" href="#tab_midtrans">Midtrans</a>
                             </li>
+                            <li class="nav-item mt-2">
+                                <a class="nav-link text-active-primary ms-0 me-10 py-5" data-bs-toggle="tab" href="#tab_whatsapp">WhatsApp</a>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -205,6 +208,14 @@
                                             <option value="false" '.(($settings['midtrans_is_production']??'')=='false'?'selected':'').'>Sandbox (Testing)</option>
                                         </select>'
                                     ); ?>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="tab_whatsapp" role="tabpanel">
+                                <div class="d-flex flex-column gap-5">
+                                    <h4 class="text-gray-800 fw-bold mb-5">WhatsApp Settings</h4>
+
+                                    <?php inputRow('Token','<input type="text" class="form-control form-control-solid" name="whatsapp_token" value="'.old('whatsapp_token',$settings['whatsapp_token']??'').'">'); ?>
+                                    <?php inputRow('Secret Key','<input type="text" class="form-control form-control-solid" name="whatsapp_secret_key" value="'.old('whatsapp_secret_key',$settings['whatsapp_secret_key']??'').'">'); ?>
                                 </div>
                             </div>
 

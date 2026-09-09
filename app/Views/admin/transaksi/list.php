@@ -298,16 +298,16 @@
                         <label class="required fs-6 fw-semibold mb-3 d-block">Kirim Lewat:</label>
                         <div class="d-flex align-items-center gap-5">
                             <div class="form-check form-check-custom form-check-solid" id="wrapper_wa">
-                                <input class="form-check-input" type="radio" name="method_type" value="whatsapp" id="option_wa" disabled />
-                                <label class="form-check-label fw-semibold text-muted" for="option_wa">WhatsApp <span class="badge badge-light-warning fs-8 ms-1">Coming Soon</span></label>
+                                <input class="form-check-input" type="radio" name="method_type" value="whatsapp" id="option_wa" />
+                                <label class="form-check-label fw-semibold" for="option_wa">WhatsApp</label>
                             </div>
                             <div class="form-check form-check-custom form-check-solid">
                                 <input class="form-check-input" type="radio" name="method_type" value="email" id="option_email" checked />
                                 <label class="form-check-label fw-semibold" for="option_email">Email</label>
                             </div>
                             <div class="form-check form-check-custom form-check-solid" id="wrapper_keduanya">
-                                <input class="form-check-input" type="radio" name="method_type" value="keduanya" id="option_keduanya" disabled />
-                                <label class="form-check-label fw-semibold text-muted" for="option_keduanya">Keduanya <span class="badge badge-light-warning fs-8 ms-1">Coming Soon</span></label>
+                                <input class="form-check-input" type="radio" name="method_type" value="keduanya" id="option_keduanya" />
+                                <label class="form-check-label fw-semibold" for="option_keduanya">Keduanya</label>
                             </div>
                         </div>
                     </div>
@@ -333,6 +333,7 @@
         </div>
     </div>
 </div>
+
 <?= $this->endSection(); ?>
 
 <?= $this->section('scripts'); ?>
@@ -925,6 +926,7 @@
 // Handler ketika tombol kirim pesan diklik
 $(document).on('click', '.btn-kirim-pesan', function() {
     var email = $(this).data('email');
+    var phone = $(this).data('hp');
     var nama = $(this).data('nama');
     var paket = $(this).data('paket');
     var nominal = $(this).data('nominal');
@@ -935,7 +937,7 @@ $(document).on('click', '.btn-kirim-pesan', function() {
     var bayarText = jenisBayar === 'online' ? 'Online (Midtrans)' : (jenisBayar === 'manual' ? 'Manual Transfer' : 'Belum memilih');
 
     $('#destination_email').val(email);
-    $('#destination_wa').val(''); // Kosongkan karena WA belum aktif
+    $('#destination_wa').val(phone);
 
     $('#modalKirimPesanLabel').text('Kirim Pesan ke ' + nama);
     $('#info_penerima').val('Email: ' + email);
@@ -954,10 +956,25 @@ $(document).on('click', '.btn-kirim-pesan', function() {
 
     $('#isi_pesan').val(pesanTemplate);
 
-    // Kunci opsi WhatsApp & Keduanya, pastikan hanya Email yang terpilih
-    $('#option_wa').prop('disabled', true).prop('checked', false);
-    $('#option_keduanya').prop('disabled', true).prop('checked', false);
+    // Aktifkan pilihan WhatsApp & Keduanya, default pilih Email
+    $('#option_wa').prop('checked', false);
+    $('#option_keduanya').prop('checked', false);
     $('#option_email').prop('checked', true);
+});
+
+// Handler ketika opsi metode kirim berubah
+$(document).on('change', 'input[name="method_type"]', function() {
+    var method = $(this).val();
+    var email = $('#destination_email').val();
+    var phone = $('#destination_wa').val();
+
+    if (method === 'whatsapp') {
+        $('#info_penerima').val('WhatsApp: ' + phone);
+    } else if (method === 'email') {
+        $('#info_penerima').val('Email: ' + email);
+    } else if (method === 'keduanya') {
+        $('#info_penerima').val('WhatsApp: ' + phone + ' | Email: ' + email);
+    }
 });
 </script>
 <?= $this->endSection(); ?>
