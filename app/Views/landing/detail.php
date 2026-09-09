@@ -390,7 +390,7 @@
               </li>
               <li class="d-flex align-items-start p-1 rounded-3 shadow-sm border border-light">
                 <i class="fa fa-check-circle text-success me-3 mt-1" style="font-size: 20px;"></i>
-                <span class="text-dark fw-semibold fs-6 lh-base">Dilatih Oleh Konsultan Pajak dan ASN/EX-DJP</span>
+                <span class="text-dark fw-semibold fs-6 lh-base">Dilatih Oleh Konsultan Pajak Resmi</span>
               </li>
             </ul>
           </div>
@@ -405,17 +405,17 @@
     <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
       <div class="card-body p-4 p-lg-5">
         <div class="row align-items-stretch g-4">
-          
+
           <!-- Kolom Rating Ringkasan & Distribusi (col-lg-4 / col-md-4) -->
           <div class="col-12 col-md-4 col-lg-4 text-center text-md-start border-end-md pe-md-4 d-flex flex-column justify-content-between">
             <div>
               <h5 class="fw-bold text-dark mb-3">Penilaian Paket Pelatihan</h5>
-              
+
               <div class="d-flex align-items-baseline justify-content-center justify-content-md-start gap-2 mb-1">
                 <h1 class="display-3 fw-bolder text-warning mb-0 lh-1"><?= $rataRating ?: '0' ?></h1>
                 <span class="text-muted fw-semibold fs-5">/ 5.0</span>
               </div>
-              
+
               <div class="text-warning mb-2 fs-5">
                 <?= showStars($rataRating) ?>
               </div>
@@ -441,13 +441,13 @@
               $ratingCount = [5 => 0, 4 => 0, 3 => 0, 2 => 0, 1 => 0];
               $totalAll = 0;
               foreach ($ratings as $r) {
-                  $ratingCount[$r->rating] = $r->total;
-                  $totalAll += $r->total;
+                $ratingCount[$r->rating] = $r->total;
+                $totalAll += $r->total;
               }
               ?>
 
               <?php foreach (range(5, 1) as $star):
-                  $percent = $totalAll > 0 ? round(($ratingCount[$star] / $totalAll) * 100) : 0;
+                $percent = $totalAll > 0 ? round(($ratingCount[$star] / $totalAll) * 100) : 0;
               ?>
                 <div class="d-flex align-items-center mb-2">
                   <div class="me-2 text-start text-muted fw-medium small" style="width:35px;"><?= $star ?> <i class="fa fa-star text-warning" style="font-size: 10px;"></i></div>
@@ -500,9 +500,9 @@
               <?php if ($reviews): ?>
                 <div class="review-scroll-container position-relative mt-2">
                   <div class="review-scroll d-flex gap-3 pb-2 overflow-auto style-scroll align-items-stretch" style="scroll-behavior: smooth; -webkit-overflow-scrolling: touch;">
-                    <?php 
+                    <?php
                     $no = 0;
-                    foreach ($reviews as $rv): 
+                    foreach ($reviews as $rv):
                       $no++;
                       $komentar = esc($rv->komentar);
                       $limit = 85;
@@ -524,7 +524,7 @@
                               <div class="text-warning" style="font-size: 11px;"><?= showStars($rv->rating) ?></div>
                             </div>
                           </div>
-                          
+
                           <div class="comment-container mb-2">
                             <p class="small text-secondary mb-1 fst-italic text-dark" style="line-height: 1.4;">
                               “<span class="short-text"><?= $short_komentar ?></span><?php if ($is_long): ?><span class="full-text d-none"><?= $komentar ?></span><?php endif; ?>”
@@ -549,7 +549,7 @@
                 </div>
               <?php endif; ?>
             </div>
-            
+
             <div class="text-end text-muted mt-2" style="font-size: 11px;">
               <span>Geser untuk melihat ulasan lainnya <i class="fa fa-arrow-right ms-1"></i></span>
             </div>
@@ -565,7 +565,7 @@
       const container = element.previousElementSibling;
       const shortText = container.querySelector('.short-text');
       const fullText = container.querySelector('.full-text');
-      
+
       if (fullText.classList.contains('d-none')) {
         fullText.classList.remove('d-none');
         shortText.classList.add('d-none');
@@ -585,26 +585,32 @@
         border-right: 1px solid #dee2e6 !important;
       }
     }
+
     .shadow-hover {
       transition: all 0.3s ease;
     }
+
     .shadow-hover:hover {
       transform: translateY(-3px);
-      box-shadow: 0 .5rem 1rem rgba(0,0,0,.08)!important;
+      box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .08) !important;
       background-color: #fff !important;
     }
+
     /* Custom Scrollbar untuk kotak ulasan horizontal */
     .style-scroll::-webkit-scrollbar {
       height: 6px;
     }
+
     .style-scroll::-webkit-scrollbar-track {
       background: #f1f1f1;
       border-radius: 10px;
     }
+
     .style-scroll::-webkit-scrollbar-thumb {
       background: #c1c1c1;
       border-radius: 10px;
     }
+
     .style-scroll::-webkit-scrollbar-thumb:hover {
       background: #a8a8a8;
     }

@@ -277,6 +277,62 @@
     </div>
 </div>
 
+<!-- Modal Kirim Pesan (WhatsApp / Email / Keduanya) -->
+<div class="modal fade" id="modalKirimPesan" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered mw-650px">
+        <div class="modal-content">
+            <form id="formKirimPesan" action="<?= base_url('sw-admin/transaksi/kirim-wa') ?>" method="POST">
+                <?= csrf_field() ?>
+                <div class="modal-header">
+                    <h2 class="fw-bold" id="modalKirimPesanLabel">Kirim Pesan</h2>
+                    <div class="btn btn-icon btn-sm btn-active-icon-primary" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i>
+                    </div>
+                </div>
+                <div class="modal-body py-10 px-lg-17">
+                    <input type="hidden" name="destination_wa" id="destination_wa">
+                    <input type="hidden" name="destination_email" id="destination_email">
+
+                    <!-- Pilihan Metode Kirim -->
+                    <div class="mb-7">
+                        <label class="required fs-6 fw-semibold mb-3 d-block">Kirim Lewat:</label>
+                        <div class="d-flex align-items-center gap-5">
+                            <div class="form-check form-check-custom form-check-solid" id="wrapper_wa">
+                                <input class="form-check-input" type="radio" name="method_type" value="whatsapp" id="option_wa" disabled />
+                                <label class="form-check-label fw-semibold text-muted" for="option_wa">WhatsApp <span class="badge badge-light-warning fs-8 ms-1">Coming Soon</span></label>
+                            </div>
+                            <div class="form-check form-check-custom form-check-solid">
+                                <input class="form-check-input" type="radio" name="method_type" value="email" id="option_email" checked />
+                                <label class="form-check-label fw-semibold" for="option_email">Email</label>
+                            </div>
+                            <div class="form-check form-check-custom form-check-solid" id="wrapper_keduanya">
+                                <input class="form-check-input" type="radio" name="method_type" value="keduanya" id="option_keduanya" disabled />
+                                <label class="form-check-label fw-semibold text-muted" for="option_keduanya">Keduanya <span class="badge badge-light-warning fs-8 ms-1">Coming Soon</span></label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-7">
+                        <label class="fs-6 fw-semibold mb-2">Tujuan:</label>
+                        <input type="text" class="form-control form-control-solid" id="info_penerima" readonly />
+                    </div>
+
+                    <div class="mb-7">
+                        <label class="required fs-6 fw-semibold mb-2">Isi Pesan:</label>
+                        <textarea class="form-control form-control-solid" rows="6" name="pesan" id="isi_pesan" placeholder="Tulis pesan Anda di sini..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer flex-center">
+                    <button type="button" class="btn btn-light me-3" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" id="submit_aksi_kirim" class="btn btn-primary">
+                        <span class="indicator-label">Kirim Pesan</span>
+                        <span class="indicator-progress">Mohon tunggu... <span class="spinner-border spinner-border-sm align-middle ms-2"></span></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 <?= $this->endSection(); ?>
 
 <?= $this->section('scripts'); ?>
@@ -864,5 +920,44 @@
         // Arahkan browser ke route controller export
         window.location.href = "<?= base_url('sw-admin/transaksi/export-excel') ?>?" + params.toString();
     });
+</script>
+<script>
+// Handler ketika tombol kirim pesan diklik
+$(document).on('click', '.btn-kirim-pesan', function() {
+    var email = $(this).data('email');
+    var nama = $(this).data('nama');
+    var paket = $(this).data('paket');
+    var nominal = $(this).data('nominal');
+    var status = $(this).data('status');
+    var jenisBayar = $(this).data('bayar');
+
+    var statusText = status === 'S' ? 'Lunas' : (status === 'P' ? 'Menunggu Pembayaran' : 'Pending / Lainnya');
+    var bayarText = jenisBayar === 'online' ? 'Online (Midtrans)' : (jenisBayar === 'manual' ? 'Manual Transfer' : 'Belum memilih');
+
+    $('#destination_email').val(email);
+    $('#destination_wa').val(''); // Kosongkan karena WA belum aktif
+
+    $('#modalKirimPesanLabel').text('Kirim Pesan ke ' + nama);
+    $('#info_penerima').val('Email: ' + email);
+    
+    var pesanTemplate = 'Halo ' + nama + ',\n\n' +
+        'Terima kasih telah mendaftar di program kami. Berikut adalah rincian informasi paket pelatihan dan status pembayaran Anda:\n\n' +
+        '📦 Detail Paket:\n' +
+        '• Nama Paket: ' + paket + '\n\n' +
+        '💳 Detail Pembayaran:\n' +
+        '• Total Tagihan: ' + nominal + '\n' +
+        '• Status: ' + statusText + '\n' +
+        '• Metode: ' + bayarText + '\n\n' +
+        'Anda dapat mengecek riwayat, melakukan konfirmasi, atau mengelola transaksi Anda melalui tautan berikut:\n' +
+        'https://kelasbrevet.com/sw-siswa/transaksi\n\n' +
+        'Jika Anda membutuhkan bantuan lebih lanjut, silakan hubungi kami Whatsapp 6282180744966. Terima kasih.';
+
+    $('#isi_pesan').val(pesanTemplate);
+
+    // Kunci opsi WhatsApp & Keduanya, pastikan hanya Email yang terpilih
+    $('#option_wa').prop('disabled', true).prop('checked', false);
+    $('#option_keduanya').prop('disabled', true).prop('checked', false);
+    $('#option_email').prop('checked', true);
+});
 </script>
 <?= $this->endSection(); ?>

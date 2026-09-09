@@ -10,5 +10,6 @@ helper([
     'encryptdecrypt',
     'tgldate',
     'domain',
-    'acaksoal'
+    'acaksoal',
+    'KirimWhatsapp'
 ]);

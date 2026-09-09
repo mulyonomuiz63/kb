@@ -231,7 +231,8 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
         $routes->get('export-excel', 'Admin\TransaksiController::exportExcel');
 
         $routes->get('invoice/(:any)', 'InvoiceController::invoice/$1'); // Route untuk cetak invoice (modal)   
-    });
+        $routes->post('kirim-wa', 'Admin\TransaksiController::kirimWa'); // Route untuk kirim WhatsApp
+    }); 
 
     $routes->group('affiliate', function ($routes) {
         $routes->get('/', 'Admin\AffiliateController::index');

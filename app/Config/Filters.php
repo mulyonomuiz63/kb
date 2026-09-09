@@ -93,6 +93,7 @@ class Filters extends BaseFilters
                     'sw-admin/diskusi/update-message',
                     'sw-admin/diskusi/delete-message',
                     'sw-admin/siswa/processImportBatch',
+                    'sw-admin/transaksi/kirim-wa',
                     'sw-guru/materi/get-chat-materi',
                     'sw-guru/materi/get-file-materi',
                     'sw-guru/materi/chat-materi',

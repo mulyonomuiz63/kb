@@ -1080,60 +1080,62 @@
                                                             </button>
                                                         </h2>
                                                         <div id="collapseDetail<?= $rows->idpaket ?>" class="accordion-collapse collapse" aria-labelledby="heading<?= $rows->idpaket ?>" data-bs-parent="#accordionDetail<?= $rows->idpaket ?>">
-                                                            <div class="accordion-body p-2 custom-accordion-text">
-                                                                <?= !empty($rows->deskripsi) ? $rows->deskripsi : (!empty($rows->detail_paket) ? $rows->detail_paket : 'Detail informasi paket pembelajaran.') ?>
+                                                            <div class="accordion-body p-3 custom-accordion-text bg-white">
+                                                                <div class="text-secondary mb-3 pb-2 border-bottom" style="font-size: 0.85rem; line-height: 1.6;">
+                                                                    <?= !empty($rows->deskripsi) ? $rows->deskripsi : (!empty($rows->detail_paket) ? $rows->detail_paket : 'Detail informasi paket pembelajaran.') ?>
+                                                                </div>
+
+                                                                <!-- Informasi Umum (Desain Baru, Rapi di bawah Accordion) -->
+                                                                <div class="mt-2 p-3 rounded-3 bg-light bg-opacity-50 border position-relative overflow-hidden">
+                                                                    <div class="box-accent"></div>
+                                                                    <h6 class="fw-bold mb-3 d-flex align-items-center text-primary" style="font-size: 13px;">
+                                                                        <i class="fa fa-star text-warning me-2"></i> Keunggulan Paket
+                                                                    </h6>
+                                                                    <div class="row g-2">
+                                                                        <div class="col-12">
+                                                                            <div class="d-flex align-items-center gap-2">
+                                                                                <i class="fa fa-check-circle text-success flex-shrink-0" style="font-size: 10px;"></i>
+                                                                                <span class="info-text text-dark fw-medium" style="font-size: 0.85rem;">LKP Terdaftar Resmi</span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-12">
+                                                                            <div class="d-flex align-items-center gap-2">
+                                                                                <i class="fa fa-check-circle text-success flex-shrink-0" style="font-size: 10px;"></i>
+                                                                                <span class="info-text text-dark fw-medium" style="font-size: 0.85rem;">Sertifikat Brevet Diakui</span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-12">
+                                                                            <div class="d-flex align-items-center gap-2">
+                                                                                <i class="fa fa-check-circle text-success flex-shrink-0" style="font-size: 10px;"></i>
+                                                                                <span class="info-text text-dark fw-medium" style="font-size: 0.85rem;">Akses Belajar Selamanya</span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-12">
+                                                                            <div class="d-flex align-items-center gap-2">
+                                                                                <i class="fa fa-check-circle text-success flex-shrink-0" style="font-size: 10px;"></i>
+                                                                                <span class="info-text text-dark fw-medium" style="font-size: 0.85rem;">Materi Terus di Update</span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-12">
+                                                                            <div class="d-flex align-items-center gap-2">
+                                                                                <i class="fa fa-check-circle text-success flex-shrink-0" style="font-size: 10px;"></i>
+                                                                                <span class="info-text text-dark fw-medium" style="font-size: 0.85rem;">Tanpa Langganan Bulanan/Tahunan</span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-12">
+                                                                            <div class="d-flex align-items-center gap-2">
+                                                                                <i class="fa fa-check-circle text-success flex-shrink-0" style="font-size: 10px;"></i>
+                                                                                <span class="info-text text-dark fw-medium" style="font-size: 0.85rem;">Dilatih Oleh Konsultan Pajak Resmi</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <!-- Informasi Umum End -->
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <!-- Accordion Detail Paket End -->
-
-                                                <!-- Informasi Umum (Desain Baru, Rapi di bawah Accordion) -->
-                                                <div class="info-umum-box p-3 p-md-4 rounded-3 shadow-sm mb-3 position-relative overflow-hidden bg-white">
-                                                    <div class="box-accent"></div>
-                                                    <h6 class="fw-bolder mb-3" style="font-size: 13px; color: #0d6efd;">
-                                                        <i class="fa fa-star text-warning me-1"></i> Keunggulan Paket
-                                                    </h6>
-                                                    <div class="row g-1">
-                                                        <div class="col-12 mb-1">
-                                                            <div class="d-flex align-items-start gap-2">
-                                                                <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
-                                                                <span class="info-text text-dark">LKP Terdaftar Resmi</span>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-12 mb-1">
-                                                            <div class="d-flex align-items-start gap-2">
-                                                                <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
-                                                                <span class="info-text text-dark">Sertifikat Brevet Diakui</span>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-12 mb-1">
-                                                            <div class="d-flex align-items-start gap-2">
-                                                                <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
-                                                                <span class="info-text text-dark">Akses Belajar Selamanya</span>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-12 mb-1">
-                                                            <div class="d-flex align-items-start gap-2">
-                                                                <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
-                                                                <span class="info-text text-dark">Materi Terus di Update</span>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-12 mb-1">
-                                                            <div class="d-flex align-items-start gap-2">
-                                                                <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
-                                                                <span class="info-text text-dark">Tanpa Langganan Bulanan/Tahunan</span>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-12 mb-1">
-                                                            <div class="d-flex align-items-start gap-2">
-                                                                <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
-                                                                <span class="info-text text-dark">Dilatih Oleh Konsultan Pajak dan ASN/EX-DJP</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <!-- Informasi Umum End -->
 
                                                 <div class="d-flex gap-2 mt-auto pt-2 border-top">
                                                     <a href="<?= base_url('sw-siswa/transaksi/pesan/' . encrypt_url($rows->idpaket)) ?>" class="btn-buy btn-sm text-center flex-fill p-2 rounded-3 shadow-sm fw-bold">Pesan Sekarang</a>

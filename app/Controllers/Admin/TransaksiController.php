@@ -19,6 +19,7 @@ class TransaksiController extends BaseController
     protected $serviceEmail;
     protected $detailTransaksiModel;
     protected $ikhModel;
+    protected $emailer;
     public function __construct()
     {
         $this->transaksiModel = new \App\Models\TransaksiModel();
@@ -32,6 +33,7 @@ class TransaksiController extends BaseController
         $this->serviceEmail = new \App\Libraries\Emailer();
         $this->detailTransaksiModel = new \App\Models\DetailTransaksiModel();
         $this->ikhModel  = new \App\Models\IkhModel();
+        $this->emailer = new \App\Libraries\Emailer();
     }
     public function index()
     {
@@ -261,21 +263,37 @@ class TransaksiController extends BaseController
                     $htmlPeserta = '<div class="text-gray-800 fw-bold fs-6">' . esc($s->nama_siswa) . '</div>';
                     $htmlPeserta .= '<div class="text-muted fw-semibold fs-7 mb-1">' . esc($s->email) . '</div>';
 
-                    // Pengecekan jika nomor HP ada dan tidak kosong
+                    $no_wa_clean = '';
                     if (!empty($s->hp)) {
-                        // Bersihkan karakter selain angka (misal ada spasi atau strip)
                         $no_wa = preg_replace('/[^0-9]/', '', $s->hp);
-
-                        // Ubah awalan '0' menjadi '62' agar formatnya sesuai dengan standar API WhatsApp
                         if (substr($no_wa, 0, 1) === '0') {
-                            $no_wa = '62' . substr($no_wa, 1);
+                            $no_wa_clean = '62' . substr($no_wa, 1);
+                        } else {
+                            $no_wa_clean = $no_wa;
                         }
-
-                        // Tambahkan tombol WhatsApp
-                        $htmlPeserta .= '<a href="https://wa.me/' . esc($no_wa) . '" target="_blank" class="badge badge-light-success text-decoration-none mt-1">
-                        <i class="ki-outline ki-whatsapp text-success me-1"></i> ' . esc($s->hp) . '
-                     </a>';
                     }
+
+                    // PERHITUNGAN DISKON & NOMINAL (Pastikan variabel $nominal sudah dihitung sebelum baris ini)
+                    $diskon         = ($s->nominal * $s->diskon) / 100;
+                    $totalDiskon    = $s->nominal - $diskon;
+                    $diskon_voucher = ($totalDiskon * $s->voucher) / 100;
+                    $nominal        = $s->nominal - $diskon - $diskon_voucher;
+                    $nominal_formatted = 'Rp ' . number_format($nominal, 0, ',', '.');
+
+                    // Tombol Universal Kirim Pesan
+                    $htmlPeserta .= '<div class="mt-1">
+                        <a href="javascript:void(0)" class="badge badge-light-primary text-decoration-none btn-kirim-pesan" data-bs-toggle="modal" data-bs-target="#modalKirimPesan" 
+                            data-hp="' . esc($no_wa_clean) . '" 
+                            data-hp-original="' . esc($s->hp ?? '') . '" 
+                            data-email="' . esc($s->email) . '" 
+                            data-nama="' . esc($s->nama_siswa) . '"
+                            data-paket="' . esc($s->nama_paket) . '"
+                            data-nominal="' . esc($nominal_formatted) . '"
+                            data-status="' . esc($s->status) . '"
+                            data-bayar="' . esc($s->jenis_bayar) . '">
+                            <i class="ki-outline ki-message-text-2 text-primary me-1"></i> Kirim Pesan
+                        </a>
+                    </div>';
 
                     $row['peserta'] = $htmlPeserta;
 
@@ -865,5 +883,94 @@ class TransaksiController extends BaseController
 
         fclose($output);
         exit;
+    }
+
+    public function kirimWa()
+    {
+        $methodType       = $this->request->getPost('method_type'); // 'whatsapp', 'email', atau 'keduanya'
+        $destinationWa    = $this->request->getPost('destination_wa');
+        $destinationEmail = $this->request->getPost('destination_email');
+        $pesan            = $this->request->getPost('pesan');
+
+        $isSuccess = false;
+        $errorMessage = '';
+
+        if ($methodType === 'whatsapp' || $methodType === 'keduanya') {
+            if (!empty($destinationWa)) {
+                $kirim = kirim_wa($destinationWa, $pesan);
+                if (isset($kirim['status']) && $kirim['status']) {
+                    $isSuccess = true;
+                } else {
+                    $errorMessage = "Gagal mengirim WhatsApp: " . ($kirim['error'] ?? 'Kesalahan API');
+                }
+            } else {
+                $errorMessage = "Nomor WhatsApp tidak tersedia.";
+            }
+        }
+
+        if ($methodType === 'email' || $methodType === 'keduanya') {
+            if (!empty($destinationEmail)) {
+                $mailSent = $this->kirimEmail($destinationEmail, $pesan);
+                if ($mailSent) {
+                    $isSuccess = true;
+                } else {
+                    $errorMessage = "Gagal mengirim email.";
+                }
+            } else {
+                $errorMessage = "Alamat email tidak tersedia.";
+            }
+        }
+        if ($isSuccess) {
+            return redirect()->back()->with('success', 'Pesan berhasil dikirim!');
+        } else {
+            return redirect()->back()->with('error', $errorMessage ?: 'Gagal mengirim pesan.');
+        }
+    }
+
+    private function kirimEmail($email, $pesan)
+    {
+        $subject = 'Informasi Pembayaran & Paket Pelatihan - KelasBrevet';
+
+        // Konversi line break agar teks dari textarea tetap rapi dalam format HTML
+        $formattedPesan = nl2br(esc($pesan));
+
+        $message = '
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Informasi KelasBrevet</title>
+    </head>
+    <body style="font-family: \'Segoe UI\', Arial, sans-serif; background-color: #f4f6f8; margin: 0; padding: 20px;">
+        <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+            <!-- Header Brand -->
+            <div style="background: linear-gradient(135deg, #0d6efd 0%, #0043a8 100%); color: #ffffff; padding: 32px 20px; text-align: center; border-top-left-radius: 8px; border-top-right-radius: 8px; border-bottom: 3px solid #ffc107;">
+                <h1 style="margin: 0; font-size: 24px; font-weight: 700; letter-spacing: 0.5px; color: #ffffff;">KelasBrevet</h1>
+                <p style="margin: 8px 0 0; font-size: 13px; color: #e2e8f0; font-weight: 500; letter-spacing: 0.3px;">Pusat Pelatihan & Sertifikasi Brevet AB</p>
+            </div>
+            
+            <!-- Body Content -->
+            <div style="padding: 30px; color: #334155; line-height: 1.6; font-size: 15px;">
+                <div style="margin-bottom: 25px;">
+                    ' . $formattedPesan . '
+                </div>
+                
+                <!-- Call to Action Button -->
+                <div style="text-align: center; margin: 35px 0 20px;">
+                    <a href="https://kelasbrevet.com/sw-siswa/transaksi" target="_blank" style="background-color: #0d6efd; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block; font-size: 14px; box-shadow: 0 2px 4px rgba(13, 110, 253, 0.2);">Akses Dashboard Transaksi</a>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <div style="background: #f8fafc; color: #64748b; padding: 18px 30px; text-align: center; font-size: 12px; border-top: 1px solid #e2e8f0;">
+                <p style="margin: 0;">' . copyright() . '</p>
+                <p style="margin: 5px 0 0; color: #94a3b8;">Pesan ini dikirimkan secara otomatis oleh sistem.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    ';
+        return $this->emailer->send($email, $subject, $message);
     }
 }

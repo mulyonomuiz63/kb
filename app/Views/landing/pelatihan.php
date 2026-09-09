@@ -215,11 +215,11 @@
                         <div class="col-12 col-md-6 col-lg-4 mt-4">
                             <!-- Single Courses Start -->
                             <div class="single-courses card position-relative animate-card">
-                                
+
                                 <!-- Flash Sale Badge di Pojok Kiri Atas -->
                                 <?php if (isset($rows->is_pinned) && $rows->is_pinned == 1): ?>
                                     <div class="position-absolute top-0 start-0 m-2 flash-sale-pill">
-                                        <i class="fa fa-bolt"></i> FLASH SALE 
+                                        <i class="fa fa-bolt"></i> FLASH SALE
                                         <span class="flash-sale-timer-box flash-sale-countdown">00:00:00</span>
                                     </div>
                                 <?php endif; ?>
@@ -254,9 +254,9 @@
                                         <div class="mb-2" style="font-size:12px">
                                             <?php if ($rataRating > 0): ?>
                                                 <span class="text-dark"><?= $rataRating ?><span> <?= showStars($rataRating) ?> <span class="text-dark">(<?= $jumlahReview + 325 ?>)</span>
-                                                <?php else: ?>
-                                                    <span class="text-dark"><?= "4.9" ?><span> <?= showStars('4.9') ?> <span class="text-dark">(<?= '484' ?>)</span>
-                                                        <?php endif; ?>
+                                                    <?php else: ?>
+                                                        <span class="text-dark"><?= "4.9" ?><span> <?= showStars('4.9') ?> <span class="text-dark">(<?= '484' ?>)</span>
+                                                            <?php endif; ?>
                                         </div>
                                         <!-- Affiliate -->
                                         <?php if (session()->get('id') && !empty($affiliate)): ?>
@@ -290,8 +290,57 @@
                                                 </button>
                                             </h2>
                                             <div id="collapseDetail<?= $rows->idpaket ?>" class="accordion-collapse collapse" aria-labelledby="heading<?= $rows->idpaket ?>" data-bs-parent="#accordionDetail<?= $rows->idpaket ?>">
-                                                <div class="accordion-body p-2 custom-accordion-text">
-                                                    <?= !empty($rows->deskripsi) ? $rows->deskripsi : (!empty($rows->detail_paket) ? $rows->detail_paket : 'Detail informasi paket pembelajaran.') ?>
+                                                <div class="accordion-body p-3 custom-accordion-text bg-white">
+                                                    <div class="text-secondary mb-3 pb-2 border-bottom" style="font-size: 0.85rem; line-height: 1.6;">
+                                                        <?= !empty($rows->deskripsi) ? $rows->deskripsi : (!empty($rows->detail_paket) ? $rows->detail_paket : 'Detail informasi paket pembelajaran.') ?>
+                                                    </div>
+
+                                                    <!-- Informasi Umum (Desain Baru, Rapi di bawah Accordion) -->
+                                                    <div class="mt-2 p-3 rounded-3 bg-light bg-opacity-50 border position-relative overflow-hidden">
+                                                        <div class="box-accent"></div>
+                                                        <h6 class="fw-bold mb-3 d-flex align-items-center text-primary" style="font-size: 13px;">
+                                                            <i class="fa fa-star text-warning me-2"></i> Keunggulan Paket
+                                                        </h6>
+                                                        <div class="row g-2">
+                                                            <div class="col-12">
+                                                                <div class="d-flex align-items-center gap-2">
+                                                                    <i class="fa fa-check-circle text-success flex-shrink-0" style="font-size: 10px;"></i>
+                                                                    <span class="info-text text-dark fw-medium" style="font-size: 0.85rem;">LKP Terdaftar Resmi</span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-12">
+                                                                <div class="d-flex align-items-center gap-2">
+                                                                    <i class="fa fa-check-circle text-success flex-shrink-0" style="font-size: 10px;"></i>
+                                                                    <span class="info-text text-dark fw-medium" style="font-size: 0.85rem;">Sertifikat Brevet Diakui</span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-12">
+                                                                <div class="d-flex align-items-center gap-2">
+                                                                    <i class="fa fa-check-circle text-success flex-shrink-0" style="font-size: 10px;"></i>
+                                                                    <span class="info-text text-dark fw-medium" style="font-size: 0.85rem;">Akses Belajar Selamanya</span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-12">
+                                                                <div class="d-flex align-items-center gap-2">
+                                                                    <i class="fa fa-check-circle text-success flex-shrink-0" style="font-size: 10px;"></i>
+                                                                    <span class="info-text text-dark fw-medium" style="font-size: 0.85rem;">Materi Terus di Update</span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-12">
+                                                                <div class="d-flex align-items-center gap-2">
+                                                                    <i class="fa fa-check-circle text-success flex-shrink-0" style="font-size: 10px;"></i>
+                                                                    <span class="info-text text-dark fw-medium" style="font-size: 0.85rem;">Tanpa Langganan Bulanan/Tahunan</span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-12">
+                                                                <div class="d-flex align-items-center gap-2">
+                                                                    <i class="fa fa-check-circle text-success flex-shrink-0" style="font-size: 10px;"></i>
+                                                                    <span class="info-text text-dark fw-medium" style="font-size: 0.85rem;">Dilatih Oleh Konsultan Pajak Resmi</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <!-- Informasi Umum End -->
                                                 </div>
                                             </div>
                                         </div>
@@ -327,52 +376,7 @@
                                     </style>
                                     <!-- Accordion Detail Paket End -->
 
-                                    <!-- Informasi Umum (Keunggulan Paket) -->
-                                    <div class="info-umum-box p-3 rounded-3 shadow-sm mb-3 position-relative overflow-hidden bg-white border">
-                                        <div class="box-accent" style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background-color: #0d6efd;"></div>
-                                        <h6 class="fw-bolder mb-2" style="font-size: 12px; color: #0d6efd;">
-                                            <i class="fa fa-star text-warning me-1"></i> Keunggulan Paket
-                                        </h6>
-                                        <div class="row g-1">
-                                            <div class="col-12 mb-1">
-                                                <div class="d-flex align-items-start gap-2">
-                                                    <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
-                                                    <span class="info-text text-dark" style="font-size: 11px; line-height: 1.3;">LKP Terdaftar Resmi</span>
-                                                </div>
-                                            </div>
-                                            <div class="col-12 mb-1">
-                                                <div class="d-flex align-items-start gap-2">
-                                                    <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
-                                                    <span class="info-text text-dark" style="font-size: 11px; line-height: 1.3;">Sertifikat Brevet Diakui</span>
-                                                </div>
-                                            </div>
-                                            <div class="col-12 mb-1">
-                                                <div class="d-flex align-items-start gap-2">
-                                                    <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
-                                                    <span class="info-text text-dark" style="font-size: 11px; line-height: 1.3;">Akses Belajar Selamanya</span>
-                                                </div>
-                                            </div>
-                                            <div class="col-12 mb-1">
-                                                <div class="d-flex align-items-start gap-2">
-                                                    <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
-                                                    <span class="info-text text-dark" style="font-size: 11px; line-height: 1.3;">Materi Terus di Update</span>
-                                                </div>
-                                            </div>
-                                            <div class="col-12 mb-1">
-                                                <div class="d-flex align-items-start gap-2">
-                                                    <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
-                                                    <span class="info-text text-dark" style="font-size: 11px; line-height: 1.3;">Tanpa Langganan Bulanan/Tahunan</span>
-                                                </div>
-                                            </div>
-                                            <div class="col-12 mb-1">
-                                                <div class="d-flex align-items-start gap-2">
-                                                    <i class="fa fa-check-circle text-success mt-1 flex-shrink-0" style="font-size: 11px;"></i>
-                                                    <span class="info-text text-dark" style="font-size: 11px; line-height: 1.3;">Dilatih Oleh Konsultan Pajak dan ASN/EX-DJP</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <!-- Informasi Umum End -->
+
 
                                     <div class="d-flex gap-2 mt-3">
                                         <a href="<?= base_url('sw-siswa/transaksi/pesan/' . encrypt_url($rows->idpaket)) ?>" class="btn-buy btn-sm text-center flex-fill p-2">Pesan Sekarang</a>
@@ -448,10 +452,10 @@
         // Countdown Timer 24 Jam Berulang (Reset setiap jam 12 malam / 00:00:00)
         function updateCountdowns() {
             const now = new Date();
-            
+
             // Waktu target akhir siklus hari ini (jam 00:00:00 hari berikutnya / tengah malam)
             const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
-            
+
             // Sisa waktu dalam milidetik menuju jam 12 malam berikutnya
             const distance = midnight.getTime() - now.getTime();
 
