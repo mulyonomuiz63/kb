@@ -55,6 +55,10 @@
                                                 $badgeVal = 'badge-light-danger';
                                                 $textVal = 'Ditolak';
                                             }
+                                            if ($row['status_validasi_admin'] == 'pending') {
+                                                $badgeVal = 'badge-light-warning';
+                                                $textVal = 'Review Admin';
+                                            }
                                             ?>
                                             <span class="badge <?= $badgeVal ?> fs-7 fw-bold"><?= $textVal ?></span>
                                         </td>
