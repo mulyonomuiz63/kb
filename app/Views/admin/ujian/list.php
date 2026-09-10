@@ -93,7 +93,7 @@
         const idSiswaEnc = $('#tableUjian').data('idsiswa');
         var table = $('#tableUjian').DataTable({
             processing: true,
-            serverSide: true,
+            serverSide: false,
             order: [],
             ajax: {
                 url: "<?= base_url('sw-admin/siswa/get-data-ujian') ?>",
