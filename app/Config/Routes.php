@@ -15,6 +15,7 @@ use CodeIgniter\Router\RouteCollection;
 $routes->set404Override('App\Controllers\Errors::show404');
 
 $routes->get('marathon-perpajakan', 'WebinarController::index');
+
 $routes->get('kelas-pajak-gratis', 'WebinarController::kelasPerpajakan');
 $routes->group('webinar', function ($routes) {
     $routes->post('daftar', 'WebinarController::daftar');
