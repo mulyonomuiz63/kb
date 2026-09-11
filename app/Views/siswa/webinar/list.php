@@ -284,21 +284,29 @@
 <div class="d-flex flex-column flex-column-fluid py-4 py-lg-6 mt-8">
     <div id="kt_app_content" class="app-content flex-column-fluid">
         <div id="kt_app_content_container" class="app-container container-xxl">
-            
+
             <?php if (!empty($webinar)): ?>
                 <?php
                 $delay = 0;
                 $currentDateTime = strtotime(date('Y-m-d H:i:s'));
-                
+
                 // ==========================================
                 // PROSES 1: PENGUMPULAN DATA & PENGELOMPOKAN
                 // ==========================================
                 $groupedSessions = [];
                 $bulanIndo = [
-                    '01' => 'Januari', '02' => 'Februari', '03' => 'Maret',
-                    '04' => 'April', '05' => 'Mei', '06' => 'Juni',
-                    '07' => 'Juli', '08' => 'Agustus', '09' => 'September',
-                    '10' => 'Oktober', '11' => 'November', '12' => 'Desember'
+                    '01' => 'Januari',
+                    '02' => 'Februari',
+                    '03' => 'Maret',
+                    '04' => 'April',
+                    '05' => 'Mei',
+                    '06' => 'Juni',
+                    '07' => 'Juli',
+                    '08' => 'Agustus',
+                    '09' => 'September',
+                    '10' => 'Oktober',
+                    '11' => 'November',
+                    '12' => 'Desember'
                 ];
                 $currentMonthKey = date('Y-m');
 
@@ -363,7 +371,7 @@
 
                             // Cek apakah group ini adalah Bulan Saat Ini agar otomatis terbuka
                             $isActiveMonth = ($monthKey === $currentMonthKey);
-                            
+
                             $collapseClass = 'show';
                             $ariaExpanded = 'true';
                             $buttonClass = '';
@@ -372,7 +380,7 @@
                                 <h2 class="accordion-header" id="heading_<?= $accIndex ?>">
                                     <button class="accordion-button fs-3 fw-bolder text-dark bg-white <?= $buttonClass ?>" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_<?= $accIndex ?>" aria-expanded="<?= $ariaExpanded ?>" aria-controls="collapse_<?= $accIndex ?>">
                                         <div class="d-flex align-items-center">
-                                            <i class="ki-outline ki-calendar-8 text-primary fs-2x me-3"></i> 
+                                            <i class="ki-outline ki-calendar-8 text-primary fs-2x me-3"></i>
                                             Webinar Bulan <?= $monthName ?>
                                             <span class="badge badge-light-primary ms-3 fs-8 px-3 py-1 rounded-pill"><?= count($sessions) ?> Sesi</span>
                                         </div>
@@ -380,7 +388,7 @@
                                 </h2>
                                 <div id="collapse_<?= $accIndex ?>" class="accordion-collapse collapse <?= $collapseClass ?>" aria-labelledby="heading_<?= $accIndex ?>" data-bs-parent="#webinarAccordion">
                                     <div class="accordion-body bg-light rounded-bottom p-5 p-lg-8 border-top">
-                                        
+
                                         <!-- Row Card Asli Anda -->
                                         <div class="row g-7">
                                             <?php foreach ($sessions as $item): ?>
@@ -389,7 +397,7 @@
                                                 $w = $item['w'];
                                                 $child = $item['child'];
                                                 $isPaketGratis = $item['isPaketGratis'];
-                                                
+
                                                 // --- LOGIKA CARD ASLI ANDA ---
                                                 $delay += 0.1;
                                                 $waktuMulai = strtotime($child->waktu_mulai);
@@ -398,20 +406,50 @@
 
                                                 // Ambil Waktu Pembelian User
                                                 $waktuBeli = strtotime($w->tgl_pembayaran ?? $w->created_at);
-
-                                                // ================================================================
-                                                // UPDATE LOGIKA: Membandingkan hanya berdasarkan TANGGAL (Hari)
-                                                // Mengabaikan Jam, sehingga beli di hari yang sama tetap aman.
-                                                // ================================================================
                                                 $tanggalBeli = strtotime(date('Y-m-d', $waktuBeli));
                                                 $tanggalSelesai = strtotime(date('Y-m-d', $waktuSelesai));
 
-                                                // Cek apakah user mendaftar/membayar HARI BERIKUTNYA setelah sesi ini selesai
-                                                $isTerlambatBeli = ($tanggalBeli > $tanggalSelesai);
+                                                // ================================================================
+                                                // UPGRADE LOGIKA: DETEKSI ALUMNI (BATCH SEBELUMNYA)
+                                                // Karena jadwal terus di-update/ditimpa untuk pelatihan selanjutnya,
+                                                // kita pisahkan mana pembeli batch lama dan mana pembeli batch baru.
+                                                // ================================================================
+                                                $isAlumniBatchLalu = false;
+
+                                                // 1. CARA PALING AKURAT: Mengecek kapan tabel sesi terakhir di-update
+                                                // (Pastikan tabel 'webinar_sesi' di database memiliki kolom 'updated_at')
+                                                if (isset($child->updated_at) && !empty($child->updated_at)) {
+                                                    $waktuUpdateSesi = strtotime($child->updated_at);
+
+                                                    // Jika peserta membeli SEBELUM admin merubah jadwal untuk batch baru, 
+                                                    // berarti dia adalah peserta batch sebelumnya (Langsung Lulus / Selesai)
+                                                    if ($waktuBeli < $waktuUpdateSesi) {
+                                                        $isAlumniBatchLalu = true;
+                                                    }
+                                                } else {
+                                                    // 2. FALLBACK JIKA DB TIDAK PUNYA KOLOM 'updated_at':
+                                                    // Jika jarak tanggal beli dengan tanggal mulai sesi LEBIH DARI 3 HARI,
+                                                    // kita asumsikan dia adalah peserta dari batch lama.
+                                                    $tanggalMulai = strtotime(date('Y-m-d', $waktuMulai));
+                                                    $jarakHari = ($tanggalMulai - $tanggalBeli) / 86400; // 86400 detik = 1 hari
+
+                                                    if ($jarakHari >= 3 && $currentDateTime > $waktuBeli) {
+                                                        $isAlumniBatchLalu = true;
+                                                    }
+                                                }
+
+                                                // Cek apakah mendaftar HARI BERIKUTNYA setelah sesi ini selesai (khusus batch berjalan)
+                                                $isTerlambatBeli = ($tanggalBeli > $tanggalSelesai) && !$isAlumniBatchLalu;
                                                 // ================================================================
 
                                                 // Menentukan Status Sesi Zoom (Dibuka 3 jam sebelum mulai)
-                                                if ($isTerlambatBeli) {
+                                                if ($isAlumniBatchLalu) {
+                                                    // Peserta Batch Lalu langsung mendapatkan status Selesai & Sertifikat
+                                                    $status = 'finished';
+                                                    $badgeColor = 'badge-light-success';
+                                                    $badgeText = 'Selesai (Alumni)';
+                                                    $icon = 'ki-check-circle';
+                                                } elseif ($isTerlambatBeli) {
                                                     $status = 'missed';
                                                     $badgeColor = 'badge-light-danger';
                                                     $badgeText = 'Sesi Terlewat';
@@ -725,7 +763,7 @@
                         </div>
                     </div>
                 <?php endif; ?>
-            
+
             <?php else: ?>
                 <!-- Empty State -->
                 <div class="row g-7">
