@@ -346,7 +346,7 @@
                     <div class="d-flex flex-column flex-grow-1 text-center text-sm-start me-sm-5 z-index-2">
 
                         <!-- Nama Paket Ditambahkan Di Sini -->
-                        <h2 class="text-gray-800 fw-bold mb-2 fs-4 text-uppercase"><?= esc("MARATHON UPDATE PERPAJAKAN 2026") ?></h2>
+                        <h2 class="text-gray-800 fw-bold mb-2 fs-4 text-uppercase"><?= esc($alert->nama_paket_parent) ?></h2>
 
                         <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-sm-start mb-2 gap-2">
                             <h3 class="text-gray-900 fw-bold m-0"><?= esc($alert->nama_sesi) ?></h3>
