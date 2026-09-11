@@ -487,7 +487,7 @@ class WebinarController extends BaseController
     }
 
 
-    public function kelasPerpajakan($slug = 'kelas-perpajakan')
+    public function kelasPerpajakan($slug = 'kelas-pajak-gratis')
     {
         
         // untuk breadcrumb 

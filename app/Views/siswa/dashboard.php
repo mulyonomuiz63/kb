@@ -555,7 +555,7 @@
 
                                         <!-- Action Buttons -->
                                         <div class="m-0 d-flex flex-column flex-sm-row gap-3">
-                                            <a href="<?= base_url('webinar/' . $paketWebinar->slug) ?>"
+                                            <a href="<?= base_url($paketWebinar->slug) ?>"
                                                 class="btn fw-bolder px-8 py-3 w-100 w-sm-auto rounded-pill text-white shadow-sm d-flex align-items-center justify-content-center" style="background-color: #1d4695;">
                                                 <i class="ki-outline ki-entrance-left fs-3 me-2 text-white"></i> Daftar Sekarang
                                             </a>
