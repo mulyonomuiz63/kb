@@ -47,6 +47,57 @@ $showForm = (
 // 4. Default Tab (Hanya boleh buka lampiran jika data Step 1 benar-benar tersimpan)
 $activeTab = (isset($_GET['tab']) && $_GET['tab'] == 'lampiran' && $hasData) ? 'lampiran' : 'data';
 ?>
+<!-- Cek kondisi dari backend -->
+<?php if (isset($ikh) && $ikh): ?>
+
+    <!-- Tambahan Style ringan untuk efek animasi logo WA -->
+    <style>
+        @keyframes pulse-wa {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .anim-pulse-wa { animation: pulse-wa 2s infinite ease-in-out; }
+    </style>
+
+    <!-- Wrapper Alert: Melayang (Fixed) di bawah agar tidak menggeser konten utama -->
+    <div id="wa-group-alert-ikh" class="d-none position-fixed bottom-0 start-50 translate-middle-x w-100 p-3 p-md-5" style="z-index: 1050; max-width: 900px;">
+
+        <!-- Metronic 8 Alert Component -->
+        <div class="alert bg-light-success border border-success border-dashed d-flex flex-column flex-md-row align-items-center justify-content-between w-100 p-4 p-md-5 shadow-lg rounded-4 mb-0">
+
+            <div class="d-flex flex-column flex-md-row align-items-center flex-grow-1 text-center text-md-start">
+                <!-- Icon -->
+                <div class="d-flex flex-center me-0 me-md-5 mb-4 mb-md-0 position-relative">
+                    <i class="fa-brands fa-whatsapp fs-3x fs-md-4x text-success anim-pulse-wa"></i>
+                </div>
+
+                <!-- Content -->
+                <div class="d-flex flex-column pe-0 pe-md-4">
+                    <h4 class="mb-2 fw-bolder text-dark">Grup Koordinasi Pembuatan IKH</h4>
+                    <span class="text-gray-700 fs-7 fs-md-6" style="line-height: 1.5;">
+                        Proses selanjutnya memerlukan koordinasi. Silakan bergabung ke Grup WhatsApp resmi kami untuk panduan teknis, tanya jawab, dan konfirmasi terkait proses pembuatan <strong>Izin Kuasa Hukum (IKH)</strong> Anda.
+                    </span>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center mt-5 mt-md-0 gap-2 gap-sm-3 w-100 w-md-auto flex-shrink-0">
+                <!-- Tombol "Sudah Bergabung" -->
+                <button type="button" class="btn btn-sm btn-outline btn-outline-dashed btn-outline-success btn-active-light-success btn-wa-action fw-bold w-100 w-sm-auto text-nowrap" data-action="sudah">
+                    Sudah Bergabung
+                </button>
+                
+                <!-- Tombol "Gabung Sekarang" -->
+                <a href="https://chat.whatsapp.com/Ioh5B5FwS51BKmvSBkEDQ0" target="_blank" class="btn btn-sm btn-success btn-wa-action fw-bold shadow-sm w-100 w-sm-auto text-nowrap" data-action="gabung">
+                    <i class="fa-brands fa-whatsapp fs-5 me-1"></i> Gabung Sekarang
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+<?php endif; ?>
 
 <div class="d-flex flex-column flex-column-fluid py-3 py-lg-6 mt-8">
     <div id="kt_app_content" class="app-content flex-column-fluid">
@@ -1416,6 +1467,50 @@ $activeTab = (isset($_GET['tab']) && $_GET['tab'] == 'lampiran' && $hasData) ? '
                     }
                 });
             }
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Ambil elemen wrapper alert
+        const alertElement = document.getElementById('wa-group-alert-ikh');
+
+        // Jika elemen tidak ada (karena kondisi PHP false), hentikan script
+        if (!alertElement) return;
+
+        // Cek apakah user belum pernah menutup alert IKH ini
+        // Menggunakan key khusus 'ikh_wa_alert_hidden' agar tidak bentrok dengan modul lain
+        if (!localStorage.getItem('ikh_wa_alert_hidden')) {
+            
+            // Persiapkan elemen untuk dianimasikan dari bawah ke atas
+            alertElement.classList.remove('d-none');
+            alertElement.style.transform = 'translate(-50%, 150%)'; // Posisi awal di bawah layar
+            alertElement.style.transition = 'transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)'; // Efek memantul (bounce)
+
+            // Jalankan animasi naik setelah jeda sebentar agar DOM selesai dimuat
+            setTimeout(() => {
+                alertElement.style.transform = 'translate(-50%, 0)';
+            }, 300);
+        }
+
+        // Tangkap semua tombol di dalam alert (Baik tombol 'Sudah' maupun 'Gabung')
+        const buttons = alertElement.querySelectorAll('.btn-wa-action');
+        
+        buttons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                
+                // 1. Simpan ke sistem browser bahwa alert ini sudah ditangani
+                localStorage.setItem('ikh_wa_alert_hidden', 'true');
+
+                // 2. Mainkan animasi turun / hilang ke bawah
+                alertElement.style.transform = 'translate(-50%, 150%)';
+
+                // 3. Hapus elemen dari layar secara total setelah animasi selesai (600ms)
+                setTimeout(() => {
+                    alertElement.style.display = 'none';
+                }, 600);
+                
+            });
         });
     });
 </script>

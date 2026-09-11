@@ -1301,7 +1301,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                             <span class="d-block fw-bold text-dark fs-6 mb-2">🎉 Langkah Terakhir!</span>
                             <p class="text-muted fs-7 mb-3">Silakan bergabung ke Grup WhatsApp resmi untuk mendapatkan link akses gmeet dan koordinasi selanjutnya.</p>
                             
-                            <a href="https://chat.whatsapp.com/CHWkmrWMqrSJvJNlu1UoVy?s=cl&p=i&mlu=4" target="_blank" class="btn btn-success fw-bold px-6 py-3 shadow-sm d-inline-flex align-items-center gap-2">
+                            <a href="https://chat.whatsapp.com/JejzQkQMV0GCo9ANGko11m?s=cl&p=i&mlu=4" target="_blank" class="btn btn-success fw-bold px-6 py-3 shadow-sm d-inline-flex align-items-center gap-2">
                                 <i class="fa-brands fa-whatsapp fs-3"></i>
                                 <span>Gabung Grup WhatsApp Sekarang</span>
                             </a>
