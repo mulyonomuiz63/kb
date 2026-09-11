@@ -74,7 +74,7 @@ class PaketModel extends Model
             ->join('detail_paket c', 'c.idpaket=paket.idpaket')
             ->join('webinar_sesi d', 'c.id_sesi=d.id_sesi')
             ->where('paket.status', 1)
-            ->notLike('paket.jenis_paket', 'webinar')
+            ->like('paket.jenis_paket', 'webinar')
             ->notLike('paket.jenis_paket', 'uskp')
             ->orderBy('paket.is_pinned', 'DESC')
             ->orderBy('paket.sort_order', 'asc')
