@@ -248,7 +248,7 @@ class WebinarController extends BaseController
             $data_siswa = array('hp' => $hp);
             $this->siswaModel->update($id_siswa, $data_siswa);
 
-            $subject = 'SELAMAT ANDA BERHASIL TERDAFTAR DI DIWEBINAR KELASBREVET';
+            $subject = 'SELAMAT ANDA BERHASIL TERDAFTAR DI WEBINAR KELASBREVET';
             $message = '
             <div style="color: #000; padding: 10px;">
                 <div style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; font-size: 20px; color: #1C3FAA; font-weight: bold;">
@@ -280,7 +280,7 @@ class WebinarController extends BaseController
 
             $this->siswaModel->insert($data_siswa);
             $id_siswa = $this->siswaModel->insertID();
-            $subject = 'SELAMAT ANDA BERHASIL TERDAFTAR DI DIWEBINAR KELASBREVET';
+            $subject = 'SELAMAT ANDA BERHASIL TERDAFTAR DI WEBINAR KELASBREVET';
             $message = '
             <div style="color: #000; padding: 10px;">
                 <div style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; font-size: 20px; color: #1C3FAA; font-weight: bold;">
