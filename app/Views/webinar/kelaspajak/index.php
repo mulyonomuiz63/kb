@@ -783,7 +783,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
 
                                                             <?php if (!$isFree && !empty($sesi['deskripsi_sesi'])): ?>
                                                                 <p class="text-secondary mb-0 mt-2" style="font-size: 0.85rem; line-height: 1.5;">
-                                                                    <span class="badge bg-primary mt-1" style="font-size: 0.65rem;">Gratis E-learning + Ujian Brevet AB</span>
+                                                                    <span class="badge bg-primary mt-1" style="font-size: 0.65rem;">Plus E-learning + Ujian Brevet AB</span>
                                                                 </p>
                                                             <?php endif; ?>
                                                         </div>
