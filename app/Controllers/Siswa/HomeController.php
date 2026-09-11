@@ -45,7 +45,7 @@ class HomeController extends BaseController
             ->join('webinar_sesi', 'detail_transaksi.idsesi = webinar_sesi.id_sesi')
             ->where('transaksi.status', 'S')
             ->where('transaksi.idsiswa', $id_siswa)
-            ->groupBy('detail_transaksi.idsesi')
+            ->groupBy('detail_transaksi.idpaket')
             ->get()
             ->getResult();
 
