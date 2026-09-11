@@ -353,7 +353,7 @@
                             <span class="badge <?= $badgeClass ?> text-white fw-bolder px-3 py-1.5 fs-8 shadow-sm animate-pulse"><?= $statusText ?></span>
                         </div>
                         <span class="text-gray-600 fs-7 d-flex align-items-center justify-content-center justify-content-sm-start gap-2">
-                            <span><i class="ki-outline ki-time fs-7 me-1"></i> <?= date('d M Y, H:i', $alert->waktu_mulai_format) ?> - <?= date('H:i WIB', $alert->waktu_selesai_format) ?></span>
+                            <span><i class="ki-outline ki-time fs-7 me-1"></i> <?= date('d M Y, H:i', $alert->waktu_mulai_format) ?> - <?= date('H:i', $alert->waktu_selesai_format) ?></span>
 
                             <?php if (!$alert->is_live): ?>
                                 <span class="badge badge-light-warning fw-bold fs-8 px-2 py-1 countdown-badge" data-mulai="<?= $alert->waktu_mulai_format ?>">
