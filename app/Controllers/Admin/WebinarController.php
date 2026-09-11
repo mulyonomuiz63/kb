@@ -219,7 +219,7 @@ class WebinarController extends BaseController
                 'link_youtube'   => json_encode(array_values($ytArray)),
                 'sesi_gratis'    => json_encode(array_values($sesiGratisInput)),
                 'status'         => $this->request->getVar('status'),
-                'file_materi'    => !empty($uploadedFiles) ? json_encode(array_values($uploadedFiles)) : null
+                'file_materi'    => !empty($uploadedFiles) ? json_encode(array_values($uploadedFiles)) : ''
             ];
 
             if ($this->webinarSesiModel->insert($data)) {

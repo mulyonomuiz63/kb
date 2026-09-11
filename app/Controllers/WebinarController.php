@@ -176,11 +176,11 @@ class WebinarController extends BaseController
         if (!$this->validate($rules)) {
             $errors = $this->validator->getErrors();
             $errorMsg = implode(' ', $errors);
-            return redirect()->to('marathon-perpajakan')->withInput()->with('error', str_replace(["\r", "\n"], '', $errorMsg));
+            return redirect()->back()->withInput()->with('error', str_replace(["\r", "\n"], '', $errorMsg));
         }
 
         if (!is_valid_domain($email)) {
-            return redirect()->to('marathon-perpajakan')->withInput()->with('error', 'Domain email tidak valid.');
+            return redirect()->back()->withInput()->with('error', 'Domain email tidak valid.');
         }
 
         $db = \Config\Database::connect();
@@ -195,7 +195,7 @@ class WebinarController extends BaseController
             ->get()->getRow();
 
         if (empty($dataPaket)) {
-            return redirect()->to('marathon-perpajakan')->with('error', 'Data Paket Webinar tidak ditemukan.');
+            return redirect()->back()->with('error', 'Data Paket Webinar tidak ditemukan.');
         }
 
         $isCurrentGratis = ((float) $dataPaket->harga_sesi <= 0);
@@ -215,7 +215,7 @@ class WebinarController extends BaseController
                 ->countAllResults();
 
             if ($recentTx > 0) {
-                return redirect()->to('marathon-perpajakan')->withInput()->with('error', 'Sistem sedang memproses pendaftaran Anda. Mohon jangan klik tombol daftar berulang kali.');
+                return redirect()->back()->withInput()->with('error', 'Sistem sedang memproses pendaftaran Anda. Mohon jangan klik tombol daftar berulang kali.');
             }
 
             // [CEK DUPLIKASI PAKET] - Boleh beli lagi JIKA beda versi (Gratis vs Berbayar)
@@ -236,7 +236,7 @@ class WebinarController extends BaseController
 
             if ($cekPaketAktif) {
                 $tipePaket = $isCurrentGratis ? 'Gratis' : 'Premium/Berbayar';
-                return redirect()->to('marathon-perpajakan')->withInput()->with('error', "Anda sudah memiliki paket {$tipePaket} untuk sesi ini. Silahkan login ke akun Anda untuk melihat paket webinar.");
+                return redirect()->back()->withInput()->with('error', "Anda sudah memiliki paket {$tipePaket} untuk sesi ini. Silahkan login ke akun Anda untuk melihat paket webinar.");
             }
         }
         // ==============================================================================
@@ -473,7 +473,7 @@ class WebinarController extends BaseController
         if ($gross_amount > 0) {
             return redirect()->to('webinar/invoice')->with('success_webinar', 'Pendaftaran berhasil, silakan selesaikan pembayaran!')->with('snapToken', $snapToken);
         } else {
-            return redirect()->to('marathon-perpajakan')->with('success_webinar', 'Pendaftaran berhasil, Anda telah terdaftar sebagai peserta webinar, informasi lengkapnya akan dikirim ke email Anda.');
+            return redirect()->back()->with('success_webinar', 'Pendaftaran berhasil, Anda telah terdaftar sebagai peserta webinar, informasi lengkapnya akan dikirim ke email Anda.');
         }
     }
     public function invoice()
@@ -484,5 +484,61 @@ class WebinarController extends BaseController
         }
 
         return view('webinar/invoice');
+    }
+
+
+    public function kelasPerpajakan($slug = 'kelas-perpajakan')
+    {
+        
+        // untuk breadcrumb 
+        $breadcrumbItems = [
+            "Home" => base_url(),
+        ];
+        $uri = new \CodeIgniter\HTTP\URI($this->request->getUri());
+        session()->set(['url' => $uri->getPath().'#pendaftaran']);
+
+        // 1. Ambil data dari model
+        $katalog_webinar = $this->sesiModel->getPaketWebinarLengkap($slug);
+
+        // Ambil nilai diskon keseluruhan dari database (Asumsi nama fieldnya 'diskon' di tabel paket)
+        // Sesuaikan '$katalog_webinar->diskon' dengan nama kolom diskon di database Anda
+        $diskonKeseluruhan = isset($katalog_webinar->diskon) ? $katalog_webinar->diskon : 10;
+
+        // 2. Manipulasi data untuk menambahkan harga_coret dan menghitung diskon pada setiap sesi
+        if ($katalog_webinar && !empty($katalog_webinar->sesi)) {
+            foreach ($katalog_webinar->sesi as &$sesi) {
+
+                if (isset($sesi['harga_sesi']) && $sesi['harga_sesi'] > 0) {
+
+                    // Cek jika ada diskon khusus per sesi, jika tidak gunakan diskon keseluruhan
+                    $diskonAktif = isset($sesi['diskon']) ? $sesi['diskon'] : $diskonKeseluruhan;
+
+                    if ($diskonAktif > 0 && $diskonAktif <= 100) {
+                        // 1. Simpan harga asli ke harga_coret (Misal: 200.000)
+                        $sesi['harga_coret'] = $sesi['harga_sesi'];
+
+                        // 2. Hitung harga bayar setelah diskon (Misal: 200.000 - 10% = 180.000)
+                        $potonganDiskon = $sesi['harga_sesi'] * ($diskonAktif / 100);
+                        $sesi['harga_sesi'] = $sesi['harga_sesi'] - $potonganDiskon;
+                    } else {
+                        // Jika tidak ada diskon
+                        $sesi['harga_coret'] = $sesi['harga_sesi'];
+                    }
+                } else {
+                    $sesi['harga_coret'] = 0; // Jika sesi gratis
+                }
+            }
+        }
+
+        // 3. Masukkan ke array $data
+        $data['katalog_webinar'] = $katalog_webinar;
+        $data['siswa'] = $this->siswaModel->where('id_siswa', session()->get('id'))->first();
+
+        $schemaBreadcrumb = $this->seo->breadcrumbSchema($breadcrumbItems);
+        $schema = $schemaBreadcrumb;
+        $data['schema'] = $schema;
+        $data['link'] = $this->googleClient->createAuthUrl();
+
+        return view('webinar/kelaspajak/index', $data);
     }
 }
