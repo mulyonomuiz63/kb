@@ -78,7 +78,7 @@ class WebinarController extends BaseController
         $id_target = (int) $id_sesi;       // ID Sesi yang ingin dilihat sertifikatnya
 
         $dataSesi = $this->transaksiModel
-            ->select('ws_target.*, paket.nama_paket')
+            ->select('ws_target.*, paket.nama_paket, paket.slug')
             ->join('detail_transaksi', 'transaksi.idtransaksi = detail_transaksi.idtransaksi')
             ->join('paket', 'detail_transaksi.idpaket = paket.idpaket')
             ->join('siswa', 'transaksi.idsiswa = siswa.id_siswa')
@@ -123,7 +123,11 @@ class WebinarController extends BaseController
         $pdf->SetKeywords('KelasBrevet, Pajak, Webinar');
 
         // 3. Background Image (Sesuai Permintaan)
-        $bgImg = 'uploads/webinar/sertifikat/background.jpeg';
+        if($dataSesi->slug == 'kelas-pajak-gratis') {
+            $bgImg = 'uploads/webinar/sertifikat/background-gratis.jpeg';
+        } else {
+            $bgImg = 'uploads/webinar/sertifikat/background.jpeg';
+        }
         $pdf->Image($bgImg, 0, 0, $pdf->getPageWidth(), $pdf->getPageHeight());
 
         // 4. Helper Format Tanggal & Nomor
