@@ -18,7 +18,7 @@ if (!function_exists('kirim_wa')) {
         $number_key = !empty($number_key) ? $number_key : 'YOUR_WATZAP_NUMBER_KEY';
 
         // Endpoint Watzap.id untuk kirim pesan teks
-        $url = "https://api.watzap.id/v1/send_message";
+        $url = "https://api.watzap.id/v1/waba_send_message_template";
 
         // Payload data dalam bentuk array
         $data = [
