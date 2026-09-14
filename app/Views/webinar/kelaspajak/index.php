@@ -179,6 +179,27 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
             transition: all 0.2s;
         }
     </style>
+    <style>
+        /* CSS khusus untuk tombol Google */
+        .btn-google-custom {
+            background-color: #ffffff !important;
+            color: #212121 !important;
+            /* Warna text awal (Hitam) */
+            border: 1px solid #dee2e6;
+            /* Border abu-abu halus standar Bootstrap */
+            transition: color 0.3s ease, border-color 0.3s ease;
+        }
+
+        /* Efek ketika kursor diarahkan (Hover) */
+        .btn-google-custom:hover {
+            color: #0d6efd !important;
+            /* Text berubah menjadi Biru Primary agar serasi dengan tombol lain */
+            border-color: #0d6efd !important;
+            /* Border ikut menjadi biru agar lebih rapi */
+            background-color: #ffffff !important;
+            /* Background tetap putih */
+        }
+    </style>
 </head>
 
 <body>
@@ -645,7 +666,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                             <div class="d-flex flex-column flex-sm-row gap-2">
                                                 <!-- Tombol Login Google -->
                                                 <?php if (strtolower(setting('client_status')) == 'true'): ?>
-                                                    <a href="<?= $link ?>" class="btn btn-outline-dark d-flex align-items-center justify-content-center flex-fill" style="background-color: #ffffff;">
+                                                    <a href="<?= $link ?>" class="btn btn-google-custom d-flex align-items-center justify-content-center flex-fill" style="background-color: #ffffff;">
                                                         <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="me-2" style="width: 18px; height: 18px;">
                                                         <span class="fw-bold" style="font-size: 0.85rem;">Login Dengan Google</span>
                                                     </a>
@@ -874,7 +895,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                             <div class="d-flex flex-column flex-sm-row gap-2">
                                                 <!-- Tombol Login Google -->
                                                 <?php if (strtolower(setting('client_status')) == 'true'): ?>
-                                                    <a href="<?= $link ?>" class="btn btn-outline-dark d-flex align-items-center justify-content-center flex-fill" style="background-color: #ffffff;">
+                                                    <a href="<?= $link ?>" class="btn btn-google-custom d-flex align-items-center justify-content-center flex-fill" style="background-color: #ffffff;">
                                                         <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="me-2" style="width: 18px; height: 18px;">
                                                         <span class="fw-bold" style="font-size: 0.85rem;">Login Dengan Google</span>
                                                     </a>

@@ -179,6 +179,27 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
             transition: all 0.2s;
         }
     </style>
+    <style>
+        /* CSS khusus untuk tombol Google */
+        .btn-google-custom {
+            background-color: #ffffff !important;
+            color: #212121 !important;
+            /* Warna text awal (Hitam) */
+            border: 1px solid #dee2e6;
+            /* Border abu-abu halus standar Bootstrap */
+            transition: color 0.3s ease, border-color 0.3s ease;
+        }
+
+        /* Efek ketika kursor diarahkan (Hover) */
+        .btn-google-custom:hover {
+            color: #0d6efd !important;
+            /* Text berubah menjadi Biru Primary agar serasi dengan tombol lain */
+            border-color: #0d6efd !important;
+            /* Border ikut menjadi biru agar lebih rapi */
+            background-color: #ffffff !important;
+            /* Background tetap putih */
+        }
+    </style>
 </head>
 
 <body>
@@ -578,10 +599,10 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                             <?php
                                             $isFree = ($sesi['harga_sesi'] <= 0);
                                             $sekarang = strtotime($currentDateTime);
-                                            
+
                                             // Asumsikan semua sudah lewat/expired
-                                            $isExpired = true; 
-                                            
+                                            $isExpired = true;
+
                                             // 1. Cek sesi induk/parent (kalau di masa depan ATAU hari ini sedang berjalan)
                                             $waktuMulaiParent = strtotime($sesi['waktu_mulai']);
                                             if ($waktuMulaiParent > $sekarang || date('Y-m-d', $waktuMulaiParent) === date('Y-m-d', $sekarang)) {
@@ -643,10 +664,10 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                                                 <p class="text-dark fw-bold fs-7 mb-3"><i class="fa-solid fa-layer-group me-2 text-primary"></i>4 Materi Spesial Webinar:</p>
                                                                 <ul class="list-unstyled mb-4" style="margin-bottom: 0;">
                                                                     <?php foreach ($childSessionsData as $cs): ?>
-                                                                        <?php 
+                                                                        <?php
                                                                         $waktuMulaiChild = strtotime($cs['waktu_mulai']);
                                                                         // Sesi individual (anak) dicoret HANYA jika waktu lewat DAN BUKAN hari ini
-                                                                        $isCsExpired = ($waktuMulaiChild < $sekarang && date('Y-m-d', $waktuMulaiChild) !== date('Y-m-d', $sekarang)); 
+                                                                        $isCsExpired = ($waktuMulaiChild < $sekarang && date('Y-m-d', $waktuMulaiChild) !== date('Y-m-d', $sekarang));
                                                                         ?>
                                                                         <li class="<?= $isCsExpired ? 'opacity-75' : '' ?> mb-3 d-flex align-items-start">
                                                                             <i class="fa-solid fa-circle-check <?= $isCsExpired ? 'text-secondary' : 'text-success' ?> fs-6 mt-1 me-3"></i>
@@ -706,7 +727,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                             <div class="d-flex flex-column flex-sm-row gap-2">
                                                 <!-- Tombol Login Google -->
                                                 <?php if (strtolower(setting('client_status')) == 'true'): ?>
-                                                    <a href="<?= $link ?>" class="btn btn-outline-dark d-flex align-items-center justify-content-center flex-fill" style="background-color: #ffffff;">
+                                                    <a href="<?= $link ?>" class="btn btn-google-custom d-flex align-items-center justify-content-center flex-fill" style="background-color: #212121;">
                                                         <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="me-2" style="width: 18px; height: 18px;">
                                                         <span class="fw-bold" style="font-size: 0.85rem;">Login Dengan Google</span>
                                                     </a>
@@ -744,7 +765,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                         </div>
                                     </div>
                                     <!-- AKHIR KODE ASLI -->
-                                     <?php if (session()->get('id')): ?>
+                                    <?php if (session()->get('id')): ?>
                                         <div class="alert alert-success border shadow-sm rounded-3 mt-4 p-3 d-flex align-items-center">
                                             <div class="me-3">
                                                 <i class="fa fa-check-circle text-success fs-3"></i>
@@ -798,10 +819,10 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                         <?php
                                         $isFree = ($sesi['harga_sesi'] <= 0);
                                         $sekarang = strtotime($currentDateTime);
-                                        
+
                                         // Asumsikan semua sudah lewat/expired
-                                        $isExpired = true; 
-                                        
+                                        $isExpired = true;
+
                                         // 1. Cek sesi induk/parent
                                         $waktuMulaiParent = strtotime($sesi['waktu_mulai']);
                                         if ($waktuMulaiParent > $sekarang || date('Y-m-d', $waktuMulaiParent) === date('Y-m-d', $sekarang)) {
@@ -864,9 +885,9 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                                             <p class="text-dark fw-bold fs-7 mb-3"><i class="fa-solid fa-layer-group me-2 text-primary"></i>4 Materi Spesial Webinar:</p>
                                                             <ul class="list-unstyled mb-4" style="margin-bottom: 0;">
                                                                 <?php foreach ($childSessionsData as $cs): ?>
-                                                                    <?php 
+                                                                    <?php
                                                                     $waktuMulaiChild = strtotime($cs['waktu_mulai']);
-                                                                    $isCsExpired = ($waktuMulaiChild < $sekarang && date('Y-m-d', $waktuMulaiChild) !== date('Y-m-d', $sekarang)); 
+                                                                    $isCsExpired = ($waktuMulaiChild < $sekarang && date('Y-m-d', $waktuMulaiChild) !== date('Y-m-d', $sekarang));
                                                                     ?>
                                                                     <li class="<?= $isCsExpired ? 'opacity-75' : '' ?> mb-3 d-flex align-items-start">
                                                                         <i class="fa-solid fa-circle-check <?= $isCsExpired ? 'text-secondary' : 'text-success' ?> fs-6 mt-1 me-3"></i>
@@ -935,7 +956,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                             <div class="d-flex flex-column flex-sm-row gap-2">
                                                 <!-- Tombol Login Google -->
                                                 <?php if (strtolower(setting('client_status')) == 'true'): ?>
-                                                    <a href="<?= $link ?>" class="btn btn-outline-dark d-flex align-items-center justify-content-center flex-fill" style="background-color: #ffffff;">
+                                                    <a href="<?= $link ?>" class="btn btn-google-custom d-flex align-items-center justify-content-center flex-fill" style="background-color: #212121;">
                                                         <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="me-2" style="width: 18px; height: 18px;">
                                                         <span class="fw-bold" style="font-size: 0.85rem;">Login Dengan Google</span>
                                                     </a>
