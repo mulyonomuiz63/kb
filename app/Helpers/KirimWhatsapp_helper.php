@@ -3,24 +3,35 @@ if (!function_exists('kirim_wa')) {
     /**
      * Mengirim pesan WhatsApp menggunakan API Watzap.id
      * 
-     * @param string $phone Nomor telepon tujuan (format: 628xxxxxxxxxx, tanpa tanda +)
+     * @param string $phone Nomor telepon tujuan
      * @param string $message Isi pesan yang akan dikirim
      * @return array|mixed Hasil response API
      */
     function kirim_wa($phone, $message) {
-        // Ambil dari pengaturan aplikasi Anda
-        // Sesuaikan parameter setting() jika Anda sudah mengubah namanya di database
-        $api_key    = setting('whatsapp_token'); // Mapping ke API Key Watzap
-        $number_key = setting('whatsapp_secret_key'); // Mapping ke Number Key Watzap
+        $api_key    = setting('whatsapp_token'); 
+        $number_key = setting('whatsapp_secret_key'); 
         
-        // Konfigurasi default kredensial jika tidak disertakan
         $api_key    = !empty($api_key) ? $api_key : 'YOUR_WATZAP_API_KEY';
         $number_key = !empty($number_key) ? $number_key : 'YOUR_WATZAP_NUMBER_KEY';
 
-        // Endpoint Watzap.id untuk kirim pesan teks
-        $url = "https://api.watzap.id/v1/waba_send_message_template";
+        // ==========================================
+        // PERBAIKAN 1: Auto-Format Nomor HP
+        // ==========================================
+        // Hapus semua karakter selain angka (spasi, strip, tanda +)
+        $phone = preg_replace('/[^0-9]/', '', $phone);
+        
+        // Jika nomor diawali dengan '0', ubah menjadi '62'
+        if (substr($phone, 0, 1) === '0') {
+            $phone = '62' . substr($phone, 1);
+        }
+        // Jika nomor diawali dengan '8', tambahkan '62' di depannya
+        if (substr($phone, 0, 1) === '8') {
+            $phone = '62' . $phone;
+        }
+        // ==========================================
 
-        // Payload data dalam bentuk array
+        $url = setting('whatsapp_url');
+
         $data = [
             "api_key"    => $api_key,
             "number_key" => $number_key,
@@ -38,11 +49,10 @@ if (!function_exists('kirim_wa')) {
             CURLOPT_TIMEOUT => 30,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => "POST",
-            CURLOPT_POSTFIELDS => json_encode($data), // Watzap wajib dikirim sebagai JSON
+            CURLOPT_POSTFIELDS => json_encode($data), 
             CURLOPT_HTTPHEADER => [
                 "Content-Type: application/json"
             ],
-            // Nonaktifkan verifikasi SSL lokal (Opsional jika server sering bermasalah SSL)
             CURLOPT_SSL_VERIFYHOST => 0,
             CURLOPT_SSL_VERIFYPEER => 0,
         ]);
@@ -60,7 +70,15 @@ if (!function_exists('kirim_wa')) {
 
         curl_close($curl);
 
-        // Watzap mengembalikan response JSON, kita decode menjadi array
-        return json_decode($result, true);
+        $response = json_decode($result, true);
+        
+        // ==========================================
+        // PERBAIKAN 2: Log / Debugging (Opsional)
+        // ==========================================
+        // Jika Anda ingin melihat respon asli dari Watzap saat testing, 
+        // Anda bisa uncomment baris di bawah ini:
+        // log_message('info', 'Watzap Response: ' . $result);
+        
+        return $response;
     }
 }

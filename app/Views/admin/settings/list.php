@@ -216,6 +216,7 @@
 
                                     <?php inputRow('Token','<input type="text" class="form-control form-control-solid" name="whatsapp_token" value="'.old('whatsapp_token',$settings['whatsapp_token']??'').'">'); ?>
                                     <?php inputRow('Secret Key','<input type="text" class="form-control form-control-solid" name="whatsapp_secret_key" value="'.old('whatsapp_secret_key',$settings['whatsapp_secret_key']??'').'">'); ?>
+                                    <?php inputRow('URL WhatsApp API','<input type="text" class="form-control form-control-solid" name="whatsapp_url" value="'.old('whatsapp_url',$settings['whatsapp_url']??'').'">'); ?>
                                 </div>
                             </div>
 
