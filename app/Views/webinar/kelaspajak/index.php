@@ -638,7 +638,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                                     <i class="fa fa-info-circle text-primary fs-5"></i>
                                                 </div>
                                                 <span class="text-dark" style="font-size: 0.85rem; line-height: 1.4;">
-                                                    <strong>Informasi:</strong> Jika Anda sudah pernah terdaftar di kelas brevet, langsung saja login dengan Google atau user Kelasbrevet Anda agar data terintegrasi.
+                                                    <strong>Informasi:</strong> Jika Anda sudah terdaftar di Kelasbrevet, silahkan login dengan Google atau akun Kelasbrevet Anda.
                                                 </span>
                                             </div>
 
@@ -647,12 +647,12 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                                 <?php if (strtolower(setting('client_status')) == 'true'): ?>
                                                     <a href="<?= $link ?>" class="btn btn-outline-dark d-flex align-items-center justify-content-center flex-fill" style="background-color: #ffffff;">
                                                         <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="me-2" style="width: 18px; height: 18px;">
-                                                        <span class="fw-bold" style="font-size: 0.85rem;">Login Google</span>
+                                                        <span class="fw-bold" style="font-size: 0.85rem;">Login Dengan Google</span>
                                                     </a>
                                                 <?php endif; ?>
                                                 <!-- Tombol Login Biasa -->
                                                 <a href="<?= base_url('auth') ?>" class="btn btn-primary d-flex align-items-center justify-content-center flex-fill">
-                                                    <span class="fw-bold" style="font-size: 0.85rem;">Login Akun</span>
+                                                    <span class="fw-bold" style="font-size: 0.85rem;">Login Dengan Akun</span>
                                                 </a>
                                             </div>
 
@@ -782,8 +782,8 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                                             <?php endif; ?>
 
                                                             <?php if (!$isFree && !empty($sesi['deskripsi_sesi'])): ?>
-                                                                <p class="text-secondary mb-0 mt-2" style="font-size: 0.85rem; line-height: 1.5;">
-                                                                    <span class="badge bg-primary mt-1" style="font-size: 0.65rem;">Plus E-learning + Ujian Brevet AB</span>
+                                                                <p class="text-secondary mb-0 mt-2" style="font-size: 2rem; line-height: 1.5;">
+                                                                    <span class="badge bg-primary mt-1">Plus E-learning + Ujian Brevet AB</span>
                                                                 </p>
                                                             <?php endif; ?>
                                                         </div>
