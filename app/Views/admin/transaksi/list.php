@@ -290,8 +290,18 @@
                     </div>
                 </div>
                 <div class="modal-body py-10 px-lg-17">
+                    <!-- Target Tujuan -->
                     <input type="hidden" name="destination_wa" id="destination_wa">
                     <input type="hidden" name="destination_email" id="destination_email">
+                    
+                    <!-- ========================================== -->
+                    <!-- TAMBAHAN: Hidden Input untuk Parameter WABA -->
+                    <!-- ========================================== -->
+                    <input type="hidden" name="param_nama" id="param_nama">
+                    <input type="hidden" name="param_paket" id="param_paket">
+                    <input type="hidden" name="param_nominal" id="param_nominal">
+                    <input type="hidden" name="param_status" id="param_status">
+                    <!-- ========================================== -->
 
                     <!-- Pilihan Metode Kirim -->
                     <div class="mb-7">
@@ -320,6 +330,9 @@
                     <div class="mb-7">
                         <label class="required fs-6 fw-semibold mb-2">Isi Pesan:</label>
                         <textarea class="form-control form-control-solid" rows="6" name="pesan" id="isi_pesan" placeholder="Tulis pesan Anda di sini..." required></textarea>
+                        <div class="form-text mt-2 text-warning">
+                            *Jika menggunakan WABA Official, isi pesan di atas akan diabaikan dan sistem akan mengirimkan Template dari Watzap.
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer flex-center">
@@ -938,6 +951,15 @@ $(document).on('click', '.btn-kirim-pesan', function() {
 
     $('#destination_email').val(email);
     $('#destination_wa').val(phone);
+
+    // ==========================================
+    // TAMBAHAN: Isi hidden input parameter WABA
+    // ==========================================
+    $('#param_nama').val(nama);
+    $('#param_paket').val(paket);
+    $('#param_nominal').val(nominal);
+    $('#param_status').val(statusText);
+    // ==========================================
 
     $('#modalKirimPesanLabel').text('Kirim Pesan ke ' + nama);
     $('#info_penerima').val('Email: ' + email);

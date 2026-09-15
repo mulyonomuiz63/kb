@@ -2,12 +2,14 @@
 if (!function_exists('kirim_wa')) {
     /**
      * Mengirim pesan WhatsApp menggunakan API Watzap.id
+     * Mendukung pesan teks biasa & pesan template.
      * 
      * @param string $phone Nomor telepon tujuan
-     * @param string $message Isi pesan yang akan dikirim
+     * @param string $message Isi pesan (kosongkan jika menggunakan template)
+     * @param array $template_data Data template (jika mengirim template)
      * @return array|mixed Hasil response API
      */
-    function kirim_wa($phone, $message) {
+    function kirim_wa($phone, $message = '', $template_data = []) {
         $api_key    = setting('whatsapp_token'); 
         $number_key = setting('whatsapp_secret_key'); 
         
@@ -17,14 +19,11 @@ if (!function_exists('kirim_wa')) {
         // ==========================================
         // PERBAIKAN 1: Auto-Format Nomor HP
         // ==========================================
-        // Hapus semua karakter selain angka (spasi, strip, tanda +)
         $phone = preg_replace('/[^0-9]/', '', $phone);
         
-        // Jika nomor diawali dengan '0', ubah menjadi '62'
         if (substr($phone, 0, 1) === '0') {
             $phone = '62' . substr($phone, 1);
         }
-        // Jika nomor diawali dengan '8', tambahkan '62' di depannya
         if (substr($phone, 0, 1) === '8') {
             $phone = '62' . $phone;
         }
@@ -32,12 +31,33 @@ if (!function_exists('kirim_wa')) {
 
         $url = setting('whatsapp_url');
 
-        $data = [
-            "api_key"    => $api_key,
-            "number_key" => $number_key,
-            "phone_no"   => $phone,
-            "message"    => $message
-        ];
+        // ==========================================
+        // PERBAIKAN 2: Logika Pemilihan Payload
+        // ==========================================
+        if (!empty($template_data)) {
+            // Jika $template_data diisi, gunakan payload format Template
+            $data = [
+                "api_key"           => $api_key,
+                "phone_no"          => $phone,
+                "template_name"     => $template_data['template_name'],
+                "template_language" => isset($template_data['template_language']) ? $template_data['template_language'] : 'id',
+                "parameter"         => isset($template_data['parameter']) ? $template_data['parameter'] : [],
+                "apps_source"       => isset($template_data['apps_source']) ? $template_data['apps_source'] : ''
+            ];
+            
+            // Opsional: Beberapa versi Watzap tetap butuh number_key meski pakai template
+            if (!empty($number_key)) {
+                $data["number_key"] = $number_key;
+            }
+        } else {
+            // Jika $template_data kosong, gunakan payload format Teks Biasa
+            $data = [
+                "api_key"    => $api_key,
+                "number_key" => $number_key,
+                "phone_no"   => $phone,
+                "message"    => $message
+            ];
+        }
 
         $curl = curl_init();
         
@@ -71,13 +91,6 @@ if (!function_exists('kirim_wa')) {
         curl_close($curl);
 
         $response = json_decode($result, true);
-        
-        // ==========================================
-        // PERBAIKAN 2: Log / Debugging (Opsional)
-        // ==========================================
-        // Jika Anda ingin melihat respon asli dari Watzap saat testing, 
-        // Anda bisa uncomment baris di bawah ini:
-        // log_message('info', 'Watzap Response: ' . $result);
         
         return $response;
     }

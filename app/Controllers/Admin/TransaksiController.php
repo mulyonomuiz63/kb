@@ -890,24 +890,73 @@ class TransaksiController extends BaseController
         $methodType       = $this->request->getPost('method_type'); // 'whatsapp', 'email', atau 'keduanya'
         $destinationWa    = $this->request->getPost('destination_wa');
         $destinationEmail = $this->request->getPost('destination_email');
+
+        // Teks pesan dari Textarea (Digunakan untuk Email dan WA Unofficial)
         $pesan            = $this->request->getPost('pesan');
 
         $isSuccess = false;
         $errorMessage = '';
 
+        // ==============================================================
+        // BLOK WHATSAPP (Di-upgrade untuk support WABA Template & Unofficial)
+        // ==============================================================
         if ($methodType === 'whatsapp' || $methodType === 'keduanya') {
             if (!empty($destinationWa)) {
-                $kirim = kirim_wa($destinationWa, $pesan);
-                if (isset($kirim['status']) && $kirim['status']) {
+
+                // 1. Deteksi Environment
+                $is_production = false;
+                if (isset($_SERVER['CI_ENVIRONMENT']) && $_SERVER['CI_ENVIRONMENT'] === 'production') {
+                    $is_production = true;
+                } elseif (defined('ENVIRONMENT') && ENVIRONMENT === 'production') {
+                    $is_production = true;
+                }
+
+                // 2. Siapkan data berdasarkan Environment
+                if ($is_production) {
+                    // MODE WABA OFFICIAL: Siapkan Parameter Template
+                    // Tangkap data spesifik dari hidden input untuk dikirim ke variabel template Watzap
+                    $paramNama    = $this->request->getPost('param_nama') ?? '-';
+                    $paramPaket   = $this->request->getPost('param_paket') ?? '-';
+                    $paramNominal = $this->request->getPost('param_nominal') ?? '-';
+                    $paramStatus  = $this->request->getPost('param_status') ?? '-';
+
+                    $data_template = [
+                        "template_name"     => "informasi_pembayaran", // WAJIB GANTI: Sesuaikan dengan nama template di dashboard Watzap Anda
+                        "template_language" => "id",
+                        "parameter"         => [
+                            [
+                                "nama"    => $paramNama,
+                                "paket"   => $paramPaket,
+                                "nominal" => $paramNominal,
+                                "status"  => $paramStatus
+                            ]
+                        ],
+                        "apps_source"       => "kelasbrevet"
+                    ];
+
+                    // Panggil helper kirim_wa (param ke-2 kosong, param ke-3 isi template)
+                    $kirim = kirim_wa($destinationWa, '', $data_template);
+                } else {
+                    // MODE UNOFFICIAL (DEVELOPMENT): Gunakan Teks dari Textarea
+                    // Panggil helper kirim_wa (param ke-2 diisi teks, param ke-3 kosong)
+                    $kirim = kirim_wa($destinationWa, $pesan, []);
+                }
+
+                // 3. Evaluasi Response
+                if (isset($kirim['status']) && ($kirim['status'] == '200' || $kirim['status'] === true)) {
                     $isSuccess = true;
                 } else {
-                    $errorMessage = "Gagal mengirim WhatsApp: " . ($kirim['error'] ?? 'Kesalahan API');
+                    // Tangkap pesan error dari API jika gagal
+                    $errorMessage = "Gagal mengirim WhatsApp: " . ($kirim['message'] ?? 'Kesalahan API');
                 }
             } else {
                 $errorMessage = "Nomor WhatsApp tidak tersedia.";
             }
         }
 
+        // ==============================================================
+        // BLOK EMAIL (TIDAK DIRUBAH SAMA SEKALI)
+        // ==============================================================
         if ($methodType === 'email' || $methodType === 'keduanya') {
             if (!empty($destinationEmail)) {
                 $mailSent = $this->kirimEmail($destinationEmail, $pesan);
@@ -920,6 +969,10 @@ class TransaksiController extends BaseController
                 $errorMessage = "Alamat email tidak tersedia.";
             }
         }
+
+        // ==============================================================
+        // HASIL AKHIR
+        // ==============================================================
         if ($isSuccess) {
             return redirect()->back()->with('success', 'Pesan berhasil dikirim!');
         } else {
