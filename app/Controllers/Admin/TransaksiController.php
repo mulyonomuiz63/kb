@@ -921,7 +921,7 @@ class TransaksiController extends BaseController
                     $paramStatus  = $this->request->getPost('param_status') ?? '-';
 
                     $data_template = [
-                        "template_name"     => "informasi_pembayaran", // WAJIB GANTI: Sesuaikan dengan nama template di dashboard Watzap Anda
+                        "template_name"     => "info_pembayaran", // WAJIB GANTI: Sesuaikan dengan nama template di dashboard Watzap Anda
                         "template_language" => "id",
                         "parameter"         => [
                             [

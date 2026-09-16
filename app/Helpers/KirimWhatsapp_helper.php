@@ -44,11 +44,6 @@ if (!function_exists('kirim_wa')) {
                 "parameter"         => isset($template_data['parameter']) ? $template_data['parameter'] : [],
                 "apps_source"       => isset($template_data['apps_source']) ? $template_data['apps_source'] : ''
             ];
-            
-            // Opsional: Beberapa versi Watzap tetap butuh number_key meski pakai template
-            if (!empty($number_key)) {
-                $data["number_key"] = $number_key;
-            }
         } else {
             // Jika $template_data kosong, gunakan payload format Teks Biasa
             $data = [
