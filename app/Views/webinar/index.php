@@ -1384,7 +1384,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                             
                             <a href="https://chat.whatsapp.com/CHWkmrWMqrSJvJNlu1UoVy?s=cl&p=i&mlu=4" target="_blank" class="btn btn-success fw-bold px-6 py-3 shadow-sm d-inline-flex align-items-center gap-2">
                                 <i class="fa-brands fa-whatsapp fs-3"></i>
-                                <span>Gabung Grup WhatsApp Sekarang</span>
+                                <span>Join Grup Update Perpajakan</span>
                             </a>
                         </div>
                     `,

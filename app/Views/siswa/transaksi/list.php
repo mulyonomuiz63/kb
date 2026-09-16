@@ -1,6 +1,65 @@
 <?= $this->extend('siswa/template/app'); ?>
 <?= $this->section('content'); ?>
 
+<!-- TAMBAHAN: CSS Khusus Layar Mobile (Merubah Tabel menjadi Card) -->
+<style>
+    @media (max-width: 767.98px) {
+        /* Mencegah scroll horizontal */
+        .table-responsive {
+            overflow-x: hidden !important;
+        }
+        
+        /* Sembunyikan judul kolom (thead) pada mobile */
+        #kt_table_transaksi thead {
+            display: none;
+        }
+        
+        /* Ubah baris (tr) menjadi bentuk Card yang rapi */
+        #kt_table_transaksi tbody tr {
+            display: block;
+            margin-bottom: 1rem;
+            border: 1px solid #eff2f5;
+            border-radius: 12px;
+            padding: 15px;
+            background-color: #ffffff;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.03);
+        }
+        
+        /* Susun isi (td) menjadi sejajar: Label di Kiri, Nilai di Kanan */
+        #kt_table_transaksi tbody td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border: none !important;
+            border-bottom: 1px dashed #eff2f5 !important;
+            text-align: right !important;
+        }
+        
+        /* Hilangkan garis batas di baris terakhir (Aksi) */
+        #kt_table_transaksi tbody td:last-child {
+            border-bottom: none !important;
+            padding-bottom: 0;
+        }
+        
+        /* Panggil Label dari atribut 'data-label' */
+        #kt_table_transaksi tbody td::before {
+            content: attr(data-label);
+            font-weight: 600;
+            color: #a1a5b7;
+            text-align: left;
+            padding-right: 15px;
+            font-size: 0.9rem;
+        }
+
+        /* Rapikan elemen flex agar rata kanan (khusus nama paket & tagline) */
+        #kt_table_transaksi tbody td .d-flex.flex-column {
+            align-items: flex-end;
+            text-align: right;
+        }
+    }
+</style>
+
 <div class="d-flex flex-column flex-column-fluid py-3 py-lg-6 mt-8">
     <div id="kt_app_content" class="app-content flex-column-fluid">
         <div id="kt_app_content_container" class="app-container container-xxl">
@@ -34,18 +93,19 @@
                                     $grand_total = $totalDiskon - $diskon_voucher;
                                 ?>
                                     <tr>
-                                        <td>
+                                        <!-- TAMBAHAN: Atribut data-label="..." pada semua tag <td> -->
+                                        <td data-label="Detail Paket">
                                             <div class="d-flex flex-column">
                                                 <span class="text-gray-800 text-hover-primary mb-1 fw-bold"><?= ucwords(strtolower($s->nama_paket)); ?></span>
                                                 <span class="fs-7 text-muted"><?= $s->tagline; ?></span>
                                             </div>
                                         </td>
 
-                                        <td class="text-center">
+                                        <td class="text-center" data-label="Nominal">
                                             <span class="fw-bold text-dark">Rp <?= number_format($grand_total, 0, '.', '.'); ?></span>
                                         </td>
 
-                                        <td class="text-center">
+                                        <td class="text-center" data-label="Metode">
                                             <?php if ($s->jenis_bayar == 'manual') : ?>
                                                 <span class="badge badge-light-success fw-bold">Manual Transfer</span>
                                             <?php elseif ($s->jenis_bayar == 'online') : ?>
@@ -55,7 +115,7 @@
                                             <?php endif; ?>
                                         </td>
 
-                                        <td class="text-center">
+                                        <td class="text-center" data-label="Status">
                                             <?php
                                             $statusMap = [
                                                 'S'  => ['color' => 'success', 'text' => 'Lunas'],
@@ -70,7 +130,7 @@
                                             <span class="badge badge-light-<?= $st['color'] ?> fw-bold"><?= $st['text'] ?></span>
                                         </td>
 
-                                        <td class="text-end">
+                                        <td class="text-end" data-label="Aksi">
                                             <?php if ($s->status == 'S') : ?>
                                                 <button class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm btn_invoice_cetak"
                                                     data-invoice="<?= base_url('sw-siswa/transaksi/invoice/' . encrypt_url($s->idtransaksi)); ?>"

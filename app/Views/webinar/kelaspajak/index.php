@@ -1319,12 +1319,20 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                         
                         <div class="p-4 bg-light-success border border-success border-dashed rounded-4 text-center">
                             <span class="d-block fw-bold text-dark fs-6 mb-2">🎉 Langkah Terakhir!</span>
-                            <p class="text-muted fs-7 mb-3">Silakan bergabung ke Grup WhatsApp resmi untuk mendapatkan link akses gmeet dan koordinasi selanjutnya.</p>
+                            <p class="text-muted fs-7 mb-4">Silakan bergabung ke Grup WhatsApp resmi untuk mendapatkan link akses gmeet dan koordinasi selanjutnya.</p>
                             
-                            <a href="https://chat.whatsapp.com/JejzQkQMV0GCo9ANGko11m?s=cl&p=i&mlu=4" target="_blank" class="btn btn-success fw-bold px-6 py-3 shadow-sm d-inline-flex align-items-center gap-2">
-                                <i class="fa-brands fa-whatsapp fs-3"></i>
-                                <span>Gabung Grup WhatsApp Sekarang</span>
-                            </a>
+                            <!-- Wrapper Flexbox untuk merapikan jarak dan responsivitas tombol -->
+                            <div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
+                                <a href="https://chat.whatsapp.com/CHWkmrWMqrSJvJNlu1UoVy?s=cl&p=i&mlu=4" target="_blank" class="btn btn-success fw-bold px-6 py-3 shadow-sm d-inline-flex align-items-center justify-content-center gap-2 w-100 w-sm-auto">
+                                    <i class="fa-brands fa-whatsapp fs-3"></i>
+                                    <span>Join Grup Update Perpajakan</span>
+                                </a>
+                                
+                                <a href="https://chat.whatsapp.com/JejzQkQMV0GCo9ANGko11m?s=cl&p=i&mlu=4" target="_blank" class="btn btn-success fw-bold px-6 py-3 shadow-sm d-inline-flex align-items-center justify-content-center gap-2 w-100 w-sm-auto">
+                                    <i class="fa-brands fa-whatsapp fs-3"></i>
+                                    <span>Join Grup ALC & KelasBrevet</span>
+                                </a>
+                            </div>
                         </div>
                     `,
                     confirmButtonColor: '#0d6efd',
