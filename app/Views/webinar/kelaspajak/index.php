@@ -800,7 +800,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
 
                                                             <?php if (!$isFree && !empty($sesi['deskripsi_sesi'])): ?>
                                                                 <p class="text-secondary mb-0 mt-2" style="font-size: 1.2rem; line-height: 1.5;">
-                                                                    <span class="badge bg-primary mt-1">Fasiltisa Full Akses Materi dan Rekaman</span>
+                                                                    <span class="badge bg-primary mt-1">Fasilitas Full Akses Materi dan Rekaman</span>
                                                                 </p>
                                                             <?php endif; ?>
                                                         </div>

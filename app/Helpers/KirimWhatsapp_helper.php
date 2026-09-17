@@ -44,6 +44,7 @@ if (!function_exists('kirim_wa')) {
                 "parameter"         => isset($template_data['parameter']) ? $template_data['parameter'] : [],
                 "apps_source"       => isset($template_data['apps_source']) ? $template_data['apps_source'] : ''
             ];
+
         } else {
             // Jika $template_data kosong, gunakan payload format Teks Biasa
             $data = [

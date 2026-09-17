@@ -27,7 +27,7 @@ class IkhController extends BaseController
         ];
 
         $data['list_ikh'] = $this->ikhModel
-        ->select('pendaftaran_ikh.*, siswa.nama_siswa')
+        ->select('pendaftaran_ikh.*, siswa.nama_siswa, siswa.hp')
         ->join('siswa', 'siswa.id_siswa = pendaftaran_ikh.id_siswa')
         ->orderBy("FIELD(pendaftaran_ikh.status_sertifikat, 'belum', 'terbit')", 'ASC', false)
         ->orderBy("FIELD(pendaftaran_ikh.status_validasi_admin, 'pending', 'revisi', 'ditolak', 'valid', 'draft')", 'ASC', false)
