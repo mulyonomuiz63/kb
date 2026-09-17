@@ -848,7 +848,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                                             <p class="text-muted fs-8 mb-4 fst-italic"><i class="fa-solid fa-info-circle me-1"></i> Belum ada sesi tertaut.</p>
                                                         <?php endif; ?>
                                                     </div>
-                                                    <?= $sesi['deskripsi_sesi'] ?><
+                                                    <?= $sesi['deskripsi_sesi'] ?>
                                                 </div>
                                             </label>
                                         </div>
