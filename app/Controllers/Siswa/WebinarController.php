@@ -36,32 +36,42 @@ class WebinarController extends BaseController
     {
         // Pastikan user sudah login
         $id_siswa = session()->get('id');
-        // Query untuk mengambil sesi webinar yang sudah dibeli dan lunas
-        // 1. Ambil data dari database TANPA groupBy, tapi urutkan dari nominal/harga tertinggi
-        $dataWebinarRaw = $this->transaksiModel
-                    ->select('webinar_sesi.*, paket.slug, paket.nama_paket, paket.file, transaksi.tgl_pembayaran, transaksi.created_at, transaksi.nominal')
-                    ->join('detail_transaksi', 'transaksi.idtransaksi = detail_transaksi.idtransaksi')
-                    ->join('paket', 'detail_transaksi.idpaket=paket.idpaket')
-                    ->join('webinar_sesi', 'detail_transaksi.idsesi=webinar_sesi.id_sesi')
-                    ->where('transaksi.status', 'S')
-                    ->where('transaksi.idsiswa', $id_siswa)
-                    ->orderBy('transaksi.nominal', 'DESC') // KUNCI: Yang bayar (nominal > 0) ditaruh paling atas
-                    ->get()
-                    ->getResult();
+        // 1. Tarik Data Mentah dari Database (Tanpa GroupBy & Tanpa OrderBy Status)
+        $rawData = $this->transaksiModel
+            ->select('webinar_sesi.*, paket.idpaket, paket.slug, paket.nama_paket, paket.file, transaksi.tgl_pembayaran, transaksi.created_at')
+            ->join('detail_transaksi', 'transaksi.idtransaksi = detail_transaksi.idtransaksi')
+            ->join('paket', 'detail_transaksi.idpaket = paket.idpaket')
+            ->join('webinar_sesi', 'detail_transaksi.idsesi = webinar_sesi.id_sesi')
+            ->where('transaksi.status', 'S')
+            ->where('transaksi.idsiswa', $id_siswa)
+            ->orderBy('transaksi.created_at', 'DESC')
+            ->get()
+            ->getResult();
 
-        // 2. Filter menggunakan PHP agar tidak ada sesi duplikat
-        $dataWebinar = [];
-        $sesi_tercatat = [];
+        // 2. Filter & Timpa Data (Logika Override)
+        $groupedData = [];
 
-        foreach ($dataWebinarRaw as $dw) {
-            // Jika ID Sesi ini belum ada di array $sesi_tercatat, maka simpan datanya.
-            // Karena query sudah diurutkan nominal DESC, maka data BERBAYAR pasti masuk duluan.
-            // Data GRATIS (yang punya id_sesi sama) otomatis akan terabaikan/dilewati.
-            if (!in_array($dw->id_sesi, $sesi_tercatat)) {
-                $dataWebinar[] = $dw;
-                $sesi_tercatat[] = $dw->id_sesi; // Catat ID sesi agar tidak masuk dua kali
+        foreach ($rawData as $row) {
+            $id_paket = $row->idpaket;
+
+            // Jika paket ini belum ada di array, langsung masukkan
+            if (!isset($groupedData[$id_paket])) {
+                $groupedData[$id_paket] = $row;
+            } else {
+                // JIKA PAKET SUDAH ADA: Kita cek statusnya!
+                // Jika baris yang sedang dicek ini statusnya 'B' (Berbayar),
+                // maka otomatis akan menimpa/menggantikan data yang lama (yang mungkin statusnya 'F')
+                if (isset($row->status) && $row->status == 'B') {
+                    $groupedData[$id_paket] = $row;
+                }
             }
         }
+
+        // 3. Ubah format datanya agar kembali menjadi array biasa
+        $dataWebinar = array_values($groupedData);
+
+        // PENTING: Pastikan variabel yang Anda kirim ke view adalah $dataWebinar
+        // Contoh: return view('nama_view', ['dataWebinar' => $dataWebinar]);
 
         // var_dump($data['webinar']);
 
@@ -69,7 +79,7 @@ class WebinarController extends BaseController
             ->where('idsiswa', $id_siswa)
             ->where('status', 'S')
             ->groupStart() // Membuka kurung query agar kondisi OR tidak merusak WHERE idsiswa
-                ->like('jenis_paket', 'webinar') // Mencari string "webinar" di dalam array
+            ->like('jenis_paket', 'webinar') // Mencari string "webinar" di dalam array
             ->groupEnd()
             ->countAllResults();
 
@@ -102,10 +112,10 @@ class WebinarController extends BaseController
             ->where('transaksi.status', 'S')
             ->where('transaksi.idsiswa', $id_siswa)
             ->groupStart()
-                // KONDISI 1: Sesi yang diminta dibeli secara langsung sebagai sesi utama
-                ->where('detail_transaksi.idsesi', $id_target)
-                // KONDISI 2: Sesi yang diminta ada di dalam daftar JSON `sesi_gratis` dari sesi utama yang dibeli
-                ->orWhere("EXISTS (
+            // KONDISI 1: Sesi yang diminta dibeli secara langsung sebagai sesi utama
+            ->where('detail_transaksi.idsesi', $id_target)
+            // KONDISI 2: Sesi yang diminta ada di dalam daftar JSON `sesi_gratis` dari sesi utama yang dibeli
+            ->orWhere("EXISTS (
                     SELECT 1 FROM webinar_sesi ws_parent 
                     WHERE ws_parent.id_sesi = detail_transaksi.idsesi 
                     AND (
@@ -138,7 +148,7 @@ class WebinarController extends BaseController
         $pdf->SetKeywords('KelasBrevet, Pajak, Webinar');
 
         // 3. Background Image (Sesuai Permintaan)
-        if($dataSesi->slug == 'kelas-pajak-gratis') {
+        if ($dataSesi->slug == 'kelas-pajak-gratis') {
             $bgImg = 'uploads/webinar/sertifikat/background-gratis.jpeg';
         } else {
             $bgImg = 'uploads/webinar/sertifikat/background.jpeg';
@@ -153,7 +163,7 @@ class WebinarController extends BaseController
         $idSesi   = str_pad($dataSesi->id_sesi, 3, '0', STR_PAD_LEFT);
         // Bisa disesuaikan jika ingin statis 8 Agustus 2026 atau dinamis berdasarkan start_ujian
         $tglSertif   = date('d', $timeStart) . ' ' . $arrBulan[(int)date('m', $timeStart)] . ' ' . date('Y', $timeStart);
-        $nomorSertif = $idSesi .'-' . $dataSiswa->id_siswa . '/WEBINAR-BREVET/' . $arrBulanRomawi[(int)date('m', $timeStart)] . '/' . date('Y', $timeStart);
+        $nomorSertif = $idSesi . '-' . $dataSiswa->id_siswa . '/WEBINAR-BREVET/' . $arrBulanRomawi[(int)date('m', $timeStart)] . '/' . date('Y', $timeStart);
 
         // =========================================================
         // 5. PENULISAN KONTEN DINAMIS (Rata Tengah)
@@ -192,9 +202,9 @@ class WebinarController extends BaseController
         $teksTema = !empty($dataSesi->nama_sesi) ? "dengan tema \"" . $dataSesi->nama_sesi . "\"\n" : "";
 
         $deskripsi = "Atas partisipasinya sebagai Peserta " . $namaWebinar . "\n"
-                   . "Yang diselenggarakan oleh Kelas Brevet\n"
-                   . $teksTema
-                   . "Pada " . $tglSertif;
+            . "Yang diselenggarakan oleh Kelas Brevet\n"
+            . $teksTema
+            . "Pada " . $tglSertif;
 
         // Karena FPDF MultiCell mengukur dari margin kiri, kita harus hitung posisi X 
         // agar kotaknya persis berada di tengah kertas.
