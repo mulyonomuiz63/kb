@@ -20,6 +20,7 @@ if (!function_exists('send_notif')) {
             'message'    => $message ?? '',
             'link'       => $link ?? '',
             'is_read'    => 0,
+            'created_at' => date('Y-m-d H:i:s'),
         ]);
     }
 }
