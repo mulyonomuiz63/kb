@@ -37,16 +37,31 @@ class WebinarController extends BaseController
         // Pastikan user sudah login
         $id_siswa = session()->get('id');
         // Query untuk mengambil sesi webinar yang sudah dibeli dan lunas
-        $dataWebinar = $this->transaksiModel
-            ->select('webinar_sesi.*, paket.slug, paket.nama_paket, paket.file, transaksi.tgl_pembayaran, transaksi.created_at')
-            ->join('detail_transaksi', 'transaksi.idtransaksi = detail_transaksi.idtransaksi')
-            ->join('paket', 'detail_transaksi.idpaket=paket.idpaket')
-            ->join('webinar_sesi', 'detail_transaksi.idsesi=webinar_sesi.id_sesi')
-            ->where('transaksi.status', 'S')
-            ->where('transaksi.idsiswa', $id_siswa)
-            ->groupBy('detail_transaksi.idsesi')
-            ->get()
-            ->getResult();
+        // 1. Ambil data dari database TANPA groupBy, tapi urutkan dari nominal/harga tertinggi
+        $dataWebinarRaw = $this->transaksiModel
+                    ->select('webinar_sesi.*, paket.slug, paket.nama_paket, paket.file, transaksi.tgl_pembayaran, transaksi.created_at, transaksi.nominal')
+                    ->join('detail_transaksi', 'transaksi.idtransaksi = detail_transaksi.idtransaksi')
+                    ->join('paket', 'detail_transaksi.idpaket=paket.idpaket')
+                    ->join('webinar_sesi', 'detail_transaksi.idsesi=webinar_sesi.id_sesi')
+                    ->where('transaksi.status', 'S')
+                    ->where('transaksi.idsiswa', $id_siswa)
+                    ->orderBy('transaksi.nominal', 'DESC') // KUNCI: Yang bayar (nominal > 0) ditaruh paling atas
+                    ->get()
+                    ->getResult();
+
+        // 2. Filter menggunakan PHP agar tidak ada sesi duplikat
+        $dataWebinar = [];
+        $sesi_tercatat = [];
+
+        foreach ($dataWebinarRaw as $dw) {
+            // Jika ID Sesi ini belum ada di array $sesi_tercatat, maka simpan datanya.
+            // Karena query sudah diurutkan nominal DESC, maka data BERBAYAR pasti masuk duluan.
+            // Data GRATIS (yang punya id_sesi sama) otomatis akan terabaikan/dilewati.
+            if (!in_array($dw->id_sesi, $sesi_tercatat)) {
+                $dataWebinar[] = $dw;
+                $sesi_tercatat[] = $dw->id_sesi; // Catat ID sesi agar tidak masuk dua kali
+            }
+        }
 
         // var_dump($data['webinar']);
 

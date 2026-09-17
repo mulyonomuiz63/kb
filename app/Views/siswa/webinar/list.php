@@ -642,7 +642,7 @@
                                                                             </div>
 
                                                                             <!-- TAMBAHAN: Tombol Upgrade Paket -->
-                                                                            <a href="<?= base_url($w->slug) ?>" class="btn btn-sm btn-danger fw-bold fs-9 ms-auto text-nowrap">
+                                                                            <a href="<?= base_url($w->slug.'#pendaftaran') ?>" class="btn btn-sm btn-danger fw-bold fs-9 ms-auto text-nowrap">
                                                                                 <i class="ki-outline ki-rocket fs-7 me-1"></i> Upgrade untuk Akses Materi
                                                                             </a>
                                                                         </div>
