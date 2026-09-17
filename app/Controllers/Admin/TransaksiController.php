@@ -251,13 +251,15 @@ class TransaksiController extends BaseController
                     }
                 }
 
-                // ==========================================
-                // 3. PEMBENTUKAN BARIS TABEL (HTML)
-                // ==========================================
                 $results = [];
                 foreach ($data as $s) {
                     $id_enc = encrypt_url($s->idtransaksi);
                     $row = [];
+
+                    // UPGRADE 1: Beri background warna kuning jika status 'V' (Menunggu Approval)
+                    if ($s->status === 'V') {
+                        $row['DT_RowClass'] = 'bg-light-warning';
+                    }
 
                     // Kolom Peserta
                     $htmlPeserta = '<div class="text-gray-800 fw-bold fs-6">' . esc($s->nama_siswa) . '</div>';
@@ -315,7 +317,6 @@ class TransaksiController extends BaseController
                         : '<span class="text-muted fs-7 fw-semibold">-</span>';
 
                     if ($is_affiliate) {
-                        // Menampilkan nama afiliasi jika ada, jika tidak ada fallback ke teks statis
                         $display_nama = $nama_afiliasi ? esc($nama_afiliasi) : 'Link Affiliate';
 
                         $html_voucher .= '<div class="mt-2">
@@ -412,15 +413,20 @@ class TransaksiController extends BaseController
                             </a>
                         </div>';
                     } else {
+                        // UPGRADE 2: Tombol approve hanya dirender jika status = 'V'
+                        if ($s->status == 'V') {
+                            $row['aksi'] .= '
+                            <div class="menu-item px-3">
+                                <a href="' . base_url('sw-admin/transaksi/approve-manual/' . $id_enc) . '" class="menu-link px-3 text-primary" id="approve">
+                                    <i class="ki-duotone ki-check-square fs-4 me-2 text-primary"><span class="path1"></span><span class="path2"></span></i> Approve Transaksi
+                                </a>
+                            </div>
+                            
+                            <div class="separator mt-3 opacity-75"></div>';
+                        }
+                        
+                        // Tombol hapus tetap muncul untuk semua status yang belum lunas (M, PM, V, E, dll)
                         $row['aksi'] .= '
-                        <div class="menu-item px-3">
-                            <a href="' . base_url('sw-admin/transaksi/approve-manual/' . $id_enc) . '" class="menu-link px-3 text-primary" id="approve">
-                                <i class="ki-duotone ki-check-square fs-4 me-2 text-primary"><span class="path1"></span><span class="path2"></span></i> Approve Transaksi
-                            </a>
-                        </div>
-                        
-                        <div class="separator mt-3 opacity-75"></div>
-                        
                         <div class="menu-item px-3 mt-3">
                             <a href="' . base_url('sw-admin/transaksi/hapus-transaksi-siswa/' . $id_enc) . '" class="menu-link px-3 text-danger btn-delete" id="hapus">
                                 <i class="ki-duotone ki-trash fs-4 me-2 text-danger"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i> Hapus Transaksi
