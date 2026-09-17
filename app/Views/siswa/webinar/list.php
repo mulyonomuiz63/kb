@@ -632,7 +632,7 @@
                                                                 <div class="d-flex flex-column gap-2" style="max-height: 140px; overflow-y: auto;">
                                                                     <!-- Logika Terkunci (Gratis ATAU Terlewat Beli) -->
                                                                     <?php if ($isPaketGratis || $isTerlambatBeli): ?>
-                                                                        <div class="alert alert-light-danger border border-danger border-dashed p-3 m-0 d-flex align-items-center">
+                                                                        <div class="alert alert-light-danger border border-danger border-dashed p-3 m-0 d-flex align-items-center flex-wrap gap-3">
                                                                             <i class="ki-outline ki-lock-3 fs-1 text-danger me-3"></i>
                                                                             <div class="d-flex flex-column">
                                                                                 <span class="fw-bold text-danger fs-8">Akses Terkunci</span>
@@ -640,6 +640,11 @@
                                                                                     <?= $isTerlambatBeli ? 'Anda mendaftar setelah sesi ini selesai.' : 'Rekaman dan materi hanya untuk peserta Premium.' ?>
                                                                                 </span>
                                                                             </div>
+
+                                                                            <!-- TAMBAHAN: Tombol Upgrade Paket -->
+                                                                            <a href="<?= base_url($w->slug) ?>" class="btn btn-sm btn-danger fw-bold fs-9 ms-auto text-nowrap">
+                                                                                <i class="ki-outline ki-rocket fs-7 me-1"></i> Upgrade untuk Akses Materi
+                                                                            </a>
                                                                         </div>
                                                                     <?php else: ?>
 
