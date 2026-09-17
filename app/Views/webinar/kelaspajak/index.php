@@ -633,15 +633,11 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                                             <?php endif; ?>
                                                         </div>
 
-                                                        <div class="mt-auto">
-                                                            <div class="alert alert-info py-2 px-3 border-0 mb-0 d-flex align-items-start gap-2 rounded-3" style="font-size: 0.8rem; line-height: 1.4; background-color: #e3f2fd; color: #0277bd;">
-                                                                <i class="fa-solid fa-circle-info mt-1"></i>
-                                                                <div><strong>Informasi Paket:</strong> <?= $sesi['deskripsi_sesi'] ?></div>
-                                                            </div>
-                                                        </div>
+                                                        <?= $sesi['deskripsi_sesi'] ?></div>
+                                                        
                                                     </div>
                                                 </label>
-                                            </div>
+                                            </div> 
                                         <?php endforeach; ?>
                                     </div>
                                 </div>
@@ -852,20 +848,7 @@ $paketWebinar = !empty($katalog_webinar) ? $katalog_webinar : null;
                                                             <p class="text-muted fs-8 mb-4 fst-italic"><i class="fa-solid fa-info-circle me-1"></i> Belum ada sesi tertaut.</p>
                                                         <?php endif; ?>
                                                     </div>
-
-                                                    <div class="mt-auto">
-                                                        <?php if ($isFree): ?>
-                                                            <div class="alert alert-info py-2 px-3 border-0 mb-0 d-flex align-items-start gap-2 rounded-3" style="font-size: 0.8rem; line-height: 1.4; background-color: #e3f2fd; color: #0277bd;">
-                                                                <i class="fa-solid fa-circle-info mt-1"></i>
-                                                                <div><strong>Informasi Paket:</strong> <?= $sesi['deskripsi_sesi'] ?></div>
-                                                            </div>
-                                                        <?php else: ?>
-                                                            <div class="alert alert-info py-2 px-3 border-0 mb-0 d-flex align-items-start gap-2 rounded-3" style="font-size: 0.8rem; line-height: 1.4; background-color: #e3f2fd; color: #0277bd;">
-                                                                <i class="fa-solid fa-circle-info mt-1"></i>
-                                                                <div><strong>Informasi Paket:</strong> <?= $sesi['deskripsi_sesi'] ?></div>
-                                                            </div>
-                                                        <?php endif; ?>
-                                                    </div>
+                                                    <?= $sesi['deskripsi_sesi'] ?><
                                                 </div>
                                             </label>
                                         </div>
