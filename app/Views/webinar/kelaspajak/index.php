@@ -297,7 +297,7 @@ $paketUtama = !empty($daftarPaket) ? $daftarPaket[0] : null;
                     <div class="col-lg-6 text-center">
                         <?php
                         // Mendapatkan path fisik file di server untuk mengecek kapan terakhir diedit
-                        $videoPath = FCPATH . 'uploads/video/opening.mp4';
+                        $videoPath = FCPATH . 'uploads/video/openingv1.mp4';
                         $versi = file_exists($videoPath) ? filemtime($videoPath) : 1;
 
                         $videoUrl = base_url('uploads/video/opening.mp4?v=' . $versi);
