@@ -109,23 +109,21 @@ class WebinarController extends BaseController
     public function sertifikat($id_sesien)
     {
         // 1. Data Retrieval
-        $id_siswa = session()->get('id'); // Ambil ID siswa dari session
+        $id_siswa = session()->get('id');
         $id_sesi   = decrypt_url($id_sesien);
-        $id_target = (int) $id_sesi;       // ID Sesi yang ingin dilihat sertifikatnya
+        $id_target = (int) $id_sesi;
 
         $dataSesi = $this->transaksiModel
-            ->select('ws_target.*, paket.nama_paket, paket.slug')
+            // TAMBAHAN: Tarik data transaksi.created_at atau transaksi.tgl_pembayaran
+            ->select('ws_target.*, paket.nama_paket, paket.slug, transaksi.created_at as tgl_transaksi')
             ->join('detail_transaksi', 'transaksi.idtransaksi = detail_transaksi.idtransaksi')
             ->join('paket', 'detail_transaksi.idpaket = paket.idpaket')
             ->join('siswa', 'transaksi.idsiswa = siswa.id_siswa')
-            // Ambil data detail dari webinar_sesi target yang ingin dicetak sertifikatnya
             ->join('webinar_sesi ws_target', 'ws_target.id_sesi = ' . $id_target)
             ->where('transaksi.status', 'S')
             ->where('transaksi.idsiswa', $id_siswa)
             ->groupStart()
-                // KONDISI 1: Sesi yang diminta dibeli secara langsung sebagai sesi utama
                 ->where('detail_transaksi.idsesi', $id_target)
-                // KONDISI 2: Sesi yang diminta ada di dalam daftar JSON `sesi_gratis` dari sesi utama yang dibeli
                 ->orWhere("EXISTS (
                     SELECT 1 FROM webinar_sesi ws_parent 
                     WHERE ws_parent.id_sesi = detail_transaksi.idsesi 
@@ -139,6 +137,7 @@ class WebinarController extends BaseController
             ->groupEnd()
             ->get()
             ->getRow();
+            
         $dataSiswa     = $this->siswaModel->where('id_siswa', $id_siswa)->get()->getRow();
 
 
@@ -158,7 +157,7 @@ class WebinarController extends BaseController
         $pdf->SetSubject('SERTIFIKAT ' . strtoupper($dataSesi->nama_sesi) . ' - SERTIFIKAT');
         $pdf->SetKeywords('KelasBrevet, Pajak, Webinar');
 
-        // 3. Background Image (Sesuai Permintaan)
+        // 3. Background Image
         if($dataSesi->slug == 'kelas-pajak-gratis') {
             $bgImg = 'uploads/webinar/sertifikat/background-gratis.jpeg';
         } else {
@@ -170,9 +169,24 @@ class WebinarController extends BaseController
         $arrBulan        = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
         $arrBulanRomawi  = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
 
-        $timeStart   = strtotime($dataSesi->waktu_mulai);
+        // =========================================================
+        // LOGIKA PENANGKAL TANGGAL (Mengatasi Update Jadwal ke Depan)
+        // =========================================================
+        $waktuMulaiWebinar = strtotime($dataSesi->waktu_mulai);
+        $waktuTransaksi    = strtotime($dataSesi->tgl_transaksi);
+        $waktuSekarang     = time();
+
+        // Jika jadwal webinar di database berada di MASA DEPAN (karena admin sudah update ke tanggal 23),
+        // sedangkan user ini sudah punya transaksi lama, maka kita cetak tanggal berdasarkan riwayat transaksi user.
+        if ($waktuMulaiWebinar > $waktuSekarang && $waktuTransaksi < $waktuMulaiWebinar) {
+            $timeStart = $waktuTransaksi;
+        } else {
+            // Jika webinar belum di-update (masih normal), pakai tanggal webinar aslinya
+            $timeStart = $waktuMulaiWebinar;
+        }
+        // =========================================================
+
         $idSesi   = str_pad($dataSesi->id_sesi, 3, '0', STR_PAD_LEFT);
-        // Bisa disesuaikan jika ingin statis 8 Agustus 2026 atau dinamis berdasarkan start_ujian
         $tglSertif   = date('d', $timeStart) . ' ' . $arrBulan[(int)date('m', $timeStart)] . ' ' . date('Y', $timeStart);
         $nomorSertif = $idSesi .'-' . $dataSiswa->id_siswa . '/WEBINAR-BREVET/' . $arrBulanRomawi[(int)date('m', $timeStart)] . '/' . date('Y', $timeStart);
 
@@ -180,33 +194,29 @@ class WebinarController extends BaseController
         // 5. PENULISAN KONTEN DINAMIS (Rata Tengah)
         // =========================================================
 
-        // A. NOMOR SERTIFIKAT (Di atas teks "diberikan kepada:")
-        $pdf->SetTextColor(51, 49, 49); // Warna Abu-abu gelap / Hitam
+        // A. NOMOR SERTIFIKAT
+        $pdf->SetTextColor(51, 49, 49);
         $pdf->SetFont('Arial', 'BU', 16);
-        // Posisi Y: 75 (Silakan naik/turunkan angka 75 jika kurang pas dengan background)
         $pdf->SetXY(10, 55);
-        // Lebar 0 agar membentang penuh dari kiri ke kanan, 'C' untuk Center
         $pdf->Cell(0, 5, "Nomor: " . $nomorSertif, 0, 1, 'C');
 
         // B. NAMA LENGKAP PESERTA
-        // Warna Biru (Menyesuaikan desain draft: RGB ~ 23, 107, 195)
         $pdf->SetTextColor(23, 98, 185);
         $pdf->SetFont('Arial', 'B', 24);
 
         $nama_siswa = ucwords(strtoupper($dataSiswa->nama_siswa));
 
-        // Jika panjang karakter nama lebih dari 20 huruf, otomatis turunkan ukuran font-nya
         if (strlen($nama_siswa) > 20) {
-            $pdf->SetFont('Arial', 'B', 20); // Font diperkecil jadi 28
+            $pdf->SetFont('Arial', 'B', 20);
         } elseif (strlen($nama_siswa) > 30) {
-            $pdf->SetFont('Arial', 'B', 18); // Font diperkecil jadi 20 jika sangat panjang
+            $pdf->SetFont('Arial', 'B', 18);
         }
 
         $pdf->SetXY(8, 88);
         $pdf->Cell(0, 10, $nama_siswa, 0, 1, 'C');
 
         // C. DESKRIPSI KEGIATAN
-        $pdf->SetTextColor(51, 49, 49); // Kembali ke warna Hitam
+        $pdf->SetTextColor(51, 49, 49);
         $pdf->SetFont('Arial', '', 12);
 
         $namaWebinar = $dataSesi->nama_paket ?? 'Webinar Perpajakan';
@@ -217,19 +227,17 @@ class WebinarController extends BaseController
                    . $teksTema
                    . "Pada " . $tglSertif;
 
-        // Karena FPDF MultiCell mengukur dari margin kiri, kita harus hitung posisi X 
-        // agar kotaknya persis berada di tengah kertas.
-        $lebar_teks = 200; // Lebar area teks
+        $lebar_teks = 200;
         $posisi_x = ($pdf->getPageWidth() - $lebar_teks) / 2;
 
-        $pdf->SetXY($posisi_x, 110); // Posisi Y: 135
+        $pdf->SetXY($posisi_x, 110);
         $pdf->MultiCell($lebar_teks, 6, $deskripsi, 0, 'C');
 
         // =========================================================
 
         // 6. Output
         $isDownload = $this->request->getGet('download');
-        $outputMode = $isDownload ? 'D' : 'I'; // 'D' = Download File, 'I' = Preview di Iframe
+        $outputMode = $isDownload ? 'D' : 'I';
 
         $this->response->setContentType('application/pdf');
         $pdf->Output(strtoupper($dataSiswa->nama_siswa) . '-SERTIFIKAT.pdf', $outputMode);
