@@ -13,21 +13,24 @@ class WebinarSesiModel extends Model
     // Fungsi untuk Landing Page: Mengambil data paket berserta sesi-sesinya
     public function getPaketWebinarLengkap($slug = null)
     {
-        // 1. PERBAIKAN DI SINI: Gunakan alias 'p' dan join tabel diskon
         $builder = $this->db->table('paket p');
-        $builder->select('p.*, d.diskon'); // Ambil semua data paket + kolom diskon
+        $builder->select('p.*, d.diskon');
         $builder->join('diskon d', 'd.iddiskon = p.iddiskon', 'left');
 
         if ($slug) {
-            $builder->where('p.slug', $slug);
+            // UPGRADE 1: Cek apakah slug berupa array (banyak) atau string (satu)
+            if (is_array($slug)) {
+                $builder->whereIn('p.slug', $slug); // Gunakan whereIn jika array
+            } else {
+                $builder->where('p.slug', $slug); // Gunakan where biasa jika string tunggal
+            }
         }
 
-        $pakets = $builder->get()->getResult(); // Sekarang object paket punya properti ->diskon
+        $pakets = $builder->get()->getResult();
 
         foreach ($pakets as $p) {
-            // Ambil sesi sebagai ARRAY menggunakan getResultArray()
             $p->sesi = $this->db->table('webinar_sesi ws')
-                ->select('ws.*, d.diskon') // (Nilai diskon per sesi tetap diambil)
+                ->select('ws.*, d.diskon')
                 ->join('detail_paket dp', 'dp.id_sesi = ws.id_sesi')
                 ->join('paket p', 'p.idpaket = dp.idpaket')
                 ->join('diskon d', 'd.iddiskon = p.iddiskon', 'left')
@@ -39,7 +42,15 @@ class WebinarSesiModel extends Model
         }
 
         if ($slug && !empty($pakets)) {
-            return $pakets[0];
+            // UPGRADE 2: Mengatur return data
+            if (is_array($slug)) {
+                // Jika memanggil banyak slug (array), kembalikan SEMUA datanya
+                return $pakets;
+            } else {
+                // Jika memanggil 1 slug saja (string), kembalikan data tunggal (Object pertama)
+                // Ini menjaga agar halaman lain yang pakai fungsi ini dengan 1 slug tidak ikut error
+                return $pakets[0];
+            }
         }
 
         return $pakets;

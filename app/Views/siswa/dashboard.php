@@ -342,7 +342,6 @@
                     </div>
 
                     <!-- Info Pelatihan & Countdown Timer -->
-                    <!-- Info Pelatihan & Countdown Timer -->
                     <div class="d-flex flex-column flex-grow-1 text-center text-sm-start me-sm-5 z-index-2">
 
                         <!-- Nama Paket Ditambahkan Di Sini -->
@@ -363,7 +362,7 @@
                         </span>
                     </div>
 
-                    <!-- Action Button Gmeet (Diberikan z-index-3 dan position-relative agar pasti bisa diklik) -->
+                    <!-- Action Button Gmeet -->
                     <div class="d-flex align-items-center mt-5 mt-sm-0 position-relative z-index-3">
                         <a href="<?= esc($alert->mainZoomLink) ?>" target="_blank" class="btn btn-<?= $alert->is_live ? 'danger animate-glow-danger' : 'primary animate-glow-primary' ?> fw-bold px-8 py-4 fs-6 shadow-sm hover-elevate-up w-100 w-sm-auto d-flex align-items-center justify-content-center gap-2 cursor-pointer">
                             <i class="ki-outline ki-entrance-left fs-3"></i>
@@ -374,7 +373,7 @@
 
             <?php endforeach; ?>
         </div>
-    <?php endif; ?>
+<?php endif; ?>
     <div class="col-xl-4">
         <div class="sticky-column">
             <div class="row mb-5 mb-xl-8 g-5 g-xl-8">
@@ -490,71 +489,8 @@
                                             ?>
                                         </h3>
 
-                                        <!-- Box Informasi Daftar Semua Sesi -->
-                                        <div class="mb-6">
-                                            <div class="d-flex flex-column gap-3 session-scroll" style="max-height: 220px; overflow-y: auto; padding-right: 8px;">
-                                                <?php foreach ($listSesi as $s): ?>
-                                                    <?php
-                                                    $isExpired = (strtotime($s->waktu_selesai) < strtotime($currentDateTime));
-                                                    $isFree = (isset($s->harga_sesi) && $s->harga_sesi <= 0);
-                                                    ?>
-                                                    <div class="session-item d-flex flex-column p-3 rounded-4 border <?= $isExpired && !$isFree ? 'border-gray-200 bg-light' : 'border-gray-200 bg-white shadow-sm' ?>">
-                                                        <div class="d-flex align-items-center justify-content-between w-100">
-                                                            <div class="d-flex align-items-center me-3">
-                                                                <div class="symbol symbol-40px me-3">
-                                                                    <span class="symbol-label rounded-circle <?= $isExpired && !$isFree ? 'bg-secondary text-gray-400' : 'bg-light-primary text-primary' ?>">
-                                                                        <i class="ki-outline ki-calendar-tick fs-3"></i>
-                                                                    </span>
-                                                                </div>
-                                                                <div>
-                                                                    <h5 class="fw-bolder mb-1 fs-6 <?= $isExpired && !$isFree ? 'text-gray-400 text-decoration-line-through' : 'text-gray-800' ?>">
-                                                                        <?= esc($s->nama_sesi) ?>
-                                                                    </h5>
-                                                                </div>
-                                                            </div>
-                                                            <div>
-                                                                <?php if (!$isFree): ?>
-                                                                    <?php if ($isExpired): ?>
-                                                                        <span class="badge bg-secondary text-gray-500 fs-8 fw-bold px-3 py-1.5 rounded-pill">Selesai</span>
-                                                                    <?php else: ?>
-                                                                        <span class="badge fs-8 fw-bolder px-3 py-1.5 rounded-pill d-flex align-items-center" style="background-color: #e8fff3; color: #15cc74;">
-                                                                            <span class="bullet bullet-dot me-1.5" style="background-color: #15cc74;"></span> Berbayar
-                                                                        </span>
-                                                                    <?php endif; ?>
-                                                                <?php else: ?>
-                                                                    <span class="badge fs-8 fw-bolder px-3 py-1.5 rounded-pill d-flex align-items-center" style="background-color: #e8f4fd; color: #0d6efd;">
-                                                                        <span style="background-color: #0d6efd;"></span> Gratis
-                                                                    </span>
-                                                                <?php endif; ?>
-                                                            </div>
-                                                        </div>
-
-                                                        <!-- List Sesi Khusus untuk Paket Gratis -->
-                                                        <?php if ($isFree): ?>
-                                                            <?php
-                                                            $childNames = [];
-                                                            $childIds = json_decode($s->sesi_gratis, true) ?? [];
-
-                                                            if (!empty($childIds)) {
-                                                                $db = \Config\Database::connect();
-                                                                $childSessions = $db->table('webinar_sesi')
-                                                                    ->whereIn('id_sesi', $childIds)
-                                                                    ->get()
-                                                                    ->getResultArray();
-                                                                foreach ($childSessions as $cs) {
-                                                                    $childNames[] = $cs['nama_sesi'];
-                                                                }
-                                                            }
-                                                            ?>
-                                                        <?php endif; ?>
-
-                                                    </div>
-                                                <?php endforeach; ?>
-                                            </div>
-                                        </div>
-
                                         <!-- Action Buttons -->
-                                        <div class="m-0 d-flex flex-column flex-sm-row gap-3">
+                                        <div class="m-0 d-flex flex-column flex-sm-row gap-3 mt-4">
                                             <a href="<?= base_url($paketWebinar->slug) ?>"
                                                 class="btn fw-bolder px-8 py-3 w-100 w-sm-auto rounded-pill text-white shadow-sm d-flex align-items-center justify-content-center" style="background-color: #1d4695;">
                                                 <i class="ki-outline ki-entrance-left fs-3 me-2 text-white"></i> Daftar Sekarang

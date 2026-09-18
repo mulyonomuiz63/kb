@@ -487,8 +487,10 @@ class WebinarController extends BaseController
     }
 
 
-    public function kelasPerpajakan($slug = 'kelas-pajak-gratis')
+    public function kelasPerpajakan()
     {
+        // UPGRADE 1: Perbaikan penulisan array slug agar berisi banyak nilai yang benar
+        $slugs = ['kelas-pajak-gratis', 'kelas-pajak-gratis-brevet-ikh', 'kelas-pajak-gratis-brevet'];
         
         // untuk breadcrumb 
         $breadcrumbItems = [
@@ -497,35 +499,32 @@ class WebinarController extends BaseController
         $uri = new \CodeIgniter\HTTP\URI($this->request->getUri());
         session()->set(['url' => $uri->getPath().'#pendaftaran']);
 
-        // 1. Ambil data dari model
-        $katalog_webinar = $this->sesiModel->getPaketWebinarLengkap($slug);
+        // 1. Ambil data dari model (Kini diasumsikan model mengembalikan ARRAY berisi BANYAK PAKET)
+        $katalog_webinar = $this->sesiModel->getPaketWebinarLengkap($slugs);
 
-        // Ambil nilai diskon keseluruhan dari database (Asumsi nama fieldnya 'diskon' di tabel paket)
-        // Sesuaikan '$katalog_webinar->diskon' dengan nama kolom diskon di database Anda
-        $diskonKeseluruhan = isset($katalog_webinar->diskon) ? $katalog_webinar->diskon : 10;
+        // 2. Manipulasi data untuk menghitung diskon pada setiap sesi di dalam BANYAK PAKET
+        if (!empty($katalog_webinar) && is_array($katalog_webinar)) {
+            foreach ($katalog_webinar as &$paket) {
+                // Ambil nilai diskon keseluruhan dari database per paket
+                $diskonKeseluruhan = isset($paket->diskon) ? $paket->diskon : 10;
 
-        // 2. Manipulasi data untuk menambahkan harga_coret dan menghitung diskon pada setiap sesi
-        if ($katalog_webinar && !empty($katalog_webinar->sesi)) {
-            foreach ($katalog_webinar->sesi as &$sesi) {
+                if (isset($paket->sesi) && !empty($paket->sesi)) {
+                    foreach ($paket->sesi as &$sesi) {
+                        if (isset($sesi['harga_sesi']) && $sesi['harga_sesi'] > 0) {
+                            
+                            $diskonAktif = isset($sesi['diskon']) ? $sesi['diskon'] : $diskonKeseluruhan;
 
-                if (isset($sesi['harga_sesi']) && $sesi['harga_sesi'] > 0) {
-
-                    // Cek jika ada diskon khusus per sesi, jika tidak gunakan diskon keseluruhan
-                    $diskonAktif = isset($sesi['diskon']) ? $sesi['diskon'] : $diskonKeseluruhan;
-
-                    if ($diskonAktif > 0 && $diskonAktif <= 100) {
-                        // 1. Simpan harga asli ke harga_coret (Misal: 200.000)
-                        $sesi['harga_coret'] = $sesi['harga_sesi'];
-
-                        // 2. Hitung harga bayar setelah diskon (Misal: 200.000 - 10% = 180.000)
-                        $potonganDiskon = $sesi['harga_sesi'] * ($diskonAktif / 100);
-                        $sesi['harga_sesi'] = $sesi['harga_sesi'] - $potonganDiskon;
-                    } else {
-                        // Jika tidak ada diskon
-                        $sesi['harga_coret'] = $sesi['harga_sesi'];
+                            if ($diskonAktif > 0 && $diskonAktif <= 100) {
+                                $sesi['harga_coret'] = $sesi['harga_sesi'];
+                                $potonganDiskon = $sesi['harga_sesi'] * ($diskonAktif / 100);
+                                $sesi['harga_sesi'] = $sesi['harga_sesi'] - $potonganDiskon;
+                            } else {
+                                $sesi['harga_coret'] = $sesi['harga_sesi'];
+                            }
+                        } else {
+                            $sesi['harga_coret'] = 0; // Jika sesi gratis
+                        }
                     }
-                } else {
-                    $sesi['harga_coret'] = 0; // Jika sesi gratis
                 }
             }
         }

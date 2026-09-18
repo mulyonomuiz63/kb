@@ -34,62 +34,52 @@ class HomeController extends BaseController
         // =================================================================================
         $db = \Config\Database::connect();
         $id_siswa = session()->get('id');
-        $currentDateTime = strtotime(date('Y-m-d H:i:s'));
+        $currentDateTime = time();
 
-        // Ambil data paket yang dimiliki siswa 
-        // (Ditambahkan paket.nama_paket agar judul H2 di alert tidak error)
-        $dataWebinar = $db->table('transaksi')
-            ->select('webinar_sesi.*, paket.nama_paket')
-            ->join('detail_transaksi', 'transaksi.idtransaksi = detail_transaksi.idtransaksi')
-            ->join('paket', 'detail_transaksi.idpaket = paket.idpaket')
-            ->join('webinar_sesi', 'detail_transaksi.idsesi = webinar_sesi.id_sesi')
-            ->where('transaksi.status', 'S')
-            ->where('transaksi.idsiswa', $id_siswa)
-            ->groupBy('detail_transaksi.idpaket')
+        // 1. Ambil SEMUA data sesi (Tanpa harus ada transaksi)
+        // Kita gunakan 'left join' ke paket agar jika ada sesi yg tidak terikat paket, tetap muncul
+        $dataWebinar = $db->table('webinar_sesi')
+            ->select('webinar_sesi.*')
             ->get()
             ->getResult();
 
         $activeAlerts = [];
 
         foreach ($dataWebinar as $w) {
+            // 2. Decode sesi_gratis untuk mengecek isinya
             $childIds = json_decode($w->sesi_gratis, true) ?? [];
 
-            if (!empty($childIds)) {
-                $childSessions = $db->table('webinar_sesi')
-                    ->whereIn('id_sesi', $childIds)
-                    ->orderBy('waktu_mulai', 'ASC')
-                    ->get()
-                    ->getResult();
-            } else {
-                $childSessions = [$w]; // Fallback jika tidak ada anak
-            }
+            // 3. KONDISI 1: Hanya proses jika sesi_gratis KOSONG (berarti nilainya [] atau null)
+            if (empty($childIds)) {
 
-            foreach ($childSessions as $child) {
-                $waktuMulai = strtotime($child->waktu_mulai);
-                $waktuSelesai = strtotime($child->waktu_selesai);
-                $waktuBukaZoom = $waktuMulai - (3 * 3600); // 3 Jam sebelum
+                $waktuMulai   = strtotime($w->waktu_mulai);
+                $waktuSelesai = strtotime($w->waktu_selesai);
+                $waktuBukaZoom = $waktuMulai - (3 * 3600); // 3 Jam sebelum mulai
 
-                // KONDISI UTAMA: Jika waktu sekarang berada di antara waktu buka zoom dan waktu selesai
+                // 4. KONDISI 2: Jika waktu sekarang berada di antara 3 jam sebelum mulai dan waktu selesai
                 if ($currentDateTime >= $waktuBukaZoom && $currentDateTime <= $waktuSelesai) {
 
                     // Ekstrak Link Gmeet/Zoom
-                    $zoomLinks = json_decode($child->link_zoom, true) ?? [];
-                    $child->mainZoomLink = $zoomLinks[0] ?? $child->link_zoom;
+                    $zoomLinks = json_decode($w->link_zoom, true) ?? [];
+                    // Jika formatnya array ambil index 0, jika text biasa langsung ambil datanya
+                    $w->mainZoomLink = !empty($zoomLinks[0]) ? $zoomLinks[0] : $w->link_zoom;
 
-                    // Penanda apakah benar-benar sedang live atau sekadar persiapan (2 jam sblm)
-                    $child->is_live = ($currentDateTime >= $waktuMulai);
-                    $child->waktu_mulai_format = $waktuMulai;
-                    $child->waktu_selesai_format = $waktuSelesai;
+                    // Penanda apakah benar-benar sedang live atau sekadar persiapan (menunggu mulai)
+                    $w->is_live = ($currentDateTime >= $waktuMulai);
+                    $w->waktu_mulai_format = $waktuMulai;
+                    $w->waktu_selesai_format = $waktuSelesai;
 
                     // Set nama paket parent untuk ditampilkan di <h2> View
-                    $child->nama_paket_parent = $w->nama_paket ?? 'Paket Pelatihan';
+                    // Jika sesi ini tidak punya paket, beri nama default
+                    $w->nama_paket_parent = $w->nama_paket ?? 'Webinar Terbuka / Gratis';
 
-                    $activeAlerts[] = $child;
+                    // Masukkan ke array alert yang akan di tampilkan
+                    $activeAlerts[] = $w;
                 }
             }
         }
 
-        // Masukkan variabel $activeAlerts ke $this->data agar bisa dibaca di View
+        // 5. Masukkan variabel $activeAlerts ke $this->data agar bisa dibaca di View
         $this->data['activeAlerts'] = $activeAlerts;
         // =================================================================================
         // AKHIR LOGIKA ALERT WEBINAR
@@ -99,8 +89,8 @@ class HomeController extends BaseController
             ->where('idsiswa', $id_siswa)
             ->where('status', 'S')
             ->groupStart() // Membuka kurung query agar kondisi OR tidak merusak WHERE idsiswa
-                ->like('jenis_paket', '"brevet"') // Mencari string "brevet" di dalam array
-                ->orLike('jenis_paket', '"ikh"')  // ATAU mencari string "ikh" di dalam array
+            ->like('jenis_paket', '"brevet"') // Mencari string "brevet" di dalam array
+            ->orLike('jenis_paket', '"ikh"')  // ATAU mencari string "ikh" di dalam array
             ->groupEnd()
             ->countAllResults();
 
