@@ -295,7 +295,7 @@ $paketUtama = !empty($daftarPaket) ? $daftarPaket[0] : null;
                     </div>
 
                     <div class="col-lg-6 text-center">
-                        <?php $videoUrl =  base_url('uploads/video/opening.mp4'); ?>
+                        <?php $videoUrl =  base_url('uploads/video/opening.mp4?v=' . time()); ?>
                         <div class="ratio ratio-16x9 rounded-4 shadow-lg border border-3 border-white overflow-hidden" style="pointer-events: none;">
                             <video src="<?= $videoUrl ?>" autoplay muted loop playsinline style="object-fit: cover; width: 100%; height: 100%;"></video>
                         </div>
