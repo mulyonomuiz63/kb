@@ -51,8 +51,10 @@ class WebinarController extends BaseController
         $breadcrumbItems = [
             "Home" => base_url(),
         ];
-        $uri = new \CodeIgniter\HTTP\URI($this->request->getUri());
-        session()->set(['url' => $uri->getPath().'#pendaftaran']);
+        session()->set([
+            'url' => current_url().'#pendaftaran',
+            'url_redirect' => current_url()
+        ]);
 
         // 1. Ambil data dari model
         $katalog_webinar = $this->sesiModel->getPaketWebinarLengkap($slug);
@@ -111,7 +113,7 @@ class WebinarController extends BaseController
 
         // Jika user iseng bypass HTML Required dan tidak memilih sesi satupun
         if (empty($sesi_terpilih) || !is_array($sesi_terpilih)) {
-            return redirect()->to(session()->get('url'))->withInput()->with('error', 'Pilih minimal satu sesi webinar.');
+            return redirect()->to(session()->get('url_redirect'))->withInput()->with('error', 'Pilih minimal satu sesi webinar.');
         }
 
         // ==============================================================================
@@ -176,11 +178,11 @@ class WebinarController extends BaseController
         if (!$this->validate($rules)) {
             $errors = $this->validator->getErrors();
             $errorMsg = implode(' ', $errors);
-            return redirect()->to(session()->get('url'))->withInput()->with('error', str_replace(["\r", "\n"], '', $errorMsg));
+            return redirect()->to(session()->get('url_redirect'))->withInput()->with('error', str_replace(["\r", "\n"], '', $errorMsg));
         }
 
         if (!is_valid_domain($email)) {
-            return redirect()->to(session()->get('url'))->withInput()->with('error', 'Domain email tidak valid.');
+            return redirect()->to(session()->get('url_redirect'))->withInput()->with('error', 'Domain email tidak valid.');
         }
 
         $db = \Config\Database::connect();
@@ -195,7 +197,7 @@ class WebinarController extends BaseController
             ->get()->getRow();
 
         if (empty($dataPaket)) {
-            return redirect()->to(session()->get('url'))->with('error', 'Data Paket Webinar tidak ditemukan.');
+            return redirect()->to(session()->get('url_redirect'))->with('error', 'Data Paket Webinar tidak ditemukan.');
         }
 
         $isCurrentGratis = ((float) $dataPaket->harga_sesi <= 0);
@@ -215,7 +217,7 @@ class WebinarController extends BaseController
                 ->countAllResults();
 
             if ($recentTx > 0) {
-                return redirect()->to(session()->get('url'))->withInput()->with('error', 'Sistem sedang memproses pendaftaran Anda. Mohon jangan klik tombol daftar berulang kali.');
+                return redirect()->to(session()->get('url_redirect'))->withInput()->with('error', 'Sistem sedang memproses pendaftaran Anda. Mohon jangan klik tombol daftar berulang kali.');
             }
 
             // [CEK DUPLIKASI PAKET] - Boleh beli lagi JIKA beda versi (Gratis vs Berbayar)
@@ -236,7 +238,7 @@ class WebinarController extends BaseController
 
             if ($cekPaketAktif) {
                 $tipePaket = $isCurrentGratis ? 'Gratis' : 'Premium/Berbayar';
-                return redirect()->to(session()->get('url'))->withInput()->with('error', "Anda sudah memiliki paket {$tipePaket} untuk sesi ini. Silahkan login ke akun Anda untuk melihat paket webinar.");
+                return redirect()->to(session()->get('url_redirect'))->withInput()->with('error', "Anda sudah memiliki paket {$tipePaket} untuk sesi ini. Silahkan login ke akun Anda untuk melihat paket webinar.");
             }
         }
         // ==============================================================================
@@ -466,14 +468,14 @@ class WebinarController extends BaseController
         $db->transComplete();
 
         if ($db->transStatus() === FALSE) {
-            return redirect()->to(session()->get('url'))->withInput()->with('error', 'Terjadi kesalahan pada server saat mendaftar.');
+            return redirect()->to(session()->get('url_redirect'))->withInput()->with('error', 'Terjadi kesalahan pada server saat mendaftar.');
         }
 
         // 7. Selesai
         if ($gross_amount > 0) {
             return redirect()->to('webinar/invoice')->with('success_webinar', 'Pendaftaran berhasil, silakan selesaikan pembayaran!')->with('snapToken', $snapToken);
         } else {
-            return redirect()->to(session()->get('url'))->with('success_webinar', 'Anda telah terdaftar sebagai peserta, informasi selengkapnya akan dikirim melalui email Anda.');
+            return redirect()->to(session()->get('url_redirect'))->with('success_webinar', 'Anda telah terdaftar sebagai peserta, informasi selengkapnya akan dikirim melalui email Anda.');
         }
     }
     public function invoice()
@@ -496,8 +498,10 @@ class WebinarController extends BaseController
         $breadcrumbItems = [
             "Home" => base_url(),
         ];
-        $uri = new \CodeIgniter\HTTP\URI($this->request->getUri());
-        session()->set(['url' => $uri->getPath().'#pendaftaran']);
+        session()->set([
+            'url' => current_url().'#pendaftaran',
+            'url_redirect' => current_url()
+        ]);
 
         // 1. Ambil data dari model (Kini diasumsikan model mengembalikan ARRAY berisi BANYAK PAKET)
         $katalog_webinar = $this->sesiModel->getPaketWebinarLengkap($slugs);
