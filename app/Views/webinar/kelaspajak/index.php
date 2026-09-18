@@ -839,25 +839,27 @@ $paketUtama = !empty($daftarPaket) ? $daftarPaket[0] : null;
                     icon: 'success',
                     title: 'Pendaftaran Berhasil!',
                     html: `
-                        <p class="text-gray-700 fs-6 mb-4"><?= json_encode(session()->getFlashdata('success_webinar')) ?></p>
-                        <div class="p-4 bg-light-success border border-success border-dashed rounded-4 text-center">
-                            <span class="d-block fw-bold text-dark fs-6 mb-2">🎉 Langkah Terakhir!</span>
-                            <p class="text-muted fs-7 mb-4">Silakan bergabung ke Grup WhatsApp resmi untuk mendapatkan link akses gmeet dan koordinasi selanjutnya.</p>
-                            <div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
-                                <a href="https://chat.whatsapp.com/CHWkmrWMqrSJvJNlu1UoVy?s=cl&p=i&mlu=4" target="_blank" class="btn btn-success fw-bold px-6 py-3 shadow-sm d-inline-flex align-items-center justify-content-center gap-2 w-100 w-sm-auto">
-                                    <i class="fa-brands fa-whatsapp fs-3"></i>
-                                    <span>Join Grup Update Perpajakan</span>
+                        <p class="text-gray-700 fs-6 mb-3"><?= json_encode(session()->getFlashdata('success_webinar')) ?></p>
+                        <div class="p-3 bg-light-success border border-success border-dashed rounded-4 text-center">
+                            <span class="d-block fw-bold text-dark fs-6 mb-1">🎉 Langkah Terakhir!</span>
+                            <p class="text-muted fs-7 mb-3" style="font-size: 0.85rem; line-height: 1.4;">Silakan bergabung ke Grup WhatsApp resmi untuk mendapatkan link akses gmeet dan koordinasi selanjutnya.</p>
+                            
+                            <!-- PERUBAHAN DI SINI: Ukuran tombol disesuaikan, padding diperkecil, dan ukuran font lebih pas -->
+                            <div class="d-flex flex-column flex-sm-row justify-content-center gap-2">
+                                <a href="https://chat.whatsapp.com/CHWkmrWMqrSJvJNlu1UoVy?s=cl&p=i&mlu=4" target="_blank" class="btn btn-success fw-bold px-3 py-2 shadow-sm d-inline-flex align-items-center justify-content-center gap-2 flex-fill text-start" style="font-size: 0.8rem; border-radius: 8px;">
+                                    <i class="fa-brands fa-whatsapp fs-4 flex-shrink-0"></i>
+                                    <span style="line-height: 1.2;">Grup Update Perpajakan</span>
                                 </a>
-                                <a href="https://chat.whatsapp.com/JejzQkQMV0GCo9ANGko11m?s=cl&p=i&mlu=4" target="_blank" class="btn btn-success fw-bold px-6 py-3 shadow-sm d-inline-flex align-items-center justify-content-center gap-2 w-100 w-sm-auto">
-                                    <i class="fa-brands fa-whatsapp fs-3"></i>
-                                    <span>Join Grup ALC & KelasBrevet</span>
+                                <a href="https://chat.whatsapp.com/JejzQkQMV0GCo9ANGko11m?s=cl&p=i&mlu=4" target="_blank" class="btn btn-success fw-bold px-3 py-2 shadow-sm d-inline-flex align-items-center justify-content-center gap-2 flex-fill text-start" style="font-size: 0.8rem; border-radius: 8px;">
+                                    <i class="fa-brands fa-whatsapp fs-4 flex-shrink-0"></i>
+                                    <span style="line-height: 1.2;">Grup ALC & KelasBrevet</span>
                                 </a>
                             </div>
                         </div>
                     `,
                     confirmButtonColor: '#0d6efd',
                     confirmButtonText: 'Tutup / Nanti Saja',
-                    customClass: { popup: 'rounded-4 p-5' }
+                    customClass: { popup: 'rounded-4 p-4' }
                 });
             <?php endif; ?>
 
