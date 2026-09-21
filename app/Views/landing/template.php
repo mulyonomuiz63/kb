@@ -914,6 +914,9 @@
                                         <p> <i class="flaticon-phone-call"></i> <a href="tel:082180744966">082180744966</a> </p>
                                     </li>
                                     <li>
+                                        <p> <i class="flaticon-phone-call"></i> <a href="tel:085284767476">085284767476</a> </p>
+                                    </li>
+                                    <li>
                                         <p> <i class="bi bi-building-add"></i><a href="#">KBIG Office - Jl. Sawo Raya - Lampung</a> </p>
                                     </li>
                                     <li>
