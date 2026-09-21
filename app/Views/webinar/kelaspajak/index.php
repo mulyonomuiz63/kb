@@ -655,7 +655,7 @@ $paketUtama = !empty($daftarPaket) ? $daftarPaket[0] : null;
                                 <div class="mb-3">
                                     <label class="form-label fw-semibold fs-7 fs-lg-6">Nomor WhatsApp <span class="text-danger">*</span></label>
                                     <div class="input-group">
-                                        <input type="number" name="hp" value="<?= session()->get('id') && isset($siswa) ? esc($siswa['hp']) : esc(old('hp')) ?>" class="form-control form-control-md form-control-lg-lg" placeholder="81234567890" pattern="[0-9]+" minlength="10" maxlength="15" required autocomplete="off" <?= session()->get('id') ? 'readonly style="cursor: not-allowed; background-color: #e9ecef;"' : '' ?>>
+                                        <input type="number" name="hp" value="<?= session()->get('id') && isset($siswa) ? esc($siswa['hp']) : esc(old('hp')) ?>" class="form-control form-control-md form-control-lg-lg" placeholder="81234567890" pattern="[0-9]+" minlength="10" maxlength="15" required autocomplete="off" <?= session()->get('id') ? 'style="cursor: not-allowed; background-color: #e9ecef;"' : '' ?>>
                                     </div>
                                 </div>
 
