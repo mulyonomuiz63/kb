@@ -170,7 +170,7 @@
                 ['icon' => '🎓', 'title' => 'E-Sertifikat', 'desc' => 'Sertifikat resmi per modul dan ujian akhir.'],
                 ['icon' => '💬', 'title' => 'Konsultasi Live', 'desc' => 'Tanya jawab langsung dengan praktisi ahli.'],
               ];
-              foreach ($benefits as $b): ?>
+              foreach ($benefits as$b): ?>
                 <div class="col-md-6">
                   <div class="d-flex align-items-center">
                     <div class="benefit-icon fs-4"><?= $b['icon'] ?></div>
@@ -222,15 +222,39 @@
 
               <div class="row g-9 mb-7">
                 <div class="col-md-6 fv-row">
-                  <label class="fw-bold fs-6 mb-2">Nomor HP aktfi Atau WA Aktif</label>
-                  <input type="number"
-                    id="hp"
-                    name="hp"
-                    value="<?= old('hp'); ?>"
-                    placeholder="Nomor/WA Aktif"
-                    class="form-control form-control-solid"
-                    required
-                    autocomplete="off">
+                  <label class="fw-bold fs-6 mb-2">Nomor HP aktif Atau WA Aktif</label>
+                  <div class="input-group flex-nowrap">
+                    <input type="number"
+                        id="hp"
+                        name="hp"
+                        data-verified="0"
+                        value="<?= old('hp'); ?>"
+                        placeholder="Nomor/WA Aktif"
+                        class="form-control form-control-solid"
+                        required
+                        maxlength="15"
+                        autocomplete="off">
+                    <button class="btn btn-primary text-nowrap" type="button" id="btn-send-otp" style="display: none;" title="Kirim OTP Ke WhatsApp">
+                        Verifikasi
+                    </button>
+                  </div>
+
+                  <!-- Form OTP Dinamis -->
+                  <div id="otp-area" class="mt-3 p-3 border border-primary border-dashed rounded bg-light-primary" style="display: none;">
+                    <label class="form-label fw-bold text-primary fs-7 mb-1">Masukkan 6 Digit OTP</label>
+                    <div class="input-group flex-nowrap mb-2">
+                        <input type="text" id="otp-input" class="form-control form-control-solid text-center fw-bolder fs-4" placeholder="••••••" maxlength="6" autocomplete="off">
+                        <button class="btn btn-success text-nowrap" type="button" id="btn-verify-otp">Cek Kode</button>
+                    </div>
+                    <div class="form-text text-muted fs-7">
+                        Kode OTP kadaluarsa dalam: <span id="otp-timer" class="fw-bold text-danger">05:00</span>
+                    </div>
+                  </div>
+
+                  <!-- Badge Terverifikasi -->
+                  <div id="wa-verified-badge" class="mt-2" style="display: none;">
+                    <span class="badge badge-light-success fs-7 fw-bold p-2 text-success"><i class="bi bi-check-circle-fill me-1"></i>Nomor WA Terverifikasi</span>
+                </div>
                 </div>
                 <div class="col-md-6 fv-row">
                   <label class="fw-bold fs-6 mb-2">Email Aktif</label>
@@ -249,7 +273,7 @@
               </div>
 
               <div class="text-center">
-                <button type="button" class="btn btn-primary btn-lg w-100 fw-bolder" onclick="submitForm('registrasi')">
+                <button type="button" class="btn btn-primary btn-lg w-100 fw-bolder" id="btn-submit-reg" onclick="submitFormCustom('registrasi')">
                   <span class="indicator-label">Daftar & Lanjutkan Pembayaran</span>
                 </button>
                 <?php if (strtolower(setting('client_status')) == 'true'): ?>
@@ -284,7 +308,7 @@
         </div>
         <div class="card-body p-9">
           <div class="mb-7 text-center">
-            <?= img_lazy('assets-landing/images/paket/thumbnails/' . $paket->file, $paket->nama_paket, ['class' => 'rounded-3 w-100 mb-5 shadow-sm']) ?>
+            <?= img_lazy('assets-landing/images/paket/thumbnails/' . $paket->file,$paket->nama_paket, ['class' => 'rounded-3 w-100 mb-5 shadow-sm']) ?>
             <h4 class="text-gray-800 fw-bolder mb-0"><?= $paket->nama_paket ?></h4>
             <span class="badge badge-light-primary fw-bold px-4 py-2 mt-2"><?= $paket->tagline ?></span>
           </div>
@@ -362,8 +386,6 @@
     btn.prop('disabled', true);
     btn.find('.indicator-label').hide();
     btn.find('.indicator-progress').show();
-
-    // Form akan otomatis ter-submit seperti biasa
   });
 
   $(document).ready(function() {
@@ -404,7 +426,6 @@
                         </div>
                     `);
 
-          // Update total di bagian bawah sidebar
           $("#main_total_display").html(`Rp ${number_format(hargaVoucher,'0','.','.')}`);
 
         } else {
@@ -438,24 +459,178 @@
 </script>
 
 <script>
-  function submitForm(actionName) {
-    if (!form.checkValidity()) {
-      // Jika tidak valid, munculkan peringatan bawaan browser
-      form.reportValidity();
-      return; // Berhenti di sini, jangan lanjut ke reCAPTCHA
-    }
-    // Ambil status aktif reCAPTCHA dari PHP/Env
-    const isRecaptchaActive = <?= setting('recaptcha_status') === 'true' ? 'true' : 'false' ?>;
+  var csrfName = '<?= csrf_token() ?>';
+  var csrfHash = '<?= csrf_hash() ?>';
 
-    // Jika tidak aktif, langsung submit form
-    if (!isRecaptchaActive) {
-      document.getElementById('form').submit();
+  $(document).ready(function() {
+    var timerInterval;
+    var lastVerifiedHp = '';
+
+    function checkWaStatus() {
+      var currentHp = $('#hp').val();
+      var isVerified = $('#hp').data('verified');
+      var btnReg = $('#btn-submit-reg');
+
+      $('#btn-send-otp').hide();
+      $('#wa-verified-badge').hide();
+      btnReg.prop('disabled', false);
+
+      if (currentHp === '') {
+        btnReg.prop('disabled', true);
+      } else if (currentHp !== lastVerifiedHp || isVerified == 0) {
+        $('#btn-send-otp').show();
+        btnReg.prop('disabled', true);
+        btnReg.html('Verifikasi WA Dulu');
+      } else {
+        $('#wa-verified-badge').show();
+        btnReg.prop('disabled', false);
+        btnReg.html('Daftar & Lanjutkan Pembayaran');
+      }
+    }
+
+    checkWaStatus();
+
+    $('#hp').on('input', function() {
+      if (this.value.length > 15) this.value = this.value.slice(0, 15);
+      $('#otp-area').slideUp();
+      clearInterval(timerInterval);
+      
+      if ($(this).val() !== lastVerifiedHp) {$(this).data('verified', 0);
+      }
+      checkWaStatus();
+    });
+
+    $('#btn-send-otp').click(function(e) {
+      e.preventDefault();
+      var hp = $('#hp').val();
+
+      if (hp.length < 9) {
+        alert('Pastikan nomor WhatsApp valid!');
+        return;
+      }
+
+      var btn = $(this);
+      btn.prop('disabled', true).text('Loading...');
+
+      var requestData = { hp: hp };
+      requestData[csrfName] = csrfHash;
+
+      $.ajax({
+        url: '<?= base_url("auth/send-otp") ?>',
+        type: 'POST',
+        data: requestData,
+        dataType: 'json',
+        success: function(res) {
+          csrfHash = res.csrfHash;
+          $('input[name="' + csrfName + '"]').val(csrfHash);
+
+          if (res.status === 'success') {
+            btn.hide().prop('disabled', false).text('Verifikasi');
+            $('#otp-area').slideDown();
+            $('#otp-input').val('').focus();
+            startOtpTimer(300);
+          } else {
+            alert(res.message);
+            btn.prop('disabled', false).text('Coba Lagi');
+          }
+        },
+        error: function(xhr) {
+          alert('Terjadi kesalahan sistem saat mengirim OTP.');
+          btn.prop('disabled', false).text('Coba Lagi');
+        }
+      });
+    });
+
+    $('#btn-verify-otp').click(function(e) {
+      e.preventDefault();
+      var otp = $('#otp-input').val();
+      var hp = $('#hp').val();
+
+      if (otp.length !== 6) {
+        alert('Kode OTP harus 6 digit angka!');
+        return;
+      }
+
+      var btn = $(this);
+      btn.prop('disabled', true).text('Cek...');
+
+      var requestData = { hp: hp, otp: otp };
+      requestData[csrfName] = csrfHash;
+
+      $.ajax({
+        url: '<?= base_url("auth/verify-otp") ?>',
+        type: 'POST',
+        data: requestData,
+        dataType: 'json',
+        success: function(res) {
+          csrfHash = res.csrfHash;
+          $('input[name="' + csrfName + '"]').val(csrfHash);
+
+          if (res.status === 'success') {
+            clearInterval(timerInterval);
+            $('#otp-area').slideUp();
+
+            lastVerifiedHp = hp;
+            $('#hp').data('verified', 1);
+            checkWaStatus();
+
+            btn.prop('disabled', false).text('Cek Kode');
+            $('#otp-input').val('');
+          } else {
+            alert(res.message);
+            btn.prop('disabled', false).text('Cek Kode');
+          }
+        },
+        error: function(xhr) {
+          alert('Terjadi kesalahan saat verifikasi.');
+          btn.prop('disabled', false).text('Cek Kode');
+        }
+      });
+    });
+
+    function startOtpTimer(duration) {
+      clearInterval(timerInterval);
+      var timer = duration, minutes, seconds;
+
+      timerInterval = setInterval(function () {
+        minutes = parseInt(timer / 60, 10);
+        seconds = parseInt(timer % 60, 10);
+
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+
+        $('#otp-timer').text(minutes + ":" + seconds);
+
+        if (--timer < 0) {
+          clearInterval(timerInterval);
+          $('#otp-area').slideUp();
+          $('#btn-send-otp').show().text('Kirim Ulang OTP');
+        }
+      }, 1000);
+    }
+  });
+
+  function submitFormCustom(actionName) {
+    var form = document.getElementById('form');
+    if (!form.checkValidity()) {
+      form.reportValidity();
       return;
     }
 
-    // Logika jika aktif
+    // Tampilkan efek loading pada tombol registrasi agar tidak dobel klik
+    var btnReg = $('#btn-submit-reg');
+    btnReg.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Sedang diproses...');
+
+    const isRecaptchaActive = <?= setting('recaptcha_status') === 'true' ? 'true' : 'false' ?>;
+
+    if (!isRecaptchaActive) {
+      form.submit();
+      return;
+    }
+
     if (typeof grecaptcha === 'undefined') {
       alert('reCAPTCHA gagal dimuat, periksa koneksi internet Anda.');
+      btnReg.prop('disabled', false).html('Daftar & Lanjutkan Pembayaran');
       return;
     }
 
@@ -464,7 +639,9 @@
         action: actionName
       }).then(function(token) {
         document.getElementById('recaptcha_token').value = token;
-        document.getElementById('form').submit();
+        form.submit();
+      }).catch(function(err) {
+        btnReg.prop('disabled', false).html('Daftar & Lanjutkan Pembayaran');
       });
     });
   }
