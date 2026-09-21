@@ -225,7 +225,7 @@ class ProfileController extends BaseController
     // Pastikan Anda meload helper atau class untuk kirim_wa
     // dan memiliki model untuk akses tabel siswa.
 
-public function sendOtp()
+    public function sendOtp()
     {
         try {
             // 1. Ambil data dari post dan session
@@ -282,7 +282,7 @@ public function sendOtp()
 
             // 8. Kirim WA dan Cek Responnya
             kirim_wa($hp, '', $data_template);
-            
+
             // Catatan: Jika helper kirim_wa mengembalikan format JSON/Array, 
             // Anda bisa melakukan pengecekan di sini. 
             // Contoh (sesuaikan dengan respon asli dari Watzap Anda):
@@ -297,7 +297,6 @@ public function sendOtp()
                 'message' => 'OTP Terkirim ke nomor Anda.',
                 'csrfHash' => csrf_hash()
             ]);
-
         } catch (\Exception $e) {
             // CATAT ERROR KE FILE LOG CI4 (Cek di folder writable/logs/)
 
@@ -386,11 +385,8 @@ public function sendOtp()
                 'message' => 'Nomor WhatsApp berhasil diverifikasi.',
                 'csrfHash' => csrf_hash()
             ]);
-
         } catch (\Exception $e) {
             // CATAT ERROR KE FILE LOG
-            log_message('error', '[VERIFY OTP ERROR] ' . $e->getMessage() . ' | Line: ' . $e->getLine());
-
             $msg = ENVIRONMENT !== 'production' ? $e->getMessage() : 'Terjadi kesalahan sistem saat memverifikasi kode.';
 
             return $this->response->setJSON([

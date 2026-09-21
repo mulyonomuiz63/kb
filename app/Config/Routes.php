@@ -38,6 +38,9 @@ $routes->group('auth', ['filter' => 'isGuest'], function ($routes) {
     
     
     $routes->get('google', 'AuthController::google');
+
+    $routes->post('send-otp', 'RegisterController::sendOtp');
+    $routes->post('verify-otp', 'RegisterController::verifyOtp');
 });
 
 

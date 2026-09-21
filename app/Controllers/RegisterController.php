@@ -361,4 +361,143 @@ class RegisterController extends BaseController
         }
         return $this->response->setJSON($result);
     }
+
+    public function sendOtp()
+    {
+        try {
+            // 1. Ambil data dari post
+            $hp = $this->request->getPost('hp');
+
+            // 2. Bersihkan Nomor HP (Hanya ambil angka)
+            $hp = preg_replace('/[^0-9]/', '', (string)$hp);
+
+            // 3. Validasi Input HP
+            if (empty($hp) || strlen($hp) < 9) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Format nomor WhatsApp tidak valid.',
+                    'csrfHash' => csrf_hash()
+                ]);
+            }
+
+            // 4. Generate OTP dan Expired (5 menit)
+            $otp_code = rand(100000, 999999);
+            $expired_time = date('Y-m-d H:i:s', strtotime('+5 minutes'));
+
+            // 5. Simpan OTP sementara ke dalam Session (karena user belum terdaftar di database)
+            session()->set([
+                'otp_reg_hp' => $hp,
+                'otp_reg_code' => $otp_code,
+                'otp_reg_expired' => $expired_time,
+                'otp_reg_verified' => false
+            ]);
+
+            // 6. Siapkan Template WhatsApp
+            $data_template = [
+                "template_name"     => "kirim_otp",
+                "template_language" => "id",
+                "parameter"         => [
+                    [
+                        "1"    => (string)$otp_code,
+                        "code" => (string)$otp_code
+                    ]
+                ],
+                "apps_source"       => "kelasbrevet"
+            ];
+
+            // 7. Kirim WA
+            kirim_wa($hp, '', $data_template);
+
+            // 8. Berhasil
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'OTP Terkirim ke nomor Anda.',
+                'csrfHash' => csrf_hash()
+            ]);
+
+        } catch (\Exception $e) {
+            log_message('error', '[AUTH SEND OTP ERROR] ' . $e->getMessage());
+
+            $msg = ENVIRONMENT !== 'production' ? $e->getMessage() : 'Terjadi kesalahan sistem saat mengirim OTP. Silakan coba beberapa saat lagi.';
+
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => $msg,
+                'csrfHash' => csrf_hash()
+            ]);
+        }
+    }
+
+    public function verifyOtp()
+    {
+        try {
+            $hp = $this->request->getPost('hp');
+            $otp = $this->request->getPost('otp');
+
+            // 1. Validasi Input
+            if (empty($hp) || empty($otp)) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Data tidak lengkap.', 'csrfHash' => csrf_hash()]);
+            }
+
+            // Bersihkan nomor HP dan OTP
+            $hp = preg_replace('/[^0-9]/', '', (string)$hp);
+            $otp = preg_replace('/[^0-9]/', '', (string)$otp);
+
+            // 2. Ambil data OTP dari Session Registrasi
+            $sessionHp = session()->get('otp_reg_hp');
+            $sessionOtp = session()->get('otp_reg_code');
+            $sessionExpired = session()->get('otp_reg_expired');
+
+            if (!$sessionHp || $sessionHp !== $hp) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Nomor WhatsApp tidak cocok dengan permintaan OTP.',
+                    'csrfHash' => csrf_hash()
+                ]);
+            }
+
+            $now = date('Y-m-d H:i:s');
+
+            // 3. Cek Kedaluwarsa
+            if ($now > $sessionExpired) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Kode OTP sudah kadaluarsa. Silakan kirim ulang kode.',
+                    'csrfHash' => csrf_hash()
+                ]);
+            }
+
+            // 4. Cek Kecocokan OTP
+            if ((string)$otp !== (string)$sessionOtp) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Kode OTP tidak cocok. Silakan periksa kembali.',
+                    'csrfHash' => csrf_hash()
+                ]);
+            }
+
+            // 5. Set Status Verified di Session menjadi True
+            session()->set([
+                'otp_reg_verified' => true,
+                'otp_reg_hp' => $hp
+            ]);
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Nomor WhatsApp berhasil diverifikasi.',
+                'csrfHash' => csrf_hash()
+            ]);
+
+        } catch (\Exception $e) {
+            log_message('error', '[AUTH VERIFY OTP ERROR] ' . $e->getMessage());
+
+            $msg = ENVIRONMENT !== 'production' ? $e->getMessage() : 'Terjadi kesalahan sistem saat memverifikasi kode.';
+
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => $msg,
+                'csrfHash' => csrf_hash()
+            ]);
+        }
+    }
 }
