@@ -55,6 +55,10 @@ $routes->group('sw-siswa', ['filter' => 'roleCheck:2'], function ($routes) {
         $routes->get('/', 'Siswa\ProfileController::index');
         $routes->post('update-data-diri', 'Siswa\ProfileController::editProfile');
         $routes->post('edit-password', 'Siswa\ProfileController::editPassword');
+
+        // Route untuk pengiriman dan verifikasi OTP WhatsApp
+        $routes->post('send-otp', 'Siswa\ProfileController::sendOtp');
+        $routes->post('verify-otp', 'Siswa\ProfileController::verifyOtp');
     });
 
 

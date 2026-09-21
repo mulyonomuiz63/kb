@@ -12,18 +12,10 @@
     }
 
     @keyframes slideDown {
-        from {
-            transform: translateY(-20px);
-            opacity: 0;
-        }
-
-        to {
-            transform: translateY(0);
-            opacity: 1;
-        }
+        from { transform: translateY(-20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
     }
 
-    /* BORDER MERAH UNTUK INPUT WAJIB YANG KOSONG */
     .is-invalid-field,
     .is-invalid-field:focus {
         border: 2px solid #f1416c !important;
@@ -37,8 +29,7 @@
         opacity: 0.75;
     }
 
-    /* Penyesuaian Select2 agar border merah terlihat jika kosong */
-    .is-invalid-field+.select2-container--bootstrap5 .select2-selection {
+    .select2-container--bootstrap5 .select2-selection {
         border: 2px solid #f1416c !important;
         background-color: #fff5f8 !important;
     }
@@ -58,41 +49,29 @@
         line-height: 1.5 !important;
     }
 
-    /* Animasi getar untuk input error */
     .shake-error {
         animation: shake 0.4s 1 linear;
     }
 
     @keyframes shake {
-
-        0%,
-        100% {
-            transform: translateX(0);
-        }
-
-        25% {
-            transform: translateX(-5px);
-        }
-
-        50% {
-            transform: translateX(5px);
-        }
-
-        75% {
-            transform: translateX(-5px);
-        }
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        50% { transform: translateX(5px); }
+        75% { transform: translateX(-5px); }
     }
 </style>
 <?= $this->endSection(); ?>
 
 <?= $this->section('content'); ?>
 <?php
-// Fungsi Bantuan untuk mengecek kekosongan data saat status 'B'
 $isStatusB = ($siswa->status == 'B');
 $checkInvalid = function ($val) use ($isStatusB) {
     $isEmpty = empty(trim((string)$val)) || trim((string)$val) === '0000-00-00';
     return ($isStatusB && $isEmpty) ? 'is-invalid-field' : '';
 };
+
+// Ambil status verifikasi dari DB, pastikan nilai default 0 jika belum ada
+$isWaVerified = isset($siswa->is_wa_verified) ? $siswa->is_wa_verified : 0; 
 ?>
 
 <div class="d-flex flex-column flex-column-fluid py-3 py-lg-6 mt-8">
@@ -159,7 +138,7 @@ $checkInvalid = function ($val) use ($isStatusB) {
                                     <label class="fs-7 fw-bold mb-2 text-uppercase">Kata Sandi Baru</label>
                                     <div class="position-relative">
                                         <input type="password" name="password" id="pass" class="form-control form-control-solid" placeholder="Masukan sandi baru" required />
-                                        <span class="btn btn-sm btn-icon position-absolute translate-middle top-50 end-0 me-n2" id="mybutton" onclick="change()">
+                                        <span class="btn btn-sm btn-icon position-absolute translate-middle top-50 end-0 me-n2" id="mybutton" onclick="togglePassword()">
                                             <i class="bi bi-eye-slash-fill fs-3"></i>
                                         </span>
                                     </div>
@@ -232,15 +211,43 @@ $checkInvalid = function ($val) use ($isStatusB) {
                                         </div>
                                     </div>
 
+                                    <!-- BAGIAN WHATSAPP & VERIFIKASI OTP -->
                                     <div class="row mb-6">
                                         <label class="col-12 col-lg-4 col-form-label fw-bold fs-6 required">Email & WhatsApp</label>
                                         <div class="col-12 col-lg-4 mb-3 mb-lg-0">
                                             <input type="email" class="form-control form-control-lg form-control-solid bg-light-secondary" value="<?= $siswa->email; ?>" readonly />
                                         </div>
                                         <div class="col-12 col-lg-4">
-                                            <input type="number" name="hp" id="hp" class="form-control form-control-lg form-control-solid <?= $checkInvalid(old('hp', $siswa->hp)) ?>" value="<?= old('hp', $siswa->hp); ?>" required maxlength="15" placeholder="Nomor WhatsApp" />
+                                            <div class="input-group">
+                                                <input type="number" name="hp" id="hp" 
+                                                       data-original="<?= old('hp', $siswa->hp); ?>" 
+                                                       data-verified="<?= $isWaVerified; ?>" 
+                                                       class="form-control form-control-lg form-control-solid <?= $checkInvalid(old('hp', $siswa->hp)) ?>" 
+                                                       value="<?= old('hp', $siswa->hp); ?>" required maxlength="15" placeholder="Nomor WhatsApp" />
+                                                <button class="btn btn-primary" type="button" id="btn-send-otp" style="display: none;" title="Kirim OTP Ke WhatsApp">
+                                                    Verifikasi
+                                                </button>
+                                            </div>
+
+                                            <!-- Form OTP Dinamis -->
+                                            <div id="otp-area" class="mt-3 p-4 border border-primary border-dashed rounded bg-light-primary" style="display: none;">
+                                                <label class="form-label fw-bold text-primary fs-7">Masukkan 6 Digit OTP</label>
+                                                <div class="input-group mb-2">
+                                                    <input type="text" id="otp-input" class="form-control form-control-solid text-center fw-bolder fs-4 ls-2" placeholder="••••••" maxlength="6" autocomplete="off">
+                                                    <button class="btn btn-success" type="button" id="btn-verify-otp">Cek Kode</button>
+                                                </div>
+                                                <div class="form-text text-muted fs-7">
+                                                    Kode OTP kadaluarsa dalam: <span id="otp-timer" class="fw-bold text-danger fs-6">05:00</span>
+                                                </div>
+                                            </div>
+
+                                            <!-- Badge Terverifikasi -->
+                                            <div id="wa-verified-badge" class="mt-2" style="display: none;">
+                                                <span class="badge badge-light-success fs-7 fw-bold p-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Nomor WA Terverifikasi</span>
+                                            </div>
                                         </div>
                                     </div>
+                                    <!-- END WHATSAPP -->
 
                                     <div class="row mb-6">
                                         <label class="col-12 col-lg-4 col-form-label fw-bold fs-6 required">Tempat & Tanggal Lahir</label>
@@ -376,83 +383,241 @@ $checkInvalid = function ($val) use ($isStatusB) {
 
 <?= $this->section('scripts'); ?>
 <script>
+    // Konfigurasi CSRF
+    var csrfName = '<?= csrf_token() ?>';
+    var csrfHash = '<?= csrf_hash() ?>';
+
     // Preview Gambar
     function previewImg() {
-        const gambar = document.querySelector('#customFile');
-        const imgPreview = document.querySelector('#profile_avatar_preview');
-        const wrapper = document.querySelector('#preview_wrapper');
+        var gambar = document.querySelector('#customFile');
+        var imgPreview = document.querySelector('#profile_avatar_preview');
+        var wrapper = document.querySelector('#preview_wrapper');
 
         if (gambar.files && gambar.files[0]) {
-            const filegambar = new FileReader();
+            var filegambar = new FileReader();
             filegambar.readAsDataURL(gambar.files[0]);
             filegambar.onload = function(e) {
                 imgPreview.src = e.target.result;
-                wrapper.style.backgroundImage = `url(${e.target.result})`;
+                wrapper.style.backgroundImage = 'url(' + e.target.result + ')';
             }
         }
     }
 
     // Toggle Password
-    function change() {
+    function togglePassword() {
         var x = document.getElementById('pass');
         var btn = document.getElementById('mybutton');
         if (x.type === 'password') {
             x.type = 'text';
-            btn.innerHTML = `<i class="bi bi-eye-fill fs-3 text-primary"></i>`;
+            btn.innerHTML = '<i class="bi bi-eye-fill fs-3 text-primary"></i>';
         } else {
             x.type = 'password';
-            btn.innerHTML = `<i class="bi bi-eye-slash-fill fs-3"></i>`;
+            btn.innerHTML = '<i class="bi bi-eye-slash-fill fs-3"></i>';
         }
     }
 
     $(document).ready(function() {
+        
+        console.log("Script berhasil dimuat!");
 
-        // Hapus border merah seketika pengguna mulai mengetik atau memilih data
+        // -------------------------------------------------------------
+        // BLOK VERIFIKASI WHATSAPP OTP
+        // -------------------------------------------------------------
+        var timerInterval;
+
+        function checkWaStatus() {
+            var currentHp = $('#hp').val();
+            var originalHp = $('#hp').data('original');
+            var isVerified = $('#hp').data('verified');
+            var btnSubmit = $('#file-submit');
+
+            // Reset UI State
+            $('#btn-send-otp').hide();
+            $('#wa-verified-badge').hide();
+            btnSubmit.prop('disabled', false); 
+
+            if (currentHp === '') {
+                btnSubmit.prop('disabled', true);
+            } else if (currentHp != originalHp || isVerified == 0) {
+                $('#btn-send-otp').show();
+                btnSubmit.prop('disabled', true);
+                btnSubmit.html('<i class="bi bi-lock-fill"></i> Selesaikan Verifikasi WA');
+            } else {
+                $('#wa-verified-badge').show();
+                btnSubmit.prop('disabled', false);
+                btnSubmit.html('Simpan Perubahan');
+            }
+        }
+
+        checkWaStatus();
+
+        $('#hp').on('input', function() {
+            if (this.value.length > 15) this.value = this.value.slice(0, 15);
+            $('#otp-area').slideUp(); 
+            clearInterval(timerInterval);
+            checkWaStatus();
+        });
+
+        $('#btn-send-otp').click(function(e) {
+            e.preventDefault();
+            var hp = $('#hp').val();
+
+            if (hp.length < 9) {
+                Swal.fire('Format Salah', 'Pastikan nomor WhatsApp yang Anda masukkan valid!', 'warning');
+                return;
+            }
+
+            var btn = $(this);
+            btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Loading...');
+
+            var requestData = { hp: hp };
+            requestData[csrfName] = csrfHash; // Assign CSRF secara manual untuk kompatibilitas penuh
+
+            $.ajax({
+                url: '<?= base_url("sw-siswa/profile/send-otp") ?>',
+                type: 'POST',
+                data: requestData,
+                dataType: 'json',
+                success: function(res) {
+                    csrfHash = res.csrfHash; // Update token baru dari server
+                    
+                    // UPDATE TOKEN CSRF PADA FORM UTAMA
+                    $('input[name="' + csrfName + '"]').val(csrfHash);
+                    
+                    if (res.status === 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'OTP Terkirim!',
+                            text: 'Silakan cek kotak masuk WhatsApp Anda.',
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
+                        btn.hide().prop('disabled', false).html('Verifikasi');
+                        $('#otp-area').slideDown();
+                        $('#otp-input').val('').focus();
+                        startOtpTimer(300); // 5 Menit
+                    } else {
+                        Swal.fire('Gagal', res.message, 'error');
+                        btn.prop('disabled', false).html('Coba Lagi');
+                    }
+                },
+            });
+        });
+
+        $('#btn-verify-otp').click(function(e) {
+            e.preventDefault();
+            var otp = $('#otp-input').val();
+            var hp = $('#hp').val();
+
+            if (otp.length !== 6) {
+                Swal.fire('Perhatian', 'Kode OTP harus 6 digit angka!', 'warning');
+                return;
+            }
+
+            var btn = $(this);
+            btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Cek...');
+
+            var requestData = { hp: hp, otp: otp };
+            requestData[csrfName] = csrfHash;
+
+            $.ajax({
+                url: '<?= base_url("sw-siswa/profile/verify-otp") ?>',
+                type: 'POST',
+                data: requestData,
+                dataType: 'json',
+                success: function(res) {
+                    csrfHash = res.csrfHash; // Update token baru dari server
+
+                    // UPDATE TOKEN CSRF PADA FORM UTAMA
+                    $('input[name="' + csrfName + '"]').val(csrfHash);
+
+                    if (res.status === 'success') {
+                        Swal.fire('Berhasil Terverifikasi!', 'Nomor WhatsApp Anda berhasil dihubungkan.', 'success');
+                        
+                        clearInterval(timerInterval);
+                        $('#otp-area').slideUp();
+                        
+                        $('#hp').data('original', hp).data('verified', 1);
+                        checkWaStatus(); 
+                        
+                        btn.prop('disabled', false).html('Cek Kode');
+                        $('#otp-input').val('');
+                    } else {
+                        Swal.fire('Gagal', res.message, 'error');
+                        btn.prop('disabled', false).html('Cek Kode');
+                    }
+                },
+                error: function() {
+                    Swal.fire('Oops!', 'Terjadi kesalahan saat memverifikasi.', 'error');
+                    btn.prop('disabled', false).html('Cek Kode');
+                }
+            });
+        });
+
+        function startOtpTimer(duration) {
+            clearInterval(timerInterval);
+            var timer = duration, minutes, seconds;
+            
+            timerInterval = setInterval(function () {
+                minutes = parseInt(timer / 60, 10);
+                seconds = parseInt(timer % 60, 10);
+
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                $('#otp-timer').text(minutes + ":" + seconds);
+
+                if (--timer < 0) {
+                    clearInterval(timerInterval);
+                    $('#otp-area').slideUp();
+                    $('#btn-send-otp').show().html('Kirim Ulang OTP');
+                    Swal.fire('Kadaluarsa', 'Waktu pengisian OTP telah habis, silakan kirim ulang kode.', 'info');
+                }
+            }, 1000);
+        }
+
+        // -------------------------------------------------------------
+        // VALIDASI UI LAMA (Bawaan)
+        // -------------------------------------------------------------
         $('input[required], select[required]').on('input change', function() {
             if ($(this).val().trim() !== '') {
                 $(this).removeClass('is-invalid-field shake-error');
             }
         });
 
-        // Validasi Panjang Input (Tanpa Alert)
         $('#nik').on('input', function() {
             if (this.value.length > 16) this.value = this.value.slice(0, 16);
         });
-        $('#hp').on('input', function() {
-            if (this.value.length > 15) this.value = this.value.slice(0, 15);
-        });
 
-        // Validasi Ukuran File Avatar
         $("#customFile").on("change", function() {
-            const fileResult = document.getElementById("file-result");
-            const fileSubmit = document.getElementById("file-submit");
+            var fileResult = document.getElementById("file-result");
+            var fileSubmit = document.getElementById("file-submit");
             if (this.files.length > 0) {
-                const fileSize = this.files.item(0).size;
-                const fileMb = fileSize / 1024 ** 2;
+                var fileSize = this.files.item(0).size;
+                var fileMb = fileSize / (1024 * 1024);
                 if (fileMb >= 1.1) {
                     fileResult.innerHTML = "<i class='bi bi-exclamation-triangle-fill'></i> File melebihi batas 1MB!";
                     fileSubmit.disabled = true;
                 } else {
                     fileResult.innerHTML = "<span class='text-success'><i class='bi bi-check-circle-fill'></i> Siap diupload (" + fileMb.toFixed(1) + "MB)</span>";
-                    fileSubmit.disabled = false;
+                    
+                    if ($('#hp').data('verified') == 1) {
+                        fileSubmit.disabled = false;
+                    }
                 }
             }
         });
 
-        // FUNGSI CEK FORM SEBELUM SUBMIT (Berbahasa Indonesia & Auto Focus)
         $('#formUpdateProfil').on('submit', function(e) {
-            let isValid = true;
-            let firstInvalidInput = null;
+            var isValid = true;
+            var firstInvalidInput = null;
 
-            // Cari semua input, select, textarea yang memiliki atribut required
             $(this).find('input[required], select[required]').each(function() {
                 if ($(this).val() === null || $(this).val().trim() === '') {
                     isValid = false;
-
-                    // Tambahkan class border merah & animasi
                     $(this).addClass('is-invalid-field shake-error');
-
-                    // Simpan elemen pertama yang kosong untuk difokuskan nanti
                     if (firstInvalidInput === null) {
                         firstInvalidInput = $(this);
                     }
@@ -461,8 +626,7 @@ $checkInvalid = function ($val) use ($isStatusB) {
                 }
             });
 
-            // Validasi Khusus NIK (harus pas 16 digit)
-            const nik = $('#nik').val();
+            var nik = $('#nik').val();
             if (nik && nik.length !== 16) {
                 isValid = false;
                 $('#nik').addClass('is-invalid-field shake-error');
@@ -474,16 +638,13 @@ $checkInvalid = function ($val) use ($isStatusB) {
                     title: 'Format NIK Tidak Valid',
                     text: 'KTP/NIK Anda harus terdiri dari 16 digit angka. Silakan periksa kembali.',
                     confirmButtonText: 'Baik, Saya Perbaiki',
-                    customClass: {
-                        confirmButton: "btn btn-primary"
-                    }
-                }).then(() => {
+                    customClass: { confirmButton: "btn btn-primary" }
+                }).then(function() {
                     $('#nik').focus();
                 });
-                return false; // Hentikan proses
+                return false;
             }
 
-            // Jika ada input wajib yang kosong
             if (!isValid) {
                 e.preventDefault();
                 Swal.fire({
@@ -491,29 +652,22 @@ $checkInvalid = function ($val) use ($isStatusB) {
                     title: 'Oops! Data Belum Lengkap',
                     text: 'Masih ada kolom wajib (bergaris merah) yang belum Anda isi. Mohon lengkapi terlebih dahulu.',
                     confirmButtonText: 'Lengkapi Sekarang',
-                    customClass: {
-                        confirmButton: "btn btn-danger"
-                    }
-                }).then(() => {
-                    // Beri jeda 300ms agar SweetAlert tertutup sempurna dulu
-                    setTimeout(() => {
-                        // Efek scroll layar mulus menuju ke inputan yang kosong 
-                        // (dikurangi 150px agar tidak tertutup sticky header di bagian atas)
+                    customClass: { confirmButton: "btn btn-danger" }
+                }).then(function() {
+                    setTimeout(function() {
                         $('html, body').animate({
                             scrollTop: firstInvalidInput.offset().top - 150
                         }, 500);
 
-                        // Eksekusi fokus
                         if (firstInvalidInput.hasClass('select2-hidden-accessible')) {
-                            firstInvalidInput.select2('open'); // Jika select2
+                            firstInvalidInput.select2('open'); 
                         } else {
-                            firstInvalidInput.focus(); // Jika input biasa
+                            firstInvalidInput.focus(); 
                         }
                     }, 300);
                 });
 
-                // Hilangkan class shake setelah animasi selesai agar bisa diputar lagi jika salah
-                setTimeout(() => {
+                setTimeout(function() {
                     $('.shake-error').removeClass('shake-error');
                 }, 500);
             }
@@ -524,23 +678,20 @@ $checkInvalid = function ($val) use ($isStatusB) {
         // -------------------------------------------------------------
         $('#btn_tambah_riwayat').click(function(e) {
             e.preventDefault();
-            let barisBaru = `
-                <div class="input-group mb-3 riwayat-row" style="display: none;">
-                    <input type="text" name="riwayat_pekerjaan[]" class="form-control form-control-lg form-control-solid" placeholder="Contoh: PT Contoh (2021 - Sekarang)" />
-                    <button type="button" class="btn btn-icon btn-light-danger btn-hapus-riwayat" title="Hapus Baris">
-                        <i class="ki-outline ki-trash fs-2"></i>
-                    </button>
-                </div>
-            `;
-            let el = $(barisBaru);
+            var barisBaru = '<div class="input-group mb-3 riwayat-row" style="display: none;">' +
+                                '<input type="text" name="riwayat_pekerjaan[]" class="form-control form-control-lg form-control-solid" placeholder="Contoh: PT Contoh (2021 - Sekarang)" required />' +
+                                '<button type="button" class="btn btn-icon btn-light-danger btn-hapus-riwayat" title="Hapus Baris">' +
+                                    '<i class="ki-outline ki-trash fs-2"></i>' +
+                                '</button>' +
+                            '</div>';
+            var el = $(barisBaru);
             $('#riwayat_container').append(el);
             el.slideDown('fast');
         });
 
-        // Fungsi Hapus Baris (Event Delegation)
         $(document).on('click', '.btn-hapus-riwayat', function(e) {
             e.preventDefault();
-            let baris = $(this).closest('.riwayat-row');
+            var baris = $(this).closest('.riwayat-row');
             baris.slideUp('fast', function() {
                 $(this).remove();
             });

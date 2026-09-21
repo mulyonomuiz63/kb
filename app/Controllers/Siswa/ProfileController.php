@@ -53,7 +53,7 @@ class ProfileController extends BaseController
                     'exact_length' => 'NIK harus tepat 16 digit.'
                 ]
             ],
-            
+
             // HP: Wajib angka, maksimal 15 digit
             'hp' => [
                 // PERHATIKAN: Gunakan tanda kutip ganda (" ") di bawah ini, bukan kutip satu (' ')
@@ -66,9 +66,9 @@ class ProfileController extends BaseController
                     'is_unique'  => 'Nomor HP ini sudah digunakan oleh akun lain.'
                 ]
             ],
-        
+
             // Field Text: Tidak boleh karakter aneh (hanya huruf, angka, spasi)
-           'alamat_ktp' => [
+            'alamat_ktp' => [
                 'rules'  => 'required|max_length[100]',
                 'errors' => [
                     'required'            => 'Alamat KTP wajib diisi.',
@@ -125,13 +125,13 @@ class ProfileController extends BaseController
                 ]
             ],
         ];
-    
+
         // 3. Jalankan Validasi
         if (!$this->validate($rules)) {
             // Ambil pesan error pertama untuk ditampilkan di SweetAlert
             $errors = $this->validator->getErrors();
             $pesanError = reset($errors);
-    
+
             session()->setFlashdata('pesan', "
                 swal({
                     title: 'Gagal!',
@@ -140,33 +140,33 @@ class ProfileController extends BaseController
                     padding: '2em'
                 }); 
             ");
-           return redirect()->to(base_url('sw-siswa/profile'))->withInput()->with('pesan', $pesanError);
+            return redirect()->to(base_url('sw-siswa/profile'))->withInput()->with('pesan', $pesanError);
         }
-    
+
         // 4. Proses File Gambar
         $file = $this->request->getFile('avatar');
         $rows = $this->request->getVar('gambar_lama');
-    
+
         if (!$file->isValid()) {
             $nama_gambar = $rows;
         } else {
             $nama_gambar = $file->getRandomName();
             $path = FCPATH . 'assets/app-assets/user/';
-    
+
             if ($file->move($path, $nama_gambar)) {
                 // Kompres gambar
                 \Config\Services::image()
                     ->withFile($path . $nama_gambar)
-                    ->resize(1012, 1012, true, 'auto') 
-                    ->save($path . $nama_gambar, 70); 
-                    
+                    ->resize(1012, 1012, true, 'auto')
+                    ->save($path . $nama_gambar, 70);
+
                 // Hapus gambar lama jika bukan default
                 if ($rows != 'default.jpg' && file_exists($path . $rows)) {
                     unlink($path . $rows);
                 }
             }
         }
-    
+
         // 5. Sanitasi Input Nama (Potong 10 huruf untuk tampilan jika perlu, 
         // tapi simpan full di DB sesuai max_length validasi)
         $namaClean = strip_tags($this->request->getVar('nama_siswa'));
@@ -175,13 +175,13 @@ class ProfileController extends BaseController
         if (!is_array($riwayat)) {
             $riwayat = [];
         }
-        $riwayat_bersih = array_values(array_filter($riwayat, function($value) {
+        $riwayat_bersih = array_values(array_filter($riwayat, function ($value) {
             return !empty(trim($value));
         }));
 
         // 4. Encode menjadi format JSON
         $json_riwayat = json_encode($riwayat_bersih);
-    
+
         // 6. Update Database
         $this->siswaModel
             ->set('nama_siswa', $namaClean)
@@ -206,7 +206,7 @@ class ProfileController extends BaseController
             ->set('status', 'S')
             ->where('id_siswa', session()->get('id'))
             ->update();
-        return redirect()->to('sw-siswa')->with('success','Profile telah diperbarui');
+        return redirect()->to('sw-siswa')->with('success', 'Profile telah diperbarui');
     }
     public function editPassword()
     {
@@ -215,10 +215,189 @@ class ProfileController extends BaseController
         }
         $siswa = $this->siswaModel->asObject()->find(session()->get('id'));
 
-            $this->siswaModel->save([
-                'id_siswa' => $siswa->id_siswa,
-                'password' => password_hash($this->request->getVar('password'), PASSWORD_DEFAULT)
+        $this->siswaModel->save([
+            'id_siswa' => $siswa->id_siswa,
+            'password' => password_hash($this->request->getVar('password'), PASSWORD_DEFAULT)
+        ]);
+        return redirect()->to('sw-siswa/profile')->with('success', 'Password telah diubah');
+    }
+
+    // Pastikan Anda meload helper atau class untuk kirim_wa
+    // dan memiliki model untuk akses tabel siswa.
+
+public function sendOtp()
+    {
+        try {
+            // 1. Ambil data dari post dan session
+            $hp = $this->request->getPost('hp');
+            $id_siswa = session()->get('id');
+
+            // 2. Validasi Sesi (Pastikan user masih login)
+            if (!$id_siswa) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Sesi Anda telah habis, silakan muat ulang halaman atau login kembali.',
+                    'csrfHash' => csrf_hash()
+                ]);
+            }
+
+            // 3. Bersihkan Nomor HP (Hanya ambil angka)
+            $hp = preg_replace('/[^0-9]/', '', (string)$hp);
+
+            // 4. Validasi Input HP
+            if (empty($hp) || strlen($hp) < 9) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Format nomor WhatsApp tidak valid.',
+                    'csrfHash' => csrf_hash()
+                ]);
+            }
+
+            // 5. Generate OTP dan Expired
+            $otp_code = rand(100000, 999999);
+            $expired_time = date('Y-m-d H:i:s', strtotime('+5 minutes'));
+
+            // 6. Simpan ke Database dengan pengecekan
+            $updateDb = $this->siswaModel->update($id_siswa, [
+                'wa_otp' => $otp_code,
+                'wa_otp_expired' => $expired_time
             ]);
-            return redirect()->to('sw-siswa/profile')->with('success', 'Password telah diubah');
+
+            if (!$updateDb) {
+                throw new \Exception('Gagal menyimpan kode OTP ke database.');
+            }
+
+            // 7. Siapkan Template WhatsApp
+            $data_template = [
+                "template_name"     => "kirim_otp",
+                "template_language" => "id",
+                "parameter"         => [
+                    [
+                        "1"    => (string)$otp_code,
+                        "code" => (string)$otp_code
+                    ]
+                ],
+                "apps_source"       => "kelasbrevet"
+            ];
+
+            // 8. Kirim WA dan Cek Responnya
+            kirim_wa($hp, '', $data_template);
+            
+            // Catatan: Jika helper kirim_wa mengembalikan format JSON/Array, 
+            // Anda bisa melakukan pengecekan di sini. 
+            // Contoh (sesuaikan dengan respon asli dari Watzap Anda):
+            // $res_wa = json_decode($send, true);
+            // if(isset($res_wa['status']) && $res_wa['status'] != 'success') {
+            //     throw new \Exception('API Watzap gagal merespon: ' . json_encode($send));
+            // }
+
+            // 9. Berhasil
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'OTP Terkirim ke nomor Anda.',
+                'csrfHash' => csrf_hash()
+            ]);
+
+        } catch (\Exception $e) {
+            // CATAT ERROR KE FILE LOG CI4 (Cek di folder writable/logs/)
+
+            // Tampilkan pesan error detail jika di environment development, 
+            // tampilkan pesan umum jika di production agar aman.
+            $msg = ENVIRONMENT !== 'production' ? $e->getMessage() : 'Terjadi kesalahan sistem saat mengirim OTP. Silakan coba beberapa saat lagi.';
+
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => $msg,
+                'csrfHash' => csrf_hash()
+            ]);
+        }
+    }
+
+    public function verifyOtp()
+    {
+        try {
+            $hp = $this->request->getPost('hp');
+            $otp = $this->request->getPost('otp');
+            $id_siswa = session()->get('id');
+
+            // 1. Validasi Input & Sesi
+            if (!$id_siswa) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Sesi habis.', 'csrfHash' => csrf_hash()]);
+            }
+            if (empty($hp) || empty($otp)) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Data tidak lengkap.', 'csrfHash' => csrf_hash()]);
+            }
+
+            // Bersihkan nomor HP dan OTP
+            $hp = preg_replace('/[^0-9]/', '', (string)$hp);
+            $otp = preg_replace('/[^0-9]/', '', (string)$otp);
+
+            // 2. Ambil data siswa
+            $siswa = $this->siswaModel->find($id_siswa);
+
+            // Pengecekan apakah user ditemukan di DB
+            if (!$siswa) {
+                throw new \Exception('Data siswa tidak ditemukan di database.');
+            }
+
+            // Pengecekan apakah OTP ada di DB
+            if (empty($siswa['wa_otp'])) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Sistem tidak menemukan permintaan OTP untuk akun ini. Silakan klik Kirim Ulang OTP.',
+                    'csrfHash' => csrf_hash()
+                ]);
+            }
+
+            $now = date('Y-m-d H:i:s');
+
+            // 3. Cek Kedaluwarsa
+            if ($now > $siswa['wa_otp_expired']) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Kode OTP sudah kadaluarsa. Silakan kirim ulang kode.',
+                    'csrfHash' => csrf_hash()
+                ]);
+            }
+
+            // 4. Cek Kecocokan (Gunakan operator type casting agar string "123456" = int 123456)
+            if ((string)$otp !== (string)$siswa['wa_otp']) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Kode OTP tidak cocok. Silakan periksa kembali.',
+                    'csrfHash' => csrf_hash()
+                ]);
+            }
+
+            // 5. Update Status Verified
+            $updateDb = $this->siswaModel->update($id_siswa, [
+                'hp' => $hp,
+                'is_wa_verified' => 1,
+                'wa_otp' => null,
+                'wa_otp_expired' => null
+            ]);
+
+            if (!$updateDb) {
+                throw new \Exception('Gagal mengupdate status verifikasi ke database.');
+            }
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Nomor WhatsApp berhasil diverifikasi.',
+                'csrfHash' => csrf_hash()
+            ]);
+
+        } catch (\Exception $e) {
+            // CATAT ERROR KE FILE LOG
+            log_message('error', '[VERIFY OTP ERROR] ' . $e->getMessage() . ' | Line: ' . $e->getLine());
+
+            $msg = ENVIRONMENT !== 'production' ? $e->getMessage() : 'Terjadi kesalahan sistem saat memverifikasi kode.';
+
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => $msg,
+                'csrfHash' => csrf_hash()
+            ]);
+        }
     }
 }
