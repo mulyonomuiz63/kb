@@ -221,8 +221,8 @@ class PdfController extends BaseController
 
         <table cellpadding="1">
             <tr>
-                <td width="55%"></td>
-                <td width="45%" style="text-align: center;">
+                <td width="40%"></td>
+                <td width="60%" style="text-align: center;">
                     '.$kota.', ' . $tanggalSekarang . '
                     ' . $htmlTtd . '
                     (' . $namaLengkap . ')
@@ -431,8 +431,8 @@ class PdfController extends BaseController
 
         <table cellpadding="1">
             <tr>
-                <td width="55%"></td>
-                <td width="45%" style="text-align: center;">
+                <td width="40%"></td>
+                <td width="60%" style="text-align: center;">
                     '.$kota.', ' . $tanggalSekarang . '
                     ' . $htmlTtd . '
                     ( ' . $namaLengkap . ' )
@@ -648,8 +648,8 @@ class PdfController extends BaseController
 
         <table cellpadding="1">
             <tr>
-                <td width="55%"></td>
-                <td width="45%" style="text-align: center;">
+                <td width="40%"></td>
+                <td width="60%" style="text-align: center;">
                     '.$kota.', ' . $tanggalSekarang . '
                     ' . $htmlTtd . '
                     ( ' . $namaLengkap . ' )
@@ -863,8 +863,8 @@ class PdfController extends BaseController
 
         <table cellpadding="1">
             <tr>
-                <td width="55%"></td>
-                <td width="45%" style="text-align: center;">
+                <td width="40%"></td>
+                <td width="60%" style="text-align: center;">
                     '.$kota.', ' . $tanggalSekarang . '
                     ' . $htmlTtd . '
                     (' . $namaLengkap . ')
