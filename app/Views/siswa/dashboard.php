@@ -496,7 +496,7 @@
                                                 <i class="ki-outline ki-entrance-left fs-3 me-2 text-white"></i> Daftar Sekarang
                                             </a>
                                             <a href="<?= base_url('list-bimbel') ?>"
-                                                class="btn btn-light-primary fw-bolder px-8 py-3 w-100 w-sm-auto rounded-pill d-flex align-items-center justify-content-center" style="background-color: #f4f8ff; color: #1d4695;">
+                                                class="btn btn-light-primary fw-bolder px-8 py-3 w-100 w-sm-auto rounded-pill d-flex align-items-center justify-content-center" style="background-color: #f4f8ff;">
                                                 Lihat Paket Lain
                                             </a>
                                         </div>
