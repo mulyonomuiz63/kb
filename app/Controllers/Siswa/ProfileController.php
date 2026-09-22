@@ -245,19 +245,37 @@ class ProfileController extends BaseController
             $hp = preg_replace('/[^0-9]/', '', (string)$hp);
 
             // 4. Validasi Input HP
-            if (empty($hp) || strlen($hp) < 9) {
+            if (empty($hp) || strlen($hp) < 10) {
                 return $this->response->setJSON([
                     'status' => 'error',
-                    'message' => 'Format nomor WhatsApp tidak valid.',
+                    'message' => 'Format nomor WhatsApp tidak valid. Minimal 10 angka.',
                     'csrfHash' => csrf_hash()
                 ]);
             }
 
-            // 5. Generate OTP dan Expired
+            // ====================================================================
+            // 5. [UPGRADE] CEK APAKAH NOMOR SUDAH DIGUNAKAN AKUN LAIN
+            // ====================================================================
+            // Asumsi primary key di tabel Anda adalah 'id'
+            $cekHpLain = $this->siswaModel->where('hp', $hp)
+                                          ->where('id_siswa !=', $id_siswa)
+                                          ->first();
+
+            if ($cekHpLain) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    // Pesan ini akan muncul di SweetAlert karena format 'error'
+                    'message' => 'Nomor WhatsApp ini sudah terdaftar pada akun lain. Silakan gunakan nomor yang berbeda.', 
+                    'csrfHash' => csrf_hash()
+                ]);
+            }
+            // ====================================================================
+
+            // 6. Generate OTP dan Expired
             $otp_code = rand(100000, 999999);
             $expired_time = date('Y-m-d H:i:s', strtotime('+5 minutes'));
 
-            // 6. Simpan ke Database dengan pengecekan
+            // 7. Simpan ke Database dengan pengecekan
             $updateDb = $this->siswaModel->update($id_siswa, [
                 'wa_otp' => $otp_code,
                 'wa_otp_expired' => $expired_time
@@ -267,7 +285,7 @@ class ProfileController extends BaseController
                 throw new \Exception('Gagal menyimpan kode OTP ke database.');
             }
 
-            // 7. Siapkan Template WhatsApp
+            // 8. Siapkan Template WhatsApp
             $data_template = [
                 "template_name"     => "kirim_otp",
                 "template_language" => "id",
@@ -280,26 +298,17 @@ class ProfileController extends BaseController
                 "apps_source"       => "kelasbrevet"
             ];
 
-            // 8. Kirim WA dan Cek Responnya
+            // 9. Kirim WA dan Cek Responnya
             kirim_wa($hp, '', $data_template);
 
-            // Catatan: Jika helper kirim_wa mengembalikan format JSON/Array, 
-            // Anda bisa melakukan pengecekan di sini. 
-            // Contoh (sesuaikan dengan respon asli dari Watzap Anda):
-            // $res_wa = json_decode($send, true);
-            // if(isset($res_wa['status']) && $res_wa['status'] != 'success') {
-            //     throw new \Exception('API Watzap gagal merespon: ' . json_encode($send));
-            // }
-
-            // 9. Berhasil
+            // 10. Berhasil
             return $this->response->setJSON([
                 'status' => 'success',
                 'message' => 'OTP Terkirim ke nomor Anda.',
                 'csrfHash' => csrf_hash()
             ]);
-        } catch (\Exception $e) {
-            // CATAT ERROR KE FILE LOG CI4 (Cek di folder writable/logs/)
 
+        } catch (\Exception $e) {
             // Tampilkan pesan error detail jika di environment development, 
             // tampilkan pesan umum jika di production agar aman.
             $msg = ENVIRONMENT !== 'production' ? $e->getMessage() : 'Terjadi kesalahan sistem saat mengirim OTP. Silakan coba beberapa saat lagi.';
