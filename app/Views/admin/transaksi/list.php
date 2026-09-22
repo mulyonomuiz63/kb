@@ -974,7 +974,7 @@ $(document).on('click', '.btn-kirim-pesan', function() {
         '• Metode: ' + bayarText + '\n\n' +
         'Anda dapat mengecek riwayat, melakukan konfirmasi, atau mengelola transaksi Anda melalui tautan berikut:\n' +
         'https://kelasbrevet.com/sw-siswa/transaksi\n\n' +
-        'Jika Anda membutuhkan bantuan lebih lanjut, silakan hubungi kami Whatsapp 6282180744966. Terima kasih.';
+        'Jika Anda membutuhkan bantuan lebih lanjut, silakan hubungi kami Whatsapp 6285284767476 atau CS Online kami https://topcs.id/kelas-brevet. Terima kasih.';
 
     $('#isi_pesan').val(pesanTemplate);
 
