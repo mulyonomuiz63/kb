@@ -380,11 +380,25 @@ class RegisterController extends BaseController
                 ]);
             }
 
-            // 4. Generate OTP dan Expired (5 menit)
+            // --- 4. VALIDASI NOMOR UNIK (HEMAT KUOTA OTP) ---
+            $db = \Config\Database::connect();
+            // Asumsi tabel user Anda bernama 'siswa'
+            $cekHp = $db->table('siswa')->where('hp', $hp)->countAllResults();
+            
+            if ($cekHp > 0) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Nomor WhatsApp sudah digunakan oleh akun lain. Silakan login dengan akun Anda, atau gunakan nomor WA yang berbeda.',
+                    'csrfHash' => csrf_hash()
+                ]);
+            }
+            // --------------------------------------------------
+
+            // 5. Generate OTP dan Expired (5 menit)
             $otp_code = rand(100000, 999999);
             $expired_time = date('Y-m-d H:i:s', strtotime('+5 minutes'));
 
-            // 5. Simpan OTP sementara ke dalam Session (karena user belum terdaftar di database)
+            // 6. Simpan OTP sementara ke dalam Session
             session()->set([
                 'otp_reg_hp' => $hp,
                 'otp_reg_code' => $otp_code,
@@ -392,7 +406,7 @@ class RegisterController extends BaseController
                 'otp_reg_verified' => false
             ]);
 
-            // 6. Siapkan Template WhatsApp
+            // 7. Siapkan Template WhatsApp
             $data_template = [
                 "template_name"     => "kirim_otp",
                 "template_language" => "id",
@@ -405,10 +419,10 @@ class RegisterController extends BaseController
                 "apps_source"       => "kelasbrevet"
             ];
 
-            // 7. Kirim WA
+            // 8. Kirim WA
             kirim_wa($hp, '', $data_template);
 
-            // 8. Berhasil
+            // 9. Berhasil
             return $this->response->setJSON([
                 'status' => 'success',
                 'message' => 'OTP Terkirim ke nomor Anda.',
@@ -416,10 +430,7 @@ class RegisterController extends BaseController
             ]);
 
         } catch (\Exception $e) {
-            log_message('error', '[AUTH SEND OTP ERROR] ' . $e->getMessage());
-
             $msg = ENVIRONMENT !== 'production' ? $e->getMessage() : 'Terjadi kesalahan sistem saat mengirim OTP. Silakan coba beberapa saat lagi.';
-
             return $this->response->setJSON([
                 'status' => 'error',
                 'message' => $msg,

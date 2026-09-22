@@ -88,7 +88,6 @@ $paketUtama = !empty($daftarPaket) ? $daftarPaket[0] : null;
             margin-top: 5px;
         }
 
-        /* PENGAMAN RESPONSIF MOBILE: Agar tidak offside/meluber di layar kecil */
         @media (max-width: 576px) {
             .countdown-box {
                 min-width: 55px !important;
@@ -107,7 +106,6 @@ $paketUtama = !empty($daftarPaket) ? $daftarPaket[0] : null;
             }
         }
 
-        /* Styling tombol custom yang sudah ada */
         .btn-custom {
             padding: 14px 32px;
             font-weight: 700;
@@ -115,13 +113,10 @@ $paketUtama = !empty($daftarPaket) ? $daftarPaket[0] : null;
             transition: all 0.3s ease;
         }
 
-        /* TAMBAHAN: Pengaman Responsif Mobile untuk Tombol Hero */
         @media (max-width: 576px) {
             .btn-custom {
                 padding: 10px 24px !important;
-                /* Padding diperkecil agar pas di HP */
                 font-size: 0.9rem !important;
-                /* Ukuran teks disesuaikan */
             }
         }
 
@@ -151,13 +146,6 @@ $paketUtama = !empty($daftarPaket) ? $daftarPaket[0] : null;
             justify-content: center;
             font-size: 1.5rem;
             margin-bottom: 20px;
-        }
-
-        .btn-custom {
-            padding: 14px 32px;
-            font-weight: 700;
-            border-radius: 50px;
-            transition: all 0.3s ease;
         }
 
         .btn-primary-custom {
@@ -196,12 +184,10 @@ $paketUtama = !empty($daftarPaket) ? $daftarPaket[0] : null;
             background-color: #f8faff;
         }
 
-        /* Sembunyikan checkbox bawaan */
         .session-checkbox {
             display: none;
         }
 
-        /* Jika checkbox dicheck, ubah tampilan card-nya */
         .session-checkbox:checked+.session-card {
             border-color: #0d6efd;
             background-color: #eef4ff;
@@ -288,7 +274,6 @@ $paketUtama = !empty($daftarPaket) ? $daftarPaket[0] : null;
                             </div>
                         </div>
 
-                        <!-- Tombol dengan kelas responsif yang proporsional di mobile & desktop -->
                         <a href="#pendaftaran" class="btn btn-primary-custom btn-custom w-100 w-sm-auto shadow-sm">
                             <i class="fa-solid fa-ticket me-2"></i> Amankan Tiket Saya
                         </a>
@@ -296,10 +281,8 @@ $paketUtama = !empty($daftarPaket) ? $daftarPaket[0] : null;
 
                     <div class="col-lg-6 text-center">
                         <?php
-                        // Mendapatkan path fisik file di server untuk mengecek kapan terakhir diedit
                         $videoPath = FCPATH . 'uploads/video/opening.mp4';
                         $versi = file_exists($videoPath) ? filemtime($videoPath) : 1;
-
                         $videoUrl = base_url('uploads/video/opening.mp4?v=' . $versi);
                         ?>
                         <div class="ratio ratio-16x9 rounded-4 shadow-lg border border-3 border-white overflow-hidden" style="pointer-events: none;">
@@ -329,53 +312,21 @@ $paketUtama = !empty($daftarPaket) ? $daftarPaket[0] : null;
         ?>
         <section id="pakar-jadwal" class="py-4" style="background-color: #0b5ed7;">
             <style>
-                .text-navy {
-                    color: #0c2b6b !important;
-                }
-
-                .bg-navy {
-                    background-color: #122b6d !important;
-                }
-
-                .bg-yellow {
-                    background-color: #ffc107 !important;
-                }
-
-                .img-top {
-                    width: 90px;
-                    height: 90px;
-                }
-
-                .img-card {
-                    width: 75px;
-                    height: 75px;
-                }
-
-                .img-top,
-                .img-card {
+                .text-navy { color: #0c2b6b !important; }
+                .bg-navy { background-color: #122b6d !important; }
+                .bg-yellow { background-color: #ffc107 !important; }
+                .img-top { width: 90px; height: 90px; }
+                .img-card { width: 75px; height: 75px; }
+                .img-top, .img-card {
                     object-fit: cover;
                     border: 3px solid #0b5ed7;
                     padding: 2px;
                     background-color: white;
                 }
-
-                .badge-pertemuan {
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    font-size: 0.75rem;
-                    font-weight: 700;
-                    padding: 6px 12px;
-                    border-bottom-right-radius: 12px;
-                    border-top-left-radius: 15px;
-                    z-index: 10;
-                }
-
                 .separator-line {
                     width: 2px;
                     background-color: #dee2e6;
                 }
-
                 @media (max-width: 768px) {
                     .separator-line {
                         width: 100%;
@@ -383,7 +334,6 @@ $paketUtama = !empty($daftarPaket) ? $daftarPaket[0] : null;
                         margin: 1rem 0;
                     }
                 }
-
                 .jadwal-divider-container {
                     display: flex;
                     align-items: center;
@@ -432,35 +382,17 @@ $paketUtama = !empty($daftarPaket) ? $daftarPaket[0] : null;
                     transition: all 0.3s ease-in-out;
                     cursor: pointer;
                 }
-
                 .session-checkbox:checked+.session-card {
                     border: 2px solid #198754 !important;
                     background-color: #f2fcf5 !important;
                     box-shadow: 0 0.5rem 1.5rem rgba(25, 135, 84, 0.2) !important;
                 }
-
-                .session-checkbox {
-                    display: none;
-                }
-
-                /* Perbaikan agar teks nominal/harga aman tidak offside di mobile */
-                .price-container {
-                    word-break: break-word;
-                    overflow-wrap: break-word;
-                }
-
+                .session-checkbox { display: none; }
+                .price-container { word-break: break-word; overflow-wrap: break-word; }
                 @media (max-width: 768px) {
-                    .session-card {
-                        padding: 1rem !important;
-                    }
-
-                    .session-card h5 {
-                        font-size: 0.95rem !important;
-                    }
-
-                    .session-card .badge {
-                        font-size: 0.6rem !important;
-                    }
+                    .session-card { padding: 1rem !important; }
+                    .session-card h5 { font-size: 0.95rem !important; }
+                    .session-card .badge { font-size: 0.6rem !important; }
                 }
             </style>
 
@@ -473,7 +405,6 @@ $paketUtama = !empty($daftarPaket) ? $daftarPaket[0] : null;
 
                 <form action="<?= base_url('webinar/daftar') ?>" method="POST" id="formWebinar">
                     <?= csrf_field() ?>
-                    <!-- ID Paket dikosongkan dan akan diisi dinamis oleh Javascript saat radio diklik -->
                     <input type="hidden" name="idpaket" id="input_idpaket" value="">
 
                     <?php
@@ -481,9 +412,7 @@ $paketUtama = !empty($daftarPaket) ? $daftarPaket[0] : null;
                     $db = \Config\Database::connect();
                     ?>
 
-                    <!-- ========================================================== -->
-                    <!-- BAGIAN 1: BARIS ATAS (PILIHAN PAKET FULL WIDTH - 2 KOLOM) -->
-                    <!-- ========================================================== -->
+                    <!-- BAGIAN 1: PILIHAN PAKET -->
                     <div class="mb-5">
                         <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-4">
                             <h4 class="fw-bold mb-0 fs-4">1. Pilih Paket</h4>
@@ -522,16 +451,11 @@ $paketUtama = !empty($daftarPaket) ? $daftarPaket[0] : null;
                                                 }
                                             }
                                             ?>
-                                            <!-- MENGGUNAKAN col-lg-6 AGAR TAMPIL 2 PER BARIS SEPERTI SCREENSHOT -->
                                             <div class="col-lg-6">
                                                 <label class="w-100 h-100 m-0 <?= $isExpired ? 'opacity-50' : '' ?>" <?= $isExpired ? 'style="cursor: not-allowed;"' : 'style="cursor: pointer;"' ?>>
-
-                                                    <!-- Tambahkan data-idpaket -->
                                                     <input type="radio" name="id_sesi[]" value="<?= esc($sesi['id_sesi']) ?>" class="session-checkbox calculate-price" data-price="<?= round($sesi['harga_sesi']) ?>" data-idpaket="<?= $paket->idpaket ?>" <?= $isExpired ? 'disabled' : '' ?> <?= $isFree && !$isExpired ? 'checked' : '' ?>>
-
                                                     <div class="session-card p-3 p-lg-4 h-100 d-flex flex-column rounded-4 shadow-sm <?= $isExpired ? 'bg-light' : 'bg-white' ?>">
                                                         <div class="d-flex align-items-start justify-content-between w-100 gap-2">
-                                                            <!-- Ditambahkan flex-grow-1 dan min-width agar teks judul tidak mendorong harga ke luar card -->
                                                             <div class="pe-1 flex-grow-1" style="min-width: 0;">
                                                                 <h5 class="fw-bold mb-1 fs-6 fs-lg-4 text-break"><?= esc($sesi['nama_sesi']) ?></h5>
                                                                 <?php if ($isExpired): ?>
@@ -547,7 +471,6 @@ $paketUtama = !empty($daftarPaket) ? $daftarPaket[0] : null;
                                                                 <?php endif; ?>
                                                             </div>
 
-                                                            <!-- Bagian Harga Paket: Diatur agar tetap rapi di sisi kanan -->
                                                             <div class="text-end flex-shrink-0 price-container ps-1">
                                                                 <?php if (!$isFree && isset($sesi['harga_coret']) && $sesi['harga_coret'] > $sesi['harga_sesi']): ?>
                                                                     <span class="text-muted text-decoration-line-through d-block" style="font-size: 0.75rem;">Rp <?= number_format($sesi['harga_coret'], 0, ',', '.') ?></span>
@@ -601,14 +524,9 @@ $paketUtama = !empty($daftarPaket) ? $daftarPaket[0] : null;
                             <?php endif; ?>
                         </div>
                     </div>
-                    <!-- ========================================================== -->
 
-
-                    <!-- ========================================================== -->
-                    <!-- BAGIAN 2: BARIS BAWAH (DATA PESERTA & PEMBAYARAN KIRI KANAN)-->
-                    <!-- ========================================================== -->
+                    <!-- BAGIAN 2: DATA PESERTA & PEMBAYARAN -->
                     <div class="row g-3 g-lg-4">
-                        <!-- KOLOM KIRI: DATA PESERTA (col-lg-7) -->
                         <div class="col-lg-7">
                             <div class="card border-0 shadow-sm rounded-4 p-3 p-lg-4 h-100">
                                 <h4 class="fw-bold mb-3 mb-lg-4 border-bottom pb-2 fs-4">2. Data Peserta</h4>
@@ -654,8 +572,38 @@ $paketUtama = !empty($daftarPaket) ? $daftarPaket[0] : null;
 
                                 <div class="mb-3">
                                     <label class="form-label fw-semibold fs-7 fs-lg-6">Nomor WhatsApp <span class="text-danger">*</span></label>
-                                    <div class="input-group">
-                                        <input type="number" name="hp" value="<?= session()->get('id') && isset($siswa) ? esc($siswa['hp']) : esc(old('hp')) ?>" class="form-control form-control-md form-control-lg-lg" placeholder="81234567890" pattern="[0-9]+" minlength="10" maxlength="15" required autocomplete="off" <?= session()->get('id') ? 'style="cursor: not-allowed; background-color: #e9ecef;"' : '' ?>>
+                                    <div class="input-group flex-nowrap">
+                                        
+                                        <!-- INPUT NOMOR HP (TIDAK ADA READONLY ATAU DISABLED AGAR BISA DIEDIT) -->
+                                        <input type="number" name="hp" id="hp"
+                                            data-verified="<?= (session()->get('id') && isset($siswa)) ? esc($siswa['is_wa_verified'] ?? '0') : '0' ?>"
+                                            value="<?= (session()->get('id') && isset($siswa)) ? esc($siswa['hp']) : esc(old('hp')) ?>"
+                                            class="form-control form-control-md form-control-lg-lg"
+                                            placeholder="81234567890" pattern="[0-9]+" minlength="10" maxlength="15" required autocomplete="off">
+
+                                        <!-- Tombol Kirim OTP -->
+                                        <button class="btn btn-primary text-nowrap px-4" type="button" id="btn-send-otp" style="display: none;" title="Kirim OTP Ke WhatsApp">
+                                            Verifikasi
+                                        </button>
+                                    </div>
+
+                                    <!-- Form OTP Dinamis -->
+                                    <div id="otp-area" class="mt-3 p-3 border border-primary border-dashed rounded bg-light-primary" style="display: none;">
+                                        <label class="form-label fw-bold text-primary fs-7 mb-1">Masukkan 6 Digit OTP</label>
+                                        <div class="input-group flex-nowrap mb-2">
+                                            <input type="text" id="otp-input" class="form-control form-control-md text-center fw-bolder fs-5" placeholder="••••••" maxlength="6" autocomplete="off">
+                                            <button class="btn btn-success text-nowrap px-4" type="button" id="btn-verify-otp">Cek Kode</button>
+                                        </div>
+                                        <div class="form-text text-muted fs-7">
+                                            Kode OTP kadaluarsa dalam: <span id="otp-timer" class="fw-bold text-danger">05:00</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Badge Terverifikasi -->
+                                    <div id="wa-verified-badge" class="mt-2" style="display: none;">
+                                        <span class="badge bg-success-subtle border border-success text-success fs-7 fw-bold p-2">
+                                            <i class="fa-solid fa-check-circle me-1"></i>Nomor WA Terverifikasi
+                                        </span>
                                     </div>
                                 </div>
 
@@ -665,23 +613,21 @@ $paketUtama = !empty($daftarPaket) ? $daftarPaket[0] : null;
                                             <i class="fa fa-check-circle text-success fs-3"></i>
                                         </div>
                                         <span class="text-dark" style="font-size: 0.82rem; line-height: 1.4;">
-                                            <strong> Anda sudah berhasil login. </strong> Silakan selesaikan pendaftaran dengan menekan tombol <strong>Daftar Sekarang</strong>.
+                                            <strong> Anda sudah berhasil login. </strong> Pastikan nomor WhatsApp aktif sebelum mendaftar.
                                         </span>
                                     </div>
                                 <?php endif; ?>
                             </div>
                         </div>
 
-                        <!-- KOLOM KANAN: KARTU BAYAR (col-lg-5) -->
+                        <!-- KOLOM KANAN: KARTU BAYAR -->
                         <div class="col-lg-5">
                             <div class="card border-primary shadow-sm rounded-4 p-3 p-lg-4 h-100 d-flex flex-column justify-content-center bg-light" style="border-width: 2px !important;">
                                 <div class="text-center px-2" style="overflow: hidden;">
                                     <p class="text-secondary fw-semibold mb-1 fs-6">Total Pembayaran Anda</p>
-
-                                    <!-- Ukuran font disesuaikan responsif (fs-4 fs-md-3 fs-lg-2) dan text-break agar nominal tidak offside/keluar card -->
                                     <h1 class="fw-bold text-primary mb-3 mb-lg-4 fs-4 fs-md-3 fs-lg-2 text-break" id="displayTotal" style="word-break: break-word;">Rp 0</h1>
 
-                                    <button type="submit" id="btnSubmit" class="btn btn-primary btn-lg w-100 fw-bold rounded-pill shadow-sm py-2.5 py-lg-3 fs-6" disabled>
+                                    <button type="submit" id="btnSubmit" class="btn btn-secondary btn-lg w-100 fw-bold rounded-pill shadow-sm py-2.5 py-lg-3 fs-6" disabled>
                                         <i class="fa-solid fa-shield-halved me-2"></i> Daftar Sekarang
                                     </button>
 
@@ -693,7 +639,6 @@ $paketUtama = !empty($daftarPaket) ? $daftarPaket[0] : null;
                             </div>
                         </div>
                     </div>
-                    <!-- ========================================================== -->
 
                 </form>
             </div>
@@ -804,7 +749,8 @@ $paketUtama = !empty($daftarPaket) ? $daftarPaket[0] : null;
         </div>
     </footer>
 
-    <!-- Bootstrap JS Bundle -->
+    <!-- JQUERY & Bootstrap JS Bundle -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Countdown Script -->
@@ -866,102 +812,268 @@ $paketUtama = !empty($daftarPaket) ? $daftarPaket[0] : null;
         }, 1000);
     </script>
 
-    <!-- SCRIPT PENGHITUNG HARGA OTOMATIS & PENGISI ID PAKET -->
+    <!-- VALIDASI FORM, PENGHITUNG HARGA & OTP LOGIC -->
     <script>
+        var csrfName = '<?= csrf_token() ?>';
+        var csrfHash = '<?= csrf_hash() ?>';
+
         document.addEventListener("DOMContentLoaded", function() {
+            const form = document.getElementById("formWebinar");
+            if (!form) return;
+
+            const btnSubmit = document.getElementById('btnSubmit');
             const checkboxes = document.querySelectorAll('.calculate-price');
             const displayTotal = document.getElementById('displayTotal');
-            const btnSubmit = document.getElementById('btnSubmit');
             const inputIdPaket = document.getElementById('input_idpaket');
+            const inputs = form.querySelectorAll("input[name='nama'], input[name='email'], input[name='hp']");
+            const hpInput = document.getElementById("hp");
 
             function formatRupiah(angka) {
                 return new Intl.NumberFormat('id-ID', {
-                    style: 'currency',
-                    currency: 'IDR',
-                    minimumFractionDigits: 0
+                    style: 'currency', currency: 'IDR', minimumFractionDigits: 0
                 }).format(angka);
             }
 
-            function calculateTotal() {
+            // Fungsi Utama Validasi
+            function validateForm() {
                 let total = 0;
-                let isChecked = false;
-
+                let isPackageSelected = false;
                 checkboxes.forEach(function(cb) {
                     if (cb.checked && !cb.disabled) {
                         total += parseInt(cb.getAttribute('data-price'));
-                        isChecked = true;
-                        // Mengisi value input idpaket saat sesi dari paket tertentu dipilih
+                        isPackageSelected = true;
                         inputIdPaket.value = cb.getAttribute('data-idpaket');
                     }
                 });
 
                 displayTotal.innerText = formatRupiah(total);
+                if (!isPackageSelected) inputIdPaket.value = "";
 
-                if (isChecked) {
-                    btnSubmit.removeAttribute('disabled');
-                    btnSubmit.classList.remove('btn-secondary');
-                    btnSubmit.classList.add('btn-primary');
-                } else {
-                    btnSubmit.setAttribute('disabled', 'true');
-                    btnSubmit.classList.remove('btn-primary');
-                    btnSubmit.classList.add('btn-secondary');
-                    inputIdPaket.value = ""; // Reset jika tidak ada yg dipilih
-                }
-            }
-
-            checkboxes.forEach(function(cb) {
-                cb.addEventListener('change', calculateTotal);
-            });
-
-            calculateTotal();
-        });
-    </script>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const form = document.getElementById("formWebinar");
-            if (!form) return;
-
-            const btnSubmit = document.getElementById("btnSubmit");
-            const inputs = form.querySelectorAll("input[name='nama'], input[name='email'], input[name='hp']");
-            const radios = form.querySelectorAll(".session-checkbox");
-
-            function validateForm() {
-                let isPackageSelected = Array.from(radios).some(radio => radio.checked && !radio.disabled);
                 let areInputsFilled = Array.from(inputs).every(input => {
                     if (input.readOnly) return true;
                     return input.value.trim() !== "";
                 });
 
                 let isHpValid = true;
-                const hpInput = form.querySelector("input[name='hp']");
                 if (hpInput && !hpInput.readOnly) {
                     let hpLength = hpInput.value.trim().length;
                     isHpValid = (hpLength >= 10 && hpLength <= 15);
                 }
 
-                if (isPackageSelected && areInputsFilled && isHpValid) {
+                // Cek status verified dari atribut secara mutlak
+                let isVerified = (hpInput && hpInput.getAttribute('data-verified') === '1');
+
+                if (isPackageSelected && areInputsFilled && isHpValid && isVerified) {
                     btnSubmit.removeAttribute("disabled");
+                    btnSubmit.classList.remove('btn-secondary');
+                    btnSubmit.classList.add('btn-primary');
                 } else {
                     btnSubmit.setAttribute("disabled", "true");
+                    btnSubmit.classList.remove('btn-primary');
+                    btnSubmit.classList.add('btn-secondary');
                 }
-            }
-
-            const hpInput = form.querySelector("input[name='hp']");
-            if (hpInput && !hpInput.readOnly) {
-                hpInput.addEventListener("input", function() {
-                    if (this.value.length > 15) {
-                        this.value = this.value.slice(0, 15);
-                    }
-                    validateForm();
-                });
             }
 
             form.addEventListener("input", validateForm);
             form.addEventListener("change", validateForm);
-            validateForm();
+            checkboxes.forEach(cb => cb.addEventListener('change', validateForm));
+
+            form.addEventListener('submit', function() {
+                btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> Sedang Memproses...';
+                btnSubmit.disabled = true;
+                btnSubmit.classList.add('disabled');
+                btnSubmit.style.pointerEvents = 'none';
+            });
+
+            // ==========================================
+            // LOGIKA OTP WHATSAPP (BERLAKU UNTUK SEMUA)
+            // ==========================================
+            var timerInterval;
+            
+            // Simpan kondisi awal dari DOM
+            var initialHp = $('#hp').val();
+            var initialVerified = $('#hp').attr('data-verified');
+            // Jika saat render awal nomor ini sudah verified=1, jadikan sebagai lastVerifiedHp
+            var lastVerifiedHp = (initialVerified == '1') ? initialHp : '';
+
+            function checkWaStatus() {
+                var currentHp = $('#hp').val();
+                
+                $('#btn-send-otp').hide();
+                $('#wa-verified-badge').hide();
+
+                if (currentHp !== '') {
+                    if (currentHp === lastVerifiedHp) {
+                        // Jika nomornya sama dengan yang sudah verified
+                        $('#hp').attr('data-verified', '1');
+                        $('#wa-verified-badge').show();
+                    } else {
+                        // Jika nomor diganti (atau dari awal memang belum verified)
+                        $('#hp').attr('data-verified', '0');
+                        $('#btn-send-otp').show();
+                    }
+                }
+                validateForm();
+            }
+
+            // Jalankan saat load pertama
+            checkWaStatus();
+
+            $('#hp').on('input', function() {
+                if (this.value.length > 15) this.value = this.value.slice(0, 15);
+                $('#otp-area').slideUp();
+                clearInterval(timerInterval);
+                checkWaStatus();
+            });
+
+            // Klik Kirim OTP
+            $('#btn-send-otp').click(function(e) {
+                e.preventDefault();
+                var hp = $('#hp').val();
+
+                if (hp.length < 10) {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire('Format Salah', 'Pastikan nomor WhatsApp valid! Minimal 10 angka.', 'warning');
+                    } else {
+                        alert('Pastikan nomor WhatsApp valid! Minimal 10 angka.');
+                    }
+                    return;
+                }
+
+                var btn = $(this);
+                btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i>');
+
+                var requestData = { hp: hp };
+                requestData[csrfName] = csrfHash;
+
+                $.ajax({
+                    url: '<?= base_url("auth/send-otp") ?>',
+                    type: 'POST',
+                    data: requestData,
+                    dataType: 'json',
+                    success: function(res) {
+                        csrfHash = res.csrfHash;
+                        $('input[name="' + csrfName + '"]').val(csrfHash);
+
+                        if (res.status === 'success') {
+                            if (typeof Swal !== 'undefined') {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'OTP Terkirim!',
+                                    text: 'Silakan cek WhatsApp Anda.',
+                                    toast: true,
+                                    position: 'top-end',
+                                    showConfirmButton: false,
+                                    timer: 3000
+                                });
+                            }
+                            btn.hide().prop('disabled', false).text('Verifikasi');
+                            $('#otp-area').slideDown();
+                            $('#otp-input').val('').focus();
+                            startOtpTimer(300);
+                        } else {
+                            if (typeof Swal !== 'undefined') {
+                                Swal.fire('Gagal', res.message, 'error');
+                            } else {
+                                alert(res.message);
+                            }
+                            btn.prop('disabled', false).text('Verifikasi');
+                        }
+                    },
+                    error: function(xhr) {
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire('Oops!', 'Terjadi kesalahan sistem saat mengirim OTP.', 'error');
+                        }
+                        btn.prop('disabled', false).text('Verifikasi');
+                    }
+                });
+            });
+
+            // Klik Verifikasi OTP
+            $('#btn-verify-otp').click(function(e) {
+                e.preventDefault();
+                var otp = $('#otp-input').val();
+                var hp = $('#hp').val();
+
+                if (otp.length !== 6) {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire('Perhatian', 'Kode OTP harus 6 digit angka!', 'warning');
+                    } else {
+                        alert('Kode OTP harus 6 digit!');
+                    }
+                    return;
+                }
+
+                var btn = $(this);
+                btn.prop('disabled', true).text('Cek...');
+
+                var requestData = { hp: hp, otp: otp };
+                requestData[csrfName] = csrfHash;
+
+                $.ajax({
+                    url: '<?= base_url("auth/verify-otp") ?>',
+                    type: 'POST',
+                    data: requestData,
+                    dataType: 'json',
+                    success: function(res) {
+                        csrfHash = res.csrfHash;
+                        $('input[name="' + csrfName + '"]').val(csrfHash);
+
+                        if (res.status === 'success') {
+                            if (typeof Swal !== 'undefined') {
+                                Swal.fire('Berhasil!', 'Nomor WhatsApp berhasil diverifikasi.', 'success');
+                            }
+
+                            clearInterval(timerInterval);
+                            $('#otp-area').slideUp();
+
+                            // Update nomor terverifikasi terbaru
+                            lastVerifiedHp = hp;
+                            checkWaStatus(); 
+
+                            btn.prop('disabled', false).text('Cek Kode');
+                            $('#otp-input').val('');
+                        } else {
+                            if (typeof Swal !== 'undefined') {
+                                Swal.fire('Gagal', res.message, 'error');
+                            } else {
+                                alert(res.message);
+                            }
+                            btn.prop('disabled', false).text('Cek Kode');
+                        }
+                    },
+                    error: function(xhr) {
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire('Oops!', 'Terjadi kesalahan saat verifikasi.', 'error');
+                        }
+                        btn.prop('disabled', false).text('Cek Kode');
+                    }
+                });
+            });
+
+            function startOtpTimer(duration) {
+                clearInterval(timerInterval);
+                var timer = duration, minutes, seconds;
+
+                timerInterval = setInterval(function() {
+                    minutes = parseInt(timer / 60, 10);
+                    seconds = parseInt(timer % 60, 10);
+
+                    minutes = minutes < 10 ? "0" + minutes : minutes;
+                    seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                    $('#otp-timer').text(minutes + ":" + seconds);
+
+                    if (--timer < 0) {
+                        clearInterval(timerInterval);
+                        $('#otp-area').slideUp();
+                        $('#btn-send-otp').show().text('Kirim Ulang OTP');
+                    }
+                }, 1000);
+            }
         });
     </script>
+
     <script src="https://topcs.id/widget.js" data-tenant="kelas-brevet" data-mode="bubble" data-position="right" data-color="#2563eb"></script>
 
     <!-- SweetAlert2 CDN & Notifikasi Logic -->
@@ -978,7 +1090,6 @@ $paketUtama = !empty($daftarPaket) ? $daftarPaket[0] : null;
                             <span class="d-block fw-bold text-dark fs-6 mb-1">🎉 Langkah Terakhir!</span>
                             <p class="text-muted fs-7 mb-3" style="font-size: 0.85rem; line-height: 1.4;">Silakan bergabung ke Grup WhatsApp resmi untuk mendapatkan link akses gmeet dan koordinasi selanjutnya.</p>
                             
-                            <!-- PERUBAHAN DI SINI: Ukuran tombol disesuaikan, padding diperkecil, dan ukuran font lebih pas -->
                             <div class="d-flex flex-column flex-sm-row justify-content-center gap-2">
                                 <a href="https://chat.whatsapp.com/CHWkmrWMqrSJvJNlu1UoVy?s=cl&p=i&mlu=4" target="_blank" class="btn btn-success fw-bold px-3 py-2 shadow-sm d-inline-flex align-items-center justify-content-center gap-2 flex-fill text-start" style="font-size: 0.8rem; border-radius: 8px;">
                                     <i class="fa-brands fa-whatsapp fs-4 flex-shrink-0"></i>
@@ -993,9 +1104,7 @@ $paketUtama = !empty($daftarPaket) ? $daftarPaket[0] : null;
                     `,
                     confirmButtonColor: '#0d6efd',
                     confirmButtonText: 'Tutup / Nanti Saja',
-                    customClass: {
-                        popup: 'rounded-4 p-4'
-                    }
+                    customClass: { popup: 'rounded-4 p-4' }
                 });
             <?php endif; ?>
 
@@ -1010,22 +1119,5 @@ $paketUtama = !empty($daftarPaket) ? $daftarPaket[0] : null;
             <?php endif; ?>
         });
     </script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const btnSubmit = document.getElementById('btnSubmit');
-            if (btnSubmit) {
-                const form = btnSubmit.closest('form');
-                if (form) {
-                    form.addEventListener('submit', function() {
-                        btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> Sedang Memproses...';
-                        btnSubmit.disabled = true;
-                        btnSubmit.classList.add('disabled');
-                        btnSubmit.style.pointerEvents = 'none';
-                    });
-                }
-            }
-        });
-    </script>
 </body>
-
 </html>
