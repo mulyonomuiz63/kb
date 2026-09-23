@@ -17,13 +17,25 @@
 			left: 0;
 			width: 100%;
 			height: 100%;
-			background-color: #ffffff;
-			/* Warna putih solid agar konten tidak terlihat */
+			/* Mengubah #ffffff menjadi rgba agar agak transparan. 
+           0.85 di akhir adalah tingkat opacity (85% putih, 15% transparan) */
+			background-color: rgba(255, 255, 255, 0.85);
+			/* Opsional: Efek blur pada konten di belakang loading agar lebih elegan */
+			backdrop-filter: blur(4px);
+			-webkit-backdrop-filter: blur(4px);
+			/* Untuk dukungan Safari */
 			z-index: 99999;
 			display: flex;
 			flex-direction: column;
 			align-items: center;
 			justify-content: center;
+		}
+
+		/* Mengatur ukuran GIF agar tidak terlalu besar */
+		.loading-gif {
+			width: 120px;
+			/* Sesuaikan ukuran ini dengan kebutuhan GIF Anda */
+			height: auto;
 		}
 
 		/* Class untuk menghilangkan loader via JS */
@@ -36,10 +48,9 @@
 
 <body id="kt_body" class="header-extended header-fixed header-tablet-and-mobile-fixed">
 	<div id="global-loader">
+		<img src="<?= base_url('uploads/media/loading.gif') ?>" alt="Loading Kelasbrevet..." class="loading-gif">
 
-		<div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status"></div>
-
-		<div class="mt-5">
+		<div class="mt-4">
 			<div class="text-gray-600 fw-semibold fs-6 text-center">Sedang memuat...</div>
 		</div>
 	</div>
@@ -75,7 +86,7 @@
 					loader.classList.add('loader-hidden');
 					document.body.classList.remove('page-loading');
 
-					// Hapus elemen dari DOM setelah animasi selesai (opsional)
+					// Hapus elemen dari DOM setelah animasi selesai
 					setTimeout(() => {
 						loader.remove();
 					}, 600);
