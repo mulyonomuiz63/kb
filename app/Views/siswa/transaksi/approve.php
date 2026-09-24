@@ -16,27 +16,39 @@ $total_bayar =$transaksi->nominal - $diskon -$diskon_voucher;
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <script>
-        !function(f,b,e,v,n,t,s)
-        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-        n.queue=[];t=b.createElement(e);t.async=!0;
-        t.src=v;s=b.getElementsByTagName(e)[0];
-        s.parentNode.insertBefore(t,s)}(window, document,'script',
-        'https://connect.facebook.net/en_US/fbevents.js');
-        
-        // GANTI DENGAN ID PIXEL ANDA
-        fbq('init', 'MASUKKAN_ID_PIXEL_ANDA_DI_SINI'); 
+        ! function(f, b, e, v, n, t, s) {
+            if (f.fbq) return;
+            n = f.fbq = function() {
+                n.callMethod ?
+                    n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+            };
+            if (!f._fbq) f._fbq = n;
+            n.push = n.ready = !0;
+            n.loaded = !0;
+            n.version = '2.0';
+            n.queue = [];
+            t = b.createElement(e);
+            t.async = !0;
+            t.src = v;
+            s = b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t, s)
+        }(window, document, 'script',
+            'https://connect.facebook.net/en_US/fbevents.js');
+            
+        // Inisialisasi menggunakan ID Meta Pixel Anda
+        fbq('init', '4623821844565938'); 
         fbq('track', 'PageView');
         
-        // EVENT PURCHASE MENGGUNAKAN TOTAL BAYAR ASLI
+        // --- TAMBAHAN EVENT PURCHASE UNTUK MENDETEKSI PEMBELIAN ---
+        // Variabel $total_bayar diambil dari perhitungan PHP di bagian atas file
         fbq('track', 'Purchase', {
-            value: <?= (float)$total_bayar; ?>,
+            value: <?= isset($total_bayar) ? (float)$total_bayar : 0.00; ?>,
             currency: 'IDR'
         });
     </script>
     <noscript>
-        <img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=MASUKKAN_ID_PIXEL_ANDA_DI_SINI&ev=PageView&noscript=1"/>
+        <img height="1" width="1" style="display:none"
+            src="https://www.facebook.com/tr?id=4623821844565938&ev=PageView&noscript=1" />
     </noscript>
     <style>
         body {
