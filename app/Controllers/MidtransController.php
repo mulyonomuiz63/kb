@@ -216,8 +216,7 @@ class MidtransController extends BaseController
             ->join('siswa b', 'b.id_siswa = transaksi.idsiswa')
             ->join('paket c', 'c.idpaket = d.idpaket')
             ->where('transaksi.idsiswa', session('id'))
-            ->where('transaksi.idtransaksi', $idtransaksi)
-            ->where('transaksi.status', 'S')->get()->getRowObject();
+            ->where('transaksi.idtransaksi', $idtransaksi)->get()->getRowObject();
 
         // 3. Keamanan Lanjutan: Jika transaksi tidak ditemukan, bukan milik user ini, atau status belum 'S'
         if (!$transaksi) {
