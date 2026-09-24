@@ -190,7 +190,7 @@ class MidtransController extends BaseController
                 return redirect()->to('sw-siswa/transaksi')->with('pesan', 'Pembayaran tidak dapat di proses');
             } else {
                 $db->transCommit();
-                return redirect()->to('pembayaran-berhasil/' . $idtransaksi);
+                return redirect()->to('pembayaran-berhasil/' . encrypt_url($idtransaksi));
             }
         } catch (\Exception $e) {
             // ---------------------------------------------------------
@@ -203,9 +203,30 @@ class MidtransController extends BaseController
         }
     }
 
-    public function pembayaranBerhasil()
+    public function pembayaranBerhasil($idtransaksi = null)
     {
-        return view('siswa/transaksi/approve');
+        // 1. Keamanan Dasar: Cek apakah parameter ID Transaksi ada
+        if (empty($idtransaksi)) {
+            return redirect()->to(base_url('sw-siswa/transaksi'))->with('error', 'Data transaksi tidak valid.');
+        }
+
+        // 2. Pengambilan Data (Query Builder CI4 sudah otomatis mencegah SQL Injection)
+        $transaksi  = $this->transaksiModel
+            ->join('detail_transaksi d', 'd.idtransaksi=transaksi.idtransaksi')
+            ->join('siswa b', 'b.id_siswa = transaksi.idsiswa')
+            ->join('paket c', 'c.idpaket = d.idpaket')
+            ->where('transaksi.idsiswa', session('id'))
+            ->where('transaksi.idtransaksi', $idtransaksi)
+            ->where('transaksi.status', 'S')->get()->getRowObject();
+
+        // 3. Keamanan Lanjutan: Jika transaksi tidak ditemukan, bukan milik user ini, atau status belum 'S'
+        if (!$transaksi) {
+            return redirect()->to(base_url('sw-siswa/transaksi'))->with('error', 'Akses ditolak atau transaksi belum selesai.');
+        }
+
+        $data['transaksi'] = $transaksi;
+
+        return view('siswa/transaksi/approve', $data);
     }
 
     private function approveOtomatis($idtransaksi)

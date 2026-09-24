@@ -485,20 +485,37 @@
       success: function(response) {
         if (response.status) {
           Swal.close(); // Tutup loading Swal
+
           window.snap.pay(response.snap_token, {
+            // 1. JIKA PEMBAYARAN LANGSUNG BERHASIL (Misal: Kartu Kredit / Gopay)
             onSuccess: function(result) {
-              window.location.href = "<?= base_url('pembayaran-berhasil') ?>" + '/' + response.idtransaksi;
+              window.location.href = "<?= base_url('pembayaran-berhasil') ?>/" + response.idtransaksi;
             },
+
+            // 2. JIKA PEMBAYARAN TERTUNDA (Misal: Harus transfer VA Bank)
             onPending: function(result) {
-              window.location.href = "<?= base_url('pembayaran-berhasil') ?>" + '/' + response.idtransaksi;
+              Swal.fire({
+                title: 'Menunggu Pembayaran',
+                text: 'Silakan selesaikan pembayaran sesuai metode yang Anda pilih.',
+                icon: 'info',
+                confirmButtonText: 'Lihat Tagihan'
+              }).then(() => {
+                // Arahkan ke halaman daftar transaksi, BUKAN halaman sukses
+                window.location.href = "<?= base_url('sw-siswa/transaksi') ?>";
+              });
             },
+
+            // 3. JIKA PEMBAYARAN GAGAL
             onError: function(result) {
-              Swal.fire('Gagal', 'Pembayaran gagal.', 'error').then(() => {
+              Swal.fire('Gagal', 'Pembayaran Anda gagal diproses.', 'error').then(() => {
                 location.reload();
               });
             },
+
+            // 4. JIKA USER MENUTUP POPUP SEBELUM MEMBAYAR
             onClose: function() {
-              location.reload(); // Reload agar tampilan update ke status VA
+              // Cukup reload saja halamannya agar statusnya ter-update menjadi pending/VA
+              location.reload();
             }
           });
         } else {
@@ -511,7 +528,7 @@
 <script>
   document.getElementById('form-pembayaran').addEventListener('submit', function(e) {
     // Tombol hanya akan berubah jika form sudah lolos validasi HTML (contoh: file required sudah diisi)
-    
+
     let btn = document.getElementById('btn-submit');
     let icon = document.getElementById('btn-icon');
     let text = document.getElementById('btn-text');

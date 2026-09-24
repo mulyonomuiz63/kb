@@ -620,7 +620,7 @@ class TransaksiController extends BaseController
 
             $this->emailer->send(session('email'), $subject, $message);
 
-            return redirect()->to('pembayaran-berhasil/' . $idTransaksi);
+            return redirect()->to('pembayaran-berhasil/' . encrypt_url($idTransaksi));
         } catch (\Exception $e) {
             $db->transRollback();
 
@@ -723,14 +723,14 @@ class TransaksiController extends BaseController
 
                 return $this->response->setJSON([
                     'status'     => true,
-                    'idtransaksi'    => $data->idtransaksi,
+                    'idtransaksi'    => encrypt_url($data->idtransaksi),
                     'snap_token' => $snapToken,
                     'csrf_hash'  => csrf_hash()
                 ]);
             } catch (\Exception $e) {
                 return $this->response->setJSON([
                     'status'    => false,
-                    'idtransaksi'    => false,
+                    'idtransaksi'    => encrypt_url($data->idtransaksi),
                     'message'   => $e->getMessage(),
                     'csrf_hash' => csrf_hash()
                 ]);
@@ -738,7 +738,7 @@ class TransaksiController extends BaseController
         } else {
             return $this->response->setJSON([
                 'status'     => true,
-                'idtransaksi'    => $cekTransaksi->idtransaksi,
+                'idtransaksi'    => encrypt_url($cekTransaksi->idtransaksi), 
                 'snap_token' => $cekTransaksi->token,
                 'csrf_hash'  => csrf_hash()
             ]);
