@@ -65,13 +65,6 @@
         // Inisialisasi menggunakan ID Meta Pixel Anda
         fbq('init', '4623821844565938'); 
         fbq('track', 'PageView');
-        
-        // --- TAMBAHAN EVENT PURCHASE UNTUK MENDETEKSI PEMBELIAN ---
-        // Variabel $total_bayar diambil dari perhitungan PHP di bagian atas file
-        fbq('track', 'Purchase', {
-            value: <?= isset($total_bayar) ? (float)$total_bayar : 0.00; ?>,
-            currency: 'IDR'
-        });
     </script>
     <noscript>
         <img height="1" width="1" style="display:none"
