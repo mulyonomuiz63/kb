@@ -226,6 +226,7 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
         $routes->post('approve-transaksi', 'Admin\TransaksiController::approveTransaksi');
         $routes->get('approve-manual/(:any)', 'Admin\TransaksiController::approveManual/$1');
         $routes->get('hapus-transaksi-siswa/(:any)', 'Admin\TransaksiController::hapusTransaksiSiswa/$1');
+        $routes->get('pembayaran-berhasil/(:segment)', 'Admin\TransaksiController::pembayaranBerhasil/$1');
 
         //export data siswa
         $routes->get('export-excel', 'Admin\TransaksiController::exportExcel');

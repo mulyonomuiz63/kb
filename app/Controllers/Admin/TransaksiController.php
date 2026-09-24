@@ -658,7 +658,7 @@ class TransaksiController extends BaseController
                 );
             }
 
-            return redirect()->to('sw-admin/transaksi')->with('success', 'Pembayaran berhasil diverifikasi.');
+            return redirect()->to('sw-admin/transaksi/pembayaran-berhasil/' . encrypt_url($idtransaksi));
         } catch (\Exception $e) {
             $db->transRollback();
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
@@ -884,6 +884,34 @@ class TransaksiController extends BaseController
         exit;
     }
 
+    public function pembayaranBerhasil($id = null)
+    {
+        // 1. Keamanan Dasar: Cek apakah parameter ID Transaksi ada
+        if (empty($id)) {
+            return redirect()->to(base_url('sw-admin/transaksi'))->with('success', 'Data transaksi tidak valid.');
+        }
+
+        $idtransaksi = decrypt_url($id);
+
+        // 2. Pengambilan Data (Query Builder CI4 sudah otomatis mencegah SQL Injection)
+        $transaksi  = $this->transaksiModel
+            ->join('detail_transaksi d', 'd.idtransaksi=transaksi.idtransaksi')
+            ->join('siswa b', 'b.id_siswa = transaksi.idsiswa')
+            ->join('paket c', 'c.idpaket = d.idpaket')
+            ->where('transaksi.idsiswa', session('id'))
+            ->where('transaksi.idtransaksi', $idtransaksi)
+            ->where('transaksi.status', 'S')->get()->getRowObject();
+
+        // 3. Keamanan Lanjutan: Jika transaksi tidak ditemukan, bukan milik user ini, atau status belum 'S'
+        if (!$transaksi) {
+            return redirect()->to(base_url('sw-admin/transaksi'))->with('success', 'Data transaksi tidak valid.');
+        }
+
+        $data['transaksi'] = $transaksi;
+
+        return view('admin/transaksi/approve', $data);
+    }
+
     public function kirimWa()
     {
         $methodType       = $this->request->getPost('method_type'); // 'whatsapp', 'email', atau 'keduanya'
@@ -1025,4 +1053,6 @@ class TransaksiController extends BaseController
     ';
         return $this->emailer->send($email, $subject, $message);
     }
+
+
 }
