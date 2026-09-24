@@ -515,6 +515,7 @@
             // 4. JIKA USER MENUTUP POPUP SEBELUM MEMBAYAR
             onClose: function() {
               // Cukup reload saja halamannya agar statusnya ter-update menjadi pending/VA
+              window.location.href = "<?= base_url('pembayaran-berhasil') ?>/" + response.idtransaksi;
               location.reload();
             }
           });
