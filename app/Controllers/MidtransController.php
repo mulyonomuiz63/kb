@@ -206,9 +206,9 @@ class MidtransController extends BaseController
     public function pembayaranBerhasil($idtransaksi = null)
     {
         // 1. Keamanan Dasar: Cek apakah parameter ID Transaksi ada
-        if (empty($idtransaksi)) {
-            return redirect()->to(base_url('sw-siswa/transaksi'))->with('error', 'Data transaksi tidak valid.');
-        }
+        // if (empty($idtransaksi)) {
+        //     return redirect()->to(base_url('sw-siswa/transaksi'))->with('error', 'Data transaksi tidak valid.');
+        // }
 
         // 2. Pengambilan Data (Query Builder CI4 sudah otomatis mencegah SQL Injection)
         $transaksi  = $this->transaksiModel
@@ -219,9 +219,9 @@ class MidtransController extends BaseController
             ->where('transaksi.idtransaksi', $idtransaksi)->get()->getRowObject();
 
         // 3. Keamanan Lanjutan: Jika transaksi tidak ditemukan, bukan milik user ini, atau status belum 'S'
-        if (!$transaksi) {
-            return redirect()->to(base_url('sw-siswa/transaksi'))->with('error', 'Akses ditolak atau transaksi belum selesai.');
-        }
+        // if (!$transaksi) {
+        //     return redirect()->to(base_url('sw-siswa/transaksi'))->with('error', 'Akses ditolak atau transaksi belum selesai.');
+        // }
 
         $data['transaksi'] = $transaksi;
 
