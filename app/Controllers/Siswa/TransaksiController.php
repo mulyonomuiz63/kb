@@ -620,7 +620,7 @@ class TransaksiController extends BaseController
 
             $this->emailer->send(session('email'), $subject, $message);
 
-            return redirect()->to('sw-siswa/transaksi')->with('success', $pesanFlashData);
+            return redirect()->to('pembayaran-berhasil/' . $idTransaksi);
         } catch (\Exception $e) {
             $db->transRollback();
 
@@ -723,12 +723,14 @@ class TransaksiController extends BaseController
 
                 return $this->response->setJSON([
                     'status'     => true,
+                    'idtransaksi'    => $data->idtransaksi,
                     'snap_token' => $snapToken,
                     'csrf_hash'  => csrf_hash()
                 ]);
             } catch (\Exception $e) {
                 return $this->response->setJSON([
                     'status'    => false,
+                    'idtransaksi'    => false,
                     'message'   => $e->getMessage(),
                     'csrf_hash' => csrf_hash()
                 ]);
@@ -736,6 +738,7 @@ class TransaksiController extends BaseController
         } else {
             return $this->response->setJSON([
                 'status'     => true,
+                'idtransaksi'    => $cekTransaksi->idtransaksi,
                 'snap_token' => $cekTransaksi->token,
                 'csrf_hash'  => csrf_hash()
             ]);

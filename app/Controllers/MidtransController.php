@@ -190,7 +190,7 @@ class MidtransController extends BaseController
                 return redirect()->to('sw-siswa/transaksi')->with('pesan', 'Pembayaran tidak dapat di proses');
             } else {
                 $db->transCommit();
-                return redirect()->to('sw-siswa/transaksi')->with('success', 'Status pembayaran berhasil diperbarui');
+                return redirect()->to('pembayaran-berhasil/' . $idtransaksi);
             }
         } catch (\Exception $e) {
             // ---------------------------------------------------------
@@ -201,6 +201,11 @@ class MidtransController extends BaseController
             // Mengembalikan ke halaman transaksi dengan pesan error yang aman tanpa merusak tampilan
             return redirect()->to('sw-siswa/transaksi')->with('pesan', 'Terjadi kesalahan koneksi ke server pembayaran. Silakan coba lagi.');
         }
+    }
+
+    public function pembayaranBerhasil()
+    {
+        return view('siswa/transaksi/approve');
     }
 
     private function approveOtomatis($idtransaksi)

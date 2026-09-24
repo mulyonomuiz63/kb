@@ -487,10 +487,10 @@
           Swal.close(); // Tutup loading Swal
           window.snap.pay(response.snap_token, {
             onSuccess: function(result) {
-              window.location.href = "<?= base_url('sw-siswa/transaksi') ?>";
+              window.location.href = "<?= base_url('pembayaran-berhasil') ?>" + '/' + response.idtransaksi;
             },
             onPending: function(result) {
-              window.location.href = "<?= base_url('sw-siswa/transaksi') ?>";
+              window.location.href = "<?= base_url('pembayaran-berhasil') ?>" + '/' + response.idtransaksi;
             },
             onError: function(result) {
               Swal.fire('Gagal', 'Pembayaran gagal.', 'error').then(() => {

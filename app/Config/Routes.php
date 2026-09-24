@@ -141,6 +141,7 @@ $routes->get('download/pdf/(:any)', 'Download::pdf/$1');
 //untuk handle midtrans
 $routes->post('midtrans/notification', 'MidtransController::notification');
 $routes->get('midtrans/notification-manual', 'MidtransController::notificationManual');
+$routes->get('pembayaran-berhasil/(:segment)', 'MidtransController::pembayaranBerhasil/$1');
 
 // Route untuk aksi update database
 $routes->group('api/notifications', function ($routes) {
