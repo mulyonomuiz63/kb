@@ -898,7 +898,6 @@ class TransaksiController extends BaseController
             ->join('detail_transaksi d', 'd.idtransaksi=transaksi.idtransaksi')
             ->join('siswa b', 'b.id_siswa = transaksi.idsiswa')
             ->join('paket c', 'c.idpaket = d.idpaket')
-            ->where('transaksi.idsiswa', session('id'))
             ->where('transaksi.idtransaksi', $idtransaksi)
             ->where('transaksi.status', 'S')->get()->getRowObject();
 
