@@ -171,6 +171,7 @@
 
       <div class="row g-5 g-xl-10">
         <div class="col-xl-8">
+          
           <div class="card card-flush shadow-sm mb-5 mb-xl-10 overflow-hidden animate__animated animate__fadeIn">
             <?php
             $thumbs = json_decode($materi->text_materi, true) ?? [];
@@ -241,65 +242,7 @@
             </div>
           </div>
 
-          <div class="alert alert-dismissible bg-light-danger d-flex flex-column flex-sm-row p-5 mb-10 border border-danger border-dashed">
-            <i class="ki-outline ki-information-5 fs-2hx text-danger me-4 mb-5 mb-sm-0"></i>
-            <div class="d-flex flex-column pe-0 pe-sm-10">
-              <h5 class="mb-1 text-danger fw-bold">Peringatan Hak Cipta!</h5>
-              <span class="fs-7 text-gray-800">Dilarang keras melakukan penyebaran atau penggandaan video pembelajaran ini tanpa seizin tertulis dari pemilik konten. Pelanggaran akan dikenakan sanksi hukum.</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-xl-4">
-          <div class="card card-flush shadow-sm h-xl-100 animate__animated animate__fadeInRight">
-            <div class="card-header pt-5 pb-5 bg-primary">
-              <div class="card-title d-flex align-items-center justify-content-between w-100 m-0">
-                <div class="d-flex flex-column pe-3" style="max-width: 60%;">
-                  <span class="card-label fw-bold text-white fs-4 lh-1 mb-1">Diskusi Materi</span>
-                  <span class="text-white opacity-75 fw-semibold fs-7 text-truncate" id="judul_materi_chat" style="max-width: 100%;">
-                    Tanyakan hal yang belum dimengerti
-                  </span>
-                </div>
-                <!-- TOMBOL DOWNLOAD YANG DIPERBARUI AGAR JELAS -->
-                <div class="card-toolbar">
-                  <button type="button" class="btn btn-sm btn-light fw-bold text-primary d-flex align-items-center px-3 py-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#staticBackdrop" title="Download File Materi">
-                    <i class="ki-outline ki-file-down fs-2 me-1 text-primary"></i>
-                    <span>File Materi</span>
-                    <span id="fileCountBadge" class="badge badge-circle badge-danger ms-2 fs-9" style="display: none;">0</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div class="card-body">
-              <div class="scroll-y me-n5 pe-5 h-300px h-lg-400px inner-chat-materi">
-                <div class="d-flex justify-content-center py-10">
-                  <span class="spinner-border text-primary"></span>
-                </div>
-              </div>
-            </div>
-
-            <div class="card-footer pt-4 position-relative" id="kt_chat_messenger_footer">
-              <input type="hidden" name="kode_materi" id="kode_materi" value="">
-
-              <!-- Dropdown Menu Tagging Mention -->
-              <div id="mention_dropdown" class="mention-dropdown shadow-lg"></div>
-
-              <textarea id="msg_input" name="text" class="form-control form-control-flush mb-3" rows="1" data-kt-element="input" placeholder="Tulis pesan... (Gunakan @ untuk tag)"></textarea>
-              <div class="d-flex flex-stack">
-                <div class="d-flex align-items-center me-2">
-                  <small id="informasi" class="text-danger"></small>
-                </div>
-                <div class="d-flex">
-                  <button id="btn_cancel_edit" class="btn btn-danger btn-sm me-2 d-none" type="button" title="Batal Edit">Batal</button>
-                  <button id="chat_materi" class="btn btn-primary btn-sm" type="button" data-kt-element="send">Kirim</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-12 mt-5">
-          <div class="card card-flush shadow-sm animate__animated animate__fadeInUp">
+          <div class="card card-flush shadow-sm mb-5 mb-xl-10 animate__animated animate__fadeInUp">
             <div class="card-header border-0 pt-5">
               <h3 class="card-title align-items-start flex-column">
                 <span class="card-label fw-bold text-dark">Playlist Pembelajaran</span>
@@ -348,6 +291,62 @@
                     </div>
                   </div>
                 <?php endforeach; ?>
+              </div>
+            </div>
+          </div>
+
+          <div class="alert alert-dismissible bg-light-danger d-flex flex-column flex-sm-row p-5 mb-10 border border-danger border-dashed">
+            <i class="ki-outline ki-information-5 fs-2hx text-danger me-4 mb-5 mb-sm-0"></i>
+            <div class="d-flex flex-column pe-0 pe-sm-10">
+              <h5 class="mb-1 text-danger fw-bold">Peringatan Hak Cipta!</h5>
+              <span class="fs-7 text-gray-800">Dilarang keras melakukan penyebaran atau penggandaan video pembelajaran ini tanpa seizin tertulis dari pemilik konten. Pelanggaran akan dikenakan sanksi hukum.</span>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="col-xl-4">
+          <div class="card card-flush shadow-sm animate__animated animate__fadeInRight">
+            <div class="card-header pt-5 pb-5 bg-primary">
+              <div class="card-title d-flex align-items-center justify-content-between w-100 m-0">
+                <div class="d-flex flex-column pe-3" style="max-width: 60%;">
+                  <span class="card-label fw-bold text-white fs-4 lh-1 mb-1">Diskusi Materi</span>
+                  <span class="text-white opacity-75 fw-semibold fs-7 text-truncate" id="judul_materi_chat" style="max-width: 100%;">
+                    Tanyakan hal yang belum dimengerti
+                  </span>
+                </div>
+                <div class="card-toolbar">
+                  <button type="button" class="btn btn-sm btn-light fw-bold text-primary d-flex align-items-center px-3 py-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#staticBackdrop" title="Download File Materi">
+                    <i class="ki-outline ki-file-down fs-2 me-1 text-primary"></i>
+                    <span>File Materi</span>
+                    <span id="fileCountBadge" class="badge badge-circle badge-danger ms-2 fs-9" style="display: none;">0</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <div class="card-body">
+              <div class="scroll-y me-n5 pe-5 inner-chat-materi" style="height: 400px; max-height: 400px;">
+                <div class="d-flex justify-content-center py-10">
+                  <span class="spinner-border text-primary"></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-footer pt-4 position-relative" id="kt_chat_messenger_footer">
+              <input type="hidden" name="kode_materi" id="kode_materi" value="">
+
+              <div id="mention_dropdown" class="mention-dropdown shadow-lg"></div>
+
+              <textarea id="msg_input" name="text" class="form-control mb-3 border border-gray-300" rows="1" data-kt-element="input" placeholder="Tulis pesan... (Gunakan @ untuk tag)"></textarea>
+              <div class="d-flex flex-stack">
+                <div class="d-flex align-items-center me-2">
+                  <small id="informasi" class="text-danger"></small>
+                </div>
+                <div class="d-flex">
+                  <button id="btn_cancel_edit" class="btn btn-danger btn-sm me-2 d-none" type="button" title="Batal Edit">Batal</button>
+                  <button id="chat_materi" class="btn btn-primary btn-sm" type="button" data-kt-element="send">Kirim</button>
+                </div>
               </div>
             </div>
           </div>
@@ -450,6 +449,49 @@
   /* ==========================================================================
      2. FUNGSI UTILITIES (AJAX, WAKTU, & TAMPILAN)
      ========================================================================== */
+     
+  // === FUNGSI PERBAIKAN: MENYAMAKAN TINGGI CHAT DAN VIDEO ===
+  function syncChatHeight() {
+    if (window.innerWidth >= 1200) {
+      const videoCard = $('#videoContainer').closest('.card');
+      const chatCard = $('.inner-chat-materi').closest('.card');
+      const chatHeader = chatCard.find('.card-header');
+      const chatFooter = chatCard.find('.card-footer');
+      const chatBody = chatCard.find('.card-body');
+
+      const videoHeight = videoCard.outerHeight();
+
+      // Samakan total tinggi kotak chat dengan kotak video
+      chatCard.css('height', videoHeight + 'px');
+
+      // Ambil nilai padding atas dan bawah dari card-body
+      const pt = parseFloat(chatBody.css('padding-top')) || 0;
+      const pb = parseFloat(chatBody.css('padding-bottom')) || 0;
+
+      // Hitung sisa ruang kosong secara presisi
+      const availableHeight = videoHeight - chatHeader.outerHeight(true) - chatFooter.outerHeight(true) - pt - pb;
+
+      if (availableHeight > 50) {
+        $('.inner-chat-materi').css({
+          'height': availableHeight + 'px',
+          'max-height': availableHeight + 'px'
+        });
+      }
+    } else {
+      // Jika di layar HP/Tablet, kembalikan ke tinggi normal
+      const chatCard = $('.inner-chat-materi').closest('.card');
+      chatCard.css('height', 'auto');
+      $('.inner-chat-materi').css({
+        'height': '400px',
+        'max-height': '400px'
+      });
+    }
+  }
+
+  // Monitor jika layar di-resize
+  window.addEventListener('resize', syncChatHeight);
+  // =======================================================
+
   function updateCsrfToken(newToken) {
     if (newToken && newToken !== currentCsrfHash) {
       currentCsrfHash = newToken;
@@ -555,6 +597,9 @@
 
       get_chat_materi(true);
       loadFileMateri(initialKode);
+
+      // Pastikan tinggi chat sejajar saat video pertama dimuat
+      setTimeout(syncChatHeight, 300);
     }
   }
 
@@ -584,21 +629,37 @@
     if (event.data === YT.PlayerState.ENDED) {
       const current = $('.video-thumb.border-primary');
       const next = current.next('.video-thumb');
+      
       if (next.length > 0) {
         next.click();
-        next[0].scrollIntoView({
-          behavior: 'smooth',
-          inline: 'center'
+        
+        // === FOKUS TETAP DI VIDEO SAAT PINDAH MATERI ===
+        // 1. Gulir daftar playlist ke samping tanpa memindahkan layar
+        const trackElement = document.getElementById('carouselTrack');
+        const scrollPos = next[0].offsetLeft - (trackElement.offsetWidth / 2) + (next[0].offsetWidth / 2);
+        trackElement.scrollTo({
+          left: scrollPos,
+          behavior: 'smooth'
         });
+
+        // 2. Kunci/Kembalikan pandangan layar pengguna fokus ke Video utama
+        document.getElementById('videoContainer').scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+        });
+        
       } else {
-        const firstThumb = $('.video-thumb').first();
-        $('.video-thumb').removeClass('border border-primary border-3');
+        const firstThumb = $('.video-thumb').first();$('.video-thumb').removeClass('border border-primary border-3');
         firstThumb.addClass('border border-primary border-3');
         $('#judul_materi_chat').text(firstThumb.data('title'));
         $('#kode_materi').val(firstThumb.data('kode_materi'));
-        track.scrollTo({
-          left: 0,
-          behavior: 'smooth'
+        
+        track.scrollTo({ left: 0, behavior: 'smooth' });
+
+        // Kunci fokus ke video utama kembali
+        document.getElementById('videoContainer').scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
         });
 
         if (player && player.cueVideoById) {
@@ -620,6 +681,10 @@
      5. EVENT LISTENERS UTAMA
      ========================================================================== */
   $(document).ready(function() {
+    
+    // Pastikan sync layout dijalankan juga saat document ready
+    setTimeout(syncChatHeight, 500);
+
     $('#videoContainer').on('mousemove mousedown touchstart keydown', function() {
       resetIdleTimer();
     });
@@ -682,8 +747,7 @@
       const title = $(this).data('title');
 
       $('.video-thumb').removeClass('border border-primary border-3');
-      $(this).addClass('border border-primary border-3');
-      $('#kode_materi').val(kode_materi);
+      $(this).addClass('border border-primary border-3');$('#kode_materi').val(kode_materi);
       $('#judul_materi_chat').text(title);
 
       // Reset Chat Panel saat pindah video
@@ -952,8 +1016,7 @@
           });
 
           if (hasNewMessage) {
-            if ($('.inner-chat-materi').find('.text-muted.py-10').length > 0) {
-              $('.inner-chat-materi').html('');
+            if ($('.inner-chat-materi').find('.text-muted.py-10').length > 0) {$('.inner-chat-materi').html('');
             }
             $('.inner-chat-materi').append(html);
             if (shouldScroll) {

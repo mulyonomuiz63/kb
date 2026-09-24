@@ -293,7 +293,7 @@
                     <!-- Target Tujuan -->
                     <input type="hidden" name="destination_wa" id="destination_wa">
                     <input type="hidden" name="destination_email" id="destination_email">
-                    
+
                     <!-- ========================================== -->
                     <!-- TAMBAHAN: Hidden Input untuk Parameter WABA -->
                     <!-- ========================================== -->
@@ -936,67 +936,68 @@
     });
 </script>
 <script>
-// Handler ketika tombol kirim pesan diklik
-$(document).on('click', '.btn-kirim-pesan', function() {
-    var email = $(this).data('email');
-    var phone = $(this).data('hp');
-    var nama = $(this).data('nama');
-    var paket = $(this).data('paket');
-    var nominal = $(this).data('nominal');
-    var status = $(this).data('status');
-    var jenisBayar = $(this).data('bayar');
+    // Handler ketika tombol kirim pesan diklik
+    $(document).on('click', '.btn-kirim-pesan', function() {
+        var email = $(this).data('email');
+        var phone = $(this).data('hp');
+        var nama = $(this).data('nama');
+        var paket = $(this).data('paket');
+        var nominal = $(this).data('nominal');
+        var status = $(this).data('status');
+        var jenisBayar = $(this).data('bayar');
 
-    var statusText = status === 'S' ? 'Lunas' : (status === 'P' ? 'Menunggu Pembayaran' : 'Pending / Lainnya');
-    var bayarText = jenisBayar === 'online' ? 'Online (Midtrans)' : (jenisBayar === 'manual' ? 'Manual Transfer' : 'Belum memilih');
+        var statusText = status === 'S' ? 'Lunas' : (status === 'P' ? 'Menunggu Pembayaran' : 'Pending / Lainnya');
+        var bayarText = jenisBayar === 'online' ? 'Online (Midtrans)' : (jenisBayar === 'manual' ? 'Manual Transfer' : 'Belum memilih');
 
-    $('#destination_email').val(email);
-    $('#destination_wa').val(phone);
+        $('#destination_email').val(email);
+        $('#destination_wa').val(phone);
 
-    // ==========================================
-    // TAMBAHAN: Isi hidden input parameter WABA
-    // ==========================================
-    $('#param_nama').val(nama);
-    $('#param_paket').val(paket);
-    $('#param_nominal').val(nominal);
-    $('#param_status').val(statusText);
-    // ==========================================
+        // ==========================================
+        // TAMBAHAN: Isi hidden input parameter WABA
+        // ==========================================
+        $('#param_nama').val(nama);
+        $('#param_paket').val(paket);
+        $('#param_nominal').val(nominal);
+        $('#param_status').val(statusText);
+        // ==========================================
 
-    $('#modalKirimPesanLabel').text('Kirim Pesan ke ' + nama);
-    $('#info_penerima').val('Email: ' + email);
-    
-    var pesanTemplate = 'Halo ' + nama + ',\n\n' +
-        'Terima kasih telah mendaftar di program kami. Berikut adalah rincian informasi paket pelatihan dan status pembayaran Anda:\n\n' +
-        '📦 Detail Paket:\n' +
-        '• Nama Paket: ' + paket + '\n\n' +
-        '💳 Detail Pembayaran:\n' +
-        '• Total Tagihan: ' + nominal + '\n' +
-        '• Status: ' + statusText + '\n' +
-        '• Metode: ' + bayarText + '\n\n' +
-        'Anda dapat mengecek riwayat, melakukan konfirmasi, atau mengelola transaksi Anda melalui tautan berikut:\n' +
-        'https://kelasbrevet.com/sw-siswa/transaksi\n\n' +
-        'Jika Anda membutuhkan bantuan lebih lanjut, silakan hubungi kami Whatsapp 6285284767476 atau CS Online kami https://topcs.id/kelas-brevet. Terima kasih.';
-
-    $('#isi_pesan').val(pesanTemplate);
-
-    // Aktifkan pilihan WhatsApp & Keduanya, default pilih Email
-    $('#option_wa').prop('checked', false);
-    $('#option_keduanya').prop('checked', false);
-    $('#option_email').prop('checked', true);
-});
-
-// Handler ketika opsi metode kirim berubah
-$(document).on('change', 'input[name="method_type"]', function() {
-    var method = $(this).val();
-    var email = $('#destination_email').val();
-    var phone = $('#destination_wa').val();
-
-    if (method === 'whatsapp') {
-        $('#info_penerima').val('WhatsApp: ' + phone);
-    } else if (method === 'email') {
+        $('#modalKirimPesanLabel').text('Kirim Pesan ke ' + nama);
         $('#info_penerima').val('Email: ' + email);
-    } else if (method === 'keduanya') {
-        $('#info_penerima').val('WhatsApp: ' + phone + ' | Email: ' + email);
-    }
-});
+
+        var pesanTemplate = 'Halo ' + nama + ',\n\n' +
+            'Kami ingin mengingatkan bahwa batas waktu pembayaran untuk pendaftaran program Anda akan segera berakhir.\n' +
+            'Agar sistem tidak membatalkan pesanan Anda secara otomatis, mohon segera menyelesaikan pembayaran dengan rincian sebagai berikut:\n\n' +
+            '📦 Detail Paket:\n' +
+            '* Nama Paket: ' + paket + '\n\n' +
+            '💳 Detail Pembayaran:\n' +
+            '* Total Tagihan: ' + nominal + '\n' +
+            '* Status: ' + statusText + '\n' +
+            '* Metode: ' + bayarText + '\n\n' +
+            'Segera lakukan konfirmasi pembayaran atau cek riwayat transaksi Anda melalui tautan berikut sebelum waktu habis:\n' +
+            '👉 https://kelasbrevet.com/sw-siswa/transaksi\n\n' +
+            '(Jika Anda sudah melakukan pembayaran, mohon abaikan pesan ini).';
+
+        $('#isi_pesan').val(pesanTemplate);
+
+        // Aktifkan pilihan WhatsApp & Keduanya, default pilih Email
+        $('#option_wa').prop('checked', false);
+        $('#option_keduanya').prop('checked', false);
+        $('#option_email').prop('checked', true);
+    });
+
+    // Handler ketika opsi metode kirim berubah
+    $(document).on('change', 'input[name="method_type"]', function() {
+        var method = $(this).val();
+        var email = $('#destination_email').val();
+        var phone = $('#destination_wa').val();
+
+        if (method === 'whatsapp') {
+            $('#info_penerima').val('WhatsApp: ' + phone);
+        } else if (method === 'email') {
+            $('#info_penerima').val('Email: ' + email);
+        } else if (method === 'keduanya') {
+            $('#info_penerima').val('WhatsApp: ' + phone + ' | Email: ' + email);
+        }
+    });
 </script>
 <?= $this->endSection(); ?>
