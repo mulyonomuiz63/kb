@@ -119,7 +119,10 @@
                                     <input type="number" name="jml_susah[]" class="form-control form-control-solid" min="0" value="0">
                                 </div>
                                 <div class="col-md-2">
-                                    <button type="button" class="btn btn-icon btn-light-danger hapus-komposisi" disabled><i class="ki-duotone ki-trash fs-2"></i></button>
+                                    <button type="button" class="btn btn-icon btn-light-danger hapus-komposisi" disabled><i class="ki-duotone ki-trash fs-2">
+                                            <span class="path1"></span>
+                                            <span class="path2"></span>
+                                        </i></button>
                                 </div>
                             </div>
                         </div>
@@ -426,7 +429,10 @@
                     <input type="number" name="jml_susah[]" class="form-control form-control-solid" min="0" value="0">
                 </div>
                 <div class="col-md-2">
-                    <button type="button" class="btn btn-icon btn-light-danger hapus-komposisi"><i class="ki-duotone ki-trash fs-2"></i></button>
+                    <button type="button" class="btn btn-icon btn-light-danger hapus-komposisi"><i class="ki-duotone ki-trash fs-2">
+                                                    <span class="path1"></span>
+                                                    <span class="path2"></span>
+                                                </i></button>
                 </div>
             </div>`;
             $('#container-komposisi').append(row);
@@ -478,7 +484,10 @@
                             <option value="H">Sulit (Hard)</option>
                         </select>
                         <button type="button" class="btn btn-sm btn-icon btn-light-danger hapus-pg">
-                            <i class="ki-duotone ki-trash fs-2"></i>
+                            <i class="ki-duotone ki-trash fs-2">
+                                                    <span class="path1"></span>
+                                                    <span class="path2"></span>
+                                                </i>
                         </button>
                     </div>
                 </div>
@@ -579,7 +588,10 @@
                             <option value="H" ${data.jenis_soal === 'H' ? 'selected' : ''}>Sulit</option>
                         </select>
                         <button type="button" class="btn btn-sm btn-icon btn-light-danger hapus-pg">
-                            <i class="ki-duotone ki-trash fs-2"></i>
+                            <i class="ki-duotone ki-trash fs-2">
+                                                    <span class="path1"></span>
+                                                    <span class="path2"></span>
+                                                </i>
                         </button>
                     </div>
                 </div>

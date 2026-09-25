@@ -128,6 +128,14 @@ class UjianController extends BaseController
             ['title' => 'List Ujian', 'url' => '#'],
         ];
         $idsiswa = decrypt_url($id_siswa);
+        $cek_ujian = $this->ujianModel->where('id_ujian', decrypt_url($id_ujian))
+                                      ->where('id_siswa', $idsiswa)
+                                      ->get()->getRowObject();
+                                      
+        if (!empty($cek_ujian) && $cek_ujian->status == 'S') {
+            // Jika status sudah 'S' (Selesai), langsung redirect ke list ujian
+            return redirect()->to(base_url('sw-siswa/ujian'))->with('pesan', 'Ujian telah selesai dan tidak dapat diakses kembali.');
+        }
         // Ambil waktu dari device (jika dikirim via GET), jika tidak pakai waktu server
         $deviceTimeRequest = $this->request->getGet('device_time');
         $now = (!empty($deviceTimeRequest)) ? date('Y-m-d H:i', strtotime($deviceTimeRequest)) : date('Y-m-d H:i');
