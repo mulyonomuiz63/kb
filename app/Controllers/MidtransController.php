@@ -272,6 +272,7 @@ class MidtransController extends BaseController
                         'waktu_per_soal' => $rowsp->waktu_per_soal,
                         'date_created' => time(),
                         'kuota'        => $rowsp->kuota,
+                        'kuota_master' => $rowsp->kuota,
                         'review'       => $rowsp->review,
                     ];
                     $this->ujianModel->save($data_ujian);

@@ -862,6 +862,7 @@ class TransaksiController extends BaseController
                         'mapel'        => $rowsp->mapel,
                         'date_created' => time(),
                         'kuota'        => $rowsp->kuota,
+                        'kuota_master' => $rowsp->kuota,
                         'review'       => $rowsp->review,
                     ]);
 
