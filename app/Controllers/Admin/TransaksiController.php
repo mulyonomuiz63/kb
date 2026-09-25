@@ -548,6 +548,8 @@ class TransaksiController extends BaseController
                         'mapel'      => $rowsp->mapel,
                         'waktu_per_soal' => $rowsp->waktu_per_soal,
                         'date_created' => time(),
+                        'kuota'        => $rowsp->kuota,
+                        'review'       => $rowsp->review
                     ]);
                     //untuk menghapus data ujian siswa yang sudah ada sebelumnya agar tidak terjadi duplikasi
                     $this->ujianSiswaModel->where('ujian', $rowsp->kode_ujian)->where('siswa', $rowst->idsiswa)->delete();
@@ -700,6 +702,8 @@ class TransaksiController extends BaseController
                             'mapel'      => $row->mapel,
                             'waktu_per_soal' => $row->waktu_per_soal,
                             'date_created' => time(),
+                            'kuota'        => $row->kuota,
+                            'review'       => $row->review
                         ]);
                     }
                 }

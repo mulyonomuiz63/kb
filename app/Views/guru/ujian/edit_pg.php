@@ -79,6 +79,17 @@ $UjiansiswaModel = new UjiansiswaModel();
                             <label class="required fs-6 fw-semibold mb-2">Waktu / Soal (Menit)</label>
                             <input type="number" name="waktu_per_soal" value="<?= $ujian->waktu_per_soal; ?>" class="form-control form-control-solid" required min="1">
                         </div>
+                        <div class="col-md-3">
+                            <label class="required fs-6 fw-semibold mb-2">Kuota Ujian</label>
+                            <input type="number" name="kuota" value="<?= $ujian->kuota; ?>" class="form-control form-control-solid" required min="1">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="required fs-6 fw-semibold mb-2">Review Soal Dan Jawaban</label>
+                            <select class="form-select form-select-solid" name="review" required>
+                                <option value="0" <?= $ujian->review == 0 ? 'selected' : '' ?>>Tidak Aktif</option>
+                                <option value="1" <?= $ujian->review == 1 ? 'selected' : '' ?>>Aktif</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="separator separator-dashed my-8"></div>

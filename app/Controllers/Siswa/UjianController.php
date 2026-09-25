@@ -393,6 +393,30 @@ class UjianController extends BaseController
         }
     }
 
+    public function reviewUjian($kode_ujian)
+    {
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-siswa')],
+            ['title' => 'Data Ujian', 'url' => base_url('sw-siswa/ujian')],
+            ['title' => 'List Soal Ujian', 'url' => '#'],
+        ];
+        $idsiswa = session()->get('id');
+        $data['ujian'] = $this->ujianMasterModel->getBykode(decrypt_url($kode_ujian));
+        $data['detail_ujian'] = $this->ujianDetailModel->getAllBykodeUjian(decrypt_url($kode_ujian));
+        $data['siswa'] = $this->siswaModel->asObject()->find($idsiswa);
+
+        $data['ujian_siswa'] = $this->ujianSiswaModel
+            ->where('ujian', decrypt_url($kode_ujian))
+            ->where('siswa', $idsiswa)
+            ->get()->getResultObject();
+
+        $data['jawaban_benar'] = $this->ujianSiswaModel->benar(decrypt_url($kode_ujian), $idsiswa, 1);
+        $data['jawaban_salah'] = $this->ujianSiswaModel->salah(decrypt_url($kode_ujian), $idsiswa, 0);
+        $data['tidak_dijawab'] = $this->ujianSiswaModel->belum_terjawab(decrypt_url($kode_ujian), $idsiswa);
+
+        return view('siswa/ujian/reviewUjian', $data);
+    }
+
     public function otomatisKirimUjian()
     {
         $data = $this->ujianModel->where('status', 'U')->where('end_ujian <', date('Y-m-d H:i'))->get()->getResultObject();

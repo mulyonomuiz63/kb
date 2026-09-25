@@ -861,6 +861,8 @@ class TransaksiController extends BaseController
                         'kelas'        => $rowsp->kelas,
                         'mapel'        => $rowsp->mapel,
                         'date_created' => time(),
+                        'kuota'        => $rowsp->kuota,
+                        'review'       => $rowsp->review,
                     ]);
 
                     // Reset status ujian siswa jika sebelumnya sudah ada

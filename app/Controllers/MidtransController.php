@@ -271,6 +271,8 @@ class MidtransController extends BaseController
                         'mapel'        => $rowsp->mapel,
                         'waktu_per_soal' => $rowsp->waktu_per_soal,
                         'date_created' => time(),
+                        'kuota'        => $rowsp->kuota,
+                        'review'       => $rowsp->review,
                     ];
                     $this->ujianModel->save($data_ujian);
                     $this->ujianSiswaModel->where('ujian', $rowsp->kode_ujian)->where('siswa', $idsiswa)->delete();

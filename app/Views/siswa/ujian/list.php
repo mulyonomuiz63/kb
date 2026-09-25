@@ -343,17 +343,42 @@
                                                     'data-soal="' . $u->total_soal . ' soal" ' .
                                                     'data-waktu="' . $totalMenit . ' menit"';
                                                 ?>
-                                                <a href="<?= base_url('sw-siswa/ujian/remedial') . '/' . encrypt_url($u->id_ujian) . '/' . encrypt_url($u->kode_ujian) . '/' . $u->status ?>"
-                                                    <?= $dataAttrs ?>
-                                                    class="btn btn-light-danger w-100 fw-bold btn-informasi btn-ujian-ulang text-uppercase">
-                                                    Ujian Ulang
-                                                </a>
+                                                <div class="d-flex gap-2 w-100">
+                                                    <a href="<?= base_url('sw-siswa/ujian/remedial') . '/' . encrypt_url($u->id_ujian) . '/' . encrypt_url($u->kode_ujian) . '/' . $u->status ?>"
+                                                        <?= $dataAttrs ?>
+                                                        class="btn btn-light-danger fw-bold btn-informasi btn-ujian-ulang text-uppercase d-flex align-items-center justify-content-center fs-8 fs-sm-7 px-2"
+                                                        style="flex: 7;">
+                                                        Ujian Ulang
+                                                    </a>
+                                                    <?php if ($u->review === '1'): ?>
+                                                        <a href="<?= base_url('sw-siswa/ujian/review-ujian') . '/' . encrypt_url($u->kode_ujian) ?>"
+                                                            <?= $dataAttrs ?>
+                                                            class="btn btn-light-success fw-bold text-uppercase d-flex align-items-center justify-content-center fs-8 fs-sm-7 px-2 lh-sm text-center"
+                                                            style="flex: 3;">
+                                                            Review<br class="d-block d-sm-none"> Ujian
+                                                        </a>
+                                                    <?php endif; ?>
+                                                </div>
                                             <?php else : ?>
-                                                <?php if ($u->nilai >= 60) : ?>
-                                                    <button class="btn btn-light-success w-100 fw-bold cursor-default" disabled>Ujian Selesai</button>
-                                                <?php else : ?>
-                                                    <a href="<?= base_url('list-bimbel') ?>" class="btn btn-light-warning w-100 fw-bold text-uppercase">Beli Paket</a>
-                                                <?php endif; ?>
+                                                <div class="d-flex gap-2 w-100">
+                                                    <?php if ($u->nilai >= 60) : ?>
+                                                        <button class="btn btn-light-success fw-bold cursor-default text-uppercase d-flex align-items-center justify-content-center fs-8 fs-sm-7 px-2" style="flex: 7;" disabled>
+                                                            Ujian Selesai
+                                                        </button>
+                                                    <?php else : ?>
+                                                        <a href="<?= base_url('list-bimbel') ?>" class="btn btn-light-warning fw-bold text-uppercase d-flex align-items-center justify-content-center fs-8 fs-sm-7 px-2" style="flex: 7;">
+                                                            Beli Paket
+                                                        </a>
+                                                    <?php endif; ?>
+
+                                                    <?php if ($u->review === '1'): ?>
+                                                        <a href="<?= base_url('sw-siswa/ujian/review-ujian') . '/' . encrypt_url($u->kode_ujian) ?>"
+                                                            class="btn btn-light-success fw-bold text-uppercase d-flex align-items-center justify-content-center fs-8 fs-sm-7 px-2 lh-sm text-center"
+                                                            style="flex: 3;">
+                                                            Review<br class="d-block d-sm-none"> Ujian
+                                                        </a>
+                                                    <?php endif; ?>
+                                                </div>
                                             <?php endif; ?>
                                         <?php endif; ?>
                                     </div>

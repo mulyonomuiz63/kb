@@ -115,6 +115,8 @@ class UjianController extends BaseController
                 'mapel'          => $this->request->getVar('mapel'),
                 'waktu_per_soal' => $this->request->getVar('waktu_per_soal'),
                 'date_created'   => time(),
+                'kuota'          => $this->request->getVar('kuota'),
+                'review'         => $this->request->getVar('review'),
             ];
             $this->ujianMasterModel->save($data_ujian);
 
@@ -617,6 +619,8 @@ class UjianController extends BaseController
                 'kelas'          => $this->request->getVar('kelas'),
                 'mapel'          => $this->request->getVar('mapel'),
                 'waktu_per_soal' => $this->request->getVar('waktu_per_soal'),
+                'kuota'          => $this->request->getVar('kuota'),
+                'review'         => $this->request->getVar('review'),
             ];
             $this->ujianMasterModel->update($ujian->id_ujian, $data_master);
 

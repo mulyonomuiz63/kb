@@ -8,7 +8,7 @@ class UjianMasterModel extends Model
 {
     protected $table            = 'ujian_master';
     protected $primaryKey       = 'id_ujian';
-    protected $allowedFields    = ['kode_ujian', 'nama_ujian', 'guru', 'kelas', 'mapel', 'waktu_per_soal', 'date_created', 'jenis_ujian', 'status'];
+    protected $allowedFields    = ['kode_ujian', 'nama_ujian', 'guru', 'kelas', 'mapel', 'waktu_per_soal', 'date_created', 'jenis_ujian', 'status','kuota', 'review'];
 
     public function getAll()
     {

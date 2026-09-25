@@ -68,7 +68,18 @@
                     <div class="row g-9 mt-5">
                         <div class="col-md-3">
                             <label class="required fs-6 fw-semibold mb-2">Waktu / Soal (Menit)</label>
-                            <input type="number" name="waktu_per_soal" class="form-control form-control-solid" required min="1" value="2">
+                            <input type="number" name="waktu_per_soal" class="form-control form-control-solid" required min="1" value="3">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="required fs-6 fw-semibold mb-2">Kuota Ujian</label>
+                            <input type="number" name="kuota" class="form-control form-control-solid" required min="1" value="3">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="required fs-6 fw-semibold mb-2">Review Soal Dan Jawaban</label>
+                            <select class="form-select form-select-solid" name="review">
+                                <option value="0">Tidak Aktif</option>
+                                <option value="1">Aktif</option>
+                            </select>
                         </div>
                     </div>
 
