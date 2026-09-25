@@ -236,7 +236,7 @@
                     // === LOGIKA KUOTA DINAMIS & ROLE ACCESS ===
                     $roleAccess = session()->get('role_access') ?? 0;
                     $sisa_kuota = $u->kuota ?? 0;
-                    $total_kuota = 3;
+                    $total_kuota = $u->kuota_master ?? 0;
                     $terpakai = $total_kuota - $sisa_kuota;
 
                     if ($roleAccess == 1) {
