@@ -368,7 +368,6 @@ class IkhController extends BaseController
         ]);
     }
 
-    // 5. Proses AJAX Upload Kartu IKH & Set Tanggal
     public function uploadKartu()
     {
         if (!$this->request->isAJAX()) return $this->response->setStatusCode(403);
@@ -491,9 +490,14 @@ class IkhController extends BaseController
             $newKuota = max(0, $newKuota - 1);
         }
 
+        // --- TAMBAHAN: Pastikan nilai tetap [""] jika kosong ---
+        if (empty($fileToSave) || $fileToSave === '[]' || $fileToSave === 'null') {
+            $fileToSave = '[""]';
+        }
+
         try {
             $this->ikhModel->update($id_ikh, [
-                'file_kartu_ikh'    => $fileToSave, // Pakai file baru (jika ada), atau tetap pakai yang lama (jika tidak upload)
+                'file_kartu_ikh'    => $fileToSave, // Akan bernilai [""] jika kosong, atau ID Drive baru/lama
                 'tgl_aktif'         => $tgl_aktif,
                 'tgl_exp'           => $tgl_exp,
                 'status_sertifikat' => 'terbit',
