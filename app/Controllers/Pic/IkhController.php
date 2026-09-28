@@ -390,115 +390,132 @@ class IkhController extends BaseController
             return $this->response->setJSON(['success' => false, 'message' => 'Data Siswa tidak ditemukan.', 'csrf_hash' => csrf_hash()]);
         }
 
+        // Ambil data file lama. Default file yang akan disimpan adalah file lama.
+        $fileLamaJson = is_array($dataLama) ? ($dataLama['file_kartu_ikh'] ?? '') : ($dataLama->file_kartu_ikh ?? '');
+        $fileToSave = $fileLamaJson;
+
         // 2. Tangkap file multiple
         $files = $this->request->getFileMultiple('file_kartu_ikh');
         $uploadedFiles = [];
+        $hasUpload = false;
 
-        // Persiapan Koneksi & Folder server
-        try {
-            $service = $this->getDriveService();
-            $folderSiswaName = strtoupper($dataSiswa['nama_siswa']) . "_" . $dataSiswa['no_induk_siswa'];
-            $folderSiswaId = $this->getOrCreateFolder($service, $folderSiswaName, setting('folder_id_drive'));
-        } catch (\Exception $e) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Gagal terhubung ke server.', 'csrf_hash' => csrf_hash()]);
-        }
-
-        foreach ($files as $index => $file) {
-            if ($file->isValid() && !$file->hasMoved()) {
-
-                // Validasi ukuran per file (2MB)
-                if ($file->getSize() > 2097152) {
-                    return $this->response->setJSON(['success' => false, 'message' => 'Salah satu file terlalu besar (Max 2MB).', 'csrf_hash' => csrf_hash()]);
-                }
-
-                // Upload file ke Drive
-                $newName = 'KARTU_IKH_' . $dataSiswa['no_induk_siswa'] . '_' . time() . '_' . $index;
-
-                $fileMetadata = new \Google\Service\Drive\DriveFile([
-                    'name' => $newName,
-                    'parents' => [$folderSiswaId]
-                ]);
-
-                try {
-                    $uploadedFileDrive = $service->files->create($fileMetadata, [
-                        'data' => file_get_contents($file->getTempName()),
-                        'mimeType' => $file->getClientMimeType(),
-                        'uploadType' => 'multipart',
-                        'fields' => 'id'
-                    ]);
-                    // Simpan ID Drive ke dalam array
-                    $uploadedFiles[] = $uploadedFileDrive->id;
-                } catch (\Exception $e) {
-                    continue; // Skip jika gagal satu
+        // Cek apakah ada file valid yang diunggah (mencegah error jika kosong)
+        if ($files) {
+            foreach ($files as $file) {
+                if ($file->isValid() && !$file->hasMoved()) {
+                    $hasUpload = true;
+                    break;
                 }
             }
         }
 
-        // 3. Jika ada file yang berhasil diunggah
-        if (!empty($uploadedFiles)) {
-
-            // --- LOGIKA HAPUS FILE FISIK LAMA (REPLACE TOTAL) ---
-            $fileLamaJson = is_array($dataLama) ? ($dataLama['file_kartu_ikh'] ?? '') : ($dataLama->file_kartu_ikh ?? '');
-            $arrFileLama = json_decode($fileLamaJson, true) ?? [];
-
-            // Jika data lama bukan JSON (hanya string tunggal dari sistem lama), bungkus jadi array
-            if (empty($arrFileLama) && !empty($fileLamaJson)) {
-                $arrFileLama = [$fileLamaJson];
-            }
-
-            foreach ($arrFileLama as $oldFile) {
-                // Deteksi apakah ID Drive atau path lokal
-                if (strpos($oldFile, '.') === false) {
-                    try {
-                        $service->files->delete($oldFile);
-                    } catch (\Exception $e) {
-                    }
-                } else {
-                    // Hapus file lokal lama sebagai bentuk pembersihan
-                    $pathOld = FCPATH . 'uploads/ikh/' . $oldFile;
-                    if (file_exists($pathOld) && is_file($pathOld)) {
-                        @unlink($pathOld);
-                    }
-                }
-            }
-
-            // --- UPDATE DATABASE ---
-            $currentStatus = is_array($dataLama) ? $dataLama['status_sertifikat'] : $dataLama->status_sertifikat;
-            $newKuota = (int)(is_array($dataLama) ? $dataLama['kuota'] : $dataLama->kuota);
-
-            // Kuota hanya dikurangi jika status belum 'terbit'
-            if ($currentStatus !== 'terbit') {
-                $newKuota = max(0, $newKuota - 1);
-            }
-
+        // Jika ada file yang diunggah, proses ke Drive
+        if ($hasUpload) {
+            // Persiapan Koneksi & Folder server
             try {
-                $this->ikhModel->update($id_ikh, [
-                    'file_kartu_ikh'    => json_encode($uploadedFiles), // Simpan dalam format JSON ID Drive
-                    'tgl_aktif'         => $tgl_aktif,
-                    'tgl_exp'           => $tgl_exp,
-                    'status_sertifikat' => 'terbit',
-                    'kuota'             => $newKuota
-                ]);
-
-                // Kirim Notifikasi
-                send_notif(
-                    $idSiswa,
-                    'Kartu IKH Diterbitkan',
-                    'Kartu IKH Anda sudah berhasil diterbitkan dan tersedia.',
-                    base_url('sw-siswa/ikh')
-                );
-
-                return $this->response->setJSON([
-                    'success' => true,
-                    'message' => 'Kartu IKH berhasil diunggah ke Drive dan diterbitkan!',
-                    'csrf_hash' => csrf_hash()
-                ]);
+                $service = $this->getDriveService();
+                $folderSiswaName = strtoupper($dataSiswa['nama_siswa']) . "_" . $dataSiswa['no_induk_siswa'];
+                $folderSiswaId = $this->getOrCreateFolder($service, $folderSiswaName, setting('folder_id_drive'));
             } catch (\Exception $e) {
-                return $this->response->setJSON(['success' => false, 'message' => 'Gagal memperbarui database.', 'csrf_hash' => csrf_hash()]);
+                return $this->response->setJSON(['success' => false, 'message' => 'Gagal terhubung ke server.', 'csrf_hash' => csrf_hash()]);
+            }
+
+            foreach ($files as $index => $file) {
+                if ($file->isValid() && !$file->hasMoved()) {
+
+                    // Validasi ukuran per file (2MB)
+                    if ($file->getSize() > 2097152) {
+                        return $this->response->setJSON(['success' => false, 'message' => 'Salah satu file terlalu besar (Max 2MB).', 'csrf_hash' => csrf_hash()]);
+                    }
+
+                    // Upload file ke Drive
+                    $newName = 'KARTU_IKH_' . $dataSiswa['no_induk_siswa'] . '_' . time() . '_' . $index;
+
+                    $fileMetadata = new \Google\Service\Drive\DriveFile([
+                        'name' => $newName,
+                        'parents' => [$folderSiswaId]
+                    ]);
+
+                    try {
+                        $uploadedFileDrive = $service->files->create($fileMetadata, [
+                            'data' => file_get_contents($file->getTempName()),
+                            'mimeType' => $file->getClientMimeType(),
+                            'uploadType' => 'multipart',
+                            'fields' => 'id'
+                        ]);
+                        // Simpan ID Drive ke dalam array
+                        $uploadedFiles[] = $uploadedFileDrive->id;
+                    } catch (\Exception $e) {
+                        continue; // Skip jika gagal satu
+                    }
+                }
+            }
+
+            // Jika ada file yang berhasil diunggah
+            if (!empty($uploadedFiles)) {
+                // --- LOGIKA HAPUS FILE FISIK LAMA (REPLACE TOTAL) ---
+                $arrFileLama = json_decode($fileLamaJson, true) ?? [];
+
+                // Jika data lama bukan JSON (hanya string tunggal dari sistem lama), bungkus jadi array
+                if (empty($arrFileLama) && !empty($fileLamaJson)) {
+                    $arrFileLama = [$fileLamaJson];
+                }
+
+                foreach ($arrFileLama as $oldFile) {
+                    // Deteksi apakah ID Drive atau path lokal
+                    if (strpos($oldFile, '.') === false) {
+                        try {
+                            $service->files->delete($oldFile);
+                        } catch (\Exception $e) {
+                        }
+                    } else {
+                        // Hapus file lokal lama sebagai bentuk pembersihan
+                        $pathOld = FCPATH . 'uploads/ikh/' . $oldFile;
+                        if (file_exists($pathOld) && is_file($pathOld)) {
+                            @unlink($pathOld);
+                        }
+                    }
+                }
+
+                // Timpa $fileToSave dengan file baru dari Drive
+                $fileToSave = json_encode($uploadedFiles);
             }
         }
 
-        return $this->response->setJSON(['success' => false, 'message' => 'Tidak ada file valid yang terpilih.', 'csrf_hash' => csrf_hash()]);
+        // --- UPDATE DATABASE --- (Selalu jalan baik ada upload file maupun tidak)
+        $currentStatus = is_array($dataLama) ? $dataLama['status_sertifikat'] : $dataLama->status_sertifikat;
+        $newKuota = (int)(is_array($dataLama) ? $dataLama['kuota'] : $dataLama->kuota);
+
+        // Kuota hanya dikurangi jika status belum 'terbit'
+        if ($currentStatus !== 'terbit') {
+            $newKuota = max(0, $newKuota - 1);
+        }
+
+        try {
+            $this->ikhModel->update($id_ikh, [
+                'file_kartu_ikh'    => $fileToSave, // Pakai file baru (jika ada), atau tetap pakai yang lama (jika tidak upload)
+                'tgl_aktif'         => $tgl_aktif,
+                'tgl_exp'           => $tgl_exp,
+                'status_sertifikat' => 'terbit',
+                'kuota'             => $newKuota
+            ]);
+
+            // Kirim Notifikasi
+            send_notif(
+                $idSiswa,
+                'Kartu IKH Diterbitkan',
+                'Kartu IKH Anda sudah berhasil diterbitkan dan tersedia.',
+                base_url('sw-siswa/ikh')
+            );
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Kartu IKH berhasil diunggah/diperbarui dan diterbitkan!',
+                'csrf_hash' => csrf_hash()
+            ]);
+        } catch (\Exception $e) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Gagal memperbarui database.', 'csrf_hash' => csrf_hash()]);
+        }
     }
 
     public function uploadFileAjax()
