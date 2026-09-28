@@ -29,9 +29,11 @@
         opacity: 0.75;
     }
 
-    .select2-container--bootstrap5 .select2-selection {
+    select.is-invalid-field + .select2-container--bootstrap5 .select2-selection,
+    select.is-invalid-field ~ .select2-container--bootstrap5 .select2-selection {
         border: 2px solid #f1416c !important;
         background-color: #fff5f8 !important;
+        transition: all 0.3s ease;
     }
 
     input::-webkit-outer-spin-button,
