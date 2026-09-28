@@ -572,7 +572,7 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                                             </div>
                                             <div class="col-md-12">
                                                 <label class="form-label fw-semibold text-primary">Upload File Kartu IKH <span class="text-muted fs-8">(Bisa pilih banyak file sekaligus)</span></label>
-                                                <input type="file" name="file_kartu_ikh[]" class="form-control" accept="image/*, application/pdf" multiple required>
+                                                <input type="file" name="file_kartu_ikh[]" class="form-control" accept="image/*, application/pdf" multiple>
 
                                                 <?php if (!empty($ikh['file_kartu_ikh'])):
                                                     $files = json_decode($ikh['file_kartu_ikh'], true) ?? [];
