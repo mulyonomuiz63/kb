@@ -655,7 +655,7 @@ class SiswaController extends BaseController
         $dataWebinar = $this->transaksiModel
             ->select('webinar_sesi.*, paket.nama_paket, paket.file, transaksi.idsiswa')
             ->join('detail_transaksi', 'transaksi.idtransaksi = detail_transaksi.idtransaksi')
-            ->join('paket','detail_transaksi.idpaket=paket.idpaket')
+            ->join('paket', 'detail_transaksi.idpaket=paket.idpaket')
             ->join('webinar_sesi', 'detail_transaksi.idsesi=webinar_sesi.id_sesi')
             ->where('transaksi.status', 'S')
             ->where('idsiswa', $id_siswa)
@@ -1320,6 +1320,50 @@ class SiswaController extends BaseController
             'success_count' => $success_count,
             'error_count'   => $error_count,
             'errors'        => $errors
+        ]);
+    }
+
+    public function kirimPromo()
+    {
+        // Tangkap data dari request AJAX
+        $destinationWa = $this->request->getPost('hp');
+        $nama          = $this->request->getPost('nama') ?? 'Kak';
+
+        $isSuccess = false;
+        $errorMessage = '';
+
+        if (!empty($destinationWa)) {
+            // Siapkan Parameter Template WABA
+            $data_template = [
+                "template_name"     => "promo_paket", // WAJIB GANTI: Sesuaikan dengan nama template carousel di dashboard Watzap
+                "template_language" => "id",
+                "parameter"         => [
+                    [
+                        "name" => $nama // Hanya menggunakan parameter name sesuai permintaan
+                    ]
+                ],
+                "apps_source"       => "kelasbrevet"
+            ];
+
+            // Panggil helper kirim_wa (param ke-2 teks kosong, param ke-3 array template)
+            $kirim = kirim_wa($destinationWa, '', $data_template);
+
+            // Evaluasi Response dari API
+            if (isset($kirim['status']) && ($kirim['status'] == '200' || $kirim['status'] === true)) {
+                $isSuccess = true;
+            } else {
+                // Tangkap pesan error dari API jika gagal
+                $errorMessage = "Gagal mengirim WhatsApp: " . ($kirim['message'] ?? 'Kesalahan API');
+            }
+        } else {
+            $errorMessage = "Nomor WhatsApp tujuan tidak tersedia.";
+        }
+
+        // Kembalikan response dalam format JSON beserta CSRF Hash terbaru
+        return $this->response->setJSON([
+            'status'   => $isSuccess ? 'success' : 'error',
+            'message'  => $isSuccess ? 'Pesan promosi berhasil dikirim!' : $errorMessage,
+            'csrfHash' => csrf_hash()
         ]);
     }
 }

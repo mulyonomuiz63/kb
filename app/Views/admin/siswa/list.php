@@ -285,7 +285,7 @@
                                 <option value="<?= $rowafiliasi->idafiliasi ?>"><?= $rowafiliasi->nama_afiliasi ?></option>
                             <?php endforeach; ?>
                         </select>
-                    </div> 
+                    </div>
 
                     <div class="fv-row mb-7">
                         <label class="fs-6 fw-semibold form-label mb-2">Tanggal Transaksi</label>
@@ -565,11 +565,15 @@ function renderDetailRow($label, $id, $col = 6)
                 },
                 {
                     data: 'hp',
-                    render: function(data) {
+                    render: function(data, type, row) { // Tambahkan parameter 'row' di sini
                         if (!data || data === '0' || data === '') return '<span class="text-muted">-</span>';
                         let cleanNumber = data.replace(/[^0-9]/g, '');
                         if (cleanNumber.startsWith('0')) cleanNumber = '62' + cleanNumber.slice(1);
-                        return `<a href="https://wa.me/${cleanNumber}" target="_blank" style="text-decoration: none;"><i class="fab fa-whatsapp" style="color: #25D366;"></i> ${data}</a>`;
+
+                        // Ubah menjadi link dengan class 'btn-kirim-promo' dan simpan data ke attribute
+                        return `<a href="javascript:void(0);" class="btn-kirim-promo" data-hp="${cleanNumber}" data-nama="${row.nama_siswa}" style="text-decoration: none;" title="Kirim Promo WA">
+                            <i class="fab fa-whatsapp fs-3" style="color: #25D366;"></i> ${data}
+                        </a>`;
                     }
                 },
                 {
@@ -852,6 +856,72 @@ function renderDetailRow($label, $id, $col = 6)
     }
     $(document).on('click', '.sertifikat_all_cetak', function() {
         $(".isiKontenSertifikatAll").html(renderModalContent('Sertifikat Brevet AB', $(this).data('sertifikat_all')));
+    });
+
+    // Event handler ketika nomor WhatsApp di DataTables diklik
+    $(document).on('click', '.btn-kirim-promo', function(e) {
+        e.preventDefault();
+
+        var phone = $(this).data('hp');
+        var nama = $(this).data('nama');
+
+        // Munculkan popup konfirmasi
+        Swal.fire({
+            title: 'Kirim Promosi?',
+            text: `Apakah Anda yakin mau mengirim pesan promosi paket ke ${nama}?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Kirim Promo',
+            cancelButtonText: 'Batal',
+            customClass: {
+                confirmButton: "btn btn-success",
+                cancelButton: "btn btn-light"
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+
+                // Tampilkan loading screen
+                Swal.fire({
+                    title: 'Mengirim Pesan...',
+                    text: 'Mohon tunggu sebentar',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                // Siapkan data (Hanya parameter name sesuai kebutuhan WABA)
+                var requestData = {
+                    hp: phone,
+                    nama: nama
+                };
+                requestData[csrfName] = csrfHash;
+
+                // Proses AJAX ke backend
+                $.ajax({
+                    url: "<?= base_url('sw-admin/siswa/kirim-promo') ?>", // GANTI dengan URL controller Anda
+                    type: 'POST',
+                    data: requestData,
+                    dataType: 'json',
+                    success: function(res) {
+                        // Update Token CSRF
+                        if (res.csrfHash) {
+                            csrfHash = res.csrfHash;
+                            $('input[name="' + csrfName + '"]').val(csrfHash);
+                        }
+
+                        if (res.status === 'success') {
+                            Swal.fire('Terkirim!', 'Pesan promosi berhasil dikirim ke WhatsApp ' + nama, 'success');
+                        } else {
+                            Swal.fire('Gagal', res.message || 'Gagal mengirim pesan promosi.', 'error');
+                        }
+                    },
+                    error: function() {
+                        Swal.fire('Error', 'Terjadi kesalahan pada server. Coba beberapa saat lagi.', 'error');
+                    }
+                });
+            }
+        });
     });
 </script>
 <?= $this->endSection(); ?>

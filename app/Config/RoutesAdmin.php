@@ -39,6 +39,8 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
         $routes->group('materi', function($routes){
             $routes->get('(:segment)', 'Admin\MateriController::index/$1');
         });
+
+        $routes->post('kirim-promo', 'Admin\SiswaController::kirimPromo');
     });
 
     $routes->group('guru', function ($routes) {
