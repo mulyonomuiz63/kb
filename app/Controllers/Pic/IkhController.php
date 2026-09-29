@@ -27,12 +27,12 @@ class IkhController extends BaseController
         ];
 
         $data['list_ikh'] = $this->ikhModel
-        ->select('pendaftaran_ikh.*, siswa.nama_siswa, siswa.hp')
-        ->join('siswa', 'siswa.id_siswa = pendaftaran_ikh.id_siswa')
-        ->orderBy("FIELD(pendaftaran_ikh.status_sertifikat, 'belum', 'terbit')", 'ASC', false)
-        ->orderBy("FIELD(pendaftaran_ikh.status_validasi_admin, 'pending', 'revisi', 'ditolak', 'valid', 'draft')", 'ASC', false)
-        ->orderBy('pendaftaran_ikh.created_at', 'DESC')
-        ->findAll();
+            ->select('pendaftaran_ikh.*, siswa.nama_siswa, siswa.hp')
+            ->join('siswa', 'siswa.id_siswa = pendaftaran_ikh.id_siswa')
+            ->orderBy("FIELD(pendaftaran_ikh.status_sertifikat, 'belum', 'terbit')", 'ASC', false)
+            ->orderBy("FIELD(pendaftaran_ikh.status_validasi_admin, 'pending', 'revisi', 'ditolak', 'valid', 'draft')", 'ASC', false)
+            ->orderBy('pendaftaran_ikh.created_at', 'DESC')
+            ->findAll();
 
         return view('pic/ikh/list', $data);
     }
@@ -189,12 +189,38 @@ class IkhController extends BaseController
                     </div>
                 ';
             } else {
+                //notif di aplikasi
                 send_notif(
                     $ikh['id_siswa'],
                     'Pengajuan IKH Ditolak',
                     'Pengajuan IKH ditolak, Silahkan cek catatan admin',
                     base_url('sw-siswa/ikh')
                 );
+                //notif di whatsapp nomer yang terdaftar di database
+                if (!empty($ikh['no_wa'])) {
+
+                    // Ambil data catatan dari POST
+                    $catatan = $this->request->getPost('catatan_admin');
+
+                    // Opsional: Pastikan catatan tidak kosong jika template WA mewajibkan isi
+                    $catatan = !empty($catatan) ? $catatan : '-';
+
+                    $data_template = [
+                        "template_name"     => "perbaikan_persyaratan_ikh",
+                        "template_language" => "id",
+                        "parameter"         => [
+                            [
+                                // Pastikan kata "keterangan" ini sama dengan nama variabel di template Watzap
+                                "nama" => $ikh['nama_lengkap'],
+                                "keterangan" => $catatan
+                            ]
+                        ],
+                        "apps_source"       => "kelasbrevet"
+                    ];
+                    // Panggil helper kirim_wa (param ke-2 kosong, param ke-3 isi template)
+                    kirim_wa($ikh['no_wa'], '', $data_template);
+                }
+
                 $subject = 'Pemberitahuan Revisi Dokumen Persyaratan - Kelas Brevet';
 
                 // Link diarahkan ke halaman login atau langsung ke dashboard siswa

@@ -42,8 +42,33 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
 
                                 <h6 class="text-uppercase text-muted fw-bold mb-3">Riwayat Pendidikan</h6>
                                 <div class="d-flex flex-column gap-4 mb-6">
-                                    <div class="d-flex flex-stack"><span class="fw-semibold text-gray-500">Pendidikan</span><span class="fw-bold text-gray-800"><?= $ikh['pendidikan_terakhir'] ?> - <?= $ikh['jurusan'] ?></span></div>
-                                    <div class="d-flex flex-stack"><span class="fw-semibold text-gray-500">Tahun Studi</span><span class="fw-bold text-gray-800"><?= $ikh['tahun_masuk'] ?> s/d <?= $ikh['tahun_lulus'] ?></span></div>
+                                    
+
+                                    <!-- TAMBAHAN BARU: PENDIDIKAN DASAR (SD/SMP/SMA) -->
+                                    <?php
+                                    $riwayat_pendidikan = !empty($ikh['riwayat_pendidikan_dasar']) ? json_decode($ikh['riwayat_pendidikan_dasar'], true) : [];
+                                    if (!empty($riwayat_pendidikan) && is_array($riwayat_pendidikan)):
+                                    ?>
+                                        <?php foreach ($riwayat_pendidikan as $pend): ?>
+                                            <div class="d-flex flex-stack">
+                                                <span class="fw-semibold text-gray-500"><?= esc($pend['tingkat']) ?></span>
+                                                <span class="fw-bold text-gray-800 text-end">
+                                                    <?= esc($pend['sekolah']) ?>
+                                                    <span class="text-muted fw-semibold fs-7 d-block">Lulus: <?= !empty($pend['lulus']) ? esc($pend['lulus']) : '-' ?></span>
+                                                </span>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                    <!-- PENDIDIKAN TERAKHIR (KODE LAMA) -->
+                                    <div class="separator separator-dashed my-1"></div>
+                                    <div class="d-flex flex-stack">
+                                        <span class="fw-semibold text-gray-500">Pendidikan Terakhir</span>
+                                        <span class="fw-bold text-gray-800 text-end"><?= $ikh['pendidikan_terakhir'] ?> - <?= $ikh['jurusan'] ?></span>
+                                    </div>
+                                    <div class="d-flex flex-stack">
+                                        <span class="fw-semibold text-gray-500">Tahun Studi</span>
+                                        <span class="fw-bold text-gray-800 text-end"><?= $ikh['tahun_masuk'] ?> s/d <?= $ikh['tahun_lulus'] ?></span>
+                                    </div>
                                 </div>
 
                                 <div class="separator border-gray-200 my-5"></div>
@@ -448,168 +473,168 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                                     </button>
                                 </form>
                             </div>
-                            
-                            <?php if($stat_val == 'valid'): ?>
-                            <div class="border rounded p-5 border-primary mb-10 <?= !empty($ikh['file_riwayat_hidup']) ? 'border-success bg-light-success' : 'border-primary' ?>">
-                                <h4 class="fw-bold text-gray-800 mb-4">2. Berkas Administrasi IKH</h4>
 
-                                <form id="form_upload_berkas" enctype="multipart/form-data">
-                                    <?= csrf_field() ?>
-                                    <input type="hidden" name="id_ikh" value="<?= $ikh['id_ikh'] ?>">
+                            <?php if ($stat_val == 'valid'): ?>
+                                <div class="border rounded p-5 border-primary mb-10 <?= !empty($ikh['file_riwayat_hidup']) ? 'border-success bg-light-success' : 'border-primary' ?>">
+                                    <h4 class="fw-bold text-gray-800 mb-4">2. Berkas Administrasi IKH</h4>
 
-                                    <div class="row g-5 mb-7">
-                                        <?php
-                                        $berkas = [
-                                            'file_riwayat_hidup' => [
-                                                'label'    => 'Daftar Riwayat Hidup',
-                                                'template' => base_url('sw-pic/cetak-pdf/cv/' . encrypt_url($ikh['id_ikh']))
-                                            ],
-                                            'file_bukan_pns' => [
-                                                'label'    => 'Surat Pernyataan Bukan PNS',
-                                                'template' => base_url('sw-pic/cetak-pdf/pernyataan-bukan-pns/' . encrypt_url($ikh['id_ikh']))
-                                            ],
-                                            'file_pakta_integritas' => [
-                                                'label'    => 'Pakta Integritas',
-                                                'template' => base_url('sw-pic/cetak-pdf/pakta-integritas/' . encrypt_url($ikh['id_ikh']))
-                                            ],
-                                            'file_pernyataan_ikh' => [
-                                                'label'    => 'Surat Pernyataan IKH',
-                                                'template' => base_url('sw-pic/cetak-pdf/pernyataan-pengajuan-ikh/' . encrypt_url($ikh['id_ikh']))
-                                            ],
-                                            'file_skck' => [
-                                                'label'    => 'File SKCK (Opsional)',
-                                                'template' => ''
-                                            ]
-                                        ];
+                                    <form id="form_upload_berkas" enctype="multipart/form-data">
+                                        <?= csrf_field() ?>
+                                        <input type="hidden" name="id_ikh" value="<?= $ikh['id_ikh'] ?>">
 
-                                        foreach ($berkas as $name => $item):
-                                            $isUploaded = !empty($ikh[$name]);
-                                        ?>
-                                            <div class="col-md-6">
-                                                <div class="border border-dashed border-gray-300 rounded p-4 h-100 bg-body d-flex flex-column">
+                                        <div class="row g-5 mb-7">
+                                            <?php
+                                            $berkas = [
+                                                'file_riwayat_hidup' => [
+                                                    'label'    => 'Daftar Riwayat Hidup',
+                                                    'template' => base_url('sw-pic/cetak-pdf/cv/' . encrypt_url($ikh['id_ikh']))
+                                                ],
+                                                'file_bukan_pns' => [
+                                                    'label'    => 'Surat Pernyataan Bukan PNS',
+                                                    'template' => base_url('sw-pic/cetak-pdf/pernyataan-bukan-pns/' . encrypt_url($ikh['id_ikh']))
+                                                ],
+                                                'file_pakta_integritas' => [
+                                                    'label'    => 'Pakta Integritas',
+                                                    'template' => base_url('sw-pic/cetak-pdf/pakta-integritas/' . encrypt_url($ikh['id_ikh']))
+                                                ],
+                                                'file_pernyataan_ikh' => [
+                                                    'label'    => 'Surat Pernyataan IKH',
+                                                    'template' => base_url('sw-pic/cetak-pdf/pernyataan-pengajuan-ikh/' . encrypt_url($ikh['id_ikh']))
+                                                ],
+                                                'file_skck' => [
+                                                    'label'    => 'File SKCK (Opsional)',
+                                                    'template' => ''
+                                                ]
+                                            ];
 
-                                                    <div class="d-flex justify-content-between align-items-center mb-4">
-                                                        <label class="form-label fw-bolder text-dark mb-0 fs-5"><?= $item['label'] ?></label>
+                                            foreach ($berkas as $name => $item):
+                                                $isUploaded = !empty($ikh[$name]);
+                                            ?>
+                                                <div class="col-md-6">
+                                                    <div class="border border-dashed border-gray-300 rounded p-4 h-100 bg-body d-flex flex-column">
 
-                                                        <?php if (!empty($item['template'])): ?>
-                                                            <a href="<?= $item['template'] ?>" terget="_blank" class="btn btn-sm btn-light-info fw-bold px-3 py-2" title="Unduh Format untuk ditempel di e-matrai">
-                                                                <i class="ki-outline ki-file-down fs-4"></i>
-                                                            </a>
-                                                        <?php endif; ?>
-                                                    </div>
+                                                        <div class="d-flex justify-content-between align-items-center mb-4">
+                                                            <label class="form-label fw-bolder text-dark mb-0 fs-5"><?= $item['label'] ?></label>
 
-                                                    <div class="mt-auto d-flex align-items-center">
-                                                        <div class="position-relative me-4">
-                                                            <input type="file" name="<?= $name ?>" id="file_<?= $name ?>" class="d-none input-file-custom" accept=".pdf">
-                                                            <label for="file_<?= $name ?>"
-                                                                class="btn btn-outline btn-outline-dashed p-0 d-flex align-items-center justify-content-center transition-all <?= $isUploaded ? 'border-success bg-light-success text-success' : 'border-primary text-primary btn-active-light-primary' ?>"
-                                                                style="width: 70px; height: 70px; border-radius: 12px; cursor: pointer;"
-                                                                title="Klik untuk memilih file">
-                                                                <i class="ki-outline ki-document <?= $isUploaded ? 'text-success' : 'text-primary' ?> fs-2x"></i>
-                                                            </label>
-
-                                                            <?php if ($isUploaded): ?>
-                                                                <span class="position-absolute top-0 start-100 translate-middle badge badge-circle badge-success shadow-sm" style="width: 22px; height: 22px;">
-                                                                    <i class="ki-outline ki-check text-white fs-8"></i>
-                                                                </span>
+                                                            <?php if (!empty($item['template'])): ?>
+                                                                <a href="<?= $item['template'] ?>" terget="_blank" class="btn btn-sm btn-light-info fw-bold px-3 py-2" title="Unduh Format untuk ditempel di e-matrai">
+                                                                    <i class="ki-outline ki-file-down fs-4"></i>
+                                                                </a>
                                                             <?php endif; ?>
                                                         </div>
 
-                                                        <div class="flex-grow-1">
-                                                            <?php if ($isUploaded): ?>
-                                                                <?php
-                                                                $fileData = $ikh[$name];
-                                                                $isDrive = (strpos($fileData, '.') === false);
-                                                                $fileUrl = $isDrive ? 'https://drive.google.com/file/d/' . $fileData . '/preview' : base_url("uploads/ikh/" . $fileData);
-                                                                $ext = $isDrive ? 'pdf' : strtolower(pathinfo($fileData, PATHINFO_EXTENSION));
-                                                                ?>
-                                                                <div class="text-success fs-8 fw-bold mb-2"><i class="ki-outline ki-verify fs-6 text-success me-1"></i> Telah Terunggah</div>
-                                                                <button type="button" class="btn btn-sm btn-light-success btn-preview-berkas py-2 px-3"
-                                                                    data-file-url="<?= $fileUrl ?>"
-                                                                    data-file-ext="<?= $ext ?>"
-                                                                    data-file-name="<?= $item['label'] ?>">
-                                                                    <i class="ki-outline ki-eye fs-5"></i> Lihat Berkas
-                                                                </button>
-                                                            <?php else: ?>
-                                                                <div class="text-muted fs-8 mb-1">Unggah <b><?= $item['label'] ?></b> di sini.</div>
-                                                                <div class="text-muted fs-9">Format: .PDF (Maks 2MB)</div>
-                                                            <?php endif; ?>
+                                                        <div class="mt-auto d-flex align-items-center">
+                                                            <div class="position-relative me-4">
+                                                                <input type="file" name="<?= $name ?>" id="file_<?= $name ?>" class="d-none input-file-custom" accept=".pdf">
+                                                                <label for="file_<?= $name ?>"
+                                                                    class="btn btn-outline btn-outline-dashed p-0 d-flex align-items-center justify-content-center transition-all <?= $isUploaded ? 'border-success bg-light-success text-success' : 'border-primary text-primary btn-active-light-primary' ?>"
+                                                                    style="width: 70px; height: 70px; border-radius: 12px; cursor: pointer;"
+                                                                    title="Klik untuk memilih file">
+                                                                    <i class="ki-outline ki-document <?= $isUploaded ? 'text-success' : 'text-primary' ?> fs-2x"></i>
+                                                                </label>
 
-                                                            <div id="filename_<?= $name ?>" class="text-primary fs-8 fw-bold mt-1" style="display: none;"></div>
+                                                                <?php if ($isUploaded): ?>
+                                                                    <span class="position-absolute top-0 start-100 translate-middle badge badge-circle badge-success shadow-sm" style="width: 22px; height: 22px;">
+                                                                        <i class="ki-outline ki-check text-white fs-8"></i>
+                                                                    </span>
+                                                                <?php endif; ?>
+                                                            </div>
+
+                                                            <div class="flex-grow-1">
+                                                                <?php if ($isUploaded): ?>
+                                                                    <?php
+                                                                    $fileData = $ikh[$name];
+                                                                    $isDrive = (strpos($fileData, '.') === false);
+                                                                    $fileUrl = $isDrive ? 'https://drive.google.com/file/d/' . $fileData . '/preview' : base_url("uploads/ikh/" . $fileData);
+                                                                    $ext = $isDrive ? 'pdf' : strtolower(pathinfo($fileData, PATHINFO_EXTENSION));
+                                                                    ?>
+                                                                    <div class="text-success fs-8 fw-bold mb-2"><i class="ki-outline ki-verify fs-6 text-success me-1"></i> Telah Terunggah</div>
+                                                                    <button type="button" class="btn btn-sm btn-light-success btn-preview-berkas py-2 px-3"
+                                                                        data-file-url="<?= $fileUrl ?>"
+                                                                        data-file-ext="<?= $ext ?>"
+                                                                        data-file-name="<?= $item['label'] ?>">
+                                                                        <i class="ki-outline ki-eye fs-5"></i> Lihat Berkas
+                                                                    </button>
+                                                                <?php else: ?>
+                                                                    <div class="text-muted fs-8 mb-1">Unggah <b><?= $item['label'] ?></b> di sini.</div>
+                                                                    <div class="text-muted fs-9">Format: .PDF (Maks 2MB)</div>
+                                                                <?php endif; ?>
+
+                                                                <div id="filename_<?= $name ?>" class="text-primary fs-8 fw-bold mt-1" style="display: none;"></div>
+                                                            </div>
+
                                                         </div>
-
                                                     </div>
                                                 </div>
-                                            </div>
-                                        <?php endforeach; ?>
-                                    </div>
-
-                                    <div class="d-flex justify-content-end">
-                                        <button type="submit" class="btn btn-primary" id="btn_simpan_berkas">
-                                            <span class="indicator-label"><i class="ki-outline ki-cloud-download fs-2"></i> Simpan & Unggah Berkas</span>
-                                            <span class="indicator-progress">Mengunggah... <span class="spinner-border spinner-border-sm align-middle ms-2"></span></span>
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-
-                            <div class="border rounded p-5 <?= $stat_ser == 'terbit' ? 'border-success bg-light-success' : 'border-primary' ?>">
-                                <h4 class="fw-bold text-gray-800 mb-4">3. Terbitkan Kartu IKH</h4>
-
-                                <?php if ($stat_fin != 'selesai'): ?>
-                                    <div class="alert alert-warning"><i class="ki-outline ki-information-5 fs-2 text-warning me-2"></i> Selesaikan Tahap Validasi berkas terlebih dahulu untuk membuka kunci fitur ini.</div>
-                                <?php else: ?>
-                                    <form id="form_upload_kartu">
-                                        <input type="hidden" name="id_ikh" value="<?= $ikh['id_ikh'] ?>">
-                                        <div class="row g-5 mb-5">
-                                            <div class="col-md-6">
-                                                <label class="form-label fw-semibold">Tanggal Aktif</label>
-                                                <input type="date" name="tgl_aktif" class="form-control form-control-solid datepicker-admin" value="<?= $ikh['tgl_aktif'] ?? date('Y-m-d') ?>" required>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label fw-semibold">Tanggal Berlaku (Exp)</label>
-                                                <input type="date" name="tgl_exp" class="form-control form-control-solid datepicker-admin" value="<?= $ikh['tgl_exp'] ?? date('Y-m-d', strtotime('+1 years')) ?>" required>
-                                            </div>
-                                            <div class="col-md-12">
-                                                <label class="form-label fw-semibold text-primary">Upload File Kartu IKH <span class="text-muted fs-8">(Bisa pilih banyak file sekaligus)</span></label>
-                                                <input type="file" name="file_kartu_ikh[]" class="form-control" accept="image/*, application/pdf" multiple>
-
-                                                <?php if (!empty($ikh['file_kartu_ikh'])):
-                                                    $files = json_decode($ikh['file_kartu_ikh'], true) ?? [];
-                                                    if (!empty($files)): ?>
-                                                        <div class="mt-3 d-flex flex-wrap gap-2">
-                                                            <?php foreach ($files as $index => $file):
-                                                                $isDrive = (strpos($file, '.') === false);
-
-                                                                if ($isDrive) {
-                                                                    $fileUrl = 'https://drive.google.com/file/d/' . $file . '/preview';
-                                                                    $ext = 'pdf';
-                                                                } else {
-                                                                    $fileUrl = base_url('uploads/ikh/' . $file);
-                                                                    $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
-                                                                }
-                                                            ?>
-                                                                <div class="symbol symbol-50px symbol-2by3 position-relative">
-                                                                    <button type="button" class="btn btn-icon btn-light-primary w-100 h-100 btn-preview-berkas"
-                                                                        data-file-url="<?= $fileUrl ?>"
-                                                                        data-file-ext="<?= strtolower($ext) ?>"
-                                                                        data-file-name="Kartu IKH - <?= $index + 1 ?>">
-                                                                        <i class="ki-outline ki-file fs-2x"></i>
-                                                                        <span class="fs-9 position-absolute bottom-0 start-50 translate-middle-x pb-1"><?= strtoupper($ext) ?></span>
-                                                                    </button>
-                                                                </div>
-                                                            <?php endforeach; ?>
-                                                        </div>
-                                                <?php endif;
-                                                endif; ?>
-                                            </div>
+                                            <?php endforeach; ?>
                                         </div>
-                                        <button type="submit" class="btn btn-success w-100" id="btn_terbitkan">
-                                            <i class="ki-outline ki-cloud-add fs-2"></i> Terbitkan Dokumen
-                                        </button>
+
+                                        <div class="d-flex justify-content-end">
+                                            <button type="submit" class="btn btn-primary" id="btn_simpan_berkas">
+                                                <span class="indicator-label"><i class="ki-outline ki-cloud-download fs-2"></i> Simpan & Unggah Berkas</span>
+                                                <span class="indicator-progress">Mengunggah... <span class="spinner-border spinner-border-sm align-middle ms-2"></span></span>
+                                            </button>
+                                        </div>
                                     </form>
-                                <?php endif; ?>
-                            </div>
+                                </div>
+
+                                <div class="border rounded p-5 <?= $stat_ser == 'terbit' ? 'border-success bg-light-success' : 'border-primary' ?>">
+                                    <h4 class="fw-bold text-gray-800 mb-4">3. Terbitkan Kartu IKH</h4>
+
+                                    <?php if ($stat_fin != 'selesai'): ?>
+                                        <div class="alert alert-warning"><i class="ki-outline ki-information-5 fs-2 text-warning me-2"></i> Selesaikan Tahap Validasi berkas terlebih dahulu untuk membuka kunci fitur ini.</div>
+                                    <?php else: ?>
+                                        <form id="form_upload_kartu">
+                                            <input type="hidden" name="id_ikh" value="<?= $ikh['id_ikh'] ?>">
+                                            <div class="row g-5 mb-5">
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">Tanggal Aktif</label>
+                                                    <input type="date" name="tgl_aktif" class="form-control form-control-solid datepicker-admin" value="<?= $ikh['tgl_aktif'] ?? date('Y-m-d') ?>" required>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">Tanggal Berlaku (Exp)</label>
+                                                    <input type="date" name="tgl_exp" class="form-control form-control-solid datepicker-admin" value="<?= $ikh['tgl_exp'] ?? date('Y-m-d', strtotime('+1 years')) ?>" required>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <label class="form-label fw-semibold text-primary">Upload File Kartu IKH <span class="text-muted fs-8">(Bisa pilih banyak file sekaligus)</span></label>
+                                                    <input type="file" name="file_kartu_ikh[]" class="form-control" accept="image/*, application/pdf" multiple>
+
+                                                    <?php if (!empty($ikh['file_kartu_ikh'])):
+                                                        $files = json_decode($ikh['file_kartu_ikh'], true) ?? [];
+                                                        if (!empty($files)): ?>
+                                                            <div class="mt-3 d-flex flex-wrap gap-2">
+                                                                <?php foreach ($files as $index => $file):
+                                                                    $isDrive = (strpos($file, '.') === false);
+
+                                                                    if ($isDrive) {
+                                                                        $fileUrl = 'https://drive.google.com/file/d/' . $file . '/preview';
+                                                                        $ext = 'pdf';
+                                                                    } else {
+                                                                        $fileUrl = base_url('uploads/ikh/' . $file);
+                                                                        $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+                                                                    }
+                                                                ?>
+                                                                    <div class="symbol symbol-50px symbol-2by3 position-relative">
+                                                                        <button type="button" class="btn btn-icon btn-light-primary w-100 h-100 btn-preview-berkas"
+                                                                            data-file-url="<?= $fileUrl ?>"
+                                                                            data-file-ext="<?= strtolower($ext) ?>"
+                                                                            data-file-name="Kartu IKH - <?= $index + 1 ?>">
+                                                                            <i class="ki-outline ki-file fs-2x"></i>
+                                                                            <span class="fs-9 position-absolute bottom-0 start-50 translate-middle-x pb-1"><?= strtoupper($ext) ?></span>
+                                                                        </button>
+                                                                    </div>
+                                                                <?php endforeach; ?>
+                                                            </div>
+                                                    <?php endif;
+                                                    endif; ?>
+                                                </div>
+                                            </div>
+                                            <button type="submit" class="btn btn-success w-100" id="btn_terbitkan">
+                                                <i class="ki-outline ki-cloud-add fs-2"></i> Terbitkan Dokumen
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
+                                </div>
                             <?php endif; ?>
 
                         </div>

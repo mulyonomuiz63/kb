@@ -74,16 +74,36 @@ class IKHController extends BaseController
 
         $idIkh = $this->request->getPost('id_ikh');
         $isEdit = !empty($idIkh);
-        $riwayat = $this->request->getVar('riwayat_pekerjaan'); // Ini akan menjadi array
+        
+        // --- Proses Riwayat Pekerjaan ---
+        $riwayat = $this->request->getVar('riwayat_pekerjaan'); 
         if (!is_array($riwayat)) {
             $riwayat = [];
         }
         $riwayat_bersih = array_values(array_filter($riwayat, function($value) {
             return !empty(trim($value));
         }));
-
-        // 4. Encode menjadi format JSON
         $json_riwayat = json_encode($riwayat_bersih);
+
+        // --- Proses Riwayat Pendidikan Dasar (TAMBAHAN BARU) ---
+        $tingkat = $this->request->getPost('tingkat_pendidikan');
+        $sekolah = $this->request->getPost('nama_sekolah');
+        $lulus   = $this->request->getPost('tahun_lulus_sekolah');
+
+        $riwayatPendidikan = [];
+        if (!empty($tingkat) && is_array($tingkat)) {
+            for ($i = 0; $i < count($tingkat); $i++) {
+                // Hanya proses jika nama sekolah tidak kosong
+                if (!empty(trim($sekolah[$i]))) { 
+                    $riwayatPendidikan[] = [
+                        'tingkat' => $tingkat[$i],
+                        'sekolah' => trim($sekolah[$i]),
+                        'lulus'   => !empty($lulus[$i]) ? trim($lulus[$i]) : ''
+                    ];
+                }
+            }
+        }
+        $json_pendidikan = empty($riwayatPendidikan) ? null : json_encode($riwayatPendidikan);
 
 
         $dataText = [
@@ -104,6 +124,7 @@ class IKHController extends BaseController
             'alamat_ktp'            => $this->request->getPost('alamat_ktp'),
             'alamat_korespondensi'  => $this->request->getPost('alamat_korespondensi'),
             'riwayat_pekerjaan'     => $json_riwayat,
+            'riwayat_pendidikan_dasar' => $json_pendidikan, // Menambahkan data pendidikan dasar
             'is_riwayat_hidup'      => $this->request->getPost('check_riwayat') ? 1 : 0,
             'is_bukan_pns'          => $this->request->getPost('check_pns') ? 1 : 0,
             'is_pakta_integritas'   => $this->request->getPost('check_pakta') ? 1 : 0,

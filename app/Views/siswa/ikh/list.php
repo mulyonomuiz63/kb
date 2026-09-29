@@ -53,11 +53,22 @@ $activeTab = (isset($_GET['tab']) && $_GET['tab'] == 'lampiran' && $hasData) ? '
     <!-- Tambahan Style ringan untuk efek animasi logo WA -->
     <style>
         @keyframes pulse-wa {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
         }
-        .anim-pulse-wa { animation: pulse-wa 2s infinite ease-in-out; }
+
+        .anim-pulse-wa {
+            animation: pulse-wa 2s infinite ease-in-out;
+        }
     </style>
 
     <!-- Wrapper Alert: Melayang (Fixed) di bawah agar tidak menggeser konten utama -->
@@ -87,7 +98,7 @@ $activeTab = (isset($_GET['tab']) && $_GET['tab'] == 'lampiran' && $hasData) ? '
                 <button type="button" class="btn btn-sm btn-outline btn-outline-dashed btn-outline-success btn-active-light-success btn-wa-action fw-bold w-100 w-sm-auto text-nowrap" data-action="sudah">
                     Sudah Bergabung
                 </button>
-                
+
                 <!-- Tombol "Gabung Sekarang" -->
                 <a href="https://chat.whatsapp.com/Ioh5B5FwS51BKmvSBkEDQ0" target="_blank" class="btn btn-sm btn-success btn-wa-action fw-bold shadow-sm w-100 w-sm-auto text-nowrap" data-action="gabung">
                     <i class="fa-brands fa-whatsapp fs-5 me-1"></i> Gabung Sekarang
@@ -373,6 +384,7 @@ $activeTab = (isset($_GET['tab']) && $_GET['tab'] == 'lampiran' && $hasData) ? '
                                         <div class="col-md-6"><label class="required form-label">Tempat Lahir</label><input type="text" name="tempat_lahir" class="form-control" value="<?= !empty($ikh['tempat_lahir']) ? $ikh['tempat_lahir'] : $siswa['tempat_lahir'] ?>" required /></div>
                                         <div class="col-md-6"><label class="required form-label">Tanggal Lahir</label><input type="date" id="kt_datepicker_lahir" name="tanggal_lahir" class="form-control" value="<?= !empty($ikh['tanggal_lahir']) ? $ikh['tanggal_lahir'] : $siswa['tgl_lahir'] ?>" required /></div>
 
+                                        <!-- KODE LAMA (TETAP UTUH) -->
                                         <div class="col-md-6">
                                             <label class="required form-label">Pendidikan Terakhir</label>
                                             <select name="pendidikan_terakhir" class="form-select" data-control="select2" required>
@@ -387,6 +399,58 @@ $activeTab = (isset($_GET['tab']) && $_GET['tab'] == 'lampiran' && $hasData) ? '
                                         <div class="col-md-6"><label class="required form-label">Jurusan</label><input type="text" name="jurusan" class="form-control" value="<?= !empty($ikh['jurusan']) ? $ikh['jurusan'] : '' ?>" required /></div>
                                         <div class="col-md-6"><label class="required form-label">Tahun Masuk</label><input type="number" name="tahun_masuk" id="tahun_masuk" class="form-control" value="<?= !empty($ikh['tahun_masuk']) ? $ikh['tahun_masuk'] : '' ?>" required /></div>
                                         <div class="col-md-6"><label class="required form-label">Tahun Lulus</label><input type="number" name="tahun_lulus" id="tahun_lulus" class="form-control" value="<?= !empty($ikh['tahun_lulus']) ? $ikh['tahun_lulus'] : '' ?>" required /></div>
+
+
+                                        <!-- KODE TAMBAHAN BARU (Riwayat SD/SMP/SMA) -->
+                                        <div class="col-12 mt-8 mb-4">
+                                            <div class="separator separator-dashed"></div>
+                                        </div>
+                                        <div class="col-12 mb-2">
+                                            <h5 class="fw-bold text-gray-800">Riwayat Pendidikan (SD/SMP/SMA)</h5>
+                                        </div>
+
+                                        <div class="col-12">
+                                            <div id="pendidikan_container">
+                                                <?php
+                                                // Cek apakah ada data JSON di database
+                                                $pendidikan_data = !empty($ikh['riwayat_pendidikan_dasar']) ? json_decode($ikh['riwayat_pendidikan_dasar'], true) : [];
+
+                                                if (empty($pendidikan_data)):
+                                                ?>
+                                                    <!-- Jika Kosong, tampilkan 1 baris default -->
+                                                    <div class="input-group mb-3 pendidikan-row">
+                                                        <select name="tingkat_pendidikan[]" class="form-select" style="max-width: 150px;">
+                                                            <option value="SD">SD</option>
+                                                            <option value="SMP">SMP</option>
+                                                            <option value="SMA/SMK">SMA/SMK</option>
+                                                        </select>
+                                                        <input type="text" name="nama_sekolah[]" class="form-control" placeholder="Nama Sekolah (Opsional)" />
+                                                        <input type="number" name="tahun_lulus_sekolah[]" class="form-control" placeholder="Tahun Lulus" style="max-width: 150px;" />
+                                                    </div>
+                                                <?php else: ?>
+                                                    <!-- Jika Ada Data, looping sesuai data yang tersimpan -->
+                                                    <?php foreach ($pendidikan_data as $index => $pend): ?>
+                                                        <div class="input-group mb-3 pendidikan-row">
+                                                            <select name="tingkat_pendidikan[]" class="form-select" style="max-width: 150px;">
+                                                                <option value="SD" <?= $pend['tingkat'] == 'SD' ? 'selected' : '' ?>>SD</option>
+                                                                <option value="SMP" <?= $pend['tingkat'] == 'SMP' ? 'selected' : '' ?>>SMP</option>
+                                                                <option value="SMA/SMK" <?= $pend['tingkat'] == 'SMA/SMK' ? 'selected' : '' ?>>SMA/SMK</option>
+                                                            </select>
+                                                            <input type="text" name="nama_sekolah[]" class="form-control" value="<?= esc($pend['sekolah']) ?>" placeholder="Nama Sekolah" />
+                                                            <input type="number" name="tahun_lulus_sekolah[]" class="form-control" value="<?= esc($pend['lulus']) ?>" placeholder="Tahun Lulus" style="max-width: 150px;" />
+                                                            <?php if ($index > 0): ?>
+                                                                <button type="button" class="btn btn-icon btn-light-danger btn-hapus-pendidikan" title="Hapus"><i class="ki-outline ki-trash fs-2"></i></button>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    <?php endforeach; ?>
+                                                <?php endif; ?>
+                                            </div>
+
+                                            <!-- Tombol Tambah Baris -->
+                                            <button type="button" class="btn btn-light-primary btn-sm mt-2" id="btn_tambah_pendidikan">
+                                                <i class="ki-outline ki-plus fs-2"></i> Tambah Riwayat Pendidikan
+                                            </button>
+                                        </div>
                                         <div class="col-md-6"><label class="required form-label">Nomor WhatsApp</label><input type="number" name="no_wa" id="no_wa" class="form-control" value="<?= !empty($ikh['no_wa']) ? $ikh['no_wa'] : $siswa['hp'] ?>" required /></div>
                                         <div class="col-md-6"><label class="required form-label">Email Aktif</label><input type="email" name="email" class="form-control" value="<?= !empty($ikh['email']) ? $ikh['email'] : $siswa['email'] ?>" required /></div>
                                         <div class="col-md-6">
@@ -733,6 +797,37 @@ $activeTab = (isset($_GET['tab']) && $_GET['tab'] == 'lampiran' && $hasData) ? '
                                     <div class="row mb-5">
                                         <div class="col-lg-5 fw-semibold text-muted">Tahun Masuk & Lulus</div>
                                         <div class="col-lg-7"><span class="fw-bold fs-6 text-gray-800"><?= $ikh['tahun_masuk'] ?> - <?= $ikh['tahun_lulus'] ?></span></div>
+                                    </div>
+
+                                    <!-- TAMBAHAN BARU: Tampilan Riwayat Pendidikan Dasar (SD/SMP/SMA) -->
+                                    <div class="row mb-5">
+                                        <div class="col-lg-5 fw-semibold text-muted">Riwayat Pendidikan (Dasar & Menengah)</div>
+                                        <div class="col-lg-7">
+                                            <?php
+                                            // Decode data JSON riwayat pendidikan dasar
+                                            $riwayat_pendidikan = !empty($ikh['riwayat_pendidikan_dasar']) ? json_decode($ikh['riwayat_pendidikan_dasar'], true) : [];
+
+                                            if (!empty($riwayat_pendidikan) && is_array($riwayat_pendidikan)):
+                                            ?>
+                                                <ul class="list-unstyled mb-0">
+                                                    <?php foreach ($riwayat_pendidikan as $pend): ?>
+                                                        <li class="mb-3">
+                                                            <div class="d-flex align-items-center">
+                                                                <span class="bullet bullet-dot bg-primary me-2"></span>
+                                                                <span class="fw-bold fs-6 text-gray-800">
+                                                                    <?= esc($pend['tingkat']) ?> - <?= esc($pend['sekolah']) ?>
+                                                                </span>
+                                                            </div>
+                                                            <div class="text-muted fs-7 ms-5">
+                                                                Tahun Lulus: <span class="fw-semibold text-gray-600"><?= !empty($pend['lulus']) ? esc($pend['lulus']) : '-' ?></span>
+                                                            </div>
+                                                        </li>
+                                                    <?php endforeach; ?>
+                                                </ul>
+                                            <?php else: ?>
+                                                <span class="fw-bold fs-6 text-gray-800">-</span>
+                                            <?php endif; ?>
+                                        </div>
                                     </div>
                                     <div class="separator my-5"></div>
                                     <div class="row mb-5">
@@ -1481,7 +1576,7 @@ $activeTab = (isset($_GET['tab']) && $_GET['tab'] == 'lampiran' && $hasData) ? '
         // Cek apakah user belum pernah menutup alert IKH ini
         // Menggunakan key khusus 'ikh_wa_alert_hidden' agar tidak bentrok dengan modul lain
         if (!localStorage.getItem('ikh_wa_alert_hidden')) {
-            
+
             // Persiapkan elemen untuk dianimasikan dari bawah ke atas
             alertElement.classList.remove('d-none');
             alertElement.style.transform = 'translate(-50%, 150%)'; // Posisi awal di bawah layar
@@ -1495,10 +1590,10 @@ $activeTab = (isset($_GET['tab']) && $_GET['tab'] == 'lampiran' && $hasData) ? '
 
         // Tangkap semua tombol di dalam alert (Baik tombol 'Sudah' maupun 'Gabung')
         const buttons = alertElement.querySelectorAll('.btn-wa-action');
-        
+
         buttons.forEach(btn => {
             btn.addEventListener('click', function() {
-                
+
                 // 1. Simpan ke sistem browser bahwa alert ini sudah ditangani
                 localStorage.setItem('ikh_wa_alert_hidden', 'true');
 
@@ -1509,7 +1604,38 @@ $activeTab = (isset($_GET['tab']) && $_GET['tab'] == 'lampiran' && $hasData) ? '
                 setTimeout(() => {
                     alertElement.style.display = 'none';
                 }, 600);
-                
+
+            });
+        });
+    });
+
+    $(document).ready(function() {
+        // Tombol Tambah Pendidikan
+        $('#btn_tambah_pendidikan').click(function(e) {
+            e.preventDefault();
+            var barisBaru = `
+            <div class="input-group mb-3 pendidikan-row" style="display: none;">
+                <select name="tingkat_pendidikan[]" class="form-select" style="max-width: 150px;">
+                    <option value="SD">SD</option>
+                    <option value="SMP">SMP</option>
+                    <option value="SMA/SMK">SMA/SMK</option>
+                </select>
+                <input type="text" name="nama_sekolah[]" class="form-control" placeholder="Nama Sekolah" />
+                <input type="number" name="tahun_lulus_sekolah[]" class="form-control" placeholder="Tahun Lulus" style="max-width: 150px;" />
+                <button type="button" class="btn btn-icon btn-light-danger btn-hapus-pendidikan" title="Hapus"><i class="ki-outline ki-trash fs-2"></i></button>
+            </div>
+        `;
+            var el = $(barisBaru);
+            $('#pendidikan_container').append(el);
+            el.slideDown('fast');
+        });
+
+        // Tombol Hapus Pendidikan (Event Delegation untuk elemen dinamis)
+        $(document).on('click', '.btn-hapus-pendidikan', function(e) {
+            e.preventDefault();
+            var baris = $(this).closest('.pendidikan-row');
+            baris.slideUp('fast', function() {
+                $(this).remove();
             });
         });
     });
