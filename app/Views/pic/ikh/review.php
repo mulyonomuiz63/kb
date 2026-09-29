@@ -42,7 +42,7 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
 
                                 <h6 class="text-uppercase text-muted fw-bold mb-3">Riwayat Pendidikan</h6>
                                 <div class="d-flex flex-column gap-4 mb-6">
-                                    
+
 
                                     <!-- TAMBAHAN BARU: PENDIDIKAN DASAR (SD/SMP/SMA) -->
                                     <?php
@@ -160,6 +160,7 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
 
                                 <h6 class="text-uppercase text-primary fw-bold mb-3 border-bottom border-primary pb-2"><i class="ki-outline ki-book-open fs-4 text-primary me-1"></i> Riwayat Pendidikan</h6>
                                 <div class="row g-3 mb-7">
+                                    <!-- PENDIDIKAN TERAKHIR (KODE LAMA TETAP UTUH) -->
                                     <div class="col-md-6">
                                         <label class="form-label fs-8 fw-semibold text-muted mb-1">Pendidikan Terakhir</label>
                                         <input type="text" name="pendidikan_terakhir" class="form-control form-control-sm form-control-solid" value="<?= $ikh['pendidikan_terakhir'] ?>">
@@ -175,6 +176,62 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                                     <div class="col-md-6">
                                         <label class="form-label fs-8 fw-semibold text-muted mb-1">Tahun Lulus</label>
                                         <input type="text" name="tahun_lulus" class="form-control form-control-sm form-control-solid" value="<?= $ikh['tahun_lulus'] ?>">
+                                    </div>
+
+                                    <!-- TAMBAHAN BARU: RIWAYAT SD/SMP/SMA (BISA DIEDIT ADMIN) -->
+                                    <div class="col-12 mt-5">
+                                        <label class="form-label fs-8 fw-semibold text-muted mb-2">Riwayat Pendidikan Dasar (SD/SMP/SMA)</label>
+                                        <div id="pendidikan_container_admin">
+                                            <?php
+                                            $pendidikan_data = !empty($ikh['riwayat_pendidikan_dasar']) ? json_decode($ikh['riwayat_pendidikan_dasar'], true) : [];
+                                            if (empty($pendidikan_data)):
+                                            ?>
+                                                <!-- Form Default Jika Kosong -->
+                                                <div class="row g-2 mb-2 pendidikan-row-admin">
+                                                    <div class="col-md-3">
+                                                        <select name="tingkat_pendidikan[]" class="form-select form-select-sm form-select-solid">
+                                                            <option value="SD">SD</option>
+                                                            <option value="SMP">SMP</option>
+                                                            <option value="SMA/SMK">SMA/SMK</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-5">
+                                                        <input type="text" name="nama_sekolah[]" class="form-control form-control-sm form-control-solid" placeholder="Nama Sekolah (Opsional)">
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <input type="number" name="tahun_lulus_sekolah[]" class="form-control form-control-sm form-control-solid" placeholder="Tahun Lulus">
+                                                    </div>
+                                                    <div class="col-md-1"></div>
+                                                </div>
+                                            <?php else: ?>
+                                                <!-- Looping Data Tersimpan -->
+                                                <?php foreach ($pendidikan_data as $index => $pend): ?>
+                                                    <div class="row g-2 mb-2 pendidikan-row-admin">
+                                                        <div class="col-md-3">
+                                                            <select name="tingkat_pendidikan[]" class="form-select form-select-sm form-select-solid">
+                                                                <option value="SD" <?= $pend['tingkat'] == 'SD' ? 'selected' : '' ?>>SD</option>
+                                                                <option value="SMP" <?= $pend['tingkat'] == 'SMP' ? 'selected' : '' ?>>SMP</option>
+                                                                <option value="SMA/SMK" <?= $pend['tingkat'] == 'SMA/SMK' ? 'selected' : '' ?>>SMA/SMK</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-5">
+                                                            <input type="text" name="nama_sekolah[]" class="form-control form-control-sm form-control-solid" value="<?= esc($pend['sekolah']) ?>" placeholder="Nama Sekolah">
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <input type="number" name="tahun_lulus_sekolah[]" class="form-control form-control-sm form-control-solid" value="<?= esc($pend['lulus']) ?>" placeholder="Tahun Lulus">
+                                                        </div>
+                                                        <div class="col-md-1">
+                                                            <?php if ($index > 0): ?>
+                                                                <button type="button" class="btn btn-icon btn-sm btn-light-danger btn-hapus-pendidikan-admin" title="Hapus"><i class="ki-outline ki-trash fs-6"></i></button>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    </div>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </div>
+                                        <button type="button" class="btn btn-light-primary btn-sm mt-2" id="btn_tambah_pendidikan_admin">
+                                            <i class="ki-outline ki-plus fs-4"></i> Tambah Riwayat
+                                        </button>
                                     </div>
                                 </div>
 
@@ -1321,6 +1378,44 @@ $stat_ser = $ikh['status_sertifikat'] ?? 'belum';
                     }
                 });
             }
+        });
+    });
+    $(document).ready(function() {
+        // Tambah Baris Pendidikan di Admin
+        $('#btn_tambah_pendidikan_admin').click(function(e) {
+            e.preventDefault();
+            var barisBaru = `
+            <div class="row g-2 mb-2 pendidikan-row-admin" style="display: none;">
+                <div class="col-md-3">
+                    <select name="tingkat_pendidikan[]" class="form-select form-select-sm form-select-solid">
+                        <option value="SD">SD</option>
+                        <option value="SMP">SMP</option>
+                        <option value="SMA/SMK">SMA/SMK</option>
+                    </select>
+                </div>
+                <div class="col-md-5">
+                    <input type="text" name="nama_sekolah[]" class="form-control form-control-sm form-control-solid" placeholder="Nama Sekolah">
+                </div>
+                <div class="col-md-3">
+                    <input type="number" name="tahun_lulus_sekolah[]" class="form-control form-control-sm form-control-solid" placeholder="Tahun Lulus">
+                </div>
+                <div class="col-md-1">
+                    <button type="button" class="btn btn-icon btn-sm btn-light-danger btn-hapus-pendidikan-admin" title="Hapus"><i class="ki-outline ki-trash fs-6"></i></button>
+                </div>
+            </div>
+        `;
+            var el = $(barisBaru);
+            $('#pendidikan_container_admin').append(el);
+            el.slideDown('fast');
+        });
+
+        // Hapus Baris Pendidikan di Admin
+        $(document).on('click', '.btn-hapus-pendidikan-admin', function(e) {
+            e.preventDefault();
+            var baris = $(this).closest('.pendidikan-row-admin');
+            baris.slideUp('fast', function() {
+                $(this).remove();
+            });
         });
     });
 </script>

@@ -37,7 +37,7 @@ $konten_pool = array_merge($artikel, $twibbon, $testimoni, $iklan, $galeri, $qui
 $profile = array('sw-admin/profile');
 $settings = array('sw-admin/settings');
 $diskusi = array('sw-admin/diskusi');
-$ikh = array('sw-admin/ikh');
+$ikh = array('sw-pic/ikh');
 $bankSoal = array('sw-admin/bank-soal');
 $pengaturan_pool = array_merge($profile, $settings);
 
@@ -301,7 +301,7 @@ $is_pengaturan_active = in_array($current_uri, $pengaturan_pool);
                                 </a>
                             </div>
                             <div class="menu-item me-0 me-lg-2">
-                                <a href="<?= base_url('sw-admin/ikh') ?>" class="menu-link <?= (in_array($current_uri, $ikh) ? 'active' : '') ?> py-3 px-4">
+                                <a href="<?= base_url('sw-pic/ikh') ?>" class="menu-link <?= (in_array($current_uri, $ikh) ? 'active' : '') ?> py-3 px-4">
                                     <span class="menu-title">IKH</span>
                                 </a>
                             </div>

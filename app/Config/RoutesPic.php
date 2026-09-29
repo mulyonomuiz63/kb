@@ -1,6 +1,6 @@
 <?php
 
-$routes->group('sw-pic', ['filter' => 'roleCheck:5'], function ($routes) {
+$routes->group('sw-pic', ['filter' => 'roleCheck:5,1'], function ($routes) {
     $routes->get('/', 'Pic\IkhController::index');
     $routes->group('ikh', function ($routes) {
         $routes->get('', 'Pic\IkhController::index');
