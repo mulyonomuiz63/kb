@@ -417,28 +417,54 @@ $activeTab = (isset($_GET['tab']) && $_GET['tab'] == 'lampiran' && $hasData) ? '
 
                                                 if (empty($pendidikan_data)):
                                                 ?>
-                                                    <!-- Jika Kosong, tampilkan 1 baris default -->
+                                                    <!-- Jika Kosong, tampilkan 3 baris default (SD, SMP, SMA/SMK) -->
+
+                                                    <!-- Baris SD -->
                                                     <div class="input-group mb-3 pendidikan-row">
-                                                        <select name="tingkat_pendidikan[]" class="form-select" style="max-width: 150px;">
-                                                            <option value="SD">SD</option>
+                                                        <select name="tingkat_pendidikan[]" class="form-select" style="max-width: 150px;" required>
+                                                            <option value="SD" selected>SD</option>
                                                             <option value="SMP">SMP</option>
                                                             <option value="SMA/SMK">SMA/SMK</option>
                                                         </select>
-                                                        <input type="text" name="nama_sekolah[]" class="form-control" placeholder="Nama Sekolah (Opsional)" />
-                                                        <input type="number" name="tahun_lulus_sekolah[]" class="form-control" placeholder="Tahun Lulus" style="max-width: 150px;" />
+                                                        <input type="text" name="nama_sekolah[]" class="form-control" placeholder="Nama Sekolah SD" required />
+                                                        <input type="number" name="tahun_lulus_sekolah[]" class="form-control" placeholder="Tahun Lulus" style="max-width: 150px;" required />
                                                     </div>
+
+                                                    <!-- Baris SMP -->
+                                                    <div class="input-group mb-3 pendidikan-row">
+                                                        <select name="tingkat_pendidikan[]" class="form-select" style="max-width: 150px;" required>
+                                                            <option value="SD">SD</option>
+                                                            <option value="SMP" selected>SMP</option>
+                                                            <option value="SMA/SMK">SMA/SMK</option>
+                                                        </select>
+                                                        <input type="text" name="nama_sekolah[]" class="form-control" placeholder="Nama Sekolah SMP" required />
+                                                        <input type="number" name="tahun_lulus_sekolah[]" class="form-control" placeholder="Tahun Lulus" style="max-width: 150px;" required />
+                                                    </div>
+
+                                                    <!-- Baris SMA/SMK -->
+                                                    <div class="input-group mb-3 pendidikan-row">
+                                                        <select name="tingkat_pendidikan[]" class="form-select" style="max-width: 150px;" required>
+                                                            <option value="SD">SD</option>
+                                                            <option value="SMP">SMP</option>
+                                                            <option value="SMA/SMK" selected>SMA/SMK</option>
+                                                        </select>
+                                                        <input type="text" name="nama_sekolah[]" class="form-control" placeholder="Nama Sekolah SMA/SMK" required />
+                                                        <input type="number" name="tahun_lulus_sekolah[]" class="form-control" placeholder="Tahun Lulus" style="max-width: 150px;" required />
+                                                    </div>
+
                                                 <?php else: ?>
                                                     <!-- Jika Ada Data, looping sesuai data yang tersimpan -->
                                                     <?php foreach ($pendidikan_data as $index => $pend): ?>
                                                         <div class="input-group mb-3 pendidikan-row">
-                                                            <select name="tingkat_pendidikan[]" class="form-select" style="max-width: 150px;">
+                                                            <select name="tingkat_pendidikan[]" class="form-select" style="max-width: 150px;" required>
                                                                 <option value="SD" <?= $pend['tingkat'] == 'SD' ? 'selected' : '' ?>>SD</option>
                                                                 <option value="SMP" <?= $pend['tingkat'] == 'SMP' ? 'selected' : '' ?>>SMP</option>
                                                                 <option value="SMA/SMK" <?= $pend['tingkat'] == 'SMA/SMK' ? 'selected' : '' ?>>SMA/SMK</option>
                                                             </select>
-                                                            <input type="text" name="nama_sekolah[]" class="form-control" value="<?= esc($pend['sekolah']) ?>" placeholder="Nama Sekolah" />
-                                                            <input type="number" name="tahun_lulus_sekolah[]" class="form-control" value="<?= esc($pend['lulus']) ?>" placeholder="Tahun Lulus" style="max-width: 150px;" />
-                                                            <?php if ($index > 0): ?>
+                                                            <input type="text" name="nama_sekolah[]" class="form-control" value="<?= esc($pend['sekolah']) ?>" placeholder="Nama Sekolah" required />
+                                                            <input type="number" name="tahun_lulus_sekolah[]" class="form-control" value="<?= esc($pend['lulus']) ?>" placeholder="Tahun Lulus" style="max-width: 150px;" required />
+                                                            <?php if ($index > 2): // Hanya tampilkan tombol hapus jika baris lebih dari 3 (tambahan baru) 
+                                                            ?>
                                                                 <button type="button" class="btn btn-icon btn-light-danger btn-hapus-pendidikan" title="Hapus"><i class="ki-outline ki-trash fs-2"></i></button>
                                                             <?php endif; ?>
                                                         </div>
