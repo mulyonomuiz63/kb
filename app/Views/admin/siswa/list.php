@@ -571,7 +571,7 @@ function renderDetailRow($label, $id, $col = 6)
                         if (cleanNumber.startsWith('0')) cleanNumber = '62' + cleanNumber.slice(1);
 
                         // Ubah menjadi link dengan class 'btn-kirim-promo' dan simpan data ke attribute
-                        return `<a href="javascript:void(0);" class="btn-kirim-promo" data-hp="${cleanNumber}" data-nama="${row.nama_siswa}" style="text-decoration: none;" title="Kirim Promo WA">
+                        return `<a href="javascript:void(0);" class="btn-kirim-promo" data-hp="${cleanNumber}" data-nama="${row.nama_siswa_wa}" style="text-decoration: none;" title="Kirim Promo WA">
                             <i class="fab fa-whatsapp fs-3" style="color: #25D366;"></i> ${data}
                         </a>`;
                     }

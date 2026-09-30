@@ -188,6 +188,7 @@ class SiswaController extends BaseController
             $data[] = [
                 "no_induk_siswa"  => $s->no_induk_siswa,
                 "nama_siswa"      => $s->nama_siswa . $infoUjian . $infoAfiliasi,
+                "nama_siswa_wa"   => $s->nama_siswa, //untuk nama pengirimana promosi
                 "email"           => $s->email,
                 "hp"              => $s->hp,
                 "date_created"    => date('d-m-Y', $s->date_created),
