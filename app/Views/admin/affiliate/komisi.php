@@ -280,7 +280,8 @@
                     </div>
                     <div class="mb-4">
                         <label class="form-label fw-bold">Potongan PPh21 (Rp)</label>
-                        <input type="number" class="form-control" name="potongan_pph21" id="potongan_pph21" required min="0" placeholder="Contoh: 15000">
+                        <!-- Tambahkan atribut step="any" di bawah ini -->
+                        <input type="number" step="any" class="form-control" name="potongan_pph21" id="potongan_pph21" required min="0" placeholder="Contoh: 15000">
                         <div class="form-text">Masukkan nominal potongan pajak (jika ada, masukkan 0 jika tidak ada).</div>
                     </div>
                     <div class="mb-4">
