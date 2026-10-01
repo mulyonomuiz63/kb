@@ -64,7 +64,8 @@ class WebinarController extends BaseController
 
         $totalRecordwithFilter = $builder->countAllResults(false);
 
-        $records = $builder->orderBy('id_sesi', 'DESC')
+        // Ubah order by menjadi waktu_mulai agar bulan mengelompok berurutan
+        $records = $builder->orderBy('waktu_mulai', 'DESC') 
             ->limit($rowperpage, $start)
             ->get()
             ->getResult();
