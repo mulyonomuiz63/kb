@@ -442,7 +442,7 @@
                                             </div>
                                         </div>
                                         <!-- TAMBAHAN: id="msg-text-${msgId}" -->
-                                        <div class="p-4 rounded bg-light-primary text-gray-900 fw-semibold mw-lg-400px text-end chat-message-text" id="msg-text-${msgId}">
+                                        <div class="p-4 rounded bg-light-primary text-gray-900 fw-semibold mw-lg-400px text-start chat-message-text" id="msg-text-${msgId}">
                                             ${formatMessage(m.text)}
                                         </div>
                                         ${actionButtons}
