@@ -217,9 +217,11 @@ $isWaVerified = isset($siswa->is_wa_verified) ? $siswa->is_wa_verified : 0;
                                     <div class="row mb-6">
                                         <label class="col-12 col-lg-4 col-form-label fw-bold fs-6 required">Email & WhatsApp</label>
                                         <div class="col-12 col-lg-4 mb-3 mb-lg-0">
+                                            <label class="form-label fs-7 fw-semibold text-muted">Alamat Email</label>
                                             <input type="email" class="form-control form-control-lg form-control-solid bg-light-secondary" value="<?= $siswa->email; ?>" readonly />
                                         </div>
                                         <div class="col-12 col-lg-4">
+                                            <label class="form-label fs-7 fw-semibold text-muted">Nomor WhatsApp</label>
                                             <div class="input-group">
                                                 <input type="number" name="hp" id="hp" 
                                                        data-original="<?= old('hp', $siswa->hp); ?>" 
@@ -254,9 +256,11 @@ $isWaVerified = isset($siswa->is_wa_verified) ? $siswa->is_wa_verified : 0;
                                     <div class="row mb-6">
                                         <label class="col-12 col-lg-4 col-form-label fw-bold fs-6 required">Tempat & Tanggal Lahir</label>
                                         <div class="col-12 col-lg-4 mb-3 mb-lg-0">
+                                            <label class="form-label fs-7 fw-semibold text-muted">Tempat Lahir</label>
                                             <input type="text" name="tempat_lahir" class="form-control form-control-lg form-control-solid <?= $checkInvalid(old('tempat_lahir', $siswa->tempat_lahir)) ?>" value="<?= old('tempat_lahir', $siswa->tempat_lahir); ?>" required placeholder="Tempat Lahir" />
                                         </div>
                                         <div class="col-12 col-lg-4">
+                                            <label class="form-label fs-7 fw-semibold text-muted">Tanggal Lahir</label>
                                             <input type="date" name="tgl_lahir" max="<?= date('Y-m-d', strtotime('-10 years')); ?>" class="form-control form-control-lg form-control-solid <?= $checkInvalid(old('tgl_lahir', $siswa->tgl_lahir)) ?>" value="<?= old('tgl_lahir', $siswa->tgl_lahir); ?>" required />
                                         </div>
                                     </div>
@@ -280,7 +284,10 @@ $isWaVerified = isset($siswa->is_wa_verified) ? $siswa->is_wa_verified : 0;
                                     <div class="row mb-6">
                                         <label class="col-12 col-lg-4 col-form-label fw-bold fs-6 required">Alamat KTP & Domisili</label>
                                         <div class="col-12 col-lg-8">
+                                            <label class="form-label fs-7 fw-semibold text-muted">Alamat KTP</label>
                                             <input type="text" name="alamat_ktp" class="form-control form-control-lg form-control-solid mb-3 <?= $checkInvalid(old('alamat_ktp', $siswa->alamat_ktp)) ?>" placeholder="Alamat lengkap sesuai KTP" value="<?= old('alamat_ktp', $siswa->alamat_ktp); ?>" required />
+                                            
+                                            <label class="form-label fs-7 fw-semibold text-muted mt-2">Alamat Domisili</label>
                                             <input type="text" name="alamat_domisili" class="form-control form-control-lg form-control-solid <?= $checkInvalid(old('alamat_domisili', $siswa->alamat_domisili)) ?>" placeholder="Alamat Domisili saat ini" value="<?= old('alamat_domisili', $siswa->alamat_domisili); ?>" required />
                                         </div>
                                     </div>
@@ -288,9 +295,11 @@ $isWaVerified = isset($siswa->is_wa_verified) ? $siswa->is_wa_verified : 0;
                                     <div class="row mb-6">
                                         <div class="col-lg-4 d-none d-lg-block"></div>
                                         <div class="col-12 col-lg-4 mb-3 mb-lg-0">
+                                            <label class="form-label fs-7 fw-semibold text-muted">Kelurahan</label>
                                             <input type="text" name="kelurahan" class="form-control form-control-solid <?= $checkInvalid(old('kelurahan', $siswa->kelurahan)) ?>" placeholder="Kelurahan" value="<?= old('kelurahan', $siswa->kelurahan); ?>" required />
                                         </div>
                                         <div class="col-12 col-lg-4">
+                                            <label class="form-label fs-7 fw-semibold text-muted">Kecamatan</label>
                                             <input type="text" name="kecamatan" class="form-control form-control-solid <?= $checkInvalid(old('kecamatan', $siswa->kecamatan)) ?>" placeholder="Kecamatan" value="<?= old('kecamatan', $siswa->kecamatan); ?>" required />
                                         </div>
                                     </div>
@@ -298,9 +307,11 @@ $isWaVerified = isset($siswa->is_wa_verified) ? $siswa->is_wa_verified : 0;
                                     <div class="row mb-6">
                                         <div class="col-lg-4 d-none d-lg-block"></div>
                                         <div class="col-12 col-lg-4 mb-3 mb-lg-0">
+                                            <label class="form-label fs-7 fw-semibold text-muted">Kota/Kabupaten</label>
                                             <input type="text" name="kota" class="form-control form-control-solid <?= $checkInvalid(old('kota', $siswa->kota)) ?>" placeholder="Kota/Kabupaten" value="<?= old('kota', $siswa->kota); ?>" required />
                                         </div>
                                         <div class="col-12 col-lg-4">
+                                            <label class="form-label fs-7 fw-semibold text-muted">Provinsi</label>
                                             <input type="text" name="provinsi" class="form-control form-control-solid <?= $checkInvalid(old('provinsi', $siswa->provinsi)) ?>" placeholder="Provinsi" value="<?= old('provinsi', $siswa->provinsi); ?>" required />
                                         </div>
                                     </div>
@@ -312,9 +323,11 @@ $isWaVerified = isset($siswa->is_wa_verified) ? $siswa->is_wa_verified : 0;
                                     <div class="row mb-6">
                                         <label class="col-12 col-lg-4 col-form-label fw-bold fs-6 required">Pekerjaan & Bidang</label>
                                         <div class="col-12 col-lg-4 mb-3 mb-lg-0">
+                                            <label class="form-label fs-7 fw-semibold text-muted">Profesi / Pekerjaan</label>
                                             <input type="text" name="profesi" class="form-control form-control-lg form-control-solid <?= $checkInvalid(old('profesi', $siswa->profesi)) ?>" placeholder="Profesi saat ini" value="<?= old('profesi', $siswa->profesi); ?>" required />
                                         </div>
                                         <div class="col-12 col-lg-4">
+                                            <label class="form-label fs-7 fw-semibold text-muted">Bidang Usaha</label>
                                             <input type="text" name="bidang_usaha" class="form-control form-control-lg form-control-solid <?= $checkInvalid(old('bidang_usaha', $siswa->bidang_usaha)) ?>" placeholder="Bidang Usaha" value="<?= old('bidang_usaha', $siswa->bidang_usaha); ?>" required />
                                         </div>
                                     </div>
@@ -322,6 +335,7 @@ $isWaVerified = isset($siswa->is_wa_verified) ? $siswa->is_wa_verified : 0;
                                     <div class="row mb-6">
                                         <label class="col-12 col-lg-4 col-form-label fw-bold fs-6 required">Kantor</label>
                                         <div class="col-12 col-lg-8">
+                                            <label class="form-label fs-7 fw-semibold text-muted">Jenis Kantor</label>
                                             <select name="kantor" id="select_kantor" class="form-select form-select-lg form-select-solid mb-3 <?= $checkInvalid(old('kantor', $siswa->kantor)) ?>" data-control="select2" required>
                                                 <option value="">- Pilih Jenis Kantor -</option>
                                                 <?php $kat = old('kantor', $siswa->kantor); ?>
@@ -331,7 +345,11 @@ $isWaVerified = isset($siswa->is_wa_verified) ? $siswa->is_wa_verified : 0;
                                                 <option value="Mandiri" <?= $kat == 'Mandiri' ? 'selected' : '' ?>>Mandiri</option>
                                                 <option value="Lainnya" <?= $kat == 'Lainnya' ? 'selected' : '' ?>>Lainnya</option>
                                             </select>
+
+                                            <label class="form-label fs-7 fw-semibold text-muted mt-2">Nama Perusahaan / Lembaga</label>
                                             <input type="text" name="nama_kantor" class="form-control form-control-lg form-control-solid mb-3 <?= $checkInvalid(old('nama_kantor', $siswa->nama_kantor)) ?>" placeholder="Nama Perusahaan/Lembaga/Instansi" value="<?= old('nama_kantor', $siswa->nama_kantor); ?>" required />
+                                            
+                                            <label class="form-label fs-7 fw-semibold text-muted mt-2">Alamat Kantor (Opsional)</label>
                                             <input type="text" name="alamat_kantor" class="form-control form-control-lg form-control-solid" placeholder="Alamat Perusahaan/Lembaga/Kantor (Opsional)" value="<?= old('alamat_kantor', $siswa->alamat_kantor); ?>" />
                                         </div>
                                     </div>
@@ -347,16 +365,22 @@ $isWaVerified = isset($siswa->is_wa_verified) ? $siswa->is_wa_verified : 0;
                                                 $riwayat_data = $siswa->riwayat_pekerjaan ? json_decode($siswa->riwayat_pekerjaan, true) : old('riwayat_pekerjaan');
                                                 if (empty($riwayat_data)):
                                                 ?>
-                                                    <div class="input-group mb-3 riwayat-row">
-                                                        <input type="text" name="riwayat_pekerjaan[]" class="form-control form-control-lg form-control-solid" placeholder="Contoh: PT. Legalyn Indonesia (2015 - 2020)" required />
+                                                    <div class="riwayat-row mb-3">
+                                                        <label class="form-label fs-7 fw-semibold text-muted">Nama Perusahaan & Periode</label>
+                                                        <div class="input-group">
+                                                            <input type="text" name="riwayat_pekerjaan[]" class="form-control form-control-lg form-control-solid" placeholder="Contoh: PT. Legalyn Indonesia (2015 - 2020)" required />
+                                                        </div>
                                                     </div>
                                                 <?php else: ?>
                                                     <?php foreach ($riwayat_data as $index => $riwayat): ?>
-                                                        <div class="input-group mb-3 riwayat-row">
-                                                            <input type="text" name="riwayat_pekerjaan[]" class="form-control form-control-lg form-control-solid" value="<?= esc($riwayat) ?>" placeholder="Contoh: PT. Legalyn Indonesia (2015 - 2020)" required/>
-                                                            <?php if ($index > 0): ?>
-                                                                <button type="button" class="btn btn-icon btn-light-danger btn-hapus-riwayat" title="Hapus Baris"><i class="ki-outline ki-trash fs-2"></i></button>
-                                                            <?php endif; ?>
+                                                        <div class="riwayat-row mb-3">
+                                                            <label class="form-label fs-7 fw-semibold text-muted">Nama Perusahaan & Periode</label>
+                                                            <div class="input-group">
+                                                                <input type="text" name="riwayat_pekerjaan[]" class="form-control form-control-lg form-control-solid" value="<?= esc($riwayat) ?>" placeholder="Contoh: PT. Legalyn Indonesia (2015 - 2020)" required/>
+                                                                <?php if ($index > 0): ?>
+                                                                    <button type="button" class="btn btn-icon btn-light-danger btn-hapus-riwayat" title="Hapus Baris"><i class="ki-outline ki-trash fs-2"></i></button>
+                                                                <?php endif; ?>
+                                                            </div>
                                                         </div>
                                                     <?php endforeach; ?>
                                                 <?php endif; ?>
@@ -680,11 +704,15 @@ $isWaVerified = isset($siswa->is_wa_verified) ? $siswa->is_wa_verified : 0;
         // -------------------------------------------------------------
         $('#btn_tambah_riwayat').click(function(e) {
             e.preventDefault();
-            var barisBaru = '<div class="input-group mb-3 riwayat-row" style="display: none;">' +
-                                '<input type="text" name="riwayat_pekerjaan[]" class="form-control form-control-lg form-control-solid" placeholder="Contoh: PT Contoh (2021 - Sekarang)" required />' +
-                                '<button type="button" class="btn btn-icon btn-light-danger btn-hapus-riwayat" title="Hapus Baris">' +
-                                    '<i class="ki-outline ki-trash fs-2"></i>' +
-                                '</button>' +
+            // Strukturnya disesuaikan agar sama persis dengan yang ada di atas
+            var barisBaru = '<div class="riwayat-row mb-3" style="display: none;">' +
+                                '<label class="form-label fs-7 fw-semibold text-muted">Nama Perusahaan & Periode</label>' +
+                                '<div class="input-group">' +
+                                    '<input type="text" name="riwayat_pekerjaan[]" class="form-control form-control-lg form-control-solid" placeholder="Contoh: PT Contoh (2021 - Sekarang)" required />' +
+                                    '<button type="button" class="btn btn-icon btn-light-danger btn-hapus-riwayat" title="Hapus Baris">' +
+                                        '<i class="ki-outline ki-trash fs-2"></i>' +
+                                    '</button>' +
+                                '</div>' +
                             '</div>';
             var el = $(barisBaru);
             $('#riwayat_container').append(el);
