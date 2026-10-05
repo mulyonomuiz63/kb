@@ -120,7 +120,7 @@ class TransaksiController extends BaseController
                 // Tangkap Parameter Filter
                 $filter_bulan = $request->getPost('filter_bulan_range');
                 $status_afiliasi = $request->getPost('filter_status_afiliasi');
-                $filter_paket = $request->getPost('paket_pelatihan'); // UPGRADE: Tangkap filter paket
+                $filter_paket = $request->getPost('paket_pelatihan'); 
 
                 // ==========================================
                 // 1. BUILDER UNTUK MENAMPILKAN DATA TABEL
@@ -131,6 +131,7 @@ class TransaksiController extends BaseController
                     $query->groupStart()
                         ->like('b.nama_siswa', $search)
                         ->orLike('c.nama_paket', $search)
+                        ->orLike('d.name', $search) // UPGRADE: Tambahkan pencarian dari nama detail transaksi (Sertifikat)
                         ->orLike('transaksi.idtransaksi', $search)
                         ->groupEnd();
                 }
@@ -158,6 +159,9 @@ class TransaksiController extends BaseController
                     $query->whereIn('c.v_materi', ['all', '1']);
                 } elseif ($filter_paket == '3') {
                     $query->like('c.jenis_paket', '"ikh"');
+                } elseif ($filter_paket == '4') { 
+                    // UPGRADE: Opsional jika Anda punya menu dropdown filter khusus Sertifikat value="4"
+                    $query->like('transaksi.jenis_paket', '"sertifikat"');
                 }
 
                 if ($status_afiliasi === '0') {
@@ -168,10 +172,8 @@ class TransaksiController extends BaseController
                     }
                 }
 
-                // Menghitung total data terfilter TANPA mereset builder (bawaan kode aslimu)
                 $totalFiltered = $query->countAllResults(false);
 
-                // Ambil data untuk baris tabel (Ini akan otomatis mereset builder $query)
                 $data = $query->orderBy("transaksi.status = 'S'", "ASC", FALSE)
                     ->orderBy("transaksi.tgl_pembayaran IS NULL", "DESC", FALSE)
                     ->orderBy('transaksi.tgl_pembayaran', 'DESC')
@@ -183,20 +185,17 @@ class TransaksiController extends BaseController
                 // ==========================================
                 // 2. BUILDER TERPISAH UNTUK TOTAL PENDAPATAN
                 // ==========================================
-                // Panggil ulang dari model agar tidak merusak $query di atas
                 $queryTotal = $this->transaksiModel->getBaseQuery();
 
                 if (!empty($search)) {
                     $queryTotal->groupStart()
                         ->like('b.nama_siswa', $search)
                         ->orLike('c.nama_paket', $search)
+                        ->orLike('d.name', $search) // UPGRADE: Tambahkan pencarian sertifikat
                         ->orLike('transaksi.idtransaksi', $search)
                         ->groupEnd();
                 }
 
-                // ==========================================
-                // IMPLEMENTASI FILTER RANGE BULAN (QUERY TOTAL)
-                // ==========================================
                 if (!empty($filter_bulan)) {
                     $dates = explode(' - ', $filter_bulan);
                     if (count($dates) == 2) {
@@ -208,15 +207,14 @@ class TransaksiController extends BaseController
                     }
                 }
 
-                // ==========================================
-                // IMPLEMENTASI FILTER PAKET (QUERY TOTAL)
-                // ==========================================
                 if ($filter_paket == '1') {
                     $queryTotal->whereIn('c.v_ujian', ['all', '1']);
                 } elseif ($filter_paket == '2') {
                     $queryTotal->whereIn('c.v_materi', ['all', '1']);
                 } elseif ($filter_paket == '3') {
                     $queryTotal->like('c.jenis_paket', '"ikh"');
+                } elseif ($filter_paket == '4') {
+                    $queryTotal->like('transaksi.jenis_paket', '"sertifikat"');
                 }
 
                 if ($status_afiliasi === '0') {
@@ -227,10 +225,8 @@ class TransaksiController extends BaseController
                     }
                 }
 
-                // Ambil semua data hanya yang berstatus Lunas (S)
                 $dataTotalLunas = $queryTotal->where('transaksi.status', 'S')->get()->getResultObject();
 
-                // Kalkulasi omset murni (Keseluruhan, Manual, dan Midtrans)
                 $totalPendapatan = 0;
                 $totalManual = 0;
                 $totalMidtrans = 0;
@@ -243,7 +239,6 @@ class TransaksiController extends BaseController
 
                     $totalPendapatan += $nominal_bersih;
 
-                    // Pisahkan berdasarkan jenis pembayaran
                     if ($dt->jenis_bayar === 'manual') {
                         $totalManual += $nominal_bersih;
                     } elseif ($dt->jenis_bayar === 'online') {
@@ -256,12 +251,13 @@ class TransaksiController extends BaseController
                     $id_enc = encrypt_url($s->idtransaksi);
                     $row = [];
 
-                    // UPGRADE 1: Beri background warna kuning jika status 'V' (Menunggu Approval)
+                    // UPGRADE: Siapkan fallback nama paket jika transaksi adalah sertifikat (nama_paket akan null)
+                    $nama_paket_display = !empty($s->nama_paket) ? $s->nama_paket : ($s->nama_detail ?? 'Sertifikat Fisik');
+
                     if ($s->status === 'V') {
                         $row['DT_RowClass'] = 'bg-light-warning';
                     }
 
-                    // Kolom Peserta
                     $htmlPeserta = '<div class="text-gray-800 fw-bold fs-6">' . esc($s->nama_siswa) . '</div>';
                     $htmlPeserta .= '<div class="text-muted fw-semibold fs-7 mb-1">' . esc($s->email) . '</div>';
 
@@ -275,21 +271,19 @@ class TransaksiController extends BaseController
                         }
                     }
 
-                    // PERHITUNGAN DISKON & NOMINAL (Pastikan variabel $nominal sudah dihitung sebelum baris ini)
                     $diskon         = ($s->nominal * $s->diskon) / 100;
                     $totalDiskon    = $s->nominal - $diskon;
                     $diskon_voucher = ($totalDiskon * $s->voucher) / 100;
                     $nominal        = $s->nominal - $diskon - $diskon_voucher;
                     $nominal_formatted = 'Rp ' . number_format($nominal, 0, ',', '.');
 
-                    // Tombol Universal Kirim Pesan
                     $htmlPeserta .= '<div class="mt-1">
                         <a href="javascript:void(0)" class="badge badge-light-primary text-decoration-none btn-kirim-pesan" data-bs-toggle="modal" data-bs-target="#modalKirimPesan" 
                             data-hp="' . esc($no_wa_clean) . '" 
                             data-hp-original="' . esc($s->hp ?? '') . '" 
                             data-email="' . esc($s->email) . '" 
                             data-nama="' . esc($s->nama_siswa) . '"
-                            data-paket="' . esc($s->nama_paket) . '"
+                            data-paket="' . esc($nama_paket_display) . '" 
                             data-nominal="' . esc($nominal_formatted) . '"
                             data-status="' . esc($s->status) . '"
                             data-bayar="' . esc($s->jenis_bayar) . '">
@@ -299,11 +293,10 @@ class TransaksiController extends BaseController
 
                     $row['peserta'] = $htmlPeserta;
 
-                    // Kolom Paket
-                    $row['paket'] = '<div class="text-gray-800 fw-bold fs-6">' . esc($s->nama_paket) . '</div>
+                    // UPGRADE: Gunakan variabel $nama_paket_display
+                    $row['paket'] = '<div class="text-gray-800 fw-bold fs-6">' . esc($nama_paket_display) . '</div>
                      <div class="text-muted fw-semibold fs-7">' . esc($s->kantor ?? '') . '</div>';
 
-                    // LOGIKA AFFILIATE & KOLOM VOUCHER
                     $is_affiliate = false;
                     $kode_affiliate = $s->kode_affiliate ?? null;
                     $nama_afiliasi = $s->nama_afiliasi ?? null;
@@ -330,7 +323,6 @@ class TransaksiController extends BaseController
 
                     $row['voucher'] = $html_voucher;
 
-                    // KOLOM PEMBAYARAN
                     $label_jenis_bayar = '';
                     if ($s->jenis_bayar === 'online') {
                         $label_jenis_bayar = '<div class="text-info fw-semibold fs-8"><i class="ki-duotone ki-credit-cart fs-7 me-1 text-info"><span class="path1"></span><span class="path2"></span></i> Midtrans</div>';
@@ -363,15 +355,8 @@ class TransaksiController extends BaseController
 
                     $row['pembayaran'] = $html_tgl_pesan . $html_tgl_bayar . '<div class="mt-1">' . $label_jenis_bayar . '</div>';
 
-                    // PERHITUNGAN DISKON & NOMINAL
-                    $diskon         = ($s->nominal * $s->diskon) / 100;
-                    $totalDiskon    = $s->nominal - $diskon;
-                    $diskon_voucher = ($totalDiskon * $s->voucher) / 100;
-                    $nominal        = $s->nominal - $diskon - $diskon_voucher;
-
                     $row['nominal'] = '<span class="text-primary fw-bold fs-6">Rp ' . number_format($nominal, 0, ',', '.') . '</span>';
 
-                    // STATUS
                     if ($s->status === 'S') {
                         $row['status'] = '<div class="text-center"><span class="badge badge-light-success fw-bold px-3 py-2">Lunas</span></div>';
                     } elseif ($s->status === 'P') {
@@ -390,7 +375,6 @@ class TransaksiController extends BaseController
                         $row['status'] = '<div class="text-center"><span class="badge badge-light-danger fw-bold px-3 py-2">Expired</span></div>';
                     }
 
-                    // AKSI
                     $row['aksi'] = '
                 <div class="text-center">
                     <a href="#" class="btn btn-sm btn-light btn-flex btn-center btn-active-light-primary" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
@@ -413,7 +397,6 @@ class TransaksiController extends BaseController
                             </a>
                         </div>';
                     } else {
-                        // UPGRADE 2: Tombol approve hanya dirender jika status = 'V'
                         if ($s->status == 'V') {
                             $row['aksi'] .= '
                             <div class="menu-item px-3">
@@ -425,7 +408,6 @@ class TransaksiController extends BaseController
                             <div class="separator mt-3 opacity-75"></div>';
                         }
                         
-                        // Tombol hapus tetap muncul untuk semua status yang belum lunas (M, PM, V, E, dll)
                         $row['aksi'] .= '
                         <div class="menu-item px-3 mt-3">
                             <a href="' . base_url('sw-admin/transaksi/hapus-transaksi-siswa/' . $id_enc) . '" class="menu-link px-3 text-danger btn-delete" id="hapus">

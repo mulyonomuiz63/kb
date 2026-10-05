@@ -29,7 +29,7 @@ class TransaksiModel extends Model
         return $this->select('transaksi.*, b.nama_siswa, b.email, b.hp, b.id_siswa, b.kantor, b.idafiliasi, c.nama_paket, a.nama_afiliasi')
             ->join('detail_transaksi d', 'd.idtransaksi=transaksi.idtransaksi')
             ->join('siswa b', 'b.id_siswa = transaksi.idsiswa')
-            ->join('paket c', 'c.idpaket = d.idpaket')
+            ->join('paket c', 'c.idpaket = d.idpaket', 'left')
             ->join('afiliasi a', 'a.idafiliasi = b.idafiliasi', 'left')
             ->groupBy('transaksi.idtransaksi');
     }

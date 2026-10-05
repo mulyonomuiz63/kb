@@ -80,7 +80,7 @@ class PengajuanSertifikatController extends BaseController
                 'created_at'     => $tgl_mulai
             ]);
             $id_transaksi = $this->db->insertID();
-            $order_id_midtrans = 'SRTF-' . $id_transaksi;
+            $order_id_midtrans = $id_transaksi;
 
             // 2. Insert ke pengajuan_sertifikat
             $this->db->table('pengajuan_sertifikat')->insert([
