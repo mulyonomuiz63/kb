@@ -360,6 +360,15 @@ class MidtransController extends BaseController
                     $this->ikhModel->insert($dataInsertLengkap);
                 }
             }
+
+            $jenisPaketArray = json_decode($transaksiMaster['jenis_paket'], true) ?? [];
+
+            if (in_array('sertifikat', $jenisPaketArray)) {
+                // Update status_pengiriman di tabel pengajuan_sertifikat menjadi 'menunggu'
+                $this->db->table('pengajuan_sertifikat')
+                    ->where('idtransaksi', $idtransaksi)
+                    ->update(['status_pengiriman' => 'diproses']);
+            }
         }
 
         // Handle Affiliate Commission

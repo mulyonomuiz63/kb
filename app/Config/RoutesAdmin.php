@@ -18,7 +18,6 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
         $routes->get('ujian/(:segment)', 'Admin\SiswaController::ujian/$1');
         $routes->post('get-data-ujian', 'Admin\SiswaController::getDataUjian');
         $routes->get('webinar/(:segment)', 'Admin\SiswaController::webinar/$1');
-        
         $routes->post('processImportBatch', 'Admin\SiswaController::processImportBatch');
 
         //cetak sertifikat
@@ -266,6 +265,12 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
         $routes->post('send', 'Admin\DiskusiController::sendMessage');
         $routes->post('update-message', 'Admin\DiskusiController::updateMessage');
         $routes->post('delete-message', 'Admin\DiskusiController::deleteMessage');
+    });
+
+    $routes->group('pengajuan-sertifikat', function ($routes) {
+        $routes->get('/', 'Admin\PengajuanSertifikatController::index');
+        $routes->post('get-data-pengajuan', 'Admin\PengajuanSertifikatController::getDataPengajuan');
+        $routes->post('update-pengiriman', 'Admin\PengajuanSertifikatController::updatePengiriman');
     });
     
     $routes->group('review', function ($routes) {

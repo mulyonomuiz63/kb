@@ -8,7 +8,7 @@
         gap: 0.75rem;
         cursor: pointer;
         padding: 10px;
-        background: f8f9fa;
+        background: #f8f9fa;
         border-radius: 12px;
     }
 
@@ -49,6 +49,85 @@
         backdrop-filter: blur(4px);
         background: rgba(255, 255, 255, 0.8) !important;
     }
+
+    /* =======================================================
+       UPGRADE: RESPONSIVE MOBILE TABLE (Card Layout)
+       ======================================================= */
+    @media (max-width: 767.98px) {
+        /* Hilangkan Header Tabel Default */
+        #kt_datatable_sertifikat thead {
+            display: none;
+        }
+        
+        /* Ubah baris (tr) menjadi bentuk Card dengan padding lebih luas */
+        #kt_datatable_sertifikat tbody tr {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #EFF2F5;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            padding: 1.25rem; /* Padding card diperbesar agar tidak mepet */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+
+        /* Atur cell (td) agar flex memanjang dengan padding lebih lega */
+        #kt_datatable_sertifikat tbody td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0 !important; /* Jarak antar baris diperbesar */
+            border-bottom: 1px dashed #EFF2F5 !important;
+            border-top: none !important;
+        }
+
+        /* Kolom terakhir (Tombol) tidak bergaris bawah */
+        #kt_datatable_sertifikat tbody td:last-child {
+            border-bottom: none !important;
+            padding-bottom: 0 !important;
+            flex-direction: column;
+            margin-top: 1rem;
+            gap: 12px;
+        }
+        #kt_datatable_sertifikat tbody td:last-child > * {
+            width: 100%;
+            display: block;
+        }
+
+        /* Buat label palsu berdasarkan atribut data-label */
+        #kt_datatable_sertifikat tbody td::before {
+            content: attr(data-label);
+            font-weight: 600;
+            color: #7E8299;
+            padding-right: 1.5rem; /* Jarak label ke isi diperbesar */
+            text-align: left;
+        }
+
+        /* Tampilan khusus untuk kolom Judul Materi agar icon & text sejajar */
+        #kt_datatable_sertifikat tbody td[data-label="Materi Pelatihan"] {
+            justify-content: flex-start;
+            flex-direction: row; /* Dibuat ke samping (sejajar) */
+            align-items: center;
+            background: #F5F8FA;
+            padding: 1.25rem !important; /* Kotak biru padding diperbesar */
+            border-radius: 10px;
+            margin-bottom: 0.75rem;
+            border-bottom: none !important;
+        }
+        
+        /* Sembunyikan label di Judul dan Tombol karena sudah jelas */
+        #kt_datatable_sertifikat tbody td[data-label="Materi Pelatihan"]::before,
+        #kt_datatable_sertifikat tbody td[data-label="Opsi Sertifikat"]::before {
+            display: none;
+        }
+        
+        /* Merapikan text align konten di mode mobile */
+        #kt_datatable_sertifikat tbody td > div {
+            text-align: right;
+        }
+        #kt_datatable_sertifikat tbody td[data-label="Materi Pelatihan"] > div {
+            text-align: left;
+        }
+    }
 </style>
 <?= $this->endSection() ?>
 
@@ -60,49 +139,52 @@
         <div id="kt_app_content_container" class="app-container container-xxl">
 
             <div class="card card-flush shadow-sm">
-                <div class="card-header align-items-center py-5 gap-2 gap-md-5">
-                    <div class="card-title">
-                        <div class="d-flex align-items-center position-relative my-1">
+                <!-- UPGRADE: Responsive flex classes for Mobile (flex-column) and Desktop (flex-md-row) -->
+                <div class="card-header d-flex flex-column flex-md-row align-items-md-center py-5 gap-4">
+                    <div class="card-title m-0 w-100 w-md-auto">
+                        <div class="d-flex align-items-center position-relative my-1 w-100">
                             <span class="svg-icon svg-icon-1 position-absolute ms-4">
                                 <i class="bi bi-search fs-2"></i>
                             </span>
-                            <input type="text" data-kt-filter="search" class="form-control form-control-solid w-250px ps-13" placeholder="Cari materi ujian..." />
+                            <input type="text" data-kt-filter="search" class="form-control form-control-solid w-100 w-md-250px ps-13" placeholder="Cari materi ujian..." />
                         </div>
                     </div>
-                    <div class="card-toolbar">
+                    <div class="card-toolbar m-0 d-flex flex-column flex-md-row gap-2 w-100 w-md-auto ms-md-auto">
                         <?php
-                        $idsiswa = session()->get('id');
-                        $total_materi_wajib = 8;
-                        $cekReviewSiswa = $db->query("
+                        $idsiswa = session()->get('id');$total_materi_wajib = 8;
+                        $cekReviewSiswa =$db->query("
                             SELECT COUNT(DISTINCT kode_ujian) as jumlah_direview 
                             FROM review_ujian 
                             WHERE id_siswa = '$idsiswa'
                         ")->getRow();
 
-                        $jumlah_sudah_review = $cekReviewSiswa->jumlah_direview;
+                        $jumlah_sudah_review =$cekReviewSiswa->jumlah_direview;
 
                         // Tentukan status apakah bisa download atau tidak
-                        $bisa_download = ($jumlah_sudah_review >= $total_materi_wajib);
+                        $bisa_download = ($jumlah_sudah_review >=$total_materi_wajib);
                         ?>
-                        <?php if ($total != 0 && $totalSertifikat >= $total): ?>
+                        <?php if ($total != 0 && $totalSertifikat >=$total): ?>
                             <?php if ($bisa_download): ?>
                                 <!-- Tombol Aktif (Jika 8 materi sudah direview) -->
+                                <a href="<?= base_url('sw-siswa/sertifikat/pengajuan-sertifikat') ?>" class="btn btn-light-info fw-bold w-100 w-md-auto px-4">
+                                    <i class="bi bi-envelope-paper fs-4 me-2"></i> Pengajuan Sertifikat Fisik
+                                </a>
                                 <a href="javascript:void(0)"
                                     data-bs-toggle="modal"
                                     data-bs-target="#sertifikat_cetak_modal"
                                     data-sertifikat_all="<?= base_url("sw-siswa/sertifikat/lihat-sertifikat-brevet/" . encrypt_url($idsiswa)) ?>"
-                                    class="btn btn-primary btn-download-glow fw-bold sertifikat_all_cetak">
-                                    <i class="bi bi-patch-check-fill fs-4 me-2"></i> Unduh Sertifikat Brevet AB (Lengkap)
+                                    class="btn btn-primary btn-download-glow fw-bold w-100 w-md-auto px-4 sertifikat_all_cetak">
+                                    <i class="bi bi-patch-check-fill fs-4 me-2"></i> Unduh Sertifikat Brevet AB
                                 </a>
 
                             <?php else: ?>
                                 <!-- Tombol Terkunci (Jika ada yang belum direview) -->
                                 <a href="#"
                                     id="btn-sertifikat-terkunci"
-                                    class="btn btn-secondary fw-bold"
+                                    class="btn btn-secondary fw-bold w-100 w-md-auto px-4"
                                     data-sudah="<?= $jumlah_sudah_review ?? 0 ?>"
                                     data-total="<?= $total_materi_wajib ?? 8 ?>">
-                                    <i class="bi bi-lock-fill fs-4 me-2"></i> Unduh Sertifikat (Terkunci)
+                                    <i class="bi bi-lock-fill fs-4 me-2"></i> Sertifikat (Terkunci)
                                 </a>
                             <?php endif; ?>
                         <?php endif; ?>
@@ -115,60 +197,57 @@
                             <thead>
                                 <tr class="text-start text-gray-400 fw-bold fs-7 text-uppercase gs-0">
                                     <th class="min-w-250px">Materi Pelatihan</th>
-                                    <th class="min-w-150px text-center">Periode Ujian</th>
-                                    <th class="min-w-100px text-center">Skor Akhir</th>
-                                    <th class="min-w-125px text-center">Status Kelulusan</th>
-                                    <th class="text-end min-w-100px">Opsi Sertifikat</th>
+                                    <th class="min-w-150px text-md-center">Periode Ujian</th>
+                                    <th class="min-w-100px text-md-center">Skor Akhir</th>
+                                    <th class="min-w-125px text-md-center">Status Kelulusan</th>
+                                    <th class="text-md-end min-w-100px">Opsi Sertifikat</th>
                                 </tr>
                             </thead>
                             <tbody class="fw-semibold text-gray-600">
-                                <?php foreach ($ujian as $u) : ?>
+                                <?php foreach ($ujian as$u) : ?>
                                     <tr>
-                                        <td>
+                                        <!-- UPGRADE: Tambahan Atribut 'data-label' untuk mode Mobile Layout -->
+                                        <td data-label="Materi Pelatihan">
                                             <div class="d-flex align-items-center">
-                                                <div class="symbol symbol-50px me-3">
+                                                <div class="symbol symbol-50px me-4">
                                                     <div class="symbol-label bg-light-primary">
                                                         <i class="bi bi-award text-primary fs-1"></i>
                                                     </div>
                                                 </div>
                                                 <div class="d-flex flex-column">
-                                                    <span class="text-gray-800 text-hover-primary fw-bold fs-6 mb-1"><?= $u->nama_ujian; ?></span>
+                                                    <span class="text-gray-800 fw-bold fs-6 mb-1"><?= $u->nama_ujian; ?></span>
                                                 </div>
                                             </div>
                                         </td>
 
-                                        <td class="text-center">
-                                            <div class="d-flex flex-column align-items-center">
+                                        <td class="text-md-center" data-label="Periode Ujian">
+                                            <div class="d-flex flex-column align-items-md-center">
                                                 <span class="text-gray-800 fw-bold fs-7"><?= date('d M Y', strtotime($u->start_ujian)) ?></span>
                                                 <span class="text-muted fs-8">Sampai <?= date('d M Y', strtotime($u->end_ujian)) ?></span>
                                             </div>
                                         </td>
 
-                                        <td class="text-center">
-                                            <div class="d-flex flex-column">
-                                                <span class="text-dark fw-bolder fs-5"><?= $u->nilai ?></span>
-                                                <div class="progress h-4px w-100 mt-1 bg-light">
-                                                    <div class="progress-bar bg-<?= $u->nilai >= 60 ? 'success' : 'danger' ?>" role="progressbar" style="width: <?= $u->nilai ?>%"></div>
-                                                </div>
-                                            </div>
+                                        <td class="text-md-center" data-label="Skor Akhir">
+                                            <!-- INDIKATOR PROGRESS BAR DIHILANGKAN, HANYA ANGKA -->
+                                            <span class="text-dark fw-bolder fs-5"><?= $u->nilai ?></span>
                                         </td>
 
-                                        <td class="text-center">
+                                        <td class="text-md-center" data-label="Status Kelulusan">
                                             <?php if ($u->nilai >= 60): ?>
-                                                <span class="badge badge-light-success border border-success border-dashed px-4 py-3">
+                                                <span class="badge badge-light-success border border-success border-dashed px-4 py-3 text-center">
                                                     <i class="bi bi-check2-circle me-1 text-success"></i> Kompeten
                                                 </span>
                                             <?php else: ?>
-                                                <span class="badge badge-light-danger border border-danger border-dashed px-4 py-3">
+                                                <span class="badge badge-light-danger border border-danger border-dashed px-4 py-3 text-center">
                                                     <i class="bi bi-exclamation-triangle me-1 text-danger"></i> Tidak Lulus
                                                 </span>
                                             <?php endif; ?>
                                         </td>
 
-                                        <td class="text-end">
+                                        <td class="text-md-center" data-label="Opsi Sertifikat">
                                             <?php
                                             $idsiswa = session()->get('id');
-                                            $ratingData = $db->query("SELECT AVG(rating) as avg_rating FROM review_ujian WHERE kode_ujian = '$u->kode_ujian' and id_siswa= '$idsiswa'")->getRow();
+                                            $ratingData =$db->query("SELECT AVG(rating) as avg_rating FROM review_ujian WHERE kode_ujian = '$u->kode_ujian' and id_siswa= '$idsiswa'")->getRow();
                                             ?>
 
                                             <?php if (empty($ratingData->avg_rating)): ?>
@@ -180,18 +259,19 @@
                                                     <i class="bi bi-star-fill fs-7 me-2"></i> Beri Feedback
                                                 </button>
                                             <?php else: ?>
-                                                <?php if ($u->nilai >= 60 && $u->status === 'S'): ?>
-                                                    <button class="btn btn-icon btn-sm btn-light-primary btn-active-primary shadow-sm sertifikat_cetak"
+                                                <?php if ($u->nilai >= 60 &&$u->status === 'S'): ?>
+                                                    <button class="btn btn-icon btn-sm btn-light-primary btn-active-primary shadow-sm sertifikat_cetak w-100 w-md-auto"
                                                         data-bs-toggle="modal"
                                                         data-bs-target="#sertifikat_cetak_modal"
                                                         data-bs-toggle="tooltip" title="Lihat & Unduh Sertifikat"
                                                         data-sertifikat="<?= base_url("sw-siswa/sertifikat/lihat-sertifikat/" . encrypt_url($u->kode_ujian) . "/" . encrypt_url($u->id_ujian)) ?>">
-                                                        <i class="bi bi-file-earmark-pdf fs-3"></i>
+                                                        <i class="bi bi-file-earmark-pdf fs-3"></i> 
+                                                        <span class="d-inline-block d-md-none ms-2 fw-bold">Lihat Dokumen</span>
                                                     </button>
                                                 <?php elseif ($u->status === 'T'): ?>
-                                                    <span class="badge badge-secondary py-3 px-4 disabled">Sertifikat Ditangguhkan</span>
+                                                    <span class="badge badge-secondary py-3 px-4 disabled w-100 text-center">Sertifikat Ditangguhkan</span>
                                                 <?php else: ?>
-                                                    <span class="badge badge-secondary py-3 px-4 disabled">🔒 Terkunci</span>
+                                                    <span class="badge badge-secondary py-3 px-4 disabled w-100 text-center">🔒 Terkunci</span>
                                                 <?php endif; ?>
                                             <?php endif; ?>
                                         </td>
@@ -300,7 +380,7 @@
         })
 
         $('.sertifikat_cetak, .sertifikat_all_cetak').off('click').on('click', function() {
-            const url = $(this).data('sertifikat') || $(this).data('sertifikat_all');
+            const url = $(this).data('sertifikat') ||$(this).data('sertifikat_all');
             if (!url) return;
 
             // 1. Persiapan Tampilan
@@ -342,7 +422,6 @@
             iframe.attr('src', '');
         });
 
-
         // Rating Logic with Descriptions
         const starDescriptions = {
             1: "Sangat Kurang",
@@ -353,21 +432,18 @@
         };
 
         $('#ratingModal').on('show.bs.modal', function(event) {
-            const button = $(event.relatedTarget);
-            $('#kode_ujian').val(button.data('id'));
+            const button = $(event.relatedTarget);$('#kode_ujian').val(button.data('id'));
             $('#idsiswa').val('<?= session()->get('id') ?>');
             $('#ratingModalLabel').text(button.data('nama'));
 
             // Reset
-            $('.star-rating .bi-star-fill').removeClass('active hover');
-            $('#ratingValue').val('');
+            $('.star-rating .bi-star-fill').removeClass('active hover');$('#ratingValue').val('');
             $('#ratingDesc').text('Pilih Bintang').removeClass('text-success').addClass('text-warning');
         });
 
         $('.star-rating .bi-star-fill').on('mouseenter', function() {
-            const val = $(this).data('value');
-            $('.star-rating .bi-star-fill').each(function() {
-                $(this).toggleClass('hover', $(this).data('value') <= val);
+            const val = $(this).data('value');$('.star-rating .bi-star-fill').each(function() {
+                $(this).toggleClass('hover',$(this).data('value') <= val);
             });
             $('#ratingDesc').text(starDescriptions[val]);
         }).on('mouseleave', function() {
@@ -377,10 +453,9 @@
         });
 
         $('.star-rating .bi-star-fill').on('click', function() {
-            const val = $(this).data('value');
-            $('#ratingValue').val(val);
+            const val = $(this).data('value');$('#ratingValue').val(val);
             $('.star-rating .bi-star-fill').each(function() {
-                $(this).toggleClass('active', $(this).data('value') <= val);
+                $(this).toggleClass('active',$(this).data('value') <= val);
             });
             $('#ratingDesc').text(starDescriptions[val]).addClass('text-success').removeClass('text-warning');
         });

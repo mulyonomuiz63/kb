@@ -45,6 +45,12 @@ $routes->group('sw-siswa', ['filter' => 'roleCheck:2'], function ($routes) {
         $routes->get('/', 'Siswa\SertifikatController::index');
         $routes->get('lihat-sertifikat-brevet/(:segment)', 'Siswa\SertifikatController::lihatSertifikatBrevet/$1');
         $routes->get('lihat-sertifikat/(:segment)/(:segment)', 'Siswa\SertifikatController::lihatSertifikat/$1/$2');
+
+        //pengajuan sertifikat fisik
+        $routes->group('pengajuan-sertifikat', ['filter' => 'cekData'], function ($routes) {
+            $routes->get('/', 'Siswa\PengajuanSertifikatController::index');
+            $routes->post('store', 'Siswa\PengajuanSertifikatController::store');
+        });
     });
 
     //  review

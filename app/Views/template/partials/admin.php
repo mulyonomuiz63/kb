@@ -26,11 +26,12 @@ $quiz = array('sw-admin/quiz', 'sw-admin/soal', 'sw-admin/hasil');
 $artikel = array('sw-admin/artikel', 'sw-admin/tambah-artikel', 'sw-admin/edit-artikel', 'sw-admin/kategori', 'sw-admin/tambah-kategori', 'sw-admin/edit-kategori');
 $diskon = array('sw-admin/diskon');
 $webinar = array('sw-admin/webinar');
+$pengajuanSertifikat = array('sw-admin/pengajuan-sertifikat');
 $paket = array('sw-admin/paket', 'sw-admin/review');
 $transaksi = array('sw-admin/transaksi');
 $affiliate = array('sw-admin/affiliate', 'sw-admin/affiliate/komisi');
 
-$langganan_pool = array_merge($transaksi, $paket, $diskon, $webinar, $affiliate);
+$langganan_pool = array_merge($transaksi, $paket, $diskon, $webinar, $pengajuanSertifikat, $affiliate);
 $konten_pool = array_merge($artikel, $twibbon, $testimoni, $iklan, $galeri, $quiz);
 
 // Pengaturan
@@ -258,13 +259,17 @@ $is_pengaturan_active = in_array($current_uri, $pengaturan_pool);
                                                 </a>
                                                 <a href="<?= base_url('sw-admin/affiliate') ?>" class="menu-link p-4 mb-2 <?= (in_array($current_uri, $affiliate) ? 'active' : '') ?>">
                                                     <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-warning"><i class="ki-duotone ki-bank text-warning fs-1"><span class="path1"></span><span class="path2"></span></i></span>
-                                                    <span class="d-flex flex-column"><span class="fs-6 fw-bold text-gray-800">Affiliate</span><span class="fs-7 fw-semibold text-muted">Komisi & Referral</span></span>
+                                                    <span class="d-flex flex-column"><span class="fs-6 fw-bold text-gray-800">Affiliate</span><span class="fs-7 fw-semibold text-muted">Komisi & Referal</span></span>
                                                 </a>
                                             </div>
                                             <div class="col-lg-6">
                                                 <a href="<?= base_url('sw-admin/webinar') ?>" class="menu-link p-4 mb-2 <?= (in_array($current_uri, $webinar) ? 'active' : '') ?>">
                                                     <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-danger"><i class="ki-duotone ki-tag text-danger fs-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i></span>
                                                     <span class="d-flex flex-column"><span class="fs-6 fw-bold text-gray-800">Webinar</span><span class="fs-7 fw-semibold text-muted">Webinar & Pelatihan</span></span>
+                                                </a>
+                                                <a href="<?= base_url('sw-admin/pengajuan-sertifikat') ?>" class="menu-link p-4 mb-2 <?= (in_array($current_uri, $pengajuanSertifikat) ? 'active' : '') ?>">
+                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-danger"><i class="ki-duotone ki-tag text-danger fs-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i></span>
+                                                    <span class="d-flex flex-column"><span class="fs-6 fw-bold text-gray-800">Pengajuan Sertifikat</span><span class="fs-7 fw-semibold text-muted">Pengajuan Sertifikat</span></span>
                                                 </a>
                                             </div>
                                         </div>
