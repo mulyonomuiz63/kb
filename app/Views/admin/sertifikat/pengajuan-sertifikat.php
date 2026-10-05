@@ -126,7 +126,10 @@
                     d[csrfName] = csrfHash;
                 },
                 dataSrc: function(json) {
-                    csrfHash = json.csrf_hash;
+                    // PERBAIKAN: Tangkap token menggunakan key dinamis dan panggil fungsi updateCsrf
+                    if (json[csrfName]) {
+                        updateCsrf(json[csrfName]); 
+                    }
                     return json.data;
                 },
                 error: function(xhr, error, thrown) {
