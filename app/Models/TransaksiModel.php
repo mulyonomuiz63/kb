@@ -17,7 +17,7 @@ class TransaksiModel extends Model
             ->select('transaksi.*, b.nama_siswa, b.email, c.nama_paket, c.v_ujian, c.v_materi, c.jenis_paket')
             ->join('detail_transaksi d', 'd.idtransaksi=transaksi.idtransaksi')
             ->join('siswa b', 'b.id_siswa = transaksi.idsiswa')
-            ->join('paket c', 'c.idpaket = d.idpaket')
+            ->join('paket c', 'c.idpaket = d.idpaket', 'left')
             ->whereIn('transaksi.status', ['V', 'S'])
             ->groupBY('transaksi.idtransaksi')
             ->orderBy('transaksi.status', 'esc')
@@ -54,7 +54,7 @@ class TransaksiModel extends Model
             ->select('transaksi.*, b.nama_siswa, b.email, b.hp, b.id_siswa, c.nama_paket')
             ->join('detail_transaksi d', 'd.idtransaksi=transaksi.idtransaksi')
             ->join('siswa b', 'b.id_siswa = transaksi.idsiswa')
-            ->join('paket c', 'c.idpaket = d.idpaket')
+            ->join('paket c', 'c.idpaket = d.idpaket', 'left')
             ->where('transaksi.status', 'S')
             ->groupBY('transaksi.idtransaksi')
             ->orderBy('transaksi.status', 'asc')
@@ -67,11 +67,11 @@ class TransaksiModel extends Model
             ->select('transaksi.*, b.nama_siswa, b.email, c.nama_paket, c.jumlah_bulan')
             ->join('detail_transaksi d', 'd.idtransaksi=transaksi.idtransaksi')
             ->join('siswa b', 'b.id_siswa = transaksi.idsiswa')
-            ->join('paket c', 'c.idpaket = d.idpaket')
+            ->join('paket c', 'c.idpaket = d.idpaket', 'left')
             ->where('transaksi.idtransaksi', $id)
             ->groupBY('transaksi.idtransaksi')
             ->get()->getRowObject();
-    }
+    } 
 
     public function getByIdSiswa($id)
     {
@@ -79,7 +79,7 @@ class TransaksiModel extends Model
             ->select('transaksi.*, c.nama_paket, c.tagline, c.jumlah_bulan, c.nominal_paket')
             ->join('detail_transaksi d', 'd.idtransaksi=transaksi.idtransaksi')
             ->join('siswa b', 'b.id_siswa = transaksi.idsiswa')
-            ->join('paket c', 'c.idpaket = d.idpaket')
+            ->join('paket c', 'c.idpaket = d.idpaket', 'left')
             ->where('transaksi.idsiswa', $id)
             ->whereIn('transaksi.status', ['P', 'V'])
             ->groupBY('transaksi.idtransaksi')
@@ -91,7 +91,7 @@ class TransaksiModel extends Model
             ->select('transaksi.*, c.nama_paket, c.tagline, c.jumlah_bulan, c.nominal_paket')
             ->join('detail_transaksi d', 'd.idtransaksi=transaksi.idtransaksi')
             ->join('siswa b', 'b.id_siswa = transaksi.idsiswa')
-            ->join('paket c', 'c.idpaket = d.idpaket')
+            ->join('paket c', 'c.idpaket = d.idpaket', 'left')
             ->where('transaksi.idsiswa', $id)
             ->whereIn('transaksi.status', ['D'])
             ->groupBY('transaksi.idtransaksi')
@@ -105,7 +105,7 @@ class TransaksiModel extends Model
             ->select('transaksi.*, b.nama_siswa, b.email, c.nama_paket, c.tagline, c.jumlah_bulan')
             ->join('detail_transaksi d', 'd.idtransaksi=transaksi.idtransaksi')
             ->join('siswa b', 'b.id_siswa = transaksi.idsiswa')
-            ->join('paket c', 'c.idpaket = d.idpaket')
+            ->join('paket c', 'c.idpaket = d.idpaket', 'left')
             ->where('transaksi.idsiswa', $id)
             ->groupBY('transaksi.idtransaksi')
             ->orderBy('transaksi.idtransaksi', 'desc')

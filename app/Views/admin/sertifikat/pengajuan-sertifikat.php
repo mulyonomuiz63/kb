@@ -143,7 +143,7 @@
                     data: null, 
                     render: function(data, type, row) {
                         return `
-                            <span class="fw-bold text-gray-800 d-block">SRTF-${row.idtransaksi}</span>
+                            <span class="fw-bold text-gray-800 d-block">${row.idtransaksi}</span>
                             <span class="text-muted fs-7">${row.tanggal_pengajuan}</span>
                         `;
                     }
