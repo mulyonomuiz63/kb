@@ -67,7 +67,7 @@
 
                     <div class="mb-5 text-center">
                         <div class="text-muted fw-semibold">Order ID</div>
-                        <div class="fs-3 fw-bold text-dark" id="display_order_id">SRTF-XXX</div>
+                        <div class="fs-3 fw-bold text-dark" id="display_order_id">XXX</div>
                     </div>
 
                     <div class="d-flex flex-column mb-7 fv-row">
@@ -200,7 +200,7 @@
                         return `
                             <button type="button" class="btn btn-sm btn-light-primary btn-icon btn-update-status" 
                                 data-id="${row.id_pengajuan}"
-                                data-order="SRTF-${row.idtransaksi}"
+                                data-order="${row.idtransaksi}"
                                 data-status="${row.status_pengiriman}"
                                 data-resi="${row.no_resi || ''}"
                                 title="${btnTitle}" ${btnState}>

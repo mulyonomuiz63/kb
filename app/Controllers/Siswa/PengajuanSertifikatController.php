@@ -34,17 +34,11 @@ class PengajuanSertifikatController extends BaseController
             ->get()
             ->getResult();
 
-        $data = [
-            'title'     => 'Pengajuan Sertifikat Fisik',
-            'pengajuan' => $records // Kirim data ke view
-        ];
-
-        $data = [
+        $data['breadcrumbs'] = [
             ['title' => 'Dashboard', 'url' => base_url('sw-siswa')],
-            ['title' => 'List Pengajuan Sertifikat', 'url' => '#'],
-            'pengajuan' => $records
+            ['title' => 'List Pengajuan Sertifikat', 'url' => '#'], // '#' untuk halaman aktif
         ];
-
+        $data = ['pengajuan' => $records];
         return view('siswa/sertifikat/pengajuan-sertifikat', $data);
     }
 
