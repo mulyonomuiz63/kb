@@ -39,6 +39,12 @@ class PengajuanSertifikatController extends BaseController
             'pengajuan' => $records // Kirim data ke view
         ];
 
+        $data = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-siswa')],
+            ['title' => 'List Pengajuan Sertifikat', 'url' => '#'],
+            'pengajuan' => $records
+        ];
+
         return view('siswa/sertifikat/pengajuan-sertifikat', $data);
     }
 
