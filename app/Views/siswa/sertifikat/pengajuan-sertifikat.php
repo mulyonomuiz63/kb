@@ -73,7 +73,7 @@
                                         }
                                     ?>
                                     <tr>
-                                        <td><span class="fw-bold text-gray-800">SRTF-<?= $row->idtransaksi ?></span></td>
+                                        <td><span class="fw-bold text-gray-800"><?= $row->idtransaksi ?></span></td>
                                         <td><?= date('d M Y H:i', strtotime($row->created_at)) ?></td>
                                         <td><b><?= esc($row->nama_penerima) ?></b><br><span class="text-muted fs-7"><?= esc($row->no_hp) ?></span></td>
                                         <td><div class="text-break" style="max-width:200px;"><?= esc($row->alamat_lengkap) ?> (<?= esc($row->kode_pos) ?>)</div></td>
