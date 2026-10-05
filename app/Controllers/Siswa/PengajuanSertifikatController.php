@@ -34,11 +34,13 @@ class PengajuanSertifikatController extends BaseController
             ->get()
             ->getResult();
 
-        $data['breadcrumbs'] = [
-            ['title' => 'Dashboard', 'url' => base_url('sw-siswa')],
-            ['title' => 'List Pengajuan Sertifikat', 'url' => '#'], // '#' untuk halaman aktif
+        $data = [
+            'breadcrumbs' => [
+                ['title' => 'Dashboard', 'url' => base_url('sw-siswa')],
+                ['title' => 'List Pengajuan Sertifikat', 'url' => '#'], // '#' untuk halaman aktif
+            ],
+            'pengajuan' => $records
         ];
-        $data = ['pengajuan' => $records];
         return view('siswa/sertifikat/pengajuan-sertifikat', $data);
     }
 
@@ -136,7 +138,6 @@ class PengajuanSertifikatController extends BaseController
                 'message' => 'Pengajuan berhasil dibuat!',
                 csrf_token() => csrf_hash()
             ]);
-
         } catch (\Exception $e) {
             $this->db->transRollback();
             return $this->response->setStatusCode(500)->setJSON([

@@ -258,19 +258,19 @@ $is_pengaturan_active = in_array($current_uri, $pengaturan_pool);
                                                     <span class="d-flex flex-column"><span class="fs-6 fw-bold text-gray-800">Diskon</span><span class="fs-7 fw-semibold text-muted">Promo & Flashsale</span></span>
                                                 </a>
                                                 <a href="<?= base_url('sw-admin/affiliate') ?>" class="menu-link p-4 mb-2 <?= (in_array($current_uri, $affiliate) ? 'active' : '') ?>">
-                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-warning"><i class="ki-duotone ki-bank text-warning fs-1"><span class="path1"></span><span class="path2"></span></i></span>
+                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-warning"><i class="ki-duotone ki-people text-warning fs-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i></span>
                                                     <span class="d-flex flex-column"><span class="fs-6 fw-bold text-gray-800">Affiliate</span><span class="fs-7 fw-semibold text-muted">Komisi & Referal</span></span>
                                                 </a>
                                             </div>
                                             <div class="col-lg-6">
                                                 <a href="<?= base_url('sw-admin/webinar') ?>" class="menu-link p-4 mb-2 <?= (in_array($current_uri, $webinar) ? 'active' : '') ?>">
-                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-danger"><i class="ki-duotone ki-tag text-danger fs-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i></span>
+                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-danger"><i class="ki-duotone ki-laptop text-danger fs-1"><span class="path1"></span><span class="path2"></span></i></span>
                                                     <span class="d-flex flex-column"><span class="fs-6 fw-bold text-gray-800">Webinar</span><span class="fs-7 fw-semibold text-muted">Webinar & Pelatihan</span></span>
                                                 </a>
                                             </div>
                                             <div class="col-lg-6">
                                                 <a href="<?= base_url('sw-admin/pengajuan-sertifikat') ?>" class="menu-link p-4 mb-2 <?= (in_array($current_uri, $pengajuanSertifikat) ? 'active' : '') ?>">
-                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-danger"><i class="ki-duotone ki-tag text-danger fs-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i></span>
+                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-danger"><i class="ki-duotone ki-badge text-danger fs-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i></span>
                                                     <span class="d-flex flex-column"><span class="fs-6 fw-bold text-gray-800">Pengajuan Sertifikat</span><span class="fs-7 fw-semibold text-muted">Pengajuan Sertifikat</span></span>
                                                 </a>
                                             </div>
