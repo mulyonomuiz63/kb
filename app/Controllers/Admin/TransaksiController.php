@@ -120,7 +120,7 @@ class TransaksiController extends BaseController
                 // Tangkap Parameter Filter
                 $filter_bulan = $request->getPost('filter_bulan_range');
                 $status_afiliasi = $request->getPost('filter_status_afiliasi');
-                $filter_paket = $request->getPost('paket_pelatihan'); 
+                $filter_paket = $request->getPost('paket_pelatihan');
 
                 // ==========================================
                 // 1. BUILDER UNTUK MENAMPILKAN DATA TABEL
@@ -159,7 +159,7 @@ class TransaksiController extends BaseController
                     $query->whereIn('c.v_materi', ['all', '1']);
                 } elseif ($filter_paket == '3') {
                     $query->like('c.jenis_paket', '"ikh"');
-                } elseif ($filter_paket == '4') { 
+                } elseif ($filter_paket == '4') {
                     // UPGRADE: Opsional jika Anda punya menu dropdown filter khusus Sertifikat value="4"
                     $query->like('transaksi.jenis_paket', '"sertifikat"');
                 }
@@ -407,7 +407,7 @@ class TransaksiController extends BaseController
                             
                             <div class="separator mt-3 opacity-75"></div>';
                         }
-                        
+
                         $row['aksi'] .= '
                         <div class="menu-item px-3 mt-3">
                             <a href="' . base_url('sw-admin/transaksi/hapus-transaksi-siswa/' . $id_enc) . '" class="menu-link px-3 text-danger btn-delete" id="hapus">
@@ -616,7 +616,6 @@ class TransaksiController extends BaseController
 
                         // 3. Jalankan perintah insert
                         $this->ikhModel->insert($dataInsertLengkap);
-
                     }
                 }
             }
@@ -684,7 +683,7 @@ class TransaksiController extends BaseController
                             'kelas'      => $row->kelas,
                             'mapel'      => $row->mapel,
                             'waktu_per_soal' => $row->waktu_per_soal,
-                            'date_created' => time(), 
+                            'date_created' => time(),
                             'kuota'        => $row->kuota,
                             'kuota_master' => $row->kuota,
                             'review'       => $row->review
@@ -742,7 +741,7 @@ class TransaksiController extends BaseController
         return redirect()->to('sw-admin/transaksi')->with('success', 'Transaksi berhasil dibatalkan');
     }
 
-    public function hapusTransaksi()
+   public function hapusTransaksi()
     {
         // Ambil SEMUA transaksi yang memenuhi kriteria kedaluwarsa
         $dataDrop = $this->db->query("SELECT * FROM transaksi WHERE status IN ('P', 'M','PM', 'DM', 'E') AND tgl_drop <= NOW()")->getResultObject();
@@ -760,17 +759,22 @@ class TransaksiController extends BaseController
                 $this->db->transBegin();
 
                 try {
-                    // Ambil data detail transaksi (child)
+                    // 1. Ambil & Hapus data detail transaksi (child 1)
                     $details = $this->detailTransaksiModel->where('idtransaksi', $transaksi->idtransaksi)->get()->getResultObject();
-
-                    // Hapus semua child
                     foreach ($details as $detail) {
                         $this->detailTransaksiModel->delete($detail->iddetailtransaksi);
                     }
 
-                    // Hapus parent (transaksi utama)
-                    $this->transaksiModel->delete($transaksi->idtransaksi);
+                    // 2. Hapus data pengajuan sertifikat (child 2)
+                    // HAPUS INI DULU SEBELUM TRANSAKSI UTAMA! 
+                    // Jika data tidak ada, query ini tidak akan error (hanya return affected rows = 0).
+                    $this->db->table('pengajuan_sertifikat')
+                             ->where('idtransaksi', $transaksi->idtransaksi)
+                             ->delete();
 
+                    // 3. Hapus parent (transaksi utama) - Lakukan paling terakhir
+                    $this->transaksiModel->delete($transaksi->idtransaksi);
+                    
                     // Cek status query di background
                     if ($this->db->transStatus() === false) {
                         throw new \Exception('Query gagal dieksekusi oleh database.');
@@ -788,7 +792,6 @@ class TransaksiController extends BaseController
             echo "Proses selesai. Berhasil: $berhasil, Gagal: $gagal.";
         }
     }
-
     public function exportExcel()
     {
         // 1. Tangkap parameter filter yang dikirim dari frontend (sama persis dengan datatables)
@@ -1040,6 +1043,4 @@ class TransaksiController extends BaseController
     ';
         return $this->emailer->send($email, $subject, $message);
     }
-
-
 }
