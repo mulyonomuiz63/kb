@@ -255,7 +255,11 @@ class TransaksiController extends BaseController
                     $nama_paket_display = !empty($s->nama_paket) ? $s->nama_paket : ($s->nama_detail ?? 'Sertifikat Fisik');
 
                     if ($s->status === 'V') {
-                        $row['DT_RowClass'] = 'bg-light-warning';
+                        // Jika statusnya V, beri warna merah muda (light danger)
+                        $row['DT_RowClass'] = 'bg-success bg-opacity-25';
+                    } elseif ($s->status !== 'S') {
+                        // Jika statusnya BUKAN S (dan otomatis bukan V karena sudah dicek di atas), beri warna kuning
+                        $row['DT_RowClass'] = 'bg-warning bg-opacity-25';
                     }
 
                     $htmlPeserta = '<div class="text-gray-800 fw-bold fs-6">' . esc($s->nama_siswa) . '</div>';
