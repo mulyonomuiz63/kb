@@ -368,6 +368,9 @@ class MidtransController extends BaseController
                 $this->db->table('pengajuan_sertifikat')
                     ->where('idtransaksi', $idtransaksi)
                     ->update(['status_pengiriman' => 'diproses']);
+
+                //untuk kirim notifikasi ke admin bahwa ada pengajuan sertifikat baru
+                send_notif('1', "Pengajuan Sertifikat Fisik Baru", "Terdapat pengajuan pencetakan sertifikat cap basah baru. Silakan cek detail dan proses pengirimannya.", base_url('sw-admin/pengajuan-sertifikat'));
             }
         }
 
