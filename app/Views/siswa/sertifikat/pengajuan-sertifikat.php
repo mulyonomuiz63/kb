@@ -7,13 +7,26 @@
 
             <!-- Banner Informasi -->
             <div class="alert alert-dismissible bg-light-primary border border-primary d-flex flex-column flex-sm-row p-5 mb-10 rounded">
-                <i class="ki-outline ki-information-5 fs-2hx text-primary me-4 mb-5 mb-sm-0 align-self-center"></i>
+                <!-- Icon disesuaikan agar posisinya tetap di atas (align-self-start) karena isi teks sekarang lebih panjang -->
+                <i class="ki-outline ki-information-5 fs-2hx text-primary me-4 mb-5 mb-sm-0 align-self-start mt-1"></i>
+
                 <div class="d-flex flex-column pe-0 pe-sm-10">
                     <h4 class="fw-bold text-primary">Informasi Pengajuan Sertifikat Fisik</h4>
-                    <span class="text-gray-800">
+                    <span class="text-gray-800 mb-3">
                         Anda dapat mengajukan pencetakan sertifikat dengan <b>Cap Basah dan Tanda Tangan Asli</b>. <br>
                         Biaya administrasi dan pengiriman adalah sebesar <span class="fw-bolder text-danger">Rp 100.000</span>. Dokumen akan dikirim ke alamat yang Anda berikan melalui kurir.
                     </span>
+
+                    <!-- Tambahan Info dan Tombol Tracking -->
+                    <div class="bg-white bg-opacity-50 rounded p-4 mt-2 border border-primary border-dashed">
+                        <span class="text-gray-700 fw-semibold d-block mb-3 fs-7">
+                            Jika status pengajuan sudah dikirim, Anda dapat mengecek perjalanan paket menggunakan Nomor Resi melalui website resmi JNE.
+                        </span>
+                        <a href="https://jne.co.id/tracking-package" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary fw-bold">
+                            <i class="ki-outline ki-truck fs-4 me-1"></i> Lacak Resi JNE
+                        </a>
+                    </div>
+
                 </div>
             </div>
 
@@ -46,37 +59,40 @@
                                 </tr>
                             </thead>
                             <tbody class="fw-semibold text-gray-600">
-                                <?php $no = 1; foreach($pengajuan as $row): ?>
+                                <?php $no = 1;
+                                foreach ($pengajuan as $row): ?>
                                     <?php
-                                        // LOGIKA STATUS PEMBAYARAN
-                                        if ($row->status == 'S') {
-                                            $statusBayar = '<span class="badge badge-light-success fw-bold px-3 py-2">Berhasil</span>';
-                                        } elseif ($row->status == 'M' || $row->status == 'P') {
-                                            $statusBayar = '<span class="badge badge-light-warning fw-bold px-3 py-2">Pending</span>';
-                                        } else {
-                                            $statusBayar = '<span class="badge badge-light-danger fw-bold px-3 py-2">Gagal</span>';
-                                        }
+                                    // LOGIKA STATUS PEMBAYARAN
+                                    if ($row->status == 'S') {
+                                        $statusBayar = '<span class="badge badge-light-success fw-bold px-3 py-2">Berhasil</span>';
+                                    } elseif ($row->status == 'M' || $row->status == 'P') {
+                                        $statusBayar = '<span class="badge badge-light-warning fw-bold px-3 py-2">Pending</span>';
+                                    } else {
+                                        $statusBayar = '<span class="badge badge-light-danger fw-bold px-3 py-2">Gagal</span>';
+                                    }
 
-                                        // LOGIKA STATUS PENGIRIMAN
-                                        if ($row->status_pengiriman == 'dikirim') {
-                                            $badgeKirim = '<span class="badge badge-light-success fw-bold px-3 py-2"><i class="ki-outline ki-delivery-time fs-6 me-1"></i> Dikirim</span>';
-                                        } elseif ($row->status_pengiriman == 'diproses') {
-                                            $badgeKirim = '<span class="badge badge-light-primary fw-bold px-3 py-2"><i class="ki-outline ki-setting-2 fs-6 me-1"></i> Diproses</span>';
-                                        } else {
-                                            $badgeKirim = '<span class="badge badge-light-secondary fw-bold px-3 py-2">Menunggu</span>';
-                                        }
+                                    // LOGIKA STATUS PENGIRIMAN
+                                    if ($row->status_pengiriman == 'dikirim') {
+                                        $badgeKirim = '<span class="badge badge-light-success fw-bold px-3 py-2"><i class="ki-outline ki-delivery-time fs-6 me-1"></i> Dikirim</span>';
+                                    } elseif ($row->status_pengiriman == 'diproses') {
+                                        $badgeKirim = '<span class="badge badge-light-primary fw-bold px-3 py-2"><i class="ki-outline ki-setting-2 fs-6 me-1"></i> Diproses</span>';
+                                    } else {
+                                        $badgeKirim = '<span class="badge badge-light-secondary fw-bold px-3 py-2">Menunggu</span>';
+                                    }
 
-                                        // TOMBOL BAYAR
-                                        $aksi = '';
-                                        if ($row->status == 'M' && !empty($row->token)) {
-                                            $aksi = '<button class="btn btn-sm btn-primary fw-bold btn-bayar" data-token="' . esc($row->token) . '"><i class="bi bi-wallet2"></i> Bayar</button>';
-                                        }
+                                    // TOMBOL BAYAR
+                                    $aksi = '';
+                                    if ($row->status == 'M' && !empty($row->token)) {
+                                        $aksi = '<button class="btn btn-sm btn-primary fw-bold btn-bayar" data-token="' . esc($row->token) . '"><i class="bi bi-wallet2"></i> Bayar</button>';
+                                    }
                                     ?>
                                     <tr>
                                         <td><span class="fw-bold text-gray-800"><?= $row->idtransaksi ?></span></td>
                                         <td><?= date('d M Y H:i', strtotime($row->created_at)) ?></td>
                                         <td><b><?= esc($row->nama_penerima) ?></b><br><span class="text-muted fs-7"><?= esc($row->no_hp) ?></span></td>
-                                        <td><div class="text-break" style="max-width:200px;"><?= esc($row->alamat_lengkap) ?> (<?= esc($row->kode_pos) ?>)</div></td>
+                                        <td>
+                                            <div class="text-break" style="max-width:200px;"><?= esc($row->alamat_lengkap) ?> (<?= esc($row->kode_pos) ?>)</div>
+                                        </td>
                                         <td><?= $statusBayar ?></td>
                                         <td><?= $badgeKirim ?></td>
                                         <td><?= !empty($row->no_resi) ? '<span class="badge badge-light fw-bold text-dark">' . esc($row->no_resi) . '</span>' : '-' ?></td>
@@ -198,7 +214,7 @@
                 error: function(xhr) {
                     btn.removeAttr("data-kt-indicator").prop("disabled", false);
                     var errMsg = "Terjadi kesalahan pada server.";
-                    if(xhr.responseJSON && xhr.responseJSON.message) errMsg = xhr.responseJSON.message;
+                    if (xhr.responseJSON && xhr.responseJSON.message) errMsg = xhr.responseJSON.message;
                     Swal.fire("Error!", errMsg, "error");
                 }
             });

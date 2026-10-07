@@ -8,10 +8,16 @@ use CodeIgniter\Database\Config;
 class PengajuanSertifikatController extends BaseController
 {
     protected $db;
+    protected $siswaModel;
+    protected $serviceEmail;
+    protected $pengajuanSertifikatModel;
 
     public function __construct()
     {
         $this->db = Config::connect();
+        $this->siswaModel = new \App\Models\SiswaModel();
+        $this->pengajuanSertifikatModel = new \App\Models\PengajuanSertifikatModel();
+        $this->serviceEmail = new \App\Libraries\Emailer();
     }
 
     // 1. Tampilkan Halaman View Admin
@@ -120,6 +126,12 @@ class PengajuanSertifikatController extends BaseController
                 throw new \Exception("Data tidak lengkap, gagal memproses.");
             }
 
+            // 1. PROTEKSI ERROR NULL: Pastikan data pengajuan benar-benar ada di database
+            $dataPengajuan = $this->pengajuanSertifikatModel->find($id_pengajuan);
+            if (!$dataPengajuan) {
+                throw new \Exception("Data pengajuan tidak ditemukan.");
+            }
+
             // Validasi: Jika status diubah jadi 'dikirim', resi wajib ada
             if ($status_pengiriman === 'dikirim' && empty(trim($no_resi))) {
                 throw new \Exception("Nomor resi wajib diisi jika status pengiriman adalah 'Dikirim'.");
@@ -135,6 +147,26 @@ class PengajuanSertifikatController extends BaseController
             $this->db->table('pengajuan_sertifikat')
                 ->where('id_pengajuan', $id_pengajuan)
                 ->update($updateData);
+
+            // 2. LOGIKA AMAN: Hanya kirim email & notif jika statusnya BENAR-BENAR "dikirim"
+            // (Mencegah email "Sertifikat Dikirim" terkirim saat admin mengubah status ke "menunggu" atau "diproses")
+            if ($status_pengiriman === 'dikirim') {
+                
+                // 3. PROTEKSI XSS (KEAMANAN): Gunakan esc() agar input resi & nama aman dari injeksi script
+                $resi_aman = esc($no_resi);
+                
+                send_notif($dataPengajuan['id_siswa'], "Sertifikat Telah Dikirim", "Sertifikat Anda telah dikirim. Nomor resi: " . $resi_aman);
+
+                $dataSiswa = $this->siswaModel->find($dataPengajuan['id_siswa']);
+                if ($dataSiswa) {
+                    $nama_aman = esc($dataSiswa['nama_siswa']);
+                    $this->serviceEmail->send(
+                        $dataSiswa['email'],
+                        "Sertifikat Telah Dikirim - KelasBrevet",
+                        "Halo <b>{$nama_aman}</b>,<br>Sertifikat Anda telah dikirim. Nomor resi: " . $resi_aman . " untuk melacak pengiriman, silakan gunakan nomor resi tersebut di https://jne.co.id/tracking-package.<br><br>Terima kasih telah menggunakan layanan kami."
+                    );
+                }
+            }
 
             return $this->response->setJSON([
                 'status'       => 'success',
