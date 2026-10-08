@@ -271,6 +271,7 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
         $routes->get('/', 'Admin\PengajuanSertifikatController::index');
         $routes->post('get-data-pengajuan', 'Admin\PengajuanSertifikatController::getDataPengajuan');
         $routes->post('update-pengiriman', 'Admin\PengajuanSertifikatController::updatePengiriman');
+        $routes->post('kirim-wa-konfirmasi', 'Admin\PengajuanSertifikatController::kirimWaKonfirmasi');
     });
     
     $routes->group('review', function ($routes) {
