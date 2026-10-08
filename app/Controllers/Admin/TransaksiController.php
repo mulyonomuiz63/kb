@@ -740,6 +740,9 @@ class TransaksiController extends BaseController
             foreach ($data as $rows) {
                 $this->detailTransaksiModel->delete($rows->iddetailtransaksi);
             }
+            $this->db->table('pengajuan_sertifikat')
+                             ->where('idtransaksi', $dataDrop->idtransaksi)
+                             ->delete();
             $this->transaksiModel->delete($dataDrop->idtransaksi);
         }
         return redirect()->to('sw-admin/transaksi')->with('success', 'Transaksi berhasil dibatalkan');
