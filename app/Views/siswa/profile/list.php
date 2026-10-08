@@ -12,8 +12,15 @@
     }
 
     @keyframes slideDown {
-        from { transform: translateY(-20px); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
+        from {
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
     }
 
     .is-invalid-field,
@@ -29,8 +36,8 @@
         opacity: 0.75;
     }
 
-    select.is-invalid-field + .select2-container--bootstrap5 .select2-selection,
-    select.is-invalid-field ~ .select2-container--bootstrap5 .select2-selection {
+    select.is-invalid-field+.select2-container--bootstrap5 .select2-selection,
+    select.is-invalid-field~.select2-container--bootstrap5 .select2-selection {
         border: 2px solid #f1416c !important;
         background-color: #fff5f8 !important;
         transition: all 0.3s ease;
@@ -56,10 +63,23 @@
     }
 
     @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        25% { transform: translateX(-5px); }
-        50% { transform: translateX(5px); }
-        75% { transform: translateX(-5px); }
+
+        0%,
+        100% {
+            transform: translateX(0);
+        }
+
+        25% {
+            transform: translateX(-5px);
+        }
+
+        50% {
+            transform: translateX(5px);
+        }
+
+        75% {
+            transform: translateX(-5px);
+        }
     }
 </style>
 <?= $this->endSection(); ?>
@@ -73,7 +93,7 @@ $checkInvalid = function ($val) use ($isStatusB) {
 };
 
 // Ambil status verifikasi dari DB, pastikan nilai default 0 jika belum ada
-$isWaVerified = isset($siswa->is_wa_verified) ? $siswa->is_wa_verified : 0; 
+$isWaVerified = isset($siswa->is_wa_verified) ? $siswa->is_wa_verified : 0;
 ?>
 
 <div class="d-flex flex-column flex-column-fluid py-3 py-lg-6 mt-8">
@@ -223,11 +243,11 @@ $isWaVerified = isset($siswa->is_wa_verified) ? $siswa->is_wa_verified : 0;
                                         <div class="col-12 col-lg-4">
                                             <label class="form-label fs-7 fw-semibold text-muted">Nomor WhatsApp</label>
                                             <div class="input-group">
-                                                <input type="number" name="hp" id="hp" 
-                                                       data-original="<?= old('hp', $siswa->hp); ?>" 
-                                                       data-verified="<?= $isWaVerified; ?>" 
-                                                       class="form-control form-control-lg form-control-solid <?= $checkInvalid(old('hp', $siswa->hp)) ?>" 
-                                                       value="<?= old('hp', $siswa->hp); ?>" required maxlength="15" placeholder="Nomor WhatsApp" />
+                                                <input type="number" name="hp" id="hp"
+                                                    data-original="<?= old('hp', $siswa->hp); ?>"
+                                                    data-verified="<?= $isWaVerified; ?>"
+                                                    class="form-control form-control-lg form-control-solid <?= $checkInvalid(old('hp', $siswa->hp)) ?>"
+                                                    value="<?= old('hp', $siswa->hp); ?>" required maxlength="15" placeholder="Nomor WhatsApp" />
                                                 <button class="btn btn-primary" type="button" id="btn-send-otp" style="display: none;" title="Kirim OTP Ke WhatsApp">
                                                     Verifikasi
                                                 </button>
@@ -286,7 +306,7 @@ $isWaVerified = isset($siswa->is_wa_verified) ? $siswa->is_wa_verified : 0;
                                         <div class="col-12 col-lg-8">
                                             <label class="form-label fs-7 fw-semibold text-muted">Alamat KTP</label>
                                             <input type="text" name="alamat_ktp" class="form-control form-control-lg form-control-solid mb-3 <?= $checkInvalid(old('alamat_ktp', $siswa->alamat_ktp)) ?>" placeholder="Alamat lengkap sesuai KTP" value="<?= old('alamat_ktp', $siswa->alamat_ktp); ?>" required />
-                                            
+
                                             <label class="form-label fs-7 fw-semibold text-muted mt-2">Alamat Domisili</label>
                                             <input type="text" name="alamat_domisili" class="form-control form-control-lg form-control-solid <?= $checkInvalid(old('alamat_domisili', $siswa->alamat_domisili)) ?>" placeholder="Alamat Domisili saat ini" value="<?= old('alamat_domisili', $siswa->alamat_domisili); ?>" required />
                                         </div>
@@ -336,7 +356,7 @@ $isWaVerified = isset($siswa->is_wa_verified) ? $siswa->is_wa_verified : 0;
                                         <label class="col-12 col-lg-4 col-form-label fw-bold fs-6 required">Kantor</label>
                                         <div class="col-12 col-lg-8">
                                             <label class="form-label fs-7 fw-semibold text-muted">Jenis Kantor</label>
-                                            <select name="kantor" id="select_kantor" class="form-select form-select-lg form-select-solid mb-3 <?= $checkInvalid(old('kantor', $siswa->kantor)) ?>" data-control="select2" required>
+                                            <select name="kantor" class="form-select form-select-lg form-select-solid mb-3 <?= $checkInvalid(old('kantor', $siswa->kantor)) ?>" data-control="select2" required>
                                                 <option value="">- Pilih Jenis Kantor -</option>
                                                 <?php $kat = old('kantor', $siswa->kantor); ?>
                                                 <option value="Firma Hukum" <?= $kat == 'Firma Hukum' ? 'selected' : '' ?>>Firma Hukum</option>
@@ -348,7 +368,7 @@ $isWaVerified = isset($siswa->is_wa_verified) ? $siswa->is_wa_verified : 0;
 
                                             <label class="form-label fs-7 fw-semibold text-muted mt-2">Nama Perusahaan / Lembaga</label>
                                             <input type="text" name="nama_kantor" class="form-control form-control-lg form-control-solid mb-3 <?= $checkInvalid(old('nama_kantor', $siswa->nama_kantor)) ?>" placeholder="Nama Perusahaan/Lembaga/Instansi" value="<?= old('nama_kantor', $siswa->nama_kantor); ?>" required />
-                                            
+
                                             <label class="form-label fs-7 fw-semibold text-muted mt-2">Alamat Kantor (Opsional)</label>
                                             <input type="text" name="alamat_kantor" class="form-control form-control-lg form-control-solid" placeholder="Alamat Perusahaan/Lembaga/Kantor (Opsional)" value="<?= old('alamat_kantor', $siswa->alamat_kantor); ?>" />
                                         </div>
@@ -376,7 +396,7 @@ $isWaVerified = isset($siswa->is_wa_verified) ? $siswa->is_wa_verified : 0;
                                                         <div class="riwayat-row mb-3">
                                                             <label class="form-label fs-7 fw-semibold text-muted">Nama Perusahaan & Periode</label>
                                                             <div class="input-group">
-                                                                <input type="text" name="riwayat_pekerjaan[]" class="form-control form-control-lg form-control-solid" value="<?= esc($riwayat) ?>" placeholder="Contoh: PT. Legalyn Indonesia (2015 - 2020)" required/>
+                                                                <input type="text" name="riwayat_pekerjaan[]" class="form-control form-control-lg form-control-solid" value="<?= esc($riwayat) ?>" placeholder="Contoh: PT. Legalyn Indonesia (2015 - 2020)" required />
                                                                 <?php if ($index > 0): ?>
                                                                     <button type="button" class="btn btn-icon btn-light-danger btn-hapus-riwayat" title="Hapus Baris"><i class="ki-outline ki-trash fs-2"></i></button>
                                                                 <?php endif; ?>
@@ -443,7 +463,7 @@ $isWaVerified = isset($siswa->is_wa_verified) ? $siswa->is_wa_verified : 0;
     }
 
     $(document).ready(function() {
-        
+
         console.log("Script berhasil dimuat!");
 
         // -------------------------------------------------------------
@@ -460,7 +480,7 @@ $isWaVerified = isset($siswa->is_wa_verified) ? $siswa->is_wa_verified : 0;
             // Reset UI State
             $('#btn-send-otp').hide();
             $('#wa-verified-badge').hide();
-            btnSubmit.prop('disabled', false); 
+            btnSubmit.prop('disabled', false);
 
             if (currentHp === '') {
                 btnSubmit.prop('disabled', true);
@@ -479,7 +499,7 @@ $isWaVerified = isset($siswa->is_wa_verified) ? $siswa->is_wa_verified : 0;
 
         $('#hp').on('input', function() {
             if (this.value.length > 15) this.value = this.value.slice(0, 15);
-            $('#otp-area').slideUp(); 
+            $('#otp-area').slideUp();
             clearInterval(timerInterval);
             checkWaStatus();
         });
@@ -496,7 +516,9 @@ $isWaVerified = isset($siswa->is_wa_verified) ? $siswa->is_wa_verified : 0;
             var btn = $(this);
             btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Loading...');
 
-            var requestData = { hp: hp };
+            var requestData = {
+                hp: hp
+            };
             requestData[csrfName] = csrfHash; // Assign CSRF secara manual untuk kompatibilitas penuh
 
             $.ajax({
@@ -506,10 +528,10 @@ $isWaVerified = isset($siswa->is_wa_verified) ? $siswa->is_wa_verified : 0;
                 dataType: 'json',
                 success: function(res) {
                     csrfHash = res.csrfHash; // Update token baru dari server
-                    
+
                     // UPDATE TOKEN CSRF PADA FORM UTAMA
                     $('input[name="' + csrfName + '"]').val(csrfHash);
-                    
+
                     if (res.status === 'success') {
                         Swal.fire({
                             icon: 'success',
@@ -545,7 +567,10 @@ $isWaVerified = isset($siswa->is_wa_verified) ? $siswa->is_wa_verified : 0;
             var btn = $(this);
             btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Cek...');
 
-            var requestData = { hp: hp, otp: otp };
+            var requestData = {
+                hp: hp,
+                otp: otp
+            };
             requestData[csrfName] = csrfHash;
 
             $.ajax({
@@ -561,13 +586,13 @@ $isWaVerified = isset($siswa->is_wa_verified) ? $siswa->is_wa_verified : 0;
 
                     if (res.status === 'success') {
                         Swal.fire('Berhasil Terverifikasi!', 'Nomor WhatsApp Anda berhasil dihubungkan.', 'success');
-                        
+
                         clearInterval(timerInterval);
                         $('#otp-area').slideUp();
-                        
+
                         $('#hp').data('original', hp).data('verified', 1);
-                        checkWaStatus(); 
-                        
+                        checkWaStatus();
+
                         btn.prop('disabled', false).html('Cek Kode');
                         $('#otp-input').val('');
                     } else {
@@ -584,9 +609,10 @@ $isWaVerified = isset($siswa->is_wa_verified) ? $siswa->is_wa_verified : 0;
 
         function startOtpTimer(duration) {
             clearInterval(timerInterval);
-            var timer = duration, minutes, seconds;
-            
-            timerInterval = setInterval(function () {
+            var timer = duration,
+                minutes, seconds;
+
+            timerInterval = setInterval(function() {
                 minutes = parseInt(timer / 60, 10);
                 seconds = parseInt(timer % 60, 10);
 
@@ -630,7 +656,7 @@ $isWaVerified = isset($siswa->is_wa_verified) ? $siswa->is_wa_verified : 0;
                     fileSubmit.disabled = true;
                 } else {
                     fileResult.innerHTML = "<span class='text-success'><i class='bi bi-check-circle-fill'></i> Siap diupload (" + fileMb.toFixed(1) + "MB)</span>";
-                    
+
                     if ($('#hp').data('verified') == 1) {
                         fileSubmit.disabled = false;
                     }
@@ -668,7 +694,9 @@ $isWaVerified = isset($siswa->is_wa_verified) ? $siswa->is_wa_verified : 0;
                     title: 'Format NIK Tidak Valid',
                     text: 'KTP/NIK Anda harus terdiri dari 16 digit angka. Silakan periksa kembali.',
                     confirmButtonText: 'Baik, Saya Perbaiki',
-                    customClass: { confirmButton: "btn btn-primary" }
+                    customClass: {
+                        confirmButton: "btn btn-primary"
+                    }
                 }).then(function() {
                     $('#nik').focus();
                 });
@@ -682,7 +710,9 @@ $isWaVerified = isset($siswa->is_wa_verified) ? $siswa->is_wa_verified : 0;
                     title: 'Oops! Data Belum Lengkap',
                     text: 'Masih ada kolom wajib (bergaris merah) yang belum Anda isi. Mohon lengkapi terlebih dahulu.',
                     confirmButtonText: 'Lengkapi Sekarang',
-                    customClass: { confirmButton: "btn btn-danger" }
+                    customClass: {
+                        confirmButton: "btn btn-danger"
+                    }
                 }).then(function() {
                     setTimeout(function() {
                         $('html, body').animate({
@@ -690,9 +720,9 @@ $isWaVerified = isset($siswa->is_wa_verified) ? $siswa->is_wa_verified : 0;
                         }, 500);
 
                         if (firstInvalidInput.hasClass('select2-hidden-accessible')) {
-                            firstInvalidInput.select2('open'); 
+                            firstInvalidInput.select2('open');
                         } else {
-                            firstInvalidInput.focus(); 
+                            firstInvalidInput.focus();
                         }
                     }, 300);
                 });
@@ -710,14 +740,14 @@ $isWaVerified = isset($siswa->is_wa_verified) ? $siswa->is_wa_verified : 0;
             e.preventDefault();
             // Strukturnya disesuaikan agar sama persis dengan yang ada di atas
             var barisBaru = '<div class="riwayat-row mb-3" style="display: none;">' +
-                                '<label class="form-label fs-7 fw-semibold text-muted">Nama Perusahaan & Periode</label>' +
-                                '<div class="input-group">' +
-                                    '<input type="text" name="riwayat_pekerjaan[]" class="form-control form-control-lg form-control-solid" placeholder="Contoh: PT Contoh (2021 - Sekarang)" required />' +
-                                    '<button type="button" class="btn btn-icon btn-light-danger btn-hapus-riwayat" title="Hapus Baris">' +
-                                        '<i class="ki-outline ki-trash fs-2"></i>' +
-                                    '</button>' +
-                                '</div>' +
-                            '</div>';
+                '<label class="form-label fs-7 fw-semibold text-muted">Nama Perusahaan & Periode</label>' +
+                '<div class="input-group">' +
+                '<input type="text" name="riwayat_pekerjaan[]" class="form-control form-control-lg form-control-solid" placeholder="Contoh: PT Contoh (2021 - Sekarang)" required />' +
+                '<button type="button" class="btn btn-icon btn-light-danger btn-hapus-riwayat" title="Hapus Baris">' +
+                '<i class="ki-outline ki-trash fs-2"></i>' +
+                '</button>' +
+                '</div>' +
+                '</div>';
             var el = $(barisBaru);
             $('#riwayat_container').append(el);
             el.slideDown('fast');
@@ -731,6 +761,16 @@ $isWaVerified = isset($siswa->is_wa_verified) ? $siswa->is_wa_verified : 0;
             });
         });
 
+    });
+    // Tambahan khusus mendeteksi kejadian select pada Select2
+    $('select').on('select2:select change', function() {
+        var val = $(this).val();
+        if (val && val.toString().trim() !== '') {
+            $(this).removeClass('is-invalid-field shake-error');
+            // Bersihkan juga class error pada container visual Select2 di sekitarnya
+            $(this).next('.select2-container').removeClass('is-invalid-field');
+            $(this).parent().find('.select2-selection').removeClass('is-invalid-field');
+        }
     });
 </script>
 <?= $this->endSection(); ?>
