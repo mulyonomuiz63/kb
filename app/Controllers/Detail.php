@@ -8,19 +8,18 @@ class Detail extends BaseController
 {
 
     protected $UjianModel;
-    
+
 
     public function __construct()
     {
         $this->UjianModel = new UjianModel();
-         
     }
 
     public function data($id_ujian)
     {
-        $data['ujian'] = $this->UjianModel->select('ujian.nama_ujian, ujian.start_ujian, ujian.nilai, ujian.kode_ujian, ujian.id_ujian, siswa.nama_siswa, kelas.nama_kelas, mapel.nama_mapel')->join('siswa','ujian.id_siswa=siswa.id_siswa')->join('kelas','ujian.kelas=kelas.id_kelas')->join('mapel','ujian.mapel=mapel.id_mapel')->where('id_ujian', decrypt_url($id_ujian))->where('nilai >=', 60)->get()->getRowObject();
-        if(!isset($data['ujian'])){
-        session()->setFlashdata('pesan', "
+        $data['ujian'] = $this->UjianModel->select('ujian.nama_ujian, ujian.start_ujian, ujian.nilai, ujian.kode_ujian, ujian.id_ujian, siswa.nama_siswa, kelas.nama_kelas, mapel.nama_mapel')->join('siswa', 'ujian.id_siswa=siswa.id_siswa')->join('kelas', 'ujian.kelas=kelas.id_kelas')->join('mapel', 'ujian.mapel=mapel.id_mapel')->where('id_ujian', decrypt_url($id_ujian))->where('nilai >=', 60)->get()->getRowObject();
+        if (empty($data['ujian'])) {
+            session()->setFlashdata('pesan', "
                         swal({
                             title: 'Info!',
                             text: 'Data yang anda masukan tidak ditemukan...',
@@ -29,7 +28,7 @@ class Detail extends BaseController
                             });
                         ");
             return redirect()->to('Auth');
-        }else{
+        } else {
             session()->setFlashdata('pesan', "
                         swal({
                             title: 'Informasi',
@@ -41,13 +40,17 @@ class Detail extends BaseController
             return view('detail', $data);
         }
     }
-    
-     public function data_ab($id_siswa)
+
+    public function data_ab($id_siswa)
     {
-        $data['hasil'] = $this->UjianModel->getByIdsiswa(decrypt_url($id_siswa));
-        $data['data'] = $this->UjianModel->getByIdsiswaDesc(decrypt_url($id_siswa));
-             
-        if(!isset($data['hasil'])){
+        // Mendekripsi ID cukup 1 kali untuk efisiensi
+        $id_decrypted = decrypt_url($id_siswa);
+
+        $data['hasil'] = $this->UjianModel->getByIdsiswa($id_decrypted);
+        $data['data'] = $this->UjianModel->getByIdsiswaDesc($id_decrypted);
+
+        // PERBAIKAN: Gunakan empty() untuk mengecek apakah data kosong
+        if (empty($data['hasil'])) {
             session()->setFlashdata('pesan', "
                         swal({
                             title: 'Info!',
@@ -57,7 +60,7 @@ class Detail extends BaseController
                             });
                         ");
             return redirect()->to('Auth');
-        }else{
+        } else {
             session()->setFlashdata('pesan', "
                         swal({
                             title: 'Informasi',
@@ -68,5 +71,5 @@ class Detail extends BaseController
                         ");
             return view('detail_ab', $data);
         }
-    }    
+    }
 }
