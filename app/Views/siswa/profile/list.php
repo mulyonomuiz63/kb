@@ -605,10 +605,12 @@ $isWaVerified = isset($siswa->is_wa_verified) ? $siswa->is_wa_verified : 0;
         }
 
         // -------------------------------------------------------------
-        // VALIDASI UI LAMA (Bawaan)
+        // VALIDASI UI LAMA (Bawaan) - SUDAH DIPERBAIKI UNTUK SELECT2
         // -------------------------------------------------------------
-        $('input[required], select[required]').on('input change', function() {
-            if ($(this).val().trim() !== '') {
+        $('input[required], select[required]').on('input change select2:select', function() {
+            var val = $(this).val();
+            // Diubah menjadi aman dari null, serta ditambahkan trigger select2:select
+            if (val !== null && val.toString().trim() !== '') {
                 $(this).removeClass('is-invalid-field shake-error');
             }
         });
@@ -641,7 +643,9 @@ $isWaVerified = isset($siswa->is_wa_verified) ? $siswa->is_wa_verified : 0;
             var firstInvalidInput = null;
 
             $(this).find('input[required], select[required]').each(function() {
-                if ($(this).val() === null || $(this).val().trim() === '') {
+                var val = $(this).val();
+                // Diubah menjadi aman dari null saat pengecekan awal saat submit form
+                if (val === null || val.toString().trim() === '') {
                     isValid = false;
                     $(this).addClass('is-invalid-field shake-error');
                     if (firstInvalidInput === null) {
