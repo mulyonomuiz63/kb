@@ -54,11 +54,12 @@
        UPGRADE: RESPONSIVE MOBILE TABLE (Card Layout)
        ======================================================= */
     @media (max-width: 767.98px) {
+
         /* Hilangkan Header Tabel Default */
         #kt_datatable_sertifikat thead {
             display: none;
         }
-        
+
         /* Ubah baris (tr) menjadi bentuk Card dengan padding lebih luas */
         #kt_datatable_sertifikat tbody tr {
             display: flex;
@@ -66,8 +67,9 @@
             border: 1px solid #EFF2F5;
             border-radius: 12px;
             margin-bottom: 1.5rem;
-            padding: 1.25rem; /* Padding card diperbesar agar tidak mepet */
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            padding: 1.25rem;
+            /* Padding card diperbesar agar tidak mepet */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
         }
 
         /* Atur cell (td) agar flex memanjang dengan padding lebih lega */
@@ -75,7 +77,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem 0 !important; /* Jarak antar baris diperbesar */
+            padding: 1rem 0 !important;
+            /* Jarak antar baris diperbesar */
             border-bottom: 1px dashed #EFF2F5 !important;
             border-top: none !important;
         }
@@ -88,7 +91,8 @@
             margin-top: 1rem;
             gap: 12px;
         }
-        #kt_datatable_sertifikat tbody td:last-child > * {
+
+        #kt_datatable_sertifikat tbody td:last-child>* {
             width: 100%;
             display: block;
         }
@@ -98,33 +102,37 @@
             content: attr(data-label);
             font-weight: 600;
             color: #7E8299;
-            padding-right: 1.5rem; /* Jarak label ke isi diperbesar */
+            padding-right: 1.5rem;
+            /* Jarak label ke isi diperbesar */
             text-align: left;
         }
 
         /* Tampilan khusus untuk kolom Judul Materi agar icon & text sejajar */
         #kt_datatable_sertifikat tbody td[data-label="Materi Pelatihan"] {
             justify-content: flex-start;
-            flex-direction: row; /* Dibuat ke samping (sejajar) */
+            flex-direction: row;
+            /* Dibuat ke samping (sejajar) */
             align-items: center;
             background: #F5F8FA;
-            padding: 1.25rem !important; /* Kotak biru padding diperbesar */
+            padding: 1.25rem !important;
+            /* Kotak biru padding diperbesar */
             border-radius: 10px;
             margin-bottom: 0.75rem;
             border-bottom: none !important;
         }
-        
+
         /* Sembunyikan label di Judul dan Tombol karena sudah jelas */
         #kt_datatable_sertifikat tbody td[data-label="Materi Pelatihan"]::before,
         #kt_datatable_sertifikat tbody td[data-label="Opsi Sertifikat"]::before {
             display: none;
         }
-        
+
         /* Merapikan text align konten di mode mobile */
-        #kt_datatable_sertifikat tbody td > div {
+        #kt_datatable_sertifikat tbody td>div {
             text-align: right;
         }
-        #kt_datatable_sertifikat tbody td[data-label="Materi Pelatihan"] > div {
+
+        #kt_datatable_sertifikat tbody td[data-label="Materi Pelatihan"]>div {
             text-align: left;
         }
     }
@@ -151,19 +159,20 @@
                     </div>
                     <div class="card-toolbar m-0 d-flex flex-column flex-md-row gap-2 w-100 w-md-auto ms-md-auto">
                         <?php
-                        $idsiswa = session()->get('id');$total_materi_wajib = 8;
-                        $cekReviewSiswa =$db->query("
+                        $idsiswa = session()->get('id');
+                        $total_materi_wajib = 8;
+                        $cekReviewSiswa = $db->query("
                             SELECT COUNT(DISTINCT kode_ujian) as jumlah_direview 
                             FROM review_ujian 
                             WHERE id_siswa = '$idsiswa'
                         ")->getRow();
 
-                        $jumlah_sudah_review =$cekReviewSiswa->jumlah_direview;
+                        $jumlah_sudah_review = $cekReviewSiswa->jumlah_direview;
 
                         // Tentukan status apakah bisa download atau tidak
-                        $bisa_download = ($jumlah_sudah_review >=$total_materi_wajib);
+                        $bisa_download = ($jumlah_sudah_review >= $total_materi_wajib);
                         ?>
-                        <?php if ($total != 0 && $totalSertifikat >=$total): ?>
+                        <?php if ($total != 0 && $totalSertifikat >= $total): ?>
                             <?php if ($bisa_download): ?>
                                 <!-- Tombol Aktif (Jika 8 materi sudah direview) -->
                                 <a href="<?= base_url('sw-siswa/sertifikat/pengajuan-sertifikat') ?>" class="btn btn-light-info fw-bold w-100 w-md-auto px-4">
@@ -187,6 +196,10 @@
                                     <i class="bi bi-lock-fill fs-4 me-2"></i> Sertifikat (Terkunci)
                                 </a>
                             <?php endif; ?>
+                        <?php else: ?>
+                            <a href="javascript:void(0)" id="btn-alert-sertifikat" class="btn btn-secondary fw-bold w-100 w-md-auto px-4">
+                                <i class="bi bi-patch-check-fill fs-4 me-2"></i> Unduh Sertifikat Brevet AB
+                            </a>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -204,7 +217,7 @@
                                 </tr>
                             </thead>
                             <tbody class="fw-semibold text-gray-600">
-                                <?php foreach ($ujian as$u) : ?>
+                                <?php foreach ($ujian as $u) : ?>
                                     <tr>
                                         <!-- UPGRADE: Tambahan Atribut 'data-label' untuk mode Mobile Layout -->
                                         <td data-label="Materi Pelatihan">
@@ -247,7 +260,7 @@
                                         <td class="text-md-center" data-label="Opsi Sertifikat">
                                             <?php
                                             $idsiswa = session()->get('id');
-                                            $ratingData =$db->query("SELECT AVG(rating) as avg_rating FROM review_ujian WHERE kode_ujian = '$u->kode_ujian' and id_siswa= '$idsiswa'")->getRow();
+                                            $ratingData = $db->query("SELECT AVG(rating) as avg_rating FROM review_ujian WHERE kode_ujian = '$u->kode_ujian' and id_siswa= '$idsiswa'")->getRow();
                                             ?>
 
                                             <?php if (empty($ratingData->avg_rating)): ?>
@@ -259,13 +272,13 @@
                                                     <i class="bi bi-star-fill fs-7 me-2"></i> Beri Feedback
                                                 </button>
                                             <?php else: ?>
-                                                <?php if ($u->nilai >= 60 &&$u->status === 'S'): ?>
+                                                <?php if ($u->nilai >= 60 && $u->status === 'S'): ?>
                                                     <button class="btn btn-icon btn-sm btn-light-primary btn-active-primary shadow-sm sertifikat_cetak w-100 w-md-auto"
                                                         data-bs-toggle="modal"
                                                         data-bs-target="#sertifikat_cetak_modal"
                                                         data-bs-toggle="tooltip" title="Lihat & Unduh Sertifikat"
                                                         data-sertifikat="<?= base_url("sw-siswa/sertifikat/lihat-sertifikat/" . encrypt_url($u->kode_ujian) . "/" . encrypt_url($u->id_ujian)) ?>">
-                                                        <i class="bi bi-file-earmark-pdf fs-3"></i> 
+                                                        <i class="bi bi-file-earmark-pdf fs-3"></i>
                                                         <span class="d-inline-block d-md-none ms-2 fw-bold">Lihat Dokumen</span>
                                                     </button>
                                                 <?php elseif ($u->status === 'T'): ?>
@@ -380,7 +393,7 @@
         })
 
         $('.sertifikat_cetak, .sertifikat_all_cetak').off('click').on('click', function() {
-            const url = $(this).data('sertifikat') ||$(this).data('sertifikat_all');
+            const url = $(this).data('sertifikat') || $(this).data('sertifikat_all');
             if (!url) return;
 
             // 1. Persiapan Tampilan
@@ -432,18 +445,21 @@
         };
 
         $('#ratingModal').on('show.bs.modal', function(event) {
-            const button = $(event.relatedTarget);$('#kode_ujian').val(button.data('id'));
+            const button = $(event.relatedTarget);
+            $('#kode_ujian').val(button.data('id'));
             $('#idsiswa').val('<?= session()->get('id') ?>');
             $('#ratingModalLabel').text(button.data('nama'));
 
             // Reset
-            $('.star-rating .bi-star-fill').removeClass('active hover');$('#ratingValue').val('');
+            $('.star-rating .bi-star-fill').removeClass('active hover');
+            $('#ratingValue').val('');
             $('#ratingDesc').text('Pilih Bintang').removeClass('text-success').addClass('text-warning');
         });
 
         $('.star-rating .bi-star-fill').on('mouseenter', function() {
-            const val = $(this).data('value');$('.star-rating .bi-star-fill').each(function() {
-                $(this).toggleClass('hover',$(this).data('value') <= val);
+            const val = $(this).data('value');
+            $('.star-rating .bi-star-fill').each(function() {
+                $(this).toggleClass('hover', $(this).data('value') <= val);
             });
             $('#ratingDesc').text(starDescriptions[val]);
         }).on('mouseleave', function() {
@@ -453,9 +469,10 @@
         });
 
         $('.star-rating .bi-star-fill').on('click', function() {
-            const val = $(this).data('value');$('#ratingValue').val(val);
+            const val = $(this).data('value');
+            $('#ratingValue').val(val);
             $('.star-rating .bi-star-fill').each(function() {
-                $(this).toggleClass('active',$(this).data('value') <= val);
+                $(this).toggleClass('active', $(this).data('value') <= val);
             });
             $('#ratingDesc').text(starDescriptions[val]).addClass('text-success').removeClass('text-warning');
         });
@@ -488,6 +505,19 @@
                 }
             });
         }
+    });
+    $(document).ready(function() {
+        $('#btn-alert-sertifikat').on('click', function(e) {
+            e.preventDefault(); // Mencegah fungsi bawaan link
+
+            let pesan = 'Sertifikat Brevet baru bisa diunduh atau dicetak apabila 8 materi ujian telah dikerjakan dan dinyatakan lulus semua.';
+
+            Swal.fire(
+                'Perhatian!',
+                pesan,
+                'warning'
+            );
+        });
     });
 </script>
 <?= $this->endSection(); ?>
