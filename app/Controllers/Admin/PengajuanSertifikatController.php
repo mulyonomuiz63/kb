@@ -182,4 +182,70 @@ class PengajuanSertifikatController extends BaseController
             ]);
         }
     }
+    // ==========================================
+    // FUNGSI BARU: KIRIM WA KONFIRMASI SERTIFIKAT
+    // ==========================================
+    public function kirimWaKonfirmasi()
+    {
+        // Cegah akses selain AJAX
+        if (!$this->request->isAJAX()) {
+            return redirect()->to('/');
+        }
+
+        try {
+            $destinationWa = $this->request->getPost('wa_no_hp');
+            $paramNama     = $this->request->getPost('wa_nama');
+
+            if (empty($destinationWa)) {
+                throw new \Exception("Nomor WhatsApp tidak tersedia.");
+            }
+
+            // 1. Deteksi Environment
+            $is_production = false;
+            if (isset($_SERVER['CI_ENVIRONMENT']) && $_SERVER['CI_ENVIRONMENT'] === 'production') {
+                $is_production = true;
+            } elseif (defined('ENVIRONMENT') && ENVIRONMENT === 'production') {
+                $is_production = true;
+            }
+
+            // 2. Siapkan data berdasarkan Environment
+            if ($is_production) {
+                // MODE WABA OFFICIAL: Menggunakan Template
+                $data_template = [
+                    "template_name"     => "konfirmasi_pengajuan_sertifikat", // Sesuai perintah
+                    "template_language" => "id",
+                    "parameter"         => [
+                        [
+                            "name" => $paramNama // Hanya mengirimkan parameter name
+                        ]
+                    ],
+                    "apps_source"       => "kelasbrevet"
+                ];
+
+                $kirim = kirim_wa($destinationWa, '', $data_template);
+            } else {
+                // MODE UNOFFICIAL (DEVELOPMENT): Menggunakan Teks Manual
+                $pesan = "Halo Kak *$paramNama*,\n\nKami ingin mengonfirmasi terkait pengajuan sertifikat fisik Brevet A&B *(Cap Basah)*. Untuk melanjutkan proses ini, silakan menyelesaikan pembayaran terlebih dahulu. Setelah pembayaran terkonfirmasi, sertifikat akan segera kami proses dan kirimkan. Terima kasih.";
+                $kirim = kirim_wa($destinationWa, $pesan, []);
+            }
+
+            // 3. Evaluasi Response API WA
+            if (isset($kirim['status']) && ($kirim['status'] == '200' || $kirim['status'] === true)) {
+                return $this->response->setJSON([
+                    'status'       => 'success',
+                    'message'      => 'Pesan WhatsApp berhasil dikirim!',
+                    csrf_token()   => csrf_hash()
+                ]);
+            } else {
+                throw new \Exception("Gagal mengirim WhatsApp: " . ($kirim['message'] ?? 'Kesalahan API Watzap'));
+            }
+
+        } catch (\Exception $e) {
+            return $this->response->setStatusCode(500)->setJSON([
+                'status'       => 'error',
+                'message'      => $e->getMessage(),
+                csrf_token()   => csrf_hash()
+            ]);
+        }
+    }
 }
