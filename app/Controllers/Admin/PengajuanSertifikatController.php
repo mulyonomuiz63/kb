@@ -42,8 +42,9 @@ class PengajuanSertifikatController extends BaseController
 
         try {
             $builder = $this->db->table('pengajuan_sertifikat a')
-                ->select('a.*, b.status as status_bayar')
-                ->join('transaksi b', 'a.idtransaksi = b.idtransaksi', 'left');
+                ->select('a.*, b.status as status_bayar, s.nama_siswa')
+                ->join('transaksi b', 'a.idtransaksi = b.idtransaksi', 'left')
+                ->join('siswa s', 'a.id_siswa = s.id_siswa', 'left');
 
             // Fitur Pencarian (Search)
             $searchValue = $this->request->getPost('search')['value'] ?? '';
@@ -82,6 +83,7 @@ class PengajuanSertifikatController extends BaseController
                     "id_pengajuan"      => $row->id_pengajuan, // Primary Key
                     "idtransaksi"       => $row->idtransaksi,
                     "tanggal_pengajuan" => date('d M Y H:i', strtotime($row->created_at)),
+                    "nama_siswa"     => esc($row->nama_siswa),
                     "nama_penerima"     => esc($row->nama_penerima),
                     "no_hp"             => esc($row->no_hp),
                     "alamat_lengkap"    => esc($row->alamat_lengkap),

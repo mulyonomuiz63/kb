@@ -26,6 +26,7 @@
                                 <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
                                     <th class="w-10px pe-2">No</th>
                                     <th class="min-w-100px">Order ID & Tgl</th>
+                                    <th class="min-w-200px">Nama Peserta</th>
                                     <th class="min-w-150px">Data Penerima</th>
                                     <th class="min-w-200px">Alamat Pengiriman</th>
                                     <th class="min-w-100px">Status Bayar</th>
@@ -198,6 +199,14 @@
                     }
                 },
                 { 
+                    data: null, 
+                    render: function(data, type, row) {
+                        return `
+                            <span class="fw-bold text-gray-800 d-block">${row.nama_siswa}</span>
+                        `;
+                    }
+                },
+                { 
                     data: null,
                     render: function(data, type, row) {
                         // UPGRADE: Nomor HP Jadi Tombol Jika Status Menunggu
@@ -205,7 +214,7 @@
                         
                         if(row.status_pengiriman === 'menunggu') {
                             contactHtml = `
-                                <a href="javascript:void(0)" class="btn btn-sm btn-light-success py-1 px-2 mt-1 fs-8 btn-wa-konfirmasi" data-nama="${row.nama_penerima}" data-hp="${row.no_hp}">
+                                <a href="javascript:void(0)" class="btn btn-sm btn-light-success py-1 px-2 mt-1 fs-8 btn-wa-konfirmasi" data-nama="${row.nama_siswa}" data-hp="${row.no_hp}">
                                     <i class="ki-duotone ki-whatsapp fs-6 text-success"><span class="path1"></span><span class="path2"></span></i> Kirim Info WA
                                 </a>
                             `;
