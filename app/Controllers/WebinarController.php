@@ -278,6 +278,7 @@ class WebinarController extends BaseController
                 'date_created'   => time(),
                 'avatar'         => 'default.jpg',
                 'hp'             => $hp,
+                'is_wa_verified' => 1
             );
 
             $this->siswaModel->insert($data_siswa);
