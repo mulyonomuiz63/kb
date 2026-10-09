@@ -561,19 +561,37 @@ function renderDetailRow($label, $id, $col = 6)
                     render: d => `<span class="text-gray-800 fw-bold">${d}</span>`
                 },
                 {
-                    data: 'email'
+                    data: 'email',
+                    render: function(data, type, row) {
+                        if (!data) return '<span class="text-muted">-</span>';
+                        
+                        // Logika Verifikasi Email berdasarkan is_active
+                        let verifyBadge = row.is_active == 1 
+                            ? '<span class="badge badge-light-success px-2 py-1 ms-2 fs-9" title="Email Terverifikasi"><i class="fas fa-check-circle text-success fs-9 me-1"></i>Verif</span>'
+                            : '<span class="badge badge-light-danger px-2 py-1 ms-2 fs-9" title="Email Belum Terverifikasi"><i class="fas fa-times-circle text-danger fs-9 me-1"></i>Belum Verif</span>';
+
+                        return `<div class="d-flex align-items-center text-gray-800">${data} ${verifyBadge}</div>`;
+                    }
                 },
                 {
                     data: 'hp',
-                    render: function(data, type, row) { // Tambahkan parameter 'row' di sini
+                    render: function(data, type, row) { 
                         if (!data || data === '0' || data === '') return '<span class="text-muted">-</span>';
                         let cleanNumber = data.replace(/[^0-9]/g, '');
                         if (cleanNumber.startsWith('0')) cleanNumber = '62' + cleanNumber.slice(1);
 
-                        // Ubah menjadi link dengan class 'btn-kirim-promo' dan simpan data ke attribute
-                        return `<a href="javascript:void(0);" class="btn-kirim-promo" data-hp="${cleanNumber}" data-nama="${row.nama_siswa_wa}" style="text-decoration: none;" title="Kirim Promo WA">
-                            <i class="fab fa-whatsapp fs-3" style="color: #25D366;"></i> ${data}
-                        </a>`;
+                        // Logika Verifikasi WhatsApp berdasarkan is_wa_verified
+                        let waVerifyBadge = row.is_wa_verified == 1 
+                            ? '<span class="badge badge-light-success px-2 py-1 ms-2 fs-9" title="WhatsApp Terverifikasi"><i class="fas fa-check-circle text-success fs-9 me-1"></i>Verif</span>'
+                            : '<span class="badge badge-light-warning px-2 py-1 ms-2 fs-9" title="WhatsApp Belum Terverifikasi"><i class="fas fa-exclamation-triangle text-warning fs-9 me-1"></i>Belum Verif</span>';
+
+                        // Diubah dengan Flexbox agar icon WA, nomor, dan badge sejajar proporsional
+                        return `<div class="d-flex align-items-center">
+                                    <a href="javascript:void(0);" class="btn-kirim-promo d-flex align-items-center text-gray-800 text-hover-primary" data-hp="${cleanNumber}" data-nama="${row.nama_siswa_wa}" style="text-decoration: none;" title="Kirim Promo WA">
+                                        <i class="fab fa-whatsapp fs-3 me-2" style="color: #25D366;"></i> ${data}
+                                    </a>
+                                    ${waVerifyBadge}
+                                </div>`;
                     }
                 },
                 {

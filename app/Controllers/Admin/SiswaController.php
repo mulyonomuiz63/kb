@@ -193,6 +193,7 @@ class SiswaController extends BaseController
                 "hp"              => $s->hp,
                 "date_created"    => date('d-m-Y', $s->date_created),
                 "is_active"       => $s->is_active,
+                "is_wa_verified"  => $s->is_wa_verified ?? 0, // TAMBAHAN: Untuk mengecek verifikasi WA
                 "stats"           => $totalLulus . '/' . $totalSertifikats,
                 "totalUjian"      => $totalSertifikats,
                 "is_sedang_ujian" => $isSedangUjian ? 1 : 0,
