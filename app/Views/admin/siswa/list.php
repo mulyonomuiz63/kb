@@ -552,6 +552,18 @@ function renderDetailRow($label, $id, $col = 6)
                     return json.data;
                 },
             },
+            // ======== TAMBAHKAN BLOK createdRow DI SINI ========
+            createdRow: function(row, data, dataIndex) {
+                // Jika statusnya B (Belum lengkap), warnai baris tabel
+                if (data.status === 'B') {
+                    // Gunakan bg-light-warning agar warna background kekuningan (soft)
+                    $(row).addClass('bg-light-warning');
+                    
+                    // Opsional: Jika ingin memberi tooltip penjelasan kenapa warnanya kuning saat di hover
+                    $(row).attr('title', 'Data siswa ini belum lengkap (Status: B)');$(row).attr('data-bs-toggle', 'tooltip');
+                }
+            },
+            // ====================================================
             columns: [{
                     data: 'no_induk_siswa',
                     className: 'text-gray-800 fw-bold'
