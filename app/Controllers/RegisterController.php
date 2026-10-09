@@ -150,6 +150,7 @@ class RegisterController extends BaseController
             'date_created'   => time(),
             'avatar'         => 'default.jpg',
             'hp'             => $this->request->getPost('hp'),
+            'is_wa_verified' => 1
         );
     
         $this->siswaModel->insert($data_siswa);
@@ -278,6 +279,7 @@ class RegisterController extends BaseController
             'date_created'   => time(),
             'avatar'         => 'default.jpg',
             'hp'             => $this->request->getPost('hp'),
+            'is_wa_verified' => 1
         );
     
         $this->siswaModel->insert($data_siswa);
