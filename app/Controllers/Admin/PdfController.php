@@ -96,8 +96,38 @@ class PdfController extends BaseController
         // Format TTL (Tempat, Tanggal Lahir)
         $ttl = $tempatLahir . ', ' . $tglLahir;
 
-        // Gabungkan Pendidikan dan Tahun Lulus sesuai format gambar
-        $pendidikanDanTahun = $pendidikan . ' (' . $tahunLulus . '), ' . $jurusan;
+        // =====================================================================
+        // UPGRADE: Gabungkan Pendidikan Dasar dan Pendidikan Terakhir
+        // =====================================================================
+        $listPendidikan = [];
+
+        // 1. Proses data JSON riwayat pendidikan dasar (SD, SMP, SMA)
+        if (!empty($peserta->riwayat_pendidikan_dasar)) {
+            $riwayatPendidikanDasar = json_decode($peserta->riwayat_pendidikan_dasar, true);
+            
+            if (is_array($riwayatPendidikanDasar) && !empty($riwayatPendidikanDasar)) {
+                foreach ($riwayatPendidikanDasar as $edu) {
+                    $tingkat = strtoupper($edu['tingkat'] ?? '');
+                    // Asumsi key untuk tahun lulus di JSON adalah 'lulus' berdasarkan awalan di gambar 1
+                    $tahun   = $edu['lulus'] ?? ''; 
+                    $sekolah = strtoupper($edu['sekolah'] ?? '');
+                    
+                    if ($tingkat !== '') {
+                        $listPendidikan[] = $tingkat . ' (' . $tahun . ') ' . $sekolah;
+                    }
+                }
+            }
+        }
+
+        // 2. Tambahkan Pendidikan Terakhir (Misal: D4, S1, dsb) di paling bawah
+        // Sesuai gambar 2: S1 (2022) ILMU HUKUM
+        if ($pendidikan !== '-' || $jurusan !== '-') {
+            $listPendidikan[] = $pendidikan . ' (' . $tahunLulus . ') ' . $jurusan;
+        }
+
+        // 3. Gabungkan seluruh list pendidikan dengan tag <br> agar turun ke bawah (multiline)
+        $pendidikanDanTahun = !empty($listPendidikan) ? implode('<br>', $listPendidikan) : '-';
+        // =====================================================================
 
         // Tanggal Download Hari Ini (Format: DD MM YYYY)
         date_default_timezone_set('Asia/Jakarta');
