@@ -305,6 +305,20 @@ class IKHController extends BaseController
                     'Pengajuan IKH siap diperiksa',
                     base_url('sw-admin/ikh')
                 );
+                $data_template = [
+                        "template_name"     => "notif_ikh_peserta",
+                        "template_language" => "id",
+                        "parameter"         => [
+                            [
+                                // Pastikan kata "keterangan" ini sama dengan nama variabel di template Watzap
+                                "nama_admin" => 'Vernanda',
+                                "nama_peserta" => $data['nama_lengkap']
+                            ]
+                        ],
+                        "apps_source"       => "kelasbrevet"
+                    ];
+                    // Panggil helper kirim_wa (param ke-2 kosong, param ke-3 isi template)
+                    kirim_wa('081278437646', '', $data_template);
             }else{
                 $isComplete = false;
             }
