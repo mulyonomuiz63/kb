@@ -170,7 +170,7 @@ class SiswaController extends BaseController
         $postData = $request->getPost();
 
         $column_order  = ['no_induk_siswa', 'nama_siswa', 'email', 'hp', 'date_created', 'is_active'];
-        $column_search = ['nama_siswa', 'no_induk_siswa', 'email'];
+        $column_search = ['nama_siswa', 'no_induk_siswa', 'email', 'hp'];
         $order         = ['id_siswa' => 'DESC'];
 
         $list = $this->siswaModel->get_datatables($column_order, $column_search, $order);
