@@ -277,6 +277,12 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
     $routes->group('review', function ($routes) {
         $routes->get('', 'Admin\ReviewController::index');
     });
+    $routes->group('materi', function($routes) {
+        $routes->get('migration', 'Admin\MateriController::list');
+        $routes->get('get-data-transaksi', 'Admin\MateriController::getDataTransaksi');
+        $routes->post('migrasi-single', 'Admin\MateriController::migrasiSingle');
+        $routes->post('migrasi-batch', 'Admin\MateriController::migrasiBatch');
+    });
 
     $routes->group('log-email', function ($routes) {
         $routes->get('', 'Admin\LogEmailController::index');

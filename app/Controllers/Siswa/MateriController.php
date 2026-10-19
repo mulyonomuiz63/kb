@@ -14,6 +14,7 @@ class MateriController extends BaseController
     protected $fileModel;
     protected $chatMateriModel;
     protected $siswaModel;
+    protected $mapelSiswaModel;
 
     public function __construct()
     {
@@ -25,6 +26,7 @@ class MateriController extends BaseController
         $this->fileModel      = new \App\Models\FileModel();
         $this->chatMateriModel = new \App\Models\ChatMateriModel();
         $this->siswaModel     = new \App\Models\SiswaModel();
+        $this->mapelSiswaModel = new \App\Models\MapelSiswaModel();
     }
     public function index()
     {
@@ -39,12 +41,9 @@ class MateriController extends BaseController
         ];
 
         // 1. Ambil semua idmapel milik siswa dalam satu query
-        $siswa = $this->transaksiModel
-            ->select('detail_transaksi.idmapel')
-            ->join('detail_transaksi', 'transaksi.idtransaksi = detail_transaksi.idtransaksi')
-            ->where('transaksi.status', 'S')
+        $siswa = $this->mapelSiswaModel
+            ->select('idmapel')
             ->where('idsiswa', $userId)
-            ->groupBy('detail_transaksi.idmapel')
             ->get()
             ->getResultObject();
 

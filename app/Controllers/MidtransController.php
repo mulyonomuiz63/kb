@@ -233,50 +233,67 @@ class MidtransController extends BaseController
 
     private function approveOtomatis($idtransaksi)
     {
+        // Hapus groupBy agar SEMUA baris di detail_transaksi terbaca
         $datatransaksi = $this->transaksiModel
             ->join('detail_transaksi', 'detail_transaksi.idtransaksi=transaksi.idtransaksi')
             ->where('transaksi.idtransaksi', $idtransaksi)
-            ->groupBy('detail_transaksi.idpaket')
             ->get()->getResultObject();
 
+        // Buat array untuk menandai idpaket mana saja yang sudah diproses ujiannya
+        $paket_diproses = [];
+
         foreach ($datatransaksi as $rowst) {
-            // Logika pengecekan status sebelum diproses
             if ($rowst->status == 'S') {
                 $idsiswa = $rowst->idsiswa;
 
-                // Tambah Mapel Siswa
-                if ($rowst->idmapel != '0') {
-                    $data_mapel_siswa = [
-                        'idmapel' => $rowst->idmapel,
-                        'idsiswa' => $rowst->idsiswa
-                    ];
-                    $this->mapelSiswaModel->save($data_mapel_siswa);
+                // 1. Tambah Mapel Siswa (Sekarang semua mapel akan diproses karena tidak di-group)
+                if ($rowst->idmapel != '0' && !empty($rowst->idmapel)) {
+                    // (Opsional) Cek dulu agar tidak terjadi duplikat mapel di database
+                    $cek_mapel = $this->mapelSiswaModel
+                        ->where('idsiswa', $idsiswa)
+                        ->where('idmapel', $rowst->idmapel)
+                        ->first();
+
+                    if (!$cek_mapel) {
+                        $data_mapel_siswa = [
+                            'idmapel' => $rowst->idmapel,
+                            'idsiswa' => $idsiswa
+                        ];
+                        $this->mapelSiswaModel->save($data_mapel_siswa);
+                    }
                 }
 
-                // Ambil Data Paket & Master Ujian
-                $datapaket = $this->detailPaketModel
-                    ->join('ujian_master', 'detail_paket.id_ujian=ujian_master.id_ujian')
-                    ->where('idpaket', $rowst->idpaket)
-                    ->groupBy('detail_paket.id_ujian')
-                    ->get()->getResultObject();
+                // 2. Ambil Data Paket & Master Ujian 
+                // Cek apakah idpaket belum ada di array $paket_diproses
+                if ($rowst->idpaket != '0' && !empty($rowst->idpaket) && !in_array($rowst->idpaket, $paket_diproses)) {
 
-                foreach ($datapaket as $rowsp) {
-                    // Menambah ujian ke siswa
-                    $data_ujian = [
-                        'id_siswa'     => $rowst->idsiswa,
-                        'kode_ujian'   => $rowsp->kode_ujian,
-                        'nama_ujian'   => $rowsp->nama_ujian,
-                        'guru'         => $rowsp->guru,
-                        'kelas'        => $rowsp->kelas,
-                        'mapel'        => $rowsp->mapel,
-                        'waktu_per_soal' => $rowsp->waktu_per_soal,
-                        'date_created' => time(),
-                        'kuota'        => $rowsp->kuota,
-                        'kuota_master' => $rowsp->kuota,
-                        'review'       => $rowsp->review,
-                    ];
-                    $this->ujianModel->save($data_ujian);
-                    $this->ujianSiswaModel->where('ujian', $rowsp->kode_ujian)->where('siswa', $idsiswa)->delete();
+                    // Masukkan idpaket ke array agar di perulangan selanjutnya tidak diproses lagi
+                    $paket_diproses[] = $rowst->idpaket;
+
+                    $datapaket = $this->detailPaketModel
+                        ->join('ujian_master', 'detail_paket.id_ujian=ujian_master.id_ujian')
+                        ->where('idpaket', $rowst->idpaket)
+                        ->groupBy('detail_paket.id_ujian')
+                        ->get()->getResultObject();
+
+                    foreach ($datapaket as $rowsp) {
+                        // Menambah ujian ke siswa
+                        $data_ujian = [
+                            'id_siswa'       => $idsiswa,
+                            'kode_ujian'     => $rowsp->kode_ujian,
+                            'nama_ujian'     => $rowsp->nama_ujian,
+                            'guru'           => $rowsp->guru,
+                            'kelas'          => $rowsp->kelas,
+                            'mapel'          => $rowsp->mapel,
+                            'waktu_per_soal' => $rowsp->waktu_per_soal,
+                            'date_created'   => time(),
+                            'kuota'          => $rowsp->kuota,
+                            'kuota_master'   => $rowsp->kuota,
+                            'review'         => $rowsp->review,
+                        ];
+                        $this->ujianModel->save($data_ujian);
+                        $this->ujianSiswaModel->where('ujian', $rowsp->kode_ujian)->where('siswa', $idsiswa)->delete();
+                    }
                 }
             }
         }

@@ -492,54 +492,68 @@ class TransaksiController extends BaseController
                 'tgl_pembayaran' => $now
             ]);
 
-            // 2. Ambil data transaksi
+            // Hapus groupBy agar SEMUA baris di detail_transaksi terbaca
             $datatransaksi = $this->transaksiModel
                 ->join('detail_transaksi', 'detail_transaksi.idtransaksi=transaksi.idtransaksi')
                 ->where('transaksi.idtransaksi', $idtransaksi)
-                ->where('transaksi.status', 'S') // Pastikan statusnya memang sudah S
-                ->groupBy('detail_transaksi.idpaket')
                 ->get()->getResultObject();
 
-            if (empty($datatransaksi)) {
-                throw new \Exception("Data transaksi tidak ditemukan atau gagal diupdate.");
-            }
-
-            // Simpan ID Siswa untuk keperluan notifikasi di luar loop
-            $idSiswaTujuan = $datatransaksi[0]->idsiswa;
+            // Buat array untuk menandai idpaket mana saja yang sudah diproses ujiannya
+            $paket_diproses = [];
 
             foreach ($datatransaksi as $rowst) {
-                // Mapping Mapel Siswa
-                if ($rowst->idmapel != '0') {
-                    $this->mapelSiswaModel->save([
-                        'idmapel' => $rowst->idmapel,
-                        'idsiswa' => $rowst->idsiswa
-                    ]);
-                }
+                if ($rowst->status == 'S') {
+                    $idsiswa = $rowst->idsiswa;
 
-                // Ambil Paket
-                $datapaket = $this->detailPaketModel
-                    ->join('ujian_master', 'detail_paket.id_ujian=ujian_master.id_ujian')
-                    ->where('idpaket', $rowst->idpaket)
-                    ->groupBy('detail_paket.id_ujian')
-                    ->get()->getResultObject();
+                    // 1. Tambah Mapel Siswa (Sekarang semua mapel akan diproses karena tidak di-group)
+                    if ($rowst->idmapel != '0' && !empty($rowst->idmapel)) {
+                        // (Opsional) Cek dulu agar tidak terjadi duplikat mapel di database
+                        $cek_mapel = $this->mapelSiswaModel
+                            ->where('idsiswa', $idsiswa)
+                            ->where('idmapel', $rowst->idmapel)
+                            ->first();
 
-                foreach ($datapaket as $rowsp) {
-                    // Menambah ujian ke siswa
-                    $this->ujianModel->save([
-                        'id_siswa'   => $rowst->idsiswa,
-                        'kode_ujian' => $rowsp->kode_ujian,
-                        'nama_ujian' => $rowsp->nama_ujian,
-                        'guru'       => $rowsp->guru,
-                        'kelas'      => $rowsp->kelas,
-                        'mapel'      => $rowsp->mapel,
-                        'waktu_per_soal' => $rowsp->waktu_per_soal,
-                        'date_created' => time(),
-                        'kuota'        => $rowsp->kuota,
-                        'kuota_master' => $rowsp->kuota,
-                        'review'       => $rowsp->review
-                    ]);
-                    //untuk menghapus data ujian siswa yang sudah ada sebelumnya agar tidak terjadi duplikasi
-                    $this->ujianSiswaModel->where('ujian', $rowsp->kode_ujian)->where('siswa', $rowst->idsiswa)->delete();
+                        if (!$cek_mapel) {
+                            $data_mapel_siswa = [
+                                'idmapel' => $rowst->idmapel,
+                                'idsiswa' => $idsiswa
+                            ];
+                            $this->mapelSiswaModel->save($data_mapel_siswa);
+                        }
+                    }
+
+                    // 2. Ambil Data Paket & Master Ujian 
+                    // Cek apakah idpaket belum ada di array $paket_diproses
+                    if ($rowst->idpaket != '0' && !empty($rowst->idpaket) && !in_array($rowst->idpaket, $paket_diproses)) {
+
+                        // Masukkan idpaket ke array agar di perulangan selanjutnya tidak diproses lagi
+                        $paket_diproses[] = $rowst->idpaket;
+
+                        $datapaket = $this->detailPaketModel
+                            ->join('ujian_master', 'detail_paket.id_ujian=ujian_master.id_ujian')
+                            ->where('idpaket', $rowst->idpaket)
+                            ->groupBy('detail_paket.id_ujian')
+                            ->get()->getResultObject();
+
+                        foreach ($datapaket as $rowsp) {
+                            // Menambah ujian ke siswa
+                            $data_ujian = [
+                                'id_siswa'       => $idsiswa,
+                                'kode_ujian'     => $rowsp->kode_ujian,
+                                'nama_ujian'     => $rowsp->nama_ujian,
+                                'guru'           => $rowsp->guru,
+                                'kelas'          => $rowsp->kelas,
+                                'mapel'          => $rowsp->mapel,
+                                'waktu_per_soal' => $rowsp->waktu_per_soal,
+                                'date_created'   => time(),
+                                'kuota'          => $rowsp->kuota,
+                                'kuota_master'   => $rowsp->kuota,
+                                'review'         => $rowsp->review,
+                            ];
+                            $this->ujianModel->save($data_ujian);
+                            $this->ujianSiswaModel->where('ujian', $rowsp->kode_ujian)->where('siswa', $idsiswa)->delete();
+                        }
+                    }
                 }
             }
 
@@ -741,14 +755,14 @@ class TransaksiController extends BaseController
                 $this->detailTransaksiModel->delete($rows->iddetailtransaksi);
             }
             $this->db->table('pengajuan_sertifikat')
-                             ->where('idtransaksi', $dataDrop->idtransaksi)
-                             ->delete();
+                ->where('idtransaksi', $dataDrop->idtransaksi)
+                ->delete();
             $this->transaksiModel->delete($dataDrop->idtransaksi);
         }
         return redirect()->to('sw-admin/transaksi')->with('success', 'Transaksi berhasil dibatalkan');
     }
 
-   public function hapusTransaksi()
+    public function hapusTransaksi()
     {
         // Ambil SEMUA transaksi yang memenuhi kriteria kedaluwarsa
         $dataDrop = $this->db->query("SELECT * FROM transaksi WHERE status IN ('P', 'M','PM', 'DM', 'E') AND tgl_drop <= NOW()")->getResultObject();
@@ -776,12 +790,12 @@ class TransaksiController extends BaseController
                     // HAPUS INI DULU SEBELUM TRANSAKSI UTAMA! 
                     // Jika data tidak ada, query ini tidak akan error (hanya return affected rows = 0).
                     $this->db->table('pengajuan_sertifikat')
-                             ->where('idtransaksi', $transaksi->idtransaksi)
-                             ->delete();
+                        ->where('idtransaksi', $transaksi->idtransaksi)
+                        ->delete();
 
                     // 3. Hapus parent (transaksi utama) - Lakukan paling terakhir
                     $this->transaksiModel->delete($transaksi->idtransaksi);
-                    
+
                     // Cek status query di background
                     if ($this->db->transStatus() === false) {
                         throw new \Exception('Query gagal dieksekusi oleh database.');
