@@ -639,9 +639,9 @@ $activeTab = (isset($_GET['tab']) && $_GET['tab'] == 'lampiran' && $hasData) ? '
                                                         <?php endif; ?>
                                                         <!-- TAMBAHAN: Petunjuk khusus hanya untuk SKCK -->
                                                         <?php if ($cfg['id'] == 'file_skck'): ?>
-                                                            <span class="text-danger fs-9 mt-1 d-block" style="line-height: 1.3;">
+                                                            <span class="text-danger fs-14 mt-1 d-block" style="line-height: 1.3;">
                                                                 <i>
-                                                                    <b>PENTING:</b> SKCK diperlukan untuk <b>PERMOHONAN IZIN KUASA HUKUM DI PENGADILAN PAJAK</b>.<br>
+                                                                    <b>PENTING:</b> Saat membuat SKCK, pastikan keperluan ditulis untuk: <b>“PERMOHONAN IZIN KUASA HUKUM DI PENGADILAN PAJAK”</b>.<br>
                                                                 </i>
                                                             </span>
                                                         <?php endif; ?>
