@@ -209,7 +209,7 @@
                                                 </a>
 
                                                 <!-- TOMBOL BARU: Download Materi via Drive -->
-                                                <a href="https://drive.google.com/drive/folders/1Rqr_3mgwLJx-8Zx2NLUPNuLT0xrqvUe9?usp=sharing" target="_blank" class="btn btn-light-success w-100 fs-7 fw-bold py-3 shadow-sm">
+                                                <a href="https://drive.google.com/drive/folders/1Rqr_3mgwLJx-8Zx2NLUPNuLT0xrqvUe9?usp=sharing" target="_blank" class="btn btn-success w-100 fs-7 fw-bold py-3 shadow-sm">
                                                     <i class="ki-outline ki-cloud-download fs-5 me-2"></i> Download File Materi
                                                 </a>
                                             <?php endif; ?>
