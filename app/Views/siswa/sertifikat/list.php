@@ -44,7 +44,7 @@
         transform: translateY(-1px);
     }
 
-    /* Iframe Loader */
+    /* Loader */
     #loader_sertifikat {
         backdrop-filter: blur(4px);
         background: rgba(255, 255, 255, 0.8) !important;
@@ -68,7 +68,6 @@
             border-radius: 12px;
             margin-bottom: 1.5rem;
             padding: 1.25rem;
-            /* Padding card diperbesar agar tidak mepet */
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
         }
 
@@ -78,7 +77,6 @@
             justify-content: space-between;
             align-items: center;
             padding: 1rem 0 !important;
-            /* Jarak antar baris diperbesar */
             border-bottom: 1px dashed #EFF2F5 !important;
             border-top: none !important;
         }
@@ -103,7 +101,6 @@
             font-weight: 600;
             color: #7E8299;
             padding-right: 1.5rem;
-            /* Jarak label ke isi diperbesar */
             text-align: left;
         }
 
@@ -111,11 +108,9 @@
         #kt_datatable_sertifikat tbody td[data-label="Materi Pelatihan"] {
             justify-content: flex-start;
             flex-direction: row;
-            /* Dibuat ke samping (sejajar) */
             align-items: center;
             background: #F5F8FA;
             padding: 1.25rem !important;
-            /* Kotak biru padding diperbesar */
             border-radius: 10px;
             margin-bottom: 0.75rem;
             border-bottom: none !important;
@@ -360,21 +355,22 @@
                     <i class="bi bi-x-lg fs-4"></i>
                 </div>
             </div>
-            <div class="modal-body p-0 position-relative bg-light-dark">
+            <!-- PERBAIKAN UTAMA: Area Render Canvas -->
+            <div class="modal-body p-4 position-relative bg-light-dark d-flex justify-content-center" style="overflow-y: auto;">
                 <div id="loader_sertifikat" class="d-flex flex-column justify-content-center align-items-center h-100 position-absolute w-100" style="z-index: 100; background: rgba(255, 255, 255, 0.9);">
                     <div class="spinner-border text-primary mb-3" role="status"></div>
                     <span class="text-gray-600 fw-bold">Menyiapkan Dokumen...</span>
                 </div>
 
-                <iframe id="iframe_sertifikat"
-                    src=""
-                    width="100%"
-                    height="100%"
-                    frameborder="0"
-                    style="opacity: 0; transition: opacity 0.5s ease;">
-                </iframe>
+                <!-- Mengganti Iframe dengan Canvas agar Support di Chrome Mobile Tanpa Block -->
+                <canvas id="pdf-render" class="shadow-sm" style="display: none; max-width: 100%; height: auto; margin: auto;"></canvas>
             </div>
-            <div class="modal-footer py-3">
+            
+            <!-- Tombol Download Berdampingan dengan Tutup -->
+            <div class="modal-footer py-3 d-flex justify-content-end gap-2">
+                <a href="#" id="btn_download_sertifikat" class="btn btn-primary fw-bold" download="E-Sertifikat.pdf">
+                    <i class="bi bi-download me-2"></i> Download
+                </a>
                 <button type="button" class="btn btn-light-primary fw-bold" data-bs-dismiss="modal">Tutup Preview</button>
             </div>
         </div>
@@ -384,55 +380,93 @@
 <?= $this->endSection(); ?>
 
 <?= $this->section('scripts'); ?>
+<!-- Menambahkan library PDF.js untuk rendering super cepat (Mencegah Block di Mobile) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+
 <script>
     $(document).ready(function() {
+        // Setup PDF.js Worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
         // Initialize Tooltips
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         tooltipTriggerList.map(function(tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl)
-        })
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
 
         $('.sertifikat_cetak, .sertifikat_all_cetak').off('click').on('click', function() {
             const url = $(this).data('sertifikat') || $(this).data('sertifikat_all');
             if (!url) return;
 
-            // 1. Persiapan Tampilan
+            // 1. Persiapan Tampilan Modal
             $('#sertifikat_cetak_modal').modal('show');
             $('#loader_sertifikat').show();
-            $('#iframe_sertifikat').css('opacity', '0').attr('src', '');
+            $('#pdf-render').hide();
 
-            // 2. Ambil data PDF menggunakan Fetch
-            fetch(url)
-                .then(response => {
+            // 2. Ambil data PDF untuk Preview dan Tombol Download
+            fetch(url, { credentials: 'same-origin' })
+                .then(function(response) {
                     if (!response.ok) throw new Error('Gagal mengambil dokumen');
-                    return response.blob(); // Ubah response menjadi Blob
+                    return response.blob(); 
                 })
-                .then(blob => {
-                    // Buat URL lokal dari Blob tersebut
-                    const blobUrl = URL.createObjectURL(blob);
+                .then(function(blob) {
+                    const pdfBlob = new Blob([blob], { type: 'application/pdf' });
+                    const blobUrl = URL.createObjectURL(pdfBlob);
+                    
+                    // Setel URL ke tombol download agar klik langsung terdownload tanpa load ulang
+                    $('#btn_download_sertifikat').attr('href', blobUrl);
 
-                    // Masukkan ke iframe
-                    $('#iframe_sertifikat').attr('src', blobUrl);
+                    // 3. Proses Render Cepat ke Canvas menggunakan PDF.js
+                    blob.arrayBuffer().then(function(arrayBuffer) {
+                        pdfjsLib.getDocument({data: arrayBuffer}).promise.then(function(pdfDoc) {
+                            // Ambil halaman pertama saja (Sangat Cepat)
+                            pdfDoc.getPage(1).then(function(page) {
+                                const canvas = document.getElementById('pdf-render');
+                                const ctx = canvas.getContext('2d');
+                                
+                                // Set resolusi render yang baik (1.5x)
+                                const viewport = page.getViewport({ scale: 1.5 });
+                                canvas.height = viewport.height;
+                                canvas.width = viewport.width;
 
-                    // Hilangkan loader segera
-                    $('#loader_sertifikat').fadeOut(300, function() {
-                        $('#iframe_sertifikat').css('opacity', '1');
-                        $(this).attr('style', 'display: none !important');
+                                const renderContext = {
+                                    canvasContext: ctx,
+                                    viewport: viewport
+                                };
+                                
+                                // Render ke layar
+                                page.render(renderContext).promise.then(function() {
+                                    $('#loader_sertifikat').fadeOut(200, function() {
+                                        $('#pdf-render').fadeIn(300);
+                                        $(this).attr('style', 'display: none !important');
+                                    });
+                                });
+                            });
+                        }).catch(function(err) {
+                            $('#loader_sertifikat').hide();
+                            alert("Gagal merender PDF, tapi Anda tetap bisa mengunduhnya.");
+                        });
                     });
-
                 })
-                .catch(error => {
+                .catch(function(error) {
                     $('#loader_sertifikat').hide();
+                    $('#btn_download_sertifikat').attr('href', url);
+                    alert("Terjadi kesalahan sistem saat memuat pratinjau.");
                 });
         });
 
-        // Bersihkan memory saat modal ditutup
+        // Bersihkan data modal saat ditutup
         $('#sertifikat_cetak_modal').on('hidden.bs.modal', function() {
-            const iframe = $('#iframe_sertifikat');
-            if (iframe.attr('src').startsWith('blob:')) {
-                URL.revokeObjectURL(iframe.attr('src')); // Hapus ObjectURL dari RAM
+            const canvas = document.getElementById('pdf-render');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Bersihkan Kanvas
+
+            const btnDownload = $('#btn_download_sertifikat');
+            const downloadUrl = btnDownload.attr('href');
+            if (downloadUrl && downloadUrl.indexOf('blob:') === 0) {
+                URL.revokeObjectURL(downloadUrl); // Bersihkan memori Blob
             }
-            iframe.attr('src', '');
+            btnDownload.attr('href', '#'); 
         });
 
         // Rating Logic with Descriptions
@@ -450,7 +484,6 @@
             $('#idsiswa').val('<?= session()->get('id') ?>');
             $('#ratingModalLabel').text(button.data('nama'));
 
-            // Reset
             $('.star-rating .bi-star-fill').removeClass('active hover');
             $('#ratingValue').val('');
             $('#ratingDesc').text('Pilih Bintang').removeClass('text-success').addClass('text-warning');
@@ -459,20 +492,32 @@
         $('.star-rating .bi-star-fill').on('mouseenter', function() {
             const val = $(this).data('value');
             $('.star-rating .bi-star-fill').each(function() {
-                $(this).toggleClass('hover', $(this).data('value') <= val);
+                if ($(this).data('value') <= val) {
+                    $(this).addClass('hover');
+                } else {
+                    $(this).removeClass('hover');
+                }
             });
             $('#ratingDesc').text(starDescriptions[val]);
         }).on('mouseleave', function() {
             $('.star-rating .bi-star-fill').removeClass('hover');
             const currentVal = $('#ratingValue').val();
-            $('#ratingDesc').text(currentVal ? starDescriptions[currentVal] : 'Pilih Bintang');
+            if (currentVal) {
+                $('#ratingDesc').text(starDescriptions[currentVal]);
+            } else {
+                $('#ratingDesc').text('Pilih Bintang');
+            }
         });
 
         $('.star-rating .bi-star-fill').on('click', function() {
             const val = $(this).data('value');
             $('#ratingValue').val(val);
             $('.star-rating .bi-star-fill').each(function() {
-                $(this).toggleClass('active', $(this).data('value') <= val);
+                if ($(this).data('value') <= val) {
+                    $(this).addClass('active');
+                } else {
+                    $(this).removeClass('active');
+                }
             });
             $('#ratingDesc').text(starDescriptions[val]).addClass('text-success').removeClass('text-warning');
         });
@@ -486,37 +531,26 @@
             btnTerkunci.addEventListener("click", function(e) {
                 e.preventDefault();
 
-                // Ambil data dari atribut tombol HTML
                 let jumlahSudah = this.getAttribute("data-sudah");
                 let jumlahTotal = this.getAttribute("data-total");
-                let pesan = `Sertifikat belum bisa diunduh. Anda baru mengisi feedback untuk ${jumlahSudah} dari ${jumlahTotal} materi.`;
+                let pesan = 'Sertifikat belum bisa diunduh. Anda baru mengisi feedback untuk ' + jumlahSudah + ' dari ' + jumlahTotal + ' materi.';
 
-                // Cek apakah custom global 'Swals' sudah ter-load
                 if (typeof Swals !== 'undefined') {
                     Swals.alert('Perhatian', pesan, 'warning');
-                }
-                // Fallback ke bawaan SweetAlert2 jika custom Swals gagal
-                else if (typeof Swal !== 'undefined') {
+                } else if (typeof Swal !== 'undefined') {
                     Swal.fire('Perhatian', pesan, 'warning');
-                }
-                // Fallback terakhir jika library JS belum ter-load sama sekali
-                else {
+                } else {
                     alert(pesan);
                 }
             });
         }
     });
+
     $(document).ready(function() {
         $('#btn-alert-sertifikat').on('click', function(e) {
-            e.preventDefault(); // Mencegah fungsi bawaan link
-
+            e.preventDefault(); 
             let pesan = 'Sertifikat Brevet baru bisa diunduh atau dicetak apabila 8 materi ujian telah dikerjakan dan dinyatakan lulus semua.';
-
-            Swal.fire(
-                'Perhatian!',
-                pesan,
-                'warning'
-            );
+            Swal.fire('Perhatian!', pesan, 'warning');
         });
     });
 </script>
