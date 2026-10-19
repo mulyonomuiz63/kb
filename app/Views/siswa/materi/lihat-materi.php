@@ -275,16 +275,27 @@
                   } else {
                     $vId = trim($item['vid']);
                   }
+
+                  // CEK APAKAH STATUS SUDAH DILIHAT DARI ARRAY CONTROLLER
+                  $isViewed = in_array($item['kode'], $viewedList) ? true : false;
                 ?>
                   <div class="video-thumb me-5 flex-shrink-0 cursor-pointer <?= $index == 0 ? 'border border-primary border-3' : '' ?>"
                     style="width: 200px; transition: all 0.3s;"
                     data-videoid="<?= $vId ?>"
                     data-kode_materi="<?= $item['kode'] ?>"
                     data-title="<?= esc($item['title']) ?>">
-                    <div class="overlay-wrapper mb-3">
+                    <div class="overlay-wrapper mb-3 position-relative">
                       <div class="overlay-layer bg-dark bg-opacity-10 rounded-3">
                         <img src="https://img.youtube.com/vi/<?= $vId ?>/hqdefault.jpg" class="w-100 rounded-3 shadow-sm hover-elevate-up" alt="">
                       </div>
+                      
+                      <!-- DESAIN CEKLIS HIJAU PROFESIONAL -->
+                      <div class="position-absolute top-0 end-0 p-2 checkmark-icon <?= $isViewed ? '' : 'd-none' ?>" id="check-<?= $item['kode'] ?>">
+                          <span class="badge badge-circle badge-success shadow-sm" style="width: 26px; height: 26px; border: 2px solid #ffffff;">
+                              <i class="ki-outline ki-check text-white fs-4 fw-bold"></i>
+                          </span>
+                      </div>
+                      
                     </div>
                     <div class="m-0">
                       <span class="text-gray-800 fw-bold text-hover-primary fs-7 d-block"><?= esc($item['title']) ?></span>
@@ -747,8 +758,23 @@
       const title = $(this).data('title');
 
       $('.video-thumb').removeClass('border border-primary border-3');
-      $(this).addClass('border border-primary border-3');$('#kode_materi').val(kode_materi);
+      $(this).addClass('border border-primary border-3');
+      $('#kode_materi').val(kode_materi);
       $('#judul_materi_chat').text(title);
+
+      // ================= TAMBAHAN LOGIKA AJAX VIEWED =================
+      $.ajax({
+          url: "<?= base_url('sw-siswa/materi/mark-viewed') ?>", // Arahkan ke method baru di controller
+          type: "POST",
+          data: { kode_materi: kode_materi },
+          dataType: "JSON",
+          success: function(res) {
+              if(res.csrf) updateCsrfToken(res.csrf);
+              // Tampilkan ceklis hijau secara halus
+              $('#check-' + kode_materi).removeClass('d-none').hide().fadeIn(300);
+          }
+      });
+      // ===============================================================
 
       // Reset Chat Panel saat pindah video
       lastDisplayedId = 0;

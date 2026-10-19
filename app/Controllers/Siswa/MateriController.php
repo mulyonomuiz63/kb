@@ -84,13 +84,43 @@ class MateriController extends BaseController
 
             $materi_siswa = $this->materiSiswaModel
                 ->join('siswa', 'materi_siswa.siswa=siswa.id_siswa')
-                ->where('materi_siswa.materi', decrypt_url($kode))
+                ->where('materi_siswa.materi', $dec_kode)
                 ->where('siswa.email', session()->get('email'))
                 ->get()->getRowObject();
 
+            // ================= PERUBAHAN UTAMA ================= 
+            // Jangan di-delete, melainkan update 'lihat' menjadi 1
             if ($materi_siswa) {
-                $this->materiSiswaModel->where('id_materi_siswa', $materi_siswa->id_materi_siswa)->delete();
+                $this->materiSiswaModel->update($materi_siswa->id_materi_siswa, ['dilihat' => 1]);
+            } else {
+                // Jika belum pernah diklik sama sekali, insert data baru
+                $siswa = $this->db->table('siswa')->where('email', session()->get('email'))->get()->getRow();
+                if ($siswa) {
+                    $this->materiSiswaModel->insert([
+                        'materi' => $dec_kode,
+                        'siswa'  => $siswa->id_siswa,
+                        'dilihat'  => 1
+                    ]);
+                }
             }
+
+            // Ambil semua daftar materi yang SUDAH DILIHAT (lihat = 1) untuk ditampilkan di View
+            $all_viewed = $this->materiSiswaModel
+                ->join('siswa', 'materi_siswa.siswa=siswa.id_siswa')
+                ->where('siswa.email', session()->get('email'))
+                ->where('materi_siswa.dilihat', 1)
+                ->get()->getResultObject();
+            
+            $viewedList = [];
+            foreach ($all_viewed as $v) {
+                $viewedList[] = $v->materi;
+            }
+            // Pastikan video yang sedang diakses saat ini langsung masuk ke list "sudah dilihat"
+            if (!in_array($dec_kode, $viewedList)) {
+                $viewedList[] = $dec_kode;
+            }
+            $data['viewedList'] = $viewedList;
+            // ===================================================
 
             $cekDataMateri = $this->materiModel->where('kode_materi', $dec_kode)->first();
             $data['link'] = '';
@@ -105,6 +135,34 @@ class MateriController extends BaseController
             return redirect()->to('sw-siswa')->with('pesan', 'Materi tidak ditemukan atau akses tidak sah.');
         }
     }
+
+    // ================= TAMBAHKAN METHOD BARU INI ================= 
+    // Berfungsi mengupdate database saat video berganti di background tanpa reload halaman
+    public function markViewed()
+    {
+        if ($this->request->isAJAX()) {
+            $kode_materi = $this->request->getPost('kode_materi');
+            $email = session()->get('email');
+            
+            $materi_siswa = $this->materiSiswaModel
+                ->join('siswa', 'materi_siswa.siswa=siswa.id_siswa')
+                ->where('materi_siswa.materi', $kode_materi)
+                ->where('siswa.email', $email)
+                ->get()->getRowObject();
+
+            if ($materi_siswa) {
+                $this->materiSiswaModel->update($materi_siswa->id_materi_siswa, ['dilihat' => 1]);
+            } else {
+                $siswa = $this->db->table('siswa')->where('email', $email)->get()->getRow();
+                if ($siswa) {
+                    $this->materiSiswaModel->insert(['materi' => $kode_materi, 'siswa' => $siswa->id_siswa, 'dilihat' => 1]);
+                }
+            }
+
+            return $this->response->setJSON(['status' => 'success', 'csrf' => csrf_hash()]);
+        }
+    }
+    
 
     public function getFileMateri()
     {
