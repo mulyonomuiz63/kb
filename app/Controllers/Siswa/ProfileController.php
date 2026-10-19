@@ -28,12 +28,12 @@ class ProfileController extends BaseController
         $id_session = session()->get('id');
         $rules = [
             'nama_siswa' => [
-                'rules'  => 'required|alpha_numeric_space|min_length[3]|max_length[60]',
+                'rules'  => 'required|regex_match[/^[a-zA-Z0-9\s.,]+$/]|min_length[3]|max_length[60]',
                 'errors' => [
-                    'required'            => 'Nama tidak boleh kosong.',
-                    'alpha_numeric_space' => 'Nama hanya boleh berisi huruf, angka, dan spasi.',
-                    'min_length'          => 'Nama minimal 3 karakter.',
-                    'max_length'          => 'Nama maksimal 60 karakter.'
+                    'required'    => 'Nama tidak boleh kosong.',
+                    'regex_match' => 'Nama hanya boleh berisi huruf, angka, spasi, titik (.), dan koma (,).',
+                    'min_length'  => 'Nama minimal 3 karakter.',
+                    'max_length'  => 'Nama maksimal 60 karakter.'
                 ]
             ],
             'avatar' => [
@@ -258,14 +258,14 @@ class ProfileController extends BaseController
             // ====================================================================
             // Asumsi primary key di tabel Anda adalah 'id'
             $cekHpLain = $this->siswaModel->where('hp', $hp)
-                                          ->where('id_siswa !=', $id_siswa)
-                                          ->first();
+                ->where('id_siswa !=', $id_siswa)
+                ->first();
 
             if ($cekHpLain) {
                 return $this->response->setJSON([
                     'status' => 'error',
                     // Pesan ini akan muncul di SweetAlert karena format 'error'
-                    'message' => 'Nomor WhatsApp ini sudah terdaftar pada akun lain. Silakan gunakan nomor yang berbeda.', 
+                    'message' => 'Nomor WhatsApp ini sudah terdaftar pada akun lain. Silakan gunakan nomor yang berbeda.',
                     'csrfHash' => csrf_hash()
                 ]);
             }
@@ -307,7 +307,6 @@ class ProfileController extends BaseController
                 'message' => 'OTP Terkirim ke nomor Anda.',
                 'csrfHash' => csrf_hash()
             ]);
-
         } catch (\Exception $e) {
             // Tampilkan pesan error detail jika di environment development, 
             // tampilkan pesan umum jika di production agar aman.
