@@ -355,18 +355,16 @@
                     <i class="bi bi-x-lg fs-4"></i>
                 </div>
             </div>
-            <!-- PERBAIKAN UTAMA: Area Render Canvas -->
-            <div class="modal-body p-4 position-relative bg-light-dark d-flex justify-content-center" style="overflow-y: auto;">
-                <div id="loader_sertifikat" class="d-flex flex-column justify-content-center align-items-center h-100 position-absolute w-100" style="z-index: 100; background: rgba(255, 255, 255, 0.9);">
+            <div class="modal-body p-4 position-relative bg-light-dark" style="overflow-y: auto;">
+                <div id="loader_sertifikat" class="d-flex flex-column justify-content-center align-items-center h-100 position-absolute w-100" style="z-index: 100; background: rgba(255, 255, 255, 0.9); top: 0; left: 0;">
                     <div class="spinner-border text-primary mb-3" role="status"></div>
-                    <span class="text-gray-600 fw-bold">Menyiapkan Dokumen...</span>
+                    <span class="text-gray-600 fw-bold">Memuat Halaman Pertama...</span>
                 </div>
 
-                <!-- Mengganti Iframe dengan Canvas agar Support di Chrome Mobile Tanpa Block -->
-                <canvas id="pdf-render" class="shadow-sm" style="display: none; max-width: 100%; height: auto; margin: auto;"></canvas>
+                <!-- Kontainer untuk menampung banyak halaman PDF -->
+                <div id="pdf-render-container" class="d-flex flex-column align-items-center" style="display: none; width: 100%;"></div>
             </div>
             
-            <!-- Tombol Download Berdampingan dengan Tutup -->
             <div class="modal-footer py-3 d-flex justify-content-end gap-2">
                 <a href="#" id="btn_download_sertifikat" class="btn btn-primary fw-bold" download="E-Sertifikat.pdf">
                     <i class="bi bi-download me-2"></i> Download
@@ -380,7 +378,7 @@
 <?= $this->endSection(); ?>
 
 <?= $this->section('scripts'); ?>
-<!-- Menambahkan library PDF.js untuk rendering super cepat (Mencegah Block di Mobile) -->
+<!-- Menambahkan library PDF.js untuk rendering super cepat dan Support Multiple Page -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 
 <script>
@@ -401,9 +399,9 @@
             // 1. Persiapan Tampilan Modal
             $('#sertifikat_cetak_modal').modal('show');
             $('#loader_sertifikat').show();
-            $('#pdf-render').hide();
+            $('#pdf-render-container').hide().empty(); // Sembunyikan & bersihkan halaman lama
 
-            // 2. Ambil data PDF untuk Preview dan Tombol Download
+            // 2. Ambil data PDF
             fetch(url, { credentials: 'same-origin' })
                 .then(function(response) {
                     if (!response.ok) throw new Error('Gagal mengambil dokumen');
@@ -413,38 +411,57 @@
                     const pdfBlob = new Blob([blob], { type: 'application/pdf' });
                     const blobUrl = URL.createObjectURL(pdfBlob);
                     
-                    // Setel URL ke tombol download agar klik langsung terdownload tanpa load ulang
+                    // Setel Href tombol Download
                     $('#btn_download_sertifikat').attr('href', blobUrl);
 
-                    // 3. Proses Render Cepat ke Canvas menggunakan PDF.js
+                    // 3. Render PDF Cepat (Prioritas Halaman 1 agar loading cepat hilang)
                     blob.arrayBuffer().then(function(arrayBuffer) {
-                        pdfjsLib.getDocument({data: arrayBuffer}).promise.then(function(pdfDoc) {
-                            // Ambil halaman pertama saja (Sangat Cepat)
-                            pdfDoc.getPage(1).then(function(page) {
-                                const canvas = document.getElementById('pdf-render');
-                                const ctx = canvas.getContext('2d');
+                        pdfjsLib.getDocument({data: arrayBuffer}).promise.then(async function(pdfDoc) {
+                            
+                            const container = document.getElementById('pdf-render-container');
+                            
+                            // Fungsi khusus untuk merender 1 halaman
+                            const renderPage = async (pageNum) => {
+                                const page = await pdfDoc.getPage(pageNum);
                                 
-                                // Set resolusi render yang baik (1.5x)
-                                const viewport = page.getViewport({ scale: 1.5 });
+                                const canvas = document.createElement('canvas');
+                                canvas.className = 'shadow-sm mb-4 bg-white';
+                                canvas.style.cssText = 'max-width: 100%; height: auto; display: block; margin: 0 auto; border-radius: 8px;';
+                                container.appendChild(canvas);
+                                
+                                const ctx = canvas.getContext('2d');
+                                // Menurunkan skala sedikit ke 1.2 agar render lebih cepat namun tetap tajam
+                                const viewport = page.getViewport({ scale: 1.2 });
                                 canvas.height = viewport.height;
                                 canvas.width = viewport.width;
 
-                                const renderContext = {
-                                    canvasContext: ctx,
-                                    viewport: viewport
-                                };
-                                
-                                // Render ke layar
-                                page.render(renderContext).promise.then(function() {
-                                    $('#loader_sertifikat').fadeOut(200, function() {
-                                        $('#pdf-render').fadeIn(300);
-                                        $(this).attr('style', 'display: none !important');
-                                    });
-                                });
+                                const renderContext = { canvasContext: ctx, viewport: viewport };
+                                await page.render(renderContext).promise;
+                            };
+
+                            // JALANKAN HALAMAN 1 SAJA DULU SEBAGAI PRIORITAS
+                            if (pdfDoc.numPages > 0) {
+                                await renderPage(1);
+                            }
+
+                            // Langsung hilangkan animasi loading begitu halaman 1 beres (Sangat Cepat)
+                            $('#loader_sertifikat').fadeOut(200, function() {
+                                $('#pdf-render-container').fadeIn(300);
+                                $(this).attr('style', 'display: none !important');
                             });
+
+                            // Proses halaman sisanya secara asinkron di belakang layar
+                            if (pdfDoc.numPages > 1) {
+                                (async () => {
+                                    for (let pageNum = 2; pageNum <= pdfDoc.numPages; pageNum++) {
+                                        await renderPage(pageNum);
+                                    }
+                                })();
+                            }
+
                         }).catch(function(err) {
                             $('#loader_sertifikat').hide();
-                            alert("Gagal merender PDF, tapi Anda tetap bisa mengunduhnya.");
+                            alert("Gagal memuat pratinjau PDF, silakan gunakan tombol Unduh.");
                         });
                     });
                 })
@@ -455,16 +472,14 @@
                 });
         });
 
-        // Bersihkan data modal saat ditutup
+        // Bersihkan data modal saat ditutup untuk mencegah RAM penuh (Memory Leak)
         $('#sertifikat_cetak_modal').on('hidden.bs.modal', function() {
-            const canvas = document.getElementById('pdf-render');
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width, canvas.height); // Bersihkan Kanvas
+            $('#pdf-render-container').empty(); 
 
             const btnDownload = $('#btn_download_sertifikat');
             const downloadUrl = btnDownload.attr('href');
             if (downloadUrl && downloadUrl.indexOf('blob:') === 0) {
-                URL.revokeObjectURL(downloadUrl); // Bersihkan memori Blob
+                URL.revokeObjectURL(downloadUrl);
             }
             btnDownload.attr('href', '#'); 
         });
