@@ -121,7 +121,7 @@
                                             <span class="text-muted fw-semibold fs-6">Daftar paket materi untuk kelas ini</span>
                                         </div>
                                     </div>
-                                    
+
                                     <!-- Menampilkan badge jumlah materi di sebelah kanan Card -->
                                     <div class="d-none d-sm-block">
                                         <span class="badge badge-light-primary fw-bold px-4 py-3 text-uppercase">
@@ -196,7 +196,8 @@
                                             </div>
                                         </div>
 
-                                        <div class="mt-8">
+                                        <!-- PERBAIKAN: Bungkus dengan flex-column dan gap-2 agar responsive atas-bawah -->
+                                        <div class="mt-8 d-flex flex-column gap-2">
                                             <?php if ($m->status == 0): ?>
                                                 <button class="btn btn-light-danger w-100 fs-7 fw-bold py-3 disabled">
                                                     <i class="ki-outline ki-lock fs-5 me-2"></i> Belum Tersedia
@@ -205,6 +206,11 @@
                                                 <a href="<?= base_url('sw-siswa/materi/lihat-materi/' . encrypt_url($m->kode_materi) . '/' . encrypt_url($m->id_mapel) . '/' . encrypt_url($m->id_kelas)) ?>"
                                                     class="btn btn-primary btn-glow-primary w-100 fs-7 fw-bold py-3 shadow-sm">
                                                     Mulai Belajar <i class="ki-outline ki-arrow-right fs-5 ms-2"></i>
+                                                </a>
+
+                                                <!-- TOMBOL BARU: Download Materi via Drive -->
+                                                <a href="https://drive.google.com/drive/folders/1Rqr_3mgwLJx-8Zx2NLUPNuLT0xrqvUe9?usp=sharing" target="_blank" class="btn btn-light-success w-100 fs-7 fw-bold py-3 shadow-sm">
+                                                    <i class="ki-outline ki-cloud-download fs-5 me-2"></i> Download File Materi
                                                 </a>
                                             <?php endif; ?>
                                         </div>
