@@ -31,7 +31,7 @@ class ProfileController extends BaseController
                 'rules'  => 'required|regex_match[/^[a-zA-Z0-9\s.,]+$/]|min_length[3]|max_length[60]',
                 'errors' => [
                     'required'    => 'Nama tidak boleh kosong.',
-                    'regex_match' => 'Nama hanya boleh berisi huruf, angka, spasi, titik (.), dan koma (,).',
+                    'regex_match' => 'Nama hanya boleh berisi huruf, angka, spasi.',
                     'min_length'  => 'Nama minimal 3 karakter.',
                     'max_length'  => 'Nama maksimal 60 karakter.'
                 ]

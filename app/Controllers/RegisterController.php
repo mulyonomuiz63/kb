@@ -78,14 +78,14 @@ class RegisterController extends BaseController
                 ]
             ],
             'nama_siswa' => [
-                'rules'  => 'required|alpha_numeric_space|min_length[3]|max_length[60]',
+                'rules'  => 'required|regex_match[/^[a-zA-Z0-9\s.,]+$/]|min_length[3]|max_length[60]',
                 'errors' => [
                     'required'            => 'Nama harus diisi.',
                     'alpha_numeric_space' => 'Nama hanya boleh huruf, angka, dan spasi.',
                     'min_length'          => 'Nama terlalu pendek.',
                     'max_length'          => 'Nama maksimal 60 karakter.'
                 ]
-            ],
+            ], 
             'password'   => [
                 'rules'  => 'required|min_length[6]',
                 'errors' => [
@@ -226,12 +226,12 @@ class RegisterController extends BaseController
                 ]
             ],
             'nama_siswa' => [
-                'rules'  => 'required|alpha_numeric_space|min_length[3]|max_length[60]',
+                'rules'  => 'required|regex_match[/^[a-zA-Z0-9\s.,]+$/]|min_length[3]|max_length[60]',
                 'errors' => [
-                    'required'            => 'Nama harus diisi.',
-                    'alpha_numeric_space' => 'Nama hanya boleh huruf, angka, dan spasi.',
-                    'min_length'          => 'Nama terlalu pendek.',
-                    'max_length'          => 'Nama maksimal 60 karakter.'
+                    'required'    => 'Nama tidak boleh kosong.',
+                    'regex_match' => 'Nama hanya boleh berisi huruf, angka, spasi.',
+                    'min_length'  => 'Nama minimal 3 karakter.',
+                    'max_length'  => 'Nama maksimal 60 karakter.'
                 ]
             ],
             'password' => [
