@@ -649,9 +649,9 @@ class TransaksiController extends BaseController
             $db->transCommit();
 
             // 4. Kirim Notifikasi (Gunakan variabel $idSiswaTujuan yang sudah aman)
-            send_notif($idSiswaTujuan, "Verifikasi pembayaran", "Pembelian paket berhasil.", base_url('sw-siswa/transaksi'));
+            send_notif($transaksiMaster['idsiswa'], "Verifikasi pembayaran", "Pembelian paket berhasil.", base_url('sw-siswa/transaksi'));
 
-            $dataSiswa = $this->siswaModel->find($idSiswaTujuan);
+            $dataSiswa = $this->siswaModel->find($transaksiMaster['idsiswa']);
             if ($dataSiswa) {
                 $this->serviceEmail->send(
                     $dataSiswa['email'],
