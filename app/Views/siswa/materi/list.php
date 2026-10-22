@@ -136,8 +136,25 @@
                         <!-- LOOPING MATERI DI DALAM KELAS TERSEBUT -->
                         <?php foreach ($daftar_materi as $m) : ?>
                             <?php
-                            $jml_materi = $db->query("select count(*) as total_materi from materi where mapel = '$m->id_mapel'")->getRow();
-                            $delay += 0.1; // Memberikan efek loading berurutan
+                                $id_siswa = session()->get('id'); // Ambil ID siswa dari session
+                                
+                                // PERUBAHAN: 
+                                // 1. Menghapus filter materi = '$m->kode_materi' agar menghitung seisi mapel
+                                // 2. Menggunakan COUNT(DISTINCT materi) agar duplikasi pembelian tidak terhitung ganda
+                                $query_materi = $db->query("SELECT  
+                                    COUNT(CASE WHEN dilihat = '1' THEN materi ELSE NULL END) as materi_selesai
+                                    FROM materi_siswa 
+                                    WHERE mapel = '$m->id_mapel' AND siswa = '$id_siswa'")->getRow();
+
+                                $query_total_materi = $db->query("SELECT COUNT(*) as total_materi FROM materi WHERE mapel = '$m->id_mapel'")->getRow();
+                                
+                                $total_materi = $query_total_materi->total_materi ?? 0;
+                                $materi_selesai = $query_materi->materi_selesai ?? 0;
+                                
+                                // Menghitung persentase (hindari pembagian dengan nol)
+                                $persentase = ($total_materi > 0) ? round(($materi_selesai / $total_materi) * 100) : 0;
+                                
+                                $delay += 0.1; // Memberikan efek loading berurutan
                             ?>
 
                             <div class="col-md-6 col-xl-4 animate-card" style="animation-delay: <?= $delay ?>s">
@@ -180,7 +197,7 @@
                                                     <i class="ki-outline ki-book-open fs-4 text-info"></i>
                                                 </div>
                                                 <div class="d-flex flex-column">
-                                                    <span class="text-dark fw-bold fs-7"><?= $jml_materi->total_materi ?> Sesi</span>
+                                                    <span class="text-dark fw-bold fs-7"><?= $total_materi ?> Sesi</span>
                                                     <span class="text-muted fw-semibold fs-9">Video Materi</span>
                                                 </div>
                                             </div>
@@ -196,16 +213,36 @@
                                             </div>
                                         </div>
 
+                                        <!-- TAMBAHAN BARU: Tampilan Progress Bar Profesional -->
+                                        <div class="d-flex flex-column mt-7">
+                                            <div class="d-flex justify-content-between w-100 fs-7 mb-2">
+                                                <span class="fw-bold text-gray-700">Progres Belajar</span>
+                                                <span class="fw-bolder text-primary"><?= $persentase ?>%</span>
+                                            </div>
+                                            <div class="h-8px w-100 bg-light-primary rounded-pill overflow-hidden">
+                                                <div class="bg-primary rounded-pill h-100" role="progressbar" style="width: <?= $persentase ?>%; transition: width 1s ease-in-out;" aria-valuenow="<?= $persentase ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                            <div class="mt-2 text-muted fs-8 fw-semibold d-flex align-items-center">
+                                                <?php if($persentase == 100): ?>
+                                                    <i class="ki-outline ki-check-circle fs-6 me-1 text-success"></i>
+                                                    <span class="text-success">Semua materi diselesaikan!</span>
+                                                <?php else: ?>
+                                                    <i class="ki-outline ki-chart-line fs-8 me-1 text-primary"></i>
+                                                    <?= $materi_selesai ?> dari <?= $total_materi ?> materi diselesaikan
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+
                                         <!-- PERBAIKAN: Bungkus dengan flex-column dan gap-2 agar responsive atas-bawah -->
-                                        <div class="mt-8 d-flex flex-column gap-2">
+                                        <div class="mt-6 d-flex flex-column gap-2">
                                             <?php if ($m->status == 0): ?>
                                                 <button class="btn btn-light-danger w-100 fs-7 fw-bold py-3 disabled">
                                                     <i class="ki-outline ki-lock fs-5 me-2"></i> Belum Tersedia
                                                 </button>
                                             <?php else: ?>
                                                 <a href="<?= base_url('sw-siswa/materi/lihat-materi/' . encrypt_url($m->kode_materi) . '/' . encrypt_url($m->id_mapel) . '/' . encrypt_url($m->id_kelas)) ?>"
-                                                    class="btn btn-primary btn-glow-primary w-100 fs-7 fw-bold py-3 shadow-sm">
-                                                    Mulai Belajar <i class="ki-outline ki-arrow-right fs-5 ms-2"></i>
+                                                    class="btn <?= ($persentase == 100) ? 'btn-light-success' : 'btn-primary btn-glow-primary' ?> w-100 fs-7 fw-bold py-3 shadow-sm">
+                                                    <?= ($persentase == 100) ? 'Belajar Ulang <i class="ki-outline ki-arrow-circle-right fs-5 ms-2"></i>' : 'Mulai Belajar <i class="ki-outline ki-arrow-right fs-5 ms-2"></i>' ?>
                                                 </a>
 
                                                 <!-- TOMBOL BARU: Download Materi via Drive -->

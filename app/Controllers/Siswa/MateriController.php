@@ -80,12 +80,14 @@ class MateriController extends BaseController
                 'materiAll' => $this->materiModel->getAllByMapelKelas($dec_idmapel, $dec_idkelas),
                 'materi'    => $this->materiModel->getBykodeMateri($dec_kode),
                 'file'      => $this->fileModel->getAllByKode($dec_kode),
+                'idmapel'   => $dec_idmapel,
+                'idkelas'   => $dec_idkelas,
             ];
 
             $materi_siswa = $this->materiSiswaModel
                 ->join('siswa', 'materi_siswa.siswa=siswa.id_siswa')
                 ->where('materi_siswa.materi', $dec_kode)
-                ->where('siswa.email', session()->get('email'))
+                ->where('materi_siswa.siswa', session()->get('id'))
                 ->get()->getRowObject();
 
             // ================= PERUBAHAN UTAMA ================= 
@@ -98,6 +100,8 @@ class MateriController extends BaseController
                 if ($siswa) {
                     $this->materiSiswaModel->insert([
                         'materi' => $dec_kode,
+                        'kelas'  => $dec_idkelas,
+                        'mapel'  => $dec_idmapel,
                         'siswa'  => $siswa->id_siswa,
                         'dilihat'  => 1
                     ]);
@@ -107,7 +111,7 @@ class MateriController extends BaseController
             // Ambil semua daftar materi yang SUDAH DILIHAT (lihat = 1) untuk ditampilkan di View
             $all_viewed = $this->materiSiswaModel
                 ->join('siswa', 'materi_siswa.siswa=siswa.id_siswa')
-                ->where('siswa.email', session()->get('email'))
+                ->where('materi_siswa.siswa', session()->get('id'))
                 ->where('materi_siswa.dilihat', 1)
                 ->get()->getResultObject();
             
@@ -142,20 +146,30 @@ class MateriController extends BaseController
     {
         if ($this->request->isAJAX()) {
             $kode_materi = $this->request->getPost('kode_materi');
-            $email = session()->get('email');
+            $idkelas     = $this->request->getPost('idkelas');
+            $idmapel     = $this->request->getPost('idmapel');
+
+            // PERUBAHAN: Gunakan ID siswa secara langsung dari session (lebih akurat)
+            $id_siswa = session()->get('id'); 
             
             $materi_siswa = $this->materiSiswaModel
-                ->join('siswa', 'materi_siswa.siswa=siswa.id_siswa')
-                ->where('materi_siswa.materi', $kode_materi)
-                ->where('siswa.email', $email)
+                ->where('materi', $kode_materi)
+                ->where('siswa', $id_siswa)
                 ->get()->getRowObject();
 
             if ($materi_siswa) {
+                // Jika sudah ada, update dilihat menjadi 1
                 $this->materiSiswaModel->update($materi_siswa->id_materi_siswa, ['dilihat' => 1]);
             } else {
-                $siswa = $this->db->table('siswa')->where('email', $email)->get()->getRow();
-                if ($siswa) {
-                    $this->materiSiswaModel->insert(['materi' => $kode_materi, 'siswa' => $siswa->id_siswa, 'dilihat' => 1]);
+                // Jika belum ada, insert beserta mapel, kelas, dan siswanya
+                if (!empty($id_siswa)) {
+                    $this->materiSiswaModel->insert([
+                        'materi'  => $kode_materi, 
+                        'kelas'   => $idkelas, 
+                        'mapel'   => $idmapel, 
+                        'siswa'   => $id_siswa, 
+                        'dilihat' => 1
+                    ]);
                 }
             }
 

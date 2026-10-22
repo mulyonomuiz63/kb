@@ -766,7 +766,12 @@
       $.ajax({
           url: "<?= base_url('sw-siswa/materi/mark-viewed') ?>", // Arahkan ke method baru di controller
           type: "POST",
-          data: { kode_materi: kode_materi },
+          data: { 
+            kode_materi: kode_materi,
+            idmapel: "<?= $idmapel ?>", // Menambahkan id mapel
+            idkelas: "<?= $idkelas ?>"  // Menambahkan id kelas
+
+           },
           dataType: "JSON",
           success: function(res) {
               if(res.csrf) updateCsrfToken(res.csrf);
