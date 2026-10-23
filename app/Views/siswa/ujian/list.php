@@ -188,7 +188,7 @@
                     </span>
                     <div>
                         <!-- Ganti href dengan link file PDF atau route CodeIgniter Anda -->
-                        <a href="<?= base_url('sertifikat') ?>" class="btn btn-primary">
+                        <a href="<?= base_url('sw-siswa/sertifikat') ?>" class="btn btn-primary">
                             Download Sertifikat
                         </a>
                     </div>
