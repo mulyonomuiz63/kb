@@ -212,79 +212,93 @@
                                 </tr>
                             </thead>
                             <tbody class="fw-semibold text-gray-600">
-                                <?php foreach ($ujian as $u) : ?>
+                                <!-- CEK APAKAH DATA UJIAN KOSONG -->
+                                <?php if (empty($ujian)) : ?>
                                     <tr>
-                                        <!-- UPGRADE: Tambahan Atribut 'data-label' untuk mode Mobile Layout -->
-                                        <td data-label="Materi Pelatihan">
-                                            <div class="d-flex align-items-center">
-                                                <div class="symbol symbol-50px me-4">
-                                                    <div class="symbol-label bg-light-primary">
-                                                        <i class="bi bi-award text-primary fs-1"></i>
-                                                    </div>
-                                                </div>
-                                                <div class="d-flex flex-column">
-                                                    <span class="text-gray-800 fw-bold fs-6 mb-1"><?= $u->nama_ujian; ?></span>
-                                                </div>
+                                        <!-- Colspan 5 karena tabel memiliki 5 kolom (<th>) -->
+                                        <td colspan="5" class="text-center text-muted py-10">
+                                            <div class="d-flex flex-column align-items-center">
+                                                <i class="bi bi-file-earmark-x fs-3x text-muted mb-3"></i>
+                                                <span class="fs-5 fw-bold text-gray-800 mb-1">Sertifikat Belum Tersedia</span>
+                                                <span class="fs-7 text-gray-500">Anda belum mengikuti ujian atau data sertifikat belum ada.</span>
                                             </div>
-                                        </td>
-
-                                        <td class="text-md-center" data-label="Periode Ujian">
-                                            <div class="d-flex flex-column align-items-md-center">
-                                                <span class="text-gray-800 fw-bold fs-7"><?= date('d M Y', strtotime($u->start_ujian)) ?></span>
-                                                <span class="text-muted fs-8">Sampai <?= date('d M Y', strtotime($u->end_ujian)) ?></span>
-                                            </div>
-                                        </td>
-
-                                        <td class="text-md-center" data-label="Skor Akhir">
-                                            <!-- INDIKATOR PROGRESS BAR DIHILANGKAN, HANYA ANGKA -->
-                                            <span class="text-dark fw-bolder fs-5"><?= $u->nilai ?></span>
-                                        </td>
-
-                                        <td class="text-md-center" data-label="Status Kelulusan">
-                                            <?php if ($u->nilai >= 60): ?>
-                                                <span class="badge badge-light-success border border-success border-dashed px-4 py-3 text-center">
-                                                    <i class="bi bi-check2-circle me-1 text-success"></i> Kompeten
-                                                </span>
-                                            <?php else: ?>
-                                                <span class="badge badge-light-danger border border-danger border-dashed px-4 py-3 text-center">
-                                                    <i class="bi bi-exclamation-triangle me-1 text-danger"></i> Tidak Lulus
-                                                </span>
-                                            <?php endif; ?>
-                                        </td>
-
-                                        <td class="text-md-center" data-label="Opsi Sertifikat">
-                                            <?php
-                                            $idsiswa = session()->get('id');
-                                            $ratingData = $db->query("SELECT AVG(rating) as avg_rating FROM review_ujian WHERE kode_ujian = '$u->kode_ujian' and id_siswa= '$idsiswa'")->getRow();
-                                            ?>
-
-                                            <?php if (empty($ratingData->avg_rating)): ?>
-                                                <button class="btn btn-sm btn-light-warning btn-active-warning w-100 justify-content-center"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#ratingModal"
-                                                    data-id="<?= $u->kode_ujian; ?>"
-                                                    data-nama="<?= htmlspecialchars($u->nama_ujian); ?>">
-                                                    <i class="bi bi-star-fill fs-7 me-2"></i> Beri Feedback
-                                                </button>
-                                            <?php else: ?>
-                                                <?php if ($u->nilai >= 60 && $u->status === 'S'): ?>
-                                                    <button class="btn btn-icon btn-sm btn-light-primary btn-active-primary shadow-sm sertifikat_cetak w-100 w-md-auto"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#sertifikat_cetak_modal"
-                                                        data-bs-toggle="tooltip" title="Lihat & Unduh Sertifikat"
-                                                        data-sertifikat="<?= base_url("sw-siswa/sertifikat/lihat-sertifikat/" . encrypt_url($u->kode_ujian) . "/" . encrypt_url($u->id_ujian)) ?>">
-                                                        <i class="bi bi-file-earmark-pdf fs-3"></i>
-                                                        <span class="d-inline-block d-md-none ms-2 fw-bold">Lihat Dokumen</span>
-                                                    </button>
-                                                <?php elseif ($u->status === 'T'): ?>
-                                                    <span class="badge badge-secondary py-3 px-4 disabled w-100 text-center">Sertifikat Ditangguhkan</span>
-                                                <?php else: ?>
-                                                    <span class="badge badge-secondary py-3 px-4 disabled w-100 text-center">🔒 Terkunci</span>
-                                                <?php endif; ?>
-                                            <?php endif; ?>
                                         </td>
                                     </tr>
-                                <?php endforeach; ?>
+                                <?php else : ?>
+                                    <?php foreach ($ujian as $u) : ?>
+                                        <tr>
+                                            <!-- UPGRADE: Tambahan Atribut 'data-label' untuk mode Mobile Layout -->
+                                            <td data-label="Materi Pelatihan">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="symbol symbol-50px me-4">
+                                                        <div class="symbol-label bg-light-primary">
+                                                            <i class="bi bi-award text-primary fs-1"></i>
+                                                        </div>
+                                                    </div>
+                                                    <div class="d-flex flex-column">
+                                                        <span class="text-gray-800 fw-bold fs-6 mb-1"><?= $u->nama_ujian; ?></span>
+                                                    </div>
+                                                </div>
+                                            </td>
+
+                                            <td class="text-md-center" data-label="Periode Ujian">
+                                                <div class="d-flex flex-column align-items-md-center">
+                                                    <span class="text-gray-800 fw-bold fs-7"><?= date('d M Y', strtotime($u->start_ujian)) ?></span>
+                                                    <span class="text-muted fs-8">Sampai <?= date('d M Y', strtotime($u->end_ujian)) ?></span>
+                                                </div>
+                                            </td>
+
+                                            <td class="text-md-center" data-label="Skor Akhir">
+                                                <!-- INDIKATOR PROGRESS BAR DIHILANGKAN, HANYA ANGKA -->
+                                                <span class="text-dark fw-bolder fs-5"><?= $u->nilai ?></span>
+                                            </td>
+
+                                            <td class="text-md-center" data-label="Status Kelulusan">
+                                                <?php if ($u->nilai >= 60): ?>
+                                                    <span class="badge badge-light-success border border-success border-dashed px-4 py-3 text-center">
+                                                        <i class="bi bi-check2-circle me-1 text-success"></i> Kompeten
+                                                    </span>
+                                                <?php else: ?>
+                                                    <span class="badge badge-light-danger border border-danger border-dashed px-4 py-3 text-center">
+                                                        <i class="bi bi-exclamation-triangle me-1 text-danger"></i> Tidak Lulus
+                                                    </span>
+                                                <?php endif; ?>
+                                            </td>
+
+                                            <td class="text-md-center" data-label="Opsi Sertifikat">
+                                                <?php
+                                                $idsiswa = session()->get('id');
+                                                $ratingData = $db->query("SELECT AVG(rating) as avg_rating FROM review_ujian WHERE kode_ujian = '$u->kode_ujian' and id_siswa= '$idsiswa'")->getRow();
+                                                ?>
+
+                                                <?php if (empty($ratingData->avg_rating)): ?>
+                                                    <button class="btn btn-sm btn-light-warning btn-active-warning w-100 justify-content-center"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#ratingModal"
+                                                        data-id="<?= $u->kode_ujian; ?>"
+                                                        data-nama="<?= htmlspecialchars($u->nama_ujian); ?>">
+                                                        <i class="bi bi-star-fill fs-7 me-2"></i> Beri Feedback
+                                                    </button>
+                                                <?php else: ?>
+                                                    <?php if ($u->nilai >= 60 && $u->status === 'S'): ?>
+                                                        <button class="btn btn-icon btn-sm btn-light-primary btn-active-primary shadow-sm sertifikat_cetak w-100 w-md-auto"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#sertifikat_cetak_modal"
+                                                            data-bs-toggle="tooltip" title="Lihat & Unduh Sertifikat"
+                                                            data-sertifikat="<?= base_url("sw-siswa/sertifikat/lihat-sertifikat/" . encrypt_url($u->kode_ujian) . "/" . encrypt_url($u->id_ujian)) ?>">
+                                                            <i class="bi bi-file-earmark-pdf fs-3"></i>
+                                                            <span class="d-inline-block d-md-none ms-2 fw-bold">Lihat Dokumen</span>
+                                                        </button>
+                                                    <?php elseif ($u->status === 'T'): ?>
+                                                        <span class="badge badge-secondary py-3 px-4 disabled w-100 text-center">Sertifikat Ditangguhkan</span>
+                                                    <?php else: ?>
+                                                        <span class="badge badge-secondary py-3 px-4 disabled w-100 text-center">🔒 Terkunci</span>
+                                                    <?php endif; ?>
+                                                <?php endif; ?>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
                             </tbody>
                         </table>
                     </div>
@@ -364,7 +378,7 @@
                 <!-- Kontainer untuk menampung banyak halaman PDF -->
                 <div id="pdf-render-container" class="d-flex flex-column align-items-center" style="display: none; width: 100%;"></div>
             </div>
-            
+
             <div class="modal-footer py-3 d-flex justify-content-end gap-2">
                 <a href="#" id="btn_download_sertifikat" class="btn btn-primary fw-bold" download="E-Sertifikat.pdf">
                     <i class="bi bi-download me-2"></i> Download
@@ -402,40 +416,51 @@
             $('#pdf-render-container').hide().empty(); // Sembunyikan & bersihkan halaman lama
 
             // 2. Ambil data PDF
-            fetch(url, { credentials: 'same-origin' })
+            fetch(url, {
+                    credentials: 'same-origin'
+                })
                 .then(function(response) {
                     if (!response.ok) throw new Error('Gagal mengambil dokumen');
-                    return response.blob(); 
+                    return response.blob();
                 })
                 .then(function(blob) {
-                    const pdfBlob = new Blob([blob], { type: 'application/pdf' });
+                    const pdfBlob = new Blob([blob], {
+                        type: 'application/pdf'
+                    });
                     const blobUrl = URL.createObjectURL(pdfBlob);
-                    
+
                     // Setel Href tombol Download
                     $('#btn_download_sertifikat').attr('href', blobUrl);
 
                     // 3. Render PDF Cepat (Prioritas Halaman 1 agar loading cepat hilang)
                     blob.arrayBuffer().then(function(arrayBuffer) {
-                        pdfjsLib.getDocument({data: arrayBuffer}).promise.then(async function(pdfDoc) {
-                            
+                        pdfjsLib.getDocument({
+                            data: arrayBuffer
+                        }).promise.then(async function(pdfDoc) {
+
                             const container = document.getElementById('pdf-render-container');
-                            
+
                             // Fungsi khusus untuk merender 1 halaman
                             const renderPage = async (pageNum) => {
                                 const page = await pdfDoc.getPage(pageNum);
-                                
+
                                 const canvas = document.createElement('canvas');
                                 canvas.className = 'shadow-sm mb-4 bg-white';
                                 canvas.style.cssText = 'max-width: 100%; height: auto; display: block; margin: 0 auto; border-radius: 8px;';
                                 container.appendChild(canvas);
-                                
+
                                 const ctx = canvas.getContext('2d');
                                 // Menurunkan skala sedikit ke 1.2 agar render lebih cepat namun tetap tajam
-                                const viewport = page.getViewport({ scale: 1.2 });
+                                const viewport = page.getViewport({
+                                    scale: 1.2
+                                });
                                 canvas.height = viewport.height;
                                 canvas.width = viewport.width;
 
-                                const renderContext = { canvasContext: ctx, viewport: viewport };
+                                const renderContext = {
+                                    canvasContext: ctx,
+                                    viewport: viewport
+                                };
                                 await page.render(renderContext).promise;
                             };
 
@@ -474,14 +499,14 @@
 
         // Bersihkan data modal saat ditutup untuk mencegah RAM penuh (Memory Leak)
         $('#sertifikat_cetak_modal').on('hidden.bs.modal', function() {
-            $('#pdf-render-container').empty(); 
+            $('#pdf-render-container').empty();
 
             const btnDownload = $('#btn_download_sertifikat');
             const downloadUrl = btnDownload.attr('href');
             if (downloadUrl && downloadUrl.indexOf('blob:') === 0) {
                 URL.revokeObjectURL(downloadUrl);
             }
-            btnDownload.attr('href', '#'); 
+            btnDownload.attr('href', '#');
         });
 
         // Rating Logic with Descriptions
@@ -563,7 +588,7 @@
 
     $(document).ready(function() {
         $('#btn-alert-sertifikat').on('click', function(e) {
-            e.preventDefault(); 
+            e.preventDefault();
             let pesan = 'Sertifikat Brevet baru bisa diunduh atau dicetak apabila 8 materi ujian telah dikerjakan dan dinyatakan lulus semua.';
             Swal.fire('Perhatian!', pesan, 'warning');
         });
