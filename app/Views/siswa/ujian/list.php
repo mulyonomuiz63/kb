@@ -183,9 +183,15 @@
                 <!-- Teks Informasi -->
                 <div class="d-flex flex-column">
                     <h4 class="mb-1 text-gray-900">Informasi Sertifikasi</h4>
-                    <span class="text-gray-700">
+                    <span class="text-gray-700 mb-3">
                         Untuk memperoleh <strong class="text-gray-900">Sertifikat Brevet AB</strong>, Anda diwajibkan lulus pada 8 materi ujian yang telah ditentukan.
                     </span>
+                    <div>
+                        <!-- Ganti href dengan link file PDF atau route CodeIgniter Anda -->
+                        <a href="<?= base_url('sertifikat') ?>" class="btn btn-primary">
+                            Download Sertifikat
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
