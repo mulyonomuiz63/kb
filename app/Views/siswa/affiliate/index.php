@@ -21,23 +21,23 @@
 
                 <!-- 1 & 2: DATA AFFILIATE & KOMISI (GRID BERSEBELAHAN AGAR RINGKAS) -->
                 <?php
-                    $status = $affiliates->status;
-                    $statusMap = [
-                        '1' => ['class' => 'badge-light-success border-success text-success', 'label' => 'Approved', 'icon' => 'ki-check-circle'],
-                        '0' => ['class' => 'badge-light-warning border-warning text-warning', 'label' => 'Pending', 'icon' => 'ki-information-2'],
-                        '2' => ['class' => 'badge-light-danger border-danger text-danger', 'label' => 'Rejected', 'icon' => 'ki-cross-circle'],
-                    ];
-                    $currStatus = $statusMap[$status] ?? ['class' => 'badge-light-secondary border-secondary', 'label' => 'Unknown', 'icon' => ''];
-                    
-                    // Hitung Total Komisi
-                    $totalKomisi = 0;
-                    if (!empty($komisi)) {
-                        foreach ($komisi as $k) {
-                            if (in_array($k['status'], ['approved', 'paid']) && $k['status_penarikan'] === 'pending') {
-                                $totalKomisi += ($k['harga'] * $k['komisi'] / 100);
-                            }
+                $status = $affiliates->status;
+                $statusMap = [
+                    '1' => ['class' => 'badge-light-success border-success text-success', 'label' => 'Approved', 'icon' => 'ki-check-circle'],
+                    '0' => ['class' => 'badge-light-warning border-warning text-warning', 'label' => 'Pending', 'icon' => 'ki-information-2'],
+                    '2' => ['class' => 'badge-light-danger border-danger text-danger', 'label' => 'Rejected', 'icon' => 'ki-cross-circle'],
+                ];
+                $currStatus = $statusMap[$status] ?? ['class' => 'badge-light-secondary border-secondary', 'label' => 'Unknown', 'icon' => ''];
+
+                // Hitung Total Komisi
+                $totalKomisi = 0;
+                if (!empty($komisi)) {
+                    foreach ($komisi as $k) {
+                        if (in_array($k['status'], ['approved', 'paid']) && $k['status_penarikan'] === 'pending') {
+                            $totalKomisi += ($k['harga'] * $k['komisi'] / 100);
                         }
                     }
+                }
                 ?>
 
                 <div class="row g-5 g-xl-8 mb-8">
@@ -51,7 +51,7 @@
                                 </div>
                                 <div class="card-toolbar">
                                     <?php if ($status === '1' && $affiliates->total_edit <= 0): ?>
-                                        <a href="<?= base_url('sw-siswa/affiliate/edit/'.encrypt_url($affiliates->id_affiliate)) ?>" class="btn btn-sm btn-icon btn-light-warning" data-bs-toggle="tooltip" title="Edit Rekening">
+                                        <a href="<?= base_url('sw-siswa/affiliate/edit/' . encrypt_url($affiliates->id_affiliate)) ?>" class="btn btn-sm btn-icon btn-light-warning" data-bs-toggle="tooltip" title="Edit Rekening">
                                             <i class="ki-outline ki-pencil fs-4"></i>
                                         </a>
                                     <?php elseif ($status === '0'): ?>
@@ -61,13 +61,13 @@
                                     <?php endif; ?>
                                 </div>
                             </div>
-                            
+
                             <div class="card-body pt-3 pb-6">
                                 <!-- Status Badge -->
                                 <div class="d-flex flex-stack bg-light rounded-3 p-4 mb-5 border border-dashed <?= $currStatus['class'] ?>">
                                     <div class="fw-bold <?= str_replace('border-', 'text-', explode(' ', $currStatus['class'])[1]) ?>">Status Pengajuan</div>
                                     <span class="badge <?= $currStatus['class'] ?> fs-7 fw-bold px-3 py-2">
-                                        <i class="ki-outline <?= $currStatus['icon'] ?> fs-5 me-1 <?= str_replace('border-', 'text-', explode(' ', $currStatus['class'])[1]) ?>"></i> 
+                                        <i class="ki-outline <?= $currStatus['icon'] ?> fs-5 me-1 <?= str_replace('border-', 'text-', explode(' ', $currStatus['class'])[1]) ?>"></i>
                                         <?= $currStatus['label'] ?>
                                     </span>
                                 </div>
@@ -144,17 +144,30 @@
                                                                     <span class="text-gray-800 fw-bold text-truncate" style="max-width: 150px;" title="<?= ucwords(strtolower($k['nama_paket'])) ?>">
                                                                         <?= ucwords(strtolower($k['nama_paket'])) ?>
                                                                     </span>
-                                                                    <span class="text-success fw-bold">Rp <?= number_format($k['harga'] * $k['komisi']/100, 0, ',', '.') ?> <span class="text-muted fw-normal fs-8">(<?= $k['komisi'] ?>%)</span></span>
+                                                                    <span class="text-success fw-bold">Rp <?= number_format($k['harga'] * $k['komisi'] / 100, 0, ',', '.') ?> <span class="text-muted fw-normal fs-8">(<?= $k['komisi'] ?>%)</span></span>
                                                                 </div>
                                                             </td>
-                                                            <td class="text-center">
-                                                                <div class="d-flex flex-column gap-1 align-items-center">
-                                                                    <?php 
-                                                                        $sc = ['approved' => 'success', 'pending' => 'warning', 'paid' => 'primary', 'rejected' => 'danger'][$k['status']] ?? 'secondary';
-                                                                        $pc = ['pending' => ['warning','Pending'], 'approved' => ['primary','Approved'], 'processing' => ['info','Proses'], 'paid' => ['success','Cair']][$k['status_penarikan']] ?? ['secondary','-'];
+                                                            <td class="text-start">
+                                                                <div class="d-flex flex-column gap-2">
+                                                                    <?php
+                                                                    // Status Transaksi (Pembelian via link affiliate)
+                                                                    $sc = ['approved' => 'success', 'pending' => 'warning', 'paid' => 'primary', 'rejected' => 'danger'][$k['status']] ?? 'secondary';
+
+                                                                    // Status Pencairan Komisi (Withdrawal)
+                                                                    $pc = ['pending' => ['warning', 'Pending'], 'approved' => ['primary', 'Approved'], 'processing' => ['info', 'Proses'], 'paid' => ['success', 'Cair']][$k['status_penarikan']] ?? ['secondary', '-'];
                                                                     ?>
-                                                                    <span class="badge badge-light-<?= $sc ?> fs-8 px-2 py-1 w-100"><?= ucfirst($k['status']) ?></span>
-                                                                    <span class="badge badge-light-<?= $pc[0] ?> fs-8 px-2 py-1 w-100"><?= $pc[1] ?></span>
+
+                                                                    <!-- Status Transaksi Pembelian -->
+                                                                    <div class="d-flex justify-content-between align-items-center">
+                                                                        <span class="text-muted fs-8 fw-medium me-3" title="Status pembayaran dari peserta yang menggunakan link Anda">Transaksi:</span>
+                                                                        <span class="badge badge-light-<?= $sc ?> fs-8 px-2 py-1 min-w-70px text-center"><?= ucfirst($k['status']) ?></span>
+                                                                    </div>
+
+                                                                    <!-- Status Pencairan Komisi -->
+                                                                    <div class="d-flex justify-content-between align-items-center">
+                                                                        <span class="text-muted fs-8 fw-medium me-3" title="Status pencairan komisi Anda ke rekening">Pencairan:</span>
+                                                                        <span class="badge badge-light-<?= $pc[0] ?> fs-8 px-2 py-1 min-w-70px text-center"><?= $pc[1] ?></span>
+                                                                    </div>
                                                                 </div>
                                                             </td>
                                                             <td class="text-end">
@@ -266,10 +279,10 @@
                                                         <div class="d-flex justify-content-between align-items-center mb-4 pb-4 border-bottom border-dashed">
                                                             <span class="fs-7 fw-bold text-gray-600"><i class="icofont-read-book fs-4 text-primary me-1"></i> <?= (!empty($jml) ? $jml : '0') ?> Soal/<span style="font-size:10px">Materi</span></span>
                                                             <div class="text-end">
-                                                                <?php 
-                                                                    $persen_diskon = $rows->diskon ?? 0;
-                                                                    $nilai_diskon = ($rows->nominal_paket * $persen_diskon) / 100;
-                                                                    $harga_tampil = $rows->nominal_paket - $nilai_diskon;
+                                                                <?php
+                                                                $persen_diskon = $rows->diskon ?? 0;
+                                                                $nilai_diskon = ($rows->nominal_paket * $persen_diskon) / 100;
+                                                                $harga_tampil = $rows->nominal_paket - $nilai_diskon;
                                                                 ?>
                                                                 <div class="fw-bolder fs-4 text-dark">Rp <?= number_format($harga_tampil, 0, ',', '.') ?></div>
                                                                 <div class="text-muted text-decoration-line-through fs-8 small">Rp <?= number_format($rows->nominal_paket, 0, ',', '.') ?></div>
@@ -278,7 +291,7 @@
 
                                                         <!-- Affiliate Estimasi Box -->
                                                         <?php
-                                                            $est_komisi = ($harga_tampil * $rows->komisi) / 100;
+                                                        $est_komisi = ($harga_tampil * $rows->komisi) / 100;
                                                         ?>
                                                         <div class="affiliate-box p-3 mb-4 bg-light-success border border-success border-dashed rounded-3">
                                                             <div class="d-flex justify-content-between align-items-center fs-7">
@@ -414,24 +427,51 @@
                 <h5 class="modal-title fw-bold">Detail Riwayat Pencairan Komisi</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            
+
             <div class="modal-body">
                 <div class="row g-5">
                     <div class="col-md-6">
                         <table class="table table-row-bordered fs-6 gy-2">
-                            <tr><td class="fw-bold text-muted">Kode Penarikan</td><td id="det_kode_penarikan" class="fw-bold text-gray-800">-</td></tr>
-                            <tr><td class="fw-bold text-muted">Bank Tujuan</td><td id="det_bank">-</td></tr>
-                            <tr><td class="fw-bold text-muted">No. Rekening</td><td id="det_norek">-</td></tr>
-                            <tr><td class="fw-bold text-muted">Atas Nama</td><td id="det_atas_nama">-</td></tr>
-                            <tr><td class="fw-bold text-muted">Status</td><td id="det_status">-</td></tr>
+                            <tr>
+                                <td class="fw-bold text-muted">Kode Penarikan</td>
+                                <td id="det_kode_penarikan" class="fw-bold text-gray-800">-</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold text-muted">Bank Tujuan</td>
+                                <td id="det_bank">-</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold text-muted">No. Rekening</td>
+                                <td id="det_norek">-</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold text-muted">Atas Nama</td>
+                                <td id="det_atas_nama">-</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold text-muted">Status</td>
+                                <td id="det_status">-</td>
+                            </tr>
                         </table>
                     </div>
                     <div class="col-md-6">
                         <table class="table table-row-bordered fs-6 gy-2">
-                            <tr><td class="fw-bold text-muted">Nominal Kotor</td><td id="det_kotor" class="text-end">-</td></tr>
-                            <tr><td class="fw-bold text-muted">Potongan PPh21</td><td id="det_pph21" class="text-end text-danger">-</td></tr>
-                            <tr><td class="fw-bold text-muted">Biaya Admin</td><td id="det_admin" class="text-end text-danger">-</td></tr>
-                            <tr><td class="fw-bold text-muted">Total Bersih</td><td id="det_bersih" class="text-end fw-bold text-success">-</td></tr>
+                            <tr>
+                                <td class="fw-bold text-muted">Nominal Kotor</td>
+                                <td id="det_kotor" class="text-end">-</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold text-muted">Potongan PPh21</td>
+                                <td id="det_pph21" class="text-end text-danger">-</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold text-muted">Biaya Admin</td>
+                                <td id="det_admin" class="text-end text-danger">-</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold text-muted">Total Bersih</td>
+                                <td id="det_bersih" class="text-end fw-bold text-success">-</td>
+                            </tr>
                         </table>
                     </div>
                 </div>
@@ -450,158 +490,241 @@
 
 <style>
     /* Styling */
-    .table.table-row-dashed tr { border-bottom: 1px dashed var(--bs-gray-200); }
-    .badge-light-success { background-color: #E8FFF3; color: #50CD89; }
-    .badge-light-warning { background-color: #FFF8DD; color: #FFC700; }
-    .badge-light-primary { background-color: #F1FAFF; color: #009EF7; }
-    .badge-light-danger { background-color: #FFF5F8; color: #F1416C; }
-    .zoom { transition: transform 0.3s ease; }
-    .zoom:hover { transform: translateY(-5px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important; }
-    
+    .table.table-row-dashed tr {
+        border-bottom: 1px dashed var(--bs-gray-200);
+    }
+
+    .badge-light-success {
+        background-color: #E8FFF3;
+        color: #50CD89;
+    }
+
+    .badge-light-warning {
+        background-color: #FFF8DD;
+        color: #FFC700;
+    }
+
+    .badge-light-primary {
+        background-color: #F1FAFF;
+        color: #009EF7;
+    }
+
+    .badge-light-danger {
+        background-color: #FFF5F8;
+        color: #F1416C;
+    }
+
+    .zoom {
+        transition: transform 0.3s ease;
+    }
+
+    .zoom:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
+    }
+
     /* Scrollbar minimalis untuk table komisi */
-    .table-responsive::-webkit-scrollbar { height: 6px; width: 6px; }
-    .table-responsive::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-    .table-responsive::-webkit-scrollbar-track { background: #f1f5f9; }
+    .table-responsive::-webkit-scrollbar {
+        height: 6px;
+        width: 6px;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+    }
+
+    .table-responsive::-webkit-scrollbar-track {
+        background: #f1f5f9;
+    }
 </style>
 
 <?= $this->endSection(); ?>
 
 <?= $this->section('scripts'); ?>
 <script>
-$(document).ready(function () {
-    // --- 1. SLIDER ---
-    if (document.querySelector('#kt_brevet_slider')) {
-        var sliderBrevet = tns({
-            container: '#kt_brevet_slider',
-            items: 3, 
-            gutter: 20,
-            speed: 400,
-            autoplay: false,
-            controls: false,
-            nav: false,
-            mouseDrag: true,
-            touch: true,
-            preventScrollOnTouch: 'auto',
-            responsive: {
-                0: { items: 1 },
-                768: { items: 2 },
-                1200: { items: 3 }
-            }
-        });
-        $('#kt_slider_prev').on('click', () => sliderBrevet.goTo('prev'));
-        $('#kt_slider_next').on('click', () => sliderBrevet.goTo('next'));
-    }
-
-    // --- 2. AJAX COPY LINK ---
-    $(document).on('click', '.btn-copy-link', function() {
-        let btn = $(this);
-        let originalContent = btn.html();
-        btn.prop('disabled', true).html('<i class="spinner-border spinner-border-sm me-1"></i> Wait..');
-
-        $.ajax({
-            url: "<?= base_url('sw-siswa/affiliate/copy') ?>",
-            type: "POST",
-            dataType: "json",
-            data: { paket_id: btn.data('paket_id'), <?= csrf_token() ?>: "<?= csrf_hash() ?>" },
-            success: function(res) {
-                if (res.status === 'success') {
-                    if (navigator.clipboard && window.isSecureContext) {
-                        navigator.clipboard.writeText(res.link).then(() => showAlert('success', 'Disalin!', 'Link siap dibagikan.')).catch(() => fallbackCopy(res.link));
-                    } else fallbackCopy(res.link);
-                } else showAlert('error', 'Gagal!', 'Link gagal dibuat.');
-                btn.prop('disabled', false).html(originalContent);
-            },
-            error: function() {
-                showAlert('error', 'Error!', 'Server bermasalah.');
-                btn.prop('disabled', false).html(originalContent);
-            }
-        });
-    });
-
-    function fallbackCopy(text) {
-        let input = document.getElementById('clipboard-temp');
-        input.value = text; input.focus(); input.select(); input.setSelectionRange(0, 99999);
-        try { document.execCommand('copy'); showAlert('success', 'Disalin!', 'Link siap dibagikan.'); } 
-        catch (e) { showAlert('error', 'Gagal', 'Tidak dapat menyalin link.'); }
-    }
-
-    // --- 3. AJAX SHARE WA ---
-    $(document).on('click', '.share-link', function(e) {
-        e.preventDefault();
-        let btn = $(this);
-        let originalContent = btn.html();
-        btn.prop('disabled', true).html('<i class="spinner-border spinner-border-sm me-1"></i> Wait..');
-        let waWindow = window.open('about:blank', '_blank');
-
-        $.ajax({
-            url: "<?= base_url('sw-siswa/affiliate/copy') ?>",
-            type: "POST", dataType: "json",
-            data: { paket_id: btn.data('paket_id'), <?= csrf_token() ?>: "<?= csrf_hash() ?>" },
-            success: function(res) {
-                if (res.status === 'success') {
-                    let link = encodeURIComponent(res.link);
-                    let pesan = encodeURIComponent("Halo, yuk gabung pelatihan brevet resmi bersama kami. Daftar lewat link ini ya: \n\n");
-                    waWindow.location.href = "https://wa.me/?text=" + pesan + link;
-                } else {
-                    showAlert('error', 'Gagal!', 'Link gagal dibuat.'); waWindow.close();
+    $(document).ready(function() {
+        // --- 1. SLIDER ---
+        if (document.querySelector('#kt_brevet_slider')) {
+            var sliderBrevet = tns({
+                container: '#kt_brevet_slider',
+                items: 3,
+                gutter: 20,
+                speed: 400,
+                autoplay: false,
+                controls: false,
+                nav: false,
+                mouseDrag: true,
+                touch: true,
+                preventScrollOnTouch: 'auto',
+                responsive: {
+                    0: {
+                        items: 1
+                    },
+                    768: {
+                        items: 2
+                    },
+                    1200: {
+                        items: 3
+                    }
                 }
-                btn.prop('disabled', false).html(originalContent);
-            },
-            error: function() {
-                showAlert('error', 'Error!', 'Server bermasalah.'); waWindow.close(); btn.prop('disabled', false).html(originalContent);
+            });
+            $('#kt_slider_prev').on('click', () => sliderBrevet.goTo('prev'));
+            $('#kt_slider_next').on('click', () => sliderBrevet.goTo('next'));
+        }
+
+        // --- 2. AJAX COPY LINK ---
+        $(document).on('click', '.btn-copy-link', function() {
+            let btn = $(this);
+            let originalContent = btn.html();
+            btn.prop('disabled', true).html('<i class="spinner-border spinner-border-sm me-1"></i> Wait..');
+
+            $.ajax({
+                url: "<?= base_url('sw-siswa/affiliate/copy') ?>",
+                type: "POST",
+                dataType: "json",
+                data: {
+                    paket_id: btn.data('paket_id'),
+                    <?= csrf_token() ?>: "<?= csrf_hash() ?>"
+                },
+                success: function(res) {
+                    if (res.status === 'success') {
+                        if (navigator.clipboard && window.isSecureContext) {
+                            navigator.clipboard.writeText(res.link).then(() => showAlert('success', 'Disalin!', 'Link siap dibagikan.')).catch(() => fallbackCopy(res.link));
+                        } else fallbackCopy(res.link);
+                    } else showAlert('error', 'Gagal!', 'Link gagal dibuat.');
+                    btn.prop('disabled', false).html(originalContent);
+                },
+                error: function() {
+                    showAlert('error', 'Error!', 'Server bermasalah.');
+                    btn.prop('disabled', false).html(originalContent);
+                }
+            });
+        });
+
+        function fallbackCopy(text) {
+            let input = document.getElementById('clipboard-temp');
+            input.value = text;
+            input.focus();
+            input.select();
+            input.setSelectionRange(0, 99999);
+            try {
+                document.execCommand('copy');
+                showAlert('success', 'Disalin!', 'Link siap dibagikan.');
+            } catch (e) {
+                showAlert('error', 'Gagal', 'Tidak dapat menyalin link.');
             }
+        }
+
+        // --- 3. AJAX SHARE WA ---
+        $(document).on('click', '.share-link', function(e) {
+            e.preventDefault();
+            let btn = $(this);
+            let originalContent = btn.html();
+            btn.prop('disabled', true).html('<i class="spinner-border spinner-border-sm me-1"></i> Wait..');
+            let waWindow = window.open('about:blank', '_blank');
+
+            $.ajax({
+                url: "<?= base_url('sw-siswa/affiliate/copy') ?>",
+                type: "POST",
+                dataType: "json",
+                data: {
+                    paket_id: btn.data('paket_id'),
+                    <?= csrf_token() ?>: "<?= csrf_hash() ?>"
+                },
+                success: function(res) {
+                    if (res.status === 'success') {
+                        let link = encodeURIComponent(res.link);
+                        let pesan = encodeURIComponent("Halo, yuk gabung pelatihan brevet resmi bersama kami. Daftar lewat link ini ya: \n\n");
+                        waWindow.location.href = "https://wa.me/?text=" + pesan + link;
+                    } else {
+                        showAlert('error', 'Gagal!', 'Link gagal dibuat.');
+                        waWindow.close();
+                    }
+                    btn.prop('disabled', false).html(originalContent);
+                },
+                error: function() {
+                    showAlert('error', 'Error!', 'Server bermasalah.');
+                    waWindow.close();
+                    btn.prop('disabled', false).html(originalContent);
+                }
+            });
+        });
+
+        function showAlert(type, title, message) {
+            Swal.fire({
+                title: title,
+                text: message,
+                icon: type,
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+
+        // --- 4. BATALKAN AFFILIATE ---
+        $(document).on('click', '.btn-delete', function() {
+            const id = $(this).data('id');
+            Swal.fire({
+                title: 'Batalkan Pengajuan?',
+                text: "Data affiliate Anda akan dihapus permanen.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Tutup',
+                customClass: {
+                    confirmButton: "btn btn-danger",
+                    cancelButton: "btn btn-active-light"
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.post("<?= base_url('sw-siswa/affiliate/delete') ?>", {
+                        id: id,
+                        <?= csrf_token() ?>: "<?= csrf_hash() ?>"
+                    }, function(res) {
+                        if (res.status === 'success') Swal.fire({
+                            title: 'Berhasil!',
+                            text: res.message,
+                            icon: 'success'
+                        }).then(() => location.reload());
+                        else Swal.fire('Gagal!', res.message, 'error');
+                    }, 'json');
+                }
+            });
+        });
+
+        // --- 5. DETAIL PENCAIRAN ---
+        $(document).on('click', '.btn-view-pencairan', function() {
+            let idKomisi = $(this).data('id-komisi');
+            $('#det_kode_penarikan, #det_bank, #det_norek, #det_atas_nama, #det_status, #det_kotor, #det_pph21, #det_admin, #det_bersih').text('...');
+            $('#wrapper_bukti').html('<span class="text-muted">Memuat...</span>');
+            $('#modalDetailPencairan').modal('show');
+
+            $.ajax({
+                url: "<?= base_url('sw-siswa/affiliate/getDetailPencairan') ?>/" + idKomisi,
+                type: "GET",
+                dataType: "json",
+                success: function(res) {
+                    if (res.status === 'success') {
+                        let d = res.data;
+                        $('#det_kode_penarikan').text(d.kode_penarikan);
+                        $('#det_bank').text(d.bank_tujuan);
+                        $('#det_norek').text(d.no_rekening);
+                        $('#det_atas_nama').text(d.atas_nama);
+                        $('#det_status').html('<span class="badge badge-light-success fw-bold">' + d.status.toUpperCase() + '</span>');
+                        $('#det_kotor').text('Rp ' + parseFloat(d.nominal_kotor).toLocaleString('id-ID'));
+                        $('#det_pph21').text('- Rp ' + parseFloat(d.potongan_pph21).toLocaleString('id-ID'));
+                        $('#det_admin').text('- Rp ' + parseFloat(d.biaya_admin).toLocaleString('id-ID'));
+                        $('#det_bersih').text('Rp ' + parseFloat(d.nominal_bersih).toLocaleString('id-ID'));
+                        if (d.bukti_transfer) {
+                            let imageUrl = "<?= base_url('uploads/bukti_pencairan/') ?>" + d.bukti_transfer;
+                            $('#wrapper_bukti').html(`<a href="${imageUrl}" target="_blank"><img src="${imageUrl}" class="img-fluid rounded" style="max-height: 250px;"></a>`);
+                        } else $('#wrapper_bukti').html('<span class="text-danger">Belum ada bukti</span>');
+                    } else Swal.fire('Gagal', res.message, 'error');
+                },
+                error: () => Swal.fire('Gagal', 'Server bermasalah', 'error')
+            });
         });
     });
-
-    function showAlert(type, title, message) {
-        Swal.fire({ title: title, text: message, icon: type, timer: 2000, showConfirmButton: false });
-    }
-
-    // --- 4. BATALKAN AFFILIATE ---
-    $(document).on('click', '.btn-delete', function () {
-        const id = $(this).data('id');
-        Swal.fire({
-            title: 'Batalkan Pengajuan?', text: "Data affiliate Anda akan dihapus permanen.", icon: 'warning',
-            showCancelButton: true, confirmButtonText: 'Ya, Hapus!', cancelButtonText: 'Tutup',
-            customClass: { confirmButton: "btn btn-danger", cancelButton: "btn btn-active-light" }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.post("<?= base_url('sw-siswa/affiliate/delete') ?>", { id: id, <?= csrf_token() ?>: "<?= csrf_hash() ?>" }, function (res) {
-                    if (res.status === 'success') Swal.fire({ title:'Berhasil!', text:res.message, icon:'success' }).then(() => location.reload());
-                    else Swal.fire('Gagal!', res.message, 'error');
-                }, 'json');
-            }
-        });
-    });
-
-    // --- 5. DETAIL PENCAIRAN ---
-    $(document).on('click', '.btn-view-pencairan', function () {
-        let idKomisi = $(this).data('id-komisi');
-        $('#det_kode_penarikan, #det_bank, #det_norek, #det_atas_nama, #det_status, #det_kotor, #det_pph21, #det_admin, #det_bersih').text('...');
-        $('#wrapper_bukti').html('<span class="text-muted">Memuat...</span>');
-        $('#modalDetailPencairan').modal('show');
-
-        $.ajax({
-            url: "<?= base_url('sw-siswa/affiliate/getDetailPencairan') ?>/" + idKomisi, type: "GET", dataType: "json",
-            success: function (res) {
-                if (res.status === 'success') {
-                    let d = res.data;
-                    $('#det_kode_penarikan').text(d.kode_penarikan); $('#det_bank').text(d.bank_tujuan); $('#det_norek').text(d.no_rekening); $('#det_atas_nama').text(d.atas_nama);
-                    $('#det_status').html('<span class="badge badge-light-success fw-bold">' + d.status.toUpperCase() + '</span>');
-                    $('#det_kotor').text('Rp ' + parseFloat(d.nominal_kotor).toLocaleString('id-ID'));
-                    $('#det_pph21').text('- Rp ' + parseFloat(d.potongan_pph21).toLocaleString('id-ID'));
-                    $('#det_admin').text('- Rp ' + parseFloat(d.biaya_admin).toLocaleString('id-ID'));
-                    $('#det_bersih').text('Rp ' + parseFloat(d.nominal_bersih).toLocaleString('id-ID'));
-                    if (d.bukti_transfer) {
-                        let imageUrl = "<?= base_url('uploads/bukti_pencairan/') ?>" + d.bukti_transfer;
-                        $('#wrapper_bukti').html(`<a href="${imageUrl}" target="_blank"><img src="${imageUrl}" class="img-fluid rounded" style="max-height: 250px;"></a>`);
-                    } else $('#wrapper_bukti').html('<span class="text-danger">Belum ada bukti</span>');
-                } else Swal.fire('Gagal', res.message, 'error');
-            },
-            error: () => Swal.fire('Gagal', 'Server bermasalah', 'error')
-        });
-    });
-});
 </script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
