@@ -14,6 +14,7 @@ class AffiliateController extends BaseController
     protected $komisi;
     protected $SiswaModel;
     protected $affiliateLinkModel;
+    protected $paketModel;
 
     public function __construct()
     {
@@ -21,6 +22,7 @@ class AffiliateController extends BaseController
         $this->komisi    = new AffiliateCommissionModel();
         $this->SiswaModel    = new SiswaModel();
         $this->affiliateLinkModel = new AffiliateLinkModel();
+        $this->paketModel = new \App\Models\PaketModel();
     }
 
     public function index()
@@ -29,6 +31,7 @@ class AffiliateController extends BaseController
             ['title' => 'Dashboard', 'url' => base_url('sw-siswa')],
             ['title' => 'Affiliate', 'url' => '#'],
         ];
+        $data['db'] = \Config\Database::connect();
         // Ambil affiliate
         $affiliate = $this->affiliate
             ->where('user_id', session()->get('id'))
@@ -36,6 +39,7 @@ class AffiliateController extends BaseController
     
         $data['affiliates'] = $affiliate;
         $data['siswa'] = $this->SiswaModel->asObject()->find(session()->get('id'));
+        $data['paket'] = $this->paketModel->getAll();
     
         // Kalau belum punya affiliate
         if (!$affiliate) {
