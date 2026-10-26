@@ -26,12 +26,60 @@ class AffiliateController extends BaseController
         $this->emailer = new Emailer();
     }
 
+
     public function index()
     {
+        $db = \Config\Database::connect();
+        $tahunSekarang = date('Y');
+
+        // 1. Hitung Total Affiliate Aktif (Status = 1 / Approved)
+        $totalAffiliate = $db->table('affiliates')->where('status', '1')->countAllResults();
+
+        // 2. Hitung Total Komisi Pending Keseluruhan
+        $queryPending = $db->query("
+        SELECT SUM(harga * komisi / 100) as total 
+        FROM affiliate_commissions 
+        WHERE status = 'approved' AND status_penarikan IN ('pending', 'proses')
+    ")->getRow();
+        $totalKomisiPending = $queryPending->total ?? 0;
+
+        // 3. Rekap Data Grafik Bulanan (Tahun Berjalan)
+        $chartData = [
+            'cair' => array_fill(0, 12, 0),
+            'pending' => array_fill(0, 12, 0)
+        ];
+
+        $queryChart = $db->query("
+        SELECT 
+            MONTH(COALESCE(tgl_pembayaran, created_at)) as bulan,
+            status_penarikan,
+            SUM(harga * komisi / 100) as total
+        FROM affiliate_commissions
+        WHERE status = 'approved' AND YEAR(COALESCE(tgl_pembayaran, created_at)) = ?
+        GROUP BY MONTH(COALESCE(tgl_pembayaran, created_at)), status_penarikan
+    ", [$tahunSekarang])->getResult();
+
+        foreach ($queryChart as $row) {
+            $bulanIndex = $row->bulan - 1;
+
+            if (in_array($row->status_penarikan, ['pending', 'proses'])) {
+                $chartData['pending'][$bulanIndex] += (float) $row->total;
+            } elseif (in_array($row->status_penarikan, ['success', 'paid'])) {
+                $chartData['cair'][$bulanIndex] += (float) $row->total;
+            }
+        }
+
         $data['breadcrumbs'] = [
             ['title' => 'Dashboard', 'url' => base_url('sw-admin')],
             ['title' => 'List Affiliate', 'url' => '#'],
         ];
+
+        // Kirim data tambahan untuk statistik & grafik ke view
+        $data['totalAffiliate'] = $totalAffiliate;
+        $data['totalKomisiPending'] = $totalKomisiPending;
+        $data['chartData'] = json_encode($chartData);
+        $data['tahunSekarang'] = $tahunSekarang;
+
         return view('admin/affiliate/index', $data);
     }
 
@@ -63,11 +111,11 @@ class AffiliateController extends BaseController
                 ),
             0) AS total_komisi_pending,
 
-            -- 2. Menghitung Total Komisi yang Sudah Berhasil Dicairkan (Success / Selesai)
+            -- 2. Menghitung Total Komisi yang Sudah Berhasil Dicairkan (Success / Selesai / Paid)
             IFNULL(
                 SUM(
                     CASE 
-                        WHEN c.status = 'approved' AND c.status_penarikan = 'success'
+                        WHEN c.status = 'approved' AND c.status_penarikan IN ('approved', 'paid')
                         THEN (c.harga * c.komisi / 100)
                         ELSE 0
                     END
@@ -75,7 +123,6 @@ class AffiliateController extends BaseController
             0) AS total_komisi_dicairkan
         ")
             ->join('siswa', 'siswa.id_siswa = affiliates.user_id')
-            // Hapus filter 'pending' di sini agar kita bisa mengambil data yang sudah cair juga
             ->join(
                 'affiliate_commissions c',
                 'c.kode_affiliate = affiliates.kode_affiliate AND c.status = "approved"',
@@ -93,12 +140,10 @@ class AffiliateController extends BaseController
 
         $totalData = $builder->countAllResults(false);
 
-        // 🔥 LOGIKA SORTING (PENGURUTAN)
-        // 1. Prioritaskan Nominal Pending/Pencairan paling besar di atas.
-        // 2. Yang nominal pendingnya 0 (termasuk yang sudah cair semua) otomatis turun ke bawah.
+        // 🔥 LOGIKA SORTING (Prioritaskan komisi pending terbesar di atas)
         $builder->orderBy('total_komisi_pending', 'desc')
-            ->orderBy('affiliates.status', 'asc')
-            ->orderBy('affiliates.id_affiliate', 'desc')
+            ->orderBy('total_komisi_dicairkan', 'desc')
+            ->orderBy('affiliates.created_at', 'desc')
             ->limit($length, $start);
 
         $query = $builder->get()->getResult();
@@ -109,65 +154,73 @@ class AffiliateController extends BaseController
 
             switch ($row->status) {
                 case '1':
-                    $badge = 'badge-success';
+                    $badge = 'badge-light-success';
                     $text  = 'Approved';
                     $btn = '
-                        <a href="' . base_url('sw-admin/affiliate/komisi/' . encrypt_url($row->kode_affiliate)) . '"
-                            class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-eye"></i>
-                        </a>';
+                    <a href="' . base_url('sw-admin/affiliate/komisi/' . encrypt_url($row->kode_affiliate)) . '"
+                        class="btn btn-sm btn-light-primary" data-bs-toggle="tooltip" title="Lihat Detail">
+                        <i class="bi bi-eye"></i> Detail
+                    </a>';
                     break;
                 case '0':
-                    $badge = 'badge-warning';
+                    $badge = 'badge-light-warning';
                     $text  = 'Pending';
                     $btn = '
-                        <a href="' . base_url('sw-admin/affiliate/edit/' . encrypt_url($row->id_affiliate)) . '"
-                            class="btn btn-sm btn-outline-warning mr-2">
-                            <i class="bi bi-eye"></i>
-                        </a>';
+                    <a href="' . base_url('sw-admin/affiliate/edit/' . encrypt_url($row->id_affiliate)) . '"
+                        class="btn btn-sm btn-light-warning" data-bs-toggle="tooltip" title="Review">
+                        <i class="bi bi-pencil"></i> Review
+                    </a>';
                     break;
                 default:
-                    $badge = 'badge-secondary';
+                    $badge = 'badge-light-secondary';
                     $text  = '-';
                     $btn = '';
             }
 
-            // 💡 KATA-KATA PROFESIONAL UNTUK TAMPILAN KOMISI
-            $tampilan_komisi = '';
+            // 💡 TAMPILAN KOMISI (Menunggu vs Sudah Cair)
+            $tampilan_komisi = '<div class="d-flex flex-column text-end">';
 
-            // Tampilkan Jika ada komisi yang sedang menunggu
             if ($row->total_komisi_pending > 0) {
                 $tampilan_komisi .= '
-                <div class="text-warning font-weight-bold" title="Menunggu Pencairan">
+                <span class="text-warning fw-bolder fs-6 mb-1" title="Komisi belum dicairkan">
                     Rp ' . number_format($row->total_komisi_pending, 0, ',', '.') . ' 
-                    <small>(Menunggu Pencairan)</small>
-                </div>';
+                    <span class="badge badge-light-warning py-1 px-2 fs-8 ms-1">Menunggu</span>
+                </span>';
+            } else {
+                $tampilan_komisi .= '
+                <span class="text-muted fw-bold fs-6 mb-1" title="Tidak ada komisi yang menunggu">
+                    Rp 0 
+                    <span class="badge badge-light-secondary py-1 px-2 fs-8 ms-1">Menunggu</span>
+                </span>';
             }
 
-            // Tampilkan Jika ada komisi yang sudah berhasil dicairkan
             if ($row->total_komisi_dicairkan > 0) {
                 $tampilan_komisi .= '
-                <div class="text-success mt-1" style="font-size: 0.85rem;" title="Sudah Dicairkan">
-                    <i class="bi bi-check-circle-fill"></i> Rp ' . number_format($row->total_komisi_dicairkan, 0, ',', '.') . ' (Telah Dicairkan)
-                </div>';
+                <span class="text-success fs-8 fw-semibold" title="Total komisi yang sudah dibayarkan">
+                    <i class="bi bi-check-circle-fill text-success me-1"></i> Cair: Rp ' . number_format($row->total_komisi_dicairkan, 0, ',', '.') . '
+                </span>';
+            } else {
+                $tampilan_komisi .= '
+                <span class="text-muted fs-8 fw-semibold">
+                    <i class="bi bi-dash-circle me-1"></i> Belum ada pencairan
+                </span>';
             }
 
-            // Jika belum ada komisi sama sekali
-            if ($row->total_komisi_pending == 0 && $row->total_komisi_dicairkan == 0) {
-                $tampilan_komisi = '<span class="text-muted">Rp 0</span>';
-            }
+            $tampilan_komisi .= '</div>';
 
             $data[] = [
-                '<div class="font-weight-bold">' . $row->nama_siswa . '</div>
-             <small class="text-muted">Affiliate User</small>',
+                '<div class="d-flex flex-column">
+                <span class="fw-bolder text-gray-800">' . $row->nama_siswa . '</span>
+                <span class="text-muted fs-8">Kode: ' . $row->kode_affiliate . '</span>
+             </div>',
 
-                date('d M Y H:i', strtotime($row->created_at)),
+                '<span class="fw-semibold text-gray-600">' . date('d M Y, H:i', strtotime($row->created_at)) . '</span>',
 
-                $tampilan_komisi, // <-- Menggunakan variabel UI komisi yang baru
+                $tampilan_komisi,
 
                 '<span class="badge ' . $badge . ' px-3 py-2">' . $text . '</span>',
 
-                '<div class="btn-group">
+                '<div class="d-flex justify-content-center">
                 ' . $btn . '
             </div>'
             ];
@@ -178,7 +231,7 @@ class AffiliateController extends BaseController
             'recordsTotal' => $totalData,
             'recordsFiltered' => $totalData,
             'data' => $data,
-            csrf_token() => csrf_hash() // 🔥 AUTO REFRESH CSRF
+            csrf_token() => csrf_hash()
         ]);
     }
 

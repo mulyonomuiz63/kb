@@ -338,7 +338,7 @@
                                                                 </button>
                                                             </div>
                                                             <a href="<?= base_url('sw-siswa/transaksi/pesan/' . encrypt_url($rows->idpaket)) ?>" class="btn btn-outline btn-outline-dashed btn-outline-default btn-sm fw-bold w-100 rounded-3 text-center text-muted">
-                                                                Lihat Paket Sendiri
+                                                                Lihat Paket
                                                             </a>
                                                         </div>
                                                         <input type="text" id="clipboard-temp" style="position:absolute;left:-9999px;">
