@@ -341,64 +341,64 @@
                         </div>
                     </div>
                 <?php endif; ?>
+            <?php endif; ?>
 
-                <!-- 4. PEDOMAN AFFILIATE CARD -->
-                <div class="card shadow-sm border-0 bg-light-info">
-                    <div class="card-header border-0 pt-6">
-                        <div class="card-title m-0">
-                            <div class="d-flex align-items-center">
-                                <i class="ki-outline ki-shield-tick fs-1 text-primary me-3"></i>
-                                <div class="d-flex flex-column">
-                                    <h3 class="fw-bolder fs-3 mb-1 text-gray-900">Panduan & Peraturan Affiliate</h3>
-                                    <span class="text-muted fw-semibold fs-7">Pahami ketentuan berikut untuk memaksimalkan komisi Anda.</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-5">
-                            <div class="col-md-6 col-xl-3">
-                                <div class="bg-white p-5 rounded-3 shadow-sm h-100 border border-gray-200">
-                                    <i class="ki-outline ki-people fs-2x text-primary mb-3 d-block"></i>
-                                    <h5 class="fw-bold text-gray-800 mb-2 fs-6">Ketentuan Umum</h5>
-                                    <span class="text-gray-600 fs-8 lh-sm">Dapatkan penghasilan tambahan dengan merekomendasikan pelatihan Kelas Brevet via media sosial.</span>
-                                </div>
-                            </div>
-                            <div class="col-md-6 col-xl-3">
-                                <div class="bg-white p-5 rounded-3 shadow-sm h-100 border border-gray-200">
-                                    <i class="ki-outline ki-percentage fs-2x text-success mb-3 d-block"></i>
-                                    <h5 class="fw-bold text-gray-800 mb-2 fs-6">Besaran Komisi</h5>
-                                    <span class="text-gray-600 fs-8 lh-sm">Komisi berdasarkan % harga paket terjual. Nilai komisi tiap paket tertera pada daftar paket di atas.</span>
-                                </div>
-                            </div>
-                            <div class="col-md-6 col-xl-3">
-                                <div class="bg-white p-5 rounded-3 shadow-sm h-100 border border-gray-200">
-                                    <i class="ki-outline ki-link fs-2x text-info mb-3 d-block"></i>
-                                    <h5 class="fw-bold text-gray-800 mb-2 fs-6">Cara Kerja Referral</h5>
-                                    <span class="text-gray-600 fs-8 lh-sm">Bagikan link atau klik tombol WA. Pembelian sah melalui link tersebut akan otomatis dihitung komisi.</span>
-                                </div>
-                            </div>
-                            <div class="col-md-6 col-xl-3">
-                                <div class="bg-white p-5 rounded-3 shadow-sm h-100 border border-gray-200">
-                                    <i class="ki-outline ki-wallet fs-2x text-warning mb-3 d-block"></i>
-                                    <h5 class="fw-bold text-gray-800 mb-2 fs-6">Sistem Pencairan</h5>
-                                    <span class="text-gray-600 fs-8 lh-sm">Cair otomatis tiap <strong>awal bulan</strong> (Min. Rp 100.000) ke rekening valid yang Anda daftarkan.</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="notice d-flex bg-white rounded-3 border-danger border border-dashed p-4 mt-5 shadow-sm align-items-center">
-                            <i class="ki-outline ki-information-2 fs-2x text-danger me-4"></i>
-                            <div class="d-flex flex-stack flex-grow-1">
-                                <div class="fw-semibold">
-                                    <h5 class="text-danger fw-bold fs-6 mb-1">Larangan Keras</h5>
-                                    <div class="fs-8 text-gray-700">Dilarang spamming, menyebar link di grup resmi tanpa izin, atau memberikan klaim palsu. Pelanggaran berakibat pada penangguhan akun sepihak.</div>
-                                </div>
+            <!-- 4. PEDOMAN AFFILIATE CARD (Diletakkan di luar supaya SELALU TAMPIL baik yang sudah daftar maupun belum) -->
+            <div class="card shadow-sm border-0 bg-light-info mb-8">
+                <div class="card-header border-0 pt-6">
+                    <div class="card-title m-0">
+                        <div class="d-flex align-items-center">
+                            <i class="ki-outline ki-shield-tick fs-1 text-primary me-3"></i>
+                            <div class="d-flex flex-column">
+                                <h3 class="fw-bolder fs-3 mb-1 text-gray-900">Panduan & Peraturan Affiliate</h3>
+                                <span class="text-muted fw-semibold fs-7">Pahami ketentuan berikut untuk memaksimalkan komisi Anda.</span>
                             </div>
                         </div>
                     </div>
                 </div>
-            <?php endif; ?>
+                <div class="card-body">
+                    <div class="row g-5">
+                        <div class="col-md-6 col-xl-3">
+                            <div class="bg-white p-5 rounded-3 shadow-sm h-100 border border-gray-200">
+                                <i class="ki-outline ki-people fs-2x text-primary mb-3 d-block"></i>
+                                <h5 class="fw-bold text-gray-800 mb-2 fs-6">Ketentuan Umum</h5>
+                                <span class="text-gray-600 fs-8 lh-sm">Dapatkan penghasilan tambahan dengan merekomendasikan pelatihan Kelas Brevet via media sosial.</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-xl-3">
+                            <div class="bg-white p-5 rounded-3 shadow-sm h-100 border border-gray-200">
+                                <i class="ki-outline ki-percentage fs-2x text-success mb-3 d-block"></i>
+                                <h5 class="fw-bold text-gray-800 mb-2 fs-6">Besaran Komisi</h5>
+                                <span class="text-gray-600 fs-8 lh-sm">Komisi berdasarkan persentase dari harga paket yang terjual melalui link Anda.</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-xl-3">
+                            <div class="bg-white p-5 rounded-3 shadow-sm h-100 border border-gray-200">
+                                <i class="ki-outline ki-link fs-2x text-info mb-3 d-block"></i>
+                                <h5 class="fw-bold text-gray-800 mb-2 fs-6">Cara Kerja Referral</h5>
+                                <span class="text-gray-600 fs-8 lh-sm">Bagikan link atau klik tombol WA. Pembelian sah melalui link tersebut akan otomatis dihitung komisi.</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-xl-3">
+                            <div class="bg-white p-5 rounded-3 shadow-sm h-100 border border-gray-200">
+                                <i class="ki-outline ki-wallet fs-2x text-warning mb-3 d-block"></i>
+                                <h5 class="fw-bold text-gray-800 mb-2 fs-6">Sistem Pencairan</h5>
+                                <span class="text-gray-600 fs-8 lh-sm">Cair otomatis tiap <strong>awal bulan</strong> (Min. Rp 100.000) ke rekening valid yang Anda daftarkan.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="notice d-flex bg-white rounded-3 border-danger border border-dashed p-4 mt-5 shadow-sm align-items-center">
+                        <i class="ki-outline ki-information-2 fs-2x text-danger me-4"></i>
+                        <div class="d-flex flex-stack flex-grow-1">
+                            <div class="fw-semibold">
+                                <h5 class="text-danger fw-bold fs-6 mb-1">Larangan Keras</h5>
+                                <div class="fs-8 text-gray-700">Dilarang spamming, menyebar link di grup resmi tanpa izin, atau memberikan klaim palsu. Pelanggaran berakibat pada penangguhan akun sepihak.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
         </div>
     </div>
@@ -602,5 +602,45 @@ $(document).ready(function () {
         });
     });
 });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const countdownElements = document.querySelectorAll(".flash-sale-badge");
+
+        countdownElements.forEach(function(element) {
+            const clockSpan = element.querySelector(".countdown-clock");
+            if (!clockSpan) return;
+
+            function updateCountdown() {
+                const now = new Date();
+
+                // Set waktu target ke pukul 00:00:00 di hari berikutnya
+                const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
+                const distance = tomorrow - now;
+
+                if (distance < 0) {
+                    clockSpan.innerHTML = "00:00:00";
+                    return;
+                }
+
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                // Format angka menjadi 2 digit (00:00:00)
+                const formatHours = String(hours).padStart(2, '0');
+                const formatMinutes = String(minutes).padStart(2, '0');
+                const formatSeconds = String(seconds).padStart(2, '0');
+
+                clockSpan.innerHTML = `${formatHours}:${formatMinutes}:${formatSeconds}`;
+            }
+
+            // Jalankan fungsi pertama kali agar tidak ada jeda 1 detik saat halaman dimuat
+            updateCountdown();
+
+            // Perbarui setiap 1 detik
+            setInterval(updateCountdown, 1000);
+        });
+    });
 </script>
 <?= $this->endSection(); ?>
