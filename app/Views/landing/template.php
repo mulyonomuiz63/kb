@@ -58,10 +58,31 @@
     <?php elseif ($uris->getSegment(1) == 'bimbel'): ?>
         <!-- Open Graph meta tags -->
         <meta name="robots" content="all" data-rh="true">
-        <meta property="og:title" content="<?= $paket->nama_paket ?>" />
-        <meta property="og:description" content="<?= $paket->nama_paket ?>" />
+        <meta property="og:title" content="<?= $paket->nama_paket ?> | KelasBrevet" />
+        <?php
+        // Logika perhitungan harga & diskon untuk deskripsi preview
+        $persen_diskon = $paket->diskon ?? 0;
+        $harga_asli = $paket->nominal_paket ?? 0;
+        $nilai_diskon = ($harga_asli * $persen_diskon) / 100;
+        $harga_final = $harga_asli - $nilai_diskon;
+
+        // Membuat efek teks coret menggunakan Unicode (̶) untuk WhatsApp
+        $harga_asli_str = "Rp " . number_format($harga_asli, 0, ',', '.');
+        $harga_coret = "";
+        for ($i = 0; $i < mb_strlen($harga_asli_str); $i++) {
+            $harga_coret .= mb_substr($harga_asli_str, $i, 1) . "\u{0336}";
+        }
+
+        // Susun deskripsi yang kaya informasi
+        if ($persen_diskon > 0) {
+            $og_desc = "🔥 DISKON " . $persen_diskon . "%! Harga Promo: Rp " . number_format($harga_final, 0, ',', '.') . " (Coret: " . $harga_coret . "). Yuk gabung kelas pelatihan resmi sekarang!";
+        } else {
+            $og_desc = "💰 Harga: Rp " . number_format($harga_asli, 0, ',', '.') . ". Pelatihan resmi bersertifikat. Daftar sekarang via KelasBrevet!";
+        }
+        ?>
+        <meta property="og:description" content="<?= $og_desc ?>" />
         <meta property="og:image" content="<?= base_url('assets-landing/images/paket/thumbnails/' . $paket->file) ?>" />
-        <meta property="og:url" content="<?= !base_url('assets-landing/images/paket/thumbnails/' . $paket->file) ?>" />
+        <meta property="og:url" content="<?= current_url() ?>" />
         <meta property="og:type" content="website" />
         <meta property="og:image:width" content="1200">
         <meta property="og:image:height" content="630">
@@ -69,8 +90,8 @@
 
         <!-- Opsional: Twitter card -->
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="<?= $paket->nama_paket ?>" />
-        <meta name="twitter:description" content="Deskripsi singkat." />
+        <meta name="twitter:title" content="<?= $paket->nama_paket ?> | KelasBrevet" />
+        <meta name="twitter:description" content="<?= $og_desc ?>" />
         <meta name="twitter:image" content="<?= base_url('assets-landing/images/paket/thumbnails/' . $paket->file) ?>" />
     <?php else: ?>
         <?php
