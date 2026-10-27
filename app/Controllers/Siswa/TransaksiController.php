@@ -171,9 +171,9 @@ class TransaksiController extends BaseController
             // 3. Simpan Transaksi Utama
             $dataInsert = [
                 'idsiswa'      => session('id'),
-                'nominal'      => $dataPaket->nominal_paket,
-                'diskon'       => $dataPaket->diskon,
-                'voucher'      => $diskon_voucher,
+                'nominal'      => $dataPaket->nominal_paket ?? 0, // Beri fallback 0 untuk keamanan
+                'diskon'       => $dataPaket->diskon ?? 0,        // Jika diskon NULL, otomatis jadi 0
+                'voucher'      => $diskon_voucher ?? 0,
                 'tgl_exp'      => $tgl_exp,
                 'tgl_drop'     => $tgl_exp, // Menggunakan tgl_exp sesuai logika awal
                 'kode_voucher' => $kode_voucher,
@@ -292,8 +292,7 @@ class TransaksiController extends BaseController
             }
         } catch (\Exception $e) {
             $db->transRollback();
-            var_dump($e->getMessage()); // Debugging: tampilkan pesan error
-            // return redirect()->to('sw-siswa')->with('success', $e->getMessage());
+            return redirect()->to('sw-siswa')->with('pesan', $e->getMessage());
         }
     }
 
