@@ -281,9 +281,9 @@ class TransaksiController extends BaseController
             // 8. LOGIKA BYPASS PEMBAYARAN JIKA HARGA AKHIR = 0
             if ($totalVoucher <= 0) {
                 // Memanggil fungsi aktivasi otomatis
-                $this->approveManual($idtransaksi, '', '');
+                $this->approveManual($idtransaksi, '', null);
 
-                return redirect()->to('sw-siswa')->with('pesan', 'Paket ujian berhasil diaktifkan. Silahkan cek di menu "Ujian" untuk memulai belajar.');
+                return redirect()->to('sw-siswa')->with('success', 'Paket ujian berhasil diaktifkan. Silahkan cek di menu "Ujian" untuk memulai belajar.');
             } else {
                 // Menggunakan Library Emailer baru Anda
                 $this->kirimEmailInvoice($this->emailer, $diskon, $diskon_voucher, encrypt_url($idtransaksi));
