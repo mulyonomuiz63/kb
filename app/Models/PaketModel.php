@@ -86,7 +86,7 @@ class PaketModel extends Model
         return $this
             ->select('paket.*, b.diskon, c.id_mapel')
             ->join('diskon b', 'b.iddiskon = paket.iddiskon', 'left') // Ubah jadi LEFT JOIN agar paket tanpa diskon tetap tampil
-            ->join('detail_paket c', 'c.idpaket=paket.idpaket')
+            ->join('detail_paket c', 'c.idpaket=paket.idpaket', 'left') // Ubah jadi LEFT JOIN agar paket tanpa detail_paket tetap tampil
             ->where('paket.idpaket', $id)
             ->where('paket.status', '1')
             ->get()->getRowObject();
