@@ -83,23 +83,15 @@
                                                     </a>
                                                 <?php endif; ?>
 
-                                                <!-- ======================================================== -->
-                                                <!-- TAMBAHAN: Tombol Kirim Email (Hanya untuk Paket Webinar) -->
-                                                <!-- ======================================================== -->
                                                 <?php
-                                                // 1. Decode string JSON menjadi Array PHP
                                                 $jenisPaketArr = json_decode($s->jenis_paket, true);
-                                                // 2. Pastikan bentuknya array, lalu ubah semua isinya jadi huruf kecil agar aman
                                                 $jenisPaketArr = is_array($jenisPaketArr) ? array_map('strtolower', $jenisPaketArr) : [];
-
-                                                // 3. Cek apakah ada kata 'webinar' di dalam array tersebut
                                                 if (in_array('webinar', $jenisPaketArr)):
                                                 ?>
                                                     <button type="button" class="btn btn-icon btn-light-success btn-sm btn-kirim-info-paket" data-id="<?= encrypt_url($s->idpaket); ?>" data-bs-toggle="tooltip" title="Kirim Email Peserta">
                                                         <i class="ki-duotone ki-send fs-3"><span class="path1"></span><span class="path2"></span></i>
                                                     </button>
                                                 <?php endif; ?>
-                                                <!-- ======================================================== -->
 
                                                 <button type="button" class="btn btn-icon btn-sm <?= $s->is_pinned ? 'btn-warning' : 'btn-light-dark' ?> pin-paket" data-id="<?= $s->idpaket ?>" data-bs-toggle="tooltip" title="<?= $s->is_pinned ? 'Lepas Pin' : 'Pin ke Atas' ?>">
                                                     <i class="ki-duotone ki-pin fs-3"><span class="path1"></span><span class="path2"></span></i>
@@ -149,6 +141,7 @@
                                 <option value="brevet">Kelas Brevet AB</option>
                                 <option value="ikh">Perijinan IKH</option>
                                 <option value="webinar">Webinar</option>
+                                <option value="tryout_ukp">Tryout UKP</option>
                                 <option value="uskp">USKP</option>
                             </select>
                             <div class="form-text text-muted">Form akan menyesuaikan berdasarkan pilihan di atas. Anda dapat memilih lebih dari satu.</div>
@@ -170,13 +163,15 @@
                         <!-- Input Nominal Tambah Paket -->
                         <div class="col-md-6 fv-row">
                             <label class="required fs-6 fw-semibold mb-2">Nominal Paket (Rp)</label>
-                            <input type="number" name="nominal_paket" id="add_nominal_paket" class="form-control form-control-solid" required>
+                            <input type="number" name="nominal_paket" id="add_nominal_paket" class="form-control form-control-solid" required value="0">
                         </div>
 
                         <div class="col-md-6 fv-row" id="wrapper_tambah_diskon">
-                            <label class="required fs-6 fw-semibold mb-2">Diskon</label>
-                            <select name="iddiskon" class="form-select form-select-solid" data-control="select2" data-dropdown-parent="#wrapper_tambah_diskon" required>
-                                <option value="">Pilih</option>
+                            <!-- Label dihapus required-nya -->
+                            <label class="fs-6 fw-semibold mb-2">Diskon (Opsional)</label>
+                            <!-- Hapus required pada select -->
+                            <select name="iddiskon" class="form-select form-select-solid" data-control="select2" data-dropdown-parent="#wrapper_tambah_diskon">
+                                <option value="">Tidak Ada Diskon</option>
                                 <?php $dataDiskon = $db->query("select * from diskon ")->getResultObject(); ?>
                                 <?php foreach ($dataDiskon as $rows) : ?>
                                     <option value="<?= $rows->iddiskon; ?>"><?= $rows->diskon; ?>%</option>
@@ -196,10 +191,10 @@
                         </div>
                     </div>
 
-                    <!-- FORM BREVET / USKP -->
+                    <!-- FORM BREVET / USKP / TRYOUT UKP -->
                     <div class="brevet-fields" style="display: none;">
                         <div class="separator separator-dashed my-8"></div>
-                        <h4 class="fw-bold text-dark mb-5"><i class="ki-duotone ki-book-open fs-2 me-2"></i> Pengaturan Kelas Brevet / USKP</h4>
+                        <h4 class="fw-bold text-dark mb-5"><i class="ki-duotone ki-book-open fs-2 me-2"></i> Pengaturan Ujian & Materi (Brevet/USKP/Tryout UKP)</h4>
                         <div class="row g-5 bg-light-primary p-5 rounded">
                             <div class="col-md-12 fv-row" id="wrapper_id_kelas">
                                 <label class="required fs-6 fw-semibold mb-2">Kelas</label>
@@ -283,6 +278,7 @@
                                 <option value="brevet">Kelas Brevet AB</option>
                                 <option value="ikh">Perijinan IKH</option>
                                 <option value="webinar">Webinar</option>
+                                <option value="tryout_ukp">Tryout UKP</option>
                                 <option value="uskp">USKP</option>
                             </select>
                         </div>
@@ -308,9 +304,11 @@
                         </div>
 
                         <div class="col-md-6 fv-row" id="wrapper_edit_diskon">
-                            <label class="required fs-6 fw-semibold mb-2">Diskon</label>
-                            <select name="iddiskon" id="iddiskon" class="form-select form-select-solid" data-control="select2" data-dropdown-parent="#wrapper_edit_diskon" required>
-                                <option value="">Pilih</option>
+                            <!-- Label dihapus required-nya -->
+                            <label class="fs-6 fw-semibold mb-2">Diskon (Opsional)</label>
+                            <!-- Hapus required pada select -->
+                            <select name="iddiskon" id="iddiskon" class="form-select form-select-solid" data-control="select2" data-dropdown-parent="#wrapper_edit_diskon">
+                                <option value="">Tidak Ada Diskon</option>
                                 <?php foreach ($dataDiskon as $rows) : ?>
                                     <option value="<?= $rows->iddiskon; ?>"><?= $rows->diskon; ?>%</option>
                                 <?php endforeach; ?>
@@ -329,10 +327,10 @@
                         </div>
                     </div>
 
-                    <!-- FORM BREVET / USKP EDIT -->
+                    <!-- FORM BREVET / USKP / TRYOUT UKP EDIT -->
                     <div class="brevet-fields" style="display: none;">
                         <div class="separator separator-dashed my-8"></div>
-                        <h4 class="fw-bold text-dark mb-5"><i class="ki-duotone ki-book-open fs-2 me-2"></i> Update Susunan Kelas Brevet / USKP</h4>
+                        <h4 class="fw-bold text-dark mb-5"><i class="ki-duotone ki-book-open fs-2 me-2"></i> Update Susunan (Brevet/USKP/Tryout UKP)</h4>
 
                         <div class="alert alert-dismissible bg-light-warning border border-warning d-flex flex-column flex-sm-row p-5 mb-5">
                             <i class="ki-duotone ki-information fs-2hx text-warning me-4 mb-5 mb-sm-0"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
@@ -420,12 +418,12 @@
         $(nominalInputId).val(total);
     }
 
-    // UPDATE: Fungsi Menampilkan/Menyembunyikan Form Dinamis (Brevet, USKP, & Webinar)
+    // UPDATE: Fungsi Menampilkan/Menyembunyikan Form Dinamis (Brevet, USKP, Tryout UKP, & Webinar)
     function toggleDynamicFields(modalElement, nominalInputId) {
         let selectedTypes = $(modalElement).find('.jenis_paket').val() || [];
 
-        // Logika Form Brevet atau USKP
-        if (selectedTypes.includes('brevet') || selectedTypes.includes('uskp')) {
+        // Logika Form Brevet, USKP, atau Tryout UKP
+        if (selectedTypes.includes('brevet') || selectedTypes.includes('uskp') || selectedTypes.includes('tryout_ukp')) {
             $(modalElement).find('.brevet-fields').slideDown();
             $(modalElement).find('.dynamic-req-brevet').prop('required', true);
         } else {
@@ -690,7 +688,7 @@
                     // Ini akan mentrigger toggleDynamicFields
                     $("#edit_paket .jenis_paket").val(arrPaket).trigger('change');
 
-                    // AUTO-FILL BREVET / USKP
+                    // AUTO-FILL BREVET / USKP / TRYOUT UKP
                     if (data.id_kelas) {
                         $("#edit_id_kelas").val(data.id_kelas).trigger({
                             type: 'change',

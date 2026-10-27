@@ -139,7 +139,6 @@ class TransaksiController extends BaseController
         $tgl_mulai = date('Y-m-d H:i:s');
         $tgl_exp   = date('Y-m-d H:i:s', strtotime('+ 1 day', strtotime($tgl_mulai)));
 
-
         $today = date('Y-m-d');
         $input_kode = $this->request->getPost('kode_voucher');
 
@@ -163,6 +162,7 @@ class TransaksiController extends BaseController
         // Gunakan pendekatan aman (Null Coalescing Operator)
         $diskon_voucher = $voucher ? $voucher['diskon_voucher'] : 0;
         $kode_voucher   = ($voucher && $diskon_voucher > 0) ? $voucher['kode_voucher'] : '';
+
         // Mulai Transaksi Database
         $db->transBegin();
         $dataPaket = $this->paketModel->join('diskon', 'paket.iddiskon=diskon.iddiskon')->where('paket.idpaket', $this->request->getVar('idpaket'))->get()->getRow();
@@ -184,15 +184,15 @@ class TransaksiController extends BaseController
             $this->transaksiModel->insert($dataInsert);
             $idtransaksi = $this->transaksiModel->insertID();
 
-            // 4. Kalkulasi Harga Satuan (Logic Asli)
+            // 4. Kalkulasi Harga Satuan (Logic Asli yang sudah diperbaiki sintaksnya)
             $totalRaw      = $dataPaket->nominal_paket;
             $diskonPersen  = $dataPaket->diskon;
             $voucherPersen = ($diskon_voucher != '') ? $diskon_voucher : 0;
 
-            $diskon        = $totalRaw - ($totalRaw - ($totalRaw * $diskonPersen / 100));
-            $totalDiskon   = $totalRaw - $diskon;
-            $diskon_voucher = $totalDiskon - ($totalDiskon - ($totalDiskon * $voucherPersen / 100));
-            $totalVoucher  = $totalDiskon - $diskon_voucher;
+            $diskon         = $totalRaw * ($diskonPersen / 100);
+            $totalDiskon    = $totalRaw - $diskon;
+            $diskon_voucher = $totalDiskon * ($voucherPersen / 100);
+            $totalVoucher   = $totalDiskon - $diskon_voucher; // Ini adalah total bayar akhir
 
             $detailPaket = $this->detailPaketModel
                 ->select('detail_paket.*, ujian_master.nama_ujian, ujian_master.kelas, mapel.nama_mapel')
@@ -232,7 +232,9 @@ class TransaksiController extends BaseController
             }
 
             $totalDataCount = $this->detailPaketModel->where('idpaket', $this->request->getVar('idpaket'))->countAllResults();
-            $hasil          = ($totalRaw - $diskon - $diskon_voucher) / (int)($totalDataCount ?: 1);
+
+            // Perbaikan sintaks hitung rata-rata harga (hasil dibagi jumlah data)
+            $hasil = $totalVoucher / (int)($totalDataCount ?: 1);
 
             // 5. Simpan Detail Transaksi
             foreach ($detailPaket as $rows) {
@@ -276,9 +278,18 @@ class TransaksiController extends BaseController
 
             $db->transCommit();
 
-            // Menggunakan Library Emailer baru Anda
-            $this->kirimEmailInvoice($this->emailer, $diskon, $diskon_voucher, encrypt_url($idtransaksi));
-            return redirect()->to('sw-siswa/transaksi/pesan-bayar/' . encrypt_url($idtransaksi))->with('pesan', 'Silahkan pilih metode pembayaran!');
+            // 8. LOGIKA BYPASS PEMBAYARAN JIKA HARGA AKHIR = 0
+            if ($totalVoucher <= 0) {
+                // Memanggil fungsi aktivasi otomatis
+                $this->approveManual($idtransaksi, '', '');
+
+                return redirect()->to('sw-siswa')->with('pesan', 'Paket ujian berhasil diaktifkan. Silahkan cek di menu "Ujian" untuk memulai belajar.');
+            } else {
+                // Menggunakan Library Emailer baru Anda
+                $this->kirimEmailInvoice($this->emailer, $diskon, $diskon_voucher, encrypt_url($idtransaksi));
+
+                return redirect()->to('sw-siswa/transaksi/pesan-bayar/' . encrypt_url($idtransaksi))->with('pesan', 'Silahkan pilih metode pembayaran!');
+            }
         } catch (\Exception $e) {
             $db->transRollback();
             return redirect()->to('sw-siswa')->with('pesan', $e->getMessage());
