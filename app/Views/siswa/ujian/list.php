@@ -955,8 +955,9 @@ $(document).ready(function () {
                             Swal.fire('Error!', response.message || 'Terjadi kesalahan saat memproses pesanan.', 'error');
                         }
                     },
-                    error: function() {
-                        Swal.fire('Error!', 'Gagal terhubung ke server.', 'error');
+                    error: function(error) {
+                        console.log(xhr.responseText);
+                        // Swal.fire('Error!', 'Gagal terhubung ke server.', 'error');
                     }
                 });
             }
