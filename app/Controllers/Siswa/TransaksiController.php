@@ -283,7 +283,7 @@ class TransaksiController extends BaseController
                 // Memanggil fungsi aktivasi otomatis
                 $this->approveManual($idtransaksi, '', null);
 
-                return redirect()->to('sw-siswa')->with('success', 'Paket ujian berhasil diaktifkan. Silahkan cek di menu "Ujian" untuk memulai belajar.');
+                return redirect()->to('sw-siswa')->with('pesan', 'Paket ujian berhasil diaktifkan. Silahkan cek di menu "Ujian" untuk memulai belajar.');
             } else {
                 // Menggunakan Library Emailer baru Anda
                 $this->kirimEmailInvoice($this->emailer, $diskon, $diskon_voucher, encrypt_url($idtransaksi));
