@@ -292,7 +292,7 @@ class TransaksiController extends BaseController
             }
         } catch (\Exception $e) {
             $db->transRollback();
-            return redirect()->to('sw-siswa')->with('success', $e->getMessage());
+            // return redirect()->to('sw-siswa')->with('success', $e->getMessage());
         }
     }
 
