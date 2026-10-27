@@ -27,18 +27,20 @@ class UjianModel extends Model
     }
 
     public function getAllBykelas($kelas, $id_siswa)
-    {
-  
-        return $this
-            ->select('ujian.*, kelas.*, mapel.nama_mapel, mapel.file, guru.*')
-            ->join('kelas', 'kelas.id_kelas=ujian.kelas')
-            ->join('mapel', 'mapel.id_mapel=ujian.mapel')
-            ->join('guru', 'guru.id_guru=ujian.guru')
-            ->where('ujian.kelas', $kelas)
-            ->where('ujian.id_siswa', $id_siswa)
-            ->groupBy('ujian.id_ujian')
-            ->get()->getResultObject();
-    }
+{
+    return $this
+        // Tambahkan ujian_master.biaya_upgrade pada bagian select
+        ->select('ujian.*, kelas.*, mapel.nama_mapel, mapel.file, guru.*, ujian_master.biaya_upgrade')
+        ->join('kelas', 'kelas.id_kelas=ujian.kelas')
+        ->join('mapel', 'mapel.id_mapel=ujian.mapel')
+        ->join('guru', 'guru.id_guru=ujian.guru')
+        // Tambahkan baris JOIN ini untuk mengambil data dari ujian_master
+        ->join('ujian_master', 'ujian_master.kode_ujian = ujian.kode_ujian', 'left')
+        ->where('ujian.kelas', $kelas)
+        ->where('ujian.id_siswa', $id_siswa)
+        ->groupBy('ujian.id_ujian')
+        ->get()->getResultObject();
+}
 
     public function getAllByKelasSertifikat($kelas, $id_siswa)
     {

@@ -79,6 +79,9 @@ $routes->group('sw-siswa', ['filter' => 'roleCheck:2'], function ($routes) {
         //untuk review soal yang sudah dikerjakan
         $routes->get('review-ujian/(:segment)', 'Siswa\UjianController::reviewUjian/$1');
 
+        //upgrade ujian supaya kunci jawaban dan pembahasan bisa di akses
+        $routes->post('upgrade-ujian', 'Siswa\UjianController::upgradeUjian');
+
         //untuk remedial
         $routes->get('remedial/(:any)/(:any)/(:any)', 'Siswa\UjianController::remedial/$1/$2/$3');
         $routes->post('proses-verifikasi', 'Siswa\UjianController::prosesVerifikasi');

@@ -20,7 +20,7 @@ class WebinarController extends BaseController
     protected  $transaksiModel;
     protected  $detailTransaksiModel;
     protected  $emailer;
-    protected $googleClient;
+    protected  $googleClient;
 
     public function __construct()
     {

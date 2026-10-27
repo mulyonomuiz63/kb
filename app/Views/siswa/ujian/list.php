@@ -166,6 +166,39 @@
         display: none;
     }
 </style>
+<?php if (strtolower(setting('midtrans_is_production')) == 'true'): ?>
+    <script type="text/javascript" src="https://app.midtrans.com/snap/snap.js" data-client-key="<?= setting('midtrans_client_key') ?>"></script>
+<?php else: ?>
+    <script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="<?= setting('midtrans_client_key') ?>"></script>
+<?php endif; ?>
+<script>
+    ! function(f, b, e, v, n, t, s) {
+        if (f.fbq) return;
+        n = f.fbq = function() {
+            n.callMethod ?
+                n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+        };
+        if (!f._fbq) f._fbq = n;
+        n.push = n.ready = !0;
+        n.loaded = !0;
+        n.version = '2.0';
+        n.queue = [];
+        t = b.createElement(e);
+        t.async = !0;
+        t.src = v;
+        s = b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t, s)
+    }(window, document, 'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+        
+    // Inisialisasi menggunakan ID Meta Pixel Anda
+    fbq('init', '4623821844565938'); 
+    fbq('track', 'PageView');
+</script>
+<noscript>
+    <img height="1" width="1" style="display:none"
+        src="https://www.facebook.com/tr?id=4623821844565938&ev=PageView&noscript=1" />
+</noscript>
 <?= $this->endSection(); ?>
 <?= $this->section('content'); ?>
 
@@ -322,7 +355,7 @@
                                             <?php if (!empty($dataStatus) && $dataStatus->status == 'A') : ?>
                                                 <?php
                                                 $dataAttrs = 'data-idujian="' . encrypt_url($u->id_ujian) . '" ' .
-                                                    'data-kuota="' . $teks_modal_kuota . '" ' .  // <-- Ubah di sini
+                                                    'data-kuota="' . $teks_modal_kuota . '" ' .
                                                     'data-warna="' . $kuotaColor . '" ' .
                                                     'data-soal="' . $u->total_soal . ' soal" ' .
                                                     'data-waktu="' . $totalMenit . ' menit"';
@@ -363,6 +396,17 @@
                                                             style="flex: 3;">
                                                             Review<br class="d-block d-sm-none"> Ujian
                                                         </a>
+                                                    <?php else: ?>
+                                                        <!-- TOMBOL UPGRADE -->
+                                                        <button type="button"
+                                                            class="btn btn-light-info fw-bold text-uppercase d-flex align-items-center justify-content-center fs-8 fs-sm-7 px-2 lh-sm text-center btn-upgrade-review"
+                                                            style="flex: 3;"
+                                                            data-id="<?= encrypt_url($u->id_ujian) ?>"
+                                                            data-kode="<?= encrypt_url($u->kode_ujian) ?>"
+                                                            data-nama="<?= htmlspecialchars($u->nama_ujian) ?>"
+                                                            data-harga="<?= $u->biaya_upgrade ?? 50000 ?>"> <!-- Fallback harga jika kolom belum dibuat -->
+                                                            Upgrade<br class="d-block d-sm-none"> Jawaban
+                                                        </button>
                                                     <?php endif; ?>
                                                 </div>
                                             <?php else : ?>
@@ -383,6 +427,17 @@
                                                             style="flex: 3;">
                                                             Review<br class="d-block d-sm-none"> Ujian
                                                         </a>
+                                                    <?php else: ?>
+                                                        <!-- TOMBOL UPGRADE -->
+                                                        <button type="button"
+                                                            class="btn btn-light-info fw-bold text-uppercase d-flex align-items-center justify-content-center fs-8 fs-sm-7 px-2 lh-sm text-center btn-upgrade-review"
+                                                            style="flex: 3;"
+                                                            data-id="<?= encrypt_url($u->id_ujian) ?>"
+                                                            data-kode="<?= encrypt_url($u->kode_ujian) ?>"
+                                                            data-nama="<?= htmlspecialchars($u->nama_ujian) ?>"
+                                                            data-harga="<?= $u->biaya_upgrade ?? 50000 ?>">
+                                                            Upgrade<br class="d-block d-sm-none"> Jawaban
+                                                        </button>
                                                     <?php endif; ?>
                                                 </div>
                                             <?php endif; ?>
@@ -806,5 +861,107 @@
             $('#laser_scanner').hide();
         });
     });
+</script>
+<script>
+$(document).ready(function () {
+    // Variabel global untuk CSRF Token
+    let csrfName = "<?= csrf_token() ?>";
+    let csrfHash = "<?= csrf_hash() ?>";
+
+    $(document).on('click', '.btn-upgrade-review', function(e) {
+        e.preventDefault();
+        let id_ujian = $(this).data('id');
+        let kode_ujian = $(this).data('kode');
+        let nama_ujian = $(this).data('nama');
+        let harga = $(this).data('harga');
+        let hargaFormat = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(harga);
+
+        Swal.fire({
+            title: 'Upgrade Akses Pembahasan',
+            html: `
+                <div class="text-start">
+                    <p class="mb-2">Anda akan melakukan upgrade untuk ujian: <strong>${nama_ujian}</strong></p>
+                    <p class="mb-4">Dengan melakukan upgrade, Anda akan mendapatkan akses ke:</p>
+                    <ul class="text-gray-700">
+                        <li>Kunci jawaban yang benar</li>
+                        <li>Penjelasan & pembahasan lengkap setiap soal</li>
+                        <li>Evaluasi materi secara detail</li>
+                    </ul>
+                    <div class="mt-5 p-3 bg-light-info text-info rounded border border-info border-dashed text-center fw-bold fs-5">
+                        Biaya Upgrade: ${hargaFormat}
+                    </div>
+                </div>
+            `,
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonText: 'Bayar Sekarang',
+            cancelButtonText: 'Batal',
+            customClass: {
+                confirmButton: "btn btn-primary fw-bold",
+                cancelButton: "btn btn-active-light fw-bold"
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                
+                Swal.fire({
+                    title: 'Memproses Pesanan...',
+                    text: 'Mohon tunggu sebentar',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                // Siapkan data payload dengan CSRF dinamis
+                let payloadData = {
+                    id_ujian: id_ujian,
+                    kode_ujian: kode_ujian
+                };
+                payloadData[csrfName] = csrfHash; // Memasukkan token CSRF
+
+                $.ajax({
+                    url: "<?= base_url('sw-siswa/ujian/upgrade-ujian') ?>", 
+                    type: "POST",
+                    dataType: "json",
+                    data: payloadData,
+                    success: function(response) {
+                        
+                        // Perbarui CSRF hash setiap ada respon dari server
+                        if(response[csrfName]) {
+                            csrfHash = response[csrfName];
+                        }
+
+                        if (response.status === 'success' && response.snap_token) {
+                            Swal.close();
+                            
+                            // Panggil popup Midtrans Snap
+                            snap.pay(response.snap_token, {
+                                onSuccess: function(result){
+                                    Swal.fire('Berhasil!', 'Pembayaran berhasil. Akses pembahasan telah dibuka.', 'success')
+                                    .then(() => location.reload());
+                                },
+                                onPending: function(result){
+                                    Swal.fire('Menunggu Pembayaran', 'Silakan selesaikan pembayaran Anda di menu tagihan.', 'warning')
+                                    .then(() => location.reload());
+                                },
+                                onError: function(result){
+                                    Swal.fire('Gagal!', 'Pembayaran gagal, silakan coba lagi.', 'error');
+                                },
+                                onClose: function(){
+                                    // User menutup popup midtrans tanpa menyelesaikan pembayaran
+                                }
+                            });
+                        } else {
+                            Swal.fire('Error!', response.message || 'Terjadi kesalahan saat memproses pesanan.', 'error');
+                        }
+                    },
+                    error: function() {
+                        Swal.fire('Error!', 'Gagal terhubung ke server.', 'error');
+                    }
+                });
+            }
+        });
+    });
+});
 </script>
 <?= $this->endSection(); ?>

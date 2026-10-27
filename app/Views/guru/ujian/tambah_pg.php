@@ -81,6 +81,11 @@
                                 <option value="1">Aktif</option>
                             </select>
                         </div>
+                        <!-- Tambahan Input Biaya Upgrade -->
+                        <div class="col-md-3">
+                            <label class="required fs-6 fw-semibold mb-2">Biaya Upgrade (Rp)</label>
+                            <input type="number" name="biaya_upgrade" class="form-control form-control-solid" required min="0" value="0" placeholder="Contoh: 50000">
+                        </div>
                     </div>
 
                     <div class="separator separator-dashed my-8"></div>

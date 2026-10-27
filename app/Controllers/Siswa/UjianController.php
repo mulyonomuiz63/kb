@@ -11,6 +11,10 @@ class UjianController extends BaseController
     protected $ujianMasterModel;
     protected $ujianDetailModel;
     protected $ujianSiswaModel;
+    protected $transaksiModel;
+    protected $detailTransaksiModel;
+    protected $emailer;
+
     public function __construct()
     {
         $this->siswaModel = new \App\Models\SiswaModel();
@@ -18,6 +22,9 @@ class UjianController extends BaseController
         $this->ujianMasterModel = new \App\Models\UjianMasterModel();
         $this->ujianDetailModel = new \App\Models\UjianDetailModel();
         $this->ujianSiswaModel = new \App\Models\UjianSiswaModel();
+        $this->transaksiModel = new \App\Models\TransaksiModel();
+        $this->detailTransaksiModel = new \App\Models\DetailTransaksiModel();
+        $this->emailer = new \App\Libraries\Emailer();
     }
     public function index()
     {
@@ -129,9 +136,9 @@ class UjianController extends BaseController
         ];
         $idsiswa = decrypt_url($id_siswa);
         $cek_ujian = $this->ujianModel->where('id_ujian', decrypt_url($id_ujian))
-                                      ->where('id_siswa', $idsiswa)
-                                      ->get()->getRowObject();
-                                      
+            ->where('id_siswa', $idsiswa)
+            ->get()->getRowObject();
+
         if (!empty($cek_ujian) && $cek_ujian->status == 'S') {
             // Jika status sudah 'S' (Selesai), langsung redirect ke list ujian
             return redirect()->to(base_url('sw-siswa/ujian'))->with('pesan', 'Ujian telah selesai dan tidak dapat diakses kembali.');
@@ -459,6 +466,132 @@ class UjianController extends BaseController
                     ->where('id_ujian', $rows->id_ujian)
                     ->update();
             }
+        }
+    }
+
+    // Untuk upgrade supaya kunci jawaban dan pembahasan bisa di akses
+    public function upgradeUjian()
+    {
+        // Pastikan request datang dari AJAX
+        if (!$this->request->isAJAX()) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Invalid Request']);
+        }
+
+        $id = $this->request->getPost('id_ujian');
+        $kode = $this->request->getPost('kode_ujian');
+
+        $idujian = decrypt_url($id);
+        $kodeujian = decrypt_url($kode);
+
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        try {
+            // 1. Ambil data harga upgrade dari ujian_master
+            $dataUjianMaster = $this->ujianMasterModel->where('kode_ujian', $kodeujian)->get()->getRowObject();
+
+            if (!$dataUjianMaster) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Data ujian tidak ditemukan.']);
+            }
+
+            $biaya_upgrade = (int) ($dataUjianMaster->biaya_upgrade ?? 0);
+
+            if ($biaya_upgrade <= 0) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Biaya upgrade belum diatur oleh Admin.']);
+            }
+
+            $tgl_mulai = date('Y-m-d H:i:s');
+            $tgl_exp   = date('Y-m-d H:i:s', strtotime('+ 1 day', strtotime($tgl_mulai)));
+            $status    = 'P'; // P = Pending
+
+            // 2. Insert ke tabel Transaksi
+            $dataInsert = [
+                'idsiswa'        => session()->get('id'),
+                'nominal'        => $biaya_upgrade,
+                'diskon'         => '0',
+                'status'         => $status,
+                'tgl_exp'        => $tgl_exp,
+                'tgl_drop'       => $tgl_exp,
+                'tgl_pembayaran' => null,
+                'jenis_bayar'    => 'online',
+                'jenis_paket'    => 'tryout_ukp', // Penanda bahwa ini transaksi khusus Upgrade
+                'created_at'     => $tgl_mulai
+            ];
+
+            $this->transaksiModel->insert($dataInsert);
+            $idtransaksi = $this->transaksiModel->insertID();
+
+            // 3. Insert ke tabel Detail Transaksi
+            $detailTransaksi = [
+                'idtransaksi' => $idtransaksi,
+                'idpaket'     => '0',
+                'idmapel'     => '0',
+                'idsesi'      => '0',
+                'idujian'     => $idujian,
+                'prince'      => $biaya_upgrade,
+                'quantity'    => 1,
+                'name'        => "Upgrade: " . $dataUjianMaster->nama_ujian
+            ];
+            $this->detailTransaksiModel->insert($detailTransaksi);
+
+            // 4. Ambil data Siswa untuk dikirim ke Midtrans
+            $siswa = $db->table('siswa')->where('id_siswa', session()->get('id'))->get()->getRowObject();
+
+            // 5. Integrasi Midtrans
+            $snapToken = null;
+            if ($biaya_upgrade > 0) {
+                \Midtrans\Config::$serverKey    = setting('midtrans_server_key');
+                \Midtrans\Config::$isProduction = filter_var(setting('midtrans_is_production'), FILTER_VALIDATE_BOOLEAN);
+                \Midtrans\Config::$isSanitized  = true;
+                \Midtrans\Config::$is3ds        = true;
+
+                $dataItem = [
+                    [
+                        'id'       => 'UPG-' . $idujian,
+                        'price'    => $biaya_upgrade,
+                        'quantity' => 1,
+                        'name'     => substr("Upgrade Pembahasan: " . $dataUjianMaster->nama_ujian, 0, 50)
+                    ]
+                ];
+
+                $params = [
+                    'transaction_details' => [
+                        'order_id'     => $idtransaksi . '-' . time(),
+                        'gross_amount' => $biaya_upgrade,
+                    ],
+                    'item_details'     => $dataItem,
+                    'customer_details' => [
+                        'first_name' => $siswa->nama_siswa ?? 'Siswa',
+                        'email'      => $siswa->email ?? 'no-email@domain.com',
+                        'phone'      => $siswa->hp ?? '080000000000',
+                    ],
+                ];
+
+                $snapToken = \Midtrans\Snap::getSnapToken($params);
+
+                // Simpan snap token ke database
+                $this->transaksiModel->where('idtransaksi', $idtransaksi)->update(['token' => $snapToken]);
+            }
+
+            $db->transComplete();
+
+            // 6. Kembalikan Response ke AJAX
+            if ($db->transStatus() === FALSE) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Gagal menyimpan transaksi ke database.']);
+            }
+
+            if ($snapToken) {
+                return $this->response->setJSON([
+                    'status'     => 'success',
+                    'snap_token' => $snapToken,
+                    csrf_token() => csrf_hash() // Mengirim kembali CSRF token baru agar form tetap aman
+                ]);
+            } else {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Gagal mendapatkan token pembayaran dari Midtrans.']);
+            }
+        } catch (\Exception $e) {
+            $db->transRollback();
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()]);
         }
     }
 }

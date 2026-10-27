@@ -299,7 +299,8 @@ class MidtransController extends BaseController
         }
 
         $transaksiMaster = $this->transaksiModel
-            ->where('idtransaksi', $idtransaksi)
+            ->join('detail_transaksi', 'detail_transaksi.idtransaksi=transaksi.idtransaksi')
+            ->where('transaksi.idtransaksi', $idtransaksi)
             ->where('status', 'S')
             ->first();
 
@@ -388,6 +389,12 @@ class MidtransController extends BaseController
 
                 //untuk kirim notifikasi ke admin bahwa ada pengajuan sertifikat baru
                 send_notif('1', "Pengajuan Sertifikat Fisik Baru", "Terdapat pengajuan pencetakan sertifikat cap basah baru. Silakan cek detail dan proses pengirimannya.", base_url('sw-admin/pengajuan-sertifikat'));
+            }elseif (in_array('tryout_ukp', $jenisPaketArray)) {
+                // Update paket supaya kunci jawaban dan pembahasan bisa di akses
+                $this->db->table('ujian')
+                    ->where('id_siswa', $transaksiMaster['idsiswa'])
+                    ->where('id_ujian', $transaksiMaster['idujian'])
+                    ->update(['review' => '1']);
             }
         }
 
