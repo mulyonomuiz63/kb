@@ -899,9 +899,11 @@ $(document).ready(function () {
                     data: payloadData,
                     success: function(response) {
                         
-                        // Perbarui CSRF hash setiap ada respon dari server
+                        // Perbarui CSRF hash jika server mengirimkan token baru
                         if(response[csrfName]) {
                             csrfHash = response[csrfName];
+                            // Update juga nilai di input hidden halaman jika ada
+                            $('input[name="' + csrfName + '"]').val(csrfHash);
                         }
 
                         if (response.status === 'success' && response.snap_token) {
@@ -928,9 +930,33 @@ $(document).ready(function () {
                             Swal.fire('Error!', response.message || 'Terjadi kesalahan saat memproses pesanan.', 'error');
                         }
                     },
-                    error: function(error) {
-                        console.log(xhr.responseText);
-                        // Swal.fire('Error!', 'Gagal terhubung ke server.', 'error');
+                    error: function(xhr, status, error) {
+                        console.log("AJAX Error Details:", xhr.responseText); // Ini akan mencetak error asli PHP di Console (F12)
+                        
+                        let errorMessage = 'Gagal terhubung ke server.';
+                        if (xhr.status === 403) {
+                            errorMessage = 'Token Keamanan (CSRF) kedaluwarsa atau tidak valid. Halaman akan dimuat ulang.';
+                            Swal.fire({
+                                title: 'Akses Ditolak',
+                                text: errorMessage,
+                                icon: 'warning'
+                            }).then(() => {
+                                location.reload(); // Refresh otomatis jika kena masalah CSRF
+                            });
+                            return;
+                        } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+
+                        Swal.fire({
+                            title: 'Error Server (' + xhr.status + ')',
+                            text: errorMessage,
+                            icon: 'error',
+                            confirmButtonText: 'OK',
+                            customClass: {
+                                confirmButton: "btn btn-danger fw-bold"
+                            }
+                        });
                     }
                 });
             }
