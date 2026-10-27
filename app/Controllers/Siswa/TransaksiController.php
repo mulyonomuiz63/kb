@@ -165,7 +165,7 @@ class TransaksiController extends BaseController
 
         // Mulai Transaksi Database
         $db->transBegin();
-        $dataPaket = $this->paketModel->join('diskon', 'paket.iddiskon=diskon.iddiskon')->where('paket.idpaket', $this->request->getVar('idpaket'))->get()->getRow();
+        $dataPaket = $this->paketModel->join('diskon', 'paket.iddiskon=diskon.iddiskon', 'left')->where('paket.idpaket', $this->request->getVar('idpaket'))->get()->getRow();
 
         try {
             // 3. Simpan Transaksi Utama
@@ -292,8 +292,7 @@ class TransaksiController extends BaseController
             }
         } catch (\Exception $e) {
             $db->transRollback();
-            var_dump($e->getMessage()); // Debugging: tampilkan pesan error
-            // return redirect()->to('sw-siswa')->with('success', $e->getMessage());
+            return redirect()->to('sw-siswa')->with('success', $e->getMessage());
         }
     }
 
