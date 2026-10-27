@@ -113,7 +113,7 @@ class PaketModel extends Model
             ->join('diskon b', 'b.iddiskon = paket.iddiskon', 'left') // Ubah jadi LEFT JOIN agar paket tanpa diskon tetap tampil
             ->join('detail_paket c', 'c.idpaket = paket.idpaket', 'left') // Ubah jadi LEFT JOIN
             ->where('paket.status', 1)
-            ->like('paket.jenis_paket', 'uskp')
+            ->like('paket.jenis_paket', 'ukp')
             ->orderBy('paket.is_pinned', 'DESC')
             ->orderBy('paket.sort_order', 'asc')
             ->groupBy('paket.idpaket, b.diskon, c.id_mapel, c.id_ujian') // Masukkan kolom select ke groupBy agar lolos aturan SQL
