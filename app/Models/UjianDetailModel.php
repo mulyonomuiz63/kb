@@ -93,8 +93,16 @@ class UjianDetailModel extends Model
             return array_slice($id_array, 0, $limit);
         };
 
-        // Eksekusi pengambilan ID berdasarkan tabel ujian_komposisi
+        // CEK APAKAH KOMPOSISI BENAR-BENAR ADA DAN JUMLAH SOALNYA > 0
+        $total_komposisi_soal = 0;
         if (!empty($komposisi)) {
+            foreach ($komposisi as $comp) {
+                $total_komposisi_soal += ((int)$comp->jml_mudah + (int)$comp->jml_sedang + (int)$comp->jml_susah);
+            }
+        }
+
+        // Eksekusi pengambilan ID berdasarkan tabel ujian_komposisi HIKA total soal > 0
+        if (!empty($komposisi) && $total_komposisi_soal > 0) {
             foreach ($komposisi as $comp) {
                 // Ambil Mudah, Sedang, Susah dengan mengecualikan ID yang sudah terpilih
                 $id_m_mudah  = $getAcakIds('E', (int) $comp->jml_mudah, $comp->nama_sub_materi, $semua_id_terpilih);
@@ -108,13 +116,17 @@ class UjianDetailModel extends Model
             }
 
             if (empty($semua_id_terpilih)) {
-                return [];
+                // Jika komposisi ada tapi soal di database tidak ditemukan, jalankan fallback juga
+                $semua_soal = $this->where('kode_ujian', $kode_ujian)
+                    ->where('deleted_at', null)
+                    ->limit(30)
+                    ->get()->getResultObject();
+            } else {
+                $semua_soal = $this->whereIn('id_detail_ujian', $semua_id_terpilih)
+                    ->get()->getResultObject();
             }
-
-            $semua_soal = $this->whereIn('id_detail_ujian', $semua_id_terpilih)
-                ->get()->getResultObject();
         } else {
-            // Fallback: Jika ujian_komposisi kosong (Ujian Brevet Biasa)
+            // Fallback: Jika ujian_komposisi kosong atau total target soal = 0 (Ujian Brevet Biasa)
             $semua_soal = $this->where('kode_ujian', $kode_ujian)
                 ->where('deleted_at', null)
                 ->limit(30)
@@ -126,7 +138,9 @@ class UjianDetailModel extends Model
         }
 
         // Acak ulang susunan akhir soal agar urutan E, M, H tercampur
-        shuffle($semua_soal);
+        if (!empty($semua_soal)) {
+            shuffle($semua_soal);
+        }
 
         return $semua_soal;
     }

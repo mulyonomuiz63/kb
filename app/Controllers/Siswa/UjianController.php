@@ -150,57 +150,56 @@ class UjianController extends BaseController
 
         $dataUjian = $this->ujianModel->where('id_ujian', decrypt_url($id_ujian))->where('id_siswa', $idsiswa)->where('status', 'B')->get()->getRowObject();
 
-        // if (!empty($dataUjian)) {
+        if (!empty($dataUjian)) {
             $this->ujianSiswaModel->where('ujian', decrypt_url($kode_ujian))->where('siswa', $idsiswa)->delete();
             // Ambil soal acak berdasarkan level jika ada pengaturan jumlah soal
             $ujian_detail = $this->ujianDetailModel->getSoalAcakBerdasarkanLevel(decrypt_url($kode_ujian));
-            var_dump($ujian_detail); // Debugging: tampilkan isi $ujian_detail
-        //     $total = count($ujian_detail);
-        //     $totalMenit = $total * $dataUjian->waktu_per_soal; // Menggunakan waktu per soal dari database
-        //     // Logic End Ujian berdasarkan waktu device/lokal yang sudah ditentukan di atas
-        //     $endUjian = date('Y-m-d H:i', strtotime($now . " + $totalMenit minutes"));
-        //     $kuota = $dataUjian->kuota - 1;
+            $total = count($ujian_detail);
+            $totalMenit = $total * $dataUjian->waktu_per_soal; // Menggunakan waktu per soal dari database
+            // Logic End Ujian berdasarkan waktu device/lokal yang sudah ditentukan di atas
+            $endUjian = date('Y-m-d H:i', strtotime($now . " + $totalMenit minutes"));
+            $kuota = $dataUjian->kuota - 1;
 
-        //     $data_ujian_siswa = [];
-        //     $id_siswa_decrypted = decrypt_url($id_siswa);
+            $data_ujian_siswa = [];
+            $id_siswa_decrypted = decrypt_url($id_siswa);
 
-        //     foreach ($ujian_detail as $uj) {
-        //         $data_ujian_siswa[] = [
-        //             'ujian_id' => $uj->id_detail_ujian,
-        //             'ujian'    => $uj->kode_ujian,
-        //             'siswa'    => $id_siswa_decrypted,
-        //         ];
-        //     }
+            foreach ($ujian_detail as $uj) {
+                $data_ujian_siswa[] = [
+                    'ujian_id' => $uj->id_detail_ujian,
+                    'ujian'    => $uj->kode_ujian,
+                    'siswa'    => $id_siswa_decrypted,
+                ];
+            }
 
-        //     // 4. Pastikan data array tidak kosong sebelum insert
-        //     if (!empty($data_ujian_siswa)) {
-        //         $this->ujianSiswaModel->insertBatch($data_ujian_siswa, 100);
-        //     }
+            // 4. Pastikan data array tidak kosong sebelum insert
+            if (!empty($data_ujian_siswa)) {
+                $this->ujianSiswaModel->insertBatch($data_ujian_siswa, 100);
+            }
 
-        //     $this->ujianModel
-        //         ->set('start_ujian', $now) // Menggunakan waktu lokal device
-        //         ->set('end_ujian', $endUjian) // Menggunakan waktu lokal device + durasi
-        //         ->set('status', 'U')
-        //         ->set('kuota', $kuota)
-        //         ->where('id_ujian', decrypt_url($id_ujian))
-        //         ->update();
-        // }
+            $this->ujianModel
+                ->set('start_ujian', $now) // Menggunakan waktu lokal device
+                ->set('end_ujian', $endUjian) // Menggunakan waktu lokal device + durasi
+                ->set('status', 'U')
+                ->set('kuota', $kuota)
+                ->where('id_ujian', decrypt_url($id_ujian))
+                ->update();
+        }
 
-        // // ... Sisa kode (data view) tetap sama ...
-        // $data['siswa'] = $this->siswaModel->asObject()->find($idsiswa);
-        // $data['ujian'] = $this->ujianModel->getBykode(decrypt_url($kode_ujian), decrypt_url($id_ujian));
-        // $data['detail_ujian'] = $this->ujianSiswaModel->getAllBykodeUjianSiswa(decrypt_url($kode_ujian), $idsiswa);
-        // $data['ujian_siswa'] = $this->ujianSiswaModel
-        //     ->where('ujian', decrypt_url($kode_ujian))
-        //     ->where('siswa', decrypt_url($id_siswa))
-        //     ->get()->getResultObject();
+        // ... Sisa kode (data view) tetap sama ...
+        $data['siswa'] = $this->siswaModel->asObject()->find($idsiswa);
+        $data['ujian'] = $this->ujianModel->getBykode(decrypt_url($kode_ujian), decrypt_url($id_ujian));
+        $data['detail_ujian'] = $this->ujianSiswaModel->getAllBykodeUjianSiswa(decrypt_url($kode_ujian), $idsiswa);
+        $data['ujian_siswa'] = $this->ujianSiswaModel
+            ->where('ujian', decrypt_url($kode_ujian))
+            ->where('siswa', decrypt_url($id_siswa))
+            ->get()->getResultObject();
 
-        // $data['jawaban_benar'] = $this->ujianSiswaModel->benar(decrypt_url($kode_ujian), decrypt_url($id_siswa), 1);
-        // $data['jawaban_salah'] = $this->ujianSiswaModel->salah(decrypt_url($kode_ujian), decrypt_url($id_siswa), 0);
-        // $data['tidak_dijawab'] = $this->ujianSiswaModel->belum_terjawab(decrypt_url($kode_ujian), decrypt_url($id_siswa), null);
-        // $data['sedang'] = true;
+        $data['jawaban_benar'] = $this->ujianSiswaModel->benar(decrypt_url($kode_ujian), decrypt_url($id_siswa), 1);
+        $data['jawaban_salah'] = $this->ujianSiswaModel->salah(decrypt_url($kode_ujian), decrypt_url($id_siswa), 0);
+        $data['tidak_dijawab'] = $this->ujianSiswaModel->belum_terjawab(decrypt_url($kode_ujian), decrypt_url($id_siswa), null);
+        $data['sedang'] = true;
 
-        // return view('siswa/ujian/pg-lihat', $data);
+        return view('siswa/ujian/pg-lihat', $data);
     }
 
     public function kirimUjian()
