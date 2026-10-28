@@ -45,6 +45,11 @@ class UjianController extends BaseController
             ->getResultObject();
 
         $data['ujian'] = array();
+
+        // Inisialisasi Database dan ID Siswa untuk keperluan pengecekan Midtrans Pending
+        $db = \Config\Database::connect();
+        $id_siswa = session()->get('id');
+
         foreach ($siswa as  $r) {
             $tugas = $this->ujianModel->getAllByKelas($r->id_kelas, $r->id_siswa);
 
@@ -55,10 +60,33 @@ class UjianController extends BaseController
                 // Gunakan pengecekan is_array agar super aman
                 $t->total_soal = is_array($ujian_detail) ? count($ujian_detail) : 0;
 
+                // =========================================================================
+                // PENGECEKAN STATUS TRANSAKSI PENDING MIDTRANS
+                // =========================================================================
+                $cekPending = $db->table('detail_transaksi')
+                    ->select('transaksi.token')
+                    ->join('transaksi', 'transaksi.idtransaksi = detail_transaksi.idtransaksi')
+                    ->where('transaksi.idsiswa', $id_siswa)
+                    ->where('detail_transaksi.idujian', $t->id_ujian)
+                    ->where('transaksi.jenis_paket', 'tryout_ukp') // Sesuai jenis paket di fungsi Upgrade
+                    ->where('transaksi.status', 'P') // P = Pending
+                    ->orderBy('transaksi.idtransaksi', 'DESC')
+                    ->get()
+                    ->getRow();
+
+                // Masukkan token pending ke dalam object $t
+                if ($cekPending && !empty($cekPending->token)) {
+                    $t->token_pending = $cekPending->token;
+                } else {
+                    $t->token_pending = null;
+                }
+                // =========================================================================
+
                 // Kelompokkan ujian berdasarkan nama kelas
                 $data['ujian'][$r->nama_kelas][] = $t;
             }
         }
+
         return view('siswa/ujian/list', $data);
     }
 
@@ -569,8 +597,9 @@ class UjianController extends BaseController
 
                 $snapToken = \Midtrans\Snap::getSnapToken($params);
 
-                // Simpan snap token ke database
-                $this->transaksiModel->where('idtransaksi', $idtransaksi)->update(['token' => $snapToken]);
+                // PERBAIKAN DI SINI:
+                // Gunakan Query Builder langsung ($db->table) agar tidak di-block oleh rules allowedFields di Model
+                $db->table('transaksi')->where('idtransaksi', $idtransaksi)->update(['token' => $snapToken]);
             }
 
             $db->transComplete();
