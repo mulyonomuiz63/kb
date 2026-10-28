@@ -215,7 +215,7 @@ $UjianSiswaModel = new UjianSiswaModel(); ?>
                                 $js = $UjianSiswaModel->where(['ujian_id' => $s->id_detail_ujian, 'siswa' => $siswa->id_siswa])->get()->getRowObject();
                             ?>
                                 <div class="nav-btn" id="nav-btn-<?= $n ?>" onclick="goToQuestion(<?= $n ?>)"
-                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Pukul: <?= $js->jam ?? '-'; ?>">
+                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Waktu Lama Pengerjaan: <?= $js->jam ?? '-'; ?>">
                                     <?= $n ?>
                                 </div>
                             <?php $n++;
