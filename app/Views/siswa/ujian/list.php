@@ -949,22 +949,12 @@
                                     },
                                     // 3. JIKA PEMBAYARAN GAGAL
                                     onError: function(result) {
-                                        Swal.fire('Gagal', 'Pembayaran Anda gagal diproses.', 'error').then(() => {
-                                            location.reload();
-                                        });
+                                        location.reload();
                                     },
 
                                     // 4. JIKA USER MENUTUP POPUP SEBELUM MEMBAYAR
                                     onClose: function() {
-                                        Swal.fire({
-                                            title: 'Pembayaran Tertunda',
-                                            text: 'Anda menutup jendela pembayaran. Tagihan Anda tersimpan di menu transaksi dan dapat dilanjutkan kapan saja.',
-                                            icon: 'info',
-                                            confirmButtonText: 'Lihat Menu Tagihan'
-                                        }).then(() => {
-                                            // Arahkan ke halaman transaksi/tagihan agar user bisa melihat status pending-nya
-                                            window.location.href = "<?= base_url('sw-siswa/transaksi') ?>";
-                                        });
+                                        location.reload();
                                     }
                                 });
                             } else {
