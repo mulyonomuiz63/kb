@@ -197,10 +197,28 @@
     $(document).ready(function() {
         var table = $('#datatables-list').DataTable({
             "ordering": false,
-            "lengthChange": false,
+            // 1. UPGRADE: Menampilkan opsi jumlah data per halaman (10, 25, 50, Semua)
+            "lengthChange": true, 
+            "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Semua Data"]],
             "pageLength": 10,
-            "info": false,
-            "dom": "rtp",
+            
+            // 2. UPGRADE: Menampilkan informasi total data (Showing 1 to 10 of X entries)
+            "info": true, 
+            
+            // 3. UPGRADE: Menyesuaikan tata letak (DOM) agar rapi menggunakan grid Bootstrap/Metronic
+            "dom": "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'l><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end text-muted'i>>" +
+                   "<'table-responsive'tr>" +
+                   "<'row mt-3'<'col-sm-12 col-md-5 d-flex align-items-center justify-content-center justify-content-md-start'><'col-sm-12 col-md-7 d-flex align-items-center justify-content-center justify-content-md-end'p>>",
+            
+            // 4. UPGRADE: Translate text ke Bahasa Indonesia agar lebih mudah dipantau
+            "language": {
+                "lengthMenu": "Tampilkan _MENU_ data per halaman",
+                "info": "Menampilkan _START_ - _END_ dari total _TOTAL_ data soal",
+                "infoEmpty": "Tidak ada data yang tersedia",
+                "infoFiltered": "(difilter dari _MAX_ total data)",
+                "emptyTable": "Belum ada bank soal",
+                "zeroRecords": "Tidak ditemukan data yang sesuai dengan filter/pencarian"
+            },
             "drawCallback": function(settings) {
                 if (typeof KTMenu !== 'undefined') {
                     KTMenu.createInstances();
@@ -213,16 +231,18 @@
             table.search(this.value).draw();
         });
 
-        // Filter Kategori (Kolom 0)
+        // 5. UPGRADE FILTER: Filter Kategori (Kolom 0)
+        // Diperbaiki agar lebih spesifik mencari teks "Kategori: [Nama]" sehingga tidak tercampur jika nama kategori mirip dengan nama soal
         $('#filter_kategori').on('change', function() {
             var val = $(this).val();
-            table.column(0).search(val).draw();
+            table.column(0).search(val ? 'Kategori: ' + val : '', false, false).draw();
         });
 
-        // Filter Sub-Materi (Kolom 1)
+        // 6. UPGRADE FILTER: Filter Sub-Materi (Kolom 1)
+        // Diperbaiki menggunakan Regex Escaping bawaan DataTables agar filter karakter khusus (seperti spasi/tanda hubung) bekerja lebih presisi 100%
         $('#filter_sub_materi').on('change', function() {
             var val = $(this).val();
-            table.column(1).search(val ? '^' + val + '$' : '', true, false).draw();
+            table.column(1).search(val ? '^' + $.fn.dataTable.util.escapeRegex(val) + '$' : '', true, false).draw();
         });
     });
 </script>

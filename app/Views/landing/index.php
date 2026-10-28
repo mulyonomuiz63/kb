@@ -626,10 +626,16 @@
                                 </li>
                                 <li>
                                     <a href="<?= base_url("marathon-perpajakan") ?>" class="text-white d-inline-flex align-items-center gap-1">
-                                        Webinar
+                                        Try Out
                                         <span class="badge bg-danger badge-pro-pulse fw-bold" style="font-size: 8px; margin-bottom: 16px; padding: 2px 5px; letter-spacing: 0.5px;">NEW</span>
                                     </a>
                                 </li>
+                                <!-- <li>
+                                    <a href="<?= base_url("marathon-perpajakan") ?>" class="text-white d-inline-flex align-items-center gap-1">
+                                        Webinar
+                                        <span class="badge bg-danger badge-pro-pulse fw-bold" style="font-size: 8px; margin-bottom: 16px; padding: 2px 5px; letter-spacing: 0.5px;">NEW</span>
+                                    </a>
+                                </li> -->
                                 <li>
                                     <a href="#" class="text-white">Informasi <i class="bi bi-chevron-down"></i></a>
                                     <div class="submenu">
