@@ -939,16 +939,18 @@
                                 Swal.close();
                                 snap.pay(response.snap_token, {
                                     onSuccess: function(result) {
-                                        Swal.fire('Berhasil!', 'Pembayaran berhasil. Akses pembahasan telah dibuka.', 'success').then(() => location.reload());
+                                        Swal.fire('Berhasil!', 'Pembayaran berhasil. Akses pembahasan telah dibuka.', 'success');
+                                        window.location.href = "<?= base_url('sw-siswa/ujian') ?>";
                                     },
                                     onPending: function(result) {
-                                        Swal.fire('Menunggu Pembayaran', 'Silakan selesaikan pembayaran Anda di menu tagihan.', 'warning').then(() => location.reload());
+                                        Swal.fire('Menunggu Pembayaran', 'Silakan selesaikan pembayaran Anda di menu tagihan.', 'warning');
+                                        window.location.href = "<?= base_url('sw-siswa/ujian') ?>";
                                     },
                                     onError: function(result) {
                                         Swal.fire('Gagal!', 'Pembayaran gagal, silakan coba lagi.', 'error');
                                     },
                                     onClose: function() {
-                                        location.reload(); /* Auto reload agar tombol berubah jadi pending */
+                                        window.location.href = "<?= base_url('sw-siswa/ujian') ?>"; /* Auto reload agar tombol berubah jadi pending */
                                     }
                                 });
                             } else {
