@@ -8,6 +8,11 @@ use App\Models\GuruModel;
 use App\Models\KategoriModel;
 use App\Models\TagModel;
 
+
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+
 class BankSoalController extends BaseController
 {
     protected $bankSoalModel;
@@ -166,4 +171,135 @@ class BankSoalController extends BaseController
         }
     }
     // END::SUMMERNOTE
+
+    // 1. Method untuk Download Template Excel
+    public function downloadTemplate()
+    {
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Header Kolom sesuai struktur data soal
+        $headers = [
+            'id_kategori',
+            'sub_materi',
+            'nama_soal',
+            'pg_1',
+            'pg_2',
+            'pg_3',
+            'pg_4',
+            'pg_5',
+            'jawaban',
+            'penjelasan',
+            'jenis_soal'
+        ];
+
+        $sheet->fromArray($headers, NULL, 'A1');
+
+        // Contoh Baris Dummy / Petunjuk
+        $example = [
+            '1',
+            'Aljabar Dasar',
+            'Berapakah hasil dari 2 + 2 * 2?',
+            '2',
+            '4',
+            '6',
+            '8',
+            '10',
+            'B',
+            'Kerjakan perkalian terlebih dahulu: 2 * 2 = 4, lalu 2 + 4 = 6.',
+            'E'
+        ];
+        $sheet->fromArray($example, NULL, 'A2');
+
+        $filename = 'Template_Import_Bank_Soal.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit();
+    }
+
+    // 2. Method untuk Proses Import dengan Chunking (Aman untuk Puluhan Ribu Data)
+    public function processImport()
+    {
+        // Naikkan batas waktu eksekusi dan memori PHP untuk data besar
+        ini_set('max_execution_time', 600); // 10 menit
+        ini_set('memory_limit', '512M');
+
+        $file = $this->request->getFile('file_excel');
+
+        if (!$file || !$file->isValid()) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'File tidak valid atau gagal diunggah.']);
+        }
+
+        $extension = $file->getExtension();
+        if (!in_array($extension, ['xlsx', 'xls', 'csv'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Format file harus Excel (.xlsx/.xls/.csv).']);
+        }
+
+        try {
+            $spreadsheet = IOFactory::load($file->getTempName());
+            $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+
+            // Hapus baris header (baris pertama)
+            array_shift($sheetData);
+
+            $batchSize = 1000; // Masukkan per 1000 baris agar tidak membebani RAM/Database
+            $chunkData = [];
+            $totalInserted = 0;
+
+            foreach ($sheetData as $row) {
+                // Lewati baris kosong
+                if (empty(array_filter($row))) {
+                    continue;
+                }
+
+                $val_pg1 = $row['D'] ?? '';
+                $val_pg2 = $row['E'] ?? '';
+                $val_pg3 = $row['F'] ?? '';
+                $val_pg4 = $row['G'] ?? '';
+                $val_pg5 = $row['H'] ?? '';
+
+                $chunkData[] = [
+                    'id_kategori' => $row['A'] ?? null,
+                    'sub_materi'  => $row['B'] ?? '',
+                    'nama_soal'   => $row['C'] ?? '',
+                    'pg_1'        => !empty(trim($val_pg1)) ? 'A. ' . $val_pg1 : '',
+                    'pg_2'        => !empty(trim($val_pg2)) ? 'B. ' . $val_pg2 : '',
+                    'pg_3'        => !empty(trim($val_pg3)) ? 'C. ' . $val_pg3 : '',
+                    'pg_4'        => !empty(trim($val_pg4)) ? 'D. ' . $val_pg4 : '',
+                    'pg_5'        => !empty(trim($val_pg5)) ? 'E. ' . $val_pg5 : '',
+                    'jawaban'     => strtoupper(trim($row['I'] ?? '')),
+                    'penjelasan'  => $row['J'] ?? '',
+                    'jenis_soal'  => strtoupper(trim($row['K'] ?? 'E')), // E = Mudah, M = Sedang, H = Sulit
+                ];
+
+                // Jika ukuran batch sudah mencapai 1000, lakukan insertBatch ke database
+                if (count($chunkData) >= $batchSize) {
+                    $this->bankSoalModel->insertBatch($chunkData);
+                    $totalInserted += count($chunkData);
+                    $chunkData = []; // Reset array
+                }
+            }
+
+            // Masukkan sisa data terakhir jika ada
+            if (!empty($chunkData)) {
+                $this->bankSoalModel->insertBatch($chunkData);
+                $totalInserted += count($chunkData);
+            }
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => "Berhasil mengimpor {$totalInserted} data soal ke dalam database."
+            ]);
+        } catch (\Exception $e) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan saat memproses file: ' . $e->getMessage()
+            ]);
+        }
+    }
 }

@@ -58,6 +58,10 @@ $routes->group('sw-guru', ['filter' => 'roleCheck:3,1'], function ($routes) {
         $routes->get('delete/(:segment)', 'Guru\BankSoalController::delete/$1');
         $routes->post('upload-summernote', 'Guru\BankSoalController::uploadSummernote');
         $routes->post('delete-image', 'Guru\BankSoalController::deleteImage');
+
+        // Route untuk Import Bank Soal
+        $routes->get('download-template', 'Guru\BankSoalController::downloadTemplate'); // Sesuaikan nama controller Anda
+        $routes->post('process-import', 'Guru\BankSoalController::processImport');     // Sesuaikan nama controller Anda
     });
 
     $routes->group('kategori', function ($routes) {
