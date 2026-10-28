@@ -404,15 +404,9 @@
                                                     Ujian Ulang
                                                 </a>
                                             <?php else : ?>
-                                                <?php if ($u->nilai >= 60) : ?>
-                                                    <button class="btn btn-light-success fw-bold cursor-default text-uppercase d-flex align-items-center justify-content-center fs-8 fs-sm-7 px-2 flex-grow-1" disabled>
-                                                        Ujian Selesai
-                                                    </button>
-                                                <?php else : ?>
-                                                    <a href="<?= base_url('list-bimbel') ?>" class="btn btn-light-warning fw-bold text-uppercase d-flex align-items-center justify-content-center fs-8 fs-sm-7 px-2 flex-grow-1">
-                                                        Beli Paket
-                                                    </a>
-                                                <?php endif; ?>
+                                                <button class="btn btn-light-success fw-bold cursor-default text-uppercase d-flex align-items-center justify-content-center fs-8 fs-sm-7 px-2 flex-grow-1" disabled>
+                                                    Ujian Selesai
+                                                </button>
                                             <?php endif; ?>
 
                                             <?php if ($u->review === '1'): ?>
