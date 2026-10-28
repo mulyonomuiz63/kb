@@ -1304,6 +1304,7 @@
                                                 </div>
 
                                                 <!-- Accordion Detail Paket Start -->
+                                                <?php if(!empty($rows->deskripsi)): ?>
                                                 <div class="accordion accordion-flush mb-3" id="accordionDetailUskp<?= $rows->idpaket ?>">
                                                     <div class="accordion-item border rounded shadow-sm">
                                                         <h2 class="accordion-header" id="headingUskp<?= $rows->idpaket ?>">
@@ -1347,6 +1348,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
+                                                <?php endif; ?>
                                                 <!-- Accordion Detail Paket End -->
 
                                                 <!-- Tombol Action -->
