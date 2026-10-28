@@ -55,7 +55,7 @@ class UjianDetailModel extends Model
     {
         $db = \Config\Database::connect();
 
-        // Ambil komposisi sub-materi berdasarkan ujian ini
+        // 1. Ambil komposisi sub-materi berdasarkan ujian ini
         $komposisi = $db->table('ujian_komposisi')
             ->where('kode_ujian', $kode_ujian)
             ->get()
@@ -63,37 +63,65 @@ class UjianDetailModel extends Model
 
         $semua_id_terpilih = [];
 
-        // Fungsi bantuan untuk mengambil ID acak per sub-materi & level
-        // Menambahkan $excluded_ids agar soal tidak terambil ganda
-        $getAcakIds = function ($jenis_soal, $limit, $sub_materi = null, $excluded_ids = []) use ($kode_ujian) {
+        // 2. Fungsi bantuan independen untuk mengambil ID acak per sub-materi & level
+        $getAcakIds = function ($jenis_soal, $limit, $sub_materi = null, &$excluded_ids = []) use ($db, $kode_ujian) {
             if ($limit <= 0) return [];
 
-            $builder = $this->select('id_detail_ujian')
+            // Gunakan $db->table() langsung agar query builder selalu fresh/bersih
+            $builder = $db->table($this->table)
+                ->select('id_detail_ujian')
                 ->where('kode_ujian', $kode_ujian)
                 ->where('jenis_soal', $jenis_soal)
                 ->where('deleted_at', null);
 
-            // Filter sub-materi
+            // Filter sub-materi jika diisi (gunakan trim untuk mengantisipasi spasi tersembunyi)
             if (!empty($sub_materi)) {
-                $builder->where('sub_materi', $sub_materi);
+                $builder->where('TRIM(sub_materi)', trim($sub_materi));
             }
 
-            // PENTING: Jangan ambil soal yang sudah terpilih di baris sebelumnya
+            // Jangan ambil soal yang sudah terpilih sebelumnya
             if (!empty($excluded_ids)) {
                 $builder->whereNotIn('id_detail_ujian', $excluded_ids);
             }
 
-            $ids = $builder->findAll();
+            $ids = $builder->get()->getResultArray();
+
+            // Jika soal spesifik sub-materi kurang dari limit, lakukan Fallback/Auto Fill-Up
+            // Ambil sisa kekurangan dari soal level sama di sub-materi lain
+            if (count($ids) < $limit && !empty($sub_materi)) {
+                $sisa_butuh = $limit - count($ids);
+                $id_terambil_sekarang = array_column($ids, 'id_detail_ujian');
+                $excl = array_merge($excluded_ids, $id_terambil_sekarang);
+
+                $builderFallback = $db->table($this->table)
+                    ->select('id_detail_ujian')
+                    ->where('kode_ujian', $kode_ujian)
+                    ->where('jenis_soal', $jenis_soal)
+                    ->where('deleted_at', null);
+
+                if (!empty($excl)) {
+                    $builderFallback->whereNotIn('id_detail_ujian', $excl);
+                }
+
+                $idsFallback = $builderFallback->get()->getResultArray();
+                $ids = array_merge($ids, $idsFallback);
+            }
 
             if (empty($ids)) return [];
 
             $id_array = array_column($ids, 'id_detail_ujian');
             shuffle($id_array);
 
-            return array_slice($id_array, 0, $limit);
+            // Ambil sejumlah limit yang diminta
+            $result_ids = array_slice($id_array, 0, $limit);
+
+            // Tambahkan ID yang baru terpilih ke array penampung utama
+            $excluded_ids = array_merge($excluded_ids, $result_ids);
+
+            return $result_ids;
         };
 
-        // CEK APAKAH KOMPOSISI BENAR-BENAR ADA DAN JUMLAH SOALNYA > 0
+        // 3. Hitung total target soal dari komposisi
         $total_komposisi_soal = 0;
         if (!empty($komposisi)) {
             foreach ($komposisi as $comp) {
@@ -101,22 +129,19 @@ class UjianDetailModel extends Model
             }
         }
 
-        // Eksekusi pengambilan ID berdasarkan tabel ujian_komposisi HIKA total soal > 0
+        // 4. Eksekusi pengambilan ID berdasarkan tabel ujian_komposisi
         if (!empty($komposisi) && $total_komposisi_soal > 0) {
             foreach ($komposisi as $comp) {
-                // Ambil Mudah, Sedang, Susah dengan mengecualikan ID yang sudah terpilih
-                $id_m_mudah  = $getAcakIds('E', (int) $comp->jml_mudah, $comp->nama_sub_materi, $semua_id_terpilih);
-                $semua_id_terpilih = array_merge($semua_id_terpilih, $id_m_mudah);
+                $subMateriNama = !empty($comp->nama_sub_materi) ? $comp->nama_sub_materi : null;
 
-                $id_m_sedang = $getAcakIds('M', (int) $comp->jml_sedang, $comp->nama_sub_materi, $semua_id_terpilih);
-                $semua_id_terpilih = array_merge($semua_id_terpilih, $id_m_sedang);
-
-                $id_m_susah  = $getAcakIds('H', (int) $comp->jml_susah, $comp->nama_sub_materi, $semua_id_terpilih);
-                $semua_id_terpilih = array_merge($semua_id_terpilih, $id_m_susah);
+                // Ambil Mudah, Sedang, Susah
+                $getAcakIds('E', (int) $comp->jml_mudah, $subMateriNama, $semua_id_terpilih);
+                $getAcakIds('M', (int) $comp->jml_sedang, $subMateriNama, $semua_id_terpilih);
+                $getAcakIds('H', (int) $comp->jml_susah, $subMateriNama, $semua_id_terpilih);
             }
 
             if (empty($semua_id_terpilih)) {
-                // Jika komposisi ada tapi soal di database tidak ditemukan, jalankan fallback juga
+                // Fallback: Jika tidak ada soal yang cocok sama sekali
                 $semua_soal = $this->where('kode_ujian', $kode_ujian)
                     ->where('deleted_at', null)
                     ->limit(30)
@@ -126,7 +151,7 @@ class UjianDetailModel extends Model
                     ->get()->getResultObject();
             }
         } else {
-            // Fallback: Jika ujian_komposisi kosong atau total target soal = 0 (Ujian Brevet Biasa)
+            // Fallback: Ujian tanpa komposisi
             $semua_soal = $this->where('kode_ujian', $kode_ujian)
                 ->where('deleted_at', null)
                 ->limit(30)
@@ -137,7 +162,7 @@ class UjianDetailModel extends Model
             }
         }
 
-        // Acak ulang susunan akhir soal agar urutan E, M, H tercampur
+        // 5. Acak ulang susunan akhir soal agar urutan level bercampur
         if (!empty($semua_soal)) {
             shuffle($semua_soal);
         }
