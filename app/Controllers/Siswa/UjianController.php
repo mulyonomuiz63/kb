@@ -69,7 +69,7 @@ class UjianController extends BaseController
                     ->where('transaksi.idsiswa', $id_siswa)
                     ->where('detail_transaksi.idujian', $t->id_ujian)
                     ->like('transaksi.jenis_paket', '"tryout_ukp"') // Sesuai jenis paket di fungsi Upgrade
-                    ->whereIn('transaksi.status', ['P', 'PM']) // P = Pending
+                    ->whereIn('transaksi.status', ['P', 'PM','M']) // P = Pending
                     ->orderBy('transaksi.idtransaksi', 'DESC')
                     ->get()
                     ->getRow();
@@ -530,7 +530,7 @@ class UjianController extends BaseController
 
             $tgl_mulai = date('Y-m-d H:i:s');
             $tgl_exp   = date('Y-m-d H:i:s', strtotime('+ 1 day', strtotime($tgl_mulai)));
-            $status    = 'P'; // P = Pending
+            $status    = 'M'; // M = Menunggu Pembayaran
 
             // 2. Insert ke tabel Transaksi
             $dataInsert = [
