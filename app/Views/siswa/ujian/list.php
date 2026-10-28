@@ -949,12 +949,12 @@
                                     },
                                     // 3. JIKA PEMBAYARAN GAGAL
                                     onError: function(result) {
-                                        location.reload();
+                                        window.location.href = "<?= base_url('sw-siswa/ujian') ?>";
                                     },
 
                                     // 4. JIKA USER MENUTUP POPUP SEBELUM MEMBAYAR
                                     onClose: function() {
-                                        location.reload();
+                                        window.location.href = "<?= base_url('sw-siswa/ujian') ?>";
                                     }
                                 });
                             } else {
