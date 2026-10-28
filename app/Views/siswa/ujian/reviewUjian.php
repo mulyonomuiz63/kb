@@ -1,4 +1,4 @@
-<?= $this->extend('template/app'); ?>
+<?= $this->extend('siswa/template/app'); ?>
 
 <?= $this->section('styles'); ?>
 <style>
