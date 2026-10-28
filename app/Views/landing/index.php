@@ -1317,33 +1317,6 @@
                                                                 <div class="text-secondary mb-3 pb-2 border-bottom" style="font-size: 0.85rem; line-height: 1.6;">
                                                                     <?= !empty($rows->deskripsi) ? $rows->deskripsi : (!empty($rows->detail_paket) ? $rows->detail_paket : 'Detail informasi paket pembelajaran.') ?>
                                                                 </div>
-
-                                                                <div class="mt-2 p-3 rounded-3 bg-light bg-opacity-50 border position-relative overflow-hidden">
-                                                                    <div class="box-accent"></div>
-                                                                    <h6 class="fw-bold mb-3 d-flex align-items-center text-primary" style="font-size: 13px;">
-                                                                        <i class="fa fa-star text-warning me-2"></i> Keunggulan Paket
-                                                                    </h6>
-                                                                    <div class="row g-2">
-                                                                        <div class="col-12">
-                                                                            <div class="d-flex align-items-center gap-2"><i class="fa fa-check-circle text-success flex-shrink-0" style="font-size: 10px;"></i><span class="info-text text-dark fw-medium" style="font-size: 0.85rem;">LKP Terdaftar Resmi</span></div>
-                                                                        </div>
-                                                                        <div class="col-12">
-                                                                            <div class="d-flex align-items-center gap-2"><i class="fa fa-check-circle text-success flex-shrink-0" style="font-size: 10px;"></i><span class="info-text text-dark fw-medium" style="font-size: 0.85rem;">Sertifikat Brevet Diakui</span></div>
-                                                                        </div>
-                                                                        <div class="col-12">
-                                                                            <div class="d-flex align-items-center gap-2"><i class="fa fa-check-circle text-success flex-shrink-0" style="font-size: 10px;"></i><span class="info-text text-dark fw-medium" style="font-size: 0.85rem;">Akses Belajar Selamanya</span></div>
-                                                                        </div>
-                                                                        <div class="col-12">
-                                                                            <div class="d-flex align-items-center gap-2"><i class="fa fa-check-circle text-success flex-shrink-0" style="font-size: 10px;"></i><span class="info-text text-dark fw-medium" style="font-size: 0.85rem;">Materi Terus di Update</span></div>
-                                                                        </div>
-                                                                        <div class="col-12">
-                                                                            <div class="d-flex align-items-center gap-2"><i class="fa fa-check-circle text-success flex-shrink-0" style="font-size: 10px;"></i><span class="info-text text-dark fw-medium" style="font-size: 0.85rem;">Tanpa Langganan Bulanan/Tahunan</span></div>
-                                                                        </div>
-                                                                        <div class="col-12">
-                                                                            <div class="d-flex align-items-center gap-2"><i class="fa fa-check-circle text-success flex-shrink-0" style="font-size: 10px;"></i><span class="info-text text-dark fw-medium" style="font-size: 0.85rem;">Dilatih Oleh Konsultan Pajak Resmi</span></div>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
