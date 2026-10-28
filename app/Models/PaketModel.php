@@ -116,7 +116,7 @@ class PaketModel extends Model
             ->like('paket.jenis_paket', 'tryout_ukp')
             ->orderBy('paket.is_pinned', 'DESC')
             ->orderBy('paket.sort_order', 'asc')
-            ->groupBy('paket.idpaket, b.diskon, c.id_mapel, c.id_ujian') // Masukkan kolom select ke groupBy agar lolos aturan SQL
+            ->groupBy('paket.idpaket') // Masukkan kolom select ke groupBy agar lolos aturan SQL
             ->get()->getResultObject();
     }
 }
