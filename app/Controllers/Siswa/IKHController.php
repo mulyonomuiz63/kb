@@ -384,10 +384,11 @@ class IKHController extends BaseController
         if (!$this->request->isAJAX()) return $this->response->setStatusCode(403);
 
         $idSiswa = session('id');
+        $idkelas = "1";
         $idIkh   = $this->request->getPost('id_ikh');
 
         // 1. DATA PREPARATION
-        $hasilUjian = $this->ujianModel->getByIdsiswaSertifikat($idSiswa);
+        $hasilUjian = $this->ujianModel->getByIdsiswaSertifikat($idSiswa, $idkelas); // Materi & Nilai
         $siswa = $this->siswaModel->where('id_siswa', $idSiswa)->get()->getRowObject();
 
         if (!$hasilUjian || !$siswa) {

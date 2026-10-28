@@ -54,7 +54,7 @@ class SertifikatController extends BaseController
     }
 
 
-    public function lihatSertifikatBrevet($id, $jenis = "")
+    public function lihatSertifikatBrevet($id, $jenis = "", $idkelas = "1")
     {
         $id_siswa = decrypt_url($id);
         $hasil = $this->ujianModel->getByIdsiswa($id_siswa);
@@ -176,7 +176,7 @@ class SertifikatController extends BaseController
         $pdf->SetXY(55, 57);
         $pdf->Cell(75, 4, strtoupper($nama), 0, 1, 'L');
 
-        $hasilMateri = $this->ujianModel->getByIdsiswaSertifikat($id_siswa);
+        $hasilMateri = $this->ujianModel->getByIdsiswaSertifikat($id_siswa, $idkelas); // Materi & Nilai
         $pdf->SetFont('Arial', '', 14);
         $pdf->SetXY(25, 63);
 

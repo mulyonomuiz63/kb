@@ -136,12 +136,13 @@ class UjianModel extends Model
             ->get()->getRowObject();
     }
     
-    public function getByIdsiswaSertifikat($id_siswa)
+    public function getByIdsiswaSertifikat($id_siswa, $idkelas)
     {
         return $this
             ->select('max(ujian.nilai) as nilai_ujian, ujian.*, siswa.nama_siswa, mapel.nama_mapel')
             ->join('siswa', 'siswa.id_siswa=ujian.id_siswa')
             ->join('mapel', 'mapel.id_mapel=ujian.mapel')
+            ->where('ujian.kelas', $idkelas)
             ->where('ujian.id_siswa', $id_siswa)
             ->where('ujian.status', 'S')
             ->where('ujian.nilai >=', 60)

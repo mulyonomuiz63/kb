@@ -27,11 +27,11 @@ class SertifikatController extends BaseController
         $this->emailer = new Emailer();
     }
 
-    public function brevetAb($id, $jenis = "")
+    public function brevetAb($id, $jenis = "", $idkelas = "1")
     {
         // 1. DATA PREPARATION
         $id_siswa = decrypt_url($id);
-        $hasilUjian = $this->ujianModel->getByIdsiswaSertifikat($id_siswa); // Materi & Nilai
+        $hasilUjian = $this->ujianModel->getByIdsiswaSertifikat($id_siswa, $idkelas); // Materi & Nilai
         $siswa = $this->siswaModel->where('id_siswa', $id_siswa)->get()->getRowObject(); // Gunakan first() untuk RowObject CI4
 
         if (!$hasilUjian || !$siswa) {
