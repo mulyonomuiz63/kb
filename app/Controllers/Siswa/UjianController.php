@@ -68,7 +68,7 @@ class UjianController extends BaseController
                     ->join('transaksi', 'transaksi.idtransaksi = detail_transaksi.idtransaksi')
                     ->where('transaksi.idsiswa', $id_siswa)
                     ->where('detail_transaksi.idujian', $t->id_ujian)
-                    ->where('transaksi.jenis_paket', 'tryout_ukp') // Sesuai jenis paket di fungsi Upgrade
+                    ->like('transaksi.jenis_paket', '"tryout_ukp"') // Sesuai jenis paket di fungsi Upgrade
                     ->where('transaksi.status', 'P') // P = Pending
                     ->orderBy('transaksi.idtransaksi', 'DESC')
                     ->get()

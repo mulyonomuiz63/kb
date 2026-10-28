@@ -797,48 +797,48 @@
 <script>
     $(document).ready(function() {
 
-        // ==========================================
-        // JIKA TOMBOL "LANJUTKAN PEMBAYARAN" DI KLIK (TRANSAKSI PENDING)
-        // ==========================================
-        $(document).on('click', '.btn-bayar-pending', function(e) {
-            e.preventDefault();
-            let pendingToken = $(this).data('token');
+    // ==========================================
+    // JIKA TOMBOL "LANJUTKAN PEMBAYARAN" DI KLIK (TRANSAKSI PENDING)
+    // ==========================================
+    $(document).on('click', '.btn-bayar-pending', function(e) {
+        e.preventDefault();
+        let pendingToken = $(this).data('token');
 
-            // Langsung panggil Snap tanpa perlu insert AJAX ke database lagi
-            snap.pay(pendingToken, {
-                onSuccess: function(result) {
-                    Swal.fire('Berhasil!', 'Pembayaran berhasil. Akses pembahasan telah dibuka.', 'success')
-                        .then(() => location.reload());
-                },
-                onPending: function(result) {
-                    Swal.fire('Menunggu Pembayaran', 'Silakan selesaikan pembayaran Anda di menu tagihan.', 'warning')
-                        .then(() => location.reload());
-                },
-                onError: function(result) {
-                    Swal.fire('Gagal!', 'Pembayaran gagal, silakan coba lagi.', 'error');
-                },
-                onClose: function() {}
-            });
+        // Langsung panggil Snap tanpa perlu insert AJAX ke database lagi
+        snap.pay(pendingToken, {
+            onSuccess: function(result) {
+                Swal.fire('Berhasil!', 'Pembayaran berhasil. Akses pembahasan telah dibuka.', 'success')
+                    .then(() => location.reload());
+            },
+            onPending: function(result) {
+                Swal.fire('Menunggu Pembayaran', 'Silakan selesaikan pembayaran Anda di menu tagihan.', 'warning')
+                    .then(() => location.reload());
+            },
+            onError: function(result) {
+                Swal.fire('Gagal!', 'Pembayaran gagal, silakan coba lagi.', 'error');
+            },
+            onClose: function() {}
         });
+    });
 
-        // ==========================================
-        // JIKA TOMBOL "UPGRADE REVIEW" DI KLIK (TRANSAKSI BARU)
-        // ==========================================
-        $(document).on('click', '.btn-upgrade-review', function(e) {
-            e.preventDefault();
+    // ==========================================
+    // JIKA TOMBOL "UPGRADE REVIEW" DI KLIK (TRANSAKSI BARU)
+    // ==========================================
+    $(document).on('click', '.btn-upgrade-review', function(e) {
+        e.preventDefault();
 
-            let id_ujian = $(this).data('id');
-            let kode_ujian = $(this).data('kode');
-            let nama_ujian = $(this).data('nama');
-            let harga = $(this).data('harga');
-            let hargaFormat = new Intl.NumberFormat('id-ID', {
-                style: 'currency',
-                currency: 'IDR'
-            }).format(harga);
+        let id_ujian = $(this).data('id');
+        let kode_ujian = $(this).data('kode');
+        let nama_ujian = $(this).data('nama');
+        let harga = $(this).data('harga');
+        let hargaFormat = new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR'
+        }).format(harga);
 
-            Swal.fire({
-                title: '<span class="fs-3 fw-bolder text-gray-900 mt-2 d-block">Upgrade Akses Pembahasan</span>',
-                html: `
+        Swal.fire({
+            title: '<span class="fs-3 fw-bolder text-gray-900 mt-2 d-block">Upgrade Akses Pembahasan</span>',
+            html: `
         <style>
             /* Mencegah scrollbar muncul dan memaksa tinggi otomatis mengikuti konten */
             .swal2-html-container {
@@ -888,19 +888,19 @@
             </div>
         </div>
     `,
-                icon: undefined,
-                showCancelButton: true,
-                confirmButtonText: '<i class="ki-outline ki-wallet fs-4 me-2"></i> Bayar Sekarang',
-                cancelButtonText: 'Batal',
-                buttonsStyling: false,
-                width: '500px', // Diperlebar sedikit agar teks tidak terlalu cepat turun ke baris baru
-                padding: '2em', // Memberikan ruang kosong yang nyaman di sekeliling popup
-                customClass: {
-                    popup: "rounded-4 shadow-sm border border-gray-200",
-                    confirmButton: "btn btn-primary fw-bold px-6 py-3 me-3 fs-7 rounded-3",
-                    cancelButton: "btn btn-light-danger text-danger fw-bold px-6 py-3 fs-7 rounded-3" // Dibuat merah pudar agar lebih kontras
-                }
-            }).then((result) => {
+            icon: undefined,
+            showCancelButton: true,
+            confirmButtonText: '<i class="ki-outline ki-wallet fs-4 me-2"></i> Bayar Sekarang',
+            cancelButtonText: 'Batal',
+            buttonsStyling: false,
+            width: '500px', // Diperlebar sedikit agar teks tidak terlalu cepat turun ke baris baru
+            padding: '2em', // Memberikan ruang kosong yang nyaman di sekeliling popup
+            customClass: {
+                popup: "rounded-4 shadow-sm border border-gray-200",
+                confirmButton: "btn btn-primary fw-bold px-6 py-3 me-3 fs-7 rounded-3",
+                cancelButton: "btn btn-light-danger text-danger fw-bold px-6 py-3 fs-7 rounded-3" // Dibuat merah pudar agar lebih kontras
+            }
+        }).then((result) => {
                 if (result.isConfirmed) {
 
                     Swal.fire({
@@ -922,40 +922,47 @@
                     payloadData[csrfName] = csrfHash;
 
                     $.ajax({
-                        url: "<?= base_url('sw-siswa/ujian/upgrade-ujian') ?>",
-                        type: "POST",
-                        dataType: "json",
-                        data: payloadData,
-                        success: function(response) {
-                            if (response[csrfName]) {
-                                $('input[name="' + csrfName + '"]').val(response[csrfName]);
-                            }
-                            if (response.status === 'success' && response.snap_token) {
-                                Swal.close();
-                                snap.pay(response.snap_token, {
-                                    onSuccess: function(result) {
-                                        Swal.fire('Berhasil!', 'Pembayaran berhasil. Akses pembahasan telah dibuka.', 'success');
-                                        window.location.href = "<?= base_url('sw-siswa/ujian') ?>";
-                                    },
-                                    onPending: function(result) {
-                                        Swal.fire('Menunggu Pembayaran', 'Silakan selesaikan pembayaran Anda di menu tagihan.', 'warning');
-                                        window.location.href = "<?= base_url('sw-siswa/ujian') ?>";
-                                    },
-                                    onError: function(result) {
-                                        Swal.fire('Gagal!', 'Pembayaran gagal, silakan coba lagi.', 'error');
-                                    },
-                                    onClose: function() {
-                                        Swal.fire({
-                                            title: 'Pembayaran Tertunda',
-                                            text: 'Anda menutup jendela pembayaran. Token pembayaran Anda tetap aktif dan dapat dilanjutkan melalui tombol "Lanjutkan Pembayaran".',
-                                            icon: 'info',
-                                            confirmButtonText: 'OK'
-                                        }).then(() => {
-                                            location.reload(); // Reload halaman aman dilakukan setelah user menekan tombol OK pada alert konfirmasi
-                                        });
+                                url: "<?= base_url('sw-siswa/ujian/upgrade-ujian') ?>",
+                                type: "POST",
+                                dataType: "json",
+                                data: payloadData,
+                                success: function(response) {
+                                    if (response[csrfName]) {
+                                        $('input[name="' + csrfName + '"]').val(response[csrfName]);
                                     }
-                                });
-                            } else {
+                                    if (response.status === 'success' && response.snap_token) {
+                                        Swal.close();
+                                        snap.pay(response.snap_token, {
+                                            onSuccess: function(result) {
+                                                Swal.fire('Berhasil!', 'Pembayaran berhasil. Akses pembahasan telah dibuka.', 'success');
+                                                window.location.href = "<?= base_url('sw-siswa/ujian') ?>";
+                                            },
+                                            onPending: function(result) {
+                                                Swal.fire({
+                                                    title: 'Menunggu Pembayaran',
+                                                    text: 'Silakan selesaikan pembayaran sesuai metode yang Anda pilih.',
+                                                    icon: 'info',
+                                                    confirmButtonText: 'Lihat Tagihan'
+                                                }).then(() => {
+                                                    window.location.href = "<?= base_url('sw-siswa/transaksi') ?>";
+                                                });
+                                            },
+                                            // 3. JIKA PEMBAYARAN GAGAL
+                                            onError: function(result) {
+                                                Swal.fire('Gagal', 'Pembayaran Anda gagal diproses.', 'error').then(() => {
+                                                    location.reload();
+                                                });
+                                            },
+
+                                            // 4. JIKA USER MENUTUP POPUP SEBELUM MEMBAYAR
+                                            onClose: function() {
+                                                // Cukup reload saja halamannya agar statusnya ter-update menjadi pending/VA
+                                                location.reload();
+                                            }
+                                        });
+                                    });
+                            }
+                            else {
                                 Swal.fire('Error!', response.message || 'Terjadi kesalahan saat memproses pesanan.', 'error');
                             }
                         },
@@ -984,10 +991,10 @@
                                 }
                             });
                         }
-                    });
-                }
-            });
-        });
+                });
+        }
+    });
+    });
     });
 </script>
 <?= $this->endSection(); ?>
