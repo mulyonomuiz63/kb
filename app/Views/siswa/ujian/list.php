@@ -33,6 +33,7 @@
     .position-absolute.bottom-0 {
         z-index: 10;
     }
+
     .btn-upgrade-review:hover .group-hover-white i,
     .group-hover-white:hover i {
         color: #ffffff !important;
@@ -330,21 +331,21 @@
                                                 <?php if ($u->status == 'B'): ?>
                                                     <!-- 1. Tampilan jika peserta BELUM MULAI ujian -->
                                                     <div class="d-flex align-items-center justify-content-center text-gray-600 fw-semibold fs-7 bg-light-secondary border border-secondary border-dashed p-3 rounded w-100">
-                                                        <i class="ki-outline ki-information-5 fs-3 text-gray-500 me-2"></i> 
+                                                        <i class="ki-outline ki-information-5 fs-3 text-gray-500 me-2"></i>
                                                         <span>Segera Kerjakan ujian</span>
                                                     </div>
 
                                                 <?php elseif ($u->status == 'U'): ?>
                                                     <!-- 2. Tampilan jika peserta SEDANG ujian -->
                                                     <div class="d-flex align-items-center justify-content-center text-warning fw-semibold fs-7 bg-light-warning border border-warning border-dashed p-3 rounded w-100">
-                                                        <i class="ki-outline ki-timer fs-3 text-warning me-2 animate-blink"></i> 
+                                                        <i class="ki-outline ki-timer fs-3 text-warning me-2 animate-blink"></i>
                                                         <span>Selesaikan ujian</span>
                                                     </div>
 
                                                 <?php else: ?>
                                                     <!-- 3. Tampilan jika sudah selesai, tapi pembahasan memang tidak tersedia (Misal: harga 0) -->
                                                     <div class="d-flex align-items-center justify-content-center text-muted fw-semibold fs-7 bg-light p-3 rounded w-100" data-bs-toggle="tooltip" title="Fitur pembahasan tidak aktif untuk paket ini">
-                                                        <i class="ki-outline ki-lock-2 fs-3 text-muted me-2"></i> 
+                                                        <i class="ki-outline ki-lock-2 fs-3 text-muted me-2"></i>
                                                         <span>Pembahasan Tidak Tersedia</span>
                                                     </div>
                                                 <?php endif; ?>
@@ -944,7 +945,14 @@
                                         Swal.fire('Gagal!', 'Pembayaran gagal, silakan coba lagi.', 'error');
                                     },
                                     onClose: function() {
-                                        window.location.href = "<?= base_url('sw-siswa/ujian') ?>"; /* Auto reload agar tombol berubah jadi pending */
+                                        Swal.fire({
+                                            title: 'Pembayaran Tertunda',
+                                            text: 'Anda menutup jendela pembayaran. Token pembayaran Anda tetap aktif dan dapat dilanjutkan melalui tombol "Lanjutkan Pembayaran".',
+                                            icon: 'info',
+                                            confirmButtonText: 'OK'
+                                        }).then(() => {
+                                            location.reload(); // Reload halaman aman dilakukan setelah user menekan tombol OK pada alert konfirmasi
+                                        });
                                     }
                                 });
                             } else {
