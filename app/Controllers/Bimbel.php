@@ -58,8 +58,8 @@ class Bimbel extends BaseController
             return redirect()->to('/');
         }
         $data['paket'] = $this->PaketModel->select('paket.*, b.diskon, c.id_mapel, c.id_ujian')
-            ->join('diskon b', 'b.iddiskon = paket.iddiskon')
-            ->join('detail_paket c', 'c.idpaket=paket.idpaket')
+            ->join('diskon b', 'b.iddiskon = paket.iddiskon', 'left') // Ubah jadi LEFT JOIN agar paket tanpa diskon tetap tampil
+            ->join('detail_paket c', 'c.idpaket=paket.idpaket', 'left') // Ubah jadi LEFT JOIN agar paket tanpa detail_paket tetap tampil
             ->where('paket.slug', $slug)->get()->getRowObject();
             
             
@@ -74,7 +74,7 @@ class Bimbel extends BaseController
         
         $query = $this->db->table('paket')->join('detail_paket b', 'paket.idpaket=b.idpaket')->join('ujian_master c', 'b.id_ujian=c.id_ujian')->join('review_ujian d', 'c.kode_ujian=d.kode_ujian')->where('paket.slug', $slug)->get()->getResultObject();
         
-        // hitung rata-rata rating
+        // hitung rata-rata rating 
         $totalRating = 0;
         $jumlahReview = count($query);
     

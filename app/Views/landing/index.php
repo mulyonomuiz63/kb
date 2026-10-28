@@ -625,7 +625,7 @@
                                     <a href="<?= base_url("testimoni") ?>" class="text-white">Testimoni</a>
                                 </li>
                                 <li>
-                                    <a href="<?= base_url("marathon-perpajakan") ?>" class="text-white d-inline-flex align-items-center gap-1">
+                                    <a href="<?= base_url("bimbel/try-out-ukp-tingkat-b") ?>" class="text-white d-inline-flex align-items-center gap-1">
                                         Try Out
                                         <span class="badge bg-danger badge-pro-pulse fw-bold" style="font-size: 8px; margin-bottom: 16px; padding: 2px 5px; letter-spacing: 0.5px;">NEW</span>
                                     </a>
@@ -1238,11 +1238,12 @@
                                                 </div>
                                             <?php endif; ?>
 
-                                            <div class="courses-images">
+                                            <div class="">
                                                 <a href="<?= base_url('bimbel/' . $rows->slug) ?>">
                                                     <?= img_lazy('assets-landing/images/paket/thumbnails/' . $rows->file, $rows->nama_paket, ['class' => 'card-img-top']) ?>
                                                 </a>
                                             </div>
+                                            
 
                                             <div class="courses-content pb-3 d-flex flex-column flex-grow-1">
                                                 <h4 class="title"><a href="<?= base_url('bimbel/' . $rows->slug) ?>"><?= $rows->nama_paket ?></a></h4>
