@@ -956,8 +956,15 @@
 
                                     // 4. JIKA USER MENUTUP POPUP SEBELUM MEMBAYAR
                                     onClose: function() {
-                                        // Cukup reload saja halamannya agar statusnya ter-update menjadi pending/VA
-                                        window.location.href = "<?= base_url('sw-siswa/ujian') ?>";
+                                        Swal.fire({
+                                            title: 'Pembayaran Tertunda',
+                                            text: 'Anda menutup jendela pembayaran. Tagihan Anda tersimpan di menu transaksi dan dapat dilanjutkan kapan saja.',
+                                            icon: 'info',
+                                            confirmButtonText: 'Lihat Menu Tagihan'
+                                        }).then(() => {
+                                            // Arahkan ke halaman transaksi/tagihan agar user bisa melihat status pending-nya
+                                            window.location.href = "<?= base_url('sw-siswa/transaksi') ?>";
+                                        });
                                     }
                                 });
                             } else {
