@@ -1194,7 +1194,7 @@
                     <?php if (!empty($paketUskp)): ?>
                         <div class="courses-wrapper mt-5 pt-4 border-top">
                             <h6>Penawaran Paket Khusus TryOut UKP</h6>
-                            <span>Persiapkan diri Anda untuk ujian sertifikasi konsultan pajak</span>
+                            <span>Persiapkan diri Anda untuk Uji Kompetensi Perpajakan</span>
 
                             <!-- Menggunakan Grid Row + Justify Content Center -->
                             <div class="row mt-3 justify-content-center">

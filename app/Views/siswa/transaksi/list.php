@@ -4,16 +4,17 @@
 <!-- TAMBAHAN: CSS Khusus Layar Mobile (Merubah Tabel menjadi Card) -->
 <style>
     @media (max-width: 767.98px) {
+
         /* Mencegah scroll horizontal */
         .table-responsive {
             overflow-x: hidden !important;
         }
-        
+
         /* Sembunyikan judul kolom (thead) pada mobile */
         #kt_table_transaksi thead {
             display: none;
         }
-        
+
         /* Ubah baris (tr) menjadi bentuk Card yang rapi */
         #kt_table_transaksi tbody tr {
             display: block;
@@ -24,7 +25,7 @@
             background-color: #ffffff;
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.03);
         }
-        
+
         /* Susun isi (td) menjadi sejajar: Label di Kiri, Nilai di Kanan */
         #kt_table_transaksi tbody td {
             display: flex;
@@ -35,13 +36,13 @@
             border-bottom: 1px dashed #eff2f5 !important;
             text-align: right !important;
         }
-        
+
         /* Hilangkan garis batas di baris terakhir (Aksi) */
         #kt_table_transaksi tbody td:last-child {
             border-bottom: none !important;
             padding-bottom: 0;
         }
-        
+
         /* Panggil Label dari atribut 'data-label' */
         #kt_table_transaksi tbody td::before {
             content: attr(data-label);
@@ -97,7 +98,9 @@
                                         <td data-label="Detail Paket">
                                             <div class="d-flex flex-column">
                                                 <span class="text-gray-800 text-hover-primary mb-1 fw-bold"><?= ucwords(strtolower($s->nama_paket)); ?></span>
-                                                <span class="fs-7 text-muted"><?= $s->tagline; ?></span>
+                                                <span class="fs-7 text-muted">
+                                                    <?= !empty($s->tagline) ? htmlspecialchars($s->tagline) : htmlspecialchars($s->keterangan); ?>
+                                                </span>
                                             </div>
                                         </td>
 
