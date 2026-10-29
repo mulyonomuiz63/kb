@@ -657,7 +657,7 @@
 
                     <!-- Headline -->
                     <h3 class="text-white fs-2qx fw-bold mb-4" style="line-height: 1.3;">
-                        Ukur Kesiapan Anda Hadapi USKP <br />
+                        Ukur Kesiapan Anda Hadapi UKP <br />
                         <span class="text-warning">Tanpa Biaya Sepeserpun!</span>
                     </h3>
 
