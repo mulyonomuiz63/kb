@@ -152,28 +152,25 @@
                         Hai, <?= esc(session()->get('nama')) ?>! 👋
 
                         <!-- Deskripsi di-upgrade dengan konteks KelasBrevet & Pajak -->
-                        <style>
-                            /* Animasi fade in yang cepat (0.5 detik) */
-                            @keyframes quickFadeIn {
-                                from {
-                                    opacity: 0;
-                                    transform: translateY(10px);
-                                }
-
-                                to {
-                                    opacity: 1;
-                                    transform: translateY(0);
-                                }
-                            }
-
-                            .quick-fade {
-                                animation: quickFadeIn 0.5s ease-out forwards;
-                            }
-                        </style>
-
-                        <span class="page-desc text-white opacity-75 fw-semibold fs-6 pt-3 quick-fade" style="max-width: 600px; line-height: 1.5;">
+                        <!-- Berikan ID pada elemen teks -->
+                        <span id="welcome-text" class="page-desc text-white opacity-75 fw-semibold fs-6 pt-3" style="max-width: 600px; line-height: 1.5; transition: opacity 0.5s ease;">
                             Selamat datang di <strong class="text-warning">KelasBrevet</strong>. Terus tingkatkan kompetensi perpajakan Anda, selesaikan ujian brevet, dan persiapkan diri menjadi Ahli Pajak bersertifikat.
                         </span>
+                        <!-- Tambahkan script ini di dalam section scripts atau di bawah kode -->
+                        <script>
+                            document.addEventListener("DOMContentLoaded", function() {
+                                setTimeout(function() {
+                                    let textElement = document.getElementById("welcome-text");
+                                    if (textElement) {
+                                        textElement.style.opacity = "0"; // Efek memudar perlahan
+                                        setTimeout(function() {
+                                            textElement.style.display = "none"; // Hilangkan elemen setelah pudar
+                                        }, 500);
+                                    }
+                                }, 5000); // Angka 5000 milidetik = 5 detik
+                            });
+                        </script>
+
                     </h1>
                 </div>
 
