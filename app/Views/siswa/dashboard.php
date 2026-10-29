@@ -373,7 +373,7 @@
 
             <?php endforeach; ?>
         </div>
-<?php endif; ?>
+    <?php endif; ?>
     <div class="col-xl-4">
         <div class="sticky-column">
             <div class="row mb-5 mb-xl-8 g-5 g-xl-8">
@@ -511,7 +511,7 @@
 
         <?php else: ?>
             <!-- TAMPILAN JIKA TIDAK ADA PAKET WEBINAR AKTIF -->
-            <div class="card bgi-position-y-bottom bgi-position-x-end bgi-no-repeat bgi-size-cover min-h-250px bg-body mb-5 mb-xl-8 shadow-sm rounded-4"
+            <!-- <div class="card bgi-position-y-bottom bgi-position-x-end bgi-no-repeat bgi-size-cover min-h-250px bg-body mb-5 mb-xl-8 shadow-sm rounded-4"
                 style="background-position: 100% 50px; background-size: 500px auto; background-image:url('<?= base_url('') ?>')" dir="ltr">
                 <div class="card-body d-flex flex-column justify-content-center ps-lg-15 p-10">
                     <h3 class="text-dark fs-2qx fw-bold mb-4">Siap Menjadi Ahli Pajak <br /><span class="text-primary">Profesional?</span></h3>
@@ -526,6 +526,160 @@
                             Lihat Paket Lain
                         </a>
                     </div>
+                </div>
+            </div> -->
+            <style>
+                /* Custom Styling & Animations untuk Banner UKP */
+                .promo-ukp-card {
+                    background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+                    position: relative;
+                    overflow: hidden;
+                    border: none;
+                    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+                }
+
+                .promo-ukp-card:hover {
+                    transform: translateY(-5px);
+                    box-shadow: 0 20px 40px rgba(44, 83, 100, 0.4) !important;
+                }
+
+                /* Elemen Dekoratif Animasi Floating */
+                .ukp-shape-1,
+                .ukp-shape-2 {
+                    position: absolute;
+                    border-radius: 50%;
+                    background: rgba(255, 255, 255, 0.05);
+                    z-index: 1;
+                }
+
+                .ukp-shape-1 {
+                    width: 350px;
+                    height: 350px;
+                    top: -120px;
+                    right: -80px;
+                    animation: floatShape 7s ease-in-out infinite;
+                }
+
+                .ukp-shape-2 {
+                    width: 200px;
+                    height: 200px;
+                    bottom: -60px;
+                    right: 20%;
+                    animation: floatShape 9s ease-in-out infinite reverse;
+                }
+
+                @keyframes floatShape {
+                    0% {
+                        transform: translateY(0px) rotate(0deg) scale(1);
+                    }
+
+                    50% {
+                        transform: translateY(-25px) rotate(15deg) scale(1.05);
+                    }
+
+                    100% {
+                        transform: translateY(0px) rotate(0deg) scale(1);
+                    }
+                }
+
+                /* Animasi Efek Denyut (Pulse) pada Badge Gratis */
+                .badge-pulse-glow {
+                    animation: pulseBadge 2s infinite;
+                }
+
+                @keyframes pulseBadge {
+                    0% {
+                        box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7);
+                    }
+
+                    70% {
+                        box-shadow: 0 0 0 15px rgba(255, 193, 7, 0);
+                    }
+
+                    100% {
+                        box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
+                    }
+                }
+
+                /* Animasi Kilatan Cahaya pada Tombol */
+                .btn-shine-effect {
+                    position: relative;
+                    overflow: hidden;
+                }
+
+                .btn-shine-effect::after {
+                    content: '';
+                    position: absolute;
+                    top: -50%;
+                    left: -60%;
+                    width: 20%;
+                    height: 200%;
+                    background: rgba(255, 255, 255, 0.4);
+                    transform: rotate(45deg);
+                    animation: shineButton 3.5s infinite;
+                }
+
+                @keyframes shineButton {
+                    0% {
+                        left: -60%;
+                    }
+
+                    20% {
+                        left: 125%;
+                    }
+
+                    100% {
+                        left: 125%;
+                    }
+                }
+
+                /* Z-Index agar teks berada di atas dekorasi */
+                .ukp-content-z {
+                    z-index: 2;
+                    position: relative;
+                }
+            </style>
+
+            <div class="card promo-ukp-card min-h-250px mb-5 mb-xl-8 shadow-lg rounded-4" dir="ltr">
+                <!-- Elemen Dekoratif Animasi -->
+                <div class="ukp-shape-1"></div>
+                <div class="ukp-shape-2"></div>
+
+                <!-- Konten Utama Banner -->
+                <div class="card-body d-flex flex-column justify-content-center ps-lg-15 p-10 ukp-content-z">
+
+                    <!-- Label Promo Animasi -->
+                    <div class="mb-5">
+                        <span class="badge bg-warning text-dark fs-6 fw-bolder px-5 py-3 badge-pulse-glow rounded-pill shadow-sm">
+                            <i class="fa fa-gift me-2 text-dark fs-5"></i> SPESIAL: TRY OUT UKP GRATIS
+                        </span>
+                    </div>
+
+                    <!-- Headline -->
+                    <h3 class="text-white fs-2qx fw-bold mb-4" style="line-height: 1.3;">
+                        Ukur Kesiapan Anda Hadapi USKP <br />
+                        <span class="text-warning">Tanpa Biaya Sepeserpun!</span>
+                    </h3>
+
+                    <!-- Subheadline -->
+                    <div class="fs-5 fw-semibold text-white opacity-75 mb-8" style="max-width: 650px; line-height: 1.6;">
+                        Ikuti simulasi Ujian Kompetensi Perpajakan dengan sistem <strong>CBT Real-time</strong>. Dapatkan evaluasi instan dan pembahasan komprehensif beserta dasar hukumnya.
+                    </div>
+
+                    <!-- Tombol Aksi (Call to Action) -->
+                    <div class="m-0 d-flex flex-column flex-sm-row gap-4">
+                        <a href="<?= base_url('bimbel/tryout-ukp') ?>"
+                            class="btn btn-warning text-dark fw-bolder px-8 py-4 w-100 w-sm-auto rounded-pill hover-elevate-up btn-shine-effect shadow">
+                            <i class="fa fa-pencil-alt me-2 text-dark"></i> Mulai Try Out Sekarang
+                        </a>
+
+                        <!-- Opsional: Tombol Secondary jika masih ingin menampilkan paket lain -->
+                        <a href="<?= base_url('list-bimbel') ?>"
+                            class="btn btn-outline btn-outline-dashed btn-outline-white text-white fw-bold px-8 py-4 w-100 w-sm-auto rounded-pill hover-elevate-up">
+                            Lihat Paket Pelatihan Brevet A&B
+                        </a>
+                    </div>
+
                 </div>
             </div>
         <?php endif; ?>
