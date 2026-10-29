@@ -43,6 +43,7 @@ class UjianController extends BaseController
             SUM(CASE WHEN nilai >= 65 AND status = "S" THEN 1 ELSE 0 END) as nilai_lulus
         ');
             $builder->groupBy('kode_ujian, nama_ujian');
+            $builder->orderBy('id_ujian', 'ASC');
 
             // 1. Hitung Total Data Asli (Tanpa Filter)
             $totalDataBuilder = clone $builder;
