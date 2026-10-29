@@ -28,64 +28,122 @@
         box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.1) !important;
     }
 
-    /* Zoom Effect pada Image */
-    .img-zoom-container {
-        overflow: hidden;
-        border-radius: 0.75rem 0.75rem 0 0;
-    }
-
-    .img-zoom-container img {
-        transition: transform 0.5s ease;
-    }
-
-    .hover-elevate-up:hover .img-zoom-container img {
-        transform: scale(1.1);
-    }
-
-    /* Glassmorphism Badge */
-    .badge-glass {
-        background: rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        color: white;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-    }
-
     /* Button Glow Effect */
     .btn-glow-primary:hover {
         box-shadow: 0 0 15px rgba(26, 79, 240, 0.4);
     }
-</style>
-<style>
-    /* ... kode CSS Anda yang sudah ada ... */
 
-    /* Animasi denyut halus untuk gambar agar tidak kaku */
+    /* Animasi denyut halus untuk empty state */
     .pulse-animation {
         animation: pulseCustom 3s infinite ease-in-out;
     }
 
     @keyframes pulseCustom {
-        0% {
-            transform: scale(1);
-        }
-
-        50% {
-            transform: scale(1.03);
-        }
-
-        100% {
-            transform: scale(1);
-        }
+        0% { transform: scale(1); }
+        50% { transform: scale(1.03); }
+        100% { transform: scale(1); }
     }
 
-    /* Batasan lebar teks agar tidak terlalu panjang di layar lebar */
     .max-w-600px {
         max-width: 600px;
     }
 
-    /* Transisi halus untuk tombol */
-    .btn {
+    /* ====================================================
+       STYLING FILTER & CARD
+       ==================================================== */
+
+    /* STYLING FILTER SCROLL */
+    .filter-scroll {
+        display: flex;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        gap: 1rem;
+        padding-bottom: 0.5rem;
+    }
+
+    .filter-scroll::-webkit-scrollbar {
+        display: none;
+    }
+
+    .btn-filter {
+        border-radius: 50px !important; 
+        padding: 0.65rem 1.75rem !important;
+        font-weight: 600;
+        font-size: 0.95rem;
+        background: transparent;
+        /* Outline Putih Solid */
+        border: 1px solid #ffffff !important; 
+        color: #ffffff;
         transition: all 0.2s ease;
+    }
+
+    /* Saat Tombol Aktif / Di-hover */
+    .btn-filter.active, .btn-filter:hover {
+        background: #009ef7 !important; /* Biru terang solid */
+        border: 1px solid #009ef7 !important;
+        color: #ffffff !important;
+    }
+
+    /* THUMBNAIL KARTU MIRIP FOTO (Gradasi & Badge) */
+    .card-thumbnail {
+        position: relative;
+        aspect-ratio: 16/9;
+        overflow: hidden;
+        border-radius: 0.75rem 0.75rem 0 0;
+    }
+    .card-thumbnail img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+    .hover-elevate-up:hover .card-thumbnail img {
+        transform: scale(1.1);
+    }
+
+    /* Overlay Gradasi Biru di bawah gambar */
+    .thumbnail-gradient {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 70%;
+        background: linear-gradient(to top, rgba(0, 85, 255, 0.95) 0%, rgba(0, 85, 255, 0.4) 60%, transparent 100%);
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        padding: 1.5rem 1rem;
+    }
+
+    /* Text Judul di dalam gambar */
+    .thumbnail-title {
+        color: #ffffff;
+        font-weight: 800;
+        font-size: 1.25rem;
+        margin: 0;
+        text-align: center;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        line-height: 1.3;
+    }
+
+    /* Badge Merah/Hijau Kanan Atas */
+    .status-badge-photo {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        border-radius: 50px;
+        padding: 0.4rem 1.25rem;
+        font-weight: 700;
+        font-size: 0.85rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+        color: white;
+        z-index: 10;
+    }
+    .bg-pink-custom {
+        background-color: #F8285A; /* Warna pink/merah persis seperti di foto */
     }
 </style>
 <?= $this->endSection(); ?>
@@ -93,54 +151,42 @@
 
 <?php $db = Config\Database::connect(); ?>
 
-
 <div class="d-flex flex-column flex-column-fluid py-4 py-lg-6 mt-8">
     <div id="kt_app_content" class="app-content flex-column-fluid">
         <div id="kt_app_content_container" class="app-container container-xxl">
+            
+            <?php if (!empty($modul)): ?>
+                <!-- TOMBOL FILTER KELAS -->
+                <div class="d-flex filter-scroll mb-8">
+                    <!-- Tombol "Semua" defaultnya aktif -->
+                    <button class="btn btn-filter flex-shrink-0 active" data-filter="semua">Semua</button>
+
+                    <!-- Looping Dinamis Kategori Kelas -->
+                    <?php foreach ($modul as $nama_kelas => $daftar_materi) : ?>
+                        <!-- Perbaikan keamanan filter slug untuk jQuery (Menghapus & , spasi, dll) -->
+                        <?php $kategori_slug = preg_replace('/[^a-z0-9]+/', '-', strtolower(trim($nama_kelas))); ?>
+                        
+                        <button class="btn btn-filter flex-shrink-0" data-filter="<?= $kategori_slug ?>">
+                            <?= htmlspecialchars($nama_kelas) ?>
+                        </button>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+
             <div class="row g-7">
                 <?php if (!empty($modul)): ?>
                     <?php $delay = 0; ?>
 
-                    <!-- PERUBAHAN TAMPILAN: Looping per kelas -->
+                    <!-- Looping per kelas -->
                     <?php foreach ($modul as $nama_kelas => $daftar_materi) : ?>
-
-                        <!-- HEADER / PEMISAH KELAS -->
-                        <div class="col-12 mt-8 mb-4">
-                            <div class="card shadow-sm border-0 border-start border-5 border-primary">
-                                <div class="card-body p-5 d-flex align-items-center justify-content-between">
-                                    <div class="d-flex align-items-center">
-                                        <div class="symbol symbol-50px symbol-circle me-5">
-                                            <div class="symbol-label bg-light-primary text-primary">
-                                                <i class="ki-duotone ki-book-open fs-2x">
-                                                    <span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span>
-                                                </i>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <h2 class="fw-bolder text-gray-900 mb-1"><?= $nama_kelas ?></h2>
-                                            <span class="text-muted fw-semibold fs-6">Daftar paket materi untuk kelas ini</span>
-                                        </div>
-                                    </div>
-
-                                    <!-- Menampilkan badge jumlah materi di sebelah kanan Card -->
-                                    <div class="d-none d-sm-block">
-                                        <span class="badge badge-light-primary fw-bold px-4 py-3 text-uppercase">
-                                            <i class="ki-outline ki-folder text-primary me-2 fs-5"></i>
-                                            <?= count($daftar_materi) ?> Paket Materi
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <!-- Samakan fungsi slug dengan tombol di atas -->
+                        <?php $kategori_slug = preg_replace('/[^a-z0-9]+/', '-', strtolower(trim($nama_kelas))); ?>
 
                         <!-- LOOPING MATERI DI DALAM KELAS TERSEBUT -->
                         <?php foreach ($daftar_materi as $m) : ?>
                             <?php
                                 $id_siswa = session()->get('id'); // Ambil ID siswa dari session
                                 
-                                // PERUBAHAN: 
-                                // 1. Menghapus filter materi = '$m->kode_materi' agar menghitung seisi mapel
-                                // 2. Menggunakan COUNT(DISTINCT materi) agar duplikasi pembelian tidak terhitung ganda
                                 $query_materi = $db->query("SELECT  
                                     COUNT(CASE WHEN dilihat = '1' THEN materi ELSE NULL END) as materi_selesai
                                     FROM materi_siswa 
@@ -157,43 +203,36 @@
                                 $delay += 0.1; // Memberikan efek loading berurutan
                             ?>
 
-                            <div class="col-md-6 col-xl-4 animate-card" style="animation-delay: <?= $delay ?>s">
-                                <div class="card border-0 shadow-sm h-100 hover-elevate-up">
+                            <!-- MATERI ITEM (Menambahkan Class materi-item dan Data Kategori) -->
+                            <div class="col-md-6 col-xl-4 animate-card materi-item" data-kategori="<?= $kategori_slug ?>" style="animation-delay: <?= $delay ?>s">
+                                <div class="card border-0 shadow-sm h-100 hover-elevate-up rounded-4">
 
-                                    <div class="position-relative img-zoom-container" style="aspect-ratio: 16/9;">
-                                        <?= img_lazy('uploads/mapel/' . $m->file, "loading", ['class' => 'w-100 h-100 object-fit-cover']) ?>
+                                    <!-- BAGIAN THUMBNAIL (Fokus Desain Mirip Foto) -->
+                                    <div class="card-thumbnail">
+                                        <?= img_lazy('uploads/mapel/' . $m->file, "loading") ?>
+                                        
+                                        <!-- Gradasi Biru & Judul di dalam Gambar -->
+                                        <div class="thumbnail-gradient">
+                                            <h3 class="thumbnail-title"><?= $m->nama_mapel ?></h3>
+                                        </div>
 
-                                        <div class="position-absolute top-0 start-0 w-100 h-100 bg-gradient-to-t from-dark opacity-25"></div>
-
+                                        <!-- Badge Status di Kanan Atas -->
                                         <?php if ($m->status == 0): ?>
-                                            <div class="position-absolute top-0 end-0 p-4">
-                                                <span class="badge badge-glass fs-8 fw-bold px-4 py-2">
-                                                    <i class="ki-outline ki-calendar-tick fs-8 me-1 text-white"></i> COMING SOON
-                                                </span>
-                                            </div>
+                                            <div class="status-badge-photo bg-secondary text-dark border border-gray-400">Coming Soon</div>
+                                        <?php elseif($persentase < 100): ?>
+                                            <div class="status-badge-photo bg-pink-custom">Belum Selesai</div>
+                                        <?php else: ?>
+                                            <div class="status-badge-photo bg-success">Selesai</div>
                                         <?php endif; ?>
                                     </div>
 
-                                    <div class="card-body p-7">
-                                        <div class="d-flex align-items-center mb-5">
-                                            <div class="symbol symbol-40px symbol-circle me-3 shadow-sm border border-2 border-white">
-                                                <img src="<?= base_url('assets-landing/images/logo-blue.png') ?>" alt="Akuntanmu">
-                                            </div>
-                                            <div class="d-flex flex-column align-items-start">
-                                                <span class="text-dark fw-bolder fs-6">Akuntanmu Learning Center</span>
-                                                <span class="badge badge-light-primary fw-bold fs-9 mt-1">Verified Mentor</span>
-                                            </div>
-                                        </div>
-
-                                        <h3 class="text-dark fw-boldest fs-4 mb-3 lh-base min-h-50px text-hover-primary transition-3ms">
-                                            <?= $m->nama_mapel ?>
-                                        </h3>
-
-                                        <div class="separator separator-dashed my-4"></div>
-
-                                        <div class="d-flex flex-stack">
-                                            <div class="d-flex align-items-center me-3">
-                                                <div class="bg-light-info rounded p-2 me-2">
+                                    <!-- BAGIAN FUNGSIONAL (Progress & Action) -->
+                                    <div class="card-body p-6">
+                                        
+                                        <!-- Ringkasan Info (Compact) -->
+                                        <div class="d-flex flex-stack mb-5">
+                                            <div class="d-flex align-items-center">
+                                                <div class="bg-light-info rounded p-2 me-3">
                                                     <i class="ki-outline ki-book-open fs-4 text-info"></i>
                                                 </div>
                                                 <div class="d-flex flex-column">
@@ -203,7 +242,7 @@
                                             </div>
 
                                             <div class="d-flex align-items-center">
-                                                <div class="bg-light-warning rounded p-2 me-2">
+                                                <div class="bg-light-warning rounded p-2 me-3">
                                                     <i class="ki-outline ki-time fs-4 text-warning"></i>
                                                 </div>
                                                 <div class="d-flex flex-column">
@@ -213,8 +252,8 @@
                                             </div>
                                         </div>
 
-                                        <!-- TAMBAHAN BARU: Tampilan Progress Bar Profesional -->
-                                        <div class="d-flex flex-column mt-7">
+                                        <!-- Progress Bar -->
+                                        <div class="d-flex flex-column mb-6">
                                             <div class="d-flex justify-content-between w-100 fs-7 mb-2">
                                                 <span class="fw-bold text-gray-700">Progres Belajar</span>
                                                 <span class="fw-bolder text-primary"><?= $persentase ?>%</span>
@@ -233,8 +272,8 @@
                                             </div>
                                         </div>
 
-                                        <!-- PERBAIKAN: Bungkus dengan flex-column dan gap-2 agar responsive atas-bawah -->
-                                        <div class="mt-6 d-flex flex-column gap-2">
+                                        <!-- Tombol Action -->
+                                        <div class="d-flex flex-column gap-2 mt-auto">
                                             <?php if ($m->status == 0): ?>
                                                 <button class="btn btn-light-danger w-100 fs-7 fw-bold py-3 disabled">
                                                     <i class="ki-outline ki-lock fs-5 me-2"></i> Belum Tersedia
@@ -245,12 +284,12 @@
                                                     <?= ($persentase == 100) ? 'Belajar Ulang <i class="ki-outline ki-arrow-circle-right fs-5 ms-2"></i>' : 'Mulai Belajar <i class="ki-outline ki-arrow-right fs-5 ms-2"></i>' ?>
                                                 </a>
 
-                                                <!-- TOMBOL BARU: Download Materi via Drive -->
                                                 <a href="https://drive.google.com/drive/folders/1Rqr_3mgwLJx-8Zx2NLUPNuLT0xrqvUe9?usp=sharing" target="_blank" class="btn btn-success w-100 fs-7 fw-bold py-3 shadow-sm">
-                                                    <i class="ki-outline ki-cloud-download fs-5 me-2"></i> Download File Materi
+                                                    <i class="ki-outline ki-cloud-download fs-5 me-2"></i> Download Materi
                                                 </a>
                                             <?php endif; ?>
                                         </div>
+
                                     </div>
                                 </div>
                             </div>
@@ -288,14 +327,65 @@
         </div>
     </div>
 </div>
-
+<?= $this->endSection(); ?>
+<!-- TAMBAHKAN SECTION SCRIPTS DI SINI -->
+<?= $this->section('scripts'); ?>
 <script>
-    // Inisialisasi tooltip Metronic jika diperlukan
     $(document).ready(function() {
         if (typeof KTComponents !== 'undefined') {
             KTComponents.init();
         }
+
+        // ==========================================
+        // FITUR FILTER KATEGORI KELAS
+        // ==========================================
+        $('.btn-filter').click(function() {
+            // 1. Reset semua tombol (kembali ke state awal outline)
+            $('.btn-filter').removeClass('active');
+
+            // 2. Tambahkan class active ke tombol yang diklik
+            $(this).addClass('active');
+
+            // 3. Ambil data-filter (slug kategori)
+            let filter = $(this).attr('data-filter');
+
+            // 4. Logika menyembunyikan/menampilkan kartu materi
+            if (filter === 'semua') {
+                $('.materi-item').fadeIn(300);
+            } else {
+                $('.materi-item').hide();
+                $('.materi-item[data-kategori="' + filter + '"]').fadeIn(300);
+            }
+        });
     });
 </script>
+<script>
+    $(document).ready(function() {
+        if (typeof KTComponents !== 'undefined') {
+            KTComponents.init();
+        }
 
+        // ==========================================
+        // FITUR FILTER KATEGORI KELAS
+        // ==========================================
+        $('.btn-filter').click(function() {
+            // 1. Reset semua tombol (kembali ke state awal outline)
+            $('.btn-filter').removeClass('active');
+
+            // 2. Tambahkan class active ke tombol yang diklik
+            $(this).addClass('active');
+
+            // 3. Ambil data-filter (slug kategori)
+            let filter = $(this).attr('data-filter');
+
+            // 4. Logika menyembunyikan/menampilkan kartu materi
+            if (filter === 'semua') {
+                $('.materi-item').fadeIn(300);
+            } else {
+                $('.materi-item').hide();
+                $('.materi-item[data-kategori="' + filter + '"]').fadeIn(300);
+            }
+        });
+    });
+</script>
 <?= $this->endSection(); ?>
