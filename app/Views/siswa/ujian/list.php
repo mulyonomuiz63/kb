@@ -282,12 +282,21 @@
                                 </div>
 
                                 <div class="card-body pt-5 d-flex flex-column">
-                                    <div class="d-flex flex-stack mb-2">
+                                    <!-- UPGRADE TAMPILAN: Informasi Jumlah Soal dan Durasi -->
+                                    <div class="d-flex flex-stack flex-wrap gap-2 mb-2">
                                         <span class="text-primary fw-bold fs-7 uppercase"><?= $u->nama_kelas ?></span>
-                                        <span class="text-gray-500 fs-8 fw-bold">
-                                            <i class="ki-duotone ki-time fs-6 me-1"><span class="path1"></span><span class="path2"></span></i>
-                                            <?= ($durasi != '0' ? (($durasi->h * 60) + $durasi->i) : '0') ?> Menit
-                                        </span>
+                                        <div class="d-flex align-items-center">
+                                            <!-- Info Jumlah Soal -->
+                                            <span class="text-gray-500 fs-8 fw-bold d-flex align-items-center me-3" title="Jumlah Soal">
+                                                <i class="ki-outline ki-book-open fs-6 me-1"></i>
+                                                <?= $total ?> Soal
+                                            </span>
+                                            <!-- Info Durasi Waktu -->
+                                            <span class="text-gray-500 fs-8 fw-bold d-flex align-items-center" title="Durasi Waktu">
+                                                <i class="ki-outline ki-time fs-6 me-1"></i>
+                                                <?= ($durasi != '0' ? (($durasi->h * 60) + $durasi->i) : '0') ?> Menit
+                                            </span>
+                                        </div>
                                     </div>
 
                                     <a href="#" class="fs-4 text-gray-900 fw-bolder text-hover-primary lh-base d-block mb-2 h-50px">
