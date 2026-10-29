@@ -94,6 +94,11 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
         $routes->get('delete/(:any)', 'Admin\PicController::delete/$1');
     });
 
+    $routes->group('ujian', function ($routes) {
+        $routes->get('', 'Admin\UjianController::index');
+        $routes->post('datatable', 'Admin\UjianController::datatable');
+    });
+
     $routes->group('afiliasi', function ($routes) {
         $routes->get('', 'Admin\AfiliasiController::index');
         $routes->post('store', 'Admin\AfiliasiController::store');

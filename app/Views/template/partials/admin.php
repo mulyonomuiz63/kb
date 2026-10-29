@@ -7,6 +7,7 @@ $siswa = array('sw-admin/siswa', 'sw-admin/siswa-tidakaktif', 'sw-admin/siswa-ba
 $guru = array('sw-admin/guru', 'sw-admin/ujianguru', 'sw-admin/lihat_ujian', 'sw-admin/pg_siswa', 'sw-admin/mapelguru', 'sw-admin/materi', 'sw-admin/lihat_materi');
 $mitra = array('sw-admin/mitra', 'sw-admin/mitra_voucher', 'sw-admin/detail-voucher');
 $pic = array('sw-admin/pic');
+$ujian = array('sw-admin/ujian');
 
 $kelas = array('sw-admin/kelas');
 $mapel = array('sw-admin/mapel');
@@ -14,7 +15,7 @@ $relasi = array('sw-admin/relasi', 'sw-admin/atur_relasi');
 $review = array('sw-admin/review');
 $afiliasi = array('sw-admin/afiliasi');
 
-$master_data_pool = array_merge($siswa, $guru, $mitra, $pic, $kelas, $mapel, $relasi, $review, $afiliasi);
+$master_data_pool = array_merge($siswa, $guru, $mitra, $ujian, $pic, $kelas, $mapel, $relasi, $review, $afiliasi);
 
 // Langganan & Konten
 $iklan = array('sw-admin/iklan');
@@ -153,6 +154,16 @@ $is_pengaturan_active = in_array($current_uri, $pengaturan_pool);
                                                     <span class="d-flex flex-column">
                                                         <span class="fs-6 fw-bold text-gray-800">Mitra</span>
                                                         <span class="fs-8 fw-semibold text-muted">Voucher & Affiliate</span>
+                                                    </span>
+                                                </a>
+                                                <!-- Ujian -->
+                                                <a href="<?= base_url('sw-admin/ujian') ?>" class="menu-link p-3 mb-2 rounded-3 menu-custom-hover <?= (in_array($current_uri, $ujian) ? 'active' : '') ?>">
+                                                    <span class="menu-custom-icon d-flex flex-center rounded-3 w-45px h-45px me-3 bg-light-primary text-primary">
+                                                        <i class="ki-duotone ki-book-open fs-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i>
+                                                    </span>
+                                                    <span class="d-flex flex-column">
+                                                        <span class="fs-6 fw-bold text-gray-800">Ujian</span>
+                                                        <span class="fs-8 fw-semibold text-muted">Manajemen & Analisis Ujian</span>
                                                     </span>
                                                 </a>
                                             </div>
