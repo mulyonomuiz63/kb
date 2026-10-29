@@ -28,22 +28,28 @@ class UjianController extends BaseController
             $request = \Config\Services::request();
 
             $db = \Config\Database::connect();
-            $builder = $db->table('ujian');
+            $builder = $db->table('ujian_master'); // Tabel utama adalah ujian_master
 
-            // Pilih kolom yang diperlukan dan agregasi data
+            // Lakukan LEFT JOIN ke tabel 'ujian' agar data ujian_master tetap tampil 
+            // meskipun belum ada siswa yang masuk ke tabel ujian
             $builder->select('
-            kode_ujian,
-            nama_ujian,
-            COUNT(id_siswa) as total_peserta,
-            SUM(CASE WHEN status = "B" THEN 1 ELSE 0 END) as status_b,
-            SUM(CASE WHEN status = "U" THEN 1 ELSE 0 END) as status_u,
-            SUM(CASE WHEN status = "S" THEN 1 ELSE 0 END) as status_s,
-            SUM(CASE WHEN status = "T" THEN 1 ELSE 0 END) as status_t,
-            SUM(CASE WHEN nilai < 65 AND status = "S" THEN 1 ELSE 0 END) as nilai_kurang,
-            SUM(CASE WHEN nilai >= 65 AND status = "S" THEN 1 ELSE 0 END) as nilai_lulus
-        ');
-            $builder->groupBy('kode_ujian, nama_ujian');
-            $builder->orderBy('id_ujian', 'ASC');
+                ujian_master.kode_ujian,
+                ujian_master.nama_ujian,
+                COUNT(ujian.id_siswa) as total_peserta,
+                SUM(CASE WHEN ujian.status = "B" THEN 1 ELSE 0 END) as status_b,
+                SUM(CASE WHEN ujian.status = "U" THEN 1 ELSE 0 END) as status_u,
+                SUM(CASE WHEN ujian.status = "S" THEN 1 ELSE 0 END) as status_s,
+                SUM(CASE WHEN ujian.status = "T" THEN 1 ELSE 0 END) as status_t,
+                SUM(CASE WHEN ujian.nilai < 65 AND ujian.status = "S" THEN 1 ELSE 0 END) as nilai_kurang,
+                SUM(CASE WHEN ujian.nilai >= 65 AND ujian.status = "S" THEN 1 ELSE 0 END) as nilai_lulus
+            ');
+            $builder->join('ujian', 'ujian.kode_ujian = ujian_master.kode_ujian', 'left');
+
+            // Group by kolom dari ujian_master
+            $builder->groupBy('ujian_master.kode_ujian, ujian_master.nama_ujian');
+
+            // Urutkan berdasarkan id di ujian_master (misal: id_ujian atau id pada master)
+            $builder->orderBy('ujian_master.id_ujian', 'ASC'); // Sesuaikan nama kolom primary key di ujian_master jika berbeda
 
             // 1. Hitung Total Data Asli (Tanpa Filter)
             $totalDataBuilder = clone $builder;
