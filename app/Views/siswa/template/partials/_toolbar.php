@@ -192,7 +192,7 @@
         <!-- ================= KOLOM KANAN (Leaderboard Auto-Scroll) ================= -->
         <!-- Filter PHP: Hanya tampilkan jika URL saat ini adalah sw-siswa -->
         <?php if (url_is('sw-siswa') && !empty($top_siswa)): ?>
-            <div class="w-100 w-lg-350px flex-shrink-0 animate-fade-in-up  mb-8 mb-lg-0">
+            <div class="w-100 w-lg-350px flex-shrink-0 animate-fade-in-up mb-8 mb-lg-0 d-none d-lg-block">
                 <div class="leaderboard-box d-flex flex-column justify-content-center">
 
                     <div class="d-flex align-items-center mb-4">
