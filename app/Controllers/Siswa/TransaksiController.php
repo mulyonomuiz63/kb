@@ -112,7 +112,15 @@ class TransaksiController extends BaseController
                     'breadcrumbs'  => $breadcrumbs
                 ];
                 $data['link'] = $this->googleClient->createAuthUrl();
-                return view('siswa/paket/index', $data);
+
+                // Ubah string JSON menjadi array PHP
+                $jenisPaket = json_decode($cekpaket->jenis_paket, true);
+                // Cek apakah 'tryout_ukp' ada di dalam array jenis_paket
+                if (is_array($jenisPaket) && in_array('tryout_ukp', $jenisPaket)) {
+                    return view('siswa/paket/indexUkp', $data);
+                } else {
+                    return view('siswa/paket/index', $data);
+                }
             } else {
                 return redirect()->to('bimbel')->with('pesan', 'Paket yang anda pilih sudah tidak ada.');
             }
@@ -162,11 +170,31 @@ class TransaksiController extends BaseController
         // Gunakan pendekatan aman (Null Coalescing Operator)
         $diskon_voucher = $voucher ? $voucher['diskon_voucher'] : 0;
         $kode_voucher   = ($voucher && $diskon_voucher > 0) ? $voucher['kode_voucher'] : '';
-
-        // Mulai Transaksi Database
-        $db->transBegin();
         $dataPaket = $this->paketModel->join('diskon', 'paket.iddiskon=diskon.iddiskon', 'left')->where('paket.idpaket', $this->request->getVar('idpaket'))->get()->getRow();
 
+        // =========================================================================
+        // UPGRADE LOGIKA: BATASI PEMESANAN TRYOUT UKP HANYA 1 KALI PER USER
+        // =========================================================================
+        if ($dataPaket && !empty($dataPaket->jenis_paket)) {
+            // Decode string JSON dari database menjadi array PHP
+            $jenis_paket_arr = json_decode($dataPaket->jenis_paket, true);
+
+            // Pastikan hasil decode adalah array dan terdapat nilai 'tryout_ukp' di dalamnya
+            if (is_array($jenis_paket_arr) && in_array('tryout_ukp', $jenis_paket_arr)) {
+                $cekPesanan = $db->table('transaksi')
+                    ->join('detail_transaksi', 'detail_transaksi.idtransaksi = transaksi.idtransaksi')
+                    ->where('transaksi.idsiswa', session('id'))
+                    ->where('detail_transaksi.idpaket', $this->request->getVar('idpaket'))
+                    ->countAllResults();
+
+                if ($cekPesanan > 0) {
+                    return redirect()->back()->with('pesan', 'Anda sudah pernah memesan paket ini. Paket TryOut UKP hanya dapat dipesan 1 kali per akun.');
+                }
+            }
+        }
+        // =========================================================================
+        // Mulai Transaksi Database
+        $db->transBegin();
         try {
             // 3. Simpan Transaksi Utama
             $dataInsert = [
