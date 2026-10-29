@@ -152,7 +152,26 @@
                         Hai, <?= esc(session()->get('nama')) ?>! 👋
 
                         <!-- Deskripsi di-upgrade dengan konteks KelasBrevet & Pajak -->
-                        <span class="page-desc text-white opacity-75 fw-semibold fs-6 pt-3" style="max-width: 600px; line-height: 1.5;">
+                        <style>
+                            /* Animasi fade in yang cepat (0.5 detik) */
+                            @keyframes quickFadeIn {
+                                from {
+                                    opacity: 0;
+                                    transform: translateY(10px);
+                                }
+
+                                to {
+                                    opacity: 1;
+                                    transform: translateY(0);
+                                }
+                            }
+
+                            .quick-fade {
+                                animation: quickFadeIn 0.5s ease-out forwards;
+                            }
+                        </style>
+
+                        <span class="page-desc text-white opacity-75 fw-semibold fs-6 pt-3 quick-fade" style="max-width: 600px; line-height: 1.5;">
                             Selamat datang di <strong class="text-warning">KelasBrevet</strong>. Terus tingkatkan kompetensi perpajakan Anda, selesaikan ujian brevet, dan persiapkan diri menjadi Ahli Pajak bersertifikat.
                         </span>
                     </h1>
@@ -160,25 +179,25 @@
 
                 <!-- Bagian Kanan: Informasi Tambahan (Tanggal & Status) -->
                 <?php if (uri_string() !== 'sw-siswa'): ?>
-                <div class="d-flex align-items-center gap-3">
-                    <!-- Info Tanggal -->
-                    <div class="d-flex align-items-center bg-white bg-opacity-10 border border-white border-opacity-20 rounded-pill px-4 py-2" data-bs-toggle="tooltip" title="Tanggal Hari Ini">
-                        <i class="ki-outline ki-calendar-8 text-white fs-4 me-2"></i>
-                        <span class="text-white fw-semibold fs-7">
-                            <?php
-                            // Menampilkan tanggal format Indonesia (Misal: 24 Oktober 2026)
-                            $bulan = array(1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember');
-                            echo date('d') . ' ' . $bulan[(int)date('m')] . ' ' . date('Y');
-                            ?>
-                        </span>
-                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <!-- Info Tanggal -->
+                        <div class="d-flex align-items-center bg-white bg-opacity-10 border border-white border-opacity-20 rounded-pill px-4 py-2" data-bs-toggle="tooltip" title="Tanggal Hari Ini">
+                            <i class="ki-outline ki-calendar-8 text-white fs-4 me-2"></i>
+                            <span class="text-white fw-semibold fs-7">
+                                <?php
+                                // Menampilkan tanggal format Indonesia (Misal: 24 Oktober 2026)
+                                $bulan = array(1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember');
+                                echo date('d') . ' ' . $bulan[(int)date('m')] . ' ' . date('Y');
+                                ?>
+                            </span>
+                        </div>
 
-                    <!-- Info Status Siswa -->
-                    <div class="d-flex align-items-center bg-white bg-opacity-10 border border-white border-opacity-20 rounded-pill px-4 py-2" data-bs-toggle="tooltip" title="Status Akun">
-                        <i class="ki-outline ki-shield-tick text-success fs-4 me-2"></i>
-                        <span class="text-white fw-semibold fs-7">Peserta Aktif</span>
+                        <!-- Info Status Siswa -->
+                        <div class="d-flex align-items-center bg-white bg-opacity-10 border border-white border-opacity-20 rounded-pill px-4 py-2" data-bs-toggle="tooltip" title="Status Akun">
+                            <i class="ki-outline ki-shield-tick text-success fs-4 me-2"></i>
+                            <span class="text-white fw-semibold fs-7">Peserta Aktif</span>
+                        </div>
                     </div>
-                </div>
                 <?php endif; ?>
             </div>
 
