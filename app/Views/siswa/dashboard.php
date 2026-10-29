@@ -529,9 +529,9 @@
                 </div>
             </div> -->
             <style>
-                /* Custom Styling & Animations untuk Banner UKP */
+                /* Custom Styling & Animations untuk Banner UKP - Tema Biru KelasBrevet */
                 .promo-ukp-card {
-                    background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+                    background: linear-gradient(135deg, #18418A 0%, #112F66 50%, #0B1D3D 100%);
                     position: relative;
                     overflow: hidden;
                     border: none;
@@ -540,7 +540,7 @@
 
                 .promo-ukp-card:hover {
                     transform: translateY(-5px);
-                    box-shadow: 0 20px 40px rgba(44, 83, 100, 0.4) !important;
+                    box-shadow: 0 20px 40px rgba(11, 29, 61, 0.4) !important;
                 }
 
                 /* Elemen Dekoratif Animasi Floating */
@@ -548,7 +548,7 @@
                 .ukp-shape-2 {
                     position: absolute;
                     border-radius: 50%;
-                    background: rgba(255, 255, 255, 0.05);
+                    background: rgba(255, 255, 255, 0.04);
                     z-index: 1;
                 }
 
@@ -656,9 +656,12 @@
                     </div>
 
                     <!-- Headline -->
-                    <h3 class="text-white fs-2qx fw-bold mb-4" style="line-height: 1.3;">
+                    <h3 class="text-white fs-2qx fw-bold mb-4" style="line-height: 1.4;">
                         Ukur Kesiapan Anda Hadapi UKP <br />
-                        <span class="text-warning">Tanpa Biaya Sepeserpun!</span>
+                        <!-- Text Gratis di-upgrade agar jauh lebih mencolok -->
+                        <span class="text-warning text-uppercase" style="font-size: 1.05em; text-shadow: 0 3px 6px rgba(0,0,0,0.4);">
+                            100% Gratis Tanpa Biaya!
+                        </span>
                     </h3>
 
                     <!-- Subheadline -->
@@ -673,9 +676,10 @@
                             <i class="fa fa-pencil-alt me-2 text-dark"></i> Mulai Try Out Sekarang
                         </a>
 
-                        <!-- Opsional: Tombol Secondary jika masih ingin menampilkan paket lain -->
+                        <!-- Tombol Secondary -->
                         <a href="<?= base_url('list-bimbel') ?>"
-                            class="btn btn-outline btn-outline-dashed btn-outline-white text-white fw-bold px-8 py-4 w-100 w-sm-auto rounded-pill hover-elevate-up">
+                            class="btn btn-outline btn-outline-dashed btn-outline-white text-white fw-bold px-8 py-4 w-100 w-sm-auto rounded-pill hover-elevate-up"
+                            style="background: rgba(255,255,255,0.05);">
                             Lihat Paket Pelatihan Brevet A&B
                         </a>
                     </div>
