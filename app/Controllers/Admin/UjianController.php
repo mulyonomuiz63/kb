@@ -169,14 +169,22 @@ class UjianController extends BaseController
             echo '<tr><td colspan="3" style="text-align:center;">Tidak ada data pada periode ini</td></tr>';
         } else {
             foreach ($peserta as $p) {
+                // Bersihkan spasi kosong di awal/akhir
+                $no_hp = trim($p->hp);
+
+                // Jika nomor hp kosong, null, atau hanya bernilai '0', lewati baris ini
+                if (empty($no_hp) || $no_hp === '0') {
+                    continue;
+                }
+
                 echo '<tr>';
                 echo '<td>' . esc(ucwords(strtolower($p->nama_siswa))) . '</td>';
-                echo '<td style="mso-number-format:\'\@\';">' . esc($p->hp) . '</td>'; 
+                echo '<td style="mso-number-format:\'\@\';">' . esc($no_hp) . '</td>';
                 echo '<td>' . esc($p->email) . '</td>';
                 echo '</tr>';
             }
         }
-        
+
         echo '</table>';
         exit;
     }
