@@ -480,7 +480,7 @@
                         <div class="modal-body scroll-y px-10 px-lg-15 pt-5 pb-10">
                             <div class="row g-5 fs-6 mb-7">
                                 <div class="col-6 text-gray-600 fw-semibold">Paket:</div>
-                                <div class="col-6 text-end text-gray-900 fw-bold">${data.nama_paket}</div>
+                                <div class="col-6 text-end text-gray-900 fw-bold">${data.nama_paket || data.keterangan || '-'}</div>
                                 
                                 <div class="col-6 text-gray-600 fw-semibold">Peserta:</div>
                                 <div class="col-6 text-end text-gray-900 fw-bold">${data.nama_siswa}</div>
