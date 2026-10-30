@@ -541,7 +541,7 @@ class UjianController extends BaseController
                 'tgl_exp'        => $tgl_exp,
                 'tgl_drop'       => $tgl_exp,
                 'tgl_pembayaran' => null,
-                'keterangan'     => 'Upgrade Pembahasan Ujian',
+                'keterangan'     => 'Upgrade Pembahasan: ' . ($dataUjianMaster->nama_ujian ?? 'Ujian'),
                 'jenis_bayar'    => 'online',
                 'jenis_paket'    => '["tryout_ukp"]', // Penanda bahwa ini transaksi khusus Upgrade
                 'created_at'     => $tgl_mulai
