@@ -129,4 +129,55 @@ class UjianController extends BaseController
             ]);
         }
     }
+
+    // FUNGSI BARU: Untuk Export Data Peserta ke Excel
+    // FUNGSI BARU: Untuk Export Data Peserta ke Excel dengan Filter
+    public function exportExcel()
+    {
+        $tahun = $this->request->getGet('tahun');
+        $bulan = $this->request->getGet('bulan');
+
+        $db = \Config\Database::connect();
+        $builder = $db->table('siswa');
+        $builder->select('siswa.nama_siswa, siswa.hp, siswa.email');
+        $builder->join('ujian', 'ujian.id_siswa = siswa.id_siswa', 'inner');
+
+        // LOGIKA FILTER MENGGUNAKAN FROM_UNIXTIME UNTUK KOLOM date_created
+        if (!empty($tahun)) {
+            $builder->where('YEAR(FROM_UNIXTIME(ujian.date_created))', $tahun);
+            if (!empty($bulan)) {
+                $builder->where('MONTH(FROM_UNIXTIME(ujian.date_created))', $bulan);
+            }
+        }
+
+        $builder->groupBy('siswa.id_siswa, siswa.nama_siswa, siswa.hp, siswa.email');
+        $query = $builder->get();
+        $peserta = $query->getResult();
+
+        header("Content-Type: application/vnd.ms-excel; charset=utf-8");
+        header("Content-Disposition: attachment; filename=Data_Peserta_Ujian_" . ($bulan ? $bulan . "_" : "") . ($tahun ? $tahun : "Semua") . ".xls");
+        header("Cache-Control: max-age=0");
+
+        echo '<table border="1">';
+        echo '<tr>';
+        echo '<th style="background-color:#009ef7; color:#ffffff;">Nama</th>';
+        echo '<th style="background-color:#009ef7; color:#ffffff;">No WhatsApp</th>';
+        echo '<th style="background-color:#009ef7; color:#ffffff;">Email</th>';
+        echo '</tr>';
+
+        if (empty($peserta)) {
+            echo '<tr><td colspan="3" style="text-align:center;">Tidak ada data pada periode ini</td></tr>';
+        } else {
+            foreach ($peserta as $p) {
+                echo '<tr>';
+                echo '<td>' . esc(ucwords(strtolower($p->nama_siswa))) . '</td>';
+                echo '<td style="mso-number-format:\'\@\';">' . esc($p->hp) . '</td>'; 
+                echo '<td>' . esc($p->email) . '</td>';
+                echo '</tr>';
+            }
+        }
+        
+        echo '</table>';
+        exit;
+    }
 }

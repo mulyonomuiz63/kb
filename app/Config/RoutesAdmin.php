@@ -97,6 +97,7 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
     $routes->group('ujian', function ($routes) {
         $routes->get('', 'Admin\UjianController::index');
         $routes->post('datatable', 'Admin\UjianController::datatable');
+        $routes->get('export-excel', 'Admin\UjianController::exportExcel');
     });
 
     $routes->group('afiliasi', function ($routes) {
