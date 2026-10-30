@@ -252,7 +252,7 @@ class TransaksiController extends BaseController
                     $row = [];
 
                     // UPGRADE: Siapkan fallback nama paket jika transaksi adalah sertifikat (nama_paket akan null)
-                    $nama_paket_display = !empty($s->nama_paket) ? $s->nama_paket : ($s->nama_detail ?? 'Sertifikat Fisik');
+                    $nama_paket_display = !empty($s->nama_paket) ? $s->nama_paket : ($s->nama_detail ?? $s->keterangan);
 
                     if ($s->status === 'V') {
                         // Jika statusnya V, beri warna merah muda (light danger)
