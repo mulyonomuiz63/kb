@@ -40,6 +40,7 @@ class UjianController extends BaseController
                 SUM(CASE WHEN ujian.status = "U" THEN 1 ELSE 0 END) as status_u,
                 SUM(CASE WHEN ujian.status = "S" THEN 1 ELSE 0 END) as status_s,
                 SUM(CASE WHEN ujian.status = "T" THEN 1 ELSE 0 END) as status_t,
+                SUM(CASE WHEN ujian.review = "1" THEN 1 ELSE 0 END) as upgrade_review,
                 SUM(CASE WHEN ujian.nilai < 65 AND ujian.status = "S" THEN 1 ELSE 0 END) as nilai_kurang,
                 SUM(CASE WHEN ujian.nilai >= 65 AND ujian.status = "S" THEN 1 ELSE 0 END) as nilai_lulus
             ');
@@ -104,6 +105,7 @@ class UjianController extends BaseController
                         <span>Berjalan (U): <b class="text-warning">' . $m->status_u . '</b></span>
                         <span>Selesai (S): <b class="text-success">' . $m->status_s . '</b></span>
                         <span>Ditangguhkan (T): <b class="text-danger">' . $m->status_t . '</b></span>
+                        <span>Upgrade Review: <b class="text-info">' . $m->upgrade_review . '</b></span>
                       </div>';
 
                 // 4. Analisis Nilai (< 65 dan >= 65)
