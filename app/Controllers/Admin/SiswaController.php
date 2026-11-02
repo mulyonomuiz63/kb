@@ -574,8 +574,53 @@ class SiswaController extends BaseController
 
         $data = [];
         foreach ($siswa_list as $r) {
-            $tugas = $this->ujianModel->getAllByKelas($r->kelas, $r->id_siswa);
+            // =========================================================================
+            // 1. KUMPULKAN SEMUA KELAS SISWA (KELAS UTAMA + KELAS TAMBAHAN DARI siswa_kelas)
+            // =========================================================================
+            $list_kelas_ids = [];
+            
+            // Masukkan kelas utama dari tabel siswa jika ada
+            if (!empty($r->kelas)) {
+                $list_kelas_ids[] = $r->kelas;
+            }
 
+            // Ambil kelas tambahan dari tabel siswa_kelas
+            $kelas_tambahan = $db->table('siswa_kelas')
+                                 ->where('id_siswa', $r->id_siswa)
+                                 ->get()
+                                 ->getResultObject();
+
+            foreach ($kelas_tambahan as $kt) {
+                if (!empty($kt->id_kelas)) {
+                    $list_kelas_ids[] = $kt->id_kelas;
+                }
+            }
+
+            // Hilangkan ID kelas yang duplikat (jika ada)
+            $list_kelas_ids = array_unique($list_kelas_ids);
+
+            // =========================================================================
+            // 2. TARIK SEMUA UJIAN BERDASARKAN SELURUH KELAS YANG DIMILIKI
+            // =========================================================================
+            $tugas = [];
+            $processed_ujian_ids = [];
+
+            foreach ($list_kelas_ids as $id_kelas_item) {
+                $tugas_per_kelas = $this->ujianModel->getAllByKelas($id_kelas_item, $r->id_siswa);
+                if (!empty($tugas_per_kelas)) {
+                    foreach ($tugas_per_kelas as $u) {
+                        // Hindari ujian ganda jika ada ujian yang berada di lebih dari 1 kelas
+                        if (!in_array($u->id_ujian, $processed_ujian_ids)) {
+                            $processed_ujian_ids[] = $u->id_ujian;
+                            $tugas[] = $u;
+                        }
+                    }
+                }
+            }
+
+            // =========================================================================
+            // 3. LOOPING DATA UJIAN (LOGIKA BAWAAN TIDAK DIUBAH SAMA SEKALI)
+            // =========================================================================
             foreach ($tugas as $u) {
                 // --- LOGIKA HITUNG DURASI (3 Menit per Soal) ---
                 $jmlSoal = soal_ujian(encrypt_url($u->kode_ujian));
@@ -610,10 +655,8 @@ class SiswaController extends BaseController
                 }
 
                 // Tambahan Tombol Hapus jika kuota == 3
-                // if ($u->kuota == 3) {
                 $url_hapus = base_url('sw-admin/siswa/delete-ujian') . '/' . encrypt_url($u->id_ujian) . '/' . encrypt_url($u->id_siswa);
                 $btn_list[] = '<a href="javascript:void(0)" data-url="' . $url_hapus . '" class="btn btn-icon btn-light-danger btn-sm btn-delete" title="Hapus Data"><i class="ki-duotone ki-trash fs-3"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i></a>';
-                // }
 
                 // --- BINDING KE OBJECT DATA ---
                 $row = new \stdClass();
@@ -621,7 +664,6 @@ class SiswaController extends BaseController
                 $row->nama_kelas = $u->nama_kelas;
 
                 // Kolom Kuota (dengan Badge & Modal Metronic Style)
-                // Menggunakan data-bs-target untuk Bootstrap 5 (bawaan Metronic 8)
                 $row->kuota_html = '<a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#tambah_kuota" class="edit_kuota badge badge-light-primary fw-bold px-3 py-2 cursor-pointer text-hover-primary" 
                         data-idsiswa="' . encrypt_url($u->id_siswa) . '" 
                         data-idujian="' . encrypt_url($u->id_ujian) . '" 
@@ -634,7 +676,6 @@ class SiswaController extends BaseController
                 $row->status_lulus = $u->nilai === null ? '-' : ($u->nilai >= 60 ? '<span class="badge badge-light-success fw-bold px-3 py-2">Lulus</span>' : '<span class="badge badge-light-danger fw-bold px-3 py-2">Tidak Lulus</span>');
 
                 // MENGGABUNGKAN TOMBOL DENGAN FLEXBOX
-                // Gap sudah didukung penuh oleh Metronic 8 / Bootstrap 5
                 $row->aksi = '<div class="d-flex justify-content-center align-items-center gap-2">' . implode('', $btn_list) . '</div>';
 
                 $data[] = $row;
