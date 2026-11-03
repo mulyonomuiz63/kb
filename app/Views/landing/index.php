@@ -1078,8 +1078,15 @@
                                                     ?>
                                                     <span class="fw-bold"> <i class="icofont-read-book"></i> <?= (!empty($total) ? $total : '0') ?> Soal/<span style="font-size:10px">Materi</span> </span>
                                                     <div class="d-flex flex-column mb-3">
-                                                        <span class="fw-bold text-danger fs-5"> Rp <?= number_format($rows->nominal_paket - (($rows->nominal_paket * $rows->diskon) / 100)) ?> </span>
-                                                        <span style="font-size:12px" class="mt-1 text-muted"> <del>Rp <?= number_format($rows->nominal_paket) ?></del> </span>
+                                                        <!-- Tambahkan text-nowrap agar Rp dan nominal tidak terpisah baris -->
+                                                        <span class="fw-bold text-danger text-nowrap" style="font-size: clamp(0.85rem, 3.5vw, 1.25rem);">
+                                                            Rp <?= number_format($rows->nominal_paket - ($rows->nominal_paket * $rows->diskon / 100)) ?>
+                                                        </span>
+
+                                                        <!-- Harga Coret -->
+                                                        <span class="text-muted mt-1 text-nowrap" style="font-size: clamp(0.65rem, 2.5vw, 0.875rem);">
+                                                            <del>Rp <?= number_format($rows->nominal_paket) ?></del>
+                                                        </span>
                                                     </div>
                                                 </div>
 
@@ -1243,7 +1250,7 @@
                                                     <?= img_lazy('assets-landing/images/paket/thumbnails/' . $rows->file, $rows->nama_paket, ['class' => 'card-img-top']) ?>
                                                 </a>
                                             </div>
-                                            
+
 
                                             <div class="courses-content pb-3 d-flex flex-column flex-grow-1">
                                                 <h4 class="title"><a href="<?= base_url('bimbel/' . $rows->slug) ?>"><?= $rows->nama_paket ?></a></h4>
@@ -1304,23 +1311,23 @@
                                                 </div>
 
                                                 <!-- Accordion Detail Paket Start -->
-                                                <?php if(!empty($rows->deskripsi)): ?>
-                                                <div class="accordion accordion-flush mb-3" id="accordionDetailUskp<?= $rows->idpaket ?>">
-                                                    <div class="accordion-item border rounded shadow-sm">
-                                                        <h2 class="accordion-header" id="headingUskp<?= $rows->idpaket ?>">
-                                                            <button class="accordion-button collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDetailUskp<?= $rows->idpaket ?>" aria-expanded="false" aria-controls="collapseDetailUskp<?= $rows->idpaket ?>" style="font-size: 0.8rem; background-color: #f8f9fa;">
-                                                                <i class="icofont-info-circle text-primary me-2"></i> <strong>Detail Paket</strong>
-                                                            </button>
-                                                        </h2>
-                                                        <div id="collapseDetailUskp<?= $rows->idpaket ?>" class="accordion-collapse collapse" aria-labelledby="headingUskp<?= $rows->idpaket ?>" data-bs-parent="#accordionDetailUskp<?= $rows->idpaket ?>">
-                                                            <div class="accordion-body p-3 custom-accordion-text bg-white">
-                                                                <div class="text-secondary mb-3 pb-2 border-bottom" style="font-size: 0.85rem; line-height: 1.6;">
-                                                                    <?= !empty($rows->deskripsi) ? $rows->deskripsi : (!empty($rows->detail_paket) ? $rows->detail_paket : 'Detail informasi paket pembelajaran.') ?>
+                                                <?php if (!empty($rows->deskripsi)): ?>
+                                                    <div class="accordion accordion-flush mb-3" id="accordionDetailUskp<?= $rows->idpaket ?>">
+                                                        <div class="accordion-item border rounded shadow-sm">
+                                                            <h2 class="accordion-header" id="headingUskp<?= $rows->idpaket ?>">
+                                                                <button class="accordion-button collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDetailUskp<?= $rows->idpaket ?>" aria-expanded="false" aria-controls="collapseDetailUskp<?= $rows->idpaket ?>" style="font-size: 0.8rem; background-color: #f8f9fa;">
+                                                                    <i class="icofont-info-circle text-primary me-2"></i> <strong>Detail Paket</strong>
+                                                                </button>
+                                                            </h2>
+                                                            <div id="collapseDetailUskp<?= $rows->idpaket ?>" class="accordion-collapse collapse" aria-labelledby="headingUskp<?= $rows->idpaket ?>" data-bs-parent="#accordionDetailUskp<?= $rows->idpaket ?>">
+                                                                <div class="accordion-body p-3 custom-accordion-text bg-white">
+                                                                    <div class="text-secondary mb-3 pb-2 border-bottom" style="font-size: 0.85rem; line-height: 1.6;">
+                                                                        <?= !empty($rows->deskripsi) ? $rows->deskripsi : (!empty($rows->detail_paket) ? $rows->detail_paket : 'Detail informasi paket pembelajaran.') ?>
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
                                                 <?php endif; ?>
                                                 <!-- Accordion Detail Paket End -->
 
