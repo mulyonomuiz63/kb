@@ -294,45 +294,15 @@ class AuthController extends BaseController
                         return redirect()->to('auth');
                     }
                 } else {
-                    $data_siswa = [
-                        'no_induk_siswa' => rand(1000000, 9000000),
-                        'nama_siswa' => $data['name'],
-                        'email' => $data['email'],
-                        'kelas' => 1,
-                        'role' => 2,
-                        'is_active' => 1,
-                        'date_created' => time(),
-                        'avatar' => 'default.jpg',
-                    ];
-                    $this->SiswaModel->save($data_siswa);
-
-
-                    $siswa = $this->SiswaModel->getByEmail($data['email']);
-                    $data = [
-                        'id' => $siswa->id_siswa,
-                        'email' => $siswa->email,
-                        'nama' => $siswa->nama_siswa,
-                        'role' => $siswa->role,
-                        'avatar' => $siswa->avatar,
-                        'status' => $siswa->status,
-                        'role_access'    => $siswa->role_access,
-                    ];
-                    session()->set($data);
-
-                    // Arahkan Ke halaman siswa
                     session()->setFlashdata('pesan', "
                     swal({
-                        title: 'Berhasil!',
-                        text: 'Selamat Datang',
-                        type: 'success',
+                        title: 'Informasi!',
+                        text: 'Login Gagal, Silahkan registrasi terlebih dahulu.',
+                        type: 'info',
                         padding: '2em'
                         })
                     ");
-                    if (!empty(session('url'))) {
-                        return redirect()->to(session('url'));
-                    } else {
-                        return redirect()->to('sw-siswa');
-                    }
+                    return redirect()->to('auth/registrasi');
                 }
             } else {
                 session()->setFlashdata('pesan', "
