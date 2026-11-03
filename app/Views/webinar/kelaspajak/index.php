@@ -579,7 +579,7 @@ $paketUtama = !empty($daftarPaket) ? $daftarPaket[0] : null;
                                             data-verified="<?= (session()->get('id') && isset($siswa)) ? esc($siswa['is_wa_verified'] ?? '0') : '0' ?>"
                                             value="<?= (session()->get('id') && isset($siswa)) ? esc($siswa['hp']) : esc(old('hp')) ?>"
                                             class="form-control form-control-md form-control-lg-lg"
-                                            placeholder="81234567890" pattern="[0-9]+" minlength="10" maxlength="15" required autocomplete="off">
+                                            placeholder="081234567890" pattern="[0-9]+" minlength="10" maxlength="15" required autocomplete="off">
 
                                         <!-- Tombol Kirim OTP -->
                                         <button class="btn btn-primary text-nowrap px-4" type="button" id="btn-send-otp" style="display: none;" title="Kirim OTP Ke WhatsApp">

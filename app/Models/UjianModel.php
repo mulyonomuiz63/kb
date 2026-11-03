@@ -8,7 +8,7 @@ class UjianModel extends Model
 {
     protected $table            = 'ujian';
     protected $primaryKey       = 'id_ujian';
-    protected $allowedFields    = ['id_siswa','kode_ujian', 'nama_ujian', 'guru', 'kelas', 'mapel', 'waktu_per_soal', 'date_created', 'waktu_mulai', 'waktu_berakhir','start_ujian', 'end_ujian', 'jenis_ujian','status','nilai','kuota', 'kuota_master','verifikasi','review','updated_at'];
+    protected $allowedFields    = ['id_siswa', 'kode_ujian', 'nama_ujian', 'guru', 'kelas', 'mapel', 'waktu_per_soal', 'date_created', 'waktu_mulai', 'waktu_berakhir', 'start_ujian', 'end_ujian', 'jenis_ujian', 'status', 'nilai', 'kuota', 'kuota_master', 'verifikasi', 'review', 'updated_at'];
 
     public function getAll()
     {
@@ -27,20 +27,20 @@ class UjianModel extends Model
     }
 
     public function getAllBykelas($kelas, $id_siswa)
-{
-    return $this
-        // Tambahkan ujian_master.biaya_upgrade pada bagian select
-        ->select('ujian.*, kelas.*, mapel.nama_mapel, mapel.file, guru.*, ujian_master.biaya_upgrade')
-        ->join('kelas', 'kelas.id_kelas=ujian.kelas')
-        ->join('mapel', 'mapel.id_mapel=ujian.mapel')
-        ->join('guru', 'guru.id_guru=ujian.guru')
-        // Tambahkan baris JOIN ini untuk mengambil data dari ujian_master
-        ->join('ujian_master', 'ujian_master.kode_ujian = ujian.kode_ujian', 'left')
-        ->where('ujian.kelas', $kelas)
-        ->where('ujian.id_siswa', $id_siswa)
-        ->groupBy('ujian.id_ujian')
-        ->get()->getResultObject();
-}
+    {
+        return $this
+            // Tambahkan ujian_master.biaya_upgrade pada bagian select
+            ->select('ujian.*, kelas.*, mapel.nama_mapel, mapel.file, guru.*, ujian_master.biaya_upgrade')
+            ->join('kelas', 'kelas.id_kelas=ujian.kelas')
+            ->join('mapel', 'mapel.id_mapel=ujian.mapel')
+            ->join('guru', 'guru.id_guru=ujian.guru')
+            // Tambahkan baris JOIN ini untuk mengambil data dari ujian_master
+            ->join('ujian_master', 'ujian_master.kode_ujian = ujian.kode_ujian', 'left')
+            ->where('ujian.kelas', $kelas)
+            ->where('ujian.id_siswa', $id_siswa)
+            ->groupBy('ujian.id_ujian')
+            ->get()->getResultObject();
+    }
 
     public function getAllByKelasSertifikat($kelas, $id_siswa)
     {
@@ -97,11 +97,11 @@ class UjianModel extends Model
             ->where('ujian.id_ujian', $id_ujian)
             ->get()->getRowObject();
     }
-    
+
     public function getByIdsiswa($id_siswa)
     {
         return $this
-        ->select("siswa.*, mapel.*, ujian.id_ujian, ujian.id_siswa, ujian.kode_ujian, max(ujian.nilai) as nilai, ujian.end_ujian")
+            ->select("siswa.*, mapel.*, ujian.id_ujian, ujian.id_siswa, ujian.kode_ujian, max(ujian.nilai) as nilai, ujian.end_ujian")
             ->join('siswa', 'siswa.id_siswa=ujian.id_siswa')
             ->join('mapel', 'mapel.id_mapel=ujian.mapel')
             ->where('ujian.id_siswa', $id_siswa)
@@ -111,7 +111,7 @@ class UjianModel extends Model
             ->orderBy('max(ujian.nilai)', 'desc')
             ->get()->getResultObject();
     }
-    
+
     public function getByIdsiswaAsc($id_siswa)
     {
         return $this
@@ -123,8 +123,8 @@ class UjianModel extends Model
             ->orderBy('ujian.start_ujian', 'asc')
             ->get()->getRowObject();
     }
-    
-     public function getByIdsiswaDesc($id_siswa)
+
+    public function getByIdsiswaDesc($id_siswa)
     {
         return $this
             ->join('siswa', 'siswa.id_siswa=ujian.id_siswa')
@@ -135,7 +135,7 @@ class UjianModel extends Model
             ->orderBy('ujian.end_ujian', 'desc')
             ->get()->getRowObject();
     }
-    
+
     public function getByIdsiswaSertifikat($id_siswa, $idkelas)
     {
         return $this
@@ -150,6 +150,4 @@ class UjianModel extends Model
             ->orderBy('ujian.mapel', 'asc')
             ->get()->getResultObject();
     }
-    
-    
 }
