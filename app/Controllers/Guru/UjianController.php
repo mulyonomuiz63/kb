@@ -559,6 +559,47 @@ class UjianController extends BaseController
     }
 
 
+    public function copyUjian($kode_ujian)
+    {
+        $idguru = session()->get('idguru_diadmin') ?? session()->get('id');
+        $kode_ujian_asli = decrypt_url($kode_ujian);
+
+        $data['breadcrumbs'] = [
+            ['title' => 'Dashboard', 'url' => base_url('sw-guru')],
+            ['title' => 'Data Ujian', 'url' => base_url('sw-guru/ujian')],
+            ['title' => 'List Soal Ujian', 'url' => '#'],
+        ];
+
+        $db = \Config\Database::connect();
+
+        $data['detail_ujian'] = $this->ujianDetailModel->getAllBykodeUjian($kode_ujian_asli);
+        $data['ujian'] = $this->ujianMasterModel->getBykode($kode_ujian_asli);
+        $data['status_ujian'] = $this->statusUjianModel->where('kode_ujian', $kode_ujian_asli)->first();
+
+        // Ambil data komposisi sub-materi yang sudah ada untuk ujian ini
+        $data['komposisi_ujian'] = $db->table('ujian_komposisi')
+            ->where('kode_ujian', $kode_ujian_asli)
+            ->get()
+            ->getResultObject();
+
+        // Ambil referensi sub-materi unik dari bank_soal untuk datalist
+        $data['sub_materi_bank'] = $db->table('bank_soal')
+            ->select('sub_materi')
+            ->distinct()
+            ->where('sub_materi IS NOT NULL')
+            ->where('sub_materi !=', '')
+            ->get()
+            ->getResultObject();
+
+        $data['siswa'] = $this->siswaModel->getAllbyKelas($data['ujian']->kelas);
+        $data['guru'] = $this->guruModel->asObject()->find($idguru);
+        $data['guru_kelas'] = $this->gurukelasModel->getALLByGuru($idguru);
+        $data['guru_mapel'] = $this->guruMapelModel->getALLByGuru($idguru);
+        $data['kategori'] = $db->table('kategori')->get()->getResultObject();
+
+        return view('guru/ujian/copy_pg', $data);
+    }
+
     public function editUjian($kode_ujian)
     {
         $idguru = session()->get('idguru_diadmin') ?? session()->get('id');

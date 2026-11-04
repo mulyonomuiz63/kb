@@ -808,8 +808,8 @@
                         <a href="<?= base_url("testimoni") ?>">Testimoni</a>
                     </li>
                     <li>
-                        <a href="<?= base_url("marathon-perpajakan") ?>" class="d-inline-flex align-items-center gap-1">
-                            Webinar
+                        <a href="<?= base_url('bimbel/tryout-ukp') ?>" class="d-inline-flex align-items-center gap-1">
+                            Try Out
                             <span class="badge bg-danger badge-pro-pulse fw-bold" style="font-size: 8px; margin-bottom: 16px; padding: 2px 5px; letter-spacing: 0.5px;">NEW</span>
                         </a>
                     </li>

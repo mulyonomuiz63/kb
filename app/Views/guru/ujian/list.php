@@ -72,6 +72,9 @@
                                                 <a href="<?= base_url('sw-guru/ujian/edit-ujian/') . encrypt_url($u->kode_ujian); ?>" class="menu-link px-3">Edit</a>
                                             </div>
                                             <div class="menu-item px-3">
+                                                <a href="<?= base_url('sw-guru/ujian/copy-ujian/') . encrypt_url($u->kode_ujian); ?>" class="menu-link px-3">Copy</a>
+                                            </div>
+                                            <div class="menu-item px-3">
                                                 <a target="_blank" href="<?= base_url('sw-guru/ujian/cetak-soal/') . encrypt_url($u->kode_ujian); ?>" class="menu-link px-3 text-primary">Cetak PDF</a>
                                             </div>
                                         </div>
