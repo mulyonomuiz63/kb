@@ -117,7 +117,7 @@ class Bimbel extends BaseController
         $jenisPaket = json_decode($data['paket']->jenis_paket, true);
 
         // Cek apakah 'tryout_ukp' ada di dalam array jenis_paket
-        if (is_array($jenisPaket) && in_array('tryout_ukp', $jenisPaket)) {
+        if (is_array($jenisPaket) && count($jenisPaket) == 1 && in_array('tryout_ukp', $jenisPaket)) {
             return view('landing/detailUkp', $data);
         } else {
             return view('landing/detail', $data);
