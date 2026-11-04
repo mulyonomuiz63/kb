@@ -696,6 +696,7 @@
                                 parsedIdKelas = JSON.parse(data.id_kelas);
                             }
                         } catch (e) {}
+                        console.log("Parsed ID Kelas:", parsedIdKelas);
 
                         $("#edit_id_kelas").val(parsedIdKelas).trigger({
                             type: 'change',
