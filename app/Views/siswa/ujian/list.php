@@ -419,6 +419,13 @@
                                             <?php else : ?>
                                                 <button class="btn btn-light flex-grow-1 fw-bold btn-informasi-disabled" disabled>Belum Dibuka</button>
                                             <?php endif; ?>
+                                            <?php if ($u->review === '1'): ?>
+                                                <a href="<?= base_url('sw-siswa/ujian/review-ujian') . '/' . encrypt_url($u->kode_ujian) ?>"
+                                                    class="btn btn-light-success fw-bold text-uppercase d-flex align-items-center justify-content-center fs-8 fs-sm-7 px-2 lh-sm text-center"
+                                                    style="min-width: 100px;">
+                                                    Review
+                                                </a>
+                                            <?php endif; ?>
                                         <?php elseif ($u->status == 'U') : ?>
                                             <a href="<?= base_url('sw-siswa/ujian/lihat-pg') . '/' . encrypt_url($u->kode_ujian) . '/' . encrypt_url(session()->get('id')) . '/' . encrypt_url($u->id_ujian); ?>"
                                                 class="btn btn-warning flex-grow-1 fw-bold">Sedang Ujian</a>
