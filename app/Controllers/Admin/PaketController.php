@@ -73,7 +73,7 @@ class PaketController extends BaseController
                 $data_paket['id_kelas']  = []; // UPGRADE: Menjadi Array
                 $data_paket['arr_ujian'] = [];
                 $data_paket['arr_mapel'] = [];
-                $data_paket['arr_sesi']  = []; 
+                $data_paket['arr_sesi']  = [];
 
                 // Cek jika paket ini mengandung layanan brevet
                 if (!empty(array_intersect(['brevet', 'uskp', 'tryout_ukp'], $jenis_paket))) {
@@ -127,7 +127,7 @@ class PaketController extends BaseController
                         ->select('id_sesi')
                         ->get()
                         ->getResultArray();
-                    
+
                     $data_paket['arr_sesi'] = array_column($sesiRows, 'id_sesi');
                 }
                 // =====================================================
@@ -230,7 +230,7 @@ class PaketController extends BaseController
 
                 $data_master = $this->ujianMasterModel
                     ->select('ujian_master.id_ujian, ujian_master.mapel')
-                    ->whereIn('ujian_master.kelas', $raw_id_kelas_bersih) 
+                    ->whereIn('ujian_master.kelas', $raw_id_kelas_bersih)
                     ->get()->getResultObject();
 
                 $arr_u = [];
@@ -375,7 +375,7 @@ class PaketController extends BaseController
 
             // Insert Detail Ujian & Mapel
             if (!empty(array_intersect(['brevet', 'uskp', 'tryout_ukp'], $jenis_paket_bersih))) {
-                
+
                 $raw_id_ujian = $this->request->getVar('id_ujian') ?? [];
                 if (!is_array($raw_id_ujian)) $raw_id_ujian = [$raw_id_ujian];
 
@@ -393,7 +393,7 @@ class PaketController extends BaseController
                     if (in_array('all', $raw_id_ujian) || in_array('all', $raw_id_mapel)) {
                         $data_master = $this->ujianMasterModel
                             ->select('ujian_master.id_ujian, ujian_master.mapel')
-                            ->whereIn('ujian_master.kelas', $raw_id_kelas_bersih) 
+                            ->whereIn('ujian_master.kelas', $raw_id_kelas_bersih)
                             ->get()->getResultObject();
                     }
 
@@ -476,15 +476,20 @@ class PaketController extends BaseController
         }
 
         try {
-            $idKelas = $this->request->getVar('id');
+            $idKelas = $this->request->getPost('id');
 
-            // Pastikan input selalu menjadi array agar bisa menggunakan whereIn
+            // Tangani jika dari JS terbaca sebagai string dipisah koma (contoh: "1,2")
+            if (is_string($idKelas) && strpos($idKelas, ',') !== false) {
+                $idKelas = explode(',', $idKelas);
+            }
+
             if (!is_array($idKelas)) {
                 $idKelas = [$idKelas];
             }
 
-            // Jika form kelas kosong (dihapus/tidak ada yang dipilih)
-            if (empty($idKelas) || empty(array_filter($idKelas))) {
+            $idKelas = array_filter($idKelas); // Bersihkan nilai kosong
+
+            if (empty($idKelas)) {
                 return $this->response->setJSON([
                     'status' => 'success',
                     'data'   => [],
@@ -492,15 +497,14 @@ class PaketController extends BaseController
                 ]);
             }
 
-            // Ubah where menjadi whereIn untuk menampung banyak kelas
             $data = $this->ujianMasterModel
-                ->whereIn('kelas', $idKelas)
+                ->whereIn('kelas', $idKelas) // whereIn sudah mendukung banyak kelas
                 ->get()->getResultObject();
 
             return $this->response->setJSON([
                 'status' => 'success',
                 'data'   => $data,
-                csrf_token() => csrf_hash() // Kirim token baru
+                csrf_token() => csrf_hash()
             ]);
         } catch (\Exception $e) {
             return $this->response->setStatusCode(500)->setJSON([
@@ -518,15 +522,20 @@ class PaketController extends BaseController
         }
 
         try {
-            $idKelas = $this->request->getVar('id');
+            $idKelas = $this->request->getPost('id');
 
-            // Pastikan input selalu menjadi array agar bisa menggunakan whereIn
+            // Tangani jika dari JS terbaca sebagai string dipisah koma
+            if (is_string($idKelas) && strpos($idKelas, ',') !== false) {
+                $idKelas = explode(',', $idKelas);
+            }
+
             if (!is_array($idKelas)) {
                 $idKelas = [$idKelas];
             }
 
-            // Jika form kelas kosong (dihapus/tidak ada yang dipilih)
-            if (empty($idKelas) || empty(array_filter($idKelas))) {
+            $idKelas = array_filter($idKelas);
+
+            if (empty($idKelas)) {
                 return $this->response->setJSON([
                     'status' => 'success',
                     'data'   => [],
@@ -534,7 +543,6 @@ class PaketController extends BaseController
                 ]);
             }
 
-            // Ubah where menjadi whereIn untuk menampung banyak kelas
             $data = $this->mapelModel->join('materi', 'materi.mapel=mapel.id_mapel')
                 ->whereIn('kelas', $idKelas)
                 ->groupBy('mapel.id_mapel')
@@ -802,7 +810,7 @@ class PaketController extends BaseController
 
         $id_encrypt = $this->request->getPost('id_paket');
         $id_paket   = decrypt_url($id_encrypt);
-        
+
         // Ambil data antrean (mulai dari 0, lalu 5, 10, dst)
         $offset = (int) $this->request->getPost('offset') ?? 0;
         $limit  = 5; // Batasi pengiriman 5 email per request agar PHP tidak Timeout
@@ -828,12 +836,12 @@ class PaketController extends BaseController
             ->where('transaksi.status', 'S')
             ->groupBy('siswa.email')
             ->get();
-            
+
         $totalData = $queryTotal->getNumRows();
 
         if ($totalData == 0) {
             return $this->response->setJSON([
-                'status' => false, 
+                'status' => false,
                 'message' => 'Tidak ada peserta aktif yang terdaftar pada paket ini.',
                 csrf_token() => csrf_hash()
             ]);
@@ -859,7 +867,7 @@ class PaketController extends BaseController
             $email = $p->email;
 
             $subject = 'INFORMASI PELAKSANAAN WEBINAR - ' . strtoupper($paket->nama_paket);
-            
+
             $message = '
             <div style="color: #000; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; max-width: 600px;">
                 <div style="font-family: `Segoe UI`, Tahoma, Geneva, Verdana, sans-serif; font-size: 20px; color: #1C3FAA; font-weight: bold; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">
@@ -891,10 +899,10 @@ class PaketController extends BaseController
             if ($kirim) {
                 $berhasilBatch++;
             }
-            
+
             // JEDA 1 DETIK ANTAR EMAIL
             // Sangat penting untuk mencegah error "Unable to send email" akibat rate-limit (dianggap spam) oleh server
-            sleep(1); 
+            sleep(1);
         }
 
         // Kalkulasi posisi berikutnya
@@ -902,7 +910,7 @@ class PaketController extends BaseController
         $isDone = ($nextOffset >= $totalData); // True jika semua email sudah terkirim
 
         return $this->response->setJSON([
-            'status'         => true, 
+            'status'         => true,
             'is_done'        => $isDone,
             'total_data'     => $totalData,
             'next_offset'    => $nextOffset,
