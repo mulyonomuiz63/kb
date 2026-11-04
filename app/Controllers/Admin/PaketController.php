@@ -96,8 +96,7 @@ class PaketController extends BaseController
 
                     // 2. Ambil Array ID Ujian
                     if ($data_paket['v_ujian'] === 'all') {
-                        $data_paket['arr_ujian'] = ['all'];
-                    } else {
+                        // $data_paket['arr_ujian'] = ['all'];
                         $ujianRows = $db->table('detail_paket')
                             ->where('idpaket', $idDecrypted)->where('id_ujian !=', 0)
                             ->select('id_ujian')->get()->getResultArray();
@@ -106,8 +105,7 @@ class PaketController extends BaseController
 
                     // 3. Ambil Array ID Mapel
                     if ($data_paket['v_materi'] === 'all') {
-                        $data_paket['arr_mapel'] = ['all'];
-                    } else {
+                        // $data_paket['arr_mapel'] = ['all'];
                         $mapelRows = $db->table('detail_paket')
                             ->where('idpaket', $idDecrypted)->where('id_mapel !=', 0)
                             ->select('id_mapel')->get()->getResultArray();

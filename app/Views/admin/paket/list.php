@@ -491,7 +491,6 @@
                 data: { id: id, [csrfName]: tokenUjian },
                 dataType: 'json',
                 success: function(resUjian) {
-                    console.log(resUjian.data);
                     updateCSRF(resUjian[csrfName]);
                     var html = '<option></option><option value="all">-- PILIH SEMUA UJIAN --</option>';
                     $.each(resUjian.data, function(i, item) {
