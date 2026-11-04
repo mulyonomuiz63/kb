@@ -229,33 +229,44 @@ class TransaksiController extends BaseController
                 ->where('detail_paket.idpaket', $this->request->getVar('idpaket'))
                 ->get()->getResultObject();
 
-            //untuk menambah kelas di table pivot
-            $id_kelas_target = null;
-            if (!empty($detailPaket)) {
-                // Cari record pertama yang memiliki kolom id_kelas di ujian_master
-                foreach ($detailPaket as $item) {
-                    // Sesuaikan nama properti 'id_kelas' jika di ujian_master namanya berbeda
-                    if (!empty($item->kelas)) {
-                        $id_kelas_target = $item->kelas;
-                        break; // Ambil 1 saja lalu hentikan perulangan
-                    }
-                }
-            }
+            // 1. Ambil semua kelas unik yang ada di detail paket tersebut
+            $detailPaketGroupByKelas = $this->detailPaketModel
+                ->select('ujian_master.kelas')
+                ->join('ujian_master', 'detail_paket.id_ujian = ujian_master.id_ujian', 'left')
+                ->where('detail_paket.idpaket', $this->request->getVar('idpaket'))
+                ->where('ujian_master.kelas IS NOT NULL')
+                ->groupBy('ujian_master.kelas')
+                ->get()->getResultObject();
 
-            if ($id_kelas_target !== null) {
-                // Asumsi variabel $id_siswa didapat dari data siswa yang sedang diproses
+            // 2. Jika ada kelas ditemukan dalam paket tersebut
+            if (!empty($detailPaketGroupByKelas)) {
                 $id_siswa = session()->get('id');
 
-                // Cek apakah sudah ada di tabel utama siswa (kolom 'kelas') ATAU di tabel pivot 'siswa_kelas'
-                $cekSiswaUtama = $this->siswaModel->where(['id_siswa' => $id_siswa, 'kelas' => $id_kelas_target])->first();
-                $cekSiswaPivot = $this->siswaKelasModel->where(['id_siswa' => $id_siswa, 'id_kelas' => $id_kelas_target])->first();
+                // Looping semua kelas yang didapat dari paket (mendukung multi-kelas)
+                foreach ($detailPaketGroupByKelas as $item) {
+                    $id_kelas_target = $item->kelas;
 
-                // Jika belum ada di kedua tabel, maka tambahkan ke tabel pivot 'siswa_kelas'
-                if (!$cekSiswaUtama || !$cekSiswaPivot) {
-                    $this->siswaKelasModel->save([
-                        'id_siswa' => $id_siswa,
-                        'id_kelas' => $id_kelas_target
-                    ]);
+                    if (!empty($id_kelas_target)) {
+                        // Cek apakah siswa sudah terdaftar di kelas ini pada tabel utama
+                        $cekSiswaUtama = $this->siswaModel->where([
+                            'id_siswa' => $id_siswa,
+                            'kelas'    => $id_kelas_target
+                        ])->first();
+
+                        // Cek apakah siswa sudah terdaftar di kelas ini pada tabel pivot (siswa_kelas)
+                        $cekSiswaPivot = $this->siswaKelasModel->where([
+                            'id_siswa' => $id_siswa,
+                            'id_kelas' => $id_kelas_target
+                        ])->first();
+
+                        // Jika siswa BELUM ADA di tabel utama DAN BELUM ADA di tabel pivot untuk kelas ini, baru masukkan ke pivot
+                        if (!$cekSiswaUtama && !$cekSiswaPivot) {
+                            $this->siswaKelasModel->save([
+                                'id_siswa' => $id_siswa,
+                                'id_kelas' => $id_kelas_target
+                            ]);
+                        }
+                    }
                 }
             }
 
