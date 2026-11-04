@@ -49,7 +49,7 @@ class IKHController extends BaseController
                             padding: '2em'
                         }); 
                     ");
-            return redirect()->to('list-bimbel');
+            return redirect()->to('bimbel/e-learning-ujian-brevet-ab-ikh');
         }
         $this->data['ikh'] = $ikh;
         $this->data['siswa'] = $siswa;
