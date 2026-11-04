@@ -158,8 +158,13 @@ class PaketController extends BaseController
             $jenis_paket_bersih = array_values(array_unique(array_filter($jenis_paket_array)));
             $json_jenis_paket = json_encode($jenis_paket_bersih);
 
-            // 2. Variabel Penampung Logika Khusus Brevet
-            $raw_id_kelas = $this->request->getVar('id_kelas');
+            // ==========================================================
+            // UPGRADE: Tangkap dan Bersihkan Input Kelas (Sekarang Array)
+            // ==========================================================
+            $raw_id_kelas = $this->request->getVar('id_kelas') ?? [];
+            if (!is_array($raw_id_kelas)) $raw_id_kelas = [$raw_id_kelas];
+            $raw_id_kelas_bersih = array_values(array_unique(array_filter($raw_id_kelas)));
+            $json_id_kelas = json_encode($raw_id_kelas_bersih); // Disimpan ke DB agar edit multi-select berjalan
 
             // Pastikan raw_id_ujian dan raw_id_mapel selalu berbentuk Array
             $raw_id_ujian = $this->request->getVar('id_ujian') ?? [];
@@ -181,7 +186,7 @@ class PaketController extends BaseController
                     return redirect()->to('sw-admin/paket')->with('info', 'Salah satu ujian atau mapel harus diisi untuk paket Brevet AB.');
                 }
 
-                // PERBAIKAN: Kalkulasi flag ujian & materi menggunakan in_array()
+                // Kalkulasi flag ujian & materi menggunakan in_array()
                 $v_ujian  = in_array("all", $raw_id_ujian) ? "all" : ($is_ujian_empty ? "0" : "1");
                 $v_materi = in_array("all", $raw_id_mapel) ? "all" : ($is_mapel_empty ? "0" : "1");
             }
@@ -226,19 +231,20 @@ class PaketController extends BaseController
                 'v_materi'      => $v_materi,
                 'deskripsi'     => $this->request->getVar('deskripsi'),
                 'komisi'        => $this->request->getVar('komisi') ?? 0,
-                'jenis_paket'   => $json_jenis_paket, // Disimpan sebagai JSON
+                'jenis_paket'   => $json_jenis_paket, 
+                'id_kelas'      => $json_id_kelas, // UPGRADE: Menambahkan input JSON kelas multi-select ke tabel
             ];
 
             $this->paketModel->insert($data_paket);
             $id_paket = $this->paketModel->insertID();
 
             // 6. Insert Tabel Detail (HANYA JIKA LAYANAN BREVET DIPILIH)
-            if (!empty(array_intersect(['brevet', 'uskp', 'tryout_ukp'], $jenis_paket_bersih)) && !empty($raw_id_kelas)) {
+            if (!empty(array_intersect(['brevet', 'uskp', 'tryout_ukp'], $jenis_paket_bersih)) && !empty($raw_id_kelas_bersih)) {
 
-                // Ambil semua data ujian dan mapel berdasarkan kelas yang dipilih
+                // UPGRADE: Ambil semua data ujian dan mapel berdasarkan BANYAK KELAS (whereIn)
                 $data_master = $this->ujianMasterModel
                     ->select('ujian_master.id_ujian, ujian_master.mapel')
-                    ->where('ujian_master.kelas', $raw_id_kelas)
+                    ->whereIn('ujian_master.kelas', $raw_id_kelas_bersih) 
                     ->groupBy('ujian_master.id_ujian')
                     ->get()->getResultObject();
 
@@ -246,7 +252,7 @@ class PaketController extends BaseController
                 // 1. Ekstrak Data Ujian
                 // ==========================================================
                 $arr_u = [];
-                // PERBAIKAN: Cek apakah ada kata "all" di dalam array
+                // Cek apakah ada kata "all" di dalam array
                 if (in_array('all', $raw_id_ujian)) {
                     foreach ($data_master as $row) {
                         $arr_u[] = $row->id_ujian;
@@ -261,7 +267,7 @@ class PaketController extends BaseController
                 // 2. Ekstrak Data Mapel
                 // ==========================================================
                 $arr_m = [];
-                // PERBAIKAN: Cek apakah ada kata "all" di dalam array
+                // Cek apakah ada kata "all" di dalam array
                 if (in_array('all', $raw_id_mapel)) {
                     foreach ($data_master as $row) {
                         $arr_m[] = $row->mapel;
@@ -352,6 +358,14 @@ class PaketController extends BaseController
             $jenis_paket_bersih = array_values(array_unique(array_filter($jenis_paket_array)));
             $json_jenis_paket = json_encode($jenis_paket_bersih);
 
+            // ==========================================================
+            // UPGRADE: Tangkap dan Bersihkan Input Kelas Edit (Sekarang Array)
+            // ==========================================================
+            $raw_id_kelas = $this->request->getVar('id_kelas') ?? [];
+            if (!is_array($raw_id_kelas)) $raw_id_kelas = [$raw_id_kelas];
+            $raw_id_kelas_bersih = array_values(array_unique(array_filter($raw_id_kelas)));
+            $json_id_kelas = json_encode($raw_id_kelas_bersih);
+
             $file = $this->request->getFile('avatar');
             $newName = $this->request->getVar('gambar_lama');
 
@@ -390,6 +404,7 @@ class PaketController extends BaseController
                 'deskripsi'     => $this->request->getVar('deskripsi'),
                 'komisi'        => $this->request->getVar('komisi') ?? 0,
                 'jenis_paket'   => $json_jenis_paket,
+                'id_kelas'      => $json_id_kelas, // UPGRADE: Simpan array kelas terbaru agar tersimpan rapih
             ];
 
             $this->paketModel->update($idpaket, $data_paket);
@@ -402,14 +417,14 @@ class PaketController extends BaseController
 
             // 1. Proses Brevet jika dipilih
             if (!empty(array_intersect(['brevet', 'uskp', 'tryout_ukp'], $jenis_paket_bersih))) {
-                $raw_id_kelas = $this->request->getVar('id_kelas');
+                
                 $raw_id_ujian = $this->request->getVar('id_ujian') ?? [];
                 if (!is_array($raw_id_ujian)) $raw_id_ujian = [$raw_id_ujian];
 
                 $raw_id_mapel = $this->request->getVar('id_mapel') ?? [];
                 if (!is_array($raw_id_mapel)) $raw_id_mapel = [$raw_id_mapel];
 
-                if (!empty($raw_id_kelas)) {
+                if (!empty($raw_id_kelas_bersih)) {
                     $is_ujian_empty = empty(array_filter($raw_id_ujian));
                     $is_mapel_empty = empty(array_filter($raw_id_mapel));
 
@@ -418,10 +433,11 @@ class PaketController extends BaseController
 
                     $data_master = [];
                     if (in_array('all', $raw_id_ujian) || in_array('all', $raw_id_mapel)) {
+                        // UPGRADE: Gunakan whereIn
                         $data_master = $this->ujianMasterModel
                             ->select('ujian_master.id_ujian, ujian_master.mapel')
                             ->join('mapel', 'mapel.id_mapel=ujian_master.mapel')
-                            ->where('ujian_master.kelas', $raw_id_kelas)
+                            ->whereIn('ujian_master.kelas', $raw_id_kelas_bersih) 
                             ->groupBy('ujian_master.id_ujian')
                             ->get()->getResultObject();
                     }
