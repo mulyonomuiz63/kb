@@ -167,9 +167,7 @@
                         </div>
 
                         <div class="col-md-6 fv-row" id="wrapper_tambah_diskon">
-                            <!-- Label dihapus required-nya -->
                             <label class="fs-6 fw-semibold mb-2">Diskon (Opsional)</label>
-                            <!-- Hapus required pada select -->
                             <select name="iddiskon" class="form-select form-select-solid" data-control="select2" data-dropdown-parent="#wrapper_tambah_diskon">
                                 <option value="">Tidak Ada Diskon</option>
                                 <?php $dataDiskon = $db->query("select * from diskon ")->getResultObject(); ?>
@@ -197,9 +195,10 @@
                         <h4 class="fw-bold text-dark mb-5"><i class="ki-duotone ki-book-open fs-2 me-2"></i> Pengaturan Ujian & Materi (Brevet/USKP/Tryout UKP)</h4>
                         <div class="row g-5 bg-light-primary p-5 rounded">
                             <div class="col-md-12 fv-row" id="wrapper_id_kelas">
-                                <label class="required fs-6 fw-semibold mb-2">Kelas</label>
-                                <select name="id_kelas" id="id_kelas" class="form-select form-select-solid dynamic-req-brevet" data-control="select2" data-dropdown-parent="#wrapper_id_kelas" data-placeholder="Pilih Kelas">
-                                    <option value="">Pilih</option>
+                                <label class="required fs-6 fw-semibold mb-2">Kelas <span class="text-danger fs-8 fw-normal">(Bisa pilih banyak)</span></label>
+                                <!-- UPDATE: Menambahkan [] pada name dan multiple="multiple" -->
+                                <select name="id_kelas[]" id="id_kelas" class="form-select form-select-solid dynamic-req-brevet" data-control="select2" data-dropdown-parent="#wrapper_id_kelas" data-placeholder="Pilih Kelas..." multiple="multiple">
+                                    <option></option>
                                     <?php $kelas = $db->query("select * from kelas")->getResultObject(); ?>
                                     <?php foreach ($kelas as $rows) : ?>
                                         <option value="<?= $rows->id_kelas; ?>"><?= $rows->nama_kelas; ?></option>
@@ -304,9 +303,7 @@
                         </div>
 
                         <div class="col-md-6 fv-row" id="wrapper_edit_diskon">
-                            <!-- Label dihapus required-nya -->
                             <label class="fs-6 fw-semibold mb-2">Diskon (Opsional)</label>
-                            <!-- Hapus required pada select -->
                             <select name="iddiskon" id="iddiskon" class="form-select form-select-solid" data-control="select2" data-dropdown-parent="#wrapper_edit_diskon">
                                 <option value="">Tidak Ada Diskon</option>
                                 <?php foreach ($dataDiskon as $rows) : ?>
@@ -342,9 +339,10 @@
 
                         <div class="row g-5 bg-light-primary p-5 rounded" id="wrapper_kelas">
                             <div class="col-md-6 fv-row">
-                                <label class="fs-6 fw-semibold mb-2">Ubah Kelas <span class="text-muted fw-normal fs-8">(Opsional)</span></label>
-                                <select name="id_kelas" id="edit_id_kelas" class="form-select form-select-solid" data-control="select2" data-dropdown-parent="#wrapper_kelas" data-placeholder="Pilih Kelas Baru">
-                                    <option value="">-- Biarkan Kosong --</option>
+                                <label class="fs-6 fw-semibold mb-2">Ubah Kelas <span class="text-muted fw-normal fs-8">(Bisa pilih banyak, Opsional)</span></label>
+                                <!-- UPDATE: Menambahkan [] pada name dan multiple="multiple" -->
+                                <select name="id_kelas[]" id="edit_id_kelas" class="form-select form-select-solid" data-control="select2" data-dropdown-parent="#wrapper_kelas" data-placeholder="Pilih Kelas Baru (Kosongkan jika tidak diubah)" multiple="multiple">
+                                    <option></option>
                                     <?php foreach ($kelas as $rows) : ?>
                                         <option value="<?= $rows->id_kelas; ?>"><?= $rows->nama_kelas; ?></option>
                                     <?php endforeach; ?>
@@ -484,7 +482,7 @@
         // 3. AJAX DYNAMIC SELECT (MODAL TAMBAH)
         // =========================================================
         $('#id_kelas').change(function() {
-            var id = $(this).val();
+            var id = $(this).val(); // Sekarang id bernilai array berkat multiple select
             var csrfName = '<?= csrf_token() ?>';
             var csrfHash = $('input[name="<?= csrf_token() ?>"]').val();
 
@@ -583,7 +581,8 @@
             var csrfName = '<?= csrf_token() ?>';
             var csrfHash = $('input[name="<?= csrf_token() ?>"]').val();
 
-            if (!id) {
+            // Cek apabila array id kosong atau tidak ada
+            if (!id || id.length === 0) {
                 $('#edit_ujian_master').html('<option></option>').trigger('change');
                 $('#edit_id_mapel').html('<option></option>').trigger('change');
                 return;
@@ -690,7 +689,15 @@
 
                     // AUTO-FILL BREVET / USKP / TRYOUT UKP
                     if (data.id_kelas) {
-                        $("#edit_id_kelas").val(data.id_kelas).trigger({
+                        let parsedIdKelas = data.id_kelas;
+                        // Handling jika data.id_kelas disave dalam bentuk string JSON array di database
+                        try {
+                            if (typeof data.id_kelas === 'string' && data.id_kelas.trim().startsWith('[')) {
+                                parsedIdKelas = JSON.parse(data.id_kelas);
+                            }
+                        } catch (e) {}
+
+                        $("#edit_id_kelas").val(parsedIdKelas).trigger({
                             type: 'change',
                             preventAjax: true
                         });
@@ -700,7 +707,7 @@
                             url: "<?php echo site_url('sw-admin/paket/ujian-master'); ?>",
                             method: "POST",
                             data: {
-                                id: data.id_kelas,
+                                id: parsedIdKelas,
                                 [csrfName]: tokenUpdate
                             },
                             dataType: 'json',
@@ -724,7 +731,7 @@
                             url: "<?php echo site_url('sw-admin/paket/get-mapel'); ?>",
                             method: "POST",
                             data: {
-                                id: data.id_kelas,
+                                id: parsedIdKelas,
                                 [csrfName]: $('input[name="<?= csrf_token() ?>"]').val()
                             },
                             dataType: 'json',
