@@ -506,8 +506,25 @@ class PaketController extends BaseController
         }
 
         try {
+            $idKelas = $this->request->getVar('id');
+
+            // Pastikan input selalu menjadi array agar bisa menggunakan whereIn
+            if (!is_array($idKelas)) {
+                $idKelas = [$idKelas];
+            }
+
+            // Jika form kelas kosong (dihapus/tidak ada yang dipilih)
+            if (empty($idKelas) || empty(array_filter($idKelas))) {
+                return $this->response->setJSON([
+                    'status' => 'success',
+                    'data'   => [],
+                    csrf_token() => csrf_hash()
+                ]);
+            }
+
+            // Ubah where menjadi whereIn untuk menampung banyak kelas
             $data = $this->ujianMasterModel
-                ->where('kelas', $this->request->getVar('id'))
+                ->whereIn('kelas', $idKelas)
                 ->get()->getResultObject();
 
             return $this->response->setJSON([
@@ -531,8 +548,25 @@ class PaketController extends BaseController
         }
 
         try {
+            $idKelas = $this->request->getVar('id');
+
+            // Pastikan input selalu menjadi array agar bisa menggunakan whereIn
+            if (!is_array($idKelas)) {
+                $idKelas = [$idKelas];
+            }
+
+            // Jika form kelas kosong (dihapus/tidak ada yang dipilih)
+            if (empty($idKelas) || empty(array_filter($idKelas))) {
+                return $this->response->setJSON([
+                    'status' => 'success',
+                    'data'   => [],
+                    csrf_token() => csrf_hash()
+                ]);
+            }
+
+            // Ubah where menjadi whereIn untuk menampung banyak kelas
             $data = $this->mapelModel->join('materi', 'materi.mapel=mapel.id_mapel')
-                ->where('kelas', $this->request->getVar('id'))
+                ->whereIn('kelas', $idKelas)
                 ->groupBy('mapel.id_mapel')
                 ->get()->getResultObject();
 
