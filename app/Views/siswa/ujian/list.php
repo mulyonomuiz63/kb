@@ -338,12 +338,28 @@
                                                 </button>
                                             <?php else: ?>
                                                 <?php if ($u->status == 'B'): ?>
-                                                    <!-- 1. Tampilan jika peserta BELUM MULAI ujian -->
-                                                    <div class="d-flex align-items-center justify-content-center text-gray-600 fw-semibold fs-7 bg-light-secondary border border-secondary border-dashed p-3 rounded w-100">
-                                                        <i class="ki-outline ki-information-5 fs-3 text-gray-500 me-2"></i>
-                                                        <span>Segera Kerjakan ujian</span>
-                                                    </div>
+                                                    <?php if (isset($u->biaya_upgrade) && $u->biaya_upgrade > 0 && $u->status == 'B'): ?>
+                                                        <button type="button"
+                                                            class="btn btn-light-primary border border-primary border-dashed fw-bold d-flex align-items-center justify-content-center justify-content-sm-between flex-wrap gap-2 w-100 btn-upgrade-review p-3 hover-elevate-up"
+                                                            data-id="<?= encrypt_url($u->id_ujian) ?>"
+                                                            data-kode="<?= encrypt_url($u->kode_ujian) ?>"
+                                                            data-nama="<?= htmlspecialchars($u->nama_ujian) ?>"
+                                                            data-harga="<?= $u->biaya_upgrade ?>">
 
+                                                            <!-- Bagian Kiri: Ikan dan Teks -->
+                                                            <!-- Tambahkan selector CSS di dalam class atau style agar ikon ikut putih saat hover -->
+                                                            <div class="d-flex align-items-center justify-content-center justify-content-sm-start flex-grow-1 group-hover-white">
+                                                                <i class="ki-outline ki-lock-2 fs-2 me-3 text-primary transition-color"></i>
+                                                                <span class="fs-6 text-start">Buka Kunci Jawaban & Pembahasan</span>
+                                                            </div>
+                                                        </button>
+                                                    <?php else: ?>
+                                                        <!-- 1. Tampilan jika peserta BELUM MULAI ujian -->
+                                                        <div class="d-flex align-items-center justify-content-center text-gray-600 fw-semibold fs-7 bg-light-secondary border border-secondary border-dashed p-3 rounded w-100">
+                                                            <i class="ki-outline ki-information-5 fs-3 text-gray-500 me-2"></i>
+                                                            <span>Segera Kerjakan ujian</span>
+                                                        </div>
+                                                    <?php endif; ?>
                                                 <?php elseif ($u->status == 'U'): ?>
                                                     <!-- 2. Tampilan jika peserta SEDANG ujian -->
                                                     <div class="d-flex align-items-center justify-content-center text-warning fw-semibold fs-7 bg-light-warning border border-warning border-dashed p-3 rounded w-100">
