@@ -82,14 +82,13 @@ class PaketController extends BaseController
                     // ==========================================================
                     // UPGRADE: 1. Cari SEMUA id_kelas berdasarkan ujian & mapel yang ada
                     // ==========================================================
-                    $kelasRows = $db->query("
-                        SELECT ujian_master.kelas as id_kelas 
-                        FROM detail_paket 
-                        LEFT JOIN ujian_master 
-                          ON (ujian_master.id_ujian = detail_paket.id_ujian OR ujian_master.mapel = detail_paket.id_mapel) 
-                        WHERE detail_paket.idpaket = ? AND ujian_master.kelas IS NOT NULL 
-                        GROUP BY ujian_master.kelas
-                    ", [$idDecrypted])->getResultArray();
+                    $kelasRows = $this->detailPaketModel
+                        ->select('ujian_master.kelas as id_kelas')
+                        ->join('ujian_master', 'detail_paket.id_ujian = ujian_master.id_ujian', 'left')
+                        ->where('detail_paket.idpaket', $idDecrypted)
+                        ->where('ujian_master.kelas IS NOT NULL')
+                        ->groupBy('ujian_master.kelas')
+                        ->get()->getResultObject();
 
                     if (!empty($kelasRows)) {
                         $data_paket['id_kelas'] = array_column($kelasRows, 'id_kelas');
