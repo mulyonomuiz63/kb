@@ -95,22 +95,18 @@ class PaketController extends BaseController
                     }
 
                     // 2. Ambil Array ID Ujian
-                    if ($data_paket['v_ujian'] === 'all') {
-                        // $data_paket['arr_ujian'] = ['all'];
-                        $ujianRows = $db->table('detail_paket')
-                            ->where('idpaket', $idDecrypted)->where('id_ujian !=', 0)
-                            ->select('id_ujian')->get()->getResultArray();
-                        $data_paket['arr_ujian'] = array_column($ujianRows, 'id_ujian');
-                    }
+                    // $data_paket['arr_ujian'] = ['all'];
+                    $ujianRows = $db->table('detail_paket')
+                        ->where('idpaket', $idDecrypted)->where('id_ujian !=', 0)
+                        ->select('id_ujian')->get()->getResultArray();
+                    $data_paket['arr_ujian'] = array_column($ujianRows, 'id_ujian');
+                    
 
                     // 3. Ambil Array ID Mapel
-                    if ($data_paket['v_materi'] === 'all') {
-                        // $data_paket['arr_mapel'] = ['all'];
-                        $mapelRows = $db->table('detail_paket')
+                    $mapelRows = $db->table('detail_paket')
                             ->where('idpaket', $idDecrypted)->where('id_mapel !=', 0)
                             ->select('id_mapel')->get()->getResultArray();
-                        $data_paket['arr_mapel'] = array_column($mapelRows, 'id_mapel');
-                    }
+                    $data_paket['arr_mapel'] = array_column($mapelRows, 'id_mapel');
                 }
 
                 // =====================================================
