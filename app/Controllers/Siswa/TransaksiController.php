@@ -116,7 +116,7 @@ class TransaksiController extends BaseController
                 // Ubah string JSON menjadi array PHP
                 $jenisPaket = json_decode($cekpaket->jenis_paket, true);
                 // Cek apakah 'tryout_ukp' ada di dalam array jenis_paket
-                if (is_array($jenisPaket) && in_array('tryout_ukp', $jenisPaket)) {
+                if (is_array($jenisPaket) && count($jenisPaket) == 1 && in_array('tryout_ukp', $jenisPaket)) {
                     return view('siswa/paket/indexUkp', $data);
                 } else {
                     return view('siswa/paket/index', $data);
