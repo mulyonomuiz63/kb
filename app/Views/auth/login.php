@@ -437,10 +437,10 @@
 
 <div class="kb-login">
     <aside class="kb-panel">
-        <div class="kb-panel-top">
-            <span class="kb-kicker">Portal KelasBrevet</span>
-        </div>
         <div class="kb-panel-copy">
+            <div class="kb-panel-top">
+                <span class="kb-kicker">Portal KelasBrevet</span>
+            </div>
             <h1>Tingkatkan keahlian perpajakan Anda sekarang.</h1>
             <p class="lead">Kelola materi, ujian, dan progres belajar Anda dalam satu tempat yang rapi dan mudah diikuti.</p>
             <div class="kb-points">
