@@ -1,33 +1,36 @@
 <?= $this->extend('auth/pages/layout'); ?>
 <?= $this->section('content'); ?>
-<div class="form-container">
-    <div class="form-content">
+<?= $this->include('auth/pages/kb-auth-style'); ?>
 
-        <h1 class="">Pulihkan Kata Sandi</h1>
-        <p class="signup-link">Lupa Sandi? masukin email kamu aja dibawah ini</p>
-        <form action="<?= base_url('auth/recovery_'); ?>" method="post" class="text-left" id="form">
-            <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>" />
-            <div class="form">
-                <div id="email-field" class="field-wrapper input">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-at-sign">
-                        <circle cx="12" cy="12" r="4"></circle>
-                        <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"></path>
-                    </svg>
-                    <input id="email" name="email" type="email" value="" placeholder="Email" required>
-                    <input type="hidden" name="recaptcha_token" id="recaptcha_token">
-                </div>
-                <div class="d-sm-flex justify-content-between">
-                    <div class="field-wrapper">
-                        <button type="button" class="btn btn-primary" onclick="submitForm('lupapassword')">Kirim</button>
+<div class="kb-login">
+    <?= $this->include('auth/pages/kb-panel'); ?>
+
+    <main class="kb-stage">
+        <div class="kb-card">
+            <a class="kb-logo" href="<?= base_url('/'); ?>">
+                <img src="<?= base_url('uploads/app-icon/' . setting('logo_perusahaan')); ?>" alt="<?= setting('app_name'); ?>">
+            </a>
+            <h2>Pulihkan kata sandi</h2>
+            <p class="kb-sub">Masukkan email akun Anda. Tautan pemulihan akan dikirim ke email tersebut.</p>
+
+            <form action="<?= base_url('auth/recovery_'); ?>" method="post" id="form">
+                <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>" />
+                <input type="hidden" name="recaptcha_token" id="recaptcha_token">
+
+                <div class="kb-field">
+                    <label for="email">Email</label>
+                    <div class="kb-input">
+                        <svg class="kb-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                        <input id="email" name="email" type="email" value="" placeholder="nama@email.com" required>
                     </div>
-                    <p class="signup-link">
-                        <a href="<?= base_url('auth') ?>">Kembali</a>
-                    </p>
                 </div>
-            </div>
-        </form>
-        <p class="terms-conditions"><?= copyright(); ?></p>
 
-    </div>
+                <button type="button" class="kb-submit" onclick="submitForm('lupapassword')">Kirim</button>
+            </form>
+
+            <p class="kb-signup"><a href="<?= base_url('auth') ?>">Kembali ke masuk</a></p>
+            <p class="kb-copy"><?= copyright(); ?></p>
+        </div>
+    </main>
 </div>
 <?= $this->endSection() ?>

@@ -1,124 +1,107 @@
 <?= $this->extend('auth/pages/layout'); ?>
 <?= $this->section('content'); ?>
-<div class="form-container">
+<?= $this->include('auth/pages/kb-auth-style'); ?>
 
-    <div class="form-content">
-        <a href="<?= base_url('/'); ?>"><img src="<?= base_url('assets-landing/images/logo.png') ?>" style="width: 250px;" /></a>
-        <form action="<?= base_url('auth/store'); ?>" method="POST" class="text-left" id="form">
-            <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>" />
-            <div class="form">
-                <div id="nama_siswa-field" class="field-wrapper input">
-                    <input type="text" id="nama_siswa" name="nama_siswa" value="<?= old('nama_siswa'); ?>" placeholder="Nama Lengkap" type="text" class="form-control" required autocomplete="off">
+<div class="kb-login">
+    <?= $this->include('auth/pages/kb-panel'); ?>
+
+    <main class="kb-stage">
+        <div class="kb-card kb-card-wide">
+            <a class="kb-logo" href="<?= base_url('/'); ?>">
+                <img src="<?= base_url('uploads/app-icon/' . setting('logo_perusahaan')); ?>" alt="<?= setting('app_name'); ?>">
+            </a>
+            <h2>Buat akun</h2>
+            <p class="kb-sub">Lengkapi data di bawah ini untuk mulai belajar.</p>
+
+            <form action="<?= base_url('auth/store'); ?>" method="POST" id="form">
+                <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>" />
+                <input type="hidden" name="recaptcha_token" id="recaptcha_token">
+                <input type="hidden" id="id_kelas" name="kelas" value="1" required>
+                <input type="checkbox" id="toggle-password" class="d-none" hidden>
+
+                <div class="kb-field">
+                    <label for="nama_siswa">Nama lengkap</label>
+                    <div class="kb-input">
+                        <svg class="kb-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        <input type="text" id="nama_siswa" name="nama_siswa" value="<?= old('nama_siswa'); ?>" placeholder="Nama lengkap" required autocomplete="off">
+                    </div>
                 </div>
 
-
-                <div id="email-field" class="field-wrapper input">
-                    <input type="email" id="email" name="email" value="<?= old('email'); ?>" placeholder="Email Aktif" class="form-control" required autocomplete="off">
+                <div class="kb-field">
+                    <label for="email">Email</label>
+                    <div class="kb-input">
+                        <svg class="kb-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                        <input type="email" id="email" name="email" value="<?= old('email'); ?>" placeholder="nama@email.com" required autocomplete="off">
+                    </div>
                 </div>
 
-                <!-- BAGIAN WHATSAPP & VERIFIKASI OTP -->
-                <div id="hp-field" class="field-wrapper input mb-3">
-                    <!-- Ditambahkan class flex-nowrap agar elemen selalu berdampingan -->
-                    <div class="input-group flex-nowrap">
-                        <input type="number"
-                            id="hp"
-                            name="hp"
-                            data-verified="0"
-                            class="form-control <?= session('errors.hp') ? 'is-invalid' : '' ?>"
-                            value="<?= old('hp'); ?>"
-                            placeholder="Nomor/WA Aktif"
-                            required
-                            maxlength="15"
-                            autocomplete="off">
-                        <button class="btn btn-primary text-nowrap" type="button" id="btn-send-otp" style="display: none;" title="Kirim OTP Ke WhatsApp">
-                            Verifikasi
+                <div class="kb-field" id="hp-field">
+                    <label for="hp">Nomor WhatsApp</label>
+                    <div class="kb-wa">
+                        <div class="kb-input">
+                            <svg class="kb-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                            <input type="number"
+                                id="hp"
+                                name="hp"
+                                data-verified="0"
+                                class="<?= session('errors.hp') ? 'is-invalid' : '' ?>"
+                                value="<?= old('hp'); ?>"
+                                placeholder="08xxxxxxxxxx"
+                                required
+                                maxlength="15"
+                                autocomplete="off">
+                        </div>
+                        <button class="kb-submit kb-submit-side" type="button" id="btn-send-otp" style="display: none;" title="Kirim OTP Ke WhatsApp">Verifikasi</button>
+                    </div>
+
+                    <div id="otp-area" class="kb-otp" style="display: none;">
+                        <label for="otp-input">Masukkan 6 Digit OTP</label>
+                        <div class="kb-wa">
+                            <div class="kb-input">
+                                <input type="text" id="otp-input" class="kb-plain" placeholder="••••••" maxlength="6" autocomplete="off">
+                            </div>
+                            <button class="kb-submit kb-submit-side" type="button" id="btn-verify-otp">Cek Kode</button>
+                        </div>
+                        <div class="kb-note">
+                            Kode OTP kadaluarsa dalam: <span id="otp-timer" class="kb-timer">05:00</span>
+                        </div>
+                    </div>
+
+                    <div id="wa-verified-badge" class="kb-badge" style="display: none;">Nomor WA terverifikasi</div>
+                </div>
+
+                <div class="kb-field">
+                    <label for="jenis_kelamin">Jenis kelamin</label>
+                    <div class="kb-input">
+                        <select name="jenis_kelamin" id="jenis_kelamin" required>
+                            <option value="">Pilih jenis kelamin</option>
+                            <option value="Laki - Laki" <?= old('jenis_kelamin') == 'Laki - Laki' ? 'selected' : ''; ?>>Laki - Laki</option>
+                            <option value="Perempuan" <?= old('jenis_kelamin') == 'Perempuan' ? 'selected' : ''; ?>>Perempuan</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="kb-field">
+                    <label for="password">Kata sandi</label>
+                    <div class="kb-input">
+                        <svg class="kb-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        <input type="password" id="password" name="password" value="" placeholder="Masukkan kata sandi" required>
+                        <button type="button" class="kb-eye" id="kb-eye" aria-label="Lihat kata sandi">
+                            <svg id="kb-eye-open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            <svg id="kb-eye-off" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"></path><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
                         </button>
                     </div>
-
-                    <!-- Form OTP Dinamis -->
-                    <div id="otp-area" class="mt-3 p-3 border border-primary border-dashed rounded bg-light-primary" style="display: none;">
-                        <label class="form-label fw-bold text-primary fs-7 mb-1">Masukkan 6 Digit OTP</label>
-                        <!-- Ditambahkan class flex-nowrap juga di area input OTP -->
-                        <div class="input-group flex-nowrap mb-2">
-                            <input type="text" id="otp-input" class="form-control form-control-solid text-center fw-bolder fs-4" placeholder="••••••" maxlength="6" autocomplete="off">
-                            <button class="btn btn-success text-nowrap" type="button" id="btn-verify-otp">Cek Kode</button>
-                        </div>
-                        <div class="form-text text-muted fs-7">
-                            Kode OTP kadaluarsa dalam: <span id="otp-timer" class="fw-bold text-danger">05:00</span>
-                        </div>
-                    </div>
-
-                    <!-- Badge Terverifikasi -->
-                    <div id="wa-verified-badge" class="mt-2" style="display: none;">
-                        <span class="badge badge-light-success fs-7 fw-bold p-2 text-success"><i class="bi bi-check-circle-fill me-1"></i>Nomor WA Terverifikasi</span>
-                    </div>
-                </div>
-                <!-- END WHATSAPP -->
-
-                <div id="jenis_kelamin-field" class="field-wrapper input">
-                    <select name="jenis_kelamin" required class="form-control" style=" display:block;
-                        color: #999;
-                        border: none;
-                        border-bottom: 1px solid #e0e6ed">
-                        <option value="">Pilih Jenis Kelamin </option>
-                        <option value="Laki - Laki" <?= old('jenis_kelamin') == 'Laki - Laki' ? 'selected' : ''; ?>>Laki - Laki</option>
-                        <option value="Perempuan" <?= old('jenis_kelamin') == 'Perempuan' ? 'selected' : ''; ?>>Perempuan</option>
-                    </select>
                 </div>
 
-                <!--<div id="kelas-field" class="field-wrapper input">-->
-                <!--    <input type="text" id="data-kelas" class="form-control" value="" placeholder="Kelas">-->
-                <input type="hidden" id="id_kelas" class="form-control" name="kelas" value="1" required>
-                <!--    <div id="suggestion-box"></div>-->
+                <button type="button" class="kb-submit" id="btn-submit-reg">Registrasi</button>
+            </form>
 
-                <!--</div>-->
-                <div id="password-field" class="field-wrapper input mb-2">
-                    <input type="password" id="password" name="password" type="password" value="" placeholder="Kata Sandi" required>
-                </div>
-                <input type="hidden" name="recaptcha_token" id="recaptcha_token">
-                <div class="d-flex justify-content-between">
-
-                    <div class="field-wrapper toggle-pass">
-
-                        <p class="d-inline-block">Lihat kata sandi</p>
-
-                        <label class="switch s-primary">
-
-                            <input type="checkbox" id="toggle-password" class="d-none">
-
-                            <span class="slider round"></span>
-
-                        </label>
-
-                    </div>
-
-                    <div class="field-wrapper">
-
-                        <button type="button" class="btn btn-primary" id="btn-submit-reg">Registrasi</button>
-
-                    </div>
-
-                </div>
-
-
-
-            </div>
-
-        </form>
-        <p class="signup-link">
-
-            Sudah punya akun? <a href="<?= base_url('auth') ?>">Masuk disini</a><br>
-
-        </p>
-        <p class="terms-conditions"><?= copyright() ?></p>
-
-
-
-    </div>
-
+            <p class="kb-signup">Sudah punya akun? <a href="<?= base_url('auth') ?>">Masuk di sini</a></p>
+            <p class="kb-copy"><?= copyright() ?></p>
+        </div>
+    </main>
 </div>
 
-<!-- SCRIPT PENDUKUNG VERIFIKASI OTP REGISTRASI -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     var csrfName = '<?= csrf_token() ?>';
@@ -126,7 +109,7 @@
 
     $(document).ready(function() {
         var timerInterval;
-        var lastVerifiedHp = ''; // Menyimpan nomor HP yang sukses diverifikasi
+        var lastVerifiedHp = '';
 
         function checkWaStatus() {
             var currentHp = $('#hp').val();
@@ -140,12 +123,10 @@
             if (currentHp === '') {
                 btnReg.prop('disabled', true);
             } else if (currentHp !== lastVerifiedHp || isVerified == 0) {
-                // Jika nomor diubah atau belum diverifikasi
                 $('#btn-send-otp').show();
                 btnReg.prop('disabled', true);
                 btnReg.text('Verifikasi WA Dulu');
             } else {
-                // Jika nomor sama dan sudah terverifikasi
                 $('#wa-verified-badge').show();
                 btnReg.prop('disabled', false);
                 btnReg.text('Registrasi');
@@ -158,33 +139,27 @@
             if (this.value.length > 15) this.value = this.value.slice(0, 15);
             $('#otp-area').slideUp();
             clearInterval(timerInterval);
-            
-            // Jika user merubah nomor dari yang sudah terverifikasi sebelumnya, set verified jadi 0
+
             if ($(this).val() !== lastVerifiedHp) {
                 $(this).data('verified', 0);
             }
             checkWaStatus();
         });
 
-        // Event Klik Tombol Registrasi (Menampilkan Loading & Menjalankan Fungsi Asli Anda)
         $('#btn-submit-reg').click(function(e) {
             e.preventDefault();
-            
+
             var btnReg = $(this);
-            
-            // Ubah tombol jadi status loading dan disable agar tidak double click
+
             btnReg.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Sedang diproses...');
 
-            // Panggil fungsi submitForm bawaan Anda yang sudah ada di sistem
             if (typeof submitForm === 'function') {
                 submitForm('registrasi');
             } else {
-                // Fallback jika fungsi submitForm global tidak ada, submit form secara native
                 $('#form').submit();
             }
         });
 
-        // Kirim OTP
         $('#btn-send-otp').click(function(e) {
             e.preventDefault();
             var hp = $('#hp').val();
@@ -247,7 +222,6 @@
             });
         });
 
-        // Verifikasi OTP
         $('#btn-verify-otp').click(function(e) {
             e.preventDefault();
             var otp = $('#otp-input').val();
@@ -285,7 +259,7 @@
                         clearInterval(timerInterval);
                         $('#otp-area').slideUp();
 
-                        lastVerifiedHp = hp; // Kunci nomor yang sudah verified
+                        lastVerifiedHp = hp;
                         $('#hp').data('verified', 1);
                         checkWaStatus();
 
@@ -330,5 +304,23 @@
             }, 1000);
         }
     });
+</script>
+<script>
+    (function () {
+        var eye = document.getElementById('kb-eye');
+        var password = document.getElementById('password');
+        var toggle = document.getElementById('toggle-password');
+        var openIcon = document.getElementById('kb-eye-open');
+        var offIcon = document.getElementById('kb-eye-off');
+        if (!eye || !password) return;
+        eye.addEventListener('click', function () {
+            var show = password.type === 'password';
+            password.type = show ? 'text' : 'password';
+            openIcon.style.display = show ? 'none' : '';
+            offIcon.style.display = show ? '' : 'none';
+            eye.setAttribute('aria-label', show ? 'Sembunyikan kata sandi' : 'Lihat kata sandi');
+            if (toggle) toggle.checked = show;
+        });
+    })();
 </script>
 <?= $this->endSection() ?>
