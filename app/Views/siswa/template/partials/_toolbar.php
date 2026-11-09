@@ -205,61 +205,6 @@
 
         </div>
 
-        <!-- ================= KOLOM KANAN (Leaderboard Auto-Scroll) ================= -->
-        <!-- Filter PHP: Hanya tampilkan jika URL saat ini adalah sw-siswa -->
-        <?php if (url_is('sw-siswa') && !empty($top_siswa)): ?>
-            <div class="w-100 w-lg-350px flex-shrink-0 animate-fade-in-up mb-8 mb-lg-0 d-none d-lg-block">
-                <div class="leaderboard-box d-flex flex-column justify-content-center">
-
-                    <div class="d-flex align-items-center mb-4">
-                        <i class="ki-outline ki-trophy text-warning fs-1 me-3"></i>
-                        <h3 class="text-white fw-bold mb-0">Top 10 Peserta Nilai Tertinggi</h3>
-                    </div>
-
-                    <!-- Area Scroll (Hanya menampilkan ~3 baris) -->
-                    <div class="ticker-container">
-                        <div class="ticker-content">
-
-                            <?php
-                            // Loop dijalankan 2 KALI agar ilusi scroll infinitenya berjalan mulus
-                            for ($i = 0; $i < 2; $i++):
-                                // Menggunakan $top_siswa dari controller
-                                foreach ($top_siswa as $index => $peserta):
-
-                                    // Membuat rank secara dinamis dari index array (dimulai dari 0, jadi + 1)
-                                    $rank = $index + 1;
-
-                                    // Tentukan warna badge berdasarkan urutan rank
-                                    $badgeClass = ($rank == 1) ? 'rank-1' : (($rank == 2) ? 'rank-2' : (($rank == 3) ? 'rank-3' : 'rank-other'));
-                                    $namaSingkat = ucfirst(strtolower(substr($peserta['nama'], 0, 4))) . '...';
-                            ?>
-
-                                    <!-- Item Baris Leaderboard -->
-                                    <div class="leaderboard-row d-flex align-items-center">
-                                        <div class="rank-badge <?= $badgeClass ?> me-4">
-                                            <?= $rank ?>
-                                        </div>
-                                        <div class="d-flex flex-column flex-grow-1">
-                                            <span class="text-white fw-bold fs-6"><?= $namaSingkat ?></span>
-                                        </div>
-                                        <div class="d-flex align-items-center">
-                                            <span class="text-warning fw-bold fs-5"><?= $peserta['nilai'] ?></span>
-                                        </div>
-                                    </div>
-
-                            <?php
-                                endforeach;
-                            endfor;
-                            ?>
-
-                        </div>
-                    </div>
-                    <!-- Akhir Area Scroll -->
-
-                </div>
-            </div>
-        <?php endif; ?>
-        <!-- AKHIR KOLOM KANAN -->
 
     </div>
 </div>

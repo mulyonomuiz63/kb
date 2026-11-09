@@ -118,8 +118,8 @@
     }
 
     #kt_brevet_slider>div {
-        flex: 0 0 calc(50% - 10px);
-        min-width: calc(50% - 10px);
+        flex: 0 0 calc(33.333% - 10px);
+        min-width: calc(33.333% - 10px);
     }
 
     #kt_webinar_slider>div {
@@ -137,6 +137,13 @@
     .tns-slider#kt_webinar_slider>div {
         flex: none !important;
         min-width: auto !important;
+    }
+
+    @media (max-width: 1199px) {
+        #kt_brevet_slider>div {
+            flex: 0 0 calc(50% - 10px);
+            min-width: calc(50% - 10px);
+        }
     }
 
     @media (max-width: 767px) {
@@ -184,12 +191,78 @@
         color: #ffffff;
     }
 
-    @media (min-width: 1200px) {
-        .sticky-column {
-            position: -webkit-sticky;
-            position: sticky;
-            top: 80px;
-            z-index: 1;
+    .kb-rank-card {
+        min-height: 0;
+    }
+
+    .kb-rank-list {
+        overflow-y: auto;
+        min-height: 0;
+        flex: 1 1 auto;
+        max-height: 252px;
+    }
+
+    @media (min-width: 992px) {
+        .kb-rank-col {
+            position: relative;
+        }
+
+        .kb-rank-card {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: calc(var(--bs-gutter-x, 1.5rem) * 0.5);
+            right: calc(var(--bs-gutter-x, 1.5rem) * 0.5);
+            width: auto;
+        }
+
+        .kb-rank-list {
+            max-height: none;
+            height: 100%;
+        }
+    }
+
+    .kb-rank {
+        width: 26px;
+        height: 26px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 12px;
+        margin-right: 10px;
+        flex-shrink: 0;
+    }
+
+    .kb-menu-card {
+        transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+    }
+
+    .kb-menu-card:hover {
+        border-color: #d7e3f5 !important;
+        box-shadow: 0 10px 24px rgba(24, 28, 50, 0.06) !important;
+        transform: translateY(-2px);
+    }
+
+    .kb-promo-title {
+        font-size: clamp(1.15rem, 1.6vw, 1.45rem);
+        line-height: 1.3;
+    }
+
+    @media (max-width: 767.98px) {
+        .nav-circle,
+        .nav-circle-webinar {
+            width: 36px !important;
+            height: 36px !important;
+        }
+
+        .promo-ukp-card .card-body {
+            padding: 1.5rem !important;
+        }
+
+        .kb-webinar-title {
+            font-size: 1.15rem !important;
         }
     }
 </style>
@@ -317,9 +390,9 @@
 
 <?php endif; ?>
 
-<div class="row g-5 g-xl-8">
+<div class="row g-5 g-xl-8 kb-dash">
     <?php if (!empty($activeAlerts)): ?>
-        <div class="mb-8 animate-alert-wrapper">
+        <div class="col-12 animate-alert-wrapper">
             <?php foreach ($activeAlerts as $alert): ?>
                 <?php
                 $alertClass = $alert->is_live ? 'bg-light-danger border-danger pulse-danger-box' : 'bg-light-primary border-primary pulse-primary-box';
@@ -374,36 +447,40 @@
             <?php endforeach; ?>
         </div>
     <?php endif; ?>
-    <div class="col-xl-4">
-        <div class="sticky-column">
-            <div class="row mb-5 mb-xl-8 g-5 g-xl-8">
-                <?php
-                $menus = [
-                    ['url' => 'sw-siswa/materi', 'icon' => 'ki-book-open', 'color' => 'primary', 'title' => 'Materi Brevet', 'desc' => 'Akses semua modul'],
-                    ['url' => 'sw-siswa/webinar', 'icon' => 'ki-award', 'color' => 'warning', 'title' => 'Webinar', 'desc' => 'Update Regulasi'],
-                    ['url' => 'sw-siswa/ujian', 'icon' => 'ki-notepad-edit', 'color' => 'danger', 'title' => 'Ujian & Try Out', 'desc' => 'Uji Kompetensi'],
-                    ['url' => 'sw-siswa/sertifikat', 'icon' => 'ki-medal-star', 'color' => 'success', 'title' => 'Sertifikat', 'desc' => 'Download bukti lulus'],
-                    ['url' => 'sw-siswa/affiliate', 'icon' => 'ki-people', 'color' => 'warning', 'title' => 'Affiliate', 'desc' => 'Bonus referensi'],
-                    ['url' => 'sw-siswa/transaksi', 'icon' => 'ki-time', 'color' => 'info', 'title' => 'Histori', 'desc' => 'Status pembayaran'],
-                    ['url' => 'sw-siswa/profile', 'icon' => 'ki-user', 'color' => 'dark', 'title' => 'Akun Saya', 'desc' => 'Pengaturan data diri'],
-                    ['url' => 'sw-siswa/diskusi', 'icon' => 'ki-messages', 'color' => 'warning', 'title' => 'Diskusi', 'desc' => 'Komunitas belajar'],
-                ];
-                foreach ($menus as $m): ?>
-                    <div class="col-6 d-flex">
-                        <div class="card card-stretch shadow-sm w-100">
-                            <a href="<?= base_url($m['url']) ?>" class="btn btn-flex btn-text-gray-800 btn-active-color-<?= $m['color'] ?> bg-body flex-column justify-content-start align-items-start text-start w-100 p-6 p-xl-10 h-100">
-                                <i class="ki-outline <?= $m['icon'] ?> fs-2tx mb-5 ms-n1 text-<?= $m['color'] ?>"></i>
-                                <span class="fs-4 fw-bold"><?= $m['title'] ?></span>
-                                <span class="fs-7 fw-semibold text-muted mt-1 d-none d-md-block"><?= $m['desc'] ?></span>
-                            </a>
+    <div class="col-12">
+        <div class="row g-4 mb-2">
+            <?php
+            $menus = [
+                ['url' => 'sw-siswa/materi', 'icon' => 'ki-book-open', 'title' => 'Materi', 'desc' => 'Modul pelajaran'],
+                ['url' => 'sw-siswa/webinar', 'icon' => 'ki-award', 'title' => 'Webinar', 'desc' => 'Jadwal kelas live'],
+                ['url' => 'sw-siswa/ujian', 'icon' => 'ki-notepad-edit', 'title' => 'Ujian', 'desc' => 'Try out dan USKP'],
+                ['url' => 'sw-siswa/sertifikat', 'icon' => 'ki-medal-star', 'title' => 'Sertifikat', 'desc' => 'Bukti kelulusan'],
+                ['url' => 'sw-siswa/affiliate', 'icon' => 'ki-people', 'title' => 'Affiliate', 'desc' => 'Komisi referral'],
+                ['url' => 'sw-siswa/transaksi', 'icon' => 'ki-time', 'title' => 'Transaksi', 'desc' => 'Status pembayaran'],
+                ['url' => 'sw-siswa/diskusi', 'icon' => 'ki-messages', 'title' => 'Diskusi', 'desc' => 'Tanya sesama peserta'],
+                ['url' => 'sw-siswa/profile', 'icon' => 'ki-user', 'title' => 'Akun', 'desc' => 'Data diri Anda'],
+            ];
+            foreach ($menus as $m): ?>
+                <div class="col-6 col-md-4 col-xl-3">
+                    <a href="<?= base_url($m['url']) ?>" class="card kb-menu-card border border-gray-200 shadow-sm h-100 text-hover-primary">
+                        <div class="card-body d-flex align-items-center gap-3 p-4 p-lg-5">
+                            <span class="symbol symbol-45px flex-shrink-0">
+                                <span class="symbol-label bg-light-primary">
+                                    <i class="ki-outline <?= $m['icon'] ?> fs-2 text-primary"></i>
+                                </span>
+                            </span>
+                            <span class="d-flex flex-column min-w-0">
+                                <span class="text-gray-900 fw-bold fs-6 text-truncate"><?= $m['title'] ?></span>
+                                <span class="text-gray-500 fw-semibold fs-8"><?= $m['desc'] ?></span>
+                            </span>
                         </div>
-                    </div>
-                <?php endforeach; ?>
-            </div>
+                    </a>
+                </div>
+            <?php endforeach; ?>
         </div>
     </div>
 
-    <div class="col-xl-8 ps-xl-12">
+    <div class="col-12">
         <?php
         // Mengumpulkan semua paket webinar aktif yang waktu selesainya belum terlewati
         $currentDateTime = date('Y-m-d H:i:s');
@@ -423,9 +500,11 @@
         }
         ?>
 
+        <div class="row g-4 align-items-stretch mb-5 mb-xl-8">
+            <div class="col-lg-8">
         <?php if (!empty($activeWebinars)): ?>
             <!-- SLIDER WEBINAR PREMIUM -->
-            <div class="position-relative mb-5 mb-xl-8">
+            <div class="position-relative h-100">
 
                 <!-- Tombol Navigasi Kustom Webinar -->
                 <div class="position-absolute top-50 start-0 translate-middle-y z-index-3 ms-n3 d-none d-md-block">
@@ -460,7 +539,7 @@
                                 <div class="card-body p-0 position-relative" dir="ltr">
 
                                     <!-- BINGKAI / BANNER GAMBAR UTAMA DI ATAS -->
-                                    <div class="position-relative w-100 overflow-hidden rounded-top-4" style="aspect-ratio: 16/9; background-color: #f1f5f9;">
+                                    <div class="position-relative w-100 overflow-hidden rounded-top-4" style="height: 148px; background-color: #f1f5f9;">
                                         <img src="<?= $gambarPaket ?>" class="w-100 h-100 object-fit-cover" alt="<?= esc($paketWebinar->nama_paket) ?>">
 
                                         <!-- Badge Webinar Aktif (Kiri Atas) -->
@@ -472,10 +551,10 @@
                                     </div>
 
                                     <!-- KONTEN DI BAWAH BINGKAI GAMBAR -->
-                                    <div class="p-6 p-lg-8">
+                                    <div class="p-5">
                                         <!-- Judul Paket -->
-                                        <h3 class="text-dark fw-bolder mb-4"
-                                            style="font-size: 1.5rem; letter-spacing: -0.5px; line-height: 1.3;"
+                                        <h3 class="text-dark fw-bolder mb-4 kb-webinar-title"
+                                            style="font-size: 1.35rem; letter-spacing: -0.4px; line-height: 1.35;"
                                             data-bs-toggle="tooltip"
                                             data-bs-placement="top"
                                             title="<?= esc($paketWebinar->nama_paket) ?>">
@@ -492,7 +571,7 @@
                                         <!-- Action Buttons -->
                                         <div class="m-0 d-flex flex-column flex-sm-row gap-3 mt-4">
                                             <a href="<?= base_url($paketWebinar->slug) ?>"
-                                                class="btn fw-bolder px-8 py-3 w-100 w-sm-auto rounded-pill text-white shadow-sm d-flex align-items-center justify-content-center" style="background-color: #1d4695;">
+                                                class="btn btn-primary fw-bolder px-8 py-3 w-100 w-sm-auto rounded-pill d-flex align-items-center justify-content-center">
                                                 <i class="ki-outline ki-entrance-left fs-3 me-2 text-white"></i> Daftar Sekarang
                                             </a>
                                             <a href="<?= base_url('list-bimbel') ?>"
@@ -640,45 +719,43 @@
                 }
             </style>
 
-            <div class="card promo-ukp-card min-h-250px mb-5 mb-xl-8 shadow-lg rounded-4" dir="ltr">
+            <div class="card promo-ukp-card shadow-sm rounded-4" dir="ltr">
                 <!-- Elemen Dekoratif Animasi -->
                 <div class="ukp-shape-1"></div>
                 <div class="ukp-shape-2"></div>
 
                 <!-- Konten Utama Banner -->
-                <div class="card-body d-flex flex-column justify-content-center ps-lg-15 p-10 ukp-content-z">
+                <div class="card-body d-flex flex-column justify-content-center p-6 p-lg-7 ukp-content-z">
 
                     <!-- Label Promo Animasi -->
-                    <div class="mb-5">
-                        <span class="badge bg-warning text-dark fs-6 fw-bolder px-5 py-3 badge-pulse-glow rounded-pill shadow-sm">
-                            <i class="fa fa-gift me-2 text-dark fs-5"></i> SPESIAL: TRY OUT UKP GRATIS
+                    <div class="mb-3">
+                        <span class="badge bg-warning text-dark fs-8 fw-bolder px-4 py-2 badge-pulse-glow rounded-pill shadow-sm">
+                            <i class="fa fa-gift me-2 text-dark"></i> SPESIAL: TRY OUT UKP GRATIS
                         </span>
                     </div>
 
                     <!-- Headline -->
-                    <h3 class="text-white fs-2qx fw-bold mb-4" style="line-height: 1.4;">
+                    <h3 class="text-white fw-bold mb-2 kb-promo-title">
                         Ukur Kesiapan Anda Hadapi UKP <br />
-                        <!-- Text Gratis di-upgrade agar jauh lebih mencolok -->
-                        <span class="text-warning text-uppercase" style="font-size: 1.05em; text-shadow: 0 3px 6px rgba(0,0,0,0.4);">
+                        <span class="text-warning text-uppercase" style="font-size: 1.05em;">
                             100% Gratis Tanpa Biaya!
                         </span>
                     </h3>
 
                     <!-- Subheadline -->
-                    <div class="fs-5 fw-semibold text-white opacity-75 mb-8" style="max-width: 650px; line-height: 1.6;">
+                    <div class="fs-7 fw-semibold text-white opacity-75 mb-4" style="max-width: 560px; line-height: 1.5;">
                         Ikuti simulasi Ujian Kompetensi Perpajakan dengan sistem <strong>CBT Real-time</strong>. Dapatkan evaluasi instan dan pembahasan komprehensif beserta dasar hukumnya.
                     </div>
 
                     <!-- Tombol Aksi (Call to Action) -->
-                    <div class="m-0 d-flex flex-column flex-sm-row gap-4">
+                    <div class="m-0 d-flex flex-column flex-sm-row gap-3">
                         <a href="<?= base_url('bimbel/tryout-ukp') ?>"
-                            class="btn btn-warning text-dark fw-bolder px-8 py-4 w-100 w-sm-auto rounded-pill hover-elevate-up btn-shine-effect shadow">
+                            class="btn btn-warning btn-sm text-dark fw-bolder px-5 py-2 w-100 w-sm-auto rounded-pill hover-elevate-up btn-shine-effect shadow">
                             <i class="fa fa-pencil-alt me-2 text-dark"></i> Mulai Try Out Sekarang
                         </a>
 
-                        <!-- Tombol Secondary -->
                         <a href="<?= base_url('list-bimbel') ?>"
-                            class="btn btn-outline btn-outline-dashed btn-outline-white text-white fw-bold px-8 py-4 w-100 w-sm-auto rounded-pill hover-elevate-up"
+                            class="btn btn-sm btn-outline btn-outline-dashed btn-outline-white text-white fw-bold px-5 py-2 w-100 w-sm-auto rounded-pill hover-elevate-up"
                             style="background: rgba(255,255,255,0.05);">
                             Lihat Paket Pelatihan Brevet A&B
                         </a>
@@ -687,12 +764,45 @@
                 </div>
             </div>
         <?php endif; ?>
+            </div>
+            <div class="col-lg-4 kb-rank-col">
+                <div class="card kb-rank-card border border-gray-200 shadow-sm d-flex flex-column overflow-hidden">
+                    <div class="card-header border-0 pt-4 pb-0 min-h-auto flex-shrink-0">
+                        <div class="card-title flex-column align-items-start">
+                            <h3 class="fw-bold text-gray-900 mb-0 fs-5">Peringkat peserta</h3>
+                            <span class="text-gray-500 fw-semibold fs-8">Geser untuk melihat peringkat lain</span>
+                        </div>
+                    </div>
+                    <div class="card-body py-2 d-flex flex-column flex-grow-1 overflow-hidden" style="min-height:0">
+                        <?php if (!empty($top_siswa)): ?>
+                            <div class="kb-rank-list">
+                                <?php foreach ($top_siswa as $index => $peserta):
+                                    $rank = $index + 1;
+                                    $rankClass = $rank === 1 ? 'bg-warning text-white' : ($rank === 2 ? 'bg-gray-600 text-white' : ($rank === 3 ? 'bg-light-warning text-warning' : 'bg-light-primary text-primary'));
+                                ?>
+                                    <div class="d-flex align-items-center py-2 <?= $rank < count($top_siswa) ? 'border-bottom border-gray-200' : '' ?>">
+                                        <span class="kb-rank <?= $rankClass ?>"><?= $rank ?></span>
+                                        <span class="text-gray-800 fw-semibold fs-7 text-truncate flex-grow-1" title="<?= esc($peserta['nama']) ?>"><?= esc($peserta['nama']) ?></span>
+                                        <span class="badge badge-light-primary fw-bold fs-8 ms-2"><?= $peserta['nilai'] ?></span>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php else: ?>
+                            <div class="text-gray-500 fw-semibold fs-7">Belum ada peringkat.</div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- BAGIAN PAKET KELAS BREVET -->
         <div class="card shadow-sm rounded-4 mb-10 border-0">
             <div class="card-body">
-                <div class="d-flex flex-stack mb-9">
-                    <h3 class="fw-bold text-dark m-0 fs-2">Paket Kelas Brevet</h3>
+                <div class="d-flex flex-stack flex-wrap gap-3 mb-6">
+                    <div>
+                        <h3 class="fw-bold text-dark m-0 fs-2">Paket Kelas Brevet</h3>
+                        <div class="text-gray-500 fw-semibold fs-7 mt-1">Geser kartu untuk melihat paket lain, lalu pesan jika sudah sesuai.</div>
+                    </div>
                     <div class="d-flex align-items-center">
                         <button class="nav-circle me-3" id="kt_slider_prev"><i class="ki-outline ki-left fs-3 text-white"></i></button>
                         <button class="nav-circle" id="kt_slider_next"><i class="ki-outline ki-right fs-3 text-white"></i></button>
@@ -931,7 +1041,7 @@
                         items: 2
                     },
                     1200: {
-                        items: 2
+                        items: 3
                     }
                 }
             });
