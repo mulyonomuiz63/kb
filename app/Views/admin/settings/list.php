@@ -48,6 +48,9 @@
                             <li class="nav-item mt-2">
                                 <a class="nav-link text-active-primary ms-0 me-10 py-5" data-bs-toggle="tab" href="#tab_whatsapp">WhatsApp</a>
                             </li>
+                            <li class="nav-item mt-2">
+                                <a class="nav-link text-active-primary ms-0 me-10 py-5" data-bs-toggle="tab" href="#tab_asisten">Chat AI</a>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -220,6 +223,47 @@
                                 </div>
                             </div>
 
+                            <div class="tab-pane fade" id="tab_asisten" role="tabpanel">
+                                <div class="d-flex flex-column gap-5">
+                                    <h4 class="text-gray-800 fw-bold mb-5">Asisten Chat Peserta</h4>
+                                    <?php
+                                    $asistenStatus = old('asisten_status', $settings['asisten_status'] ?? 'false');
+                                    $asistenModel = old('asisten_model', $settings['asisten_model'] ?? 'gemini-3.5-flash');
+                                    $asistenUrl = old('asisten_url', $settings['asisten_url'] ?? 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions');
+                                    $asistenKeyAda = !empty($settings['asisten_api_key']);
+                                    ?>
+
+                                    <?php inputRow('Status',
+                                        '<select name="asisten_status" class="form-select form-select-solid" data-control="select2" data-hide-search="true">
+                                            <option value="true" '.($asistenStatus === 'true' ? 'selected' : '').'>Aktif</option>
+                                            <option value="false" '.($asistenStatus !== 'true' ? 'selected' : '').'>Nonaktif</option>
+                                        </select>
+                                        <div class="text-muted fs-7 mt-2">Saat aktif, ikon chat tampil di pojok kanan bawah halaman peserta. Saat nonaktif, ikon disembunyikan.</div>'
+                                    ); ?>
+
+                                    <?php inputRow('Model',
+                                        '<input type="text" class="form-control form-control-solid" name="asisten_model" value="'.esc($asistenModel).'" placeholder="gemini-3.5-flash" required>
+                                        <div class="text-muted fs-7 mt-2">Nama model dari penyedia yang dipakai, misalnya gemini-3.5-flash atau gpt-4o-mini.</div>'
+                                    ); ?>
+
+                                    <?php inputRow('URL API',
+                                        '<input type="url" class="form-control form-control-solid" name="asisten_url" value="'.esc($asistenUrl).'" placeholder="https://..." required>
+                                        <div class="text-muted fs-7 mt-2">Alamat endpoint chat yang kompatibel dengan format OpenAI <code>/chat/completions</code>. Bisa diganti ke penyedia lain.</div>'
+                                    ); ?>
+
+                                    <?php inputRow('API Key',
+                                        '<input type="password" class="form-control form-control-solid" name="asisten_api_key" id="asisten_api_key" autocomplete="new-password" placeholder="'.($asistenKeyAda ? 'API key sudah tersimpan' : 'Tempel API key').'">
+                                        <div class="text-muted fs-7 mt-2">'.($asistenKeyAda ? 'Kunci sudah tersimpan. Kosongkan jika tidak ingin mengubahnya.' : 'Belum ada kunci tersimpan. Isi API key dari penyedia yang dipilih.').'</div>'
+                                    ); ?>
+
+                                    <?php inputRow('Uji Koneksi',
+                                        '<button type="button" class="btn btn-light-primary fw-bold" id="btnUjiAsisten">Uji API Key</button>
+                                        <div id="asistenUjiHasil" class="fs-7 mt-3"></div>
+                                        <div class="text-muted fs-7 mt-2">Menguji model, URL, dan API key yang sedang diisi. Jika kolom kunci kosong, kunci yang sudah tersimpan yang dipakai.</div>'
+                                    ); ?>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                     
@@ -242,6 +286,39 @@
     $(document).ready(function() {
         // Inisialisasi Select2 untuk semua select
         $('[data-control="select2"]').select2();
+
+        $('#btnUjiAsisten').on('click', function() {
+            var btn = $(this);
+            var hasil = $('#asistenUjiHasil');
+            btn.prop('disabled', true);
+            hasil.removeClass('text-success text-danger').addClass('text-muted').text('Sedang menguji koneksi...');
+
+            $.ajax({
+                url: '<?= base_url('sw-admin/settings/uji-asisten') ?>',
+                method: 'POST',
+                dataType: 'json',
+                data: {
+                    csrf_test_name: $('input[name="csrf_test_name"]').val(),
+                    asisten_model: $('input[name="asisten_model"]').val(),
+                    asisten_url: $('input[name="asisten_url"]').val(),
+                    asisten_api_key: $('#asisten_api_key').val()
+                }
+            }).done(function(res) {
+                if (res && res.csrf) {
+                    $('input[name="csrf_test_name"]').val(res.csrf);
+                    $('meta[name="csrf-token"]').attr('content', res.csrf);
+                }
+                hasil.removeClass('text-muted').addClass(res && res.ok ? 'text-success' : 'text-danger').text((res && res.message) ? res.message : 'Tidak ada jawaban dari server.');
+            }).fail(function(xhr) {
+                var res = xhr.responseJSON || {};
+                if (res.csrf) {
+                    $('input[name="csrf_test_name"]').val(res.csrf);
+                }
+                hasil.removeClass('text-muted').addClass('text-danger').text(res.message || 'Gagal menguji koneksi.');
+            }).always(function() {
+                btn.prop('disabled', false);
+            });
+        });
     });
 </script>
 <?= $this->endSection(); ?>

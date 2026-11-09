@@ -97,6 +97,26 @@ $UjiansiswaModel = new UjiansiswaModel();
                         </div>
                     </div>
 
+                    <div class="row g-9 mt-5">
+                        <div class="col-md-6">
+                            <label class="fs-6 fw-semibold mb-2">Lampiran Ujian (PDF / JPG)</label>
+                            <input type="file" name="lampiran" class="form-control form-control-solid" accept=".pdf,.jpg,.jpeg,application/pdf,image/jpeg">
+                            <div class="form-text">Opsional, maksimal 8 MB. Kosongkan jika lampiran tidak diganti.</div>
+                            <?php if (isset($ujian->lampiran) && $ujian->lampiran !== ''):
+                                $fileLampiran = basename($ujian->lampiran);
+                                $urlLampiran = base_url('uploads/lampiranUjian/' . rawurlencode($fileLampiran));
+                            ?>
+                                <div class="d-flex flex-wrap align-items-center gap-4 mt-3">
+                                    <a href="<?= $urlLampiran ?>" target="_blank" rel="noopener" class="btn btn-sm btn-light-primary">Lihat lampiran saat ini</a>
+                                    <label class="form-check form-check-custom form-check-solid mb-0">
+                                        <input class="form-check-input" type="checkbox" name="hapus_lampiran" value="1">
+                                        <span class="form-check-label text-danger">Hapus lampiran</span>
+                                    </label>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
                     <div class="separator separator-dashed my-8"></div>
 
                     <!-- KOMPOSISI MATERI USKP -->

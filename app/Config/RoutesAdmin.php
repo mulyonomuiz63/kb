@@ -262,6 +262,7 @@ $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
     $routes->group('settings', function ($routes) {
         $routes->get('', 'Admin\SettingsController::index');
         $routes->post('update', 'Admin\SettingsController::update');
+        $routes->post('uji-asisten', 'Admin\SettingsController::ujiAsisten');
     });
 
     // diskusi

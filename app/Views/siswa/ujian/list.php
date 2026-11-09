@@ -407,7 +407,7 @@
                                     </div>
 
                                     <!-- TOMBOL AKSI UTAMA BAWAH -->
-                                    <div class="d-flex gap-2 mt-auto">
+                                    <div class="d-flex flex-wrap gap-2 mt-auto">
                                         <?php if ($u->status == 'B') : ?>
                                             <?php $dataStatus = $db->query("SELECT * FROM status_ujian WHERE kode_ujian = ?", [$u->kode_ujian])->getRow(); ?>
                                             <?php if (!empty($dataStatus) && $dataStatus->status == 'A') : ?>
@@ -449,6 +449,13 @@
                                                     Review
                                                 </a>
                                             <?php endif; ?>
+                                        <?php endif; ?>
+                                        <?php if ((string) $u->review === '1' && !empty($u->lampiran)): ?>
+                                            <a href="<?= base_url('sw-siswa/ujian/lampiran/' . encrypt_url($u->kode_ujian)) ?>"
+                                                class="btn btn-light-info fw-bold text-uppercase d-flex align-items-center justify-content-center fs-8 fs-sm-7 px-2 lh-sm text-center"
+                                                style="min-width: 100px;">
+                                                E-Book
+                                            </a>
                                         <?php endif; ?>
                                     </div>
                                 </div>

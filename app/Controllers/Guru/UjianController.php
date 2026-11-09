@@ -106,6 +106,23 @@ class UjianController extends BaseController
             $kode_ujian = random_string('alnum', 10);
             $db = \Config\Database::connect();
 
+            $this->pastikanKolomLampiran();
+            $namaLampiran = null;
+            $lampiranDitolak = false;
+            $hasilLampiran = $this->simpanLampiranUjian($this->request->getFile('lampiran'));
+            if ($hasilLampiran === false) {
+                $lampiranDitolak = true;
+            } elseif (is_string($hasilLampiran) && $hasilLampiran !== '') {
+                $namaLampiran = $hasilLampiran;
+            }
+
+            if ($namaLampiran === null && $this->request->getVar('tanpa_lampiran') != '1') {
+                $salinanLampiran = $this->salinFileLampiran($this->request->getVar('lampiran_asal'));
+                if (is_string($salinanLampiran) && $salinanLampiran !== '') {
+                    $namaLampiran = $salinanLampiran;
+                }
+            }
+
             // 1. DATA UJIAN (MASTER)
             $data_ujian = [
                 'kode_ujian'     => $kode_ujian,
@@ -118,6 +135,7 @@ class UjianController extends BaseController
                 'kuota'          => $this->request->getVar('kuota'),
                 'review'         => $this->request->getVar('review'),
                 'biaya_upgrade'  => $this->request->getVar('biaya_upgrade'),
+                'lampiran'       => $namaLampiran,
             ];
             $this->ujianMasterModel->save($data_ujian);
 
@@ -179,7 +197,14 @@ class UjianController extends BaseController
                 $index++;
             }
 
-            return redirect()->to('sw-guru/ujian')->with('success', 'Ujian USKP beserta Komposisi berhasil dibuat.');
+            $pesanSukses = 'Ujian USKP beserta Komposisi berhasil dibuat.';
+            if ($lampiranDitolak) {
+                $pesanSukses .= $namaLampiran
+                    ? ' Lampiran baru tidak disimpan karena bukan PDF/JPG atau ukurannya lebih dari 8 MB. Lampiran ujian asal tetap disalin.'
+                    : ' Lampiran tidak disimpan karena bukan PDF/JPG atau ukurannya lebih dari 8 MB.';
+            }
+
+            return redirect()->to('sw-guru/ujian')->with('success', $pesanSukses);
         } else {
             return redirect()->to('sw-guru/ujian')->with('error', 'Ujian Tidak dapat di tambah karna tidak ada soal yang di ditambah');
         }
@@ -655,6 +680,22 @@ class UjianController extends BaseController
         if ($nama_soal != null) {
             $db = \Config\Database::connect();
 
+            $this->pastikanKolomLampiran();
+            $lampiranLama = isset($ujian->lampiran) ? $ujian->lampiran : null;
+            $namaLampiran = $lampiranLama;
+            $lampiranDitolak = false;
+            $hasilLampiran = $this->simpanLampiranUjian($this->request->getFile('lampiran'));
+
+            if ($hasilLampiran === false) {
+                $lampiranDitolak = true;
+            } elseif (is_string($hasilLampiran) && $hasilLampiran !== '') {
+                $this->hapusFileLampiran($lampiranLama);
+                $namaLampiran = $hasilLampiran;
+            } elseif ($this->request->getVar('hapus_lampiran') == '1') {
+                $this->hapusFileLampiran($lampiranLama);
+                $namaLampiran = null;
+            }
+
             // 1. UPDATE DATA MASTER UJIAN (Tanpa jml_mudah, jml_sedang, jml_susah global)
             $data_master = [
                 'nama_ujian'     => $this->request->getVar('nama_ujian'),
@@ -664,6 +705,7 @@ class UjianController extends BaseController
                 'kuota'          => $this->request->getVar('kuota'),
                 'review'         => $this->request->getVar('review'),
                 'biaya_upgrade'  => $this->request->getVar('biaya_upgrade'),
+                'lampiran'       => $namaLampiran,
             ];
             $this->ujianMasterModel->update($ujian->id_ujian, $data_master);
 
@@ -750,7 +792,12 @@ class UjianController extends BaseController
                     ->update();
             }
 
-            return redirect()->to('sw-guru/ujian')->with('success', 'Ujian berhasil diperbarui.');
+            $pesanSukses = 'Ujian berhasil diperbarui.';
+            if ($lampiranDitolak) {
+                $pesanSukses .= ' Lampiran baru tidak disimpan karena bukan PDF/JPG atau ukurannya lebih dari 8 MB.';
+            }
+
+            return redirect()->to('sw-guru/ujian')->with('success', $pesanSukses);
         } else {
             return redirect()->to('sw-guru/ujian')->with('error', 'Ujian tidak dapat diperbarui karena tidak ada soal yang dimasukkan');
         }
@@ -856,5 +903,109 @@ class UjianController extends BaseController
             }
         }
         return redirect()->to('guru/ujian')->with('success', 'Ujian telah dibuat');
+    }
+
+    private function pastikanKolomLampiran(): void
+    {
+        $db = \Config\Database::connect();
+        if ($db->fieldExists('lampiran', 'ujian_master')) {
+            return;
+        }
+
+        $forge = \Config\Database::forge();
+
+        $forge->addColumn('ujian_master', [
+            'lampiran' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 255,
+                'null'       => true,
+            ],
+        ]);
+    }
+
+    /**
+     * Simpan lampiran ujian. Null jika tidak ada file, false jika file ditolak.
+     */
+    private function simpanLampiranUjian($file)
+    {
+        if ($file === null || $file->getError() === UPLOAD_ERR_NO_FILE) {
+            return null;
+        }
+
+        if (!$file->isValid() || $file->hasMoved()) {
+            return false;
+        }
+
+        if ($file->getSize() > (8 * 1024 * 1024)) {
+            return false;
+        }
+
+        $mime = strtolower((string) $file->getMimeType());
+        $allowedMime = ['application/pdf', 'application/x-pdf', 'image/jpeg', 'image/jpg', 'image/pjpeg'];
+        if (!in_array($mime, $allowedMime, true)) {
+            return false;
+        }
+
+        $ext = strtolower((string) ($file->guessExtension() ?: $file->getExtension()));
+        if ($ext === 'jpeg') {
+            $ext = 'jpg';
+        }
+        if (!in_array($ext, ['pdf', 'jpg'], true)) {
+            return false;
+        }
+
+        $uploadPath = FCPATH . 'uploads' . DIRECTORY_SEPARATOR . 'lampiranUjian';
+        if (!is_dir($uploadPath) && !mkdir($uploadPath, 0755, true) && !is_dir($uploadPath)) {
+            return false;
+        }
+
+        $newName = bin2hex(random_bytes(16)) . '.' . $ext;
+        $file->move($uploadPath, $newName);
+
+        return $newName;
+    }
+
+    private function salinFileLampiran($namaFile): ?string
+    {
+        if (!is_string($namaFile) || $namaFile === '') {
+            return null;
+        }
+
+        $namaFile = basename($namaFile);
+        $ext = strtolower(pathinfo($namaFile, PATHINFO_EXTENSION));
+        if ($ext === 'jpeg') {
+            $ext = 'jpg';
+        }
+        if (!in_array($ext, ['pdf', 'jpg'], true)) {
+            return null;
+        }
+
+        $uploadPath = FCPATH . 'uploads' . DIRECTORY_SEPARATOR . 'lampiranUjian';
+        $asal = $uploadPath . DIRECTORY_SEPARATOR . $namaFile;
+        if (!is_file($asal)) {
+            return null;
+        }
+        if (!is_dir($uploadPath) && !mkdir($uploadPath, 0755, true) && !is_dir($uploadPath)) {
+            return null;
+        }
+
+        $newName = bin2hex(random_bytes(16)) . '.' . $ext;
+        if (!copy($asal, $uploadPath . DIRECTORY_SEPARATOR . $newName)) {
+            return null;
+        }
+
+        return $newName;
+    }
+
+    private function hapusFileLampiran(?string $namaFile): void
+    {
+        if ($namaFile === null || $namaFile === '') {
+            return;
+        }
+
+        $path = FCPATH . 'uploads' . DIRECTORY_SEPARATOR . 'lampiranUjian' . DIRECTORY_SEPARATOR . basename($namaFile);
+        if (is_file($path)) {
+            unlink($path);
+        }
     }
 }

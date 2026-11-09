@@ -104,6 +104,12 @@ $ujianSiswaModel = new UjianSiswaModel(); ?>
                     <div class="card-title align-items-start flex-column">
                         <span class="fw-bold text-gray-900 fs-3"><?= $ujian->nama_ujian; ?></span>
                         <span class="text-muted mt-1 fw-semibold fs-7">Siswa: <?= session()->get('nama'); ?></span>
+                        <?php if (!empty($lampiran_ujian ?? null)):
+                            $fileLampiran = basename($lampiran_ujian);
+                            $urlLampiran = base_url('uploads/lampiranUjian/' . rawurlencode($fileLampiran));
+                        ?>
+                            <a href="<?= $urlLampiran ?>" target="_blank" rel="noopener" class="btn btn-sm btn-light-primary mt-3">Lihat Lampiran Ujian</a>
+                        <?php endif; ?>
                     </div>
                     <div class="card-toolbar">
                         <div class="d-flex flex-column align-items-end">

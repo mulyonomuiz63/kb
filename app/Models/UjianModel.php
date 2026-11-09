@@ -28,9 +28,13 @@ class UjianModel extends Model
 
     public function getAllBykelas($kelas, $id_siswa)
     {
+        $select = 'ujian.*, kelas.*, mapel.nama_mapel, mapel.file, guru.*, ujian_master.biaya_upgrade';
+        if (\Config\Database::connect()->fieldExists('lampiran', 'ujian_master')) {
+            $select .= ', ujian_master.lampiran';
+        }
+
         return $this
-            // Tambahkan ujian_master.biaya_upgrade pada bagian select
-            ->select('ujian.*, kelas.*, mapel.nama_mapel, mapel.file, guru.*, ujian_master.biaya_upgrade')
+            ->select($select)
             ->join('kelas', 'kelas.id_kelas=ujian.kelas')
             ->join('mapel', 'mapel.id_mapel=ujian.mapel')
             ->join('guru', 'guru.id_guru=ujian.guru')

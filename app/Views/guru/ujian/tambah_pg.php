@@ -88,6 +88,14 @@
                         </div>
                     </div>
 
+                    <div class="row g-9 mt-5">
+                        <div class="col-md-6">
+                            <label class="fs-6 fw-semibold mb-2">Lampiran Ujian (PDF / JPG)</label>
+                            <input type="file" name="lampiran" class="form-control form-control-solid" accept=".pdf,.jpg,.jpeg,application/pdf,image/jpeg">
+                            <div class="form-text">Opsional, maksimal 8 MB. Satu lampiran untuk seluruh ujian.</div>
+                        </div>
+                    </div>
+
                     <div class="separator separator-dashed my-8"></div>
 
                     <!-- KOMPOSISI MATERI USKP (Dilewati jika ujian tipe brevet biasa dengan mengosongkan komposisi) -->

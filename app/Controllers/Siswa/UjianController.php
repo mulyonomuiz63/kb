@@ -216,6 +216,11 @@ class UjianController extends BaseController
         // ... Sisa kode (data view) tetap sama ...
         $data['siswa'] = $this->siswaModel->asObject()->find($idsiswa);
         $data['ujian'] = $this->ujianModel->getBykode(decrypt_url($kode_ujian), decrypt_url($id_ujian));
+        $data['lampiran_ujian'] = null;
+        if (\Config\Database::connect()->fieldExists('lampiran', 'ujian_master')) {
+            $masterUjian = $this->ujianMasterModel->select('lampiran')->where('kode_ujian', decrypt_url($kode_ujian))->get()->getRowObject();
+            $data['lampiran_ujian'] = $masterUjian->lampiran ?? null;
+        }
         $data['detail_ujian'] = $this->ujianSiswaModel->getAllBykodeUjianSiswa(decrypt_url($kode_ujian), $idsiswa);
         $data['ujian_siswa'] = $this->ujianSiswaModel
             ->where('ujian', decrypt_url($kode_ujian))
@@ -622,6 +627,254 @@ class UjianController extends BaseController
         } catch (\Exception $e) {
             $db->transRollback();
             return $this->response->setJSON(['status' => 'error', 'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()]);
+        }
+    }
+
+    public function unduhLampiran($kode_ujian)
+    {
+        $kode = decrypt_url($kode_ujian);
+        $idSiswa = session()->get('id');
+        if ($kode === '' || empty($idSiswa)) {
+            return redirect()->to('sw-siswa/ujian')->with('pesan', 'Lampiran tidak tersedia.');
+        }
+
+        $db = \Config\Database::connect();
+        if (!$db->fieldExists('lampiran', 'ujian_master')) {
+            return redirect()->to('sw-siswa/ujian')->with('pesan', 'Lampiran tidak tersedia.');
+        }
+
+        $ujian = $this->ujianModel
+            ->select('ujian.review, ujian_master.lampiran')
+            ->join('ujian_master', 'ujian_master.kode_ujian = ujian.kode_ujian', 'left')
+            ->where('ujian.kode_ujian', $kode)
+            ->where('ujian.id_siswa', $idSiswa)
+            ->where('ujian.review', '1')
+            ->where('ujian_master.lampiran IS NOT NULL', null, false)
+            ->where('ujian_master.lampiran !=', '')
+            ->get()
+            ->getRowObject();
+
+        if (!$ujian || empty($ujian->lampiran)) {
+            return redirect()->to('sw-siswa/ujian')->with('pesan', 'Lampiran hanya bisa diunduh saat review aktif.');
+        }
+
+        $namaFile = basename($ujian->lampiran);
+        $path = FCPATH . 'uploads' . DIRECTORY_SEPARATOR . 'lampiranUjian' . DIRECTORY_SEPARATOR . $namaFile;
+        if (!is_file($path)) {
+            return redirect()->to('sw-siswa/ujian')->with('error', 'File lampiran tidak ditemukan.');
+        }
+
+        $siswa = $this->siswaModel->asObject()->find($idSiswa);
+        $nama = trim(strip_tags((string) ($siswa->nama_siswa ?? session()->get('nama') ?? 'Siswa')));
+        $nama = preg_replace('/\s+/', ' ', $nama) ?: 'Siswa';
+        if (function_exists('mb_substr')) {
+            $nama = mb_substr($nama, 0, 80);
+        } else {
+            $nama = substr($nama, 0, 80);
+        }
+
+        $ext = strtolower(pathinfo($namaFile, PATHINFO_EXTENSION));
+        if ($ext === 'pdf') {
+            return $this->unduhPdfWatermark($path, $nama);
+        }
+
+        return $this->unduhGambarWatermark($path, $nama, $ext);
+    }
+
+    private function unduhPdfWatermark(string $path, string $nama)
+    {
+        $sementara = null;
+        try {
+            if (!class_exists(\TCPDF::class)) {
+                require_once APPPATH . 'ThirdParty/TCPDF-6.3.5/tcpdf.php';
+            }
+            require_once APPPATH . 'ThirdParty/fpdi/src/autoload.php';
+
+            $siapkanPdf = function () {
+                $dokumen = new \setasign\Fpdi\Tcpdf\Fpdi();
+                $dokumen->setPrintHeader(false);
+                $dokumen->setPrintFooter(false);
+                $dokumen->SetAutoPageBreak(false, 0);
+                $dokumen->SetMargins(0, 0, 0);
+                return $dokumen;
+            };
+
+            $pdf = $siapkanPdf();
+            $sumber = $path;
+            try {
+                $pageCount = $pdf->setSourceFile($sumber);
+            } catch (\Throwable $e) {
+                $terbuka = (new \App\Libraries\PdfLampiran())->bukaEnkripsiPemilik($path);
+                $sementara = tempnam(sys_get_temp_dir(), 'lampiran');
+                file_put_contents($sementara, $terbuka);
+                unset($terbuka);
+                $sumber = $sementara;
+                $pdf = $siapkanPdf();
+                $pageCount = $pdf->setSourceFile($sumber);
+            }
+
+            for ($i = 1; $i <= $pageCount; $i++) {
+                $template = $pdf->importPage($i);
+                $size = $pdf->getTemplateSize($template);
+                $orientation = ($size['width'] > $size['height']) ? 'L' : 'P';
+                $pdf->AddPage($orientation, [$size['width'], $size['height']]);
+                $pdf->useTemplate($template, 0, 0, $size['width'], $size['height']);
+                $this->tulisWatermarkPdf($pdf, $nama, (float) $size['width'], (float) $size['height']);
+            }
+
+            $binary = $pdf->Output('lampiran-ujian.pdf', 'S');
+        } catch (\Throwable $e) {
+            log_message('error', '[Lampiran PDF] ' . $e->getMessage());
+            return redirect()->to('sw-siswa/ujian')->with('pesan', 'Lampiran PDF tidak dapat diberi watermark.');
+        } finally {
+            if (is_string($sementara) && is_file($sementara)) {
+                unlink($sementara);
+            }
+        }
+
+        return $this->response
+            ->setHeader('Content-Type', 'application/pdf')
+            ->setHeader('Content-Disposition', 'attachment; filename="lampiran-ujian.pdf"')
+            ->setHeader('Content-Length', (string) strlen($binary))
+            ->setBody($binary);
+    }
+
+    private function tulisWatermarkPdf($pdf, string $nama, float $lebar, float $tinggi): void
+    {
+        $ukuran = 12;
+        $pdf->SetFont('helvetica', '', $ukuran);
+        while ($pdf->GetStringWidth($nama) > $lebar * 0.42 && $ukuran > 8) {
+            $ukuran--;
+            $pdf->SetFont('helvetica', '', $ukuran);
+        }
+
+        $sudut = 30;
+        $rad = deg2rad($sudut);
+        $lebarTeks = $pdf->GetStringWidth($nama);
+        $tinggiHuruf = $ukuran * 0.36;
+        $maju = $lebarTeks * cos($rad);
+        $naik = $lebarTeks * sin($rad);
+        $jarakX = $maju + 16;
+        $jarakY = $naik + $tinggiHuruf + 14;
+        $margin = 10;
+
+        $pdf->SetTextColor(145, 145, 145);
+        $pdf->SetAlpha(0.22);
+
+        for ($y = $margin + $naik; $y <= $tinggi - $margin; $y += $jarakY) {
+            for ($x = $margin; $x + $maju <= $lebar - $margin; $x += $jarakX) {
+                $pdf->StartTransform();
+                $pdf->Rotate($sudut, $x, $y);
+                $pdf->Text($x, $y, $nama);
+                $pdf->StopTransform();
+            }
+        }
+
+        $pdf->SetAlpha(1);
+    }
+
+    private function unduhGambarWatermark(string $path, string $nama, string $ext)
+    {
+        if (!function_exists('imagecreatetruecolor')) {
+            return redirect()->to('sw-siswa/ujian')->with('pesan', 'Server belum mendukung watermark gambar.');
+        }
+
+        $sumber = $this->bukaGambarLampiran($path, $ext);
+        if ($sumber === null) {
+            return redirect()->to('sw-siswa/ujian')->with('pesan', 'Format lampiran tidak didukung.');
+        }
+
+        $lebar = imagesx($sumber);
+        $tinggi = imagesy($sumber);
+        $gambar = imagecreatetruecolor($lebar, $tinggi);
+        $putih = imagecolorallocate($gambar, 255, 255, 255);
+        imagefilledrectangle($gambar, 0, 0, $lebar, $tinggi, $putih);
+        imagecopy($gambar, $sumber, 0, 0, 0, 0, $lebar, $tinggi);
+        imagedestroy($sumber);
+
+        $font = FCPATH . 'fonts/bookosb.ttf';
+        if (is_file($font) && function_exists('imagettftext')) {
+            $this->tulisWatermarkGambar($gambar, $nama, $lebar, $tinggi, $font);
+        } else {
+            $warnaSolid = imagecolorallocate($gambar, 140, 140, 140);
+            $langkahX = max(160, strlen($nama) * 12);
+            for ($y = 28; $y < $tinggi - 10; $y += 52) {
+                for ($x = 16; $x + $langkahX <= $lebar; $x += $langkahX) {
+                    imagestring($gambar, 5, $x, $y, $nama, $warnaSolid);
+                }
+            }
+        }
+
+        ob_start();
+        $mime = 'image/jpeg';
+        $namaUnduh = 'lampiran-ujian.jpg';
+        if ($ext === 'png' && function_exists('imagepng')) {
+            imagepng($gambar);
+            $mime = 'image/png';
+            $namaUnduh = 'lampiran-ujian.png';
+        } elseif ($ext === 'webp' && function_exists('imagewebp')) {
+            imagewebp($gambar, null, 85);
+            $mime = 'image/webp';
+            $namaUnduh = 'lampiran-ujian.webp';
+        } else {
+            imagejpeg($gambar, null, 90);
+        }
+        $binary = ob_get_clean();
+        imagedestroy($gambar);
+
+        return $this->response
+            ->setHeader('Content-Type', $mime)
+            ->setHeader('Content-Disposition', 'attachment; filename="' . $namaUnduh . '"')
+            ->setHeader('Content-Length', (string) strlen($binary))
+            ->setBody($binary);
+    }
+
+    private function tulisWatermarkGambar($gambar, string $nama, int $lebar, int $tinggi, string $font): void
+    {
+        $ukuran = max(18, (int) round(min($lebar, $tinggi) / 34));
+        $sudut = 30;
+
+        $ukur = function (int $ukuranFont) use ($font, $nama, $sudut): array {
+            $kotak = imagettfbbox($ukuranFont, $sudut, $font, $nama);
+            $xs = [$kotak[0], $kotak[2], $kotak[4], $kotak[6]];
+            $ys = [$kotak[1], $kotak[3], $kotak[5], $kotak[7]];
+            return [min($xs), min($ys), max($xs) - min($xs), max($ys) - min($ys)];
+        };
+
+        [$minX, $minY, $teksW, $teksH] = $ukur($ukuran);
+        while ($teksW > $lebar * 0.42 && $ukuran > 14) {
+            $ukuran -= 2;
+            [$minX, $minY, $teksW, $teksH] = $ukur($ukuran);
+        }
+
+        $maju = $teksW;
+        $naik = $teksH;
+        $jarakX = (int) ($maju + max(28, $ukuran * 1.4));
+        $jarakY = (int) ($naik + max(24, $ukuran * 1.5));
+        $margin = (int) max(12, $ukuran);
+        $warna = imagecolorallocatealpha($gambar, 145, 145, 145, 72);
+
+        for ($y = $margin; $y + $naik <= $tinggi - $margin; $y += $jarakY) {
+            for ($x = $margin; $x + $maju <= $lebar - $margin; $x += $jarakX) {
+                imagettftext($gambar, $ukuran, $sudut, $x - (int) $minX, $y - (int) $minY, $warna, $font, $nama);
+            }
+        }
+    }
+
+    private function bukaGambarLampiran(string $path, string $ext)
+    {
+        switch ($ext) {
+            case 'jpg':
+            case 'jpeg':
+                return function_exists('imagecreatefromjpeg') ? @imagecreatefromjpeg($path) : null;
+            case 'png':
+                return function_exists('imagecreatefrompng') ? @imagecreatefrompng($path) : null;
+            case 'gif':
+                return function_exists('imagecreatefromgif') ? @imagecreatefromgif($path) : null;
+            case 'webp':
+                return function_exists('imagecreatefromwebp') ? @imagecreatefromwebp($path) : null;
+            default:
+                return null;
         }
     }
 }

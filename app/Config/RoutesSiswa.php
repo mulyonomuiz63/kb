@@ -78,6 +78,7 @@ $routes->group('sw-siswa', ['filter' => 'roleCheck:2'], function ($routes) {
 
         //untuk review soal yang sudah dikerjakan
         $routes->get('review-ujian/(:segment)', 'Siswa\UjianController::reviewUjian/$1');
+        $routes->get('lampiran/(:segment)', 'Siswa\UjianController::unduhLampiran/$1');
 
         //upgrade ujian supaya kunci jawaban dan pembahasan bisa di akses
         $routes->post('upgrade-ujian', 'Siswa\UjianController::upgradeUjian');
@@ -112,4 +113,6 @@ $routes->group('sw-siswa', ['filter' => 'roleCheck:2'], function ($routes) {
         $routes->get('lihat-materi', 'Siswa\WebinarController::lihatMateri');
         $routes->get('sertifikat/(:segment)', 'Siswa\WebinarController::sertifikat/$1');
     });
+
+    $routes->post('asisten/chat', 'Siswa\AsistenController::chat');
 });
