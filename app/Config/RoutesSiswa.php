@@ -14,6 +14,7 @@ $routes->group('sw-siswa', ['filter' => 'roleCheck:2'], function ($routes) {
         $routes->post('delete', 'Siswa\AffiliateController::delete');
         $routes->post('copy', 'Siswa\AffiliateController::copy');
         $routes->get('getDetailPencairan/(:segment)', 'Siswa\AffiliateController::getDetailPencairan/$1');
+        $routes->get('kartu', 'Siswa\AffiliateController::kartu');
     });
 
     // transaksi
