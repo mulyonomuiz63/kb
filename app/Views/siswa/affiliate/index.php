@@ -701,9 +701,6 @@
                                                     <td>
                                                         <?php if ($linkUrl): ?>
                                                             <div class="d-flex align-items-center gap-2">
-                                                                <code class="text-primary bg-light-primary px-2 py-1 rounded fs-8 text-truncate" style="max-width: 160px;" title="<?= $linkUrl ?>">
-                                                                    ref/<?= $lData['short_code'] ?>
-                                                                </code>
                                                                 <button type="button" class="btn btn-icon btn-sm btn-light-primary btn-copy-link" data-paket_id="<?= $p->idpaket ?>" title="Salin Link">
                                                                     <i class="ki-outline ki-copy fs-5"></i>
                                                                 </button>
