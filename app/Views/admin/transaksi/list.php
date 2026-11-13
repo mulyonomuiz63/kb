@@ -35,14 +35,18 @@
 
         <div id="kt_app_content_container" class="app-container container-xxl">
 
-            <div class="row g-5 g-xl-8 mb-8">
+            <!-- KARTU ANALITIK UTAMA TRANSAKSI -->
+            <div class="row g-5 g-xl-8 mb-6">
 
                 <div class="col-xl-4">
                     <div class="card card-flush shadow-sm border-0 h-100">
                         <div class="card-header pt-5 border-0">
                             <h3 class="card-title align-items-start flex-column">
-                                <span class="card-label fw-bold text-gray-800 fs-4">Paket Terlaris</span>
-                                <span class="text-gray-500 mt-1 fw-semibold fs-7">Top 5 Paket Terpopuler</span>
+                                <span class="card-label fw-bolder text-gray-900 fs-5 d-flex align-items-center gap-2">
+                                    <i class="ki-duotone ki-crown fs-2 text-warning"><span class="path1"></span><span class="path2"></span></i>
+                                    Top 5 Paket Terlaris
+                                </span>
+                                <span class="text-gray-500 mt-1 fw-semibold fs-8">Volume pendaftaran paket brevet & ujian</span>
                             </h3>
                         </div>
                         <div class="card-body d-flex align-items-end pt-0">
@@ -55,8 +59,11 @@
                     <div class="card card-flush shadow-sm border-0 h-100">
                         <div class="card-header pt-5 border-0">
                             <h3 class="card-title align-items-start flex-column">
-                                <span class="card-label fw-bold text-gray-800 fs-4">Metode Bayar</span>
-                                <span class="text-gray-500 mt-1 fw-semibold fs-7">Rasio Online vs Manual</span>
+                                <span class="card-label fw-bolder text-gray-900 fs-5 d-flex align-items-center gap-2">
+                                    <i class="ki-duotone ki-credit-cart fs-2 text-primary"><span class="path1"></span><span class="path2"></span></i>
+                                    Kanal Pembayaran
+                                </span>
+                                <span class="text-gray-500 mt-1 fw-semibold fs-8">Rasio transaksi Online (Midtrans) vs Manual</span>
                             </h3>
                         </div>
                         <div class="card-body d-flex flex-center pt-0">
@@ -69,8 +76,11 @@
                     <div class="card card-flush shadow-sm border-0 h-100">
                         <div class="card-header pt-5 border-0">
                             <h3 class="card-title align-items-start flex-column">
-                                <span class="card-label fw-bold text-gray-800 fs-4">Performa Voucher</span>
-                                <span class="text-gray-500 mt-1 fw-semibold fs-7">Mitra vs Voucher Affiliate</span>
+                                <span class="card-label fw-bolder text-gray-900 fs-5 d-flex align-items-center gap-2">
+                                    <i class="ki-duotone ki-discount fs-2 text-danger"><span class="path1"></span><span class="path2"></span></i>
+                                    Performa Referral & Voucher
+                                </span>
+                                <span class="text-gray-500 mt-1 fw-semibold fs-8">Mitra vs Affiliate vs Organik (Tanpa Voucher)</span>
                             </h3>
                         </div>
                         <div class="card-body d-flex flex-center pt-0">
@@ -80,28 +90,31 @@
                 </div>
 
             </div>
+
+            <!-- TABEL PEMBAYARAN & FILTER BARU YANG LEBIH RAPI -->
             <div class="card card-flush shadow-sm border-0">
 
-                <div class="card-header align-items-center py-4 gap-2">
-                    <!-- Judul & Total Lunas -->
+                <div class="card-header align-items-center py-5 gap-3 gap-md-5">
+                    <!-- Judul & Quick Total Pill Stats -->
                     <div class="card-title flex-column align-items-start m-0">
-                        <span class="card-label fw-bold text-gray-800 fs-4">Daftar Pembayaran</span>
+                        <span class="card-label fw-bolder text-gray-900 fs-4">Daftar & Rekap Pembayaran</span>
                         <div class="d-flex align-items-center gap-2 mt-2 flex-wrap">
-                            <span class="text-gray-500 fs-7">Kelola dan validasi pembayaran:</span>
-
                             <!-- Badge 1: Total Keseluruhan -->
-                            <span class="badge badge-light-success fw-bold fs-7 px-3 py-1.5" title="Total Keseluruhan">
-                                Total: Rp <span id="ui_total_pendapatan">0</span>
+                            <span class="badge badge-light-success fw-bold fs-8 px-3 py-2 border border-success border-opacity-20" title="Total Seluruh Pembayaran Lunas">
+                                <i class="ki-duotone ki-wallet fs-5 text-success me-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i>
+                                Total: Rp <strong id="ui_total_pendapatan" class="ms-1">0</strong>
                             </span>
 
                             <!-- Badge 2: Total Manual -->
-                            <span class="badge badge-light-primary fw-bold fs-7 px-3 py-1.5" title="Total Pembayaran Manual">
-                                Manual: Rp <span id="ui_total_manual">0</span>
+                            <span class="badge badge-light-primary fw-bold fs-8 px-3 py-2 border border-primary border-opacity-20" title="Total Pembayaran Transfer Manual">
+                                <i class="ki-duotone ki-bank fs-5 text-primary me-1"><span class="path1"></span><span class="path2"></span></i>
+                                Manual: Rp <strong id="ui_total_manual" class="ms-1">0</strong>
                             </span>
 
                             <!-- Badge 3: Total Midtrans -->
-                            <span class="badge badge-light-info fw-bold fs-7 px-3 py-1.5" title="Total Pembayaran Midtrans">
-                                Midtrans: Rp <span id="ui_total_midtrans">0</span>
+                            <span class="badge badge-light-info fw-bold fs-8 px-3 py-2 border border-info border-opacity-20" title="Total Pembayaran Midtrans Otomatis">
+                                <i class="ki-duotone ki-credit-cart fs-5 text-info me-1"><span class="path1"></span><span class="path2"></span></i>
+                                Midtrans: Rp <strong id="ui_total_midtrans" class="ms-1">0</strong>
                             </span>
                         </div>
                     </div>
@@ -228,19 +241,19 @@
 
                 <div class="card-body pt-0">
                     <div class="table-responsive">
-                        <table id="datatables-list" class="table align-middle table-row-dashed fs-6 gy-5 text-nowrap w-100">
+                        <table id="datatables-list" class="table align-middle table-row-dashed table-hover fs-6 gy-4 text-nowrap w-100">
                             <thead>
-                                <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
-                                    <th class="min-w-150px">Peserta</th>
-                                    <th class="min-w-200px">Paket & Lembaga</th>
-                                    <th class="min-w-100px">Voucher</th>
-                                    <th class="min-w-125px">Pembayaran</th>
-                                    <th class="text-end min-w-100px">Nominal</th>
-                                    <th class="text-center min-w-100px">Status</th>
-                                    <th class="text-center min-w-100px">Aksi</th>
+                                <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0 bg-light">
+                                    <th class="ps-4 rounded-start min-w-160px">Peserta</th>
+                                    <th class="min-w-200px">Paket & Afiliasi</th>
+                                    <th class="min-w-110px">Kode Voucher</th>
+                                    <th class="min-w-130px">Kanal Bayar</th>
+                                    <th class="text-end min-w-110px">Nominal Bersih</th>
+                                    <th class="text-center min-w-100px">Status Tagihan</th>
+                                    <th class="text-center pe-4 rounded-end min-w-100px">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody class="fw-semibold text-gray-600">
+                            <tbody class="fw-semibold text-gray-700">
                             </tbody>
                         </table>
                     </div>

@@ -4,100 +4,129 @@
     <div id="kt_app_content" class="app-content flex-column-fluid">
         <div id="kt_app_content_container" class="app-container container-xxl">
 
-            <div class="row g-5 g-xl-10 mb-5 mb-xl-10">
+            <div class="row g-5 g-xl-8 mb-6">
 
-                <!-- Statistik + Chart -->
+                <!-- Statistik + Chart Distribusi Nilai -->
                 <div class="col-xl-8">
-                    <div class="card card-flush h-xl-100 shadow-sm">
+                    <div class="card card-flush h-xl-100 shadow-sm border-0">
 
                         <!-- Header -->
                         <div class="card-header align-items-center border-0 pt-6">
                             <div class="card-title flex-column align-items-start">
-                                <h3 class="fw-bold text-gray-800 mb-1">
-                                    Statistik Ujian Peserta
+                                <h3 class="fw-bolder text-gray-900 mb-1 d-flex align-items-center gap-2">
+                                    <i class="ki-duotone ki-chart-simple-2 fs-1 text-primary">
+                                        <span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span>
+                                    </i>
+                                    Statistik & Distribusi Ujian Peserta
                                 </h3>
                                 <span class="text-muted fw-semibold fs-7">
-                                    Visualisasi distribusi nilai peserta
+                                    Visualisasi pencapaian dan sebaran nilai peserta Brevet Pajak
                                 </span>
                             </div>
                         </div>
 
-                        <!-- Statistik -->
+                        <!-- 3 Kartu Mini KPI yang Rapi + Mini Live Bar Status -->
                         <div class="card-body pt-3">
-                            <div class="row g-5 mb-8">
+                            <div class="row g-4 mb-4">
                                 <div class="col-md-4">
-                                    <div class="bg-primary rounded-3 p-6 h-100">
-                                        <div class="fs-2hx fw-bold text-white" id="stat_total_mengerjakan">0</div>
-                                        <div class="text-white opacity-75 fw-semibold">
-                                            Peserta Selesai
+                                    <div class="p-5 rounded-3 bg-light-primary border border-primary border-opacity-10 h-100 d-flex flex-column justify-content-between">
+                                        <div class="d-flex align-items-center justify-content-between mb-3">
+                                            <span class="text-primary fw-bold fs-8 text-uppercase ls-1">Peserta Selesai</span>
+                                            <div class="symbol symbol-35px bg-primary bg-opacity-20 d-flex align-items-center justify-content-center rounded">
+                                                <i class="ki-duotone ki-check-circle fs-3 text-primary"><span class="path1"></span><span class="path2"></span></i>
+                                            </div>
                                         </div>
+                                        <div class="fs-2hx fw-bolder text-gray-900" id="stat_total_mengerjakan">0</div>
+                                        <span class="text-muted fs-8 mt-1">Lulus seluruh modul brevet</span>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
-                                    <div class="bg-success rounded-3 p-6 h-100">
-                                        <div class="fs-2hx fw-bold text-white" id="stat_nilai_tertinggi">0</div>
-                                        <div class="text-white opacity-75 fw-semibold">
-                                            Nilai Tertinggi
+                                    <div class="p-5 rounded-3 bg-light-success border border-success border-opacity-10 h-100 d-flex flex-column justify-content-between">
+                                        <div class="d-flex align-items-center justify-content-between mb-3">
+                                            <span class="text-success fw-bold fs-8 text-uppercase ls-1">Nilai Tertinggi</span>
+                                            <div class="symbol symbol-35px bg-success bg-opacity-20 d-flex align-items-center justify-content-center rounded">
+                                                <i class="ki-duotone ki-medal-star fs-3 text-success"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i>
+                                            </div>
                                         </div>
-
-                                        <div class="text-white fw-bold fs-7 mt-2" id="stat_nama_tertinggi">
-                                            -
-                                        </div>
+                                        <div class="fs-2hx fw-bolder text-success" id="stat_nilai_tertinggi">0</div>
+                                        <div class="text-gray-700 fw-bold fs-8 mt-1 text-truncate" id="stat_nama_tertinggi" title="Peserta Terbaik">-</div>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
-                                    <div class="bg-info rounded-3 p-6 h-100">
-                                        <div class="fs-2hx fw-bold text-white" id="stat_rata_rata">0</div>
-                                        <div class="text-white opacity-75 fw-semibold">
-                                            Rata-rata Nilai
+                                    <div class="p-5 rounded-3 bg-light-info border border-info border-opacity-10 h-100 d-flex flex-column justify-content-between">
+                                        <div class="d-flex align-items-center justify-content-between mb-3">
+                                            <span class="text-info fw-bold fs-8 text-uppercase ls-1">Rata-Rata Nilai</span>
+                                            <div class="symbol symbol-35px bg-info bg-opacity-20 d-flex align-items-center justify-content-center rounded">
+                                                <i class="ki-duotone ki-calculator fs-3 text-info"><span class="path1"></span><span class="path2"></span></i>
+                                            </div>
                                         </div>
+                                        <div class="fs-2hx fw-bolder text-info" id="stat_rata_rata">0</div>
+                                        <span class="text-muted fs-8 mt-1">Skor rata-rata kompetensi</span>
                                     </div>
                                 </div>
                             </div>
-                            <!-- Chart -->
-                            <div id="kt_charts_ujian" style="height:350px;"></div>
+
+                            <!-- Live Quick Bar Status -->
+                            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 p-3 bg-light rounded-3 mb-4 border border-gray-200">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge badge-primary fw-bolder fs-8">Aktif</span>
+                                    <span class="text-gray-700 fs-8 fw-semibold">Siswa Aktif: <strong><?= $total_siswa_aktif ?? 0 ?></strong></span>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge badge-success fw-bolder fs-8"><i class="fab fa-whatsapp me-1"></i>Verif</span>
+                                    <span class="text-gray-700 fs-8 fw-semibold">WA Terverifikasi: <strong><?= $total_siswa_wa_verif ?? 0 ?></strong></span>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge badge-warning fw-bolder fs-8">Live</span>
+                                    <span class="text-gray-700 fs-8 fw-semibold">Sedang Mengerjakan: <strong><?= $total_sedang_ujian ?? 0 ?></strong></span>
+                                </div>
+                            </div>
+
+                            <!-- Chart Distribusi -->
+                            <div id="kt_charts_ujian" style="height:300px;"></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Top 5 -->
+                <!-- Top 7 Peserta Terbaik -->
                 <div class="col-xl-4">
-                    <div class="card card-flush h-xl-100 shadow-sm">
-                        <div class="card-header">
+                    <div class="card card-flush h-xl-100 shadow-sm border-0">
+                        <div class="card-header pt-6 border-0">
                             <div class="card-title flex-column align-items-start">
-                                <h3 class="fw-bold text-gray-800 mb-1">
-                                    Top 7 Peserta
+                                <h3 class="fw-bolder text-gray-900 mb-1 d-flex align-items-center gap-2">
+                                    <i class="ki-duotone ki-award fs-2 text-warning"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
+                                    Top 7 Peserta Terbaik
                                 </h3>
                                 <span class="text-muted fs-7">
-                                    Berdasarkan nilai tertinggi
+                                    Peringkat nilai akhir ujian Brevet AB
                                 </span>
                             </div>
                         </div>
-                        <div class="card-body">
+                        <div class="card-body pt-2">
                             <?php if (!empty($top_siswa)): ?>
                                 <?php foreach ($top_siswa as $index => $siswa): ?>
-                                    <div class="d-flex align-items-center <?= $index != count($top_siswa) - 1 ? 'mb-6' : '' ?>">
-                                        <div class="symbol symbol-50px me-4">
+                                    <div class="d-flex align-items-center p-3 rounded-3 <?= $index < 3 ? 'bg-light-' . ($index == 0 ? 'warning' : ($index == 1 ? 'primary' : 'success')) . ' bg-opacity-50' : 'bg-hover-light' ?> <?= $index != count($top_siswa) - 1 ? 'mb-3' : '' ?>">
+                                        <div class="symbol symbol-40px me-3">
                                             <?php
-                                            $bg = 'bg-light-secondary';
-                                            if ($index == 0) $bg = 'bg-warning';
-                                            if ($index == 1) $bg = 'bg-light-primary';
-                                            if ($index == 2) $bg = 'bg-light-danger';
+                                            $bg = 'bg-light-secondary text-gray-700';
+                                            if ($index == 0) $bg = 'bg-warning text-white';
+                                            if ($index == 1) $bg = 'bg-primary text-white';
+                                            if ($index == 2) $bg = 'bg-success text-white';
                                             ?>
-                                            <span class="symbol-label <?= $bg ?> fw-bold fs-5">
-                                                <?= $index + 1 ?>
+                                            <span class="symbol-label <?= $bg ?> fw-bolder fs-6">
+                                                #<?= $index + 1 ?>
                                             </span>
                                         </div>
-                                        <div class="flex-grow-1">
-                                            <div class="fw-bold text-gray-800 fs-6">
-                                                <a href="javascript:void(0);" class="detail-siswa" data-siswa="<?= esc(encrypt_url($siswa['id_siswa'])) ?>" data-bs-toggle="modal" data-bs-target="#detail_siswa"><?= esc($siswa['nama']) ?></a>
+                                        <div class="flex-grow-1 overflow-hidden me-2">
+                                            <div class="fw-bold text-gray-900 fs-7 text-truncate">
+                                                <a href="javascript:void(0);" class="detail-siswa text-gray-900 text-hover-primary" data-siswa="<?= esc(encrypt_url($siswa['id_siswa'])) ?>" data-bs-toggle="modal" data-bs-target="#detail_siswa"><?= esc($siswa['nama']) ?></a>
                                             </div>
-                                            <div class="text-muted fs-7">
-                                                Nilai Akhir
+                                            <div class="text-muted fs-8">
+                                                Skor Akhir
                                             </div>
                                         </div>
-                                        <span class="badge badge-light-success fs-6 fw-bold">
-                                            <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#sertifikat_all_cetak_modal" data-sertifikat_all="<?= base_url("sw-admin/siswa/lihatSertifikatBrevet/" . encrypt_url($siswa['id_siswa'])) ?>" class="btn btn-sm btn-light-success sertifikat_all_cetak" title="Unduh Sertifikat Brevet AB">
+                                        <span class="badge badge-light-success fs-7 fw-bolder px-3 py-1">
+                                            <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#sertifikat_all_cetak_modal" data-sertifikat_all="<?= base_url("sw-admin/siswa/lihatSertifikatBrevet/" . encrypt_url($siswa['id_siswa'])) ?>" class="sertifikat_all_cetak text-success text-decoration-none" title="Unduh Sertifikat Brevet AB">
                                                 <?= number_format($siswa['nilai']) ?>
                                             </a>
                                         </span>
@@ -109,7 +138,7 @@
                                         <span class="path1"></span>
                                         <span class="path2"></span>
                                     </i>
-                                    <span class="text-muted">
+                                    <span class="text-muted fs-7">
                                         Belum ada data peserta
                                     </span>
                                 </div>
@@ -118,65 +147,65 @@
                     </div>
                 </div>
             </div>
-            <div class="card card-flush">
-                <div class="card-header align-items-center py-5 gap-2 gap-md-5">
+            <div class="card card-flush shadow-sm border-0">
+                <div class="card-header align-items-center py-5 gap-3 gap-md-5">
                     <div class="card-title">
                         <div class="d-flex align-items-center position-relative my-1">
-                            <i class="ki-duotone ki-magnifier fs-3 position-absolute ms-4">
+                            <i class="ki-duotone ki-magnifier fs-3 position-absolute ms-4 text-gray-500">
                                 <span class="path1"></span><span class="path2"></span>
                             </i>
-                            <input type="text" data-kt-siswa-table-filter="search" class="form-control form-control-solid w-250px ps-12" placeholder="Cari peserta..." />
+                            <input type="text" data-kt-siswa-table-filter="search" class="form-control form-control-solid w-250px ps-12" placeholder="Cari peserta, email, nip..." />
                         </div>
                     </div>
 
-                    <div class="card-toolbar flex-row-fluid justify-content-end gap-5">
+                    <div class="card-toolbar flex-row-fluid justify-content-end gap-3 flex-wrap">
                         <div class="w-100 mw-150px">
-                            <select id="filter-status" class="form-select form-select-solid" data-control="select2" data-hide-search="true" data-placeholder="Status">
+                            <select id="filter-status" class="form-select form-select-solid" data-control="select2" data-hide-search="true" data-placeholder="Status Akun">
                                 <option value="">Semua Status</option>
                                 <option value="1">Aktif</option>
                                 <option value="0">Tidak Aktif</option>
-                                <option value="2">Data Tidak Lengkap</option>
+                                <option value="2">Data Belum Lengkap</option>
                             </select>
                         </div>
                         <div class="w-100 mw-150px">
-                            <select id="filter-status-afiliasi" class="form-select form-select-solid" data-control="select2" data-hide-search="true" data-placeholder="Status">
-                                <option value="0">Tidak Afiliasi</option>
+                            <select id="filter-status-afiliasi" class="form-select form-select-solid" data-control="select2" data-hide-search="true" data-placeholder="Afiliasi">
+                                <option value="0">Bukan Afiliasi</option>
                                 <option value="1">Afiliasi</option>
-                                <option value="2">Semua Data</option>
+                                <option value="2">Semua Peserta</option>
                             </select>
                         </div>
 
-                        <a href="javascript:void(0)" class="btn btn-light-success" data-bs-toggle="modal" data-bs-target="#modal_import_siswa" data-bs-placement="top" title="Import data siswa">
-                            <i class="ki-duotone ki-badge fs-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i>
-                            Import Data Siswa
+                        <a href="javascript:void(0)" class="btn btn-sm btn-light-success fw-bold d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#modal_import_siswa" title="Import data siswa batch">
+                            <i class="ki-duotone ki-file-up fs-3"><span class="path1"></span><span class="path2"></span></i>
+                            Import
                         </a>
-                        <a href="<?= base_url('sw-admin/siswa/sertifikat-ab') ?>" class="btn btn-light-success" data-bs-toggle="tooltip" data-bs-placement="top" title="List sertifikat AB seluruh siswa">
-                            <i class="ki-duotone ki-badge fs-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i>
+                        <a href="<?= base_url('sw-admin/siswa/sertifikat-ab') ?>" class="btn btn-sm btn-light-info fw-bold d-flex align-items-center gap-1" title="Lihat Rekap Sertifikat AB">
+                            <i class="ki-duotone ki-award fs-3"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
                             Sertifikat AB
                         </a>
 
-                        <a href="<?= base_url('sw-admin/siswa/create') ?>" class="btn btn-primary">
-                            <i class="ki-duotone ki-plus fs-2"></i> Tambah Peserta
+                        <a href="<?= base_url('sw-admin/siswa/create') ?>" class="btn btn-sm btn-primary fw-bold d-flex align-items-center gap-1">
+                            <i class="ki-duotone ki-plus fs-3"></i> Tambah Siswa
                         </a>
                     </div>
                 </div>
 
                 <div class="card-body pt-0">
                     <div class="table-responsive">
-                        <table id="datatable-list" class="table align-middle table-row-dashed fs-6 gy-5 text-wrap">
+                        <table id="datatable-list" class="table align-middle table-row-dashed table-hover fs-6 gy-4">
                             <thead>
-                                <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
-                                    <th class="min-w-100px">NIP</th>
-                                    <th class="min-w-150px">Nama</th>
-                                    <th class="min-w-150px">Email</th>
-                                    <th class="min-w-125px">Handphone</th>
+                                <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0 bg-light">
+                                    <th class="ps-4 rounded-start min-w-100px">NIP</th>
+                                    <th class="min-w-160px">Nama Siswa</th>
+                                    <th class="min-w-180px">Email & Verifikasi</th>
+                                    <th class="min-w-140px">WhatsApp</th>
                                     <th class="text-center min-w-100px">Registrasi</th>
-                                    <th class="text-center min-w-100px">Status</th>
-                                    <th class="text-center min-w-100px">Ujian</th>
-                                    <th class="text-end min-w-100px">Opsi</th>
+                                    <th class="text-center min-w-100px">Status Akun</th>
+                                    <th class="text-center min-w-100px">Progres Ujian</th>
+                                    <th class="text-end pe-4 rounded-end min-w-100px">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody class="fw-semibold text-gray-600">
+                            <tbody class="fw-semibold text-gray-700">
                             </tbody>
                         </table>
                     </div>

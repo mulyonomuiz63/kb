@@ -156,6 +156,11 @@ class SiswaController extends BaseController
             'chart_data'        => array_values($distribusi)
         ]);
 
+        // Ringkasan KPI Siswa Tambahan
+        $data['total_siswa_aktif'] = $this->siswaModel->where('is_active', 1)->countAllResults();
+        $data['total_siswa_wa_verif'] = $this->siswaModel->where('is_wa_verified', 1)->countAllResults();
+        $data['total_sedang_ujian'] = $db->table('ujian')->where('status', 'U')->countAllResults();
+
         // 6. Data kelas
         $data['kelas'] = $this->kelasModel->asObject()->findAll();
         $data['paket'] = $this->paketModel->asObject()->findAll();

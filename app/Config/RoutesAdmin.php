@@ -2,6 +2,7 @@
 
 $routes->group('sw-admin', ['filter' => 'roleCheck:1'], function ($routes) {
     $routes->get('/', 'Admin\HomeController::index');
+    $routes->get('dashboard-filter', 'Admin\HomeController::getDashboardData');
 
     $routes->group('siswa', function ($routes) {
         $routes->get('', 'Admin\SiswaController::index');
