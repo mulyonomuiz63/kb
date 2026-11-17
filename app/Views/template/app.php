@@ -74,6 +74,7 @@
 	<?= $this->include('template/partials/footer_js') ?>
 	<?= $this->renderSection('scripts') ?>
 	<?= $this->include('template/partials/notification') ?>
+	<?= $this->include('template/partials/_chat_floating') ?>
 	<script>
 		// Tambahkan class loading ke body saat mulai
 		document.body.classList.add('page-loading');

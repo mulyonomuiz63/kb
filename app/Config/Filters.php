@@ -109,6 +109,8 @@ class Filters extends BaseFilters
                     'sw-siswa/materi/get-file-materi',
                     'sw-siswa/diskusi/send',
                     'sw-siswa/ikh/upload-ajax',
+                    'chat/*',
+                    'chat',
                     'midtrans/notification', //midtrans handle
                 ]
             ],

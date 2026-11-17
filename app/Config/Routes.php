@@ -183,3 +183,21 @@ $routes->get('maintenance', 'Maintenance::index');
 
 // Sitemap
 $routes->get('sitemap', 'Sitemap::serve');
+
+// Fitur Chat Realtime (Admin & Peserta)
+$routes->group('chat', function ($routes) {
+    $routes->get('/', 'ChatController::index');
+    $routes->get('status', 'ChatController::getStatus');
+    $routes->post('toggle-status', 'ChatController::toggleStatus');
+    $routes->post('toggle-guru-status', 'ChatController::toggleGuruStatus');
+    $routes->get('rooms', 'ChatController::getRooms');
+    $routes->get('contacts', 'ChatController::searchContacts');
+    $routes->post('open-direct', 'ChatController::openDirectChat');
+    $routes->post('create-group', 'ChatController::createGroup');
+    $routes->get('messages/(:num)', 'ChatController::getMessages/$1');
+    $routes->post('send-message', 'ChatController::sendMessage');
+    $routes->post('edit-message', 'ChatController::editMessage');
+    $routes->post('delete-message', 'ChatController::deleteMessage');
+    $routes->get('room-details/(:num)', 'ChatController::getRoomDetails/$1');
+    $routes->post('add-member', 'ChatController::addGroupMember');
+});

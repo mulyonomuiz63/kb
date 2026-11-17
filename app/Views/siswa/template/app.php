@@ -159,7 +159,7 @@
 	<?= $this->include('siswa/template/partials/_script_notif') ?>
 	<?= $this->include('siswa/template/partials/_script_lazy') ?>
 	<?= $this->include('siswa/template/partials/_script_alert') ?>
-	<?= $this->include('siswa/template/partials/_asisten') ?>
+	<?= $this->include('template/partials/_chat_floating') ?>
 	<script>
 		// Tambahkan class loading ke body saat mulai
 		document.body.classList.add('page-loading');
