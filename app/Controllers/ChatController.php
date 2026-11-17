@@ -225,6 +225,9 @@ class ChatController extends BaseController
                 ->where('m.user_id', $user['id']);
         }
 
+        // Khusus direct chat awal yang belum ada pesan terkirim, jangan tampilkan di daftar percakapan
+        $query->where("(r.type = 'group' OR (r.last_message IS NOT NULL AND r.last_message != ''))");
+
         $query->orderBy('r.last_message_at', 'DESC');
         $rooms = $query->get()->getResultArray();
 
@@ -841,6 +844,7 @@ class ChatController extends BaseController
             'message'         => null,
             'file_attachment' => null,
             'link_preview'    => null,
+            'reactions'       => null,
             'updated_at'      => date('Y-m-d H:i:s'),
         ]);
 
@@ -855,6 +859,83 @@ class ChatController extends BaseController
         return $this->response->setJSON([
             'status'  => 'success',
             'message' => 'Pesan berhasil ditarik/dihapus.',
+        ]);
+    }
+
+    /**
+     * API: Berikan atau hapus reaksi emoji pada pesan (Toggle seperti WhatsApp)
+     */
+    public function reactMessage()
+    {
+        $user = $this->getAuthUser();
+        if (!$user) {
+            return $this->response->setStatusCode(401)->setJSON(['status' => 'error']);
+        }
+
+        $msgId = (int) $this->request->getPost('message_id');
+        $emoji = trim((string) $this->request->getPost('emoji'));
+
+        if ($msgId <= 0 || $emoji === '') {
+            return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => 'Data reaksi tidak valid.']);
+        }
+
+        $db = \Config\Database::connect();
+        if (!$db->fieldExists('reactions', 'chat_messages')) {
+            try {
+                $db->query("ALTER TABLE `chat_messages` ADD COLUMN `reactions` TEXT NULL AFTER `link_preview`");
+            } catch (\Throwable $e) {
+            }
+        }
+
+        $msg = $this->messageModel->find($msgId);
+        if (!$msg || $msg['is_deleted']) {
+            return $this->response->setStatusCode(404)->setJSON(['status' => 'error', 'message' => 'Pesan tidak ditemukan.']);
+        }
+
+        $reactions = [];
+        if (!empty($msg['reactions'])) {
+            $decoded = json_decode($msg['reactions'], true);
+            if (is_array($decoded)) {
+                $reactions = $decoded;
+            }
+        }
+
+        $foundIndex = -1;
+        $sameEmoji  = false;
+        foreach ($reactions as $idx => $r) {
+            if (($r['user_role'] ?? '') === $user['role'] && (int)($r['user_id'] ?? 0) === $user['id']) {
+                $foundIndex = $idx;
+                $sameEmoji  = (($r['emoji'] ?? '') === $emoji);
+                break;
+            }
+        }
+
+        if ($foundIndex !== -1) {
+            if ($sameEmoji) {
+                // Klik emoji yang sama -> hapus reaksi (toggle off)
+                array_splice($reactions, $foundIndex, 1);
+            } else {
+                // Klik emoji berbeda -> ganti reaksi
+                $reactions[$foundIndex]['emoji']     = $emoji;
+                $reactions[$foundIndex]['user_name'] = $user['name'];
+            }
+        } else {
+            // Tambah reaksi baru
+            $reactions[] = [
+                'emoji'     => $emoji,
+                'user_role' => $user['role'],
+                'user_id'   => $user['id'],
+                'user_name' => $user['name'],
+            ];
+        }
+
+        $this->messageModel->update($msgId, [
+            'reactions' => !empty($reactions) ? json_encode(array_values($reactions)) : null,
+        ]);
+
+        return $this->response->setJSON([
+            'status'    => 'success',
+            'reactions' => array_values($reactions),
         ]);
     }
 

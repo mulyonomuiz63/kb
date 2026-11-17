@@ -158,6 +158,10 @@ class CreateChatTables extends Migration
                 'type' => 'TEXT', // JSON {title, description, image, url}
                 'null' => true,
             ],
+            'reactions' => [
+                'type' => 'TEXT', // JSON array of {emoji, user_role, user_id, user_name}
+                'null' => true,
+            ],
             'is_edited' => [
                 'type'       => 'TINYINT',
                 'constraint' => 1,

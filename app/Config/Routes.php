@@ -198,6 +198,7 @@ $routes->group('chat', function ($routes) {
     $routes->post('send-message', 'ChatController::sendMessage');
     $routes->post('edit-message', 'ChatController::editMessage');
     $routes->post('delete-message', 'ChatController::deleteMessage');
+    $routes->post('react-message', 'ChatController::reactMessage');
     $routes->get('room-details/(:num)', 'ChatController::getRoomDetails/$1');
     $routes->post('add-member', 'ChatController::addGroupMember');
 });

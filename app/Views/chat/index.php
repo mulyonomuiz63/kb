@@ -58,11 +58,18 @@
         min-height: 0;
         overflow: hidden;
     }
+    @media (max-width: 991.98px) {
+        .kb-chat-app {
+            left: 10px;
+            right: 10px;
+            bottom: 73px;
+        }
+    }
     @media (max-width: 767.98px) {
         .kb-chat-app {
             left: 8px;
             right: 8px;
-            bottom: 8px;
+            bottom: 73px;
         }
         .kb-chat-sidebar {
             width: 100%;
@@ -214,6 +221,45 @@
     .kb-act-btn.kb-act-danger:hover {
         background: #fef2f2;
         color: #dc2626;
+    }
+    .kb-react-emoji-btn {
+        border: none;
+        background: transparent;
+        font-size: 1rem;
+        line-height: 1;
+        padding: 3px 5px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: transform 0.15s ease, background 0.15s ease;
+    }
+    .kb-react-emoji-btn:hover {
+        transform: scale(1.28);
+        background: #f1f5f9;
+    }
+    .kb-react-emoji-btn.active {
+        background: #e0e7ff;
+        box-shadow: 0 0 0 1px #6366f1;
+    }
+    .kb-reactions-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        background: #ffffff;
+        color: #1e293b;
+        border: 1px solid #e2e8f0;
+        border-radius: 50rem;
+        padding: 1px 7px;
+        font-size: 0.75rem;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+        margin-top: 4px;
+        cursor: pointer;
+        user-select: none;
+    }
+    .kb-reactions-pill .kb-react-count {
+        font-size: 0.68rem;
+        font-weight: 700;
+        color: #475569;
+        margin-left: 2px;
     }
     @media (max-width: 576px) {
         .kb-bubble {
@@ -671,7 +717,7 @@
     let lastLoadedMessageId = 0;
     let adminFilterMode = 'my'; // 'my' or 'all'
 
-    // Sesuaikan posisi & tinggi container chat secara presisi di bawah navbar atas hingga batas bawah layar
+    // Sesuaikan posisi & tinggi container chat secara presisi di bawah navbar atas hingga di atas bottom navbar (tablet/mobile)
     function adjustChatHeight() {
         const appEl = document.querySelector('.kb-chat-app');
         if (!appEl) return;
@@ -680,11 +726,22 @@
         if (headerEl) {
             const hRect = headerEl.getBoundingClientRect();
             if (hRect.height > 20) {
-                topPos = Math.max(64, Math.round(hRect.height + 10));
+                topPos = Math.max(60, Math.round(hRect.height + 10));
             }
         }
+
+        // Deteksi bottom navbar (.siswa-mobile-bottom-nav) yang tampil pada layar tablet & mobile (<= 991.98px)
+        let bottomPos = 12;
+        const bottomNav = document.querySelector('.siswa-mobile-bottom-nav');
+        if (bottomNav && window.getComputedStyle(bottomNav).display !== 'none') {
+            const bRect = bottomNav.getBoundingClientRect();
+            if (bRect.height > 0) {
+                bottomPos = Math.round(bRect.height + 8);
+            }
+        }
+
         appEl.style.top = topPos + 'px';
-        appEl.style.bottom = '12px';
+        appEl.style.bottom = bottomPos + 'px';
         appEl.style.height = 'auto';
     }
     window.addEventListener('resize', adjustChatHeight);
@@ -998,6 +1055,7 @@
 
         // Load Messages
         loadMessages(true);
+        setTimeout(() => document.getElementById('input_chat_message')?.focus(), 150);
 
         // Polling realtime (setiap 2 detik)
         if (pollingInterval) clearInterval(pollingInterval);
@@ -1017,6 +1075,15 @@
                 const box = document.getElementById('messages_container');
                 if (isInitial) box.innerHTML = '';
 
+                if (res.messages.length === 0) {
+                    if (!document.getElementById('empty_room_hint')) {
+                        box.innerHTML = '<div id="empty_room_hint" class="text-center py-8"><span class="bg-white text-muted fs-8 px-4 py-2 rounded-pill shadow-sm d-inline-block border">👋 Belum ada pesan. Kirim pesan pertama agar obrolan tampil di penerima.</span></div>';
+                    }
+                    return;
+                } else {
+                    document.getElementById('empty_room_hint')?.remove();
+                }
+
                 let hasNewMessage = false;
                 let hasIncomingFromOther = false;
                 res.messages.forEach(msg => {
@@ -1028,10 +1095,11 @@
                         lastLoadedMessageId = msg.id;
                         hasNewMessage = true;
                     }
-                    const sig = `${msg.message}|${msg.is_edited ? 1 : 0}|${msg.is_deleted ? 1 : 0}|${msg.can_modify ? 1 : 0}`;
+                    const reactSig = JSON.stringify(msg.reactions || []);
+                    const sig = `${msg.message}|${msg.is_edited ? 1 : 0}|${msg.is_deleted ? 1 : 0}|${msg.can_modify ? 1 : 0}|${reactSig}`;
                     const existing = document.getElementById('msg_row_' + msg.id);
                     if (existing) {
-                        // Hanya update DOM jika ada perubahan status (diedit / ditarik / waktu 5m habis)
+                        // Hanya update DOM jika ada perubahan status (diedit / ditarik / reaksi / waktu 5m habis)
                         if (existing.getAttribute('data-sig') !== sig) {
                             const wasSelected = existing.classList.contains('is-selected');
                             existing.outerHTML = renderMessageRow(msg, sig, wasSelected);
@@ -1108,18 +1176,51 @@
             `;
         }
 
+        // Reaksi Emoji pada pesan (ala WhatsApp)
+        const quickEmojis = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
+        const msgReactions = Array.isArray(msg.reactions) ? msg.reactions : [];
+        let myReactedEmoji = '';
+        msgReactions.forEach(r => {
+            if (r.user_role === CURRENT_USER.role && Number(r.user_id) === Number(CURRENT_USER.id)) {
+                myReactedEmoji = r.emoji;
+            }
+        });
+
+        let reactionsPillHtml = '';
+        if (!msg.is_deleted && msgReactions.length > 0) {
+            const uniqueEmojis = [...new Set(msgReactions.map(r => r.emoji))];
+            const tooltipNames = msgReactions.map(r => `${r.user_name}: ${r.emoji}`).join(', ');
+            reactionsPillHtml = `
+                <div class="d-flex ${isMe ? 'justify-content-end' : 'justify-content-start'}">
+                    <div class="kb-reactions-pill" title="${escapeHtml(tooltipNames)}" onclick="event.stopPropagation(); toggleReaction(${msg.id}, '${myReactedEmoji || uniqueEmojis[0]}')">
+                        <span>${uniqueEmojis.join(' ')}</span>
+                        ${msgReactions.length > 1 ? `<span class="kb-react-count">${msgReactions.length}</span>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
         // Action Bar ala WhatsApp (Tampil saat kursor diarahkan / hover ATAU saat pesan diklik)
-        // Menyesuaikan otomatis siapa pengirimnya & batas waktu 5 menit
+        // Menyesuaikan otomatis siapa pengirimnya & batas waktu 5 menit + Reaksi Cepat
         let actionsBar = '';
         let chevronIcon = '';
         if (!msg.is_deleted) {
-            chevronIcon = `<span class="kb-wa-chevron" title="Klik untuk opsi pesan"><i class="fas fa-chevron-down"></i></span>`;
+            chevronIcon = `<span class="kb-wa-chevron" title="Klik untuk opsi & reaksi pesan"><i class="fas fa-chevron-down"></i></span>`;
 
             const canEditOrPull = (isMe && msg.can_modify);
             const canAdminDelete = (!isMe && IS_ADMIN);
 
+            let reactButtonsHtml = '';
+            quickEmojis.forEach(emo => {
+                const isAct = (myReactedEmoji === emo) ? 'active' : '';
+                reactButtonsHtml += `<button type="button" class="kb-react-emoji-btn ${isAct}" onclick="toggleReaction(${msg.id}, '${emo}'); clearSelectedMessage();" title="Beri Reaksi ${emo}">${emo}</button>`;
+            });
+
             actionsBar = `
                 <div class="kb-msg-actions-bar ${isMe ? 'order-first me-2' : 'ms-2'}" onclick="event.stopPropagation()">
+                    <div class="d-flex align-items-center pe-1 border-end me-1">
+                        ${reactButtonsHtml}
+                    </div>
                     <button type="button" class="kb-act-btn" onclick="startReply(${msg.id}, '${escapeJs(msg.sender_name)}', '${escapeJs(msg.message)}'); clearSelectedMessage();" title="Balas Pesan Ini">
                         <i class="fas fa-reply text-primary"></i> <span>Balas</span>
                     </button>
@@ -1152,20 +1253,37 @@
         return `
             <div class="kb-msg-row d-flex align-items-center ${isMe ? 'justify-content-end' : 'justify-content-start'} ${selectedClass}" id="msg_row_${msg.id}" data-sig="${escapeHtml(sig)}">
                 ${isMe ? actionsBar : ''}
-                <div class="kb-bubble ${bubbleClass}" onclick="toggleSelectMessage(${msg.id}, event)">
-                    ${chevronIcon}
-                    ${senderLabel}
-                    ${replyHtml}
-                    ${fileHtml}
-                    <div class="kb-msg-text pe-3">${msg.is_deleted ? '<i class="fas fa-ban me-1"></i> Pesan ini telah ditarik' : linkify(escapeHtml(msg.message || ''))}</div>
-                    ${linkHtml}
-                    <div class="kb-bubble-time">
-                        ${msg.time_formatted} ${editedTag} ${checkIcon}
+                <div class="d-flex flex-column ${isMe ? 'align-items-end' : 'align-items-start'}" style="max-width: 68%;">
+                    <div class="kb-bubble ${bubbleClass}" style="max-width: 100%;" onclick="toggleSelectMessage(${msg.id}, event)">
+                        ${chevronIcon}
+                        ${senderLabel}
+                        ${replyHtml}
+                        ${fileHtml}
+                        <div class="kb-msg-text pe-3">${msg.is_deleted ? '<i class="fas fa-ban me-1"></i> Pesan ini telah ditarik' : linkify(escapeHtml(msg.message || ''))}</div>
+                        ${linkHtml}
+                        <div class="kb-bubble-time">
+                            ${msg.time_formatted} ${editedTag} ${checkIcon}
+                        </div>
                     </div>
+                    ${reactionsPillHtml}
                 </div>
                 ${!isMe ? actionsBar : ''}
             </div>
         `;
+    }
+
+    // Toggle Reaksi Emoji pada Pesan
+    function toggleReaction(msgId, emoji) {
+        if (!msgId || !emoji) return;
+        $.post("<?= base_url('chat/react-message') ?>", {
+            message_id: msgId,
+            emoji: emoji,
+            '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
+        }, function(res) {
+            if (res.status === 'success') {
+                loadMessages(false);
+            }
+        }, 'json');
     }
 
     // Linkify helper

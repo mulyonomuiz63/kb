@@ -62,12 +62,12 @@ $canShowChatWidget = $isChatAdmin || $isChatEnabled;
         50% { transform: scale(1.15); }
         100% { transform: scale(1); }
     }
-    @media (max-width: 576px) {
+    @media (max-width: 991.98px) {
         .kb-chat-floating-btn {
-            right: 14px;
-            bottom: 14px;
-            width: 50px;
-            height: 50px;
+            right: 16px;
+            bottom: 78px;
+            width: 52px;
+            height: 52px;
         }
     }
 </style>

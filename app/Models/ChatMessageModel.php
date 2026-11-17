@@ -19,6 +19,7 @@ class ChatMessageModel extends Model
         'file_name',
         'file_type',
         'link_preview',
+        'reactions',
         'is_edited',
         'is_deleted',
         'created_at',
@@ -34,6 +35,14 @@ class ChatMessageModel extends Model
      */
     public function getMessagesForRoom(int $roomId, int $lastId = 0): array
     {
+        $db = \Config\Database::connect();
+        if (!$db->fieldExists('reactions', 'chat_messages')) {
+            try {
+                $db->query("ALTER TABLE `chat_messages` ADD COLUMN `reactions` TEXT NULL AFTER `link_preview`");
+            } catch (\Throwable $e) {
+            }
+        }
+
         $builder = $this->where('room_id', $roomId);
         if ($lastId > 0) {
             $builder->where('id >', $lastId);
@@ -44,8 +53,6 @@ class ChatMessageModel extends Model
         if (empty($messages)) {
             return [];
         }
-
-        $db = \Config\Database::connect();
 
         // Kumpulkan sender & reply id untuk efisiensi
         $userCache = [];
@@ -93,6 +100,15 @@ class ChatMessageModel extends Model
                 $linkPreview = json_decode($msg['link_preview'], true);
             }
 
+            // Parse reactions JSON jika ada
+            $reactions = [];
+            if (!$msg['is_deleted'] && !empty($msg['reactions'])) {
+                $decodedReactions = json_decode($msg['reactions'], true);
+                if (is_array($decodedReactions)) {
+                    $reactions = $decodedReactions;
+                }
+            }
+
             // Hitung apakah masih bisa di-edit/dihapus (< 5 menit)
             $createdTimestamp = strtotime($msg['created_at']);
             $canModify = (time() - $createdTimestamp) < 300; // 300 detik = 5 menit
@@ -109,6 +125,7 @@ class ChatMessageModel extends Model
                 'file_name'       => $msg['file_name'],
                 'file_type'       => $msg['file_type'],
                 'link_preview'    => $msg['is_deleted'] ? null : $linkPreview,
+                'reactions'       => $reactions,
                 'reply_to'        => $replyData,
                 'is_edited'       => (bool) $msg['is_edited'],
                 'is_deleted'      => (bool) $msg['is_deleted'],
