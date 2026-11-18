@@ -236,21 +236,59 @@ class ChatController extends BaseController
             $roomId = (int) $room['id'];
             $roomName = $room['name'];
             $roomAvatar = $room['avatar'] ? base_url($room['avatar']) : '';
+            $secondAvatar = '';
+            $participantsSubtitle = '';
 
-            // Jika direct chat, cari lawan bicara
+            // Jika direct chat, cari partisipan di dalamnya
             if ($room['type'] === 'direct') {
-                $otherMember = $db->table('chat_members')
+                $directMembers = $db->table('chat_members')
                     ->where('room_id', $roomId)
-                    ->where('NOT (user_role = ' . $db->escape($user['role']) . ' AND user_id = ' . (int)$user['id'] . ')')
-                    ->limit(1)
-                    ->get()->getRow();
+                    ->orderBy('id', 'ASC')
+                    ->get()->getResult();
 
-                if ($otherMember) {
-                    $otherInfo = $this->resolveUserInfo($db, $otherMember->user_role, (int)$otherMember->user_id);
-                    $roomName   = $otherInfo['name'];
-                    $roomAvatar = $otherInfo['avatar'];
+                $isMeInDirect = false;
+                foreach ($directMembers as $dm) {
+                    if ($dm->user_role === $user['role'] && (int)$dm->user_id === $user['id']) {
+                        $isMeInDirect = true;
+                        break;
+                    }
+                }
+
+                // Jika mode Monitoring Semua (atau Admin tidak termasuk di dalam direct chat ini), tampilkan kedua pihak (User A ↔ User B)
+                if (($user['role'] === 'admin' && $mode === 'all') || !$isMeInDirect) {
+                    $pInfos = [];
+                    foreach ($directMembers as $dm) {
+                        $pInfos[] = $this->resolveUserInfo($db, $dm->user_role, (int)$dm->user_id);
+                    }
+                    if (count($pInfos) >= 2) {
+                        $roomName     = $pInfos[0]['name'] . ' ↔ ' . $pInfos[1]['name'];
+                        $roomAvatar   = $pInfos[0]['avatar'];
+                        $secondAvatar = $pInfos[1]['avatar'];
+                        $participantsSubtitle = $pInfos[0]['role_label'] . ' ↔ ' . $pInfos[1]['role_label'];
+                    } elseif (count($pInfos) === 1) {
+                        $roomName   = $pInfos[0]['name'];
+                        $roomAvatar = $pInfos[0]['avatar'];
+                        $participantsSubtitle = $pInfos[0]['role_label'];
+                    } else {
+                        $roomName = 'Direct Chat';
+                    }
                 } else {
-                    $roomName = 'Direct Chat';
+                    // Chat personal milik user sendiri -> tampilkan lawan bicara
+                    $otherMember = null;
+                    foreach ($directMembers as $dm) {
+                        if (!($dm->user_role === $user['role'] && (int)$dm->user_id === $user['id'])) {
+                            $otherMember = $dm;
+                            break;
+                        }
+                    }
+                    if ($otherMember) {
+                        $otherInfo = $this->resolveUserInfo($db, $otherMember->user_role, (int)$otherMember->user_id);
+                        $roomName   = $otherInfo['name'];
+                        $roomAvatar = $otherInfo['avatar'];
+                        $participantsSubtitle = $otherInfo['role_label'];
+                    } else {
+                        $roomName = 'Direct Chat';
+                    }
                 }
             } else {
                 // Group chat: jika avatar kosong, berikan default group icon
@@ -259,28 +297,34 @@ class ChatController extends BaseController
                 }
             }
 
-            // Hitung unread count
-            $lastRead = (int) ($room['last_read_message_id'] ?? 0);
-            $unreadCount = $db->table('chat_messages')
-                ->where('room_id', $roomId)
-                ->where('id >', $lastRead)
-                ->where('is_deleted', 0)
-                ->where('NOT (sender_role = ' . $db->escape($user['role']) . ' AND sender_id = ' . (int)$user['id'] . ')')
-                ->countAllResults();
+            // Hitung unread count (hanya jika bukan mode monitoring semua)
+            $unreadCount = 0;
+            if (!($user['role'] === 'admin' && $mode === 'all') && !empty($room['role_in_room'])) {
+                $lastRead = (int) ($room['last_read_message_id'] ?? 0);
+                $unreadCount = $db->table('chat_messages')
+                    ->where('room_id', $roomId)
+                    ->where('id >', $lastRead)
+                    ->where('is_deleted', 0)
+                    ->where('NOT (sender_role = ' . $db->escape($user['role']) . ' AND sender_id = ' . (int)$user['id'] . ')')
+                    ->countAllResults();
+            }
 
             // Total members dalam room
             $totalMembers = $db->table('chat_members')->where('room_id', $roomId)->countAllResults();
 
             $formatted[] = [
-                'id'              => $roomId,
-                'type'            => $room['type'],
-                'name'            => $roomName,
-                'avatar'          => $roomAvatar,
-                'last_message'    => $room['last_message'] ?: 'Belum ada pesan',
-                'last_message_at' => $room['last_message_at'] ? date('H:i', strtotime($room['last_message_at'])) : '',
-                'unread_count'    => $unreadCount,
-                'total_members'   => $totalMembers,
-                'is_member'       => !empty($room['role_in_room']),
+                'id'                    => $roomId,
+                'type'                  => $room['type'],
+                'name'                  => $roomName,
+                'avatar'                => $roomAvatar,
+                'second_avatar'         => $secondAvatar,
+                'participants_subtitle' => $participantsSubtitle,
+                'last_message'          => $room['last_message'] ?: 'Belum ada pesan',
+                'last_message_at'       => $room['last_message_at'] ? date('H:i', strtotime($room['last_message_at'])) : '',
+                'unread_count'          => $unreadCount,
+                'total_members'         => $totalMembers,
+                'is_member'             => !empty($room['role_in_room']),
+                'is_monitoring'         => ($user['role'] === 'admin' && $mode === 'all') || empty($room['role_in_room']),
             ];
         }
 
@@ -505,21 +549,11 @@ class ChatController extends BaseController
             ],
         ];
 
-        // Pastikan admin utama selalu masuk atau terdaftar jika dibuat oleh peserta
-        $adminIncluded = false;
-        if ($user['role'] === 'admin') {
-            $adminIncluded = true;
-        }
-
         foreach ($members as $m) {
             $mRole = $m['role'] ?? 'siswa';
             $mId   = (int) ($m['id'] ?? 0);
             if ($mId <= 0) continue;
             if ($mRole === $user['role'] && $mId === $user['id']) continue; // jangan duplikat
-
-            if ($mRole === 'admin') {
-                $adminIncluded = true;
-            }
 
             $memberRows[] = [
                 'room_id'              => $roomId,
@@ -529,21 +563,6 @@ class ChatController extends BaseController
                 'last_read_message_id' => 0,
                 'joined_at'            => $now,
             ];
-        }
-
-        // Jika grup dibuat oleh peserta dan belum ada admin, tambahkan 1 admin aktif agar admin bisa memonitor
-        if (!$adminIncluded) {
-            $firstAdmin = $db->table('admin')->select('id_admin')->where('is_active', 1)->orderBy('id_admin', 'ASC')->limit(1)->get()->getRow();
-            if ($firstAdmin) {
-                $memberRows[] = [
-                    'room_id'              => $roomId,
-                    'user_role'            => 'admin',
-                    'user_id'              => (int) $firstAdmin->id_admin,
-                    'role_in_room'         => 'member',
-                    'last_read_message_id' => 0,
-                    'joined_at'            => $now,
-                ];
-            }
         }
 
         $db->table('chat_members')->insertBatch($memberRows);
@@ -954,38 +973,72 @@ class ChatController extends BaseController
             return $this->response->setStatusCode(404)->setJSON(['status' => 'error']);
         }
 
-        $db = \Config\Database::connect();
+        $mode = $this->request->getGet('mode');
+        $db   = \Config\Database::connect();
         $members = $this->memberModel->getMembersWithUser($roomId);
 
-        if ($room['type'] === 'direct') {
-            $otherMember = $db->table('chat_members')
-                ->where('room_id', $roomId)
-                ->where('NOT (user_role = ' . $db->escape($user['role']) . ' AND user_id = ' . (int)$user['id'] . ')')
-                ->limit(1)
-                ->get()->getRow();
+        $roleLabelMap = [
+            'admin' => 'Admin KelasBrevet',
+            'guru'  => 'Instruktur / Pengajar',
+            'pic'   => 'PIC KelasBrevet',
+            'mitra' => 'Mitra KelasBrevet',
+            'siswa' => 'Peserta',
+        ];
 
-            if ($otherMember) {
-                $otherInfo = $this->resolveUserInfo($db, $otherMember->user_role, (int)$otherMember->user_id);
-                $room['name']   = $otherInfo['name'];
-                $room['avatar'] = $otherInfo['avatar'];
-                $roleMap = [
-                    'admin' => 'Admin KelasBrevet',
-                    'guru'  => 'Instruktur / Pengajar',
-                    'pic'   => 'PIC KelasBrevet',
-                    'mitra' => 'Mitra KelasBrevet',
-                    'siswa' => 'Peserta',
-                ];
-                $roleLabel = $roleMap[$otherMember->user_role] ?? 'Peserta';
-                $room['subtitle'] = $roleLabel . ' • Personal Chat';
-            } else {
+        $isMeInRoom = false;
+        foreach ($members as &$m) {
+            if ($m['user_role'] === $user['role'] && (int)$m['user_id'] === $user['id']) {
+                $isMeInRoom = true;
+            }
+            $m['role_label'] = $roleLabelMap[$m['user_role']] ?? 'Peserta';
+            $m['message_count'] = $db->table('chat_messages')
+                ->where('room_id', $roomId)
+                ->where('sender_role', $m['user_role'])
+                ->where('sender_id', (int)$m['user_id'])
+                ->countAllResults();
+        }
+        unset($m);
+
+        $isMonitoring = ($user['role'] === 'admin' && $mode === 'all') || !$isMeInRoom;
+        $room['is_monitoring'] = $isMonitoring;
+        $room['second_avatar'] = '';
+        $room['first_member']  = null;
+
+        if ($room['type'] === 'direct') {
+            if ($isMonitoring) {
                 $names = array_map(fn($m) => $m['user_name'], $members);
-                $room['name']     = !empty($names) ? implode(' & ', $names) : 'Personal Chat';
-                $room['avatar']   = $members[0]['user_avatar'] ?? base_url('assets/app-assets/user/default.jpg');
-                $room['subtitle'] = 'Personal Chat';
+                $roleDetails = array_map(fn($m) => $m['user_name'] . ' (' . $m['role_label'] . ')', $members);
+                $room['name']          = !empty($names) ? implode(' ↔ ', $names) : 'Personal Chat';
+                $room['avatar']        = $members[0]['user_avatar'] ?? base_url('assets/app-assets/user/default.jpg');
+                $room['second_avatar'] = $members[1]['user_avatar'] ?? '';
+                $room['subtitle']      = 'Chat Personal • ' . implode(' ↔ ', $roleDetails);
+                $room['first_member']  = isset($members[0]) ? [
+                    'role' => $members[0]['user_role'],
+                    'id'   => (int)$members[0]['user_id'],
+                ] : null;
+            } else {
+                $otherMember = null;
+                foreach ($members as $m) {
+                    if (!($m['user_role'] === $user['role'] && (int)$m['user_id'] === $user['id'])) {
+                        $otherMember = $m;
+                        break;
+                    }
+                }
+                if ($otherMember) {
+                    $room['name']     = $otherMember['user_name'];
+                    $room['avatar']   = $otherMember['user_avatar'] ?: base_url('assets/app-assets/user/default.jpg');
+                    $room['subtitle'] = $otherMember['role_label'] . ' • Personal Chat';
+                } else {
+                    $room['name']     = 'Personal Chat';
+                    $room['avatar']   = base_url('assets/app-assets/user/default.jpg');
+                    $room['subtitle'] = 'Personal Chat';
+                }
             }
         } else {
             $room['avatar']   = !empty($room['avatar']) ? base_url($room['avatar']) : base_url('assets-landing/images/logo.png');
-            $room['subtitle'] = count($members) . ' Anggota Grup';
+            $memberNames = array_map(fn($m) => $m['user_name'], array_slice($members, 0, 4));
+            $moreCount = count($members) > 4 ? ' +' . (count($members) - 4) . ' lainnya' : '';
+            $room['subtitle'] = count($members) . ' Anggota Grup (' . implode(', ', $memberNames) . $moreCount . ')';
         }
 
         return $this->response->setJSON([
@@ -1147,34 +1200,40 @@ class ChatController extends BaseController
 
     private function resolveUserInfo($db, string $role, int $id): array
     {
-        $name   = 'User';
-        $avatar = base_url('assets/app-assets/user/default.jpg');
+        $name      = 'User';
+        $avatar    = base_url('assets/app-assets/user/default.jpg');
+        $roleLabel = 'Peserta';
 
         if ($role === 'admin') {
+            $roleLabel = 'Admin';
             $u = $db->table('admin')->where('id_admin', $id)->get()->getRow();
             if ($u) {
                 $name   = $u->nama_admin ?? 'Admin KelasBrevet';
                 $avatar = !empty($u->avatar) ? base_url('assets/app-assets/user/' . $u->avatar) : base_url('assets/app-assets/user/default.jpg');
             }
         } elseif ($role === 'siswa') {
+            $roleLabel = 'Peserta';
             $u = $db->table('siswa')->where('id_siswa', $id)->get()->getRow();
             if ($u) {
                 $name   = $u->nama_siswa ?? 'Peserta';
                 $avatar = !empty($u->avatar) ? base_url('assets/app-assets/user/' . $u->avatar) : base_url('assets/app-assets/user/default.jpg');
             }
         } elseif ($role === 'guru') {
+            $roleLabel = 'Pengajar';
             $u = $db->table('guru')->where('id_guru', $id)->get()->getRow();
             if ($u) {
                 $name   = $u->nama_guru ?? 'Pengajar';
                 $avatar = !empty($u->avatar) ? base_url('assets/app-assets/user/' . $u->avatar) : base_url('assets/app-assets/user/default.jpg');
             }
         } elseif ($role === 'pic') {
+            $roleLabel = 'PIC';
             $u = $db->table('pic')->where('idpic', $id)->get()->getRow();
             if ($u) {
                 $name   = $u->nama_pic ?? 'PIC';
                 $avatar = !empty($u->avatar) ? base_url('assets/app-assets/user/' . $u->avatar) : base_url('assets/app-assets/user/default.jpg');
             }
         } elseif ($role === 'mitra') {
+            $roleLabel = 'Mitra';
             $u = $db->table('mitra')->where('idmitra', $id)->get()->getRow();
             if ($u) {
                 $name   = $u->nama_mitra ?? 'Mitra';
@@ -1182,6 +1241,6 @@ class ChatController extends BaseController
             }
         }
 
-        return ['name' => $name, 'avatar' => $avatar];
+        return ['name' => $name, 'avatar' => $avatar, 'role_label' => $roleLabel];
     }
 }

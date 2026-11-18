@@ -114,12 +114,13 @@ class ChatMessageModel extends Model
             $canModify = (time() - $createdTimestamp) < 300; // 300 detik = 5 menit
 
             $formatted[] = [
-                'id'              => (int) $msg['id'],
-                'room_id'         => (int) $msg['room_id'],
-                'sender_role'     => $msg['sender_role'],
-                'sender_id'       => (int) $msg['sender_id'],
-                'sender_name'     => $sender['name'],
-                'sender_avatar'   => $sender['avatar'],
+                'id'                => (int) $msg['id'],
+                'room_id'           => (int) $msg['room_id'],
+                'sender_role'       => $msg['sender_role'],
+                'sender_id'         => (int) $msg['sender_id'],
+                'sender_name'       => $sender['name'],
+                'sender_role_label' => $sender['role_label'],
+                'sender_avatar'     => $sender['avatar'],
                 'message'         => $msg['is_deleted'] ? '🚫 Pesan ini telah ditarik/dihapus' : $msg['message'],
                 'file_attachment' => $msg['is_deleted'] ? null : ($msg['file_attachment'] ? base_url($msg['file_attachment']) : null),
                 'file_name'       => $msg['file_name'],
@@ -141,34 +142,40 @@ class ChatMessageModel extends Model
 
     private function resolveUserInfo($db, string $role, int $id): array
     {
-        $name   = 'User';
-        $avatar = base_url('assets/app-assets/user/default.jpg');
+        $name      = 'User';
+        $avatar    = base_url('assets/app-assets/user/default.jpg');
+        $roleLabel = 'Peserta';
 
         if ($role === 'admin') {
+            $roleLabel = 'Admin';
             $u = $db->table('admin')->where('id_admin', $id)->get()->getRow();
             if ($u) {
                 $name   = $u->nama_admin ?? 'Admin KelasBrevet';
                 $avatar = !empty($u->avatar) ? base_url('assets/app-assets/user/' . $u->avatar) : base_url('assets/app-assets/user/default.jpg');
             }
         } elseif ($role === 'siswa') {
+            $roleLabel = 'Peserta';
             $u = $db->table('siswa')->where('id_siswa', $id)->get()->getRow();
             if ($u) {
                 $name   = $u->nama_siswa ?? 'Peserta';
                 $avatar = !empty($u->avatar) ? base_url('assets/app-assets/user/' . $u->avatar) : base_url('assets/app-assets/user/default.jpg');
             }
         } elseif ($role === 'guru') {
+            $roleLabel = 'Pengajar';
             $u = $db->table('guru')->where('id_guru', $id)->get()->getRow();
             if ($u) {
                 $name   = $u->nama_guru ?? 'Pengajar';
                 $avatar = !empty($u->avatar) ? base_url('assets/app-assets/user/' . $u->avatar) : base_url('assets/app-assets/user/default.jpg');
             }
         } elseif ($role === 'pic') {
+            $roleLabel = 'PIC';
             $u = $db->table('pic')->where('idpic', $id)->get()->getRow();
             if ($u) {
                 $name   = $u->nama_pic ?? 'PIC';
                 $avatar = !empty($u->avatar) ? base_url('assets/app-assets/user/' . $u->avatar) : base_url('assets/app-assets/user/default.jpg');
             }
         } elseif ($role === 'mitra') {
+            $roleLabel = 'Mitra';
             $u = $db->table('mitra')->where('idmitra', $id)->get()->getRow();
             if ($u) {
                 $name   = $u->nama_mitra ?? 'Mitra';
@@ -177,8 +184,9 @@ class ChatMessageModel extends Model
         }
 
         return [
-            'name'   => $name,
-            'avatar' => $avatar,
+            'name'       => $name,
+            'avatar'     => $avatar,
+            'role_label' => $roleLabel,
         ];
     }
 }

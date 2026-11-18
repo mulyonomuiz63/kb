@@ -461,23 +461,27 @@
 
                         <!-- Header Active Room -->
                         <div class="p-3 px-4 border-bottom bg-white d-flex align-items-center justify-content-between flex-shrink-0">
-                            <div class="d-flex align-items-center gap-3">
-                                <button type="button" id="btn_mobile_back" class="btn btn-icon btn-sm btn-light rounded-circle d-md-none" title="Kembali ke Daftar Chat">
+                            <div class="d-flex align-items-center gap-3 cursor-pointer" onclick="document.getElementById('btn_room_info')?.click()" title="Klik untuk melihat detail partisipan & informasi percakapan">
+                                <button type="button" id="btn_mobile_back" class="btn btn-icon btn-sm btn-light rounded-circle d-md-none" onclick="event.stopPropagation();" title="Kembali ke Daftar Chat">
                                     <i class="fas fa-arrow-left fs-5"></i>
                                 </button>
-                                <div class="position-relative">
-                                    <img id="active_room_avatar" src="<?= base_url('assets/app-assets/user/default.jpg') ?>" onerror="this.onerror=null;this.src='<?= base_url('assets/app-assets/user/default.jpg') ?>'" alt="Avatar" class="w-40px h-40px rounded-circle object-fit-cover shadow-sm border" />
+                                <div class="position-relative d-flex align-items-center">
+                                    <img id="active_room_avatar" src="<?= base_url('assets/app-assets/user/default.jpg') ?>" onerror="this.onerror=null;this.src='<?= base_url('assets/app-assets/user/default.jpg') ?>'" alt="Avatar" class="w-40px h-40px rounded-circle object-fit-cover shadow-sm border border-2 border-white" />
+                                    <img id="active_room_second_avatar" src="<?= base_url('assets/app-assets/user/default.jpg') ?>" onerror="this.onerror=null;this.src='<?= base_url('assets/app-assets/user/default.jpg') ?>'" alt="Avatar 2" class="w-40px h-40px rounded-circle object-fit-cover shadow-sm border border-2 border-white d-none" style="margin-left: -12px;" />
                                     <span id="active_room_online_dot" class="position-absolute bottom-0 end-0 bg-success rounded-circle border border-white" style="width: 10px; height: 10px;"></span>
                                 </div>
                                 <div class="d-flex flex-column">
-                                    <h6 class="fw-bolder text-gray-900 mb-0" id="active_room_name">-</h6>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <h6 class="fw-bolder text-gray-900 mb-0" id="active_room_name">-</h6>
+                                        <span id="active_room_type_badge" class="badge badge-light-primary fs-9 px-2 py-0">Personal</span>
+                                    </div>
                                     <span class="text-muted fs-8" id="active_room_meta">Memuat...</span>
                                 </div>
                             </div>
 
                             <div class="d-flex align-items-center gap-2">
-                                <!-- Tombol Info Grup (jika grup) -->
-                                <button type="button" id="btn_room_info" class="btn btn-icon btn-sm btn-light-info rounded-circle d-none" title="Detail Grup & Anggota">
+                                <!-- Tombol Detail Partisipan / Info Grup -->
+                                <button type="button" id="btn_room_info" class="btn btn-icon btn-sm btn-light-info rounded-circle" title="Detail Partisipan & Informasi Percakapan">
                                     <i class="fas fa-info-circle fs-4 text-info"></i>
                                 </button>
 
@@ -494,7 +498,7 @@
                                 <div class="spinner-border spinner-border-sm text-primary mb-2"></div>
                                 <div class="fs-8">Memuat riwayat obrolan...</div>
                             </div>
-                            <div id="messages_container" class="d-flex flex-column gap-2"></div>
+                            <div id="messages_container" class="d-flex flex-column gap-3"></div>
                         </div>
 
                         <!-- Active Reply Box -->
@@ -511,8 +515,19 @@
                             </button>
                         </div>
 
+                        <!-- Banner Mode Monitoring Read-Only (Tampil khusus saat Admin Monitoring Semua) -->
+                        <div id="monitoring_readonly_bar" class="d-none p-3 px-4 bg-light-warning border-top d-flex align-items-center justify-content-between flex-shrink-0">
+                            <div class="d-flex align-items-center gap-2 text-gray-800 fs-8 fw-semibold">
+                                <span class="badge badge-warning text-dark fw-bold px-2 py-1"><i class="fas fa-eye me-1 text-dark"></i> MODE MONITORING</span>
+                                <span>Anda sedang memantau komunikasi ini (Hanya melihat isi percakapan & tidak dapat membalas pesan).</span>
+                            </div>
+                            <button type="button" class="btn btn-xs btn-light-primary fw-bold flex-shrink-0" onclick="document.getElementById('btn_room_info')?.click()">
+                                <i class="fas fa-users me-1"></i> Detail Partisipan
+                            </button>
+                        </div>
+
                         <!-- Input & Attachments Bar -->
-                        <div class="p-3 bg-white border-top position-relative">
+                        <div id="chat_input_bar_wrapper" class="p-3 bg-white border-top position-relative flex-shrink-0">
 
                             <!-- Emoji Picker Panel -->
                             <div class="kb-emoji-panel" id="emoji_panel">
@@ -939,12 +954,14 @@
         adminFilterMode = 'my';
         $(this).removeClass('btn-light').addClass('btn-primary');
         $('#btn_mode_all').removeClass('btn-primary').addClass('btn-light');
+        closeActiveChat();
         loadRooms();
     });
     $('#btn_mode_all')?.on('click', function() {
         adminFilterMode = 'all';
         $(this).removeClass('btn-light').addClass('btn-primary');
         $('#btn_mode_my').removeClass('btn-primary').addClass('btn-light');
+        closeActiveChat();
         loadRooms();
     });
 
@@ -981,18 +998,32 @@
             filtered.forEach(r => {
                 const isActive = (r.id === activeRoomId) ? 'active' : '';
                 const unreadBadge = (r.unread_count > 0) ? `<span class="badge badge-circle badge-primary fs-9 ms-auto">${r.unread_count}</span>` : '';
-                const groupBadge = (r.type === 'group') ? `<span class="badge badge-light-primary px-2 py-0 fs-9 me-1">Grup</span>` : '';
+                const typeBadge = (r.type === 'group')
+                    ? `<span class="badge badge-light-primary px-2 py-0 fs-9 me-1"><i class="fas fa-users me-1" style="font-size:9px;"></i>Grup</span>`
+                    : `<span class="badge badge-light-info px-2 py-0 fs-9 me-1"><i class="fas fa-user-friends me-1" style="font-size:9px;"></i>Personal</span>`;
+
+                const avatarHtml = r.second_avatar
+                    ? `<div class="d-flex align-items-center flex-shrink-0">
+                           <img src="${r.avatar || DEFAULT_AVATAR}" onerror="this.onerror=null;this.src='${DEFAULT_AVATAR}'" class="w-35px h-35px rounded-circle object-fit-cover border border-2 border-white shadow-xs" />
+                           <img src="${r.second_avatar || DEFAULT_AVATAR}" onerror="this.onerror=null;this.src='${DEFAULT_AVATAR}'" class="w-35px h-35px rounded-circle object-fit-cover border border-2 border-white shadow-xs" style="margin-left: -12px;" />
+                       </div>`
+                    : `<div class="position-relative flex-shrink-0">
+                           <img src="${r.avatar || DEFAULT_AVATAR}" onerror="this.onerror=null;this.src='${DEFAULT_AVATAR}'" class="w-40px h-40px rounded-circle object-fit-cover border" />
+                       </div>`;
+
+                const roleSubHtml = r.participants_subtitle
+                    ? `<div class="fs-9 text-primary fw-semibold text-truncate mb-1">${escapeHtml(r.participants_subtitle)}</div>`
+                    : '';
 
                 html += `
                     <div class="kb-room-item d-flex align-items-center gap-3 ${isActive}" id="room_item_${r.id}" onclick="selectRoom(${r.id})">
-                        <div class="position-relative flex-shrink-0">
-                            <img src="${r.avatar || DEFAULT_AVATAR}" onerror="this.onerror=null;this.src='${DEFAULT_AVATAR}'" class="w-40px h-40px rounded-circle object-fit-cover border" />
-                        </div>
+                        ${avatarHtml}
                         <div class="flex-grow-1 overflow-hidden">
-                            <div class="d-flex align-items-center justify-content-between mb-1">
-                                <span class="fw-bold text-gray-900 fs-7 text-truncate">${groupBadge}${escapeHtml(r.name)}</span>
+                            <div class="d-flex align-items-center justify-content-between mb-0">
+                                <span class="fw-bold text-gray-900 fs-7 text-truncate">${typeBadge}${escapeHtml(r.name)}</span>
                                 <span class="fs-9 text-muted flex-shrink-0 ms-1">${r.last_message_at}</span>
                             </div>
+                            ${roleSubHtml}
                             <div class="d-flex align-items-center justify-content-between">
                                 <span class="fs-8 text-muted text-truncate" style="max-width: 190px;">${escapeHtml(r.last_message)}</span>
                                 ${unreadBadge}
@@ -1014,6 +1045,19 @@
         loadRooms(this.value);
     });
 
+    function applyMonitoringUI(isMonitoring) {
+        const inputWrapper = document.getElementById('chat_input_bar_wrapper');
+        const monitorBar   = document.getElementById('monitoring_readonly_bar');
+        if (isMonitoring) {
+            inputWrapper?.classList.add('d-none');
+            monitorBar?.classList.remove('d-none');
+            cancelReply();
+        } else {
+            inputWrapper?.classList.remove('d-none');
+            monitorBar?.classList.add('d-none');
+        }
+    }
+
     // Select Room
     function selectRoom(roomId) {
         activeRoomId = roomId;
@@ -1029,33 +1073,57 @@
         document.querySelectorAll('.kb-room-item').forEach(el => el.classList.remove('active'));
         document.getElementById('room_item_' + roomId)?.classList.add('active');
 
+        const typeBadgeEl = document.getElementById('active_room_type_badge');
+        const secondAvatarEl = document.getElementById('active_room_second_avatar');
+
         // Tampilkan langsung nama & foto peserta dari cache sidebar sebelum detail API selesai
         if (roomsMap[roomId]) {
             const cached = roomsMap[roomId];
             document.getElementById('active_room_name').innerText = cached.name || 'Chat';
             document.getElementById('active_room_avatar').src = cached.avatar || DEFAULT_AVATAR;
-            document.getElementById('active_room_meta').innerText = (cached.type === 'group') ? (cached.total_members + ' Anggota Grup') : 'Personal Chat';
+            if (cached.second_avatar) {
+                secondAvatarEl.src = cached.second_avatar;
+                secondAvatarEl.classList.remove('d-none');
+            } else {
+                secondAvatarEl.classList.add('d-none');
+            }
+            if (typeBadgeEl) {
+                typeBadgeEl.className = cached.type === 'group' ? 'badge badge-light-primary fs-9 px-2 py-0' : 'badge badge-light-info fs-9 px-2 py-0';
+                typeBadgeEl.innerText = cached.type === 'group' ? 'Grup' : 'Personal';
+            }
+            document.getElementById('active_room_meta').innerText = (cached.type === 'group') ? (cached.total_members + ' Anggota Grup') : (cached.participants_subtitle || 'Personal Chat');
+            applyMonitoringUI(!!cached.is_monitoring || (IS_ADMIN && adminFilterMode === 'all'));
         }
 
-        // Load detail lengkap room & lawan bicara
-        $.getJSON("<?= base_url('chat/room-details/') ?>" + roomId, function(res) {
+        // Load detail lengkap room & lawan bicara, lalu muat pesan
+        $.getJSON("<?= base_url('chat/room-details/') ?>" + roomId + "?mode=" + adminFilterMode, function(res) {
             if (res.status === 'success') {
                 activeRoomData = res.room;
                 document.getElementById('active_room_name').innerText = res.room.name || 'Chat';
                 document.getElementById('active_room_avatar').src = res.room.avatar || DEFAULT_AVATAR;
+                if (res.room.second_avatar) {
+                    secondAvatarEl.src = res.room.second_avatar;
+                    secondAvatarEl.classList.remove('d-none');
+                } else {
+                    secondAvatarEl.classList.add('d-none');
+                }
+                if (typeBadgeEl) {
+                    typeBadgeEl.className = res.room.type === 'group' ? 'badge badge-light-primary fs-9 px-2 py-0' : 'badge badge-light-info fs-9 px-2 py-0';
+                    typeBadgeEl.innerText = res.room.type === 'group' ? 'Grup' : 'Personal';
+                }
                 document.getElementById('active_room_meta').innerText = res.room.subtitle || (res.room.type === 'group' ? (res.members.length + ' Anggota Grup') : 'Personal Chat');
 
-                if (res.room.type === 'group') {
-                    document.getElementById('btn_room_info').classList.remove('d-none');
-                } else {
-                    document.getElementById('btn_room_info').classList.add('d-none');
+                const isMonitoring = !!res.room.is_monitoring || (IS_ADMIN && adminFilterMode === 'all');
+                applyMonitoringUI(isMonitoring);
+
+                // Muat pesan setelah activeRoomData siap agar layout kiri-kanan & profil akurat
+                lastLoadedMessageId = 0;
+                loadMessages(true);
+                if (!isMonitoring) {
+                    setTimeout(() => document.getElementById('input_chat_message')?.focus(), 150);
                 }
             }
         });
-
-        // Load Messages
-        loadMessages(true);
-        setTimeout(() => document.getElementById('input_chat_message')?.focus(), 150);
 
         // Polling realtime (setiap 2 detik)
         if (pollingInterval) clearInterval(pollingInterval);
@@ -1077,7 +1145,7 @@
 
                 if (res.messages.length === 0) {
                     if (!document.getElementById('empty_room_hint')) {
-                        box.innerHTML = '<div id="empty_room_hint" class="text-center py-8"><span class="bg-white text-muted fs-8 px-4 py-2 rounded-pill shadow-sm d-inline-block border">👋 Belum ada pesan. Kirim pesan pertama agar obrolan tampil di penerima.</span></div>';
+                        box.innerHTML = '<div id="empty_room_hint" class="text-center py-8"><span class="bg-white text-muted fs-8 px-4 py-2 rounded-pill shadow-sm d-inline-block border">👋 Belum ada pesan dalam percakapan ini.</span></div>';
                     }
                     return;
                 } else {
@@ -1086,6 +1154,7 @@
 
                 let hasNewMessage = false;
                 let hasIncomingFromOther = false;
+                const isMonitoring = !!(activeRoomData && activeRoomData.is_monitoring) || (IS_ADMIN && adminFilterMode === 'all');
                 res.messages.forEach(msg => {
                     if (msg.id > lastLoadedMessageId) {
                         const isMsgFromMe = (msg.sender_role === CURRENT_USER.role && Number(msg.sender_id) === Number(CURRENT_USER.id));
@@ -1096,7 +1165,7 @@
                         hasNewMessage = true;
                     }
                     const reactSig = JSON.stringify(msg.reactions || []);
-                    const sig = `${msg.message}|${msg.is_edited ? 1 : 0}|${msg.is_deleted ? 1 : 0}|${msg.can_modify ? 1 : 0}|${reactSig}`;
+                    const sig = `${msg.message}|${msg.is_edited ? 1 : 0}|${msg.is_deleted ? 1 : 0}|${msg.can_modify ? 1 : 0}|${reactSig}|${isMonitoring ? 1 : 0}`;
                     const existing = document.getElementById('msg_row_' + msg.id);
                     if (existing) {
                         // Hanya update DOM jika ada perubahan status (diedit / ditarik / reaksi / waktu 5m habis)
@@ -1109,7 +1178,7 @@
                     }
                 });
 
-                if (hasIncomingFromOther) {
+                if (hasIncomingFromOther && !isMonitoring) {
                     playIncomingRingtone();
                     loadRooms(document.getElementById('search_room_input')?.value || '');
                 }
@@ -1135,9 +1204,34 @@
 
     function renderMessageRow(msg, sig = '', isSelected = false) {
         const isMe = (msg.sender_role === CURRENT_USER.role && Number(msg.sender_id) === Number(CURRENT_USER.id));
-        const bubbleClass = msg.is_deleted ? 'kb-bubble-deleted' : (isMe ? 'kb-bubble-me' : 'kb-bubble-other');
-        const senderLabel = (!isMe && activeRoomData && activeRoomData.type === 'group') ? `<div class="fw-bold fs-8 text-primary mb-1">${escapeHtml(msg.sender_name)}</div>` : '';
+        const isMonitoring = !!(activeRoomData && activeRoomData.is_monitoring) || (IS_ADMIN && adminFilterMode === 'all');
+
+        // Saat mode Monitoring Personal Chat antara 2 peserta, pisahkan posisi kiri (Partisipan 1) dan kanan (Partisipan 2) agar alur dialog terlihat jelas
+        let isRightSide = isMe;
+        if (isMonitoring && activeRoomData && activeRoomData.type === 'direct' && activeRoomData.first_member) {
+            const isFirstParticipant = (msg.sender_role === activeRoomData.first_member.role && Number(msg.sender_id) === Number(activeRoomData.first_member.id));
+            isRightSide = !isFirstParticipant;
+        }
+
+        const bubbleClass = msg.is_deleted ? 'kb-bubble-deleted' : (isRightSide ? 'kb-bubble-me' : 'kb-bubble-other');
         const selectedClass = (isSelected || selectedMessageId === msg.id) ? 'is-selected' : '';
+
+        // Info Lengkap Pengirim (Nama + Badge Role) di dalam setiap gelembung pesan
+        const roleBadgeColor = isRightSide ? 'bg-white bg-opacity-20 text-white' : 'badge-light-primary text-primary';
+        const senderNameColor = isRightSide ? 'text-white' : 'text-gray-900';
+        const senderHeaderHtml = `
+            <div class="d-flex align-items-center justify-content-between gap-2 mb-1 pb-1 border-bottom ${isRightSide ? 'border-white border-opacity-25' : 'border-gray-200'}">
+                <span class="fw-bolder fs-8 ${senderNameColor}">${escapeHtml(msg.sender_name)}</span>
+                <span class="badge ${roleBadgeColor} fs-10 px-2 py-0">${escapeHtml(msg.sender_role_label || msg.sender_role)}</span>
+            </div>
+        `;
+
+        // Foto Profil (Avatar) Pengirim di samping gelembung chat
+        const avatarImgHtml = `
+            <div class="flex-shrink-0 align-self-end ${isRightSide ? 'ms-2 order-last' : 'me-2'}">
+                <img src="${msg.sender_avatar || DEFAULT_AVATAR}" onerror="this.onerror=null;this.src='${DEFAULT_AVATAR}'" class="w-35px h-35px rounded-circle object-fit-cover border shadow-xs" title="${escapeHtml(msg.sender_name)} (${escapeHtml(msg.sender_role_label || msg.sender_role)})" />
+            </div>
+        `;
 
         // Reply box (klik untuk lompat ke pesan yang dibalas)
         let replyHtml = '';
@@ -1190,9 +1284,10 @@
         if (!msg.is_deleted && msgReactions.length > 0) {
             const uniqueEmojis = [...new Set(msgReactions.map(r => r.emoji))];
             const tooltipNames = msgReactions.map(r => `${r.user_name}: ${r.emoji}`).join(', ');
+            const pillClickAttr = isMonitoring ? '' : `onclick="event.stopPropagation(); toggleReaction(${msg.id}, '${myReactedEmoji || uniqueEmojis[0]}')"`;
             reactionsPillHtml = `
-                <div class="d-flex ${isMe ? 'justify-content-end' : 'justify-content-start'}">
-                    <div class="kb-reactions-pill" title="${escapeHtml(tooltipNames)}" onclick="event.stopPropagation(); toggleReaction(${msg.id}, '${myReactedEmoji || uniqueEmojis[0]}')">
+                <div class="d-flex ${isRightSide ? 'justify-content-end' : 'justify-content-start'}">
+                    <div class="kb-reactions-pill" title="${escapeHtml(tooltipNames)}" ${pillClickAttr}>
                         <span>${uniqueEmojis.join(' ')}</span>
                         ${msgReactions.length > 1 ? `<span class="kb-react-count">${msgReactions.length}</span>` : ''}
                     </div>
@@ -1200,11 +1295,10 @@
             `;
         }
 
-        // Action Bar ala WhatsApp (Tampil saat kursor diarahkan / hover ATAU saat pesan diklik)
-        // Menyesuaikan otomatis siapa pengirimnya & batas waktu 5 menit + Reaksi Cepat
+        // Action Bar ala WhatsApp (Saat mode Monitoring, Admin hanya melihat dan tidak ada tombol Balas/Reaksi)
         let actionsBar = '';
         let chevronIcon = '';
-        if (!msg.is_deleted) {
+        if (!msg.is_deleted && !isMonitoring) {
             chevronIcon = `<span class="kb-wa-chevron" title="Klik untuk opsi & reaksi pesan"><i class="fas fa-chevron-down"></i></span>`;
 
             const canEditOrPull = (isMe && msg.can_modify);
@@ -1217,7 +1311,7 @@
             });
 
             actionsBar = `
-                <div class="kb-msg-actions-bar ${isMe ? 'order-first me-2' : 'ms-2'}" onclick="event.stopPropagation()">
+                <div class="kb-msg-actions-bar ${isRightSide ? 'order-first me-2' : 'ms-2'}" onclick="event.stopPropagation()">
                     <div class="d-flex align-items-center pe-1 border-end me-1">
                         ${reactButtonsHtml}
                     </div>
@@ -1248,26 +1342,29 @@
         }
 
         const editedTag = (msg.is_edited && !msg.is_deleted) ? '<span class="fs-9 opacity-75 ms-1">(diedit)</span>' : '';
-        const checkIcon = (isMe && !msg.is_deleted) ? '<i class="fas fa-check-double ms-1" style="font-size:0.65rem; color:#93c5fd;"></i>' : '';
+        const checkIcon = (isRightSide && !msg.is_deleted) ? '<i class="fas fa-check-double ms-1" style="font-size:0.65rem; color:#93c5fd;"></i>' : '';
+        const timeDisplay = msg.date_formatted ? `${msg.date_formatted}, ${msg.time_formatted}` : msg.time_formatted;
 
         return `
-            <div class="kb-msg-row d-flex align-items-center ${isMe ? 'justify-content-end' : 'justify-content-start'} ${selectedClass}" id="msg_row_${msg.id}" data-sig="${escapeHtml(sig)}">
-                ${isMe ? actionsBar : ''}
-                <div class="d-flex flex-column ${isMe ? 'align-items-end' : 'align-items-start'}" style="max-width: 68%;">
-                    <div class="kb-bubble ${bubbleClass}" style="max-width: 100%;" onclick="toggleSelectMessage(${msg.id}, event)">
+            <div class="kb-msg-row d-flex align-items-center ${isRightSide ? 'justify-content-end' : 'justify-content-start'} ${selectedClass}" id="msg_row_${msg.id}" data-sig="${escapeHtml(sig)}">
+                ${!isRightSide ? avatarImgHtml : ''}
+                ${isRightSide ? actionsBar : ''}
+                <div class="d-flex flex-column ${isRightSide ? 'align-items-end' : 'align-items-start'}" style="max-width: 68%; min-width: 180px;">
+                    <div class="kb-bubble ${bubbleClass} w-100" style="max-width: 100%;" onclick="toggleSelectMessage(${msg.id}, event)">
                         ${chevronIcon}
-                        ${senderLabel}
+                        ${senderHeaderHtml}
                         ${replyHtml}
                         ${fileHtml}
                         <div class="kb-msg-text pe-3">${msg.is_deleted ? '<i class="fas fa-ban me-1"></i> Pesan ini telah ditarik' : linkify(escapeHtml(msg.message || ''))}</div>
                         ${linkHtml}
                         <div class="kb-bubble-time">
-                            ${msg.time_formatted} ${editedTag} ${checkIcon}
+                            ${timeDisplay} ${editedTag} ${checkIcon}
                         </div>
                     </div>
                     ${reactionsPillHtml}
                 </div>
-                ${!isMe ? actionsBar : ''}
+                ${!isRightSide ? actionsBar : ''}
+                ${isRightSide ? avatarImgHtml : ''}
             </div>
         `;
     }
@@ -1597,30 +1694,50 @@
         });
     });
 
-    // Group Info Details
+    // Group & Room Info Details
     document.getElementById('btn_room_info')?.addEventListener('click', function() {
         if (!activeRoomId) return;
-        $.getJSON("<?= base_url('chat/room-details/') ?>" + activeRoomId, function(res) {
+        $.getJSON("<?= base_url('chat/room-details/') ?>" + activeRoomId + "?mode=" + adminFilterMode, function(res) {
             if (res.status === 'success') {
-                document.getElementById('info_group_title').innerText = res.room.name;
+                document.getElementById('info_group_title').innerText = (res.room.type === 'group' ? 'Detail Grup: ' : 'Detail Partisipan: ') + (res.room.name || '');
                 document.getElementById('info_group_count').innerText = res.members.length;
+
+                const isMonitoring = !!res.room.is_monitoring || (IS_ADMIN && adminFilterMode === 'all');
+                const btnOpenAdd = document.getElementById('btn_open_add_member');
+                const addSec = document.getElementById('add_member_section');
+                if (res.room.type === 'group' && !isMonitoring) {
+                    btnOpenAdd?.classList.remove('d-none');
+                } else {
+                    btnOpenAdd?.classList.add('d-none');
+                    addSec?.classList.add('d-none');
+                }
 
                 let html = '';
                 res.members.forEach(m => {
-                    const adminBadge = (m.role_in_room === 'admin') ? '<span class="badge badge-light-primary fs-9 ms-auto">Admin</span>' : '';
+                    const adminBadge = (res.room.type === 'group' && m.role_in_room === 'admin') ? '<span class="badge badge-light-primary fs-9">Pembuat Grup</span>' : '';
+                    const msgCountBadge = `<span class="badge badge-light-info fs-9">${Number(m.message_count || 0)} pesan</span>`;
+                    const emailText = m.user_email ? `<div class="fs-9 text-muted">${escapeHtml(m.user_email)}</div>` : '';
                     html += `
-                        <div class="d-flex align-items-center gap-3 p-2 border-bottom">
-                            <img src="${m.user_avatar || DEFAULT_AVATAR}" onerror="this.onerror=null;this.src='${DEFAULT_AVATAR}'" class="w-35px h-35px rounded-circle object-fit-cover" />
-                            <div>
-                                <strong class="fs-8 text-gray-900 d-block">${escapeHtml(m.user_name)}</strong>
-                                <span class="fs-9 text-muted">${escapeHtml(m.user_role)}</span>
+                        <div class="d-flex align-items-center justify-content-between gap-3 p-2 border-bottom">
+                            <div class="d-flex align-items-center gap-3 overflow-hidden">
+                                <img src="${m.user_avatar || DEFAULT_AVATAR}" onerror="this.onerror=null;this.src='${DEFAULT_AVATAR}'" class="w-40px h-40px rounded-circle object-fit-cover border flex-shrink-0" />
+                                <div class="overflow-hidden">
+                                    <strong class="fs-7 text-gray-900 d-block text-truncate">${escapeHtml(m.user_name)}</strong>
+                                    <span class="badge badge-light-secondary text-gray-700 fs-10 px-2 py-0">${escapeHtml(m.role_label || m.user_role)}</span>
+                                    ${emailText}
+                                </div>
                             </div>
-                            ${adminBadge}
+                            <div class="d-flex flex-column align-items-end gap-1 flex-shrink-0">
+                                ${msgCountBadge}
+                                ${adminBadge}
+                            </div>
                         </div>
                     `;
                 });
                 document.getElementById('info_group_members_list').innerHTML = html;
-                new bootstrap.Modal(document.getElementById('modal_group_info')).show();
+                const modalEl = document.getElementById('modal_group_info');
+                const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                modal.show();
             }
         });
     });
