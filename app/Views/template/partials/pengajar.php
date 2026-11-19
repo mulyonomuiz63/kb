@@ -10,6 +10,28 @@ $mapel = array('sw-guru/mapel');
 //user menu
 $profile = array('sw-guru/profile');
 $settings = array('sw-guru/settings');
+$diskusi = array('sw-guru/diskusi');
+
+// Hitung unread diskusi materi untuk pengajar
+$unreadDiskusiGuru = 0;
+try {
+    $dbNavGuru = \Config\Database::connect();
+    $idGuruNav = session()->get('id');
+    $emailGuruNav = (string) session()->get('email');
+    if ($idGuruNav) {
+        $rowUnread = $dbNavGuru->table('chat_materi')
+            ->select('COUNT(chat_materi.id_chat_materi) as total')
+            ->join('materi', 'materi.kode_materi = chat_materi.materi')
+            ->where('materi.guru', $idGuruNav)
+            ->where('chat_materi.status_notif', '0')
+            ->where('chat_materi.email !=', $emailGuruNav)
+            ->get()
+            ->getRowArray();
+        $unreadDiskusiGuru = (int) ($rowUnread['total'] ?? 0);
+    }
+} catch (\Throwable $e) {
+    $unreadDiskusiGuru = 0;
+}
 
 // State Checker untuk Active Menu
 $is_master_data = in_array(uri_string(), array_merge($bank_soal, $mapel, $ujian));
@@ -115,6 +137,17 @@ $is_pengaturan  = in_array(uri_string(), array_merge($profile, $settings));
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+
+                            <div class="menu-item me-0 me-lg-2">
+                                <a href="<?= base_url('sw-guru/diskusi') ?>" class="menu-link <?= (in_array(uri_string(), $diskusi) ? 'active' : '') ?> py-3 px-4">
+                                    <span class="menu-title d-flex align-items-center">
+                                        Diskusi Materi
+                                        <?php if ($unreadDiskusiGuru > 0): ?>
+                                            <span class="badge badge-circle badge-danger ms-2 fs-9"><?= $unreadDiskusiGuru > 99 ? '99+' : $unreadDiskusiGuru ?></span>
+                                        <?php endif; ?>
+                                    </span>
+                                </a>
                             </div>
                             </div>
                     </div>

@@ -1,5 +1,6 @@
 <script>
-    // Variabel Global
+    // Variabel Global Notifikasi
+    let notifCsrfName = '<?= csrf_token() ?>';
     let currentCsrfToken = '<?= csrf_hash() ?>';
 
     /**
@@ -12,7 +13,6 @@
         })
         .then(response => response.json())
         .then(res => {
-            // Update CSRF jika dikirim dari server
             if (res.csrf_token) currentCsrfToken = res.csrf_token;
 
             const listContainer = document.getElementById('notification-list');
@@ -22,48 +22,51 @@
 
             const unreadCount = parseInt(res.unread_count) || 0;
 
-            // Update Badge Status
-            if (unreadCount > 0) {
-                mainBadge.classList.remove('d-none');
-                headerBadge.innerText = `${unreadCount > 99 ? '99+' : unreadCount} Baru`;
-                headerBadge.classList.remove('d-none');
-            } else {
-                mainBadge.classList.add('d-none');
-                headerBadge.classList.add('d-none');
+            if (mainBadge && headerBadge) {
+                if (unreadCount > 0) {
+                    mainBadge.classList.remove('d-none');
+                    headerBadge.innerText = `${unreadCount > 99 ? '99+' : unreadCount} Baru`;
+                    headerBadge.classList.remove('d-none');
+                } else {
+                    mainBadge.classList.add('d-none');
+                    headerBadge.classList.add('d-none');
+                }
             }
 
             if (loader) loader.style.display = 'none';
+            if (!listContainer) return;
 
-            // Render HTML List
             if (res.data && res.data.length > 0) {
                 let html = '';
                 res.data.forEach(item => {
-                    const isUnread = item.is_read == 0 ? 'bg-light-primary' : '';
+                    const isUnread = item.is_read == 0 ? 'bg-light-primary border border-primary border-opacity-25' : 'bg-light';
+                    const isDiskusi = (item.title && item.title.toLowerCase().includes('diskusi')) || (item.link && item.link.includes('diskusi'));
+                    const iconClass = isDiskusi ? 'ki-messages text-primary' : 'ki-notification-status text-primary';
+                    const timeStr = item.created_at ? item.created_at.substring(0, 16) : '';
+
                     html += `
-                    <div class="d-flex align-items-center mb-5 p-3 rounded ${isUnread}">
-                        <div class="symbol symbol-35px me-4">
-                            <span class="symbol-label bg-light-primary">
-                                <i class="ki-duotone ki-notification-status fs-2 text-primary">
+                    <a href="${item.link || '#'}" data-id="${item.id}" class="btn-mark-read d-flex align-items-start mb-3 p-3 rounded-3 text-decoration-none ${isUnread}" style="transition: all 0.2s ease;">
+                        <div class="symbol symbol-35px me-3 flex-shrink-0 mt-1">
+                            <span class="symbol-label bg-white shadow-xs">
+                                <i class="ki-duotone ${iconClass} fs-2">
                                     <span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span>
                                 </i>
                             </span>
                         </div>
-                        
-                        <div class="mb-1 flex-grow-1">
-                            <a href="${item.link}" 
-                               class="btn-mark-read text-gray-800 text-hover-primary fw-bold fs-6 d-block" 
-                               data-id="${item.id}">
-                                ${item.title}
-                            </a>
-                            <span class="text-gray-400 fw-semibold d-block fs-8">${item.message}</span>
+                        <div class="flex-grow-1 overflow-hidden">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="text-gray-900 text-hover-primary fw-bold fs-7 text-truncate">${item.title || 'Notifikasi'}</span>
+                            </div>
+                            <span class="text-gray-600 fw-semibold d-block fs-8 mb-1" style="line-height: 1.35;">${item.message || ''}</span>
+                            ${timeStr ? `<span class="text-muted fs-9"><i class="ki-duotone ki-time fs-9 me-1"><span class="path1"></span><span class="path2"></span></i>${timeStr}</span>` : ''}
                         </div>
-                    </div>`;
+                    </a>`;
                 });
                 listContainer.innerHTML = html;
             } else {
                 listContainer.innerHTML = `
                 <div class="d-flex flex-column flex-center py-10">
-                    <i class="ki-duotone ki-notification-on fs-3x text-gray-300 mb-4"><span class="path1"></span><span class="path2"></span></i>
+                    <i class="ki-duotone ki-notification-on fs-3x text-gray-300 mb-3"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i>
                     <span class="text-gray-400 fs-7 fw-bold">Tidak ada notifikasi baru</span>
                 </div>`;
             }
@@ -81,7 +84,7 @@
         
         const formData = new FormData();
         formData.append('uuid', id);
-        formData.append(csrfName, currentCsrfToken);
+        formData.append(notifCsrfName, currentCsrfToken);
 
         try {
             const response = await fetch('<?= base_url("notif/mark-read") ?>', {
@@ -94,7 +97,11 @@
         } catch (err) {
             console.error("Gagal update read status:", err);
         } finally {
-            window.location.href = href;
+            if (href && href !== '#') {
+                window.location.href = href;
+            } else {
+                updateNotification();
+            }
         }
     });
 
@@ -106,10 +113,10 @@
         const btn = $(this);
         const originalContent = btn.html();
 
-        btn.html('<span class="spinner-border spinner-border-sm me-2"></span> Loading...').prop('disabled', true);
+        btn.html('<span class="spinner-border spinner-border-sm me-2"></span> Memproses...').prop('disabled', true);
 
         const formData = new FormData();
-        formData.append(csrfName, currentCsrfToken);
+        formData.append(notifCsrfName, currentCsrfToken);
 
         try {
             const response = await fetch('<?= base_url("notif/mark-all-read") ?>', {
@@ -122,13 +129,6 @@
 
             if (response.ok) {
                 updateNotification();
-                Swal.fire({
-                    text: "Semua notifikasi telah dibaca",
-                    icon: "success",
-                    buttonsStyling: false,
-                    confirmButtonText: "Ok",
-                    customClass: { confirmButton: "btn btn-primary" }
-                });
             }
         } catch (err) {
             console.error("Gagal mark all read:", err);
@@ -140,9 +140,8 @@
     // Inisialisasi
     updateNotification();
     
-    // Realtime Interval (30 Detik)
-    const notifInterval = setInterval(updateNotification, 30000);
+    // Realtime Interval (15 Detik)
+    const notifInterval = setInterval(updateNotification, 15000);
 
-    // Hentikan interval saat user meninggalkan halaman/form submit (Opsional)
     $(window).on('beforeunload', () => clearInterval(notifInterval));
 </script>

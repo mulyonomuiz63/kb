@@ -22,23 +22,30 @@
     <div class="scroll-y mh-325px my-5 px-8">
         <?php if (!empty($notifications)): ?>
             <?php foreach ($notifications as $notif): ?>
-                <div class="d-flex flex-stack py-4 border-bottom border-gray-200 border-bottom-dashed notification-item"
-                    data-uuid="<?= $notif['id'] ?>"
-                    data-link="<?= $notif['link'] ?>"
-                    style="cursor: pointer;">
-
-                    <div class="d-flex align-items-center">
-                        <div class="mb-0 me-2">
-                            <a href="<?= $notif['link'] ?>" 
-                               class="fs-6 text-gray-800 text-hover-primary fw-bold btn-mark-read" 
-                               data-id="<?= $notif['id'] ?>">
-                                <?= esc($notif['title']) ?>
-                            </a>
-                            <div class="text-gray-500 fs-7 d-block"><?= esc($notif['message']) ?></div>
-                            <span class="badge badge-success fs-9"><?= timeAgo($notif['created_at']) ?></span>
-                        </div>
+                <?php
+                    $isDiskusi = stripos($notif['title'] ?? '', 'diskusi') !== false
+                        || stripos($notif['title'] ?? '', 'balasan') !== false
+                        || stripos($notif['title'] ?? '', 'menyebut') !== false
+                        || stripos($notif['link'] ?? '', 'diskusi') !== false;
+                    $iconName = $isDiskusi ? 'ki-messages' : 'ki-notification-status';
+                ?>
+                <a href="<?= esc($notif['link']) ?>"
+                    class="btn-mark-read notif-item d-flex align-items-start py-3 px-3 mb-2 rounded-3 bg-light-primary bg-opacity-50 border border-primary border-opacity-25 text-decoration-none"
+                    data-id="<?= esc($notif['id']) ?>"
+                    style="transition: all 0.2s ease;">
+                    <div class="symbol symbol-35px me-3 mt-1 flex-shrink-0">
+                        <span class="symbol-label bg-white shadow-xs">
+                            <i class="ki-outline <?= $iconName ?> fs-2 text-primary"></i>
+                        </span>
                     </div>
-                </div>
+                    <div class="flex-grow-1 overflow-hidden">
+                        <span class="fs-7 text-gray-900 text-hover-primary fw-bold d-block mb-1 text-truncate">
+                            <?= esc($notif['title']) ?>
+                        </span>
+                        <div class="text-gray-600 fs-8 d-block mb-1" style="line-height: 1.35;"><?= esc($notif['message']) ?></div>
+                        <span class="badge badge-light-success fs-9"><?= timeAgo($notif['created_at']) ?></span>
+                    </div>
+                </a>
             <?php endforeach; ?>
         <?php else: ?>
             <div class="text-center py-10 text-gray-400">Tidak ada notifikasi baru</div>

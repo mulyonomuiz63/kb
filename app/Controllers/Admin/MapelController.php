@@ -369,19 +369,23 @@ class MapelController extends BaseController
                 ])->setStatusCode(404);
             }
 
-            // Ambil data (sesuaikan apakah $user itu array atau object)
-            // Jika find() mengembalikan array (default CI4), gunakan $user['nama_guru']
+            $senderName  = is_array($user) ? ($user['nama_guru'] ?? 'Pengajar') : ($user->nama_guru ?? 'Pengajar');
+            $senderEmail = is_array($user) ? ($user['email'] ?? '') : ($user->email ?? '');
+            $avatar      = is_array($user) ? ($user['avatar'] ?? 'default.jpg') : ($user->avatar ?? 'default.jpg');
+
             $data = [
                 'materi'       => $kode_materi,
-                'nama'         => is_array($user) ? $user['nama_guru'] : $user->nama_guru,
-                'gambar'       => is_array($user) ? $user['avatar'] : $user->avatar,
-                'email'        => is_array($user) ? $user['email'] : $user->email,
-                'text'         => strip_tags($chat_text), // Bersihkan tag HTML
+                'nama'         => $senderName,
+                'gambar'       => $avatar ?: 'default.jpg',
+                'email'        => $senderEmail,
+                'text'         => htmlspecialchars($chat_text),
+                'status_notif' => '0',
                 'date_created' => time()
             ];
 
             try {
                 $this->chatMateriModel->save($data);
+                send_diskusi_notif((string) $kode_materi, '1', (string) $senderEmail, (string) $senderName, (string) $chat_text);
 
                 return $this->response->setJSON([
                     'status' => true,

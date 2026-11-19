@@ -37,8 +37,8 @@
         }
     }
 
-    // Jalankan polling setiap 30 detik
-    setInterval(updateNotificationUI, 30000);
+    // Jalankan polling setiap 15 detik
+    setInterval(updateNotificationUI, 15000);
 
     /**
      * Event Handlers (Delegasi ke Document)
@@ -52,6 +52,7 @@
             const uuid = $(this).data('id');
             const fullUrl = $(this).attr('href');
             const targetUrl = '<?= base_url("api/notifications/mark-as-read") ?>';
+            const csrfTokenVal = $('meta[name="csrf-token"]').attr('content') || '<?= csrf_hash() ?>';
 
             // Efek loading
             $(this).closest('.notif-item').css('opacity', '0.5');
@@ -59,21 +60,27 @@
             try {
                 const formData = new FormData();
                 formData.append('uuid', uuid);
-                formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+                formData.append('<?= csrf_token() ?>', csrfTokenVal);
 
-                await fetch(targetUrl, {
+                const res = await fetch(targetUrl, {
                     method: 'POST',
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest'
                     },
                     body: formData
                 });
+                const json = await res.json();
+                if (json && json.csrf_token) {
+                    $('meta[name="csrf-token"]').attr('content', json.csrf_token);
+                }
             } catch (err) {
                 console.error("Gagal menandai baca:", err);
             } finally {
                 // Redirect tetap dilakukan baik fetch berhasil atau gagal
                 if (fullUrl && fullUrl !== '#') {
                     window.location.href = fullUrl;
+                } else {
+                    updateNotificationUI();
                 }
             }
         });
@@ -85,13 +92,14 @@
             const targetUrl = '<?= base_url("api/notifications/mark-all-read") ?>';
             const btn = $(this);
             const originalText = btn.html();
+            const csrfTokenVal = $('meta[name="csrf-token"]').attr('content') || '<?= csrf_hash() ?>';
 
             // Loading State
             btn.html('<span class="spinner-border spinner-border-sm me-2"></span> Memproses...').prop('disabled', true);
 
             try {
                 const formData = new FormData();
-                formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+                formData.append('<?= csrf_token() ?>', csrfTokenVal);
 
                 const response = await fetch(targetUrl, {
                     method: 'POST',
@@ -102,6 +110,10 @@
                 });
 
                 if (response.ok) {
+                    const json = await response.json();
+                    if (json && json.csrf_token) {
+                        $('meta[name="csrf-token"]').attr('content', json.csrf_token);
+                    }
                     // Sembunyikan badge secara instan
                     $('#main-notif-badge').fadeOut();
 

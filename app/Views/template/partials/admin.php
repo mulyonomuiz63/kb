@@ -43,6 +43,22 @@ $ikh = array('sw-pic/ikh');
 $bankSoal = array('sw-admin/bank-soal');
 $pengaturan_pool = array_merge($profile, $settings);
 
+$unreadDiskusiAdmin = 0;
+try {
+    $dbNavAdmin = \Config\Database::connect();
+    $rowUnreadAdmin = $dbNavAdmin->table('chat_materi')
+        ->select('COUNT(chat_materi.id_chat_materi) as total')
+        ->join('materi', 'materi.kode_materi = chat_materi.materi')
+        ->join('guru', 'guru.id_guru = materi.guru', 'left')
+        ->where('chat_materi.status_notif', '0')
+        ->where('chat_materi.email != IFNULL(guru.email, "")', null, false)
+        ->get()
+        ->getRowArray();
+    $unreadDiskusiAdmin = (int) ($rowUnreadAdmin['total'] ?? 0);
+} catch (\Throwable $e) {
+    $unreadDiskusiAdmin = 0;
+}
+
 // State Checker
 $current_uri = uri_string();
 $is_master_active = in_array($current_uri, $master_data_pool);
@@ -315,7 +331,12 @@ $is_pengaturan_active = in_array($current_uri, $pengaturan_pool);
 
                             <div class="menu-item me-0 me-lg-2">
                                 <a href="<?= base_url('sw-admin/diskusi') ?>" class="menu-link <?= (in_array($current_uri, $diskusi) ? 'active' : '') ?> py-3 px-4">
-                                    <span class="menu-title">Diskusi</span>
+                                    <span class="menu-title d-flex align-items-center">
+                                        Diskusi
+                                        <?php if ($unreadDiskusiAdmin > 0): ?>
+                                            <span class="badge badge-circle badge-danger ms-2 fs-9"><?= $unreadDiskusiAdmin > 99 ? '99+' : $unreadDiskusiAdmin ?></span>
+                                        <?php endif; ?>
+                                    </span>
                                 </a>
                             </div>
                             <div class="menu-item me-0 me-lg-2">

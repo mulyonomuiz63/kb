@@ -69,6 +69,7 @@
                             <tr class="text-start text-muted fw-bold fs-7 text-uppercase gs-0">
                                 <th class="min-w-150px">Judul</th>
                                 <th class="min-w-100px">File Lampiran</th>
+                                <th class="min-w-100px">Diskusi</th>
                                 <th class="min-w-100px">Status</th>
                                 <th class="text-end min-w-100px">Opsi</th>
                             </tr>
@@ -78,11 +79,21 @@
                                 <tr>
                                     <td><span class="text-gray-800 fw-bold"><?= $m->nama_materi; ?></span></td>
                                     <?php $jml_file = $db->query("select count(*) as total_file from file where kode_file = '$m->kode_materi'")->getRow(); ?>
+                                    <?php $jml_chat = $db->query("select count(*) as total_chat, sum(case when status_notif = '0' then 1 else 0 end) as unread_chat from chat_materi where materi = " . $db->escape($m->kode_materi))->getRow(); ?>
                                     <td>
                                         <span class="badge badge-light-dark fw-bold">
                                             <i class="ki-duotone ki-file fs-7 me-1"><span class="path1"></span><span class="path2"></span></i>
                                             (<?= !empty($jml_file) ? $jml_file->total_file : 0; ?>) File
                                         </span>
+                                    </td>
+                                    <td>
+                                        <a href="<?= base_url('sw-guru/diskusi?materi=' . urlencode($m->kode_materi)) ?>" class="badge badge-light-primary fw-bold text-hover-primary text-decoration-none">
+                                            <i class="ki-duotone ki-messages fs-7 me-1 text-primary"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
+                                            <?= (int) ($jml_chat->total_chat ?? 0) ?> Pesan
+                                            <?php if ((int) ($jml_chat->unread_chat ?? 0) > 0): ?>
+                                                <span class="badge badge-circle badge-danger ms-2 fs-9"><?= (int) $jml_chat->unread_chat ?></span>
+                                            <?php endif; ?>
+                                        </a>
                                     </td>
                                     <td>
                                         <?= $m->status == 0 ? '<span class="badge badge-light-warning">Coming Soon</span>' : '<span class="badge badge-light-success">Ready</span>'; ?>

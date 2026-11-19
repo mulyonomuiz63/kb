@@ -227,11 +227,17 @@ class MateriController extends BaseController
         if ($this->request->isAJAX()) {
             $kode_materi = $this->request->getVar('kode_materi');
             $last_id = $this->request->getVar('last_id') ?? 0;
-            
+
+            $materiRow = $this->materiModel
+                ->select('materi.*, guru.nama_guru, guru.email as email_guru')
+                ->join('guru', 'guru.id_guru = materi.guru', 'left')
+                ->where('materi.kode_materi', $kode_materi)
+                ->first();
+
             // Ambil pesan hanya yang melebihi ID terakhir yang ditampilkan di layar
             $chat_materi = $this->chatMateriModel->where('materi', $kode_materi)
                                                  ->where('id_chat_materi >', $last_id)
-                                                 ->orderBy('date_created', 'ASC')
+                                                 ->orderBy('id_chat_materi', 'ASC')
                                                  ->findAll();
                                                  
             // Ambil partisipan untuk fitur Mention (@)
@@ -240,14 +246,22 @@ class MateriController extends BaseController
                                                       ->groupBy('nama')
                                                       ->findAll();
             $participants = [];
+            if (!empty($materiRow['nama_guru'])) {
+                $participants[] = $materiRow['nama_guru'];
+            }
             foreach ($participantsData as $p) {
-                $participants[] = is_object($p) ? $p->nama : $p['nama'];
+                $pName = is_object($p) ? $p->nama : $p['nama'];
+                if ($pName && !in_array($pName, $participants, true)) {
+                    $participants[] = $pName;
+                }
             }
 
             return $this->response->setJSON([
-                'messages' => $chat_materi,
+                'messages'     => $chat_materi,
                 'participants' => $participants,
-                'token' => csrf_hash()
+                'guru_email'   => $materiRow['email_guru'] ?? '',
+                'guru_nama'    => $materiRow['nama_guru'] ?? '',
+                'token'        => csrf_hash()
             ]);
         }
     }
@@ -256,39 +270,35 @@ class MateriController extends BaseController
     {
         if ($this->request->isAJAX()) {
             try {
-                $kode_materi = $this->request->getPost('kode_materi');
-                $chat_text   = (string) $this->request->getPost('chat_materi');
-                $link        = $this->request->getPost('link');
-                $linkadmin   = $this->request->getPost('linkadmin');
+                $kode_materi = (string) $this->request->getPost('kode_materi');
+                $chat_text   = trim((string) $this->request->getPost('chat_materi'));
+
+                if ($kode_materi === '' || $chat_text === '') {
+                    return $this->response->setJSON([
+                        'status'  => 'error',
+                        'message' => 'Pesan tidak boleh kosong.',
+                        'token'   => csrf_hash()
+                    ])->setStatusCode(400);
+                }
 
                 $user = $this->siswaModel->asObject()->find(session('id'));
-                $dataMateri = $this->materiModel->where('kode_materi', $kode_materi)->first();
-
-                if ($dataMateri) {
-                    send_notif(
-                        $dataMateri['guru'],
-                        'Pesan baru: ' . session()->get('nama'),
-                        mb_strimwidth($chat_text, 0, 40, "..."),
-                        base_url('sw-guru/materi/lihat-materi/' . $link)
-                    );
-                    send_notif(
-                        '1',
-                        'Pesan baru: ' . session()->get('nama'),
-                        mb_strimwidth($dataMateri['nama_materi'], 0, 40, "..."),
-                        base_url('sw-admin/diskusi')
-                    );
-                }
+                $senderName  = (string) (session()->get('nama') ?: ($user->nama_siswa ?? 'Peserta'));
+                $senderEmail = (string) (session()->get('email') ?: ($user->email ?? ''));
+                $avatar      = !empty($user->avatar) ? $user->avatar : 'default.jpg';
 
                 $data = [
                     'materi'       => $kode_materi,
-                    'nama'         => session()->get('nama'),
-                    'gambar'       => $user->avatar ?? 'default.png',
-                    'email'        => session()->get('email'),
+                    'nama'         => $senderName,
+                    'gambar'       => $avatar,
+                    'email'        => $senderEmail,
                     'text'         => htmlspecialchars($chat_text),
+                    'status_notif' => '0',
                     'date_created' => time()
                 ];
 
                 if ($this->chatMateriModel->save($data)) {
+                    send_diskusi_notif($kode_materi, '2', $senderEmail, $senderName, $chat_text);
+
                     return $this->response->setJSON([
                         'status' => 'success',
                         'token'  => csrf_hash()
@@ -310,13 +320,14 @@ class MateriController extends BaseController
         if ($this->request->isAJAX()) {
             try {
                 $id_chat = $this->request->getPost('id_chat');
-                $text    = (string) $this->request->getPost('text');
+                $text    = trim((string) $this->request->getPost('text'));
                 $email   = session()->get('email');
 
                 $pesan = $this->chatMateriModel->where('id_chat_materi', $id_chat)->first();
-                $pesanEmail = is_object($pesan) ? $pesan->email : $pesan['email'];
+                $pesanEmail = is_object($pesan) ? $pesan->email : ($pesan['email'] ?? '');
+                $pesanDate  = is_object($pesan) ? $pesan->date_created : ($pesan['date_created'] ?? 0);
 
-                if ($pesan && $pesanEmail === $email) {
+                if ($pesan && $pesanEmail === $email && (time() - $pesanDate) <= 300) {
                     $this->chatMateriModel->update($id_chat, [
                         'text' => htmlspecialchars($text)
                     ]);
@@ -327,7 +338,7 @@ class MateriController extends BaseController
                     ]);
                 }
 
-                return $this->response->setJSON(['status' => 'error', 'message' => 'Akses ditolak', 'token' => csrf_hash()])->setStatusCode(403);
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Pesan tidak dapat diedit (batas waktu 5 menit habis atau akses ditolak).', 'token' => csrf_hash()])->setStatusCode(400);
             } catch (\Exception $e) {
                 return $this->response->setJSON(['status' => 'error', 'message' => $e->getMessage(), 'token' => csrf_hash()])->setStatusCode(500);
             }

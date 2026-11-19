@@ -19,6 +19,16 @@ $routes->group('sw-guru', ['filter' => 'roleCheck:3,1'], function ($routes) {
         $routes->post('get-file-materi', 'Guru\MateriController::getFileMateri');
         $routes->post('get-chat-materi', 'Guru\MateriController::getChatMateri');
         $routes->post('chat-materi', 'Guru\MateriController::ChatMateri');
+        $routes->post('update-chat-materi', 'Guru\MateriController::updateChatMateri');
+        $routes->post('delete-chat-materi', 'Guru\MateriController::deleteChatMateri');
+    });
+
+    $routes->group('diskusi', function ($routes) {
+        $routes->get('/', 'Guru\DiskusiController::index');
+        $routes->get('get-messages/(:any)', 'Guru\DiskusiController::getMessages/$1');
+        $routes->post('send', 'Guru\DiskusiController::sendMessage');
+        $routes->post('update-message', 'Guru\DiskusiController::updateMessage');
+        $routes->post('delete-message', 'Guru\DiskusiController::deleteMessage');
     });
 
     $routes->group('ujian', function ($routes) {

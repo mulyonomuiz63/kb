@@ -245,13 +245,16 @@
     min-height: 560px;
     display: flex;
     flex-direction: column;
-    border-radius: 0.85rem;
-    overflow: hidden;
-    background: #ffffff;
+    border-radius: 0.85rem !important;
+    overflow: hidden !important;
+    background: transparent !important;
   }
 
   .chat-header-gradient {
-    background: linear-gradient(135deg, #0086a7 0%, #00566b 100%);
+    background: linear-gradient(135deg, #0086a7 0%, #00566b 100%) !important;
+    border-radius: 0.85rem 0.85rem 0 0 !important;
+    border-bottom: none !important;
+    min-height: auto !important;
   }
 
   .inner-chat-materi {
@@ -562,24 +565,26 @@
           <div class="chat-card-container card card-flush shadow-sm animate__animated animate__fadeInRight border-0">
             
             <!-- HEADER CHAT -->
-            <div class="card-header pt-4 pb-4 px-4 chat-header-gradient flex-shrink-0">
-              <div class="card-title d-flex align-items-center justify-content-between w-100 m-0">
-                <div class="d-flex flex-column pe-2" style="max-width: 65%;">
-                  <div class="d-flex align-items-center gap-2">
-                    <i class="ki-outline ki-messages text-white fs-3"></i>
-                    <span class="card-label fw-bold text-white fs-5 lh-1">Diskusi Materi</span>
-                  </div>
-                  <span class="text-white opacity-75 fw-semibold fs-8 text-truncate mt-1" id="judul_materi_chat" style="max-width: 100%;">
-                    Tanyakan hal yang belum dimengerti
-                  </span>
+            <div class="px-4 py-3 chat-header-gradient flex-shrink-0 d-flex align-items-center justify-content-between gap-2 flex-nowrap">
+              <div class="d-flex flex-column overflow-hidden pe-1" style="min-width: 0; flex: 1 1 auto;">
+                <div class="d-flex align-items-center gap-2">
+                  <i class="ki-outline ki-messages text-white fs-3 flex-shrink-0"></i>
+                  <span class="fw-bolder text-white fs-5 lh-1 text-nowrap">Diskusi Materi</span>
                 </div>
-                <div class="card-toolbar">
-                  <button type="button" class="btn btn-sm btn-light fw-bold text-primary d-flex align-items-center px-3 py-2 shadow-sm rounded-pill" data-bs-toggle="modal" data-bs-target="#staticBackdrop" title="Download File Materi">
-                    <i class="ki-outline ki-file-down fs-4 me-1 text-primary"></i>
-                    <span class="fs-8">File Modul</span>
-                    <span id="fileCountBadge" class="badge badge-circle badge-danger ms-2 fs-9" style="display: none;">0</span>
-                  </button>
-                </div>
+                <span class="text-white opacity-75 fw-semibold fs-8 text-truncate d-block mt-1" id="judul_materi_chat" title="<?= esc($materi->nama_materi ?? '') ?>">
+                  <?= esc($materi->nama_materi ?? 'Tanyakan hal yang belum dimengerti') ?>
+                </span>
+              </div>
+
+              <div class="d-flex align-items-center gap-2 flex-shrink-0 flex-nowrap">
+                <button type="button" class="btn btn-sm btn-light fw-bold text-primary d-inline-flex align-items-center px-3 py-2 shadow-sm rounded-pill text-nowrap" data-bs-toggle="modal" data-bs-target="#staticBackdrop" title="Download File Materi">
+                  <i class="ki-outline ki-file-down fs-4 me-1 text-primary"></i>
+                  <span class="fs-8">File Modul</span>
+                  <span id="fileCountBadge" class="badge badge-circle badge-danger ms-1 fs-9" style="display: none;">0</span>
+                </button>
+                <a href="<?= base_url('sw-siswa/diskusi?materi=' . urlencode($materi->kode_materi)) ?>" id="btnOpenFullDiskusi" class="btn btn-sm btn-icon btn-white-glass rounded-circle shadow-sm flex-shrink-0" style="width: 34px; height: 34px;" title="Buka Ruang Diskusi Layar Penuh">
+                  <i class="ki-outline ki-maximize fs-4 text-primary"></i>
+                </a>
               </div>
             </div>
             
@@ -744,7 +749,7 @@
 
       if (videoHeight > 300) {
         chatCard.css('height', videoHeight + 'px');
-        const chatHeaderHeight = chatCard.find('.card-header').outerHeight(true) || 60;
+        const chatHeaderHeight = chatCard.find('.chat-header-gradient').outerHeight(true) || 64;
         const chatFooterHeight = chatCard.find('.card-footer').outerHeight(true) || 120;
         const chatBody = chatCard.find('.card-body');
         const pt = parseFloat(chatBody.css('padding-top')) || 16;
@@ -875,6 +880,7 @@
       const initialKode = firstThumb.data('kode_materi');
       $('#judul_materi_chat').text(initialTitle);
       $('#kode_materi').val(initialKode);
+      $('#btnOpenFullDiskusi').attr('href', '<?= base_url('sw-siswa/diskusi') ?>?materi=' + encodeURIComponent(initialKode));
       $('#active_video_title').text(initialTitle);
       $('#active_video_title_sub').text(initialTitle);
       $('#active_video_code_badge').html('<i class="ki-outline ki-code fs-8 me-1"></i> ' + initialKode);
@@ -1041,6 +1047,7 @@
       $(this).addClass('border border-primary border-3');
       $('#kode_materi').val(kode_materi);
       $('#judul_materi_chat').text(title);
+      $('#btnOpenFullDiskusi').attr('href', '<?= base_url('sw-siswa/diskusi') ?>?materi=' + encodeURIComponent(kode_materi));
       $('#active_video_title').text(title);
       $('#active_video_title_sub').text(title);
       $('#active_video_code_badge').html('<i class="ki-outline ki-code fs-8 me-1"></i> ' + kode_materi);
@@ -1252,6 +1259,7 @@
           let html = '';
           let hasNewMessage = false;
           const myEmail = '<?= session()->get('email') ?>';
+          const guruEmail = (res.guru_email || '').toLowerCase();
           const currentTime = Math.floor(Date.now() / 1000);
 
           data.forEach(m => {
@@ -1264,7 +1272,13 @@
               lastDisplayedId = msgId;
               hasNewMessage = true;
 
-              const isMe = (m.email && myEmail && m.email.toLowerCase() === myEmail.toLowerCase());
+              const msgEmail = (m.email || '').toLowerCase();
+              const isMe = (msgEmail && myEmail && msgEmail === myEmail.toLowerCase());
+              const isGuru = (msgEmail && guruEmail && msgEmail === guruEmail);
+              const roleBadge = isGuru
+                ? `<span class="badge badge-primary fs-9 px-2 py-1 me-2"><i class="ki-outline ki-verify text-white fs-9 me-1"></i>Pengajar</span>`
+                : '';
+
               const date = new Date(m.date_created * 1000);
               const timeStr = date.toLocaleTimeString([], {
                 hour: '2-digit',
@@ -1272,7 +1286,7 @@
               });
               
               const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(senderName)}&background=0086a7&color=fff&bold=true`;
-              const avatarUrl = m.gambar && m.gambar !== 'default.png' 
+              const avatarUrl = m.gambar && m.gambar !== 'default.png' && m.gambar !== 'default.jpg'
                 ? '<?= base_url('assets/app-assets/user/') ?>' + m.gambar 
                 : defaultAvatar;
 
@@ -1300,7 +1314,7 @@
                         <span class="text-muted fs-9 me-2">${timeStr}</span>
                         <span class="fs-8 fw-bold text-gray-900 me-2">Anda</span>
                         <div class="symbol symbol-25px symbol-circle">
-                          <img alt="${senderName}" src="${avatarUrl}" onerror="this.src='${defaultAvatar}'" />
+                          <img alt="${senderName}" src="${avatarUrl}" onerror="this.onerror=null;this.src='${defaultAvatar}'" />
                         </div>
                       </div>
                       <div class="p-3 chat-bubble-me text-gray-800 fw-semibold text-start chat-message-text fs-7" id="msg-text-${msgId}">
@@ -1311,20 +1325,21 @@
                   </div>`;
               } else {
                 html += `
-                  <div class="d-flex justify-content-start mb-3">
+                  <div class="d-flex justify-content-start mb-3" id="chat-item-${msgId}">
                     <div class="d-flex flex-column align-items-start" style="max-width: 88%;">
-                      <div class="d-flex align-items-center mb-1">
+                      <div class="d-flex align-items-center mb-1 flex-wrap">
                         <div class="symbol symbol-25px symbol-circle me-2">
-                          <img alt="${senderName}" src="${avatarUrl}" onerror="this.src='${defaultAvatar}'" />
+                          <img alt="${senderName}" src="${avatarUrl}" onerror="this.onerror=null;this.src='${defaultAvatar}'" />
                         </div>
-                        <span class="fs-8 fw-bold text-gray-900 me-2">${senderName}</span>
+                        <span class="fs-8 fw-bold text-gray-900 me-1">${senderName}</span>
+                        ${roleBadge}
                         <span class="text-muted fs-9">${timeStr}</span>
                       </div>
-                      <div class="p-3 chat-bubble-other text-gray-800 fw-semibold text-start chat-message-text fs-7">
+                      <div class="p-3 chat-bubble-other ${isGuru ? 'border-primary border-opacity-50 bg-light-primary bg-opacity-25' : ''} text-gray-800 fw-semibold text-start chat-message-text fs-7">
                         ${formatMessage(m.text)}
                       </div>
                       <div class="mt-1 ms-2">
-                        <span class="badge badge-light badge-sm cursor-pointer text-hover-primary" onclick="replyTo('${senderName}')">
+                        <span class="badge badge-light badge-sm cursor-pointer text-hover-primary" onclick="replyTo('${senderName.replace(/'/g, "\\'")}')">
                           <i class="ki-outline ki-left fs-9 me-1"></i>Balas
                         </span>
                       </div>

@@ -36,6 +36,20 @@
 
                             <div class="col-lg-6 mb-3">
                                 <div class="menu-item p-0 m-0">
+                                    <a href="<?= base_url('sw-siswa/diskusi') ?>" class="menu-link <?= ($current_uri == 'sw-siswa/diskusi') ? 'active' : '' ?>">
+                                        <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
+                                            <i class="ki-outline ki-messages text-primary fs-1"></i>
+                                        </span>
+                                        <span class="d-flex flex-column">
+                                            <span class="fs-6 fw-bold text-gray-800">Diskusi Materi</span>
+                                            <span class="fs-7 fw-semibold text-muted">Tanya jawab modul & video</span>
+                                        </span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6 mb-3">
+                                <div class="menu-item p-0 m-0">
                                     <a href="<?= base_url('sw-siswa/webinar') ?>" class="menu-link <?= ($current_uri == 'sw-siswa/webinar') ? 'active' : '' ?>">
                                         <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
                                             <i class="ki-outline ki-award text-primary fs-1"></i>
