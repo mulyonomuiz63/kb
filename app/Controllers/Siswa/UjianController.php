@@ -171,6 +171,15 @@ class UjianController extends BaseController
             // Jika status sudah 'S' (Selesai), langsung redirect ke list ujian
             return redirect()->to(base_url('sw-siswa/ujian'))->with('pesan', 'Ujian telah selesai dan tidak dapat diakses kembali.');
         }
+
+        // Cek jika pelanggaran sudah mencapai batas maksimal 5 kali
+        if (!empty($cek_ujian) && (int)($cek_ujian->jml_pelanggaran ?? 0) >= 5) {
+            if ($cek_ujian->status !== 'S') {
+                $this->selesaikanUjianOtomatisInternal(decrypt_url($kode_ujian), decrypt_url($id_ujian), $idsiswa);
+            }
+            return redirect()->to(base_url('sw-siswa/ujian'))->with('pesan', 'Ujian telah dihentikan karena Anda telah mencapai batas maksimal 5 kali pelanggaran.');
+        }
+
         // Ambil waktu dari device (jika dikirim via GET), jika tidak pakai waktu server
         $deviceTimeRequest = $this->request->getGet('device_time');
         $now = (!empty($deviceTimeRequest)) ? date('Y-m-d H:i', strtotime($deviceTimeRequest)) : date('Y-m-d H:i');
@@ -209,6 +218,7 @@ class UjianController extends BaseController
                 ->set('end_ujian', $endUjian) // Menggunakan waktu lokal device + durasi
                 ->set('status', 'U')
                 ->set('kuota', $kuota)
+                ->set('jml_pelanggaran', 0) // Reset ke 0 saat pertama kali mulai
                 ->where('id_ujian', decrypt_url($id_ujian))
                 ->update();
         }
@@ -297,18 +307,101 @@ class UjianController extends BaseController
         }
     }
 
+    public function catatPelanggaran()
+    {
+        $id_ujian   = $this->request->getPost('id_ujian');
+        $kode_ujian = $this->request->getPost('kode_ujian');
+        $tipe       = $this->request->getPost('tipe') ?? 'meninggalkan_halaman';
+        $id_siswa   = session()->get('id') ?? session('id') ?? $this->request->getPost('id_siswa');
+
+        if (!$id_ujian) {
+            return $this->response->setJSON([
+                'status' => false,
+                'pesan'  => 'ID Ujian tidak ditemukan'
+            ]);
+        }
+
+        $db = \Config\Database::connect();
+        $ujian = $db->table('ujian')->where('id_ujian', $id_ujian)->get()->getRowObject();
+
+        if (!$ujian) {
+            return $this->response->setJSON([
+                'status' => false,
+                'pesan'  => 'Ujian tidak ditemukan'
+            ]);
+        }
+
+        if ($ujian->status === 'S') {
+            return $this->response->setJSON([
+                'status'          => true,
+                'jml_pelanggaran' => (int)($ujian->jml_pelanggaran ?? 0),
+                'max_pelanggaran' => 5,
+                'force_submit'    => true
+            ]);
+        }
+
+        $currentCount = (int)($ujian->jml_pelanggaran ?? 0);
+        $clientCount  = (int)$this->request->getPost('client_count');
+
+        // Jika client mengirimkan angka pelanggaran spesifik (misal dari client atau sync_reload),
+        // gunakan angka tersebut tanpa menambah +1 lagi. Hanya tambah +1 jika tidak ada client_count.
+        if ($clientCount > 0) {
+            $newCount = max($currentCount, $clientCount);
+        } else {
+            $newCount = $currentCount + 1;
+        }
+
+        // Update langsung ke tabel ujian
+        $db->table('ujian')
+            ->where('id_ujian', $id_ujian)
+            ->update(['jml_pelanggaran' => $newCount]);
+
+        $forceSubmit = false;
+        if ($newCount >= 5) {
+            $forceSubmit = true;
+            $this->selesaikanUjianOtomatisInternal($kode_ujian ?: $ujian->kode_ujian, $id_ujian, $ujian->id_siswa);
+        }
+
+        return $this->response->setJSON([
+            'status'          => true,
+            'jml_pelanggaran' => $newCount,
+            'max_pelanggaran' => 5,
+            'force_submit'    => $forceSubmit,
+            'tipe'            => $tipe
+        ]);
+    }
+
     public function kirimUjianSelesai()
     {
-        $db = \Config\Database::connect();
-        $db->transBegin();
-
         try {
             $kode_ujian = $this->request->getVar('kode_ujian');
             $id_ujian   = $this->request->getVar('id_ujian');
             $waktu_selesai_client = $this->request->getVar('waktu_selesai_client');
             $id_siswa   = session('id');
 
-            // 1. Update status di tabel ujianSiswaModel (detail jawaban siswa)
+            $sukses = $this->selesaikanUjianOtomatisInternal($kode_ujian, $id_ujian, $id_siswa, $waktu_selesai_client);
+
+            if (!$sukses) {
+                return redirect()->to('sw-siswa/ujian')->with('pesan', 'Gagal menyimpan ujian. Pastikan koneksi internet stabil.');
+            } else {
+                return redirect()->to('sw-siswa/ujian')->with('success', 'Ujian telah dikerjakan');
+            }
+        } catch (\Throwable $e) {
+            return redirect()->to('sw-siswa/ujian')->with('pesan', $e->getMessage());
+        }
+    }
+
+    private function selesaikanUjianOtomatisInternal($kode_ujian, $id_ujian, $id_siswa, $waktu_selesai_client = null)
+    {
+        $db = \Config\Database::connect();
+        $db->transBegin();
+
+        try {
+            if (empty($waktu_selesai_client)) {
+                $waktu_selesai_client = date('Y-m-d H:i:s');
+            }
+
+            // 1. Update status di tabel ujian_siswa
             $this->ujianSiswaModel
                 ->set('status', 'selesai')
                 ->set('date_send', time())
@@ -316,13 +409,13 @@ class UjianController extends BaseController
                 ->where('siswa', $id_siswa)
                 ->update();
 
-            // 2. Ambil data siswa (Gunakan getRowObject karena 1 email = 1 siswa)
+            // 2. Ambil data siswa
             $siswa = $this->siswaModel
-                ->where('email', session()->get('email'))
+                ->where('id_siswa', $id_siswa)
                 ->get()
                 ->getRowObject();
 
-            if ($siswa) { // Pastikan data siswa ada
+            if ($siswa) {
                 // 3. Ambil data ujian untuk kalkulasi nilai
                 $ujian = $this->ujianMasterModel
                     ->getAllUntukNilaiUjian($siswa->id_siswa, $kode_ujian);
@@ -331,7 +424,6 @@ class UjianController extends BaseController
                     $kode_ujian_loop = $u->kode_ujian;
                     $jumlah_benar    = $u->benar ?? 0;
 
-                    // Cek jumlah soal yang ada di tabel siswa
                     $ujian_detail = $this->ujianSiswaModel
                         ->where('ujian', $kode_ujian_loop)
                         ->where('siswa', $id_siswa)
@@ -340,36 +432,33 @@ class UjianController extends BaseController
 
                     $total_soal = count($ujian_detail);
 
-                    // CEGAH ERROR "DIVISION BY ZERO"
                     if ($total_soal > 0) {
                         $nilai = round(($jumlah_benar / $total_soal) * 100);
                     } else {
                         $nilai = 0;
                     }
 
-                    // 4. UPDATE KE TABEL ujianModel DENGAN BENAR DAN AMAN
                     $this->ujianModel
                         ->set('status', 'S')
                         ->set('nilai', $nilai)
                         ->set('updated_at', $waktu_selesai_client)
-                        ->where('kode_ujian', $kode_ujian_loop) // MENGGUNAKAN VARIABEL LOOP!
+                        ->where('kode_ujian', $kode_ujian_loop)
                         ->where('id_ujian', $id_ujian)
-                        ->where('id_siswa', $id_siswa) // SANGAT PENTING: Agar tidak menimpa nilai siswa lain!
+                        ->where('id_siswa', $id_siswa)
                         ->update();
                 }
             }
 
-            // 5. Finalisasi Transaksi
             if ($db->transStatus() === false) {
                 $db->transRollback();
-                return redirect()->to('sw-siswa/ujian')->with('pesan', 'Gagal menyimpan ujian. Pastikan koneksi internet stabil.');
+                return false;
             } else {
                 $db->transCommit();
-                return redirect()->to('sw-siswa/ujian')->with('success', 'Ujian telah dikerjakan');
+                return true;
             }
         } catch (\Throwable $e) {
             $db->transRollback();
-            return redirect()->to('sw-siswa/ujian')->with('pesan', $e->getMessage());
+            return false;
         }
     }
 
@@ -422,6 +511,7 @@ class UjianController extends BaseController
                     ->set('end_ujian', $endTime)
                     ->set('status', 'U')
                     ->set('kuota', $kuota)
+                    ->set('jml_pelanggaran', 0) // Reset pelanggaran ke 0 saat ujian ulang / remedial baru
                     ->where('id_ujian', $id_ujian)
                     ->update();
             }

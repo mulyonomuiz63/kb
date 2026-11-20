@@ -76,6 +76,7 @@ $routes->group('sw-siswa', ['filter' => 'roleCheck:2'], function ($routes) {
         $routes->get('lihat-pg/(:any)/(:any)/(:any)', 'Siswa\UjianController::lihatPg/$1/$2/$3');
         $routes->post('kirim-ujian', 'Siswa\UjianController::kirimUjian');
         $routes->post('kirim-ujian-selesai', 'Siswa\UjianController::kirimUjianSelesai');
+        $routes->post('catat-pelanggaran', 'Siswa\UjianController::catatPelanggaran');
 
         //untuk review soal yang sudah dikerjakan
         $routes->get('review-ujian/(:segment)', 'Siswa\UjianController::reviewUjian/$1');

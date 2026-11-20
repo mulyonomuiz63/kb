@@ -92,6 +92,10 @@ $ujianSiswaModel = new UjianSiswaModel(); ?>
 
 <div id="kt_app_content_container" class="app-container container-xxl">
     <input type="hidden" id="kode_ujian" value="<?= $ujian->kode_ujian; ?>">
+    <input type="hidden" id="id_ujian" value="<?= $ujian->id_ujian; ?>">
+    <input type="hidden" id="id_siswa" value="<?= session()->get('id') ?? session('id') ?? $ujian->id_siswa; ?>">
+    <input type="hidden" id="initial_cheat_count" value="<?= (int)($ujian->jml_pelanggaran ?? 0); ?>">
+    <input type="hidden" id="is_remedial_flag" value="<?= session()->getFlashdata('pesan') ? '1' : '0'; ?>">
 
     <div class="d-none">
         <span id="hour">00</span>:<span id="minute">00</span>:<span id="second">00</span>:<span id="count">00</span>
@@ -105,7 +109,13 @@ $ujianSiswaModel = new UjianSiswaModel(); ?>
                         <span class="fw-bold text-gray-900 fs-3"><?= $ujian->nama_ujian; ?></span>
                         <span class="text-muted mt-1 fw-semibold fs-7">Siswa: <?= session()->get('nama'); ?></span>
                     </div>
-                    <div class="card-toolbar">
+                    <div class="card-toolbar d-flex align-items-center gap-4 flex-wrap">
+                        <div class="d-flex flex-column align-items-end">
+                            <span class="text-muted fs-8 fw-bold text-uppercase mb-1">Status Keamanan</span>
+                            <span id="badge_pelanggaran" class="badge badge-light-<?= ((int)($ujian->jml_pelanggaran ?? 0) > 0) ? 'danger' : 'success'; ?> fs-7 fw-bolder px-3 py-2">
+                                Pelanggaran: <span id="cheat_count_display"><?= (int)($ujian->jml_pelanggaran ?? 0); ?></span> / 5
+                            </span>
+                        </div>
                         <div class="d-flex flex-column align-items-end">
                             <span class="text-muted fs-8 fw-bold text-uppercase mb-1">Sisa Waktu</span>
                             <div id="jam_skrng" class="badge badge-light-danger fs-3 fw-bolder px-4 py-3">00 : 00 : 00</div>
@@ -530,6 +540,9 @@ $ujianSiswaModel = new UjianSiswaModel(); ?>
             if (result.isConfirmed) {
                 const localTime = new Date().toLocaleString('sv-SE').replace(' ', 'T');
                 $("#waktu_selesai_client").val(localTime);
+                try {
+                    localStorage.removeItem('exam_violation_' + $('#kode_ujian').val() + '_' + $('#id_ujian').val());
+                } catch(e) {}
                 Swal.fire({
                     text: "Ujian sedang dikirim...",
                     icon: "success",
@@ -551,10 +564,205 @@ $ujianSiswaModel = new UjianSiswaModel(); ?>
     });
 </script>
 <script>
+    // =========================================================================
+    // SISTEM KEAMANAN & DETEKSI KECURANGAN UJIAN KETAT (ANTI-CHEAT SYSTEM)
+    // =========================================================================
+    const MAX_VIOLATION = 5;
+    const idUjianVal = $('#id_ujian').val();
+    const kodeUjianVal = $('#kode_ujian').val();
+    const idSiswaVal = $('#id_siswa').val();
+    const isRemedial = $('#is_remedial_flag').val() === '1';
+    const storageKey = 'exam_violation_' + kodeUjianVal + '_' + idUjianVal;
+
+    // Ambil nilai awal pelanggaran dari server (database)
+    let serverCount = parseInt($('#initial_cheat_count').val()) || 0;
+    let localStored = 0;
+    try {
+        if (isRemedial) {
+            localStorage.removeItem(storageKey);
+            localStored = 0;
+        } else {
+            localStored = parseInt(localStorage.getItem(storageKey)) || 0;
+        }
+    } catch (e) {}
+
+    // Nilai pelanggaran mengambil angka tertinggi agar TIDAK PERNAH reset saat reload/refresh
+    let cheatCount = Math.max(serverCount, localStored);
+    try {
+        localStorage.setItem(storageKey, cheatCount);
+    } catch (e) {}
+
+    // Perbarui badge tampilan pelanggaran di header ujian
+    function updateCheatBadge() {
+        $('#cheat_count_display').text(cheatCount);
+        if (cheatCount > 0) {
+            $('#badge_pelanggaran')
+                .removeClass('badge-light-success')
+                .addClass('badge-light-danger');
+        } else {
+            $('#badge_pelanggaran')
+                .removeClass('badge-light-danger')
+                .addClass('badge-light-success');
+        }
+    }
+    updateCheatBadge();
+
+    // Jika di localStorage lebih tinggi dari server (misal reload cepat sebelum ajax database selesai), sinkronkan ke server
+    if (cheatCount > serverCount) {
+        $.ajax({
+            type: 'POST',
+            url: "<?= base_url('sw-siswa/ujian/catat-pelanggaran') ?>",
+            data: {
+                id_ujian: idUjianVal,
+                kode_ujian: kodeUjianVal,
+                id_siswa: idSiswaVal,
+                client_count: cheatCount,
+                tipe: 'sync_reload'
+            },
+            dataType: 'json'
+        });
+    }
+
+    // Jika saat buka halaman pelanggaran sudah mencapai batas maksimal
+    if (cheatCount >= MAX_VIOLATION) {
+        const localTime = new Date().toLocaleString('sv-SE').replace(' ', 'T');
+        $("#waktu_selesai_client").val(localTime);
+        try { localStorage.removeItem(storageKey); } catch(e) {}
+        document.getElementById("kirim_ujian").submit();
+    }
+
+    let isProcessingViolation = false;
+    let lastViolationTimestamp = 0;
+    let isSwalViolationOpen = false;
+    let isExamFinished = false;
+    let isPageUnloading = false;
+    let isPageLoadedAndReady = false;
+
+    // Beri jeda 2 detik saat halaman dimuat agar browser stabil dan tidak ada false alarm
+    setTimeout(function() {
+        isPageLoadedAndReady = true;
+    }, 2000);
+
+    // Deteksi jika halaman sedang di-reload atau ditutup agar tidak dianggap pelanggaran
+    window.addEventListener('beforeunload', function() {
+        isPageUnloading = true;
+    });
+    window.addEventListener('pagehide', function() {
+        isPageUnloading = true;
+    });
+
+    // Fungsi Utama Pencatatan Pelanggaran (Tersimpan ke Database & LocalStorage)
+    function handleViolation(tipe, deskripsi) {
+        // Jika ujian selesai, sedang di-reload, atau halaman baru dimuat, abaikan
+        if (isExamFinished || isPageUnloading || !isPageLoadedAndReady) return;
+
+        const now = Date.now();
+        // Cooldown 2.5 detik untuk mencegah double-trigger jika blur & visibilitychange aktif bersamaan
+        if (now - lastViolationTimestamp < 2500 || isProcessingViolation || isSwalViolationOpen) {
+            return;
+        }
+
+        lastViolationTimestamp = now;
+        isProcessingViolation = true;
+
+        // Naikkan hitungan secara instan di client & localStorage agar langsung tersimpan walau di-refresh
+        cheatCount++;
+        try { localStorage.setItem(storageKey, cheatCount); } catch(e) {}
+        updateCheatBadge();
+
+        // Mainkan suara peringatan
+        try {
+            const sound = document.getElementById("notifSound");
+            if (sound) sound.play();
+        } catch (e) {}
+
+        // JIKA MENCAPAI BATAS MAKSIMAL PELANGGARAN -> HENTIKAN UJIAN OTOMATIS
+        if (cheatCount >= MAX_VIOLATION) {
+            isExamFinished = true;
+            isSwalViolationOpen = true;
+
+            // Laporkan ke server
+            $.ajax({
+                type: 'POST',
+                url: "<?= base_url('sw-siswa/ujian/catat-pelanggaran') ?>",
+                data: {
+                    id_ujian: idUjianVal,
+                    kode_ujian: kodeUjianVal,
+                    id_siswa: idSiswaVal,
+                    client_count: cheatCount,
+                    tipe: tipe
+                },
+                dataType: 'json'
+            });
+
+            Swal.fire({
+                title: "Ujian Dihentikan!",
+                html: "<p class='mb-2'>" + deskripsi + "</p>" +
+                      "<p class='text-danger fw-bold fs-5'>Anda telah mencapai batas maksimal " + MAX_VIOLATION + " kali pelanggaran.</p>" +
+                      "<p class='text-muted fs-7'>Ujian telah dihentikan otomatis dan jawaban Anda tersimpan ke sistem.</p>",
+                icon: "error",
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                timer: 3500
+            }).then(() => {
+                try { localStorage.removeItem(storageKey); } catch(e) {}
+                const localTime = new Date().toLocaleString('sv-SE').replace(' ', 'T');
+                $("#waktu_selesai_client").val(localTime);
+                document.getElementById("kirim_ujian").submit();
+            });
+            return;
+        }
+
+        // TAMPILKAN PERINGATAN KERAS KE SISWA
+        isSwalViolationOpen = true;
+        Swal.fire({
+            title: "Peringatan Keras!",
+            html: "<p class='mb-3 fs-6'>" + deskripsi + "</p>" +
+                  "<div class='alert alert-danger py-2 mb-2 d-inline-block fw-bold fs-5 px-5'>" +
+                  "Pelanggaran ke-<b>" + cheatCount + "</b> dari " + MAX_VIOLATION +
+                  "</div>" +
+                  "<p class='text-muted fs-7 mt-2 mb-0'>Perhatian: Jika berulang hingga " + MAX_VIOLATION + " kali, ujian akan dihentikan otomatis!</p>",
+            icon: "error",
+            confirmButtonText: "Saya Mengerti",
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            customClass: {
+                confirmButton: "btn btn-danger px-8 fw-bold"
+            }
+        }).then(() => {
+            isSwalViolationOpen = false;
+            setTimeout(() => {
+                isProcessingViolation = false;
+            }, 1200);
+        });
+
+        // Kirim pencatatan pelanggaran ke database secara asinkron
+        $.ajax({
+            type: 'POST',
+            url: "<?= base_url('sw-siswa/ujian/catat-pelanggaran') ?>",
+            data: {
+                id_ujian: idUjianVal,
+                kode_ujian: kodeUjianVal,
+                id_siswa: idSiswaVal,
+                client_count: cheatCount,
+                tipe: tipe
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response && response.status) {
+                    cheatCount = Math.max(cheatCount, response.jml_pelanggaran);
+                    try { localStorage.setItem(storageKey, cheatCount); } catch(e) {}
+                    updateCheatBadge();
+                }
+            }
+        });
+    }
+
     // 1. Matikan Klik Kanan
     document.addEventListener('contextmenu', event => event.preventDefault());
 
-    // 2. Matikan Shortcut Keyboard (F12, Inspect, Copy, Paste, Save)
+    // 2. Matikan Shortcut Keyboard (F12, Inspect, Copy, Paste, Save, Select-All)
     document.onkeydown = function(e) {
         if (e.keyCode == 123) return false; // F12
         if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false; // Ctrl+Shift+I
@@ -564,46 +772,52 @@ $ujianSiswaModel = new UjianSiswaModel(); ?>
         if (e.ctrlKey && e.keyCode == 'C'.charCodeAt(0)) return false; // Ctrl+C
         if (e.ctrlKey && e.keyCode == 'V'.charCodeAt(0)) return false; // Ctrl+V
         if (e.ctrlKey && e.keyCode == 'S'.charCodeAt(0)) return false; // Ctrl+S
+        if (e.ctrlKey && e.keyCode == 'A'.charCodeAt(0)) return false; // Ctrl+A
+        if (e.ctrlKey && e.keyCode == 'P'.charCodeAt(0)) return false; // Ctrl+P
     };
 
-    // 3. Deteksi Jika User Pindah Tab (Anti-Buka Google)
-    let cheatCount = 0;
+    // 3. Deteksi Pindah Tab (Anti Buka Google / Tab Lain)
     document.addEventListener("visibilitychange", function() {
-        if (document.hidden) {
-            cheatCount++;
-
-            // Suara peringatan bisa ditambahkan di sini
-            const sound = document.getElementById("notifSound");
-            if (sound) sound.play();
-
-            Swal.fire({
-                title: "Peringatan Keras!",
-                text: "Anda terdeteksi meninggalkan halaman ujian. Pelanggaran ke-" + cheatCount + ". Jika berulang 5 kali, ujian akan dihentikan otomatis.",
-                icon: "error",
-                confirmButtonText: "Saya Mengerti",
-                customClass: {
-                    confirmButton: "btn btn-danger"
-                }
-            });
-
-            // Opsi: Jika sudah 3 kali pindah tab, otomatis submit
-            if (cheatCount >= 5) {
-                Swal.fire({
-                    title: "Ujian Dihentikan!",
-                    text: "Anda telah melebihi batas perpindahan halaman.",
-                    icon: "error",
-                    showConfirmButton: false,
-                    timer: 3000
-                }).then(() => {
-                    const localTime = new Date().toLocaleString('sv-SE').replace(' ', 'T');
-                    $("#waktu_selesai_client").val(localTime);
-                    document.getElementById("kirim_ujian").submit();
-                });
-            }
+        if (document.hidden && !isPageUnloading && isPageLoadedAndReady) {
+            handleViolation("pindah_tab", "Anda terdeteksi meninggalkan halaman / berpindah tab ujian.");
         }
     });
 
-    // 4. Mencegah User Tidak Sengaja Klik Tombol Back Browser
+    // 4. Deteksi Beralih ke Aplikasi Lain (Window Blur / Alt+Tab / Klik Luar Browser)
+    window.addEventListener("blur", function() {
+        if (!isSwalViolationOpen && !isExamFinished && !isPageUnloading && isPageLoadedAndReady) {
+            handleViolation("keluar_jendela", "Anda terdeteksi beralih ke aplikasi lain atau mengklik di luar jendela ujian.");
+        }
+    });
+
+    // 5. Deteksi Layar Ujian Diperkecil / Split Screen (Multi-Window Cheating)
+    function isWindowShrunk() {
+        // Cek pada perangkat selain smartphone portrait (availWidth >= 768px)
+        if (window.screen.availWidth >= 768) {
+            const widthRatio = window.outerWidth / window.screen.availWidth;
+            const heightRatio = window.outerHeight / window.screen.availHeight;
+
+            // Jika ukuran browser kurang dari 80% lebar layar atau 70% tinggi layar
+            // Berarti jendela di-split screen (50%), di-restore down, atau diperkecil untuk membuka aplikasi lain
+            if (widthRatio < 0.80 || heightRatio < 0.70) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Deteksi jika selama ujian browser diperkecil / di-split screen
+    let resizeTimer = null;
+    window.addEventListener("resize", function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
+            if (isWindowShrunk() && !isExamFinished && !isPageUnloading && isPageLoadedAndReady) {
+                handleViolation("layar_diperkecil", "Anda terdeteksi memperkecil ukuran layar browser / split screen untuk membuka aplikasi lain.");
+            }
+        }, 600);
+    });
+
+    // 6. Mencegah User Tidak Sengaja Klik Tombol Back Browser
     window.history.pushState(null, null, window.location.href);
     window.onpopstate = function() {
         window.history.go(1);

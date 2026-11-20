@@ -105,6 +105,7 @@ class Filters extends BaseFilters
                     'sw-siswa/materi/chat-materi',
                     'sw-siswa/ujian/kirim-ujian',
                     'sw-siswa/ujian/kirim-ujian-selesai',
+                    'sw-siswa/ujian/catat-pelanggaran',
                     'sw-siswa/transaksi/cek-kode-voucher',
                     'sw-siswa/materi/get-file-materi',
                     'sw-siswa/diskusi/send',
